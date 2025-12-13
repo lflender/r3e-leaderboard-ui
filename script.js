@@ -207,12 +207,14 @@ function displayResults(data) {
         
         // Create driver header row
         const groupId = `group-${driverName.replace(/\s+/g, '-')}`;
+        // Prepare flag HTML (no tooltip) when available
+        const flagHtml = countryToFlag(country) ? '<span class="country-flag">' + countryToFlag(country) + '</span> ' : '';
         tableHTML += `
             <tr class="driver-group-header" onclick="toggleGroup('${groupId}')">
                 <td colspan="${keys.length}">
                     <span class="toggle-icon">▼</span>
                     <strong>${driverName}</strong>
-                    <span class="driver-meta">🌍 ${country} | ⭐ Rank ${rank} | 🏁 Team ${team}</span>
+                    <span class="driver-meta">${flagHtml}${escapeHtml(country)} | ⭐ Rank ${rank} | 🏁 Team ${team}</span>
                 </td>
             </tr>`;
         
@@ -221,7 +223,10 @@ function displayResults(data) {
             // Use TrackID and ClassID for detail view if available
             const trackId = item.TrackID || item.track_id || item['Track ID'] || '';
             const classId = item.ClassID || item.class_id || item['Class ID'] || '';
-            tableHTML += `<tr class="driver-data-row ${groupId}" onclick="openDetailView(event, this)" data-trackid="${escapeHtml(trackId)}" data-classid="${escapeHtml(classId)}" data-track="${escapeHtml(item.Track || item.track || '')}" data-class="${escapeHtml(firstEntry.CarClass || firstEntry['Car Class'] || firstEntry.car_class || firstEntry.Class || '')}">`;
+            // Determine numeric position if present
+            const rawPos = item.Position || item.position || item.Pos || '';
+            const numericPos = parseInt(String(rawPos).replace(/[^0-9]/g, '')) || '';
+            tableHTML += `<tr class="driver-data-row ${groupId}" onclick="openDetailView(event, this)" data-position="${numericPos}" data-trackid="${escapeHtml(trackId)}" data-classid="${escapeHtml(classId)}" data-track="${escapeHtml(item.Track || item.track || '')}" data-class="${escapeHtml(firstEntry.CarClass || firstEntry['Car Class'] || firstEntry.car_class || firstEntry.Class || '')}">`;
             keys.forEach(key => {
                 let value = item[key];
                 
@@ -320,6 +325,62 @@ function formatValue(value) {
     return value;
 }
 
+// Convert a 2-letter country code to a regional indicator flag emoji.
+function codeToFlag(code) {
+    if (!code || code.length !== 2) return '';
+    const A = 'A'.charCodeAt(0);
+    return String.fromCodePoint(...[...code.toUpperCase()].map(c => 0x1F1E6 + (c.charCodeAt(0) - A)));
+}
+
+// A list of ISO 3166-1 alpha-2 country codes to try matching by name when only a country name is provided.
+const ISO_COUNTRY_CODES = [
+    'AF','AX','AL','DZ','AS','AD','AO','AI','AQ','AG','AR','AM','AW','AU','AT','AZ','BS','BH','BD','BB','BY','BE','BZ','BJ','BM','BT','BO','BQ','BA','BW','BV','BR','IO','BN','BG','BF','BI','KH','CM','CA','CV','KY','CF','TD','CL','CN','CX','CC','CO','KM','CG','CD','CK','CR','CI','HR','CU','CW','CY','CZ','DK','DJ','DM','DO','EC','EG','SV','GQ','ER','EE','SZ','ET','FK','FO','FJ','FI','FR','GF','PF','TF','GA','GM','GE','DE','GH','GI','GR','GL','GD','GP','GU','GT','GG','GN','GW','GY','HT','HM','VA','HN','HK','HU','IS','IN','ID','IR','IQ','IE','IM','IL','IT','JM','JP','JE','JO','KZ','KE','KI','KP','KR','KW','KG','LA','LV','LB','LS','LR','LY','LI','LT','LU','MO','MG','MW','MY','MV','ML','MT','MH','MQ','MR','MU','YT','MX','FM','MD','MC','MN','ME','MS','MA','MZ','MM','NA','NR','NP','NL','NC','NZ','NI','NE','NG','NU','NF','MK','MP','NO','OM','PK','PW','PS','PA','PG','PY','PE','PH','PN','PL','PT','PR','QA','RE','RO','RU','RW','BL','SH','KN','LC','MF','PM','VC','WS','SM','ST','SA','SN','RS','SC','SL','SG','SX','SK','SI','SB','SO','ZA','GS','SS','ES','LK','SD','SR','SJ','SE','CH','SY','TW','TJ','TZ','TH','TL','TG','TK','TO','TT','TN','TR','TM','TC','TV','UG','UA','AE','GB','US','UM','UY','UZ','VU','VE','VN','VG','VI','WF','EH','YE','ZM','ZW'
+];
+
+// Try to resolve a country name to an ISO code using Intl.DisplayNames where available.
+function findCountryCodeByName(name) {
+    if (!name) return null;
+    const nm = String(name).trim().toLowerCase();
+    try {
+        const disp = new Intl.DisplayNames(['en'], { type: 'region' });
+        for (const code of ISO_COUNTRY_CODES) {
+            const display = disp.of(code);
+            if (!display) continue;
+            const d = String(display).toLowerCase();
+            if (d === nm || d.includes(nm) || nm.includes(d)) return code;
+        }
+    } catch (e) {
+        // Intl or DisplayNames not available, fall back later
+    }
+    return null;
+}
+
+// Given a country value (name or code), try to return a flag emoji or empty string.
+function countryToFlag(country) {
+    if (!country) return '';
+    const s = String(country).trim();
+    // If it already contains regional indicator symbols or emoji, return it
+    try {
+        if (/\p{Regional_Indicator}/u.test(s) || /[\u{1F1E6}-\u{1F1FF}]/u.test(s)) return s + ' ';
+    } catch (e) {}
+
+    // If it's a 2-letter code (e.g., GB, US), convert
+    if (/^[A-Za-z]{2}$/.test(s)) {
+        return codeToFlag(s) + ' ';
+    }
+
+    // If value contains a country code in parentheses like "United Kingdom (GB)", extract
+    const paren = s.match(/\(([A-Za-z]{2})\)$/);
+    if (paren) return codeToFlag(paren[1]) + ' ';
+
+    // Try to map the full country name to an ISO code
+    const mapped = findCountryCodeByName(s);
+    if (mapped) return codeToFlag(mapped) + ' ';
+
+    // Nothing matched — return empty to avoid showing world icon
+    return '';
+}
+
 function toggleGroup(groupId) {
     const rows = document.querySelectorAll(`.${groupId}`);
     const header = event.target.closest('.driver-group-header');
@@ -354,11 +415,14 @@ function openDetailView(event, row) {
     // Fallback to names if IDs are missing
     const track = row.dataset.track;
     const carClass = row.dataset.class;
+    const pos = row.dataset.position;
     if (trackId && classId) {
-        const url = `detail.html?track=${encodeURIComponent(trackId)}&class=${encodeURIComponent(classId)}`;
+        let url = `detail.html?track=${encodeURIComponent(trackId)}&class=${encodeURIComponent(classId)}`;
+        if (pos) url += `&pos=${encodeURIComponent(pos)}`;
         window.open(url, '_blank');
     } else if (track && carClass) {
-        const url = `detail.html?track=${encodeURIComponent(track)}&class=${encodeURIComponent(carClass)}`;
+        let url = `detail.html?track=${encodeURIComponent(track)}&class=${encodeURIComponent(carClass)}`;
+        if (pos) url += `&pos=${encodeURIComponent(pos)}`;
         window.open(url, '_blank');
     }
 }

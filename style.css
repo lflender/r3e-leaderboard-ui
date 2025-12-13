@@ -175,6 +175,16 @@ main {
     background: var(--hover-bg);
 }
 
+.highlight-row td {
+    background-color: rgba(59, 130, 246, 0.08) !important;
+    box-shadow: inset 0 0 12px rgba(59,130,246,0.05);
+    font-weight: 700;
+}
+
+.highlight-row {
+    transition: background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
 .results-table tr:last-child td {
     border-bottom: none;
 }
@@ -262,6 +272,13 @@ main {
     opacity: 0.9;
     font-size: 0.97rem;
     color: #a5b4fc;
+}
+
+.country-flag {
+    display: inline-block;
+    margin-right: 0.4rem;
+    font-size: 1.05rem;
+    vertical-align: middle;
 }
 
 .driver-data-row {

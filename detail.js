@@ -2,6 +2,7 @@
 const urlParams = new URLSearchParams(window.location.search);
 const trackParam = urlParams.get('track');
 const classParam = urlParams.get('class');
+const posParam = parseInt(urlParams.get('pos') || '');
 
 // Pagination state
 let currentPage = 1;
@@ -86,6 +87,14 @@ function displayResults(data) {
     // Calculate pagination
     const totalResults = results.length;
     const totalPages = Math.ceil(totalResults / itemsPerPage);
+
+    // If a posParam was passed, compute the page and set currentPage accordingly
+    if (posParam && !Number.isNaN(posParam)) {
+        const targetIndex = Math.max(0, posParam - 1);
+        const targetPage = Math.floor(targetIndex / itemsPerPage) + 1;
+        currentPage = Math.min(Math.max(1, targetPage), totalPages);
+    }
+
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = Math.min(startIndex + itemsPerPage, totalResults);
     const paginatedResults = results.slice(startIndex, endIndex);
@@ -184,6 +193,26 @@ function displayResults(data) {
     }
     
     resultsContainer.innerHTML = tableHTML + paginationHTML;
+
+    // If a posParam was provided, highlight the matching row in the current page
+    if (posParam && !Number.isNaN(posParam)) {
+        // Run after a tiny delay so the DOM is settled
+        setTimeout(() => {
+            const rows = document.querySelectorAll('#detail-results-container table.results-table tbody tr');
+            rows.forEach(r => r.classList.remove('highlight-row'));
+            for (const r of rows) {
+                const td = r.querySelector('td');
+                if (!td) continue;
+                const posText = td.textContent || '';
+                const num = parseInt((posText.match(/\d+/) || [''])[0]);
+                if (num === posParam) {
+                    r.classList.add('highlight-row');
+                    r.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    break;
+                }
+            }
+        }, 50);
+    }
 }
 
 function displayError(message) {

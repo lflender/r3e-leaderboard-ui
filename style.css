@@ -206,6 +206,13 @@ main {
     gap: 0.25rem;
 }
 
+.status-item-inline {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    align-items: baseline;
+}
+
 .status-label {
     color: var(--text-secondary);
     font-size: 0.875rem;

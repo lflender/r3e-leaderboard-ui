@@ -27,7 +27,7 @@ let allResults = [];
 
 // Status cache constants
 const STATUS_CACHE_KEY = 'r3e_status_cache';
-const STATUS_CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+const STATUS_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
 
 // Fetch and display status on page load
 fetchAndDisplayStatus();
@@ -431,10 +431,38 @@ function displayStatus(data) {
     
     // The API returns nested data under the 'data' property
     const statusData = data.data || data;
-    
-    // Update the display
+
+    // Helper: recursively search for a numeric field matching a key pattern
+    function findNumericField(obj, re) {
+        if (!obj || typeof obj !== 'object') return undefined;
+        for (const key of Object.keys(obj)) {
+            try {
+                if (re.test(key) && typeof obj[key] === 'number') return obj[key];
+            } catch (e) {}
+            const val = obj[key];
+            if (val && typeof val === 'object') {
+                const found = findNumericField(val, re);
+                if (found !== undefined) return found;
+            }
+        }
+        return undefined;
+    }
+
+    // Try common property names first, then fall back to recursive search
+    let driversCount = undefined;
+    if (statusData && typeof statusData === 'object') {
+        if (typeof statusData.total_indexed_drivers === 'number') driversCount = statusData.total_indexed_drivers;
+        else if (typeof statusData.total_drivers === 'number') driversCount = statusData.total_drivers;
+        else if (typeof statusData.totalIndexedDrivers === 'number') driversCount = statusData.totalIndexedDrivers;
+        else driversCount = findNumericField(statusData, /total[_ ]?indexed[_ ]?drivers|total[_ ]?drivers|indexed[_ ]?drivers|totalDrivers|totalIndexedDrivers/i);
+    }
+
+    // Update the display (show '-' if value missing)
     document.getElementById('status-timestamp').textContent = lastFetchTime.toLocaleString();
-    document.getElementById('status-tracks').textContent = (statusData.unique_tracks || 0).toLocaleString();
-    document.getElementById('status-combinations').textContent = (statusData.tracks_loaded || 0).toLocaleString();
-    document.getElementById('status-entries').textContent = (statusData.total_entries || 0).toLocaleString();
+    document.getElementById('status-tracks').textContent = (statusData.unique_tracks || statusData.uniqueTracks || '-').toLocaleString ? (statusData.unique_tracks || statusData.uniqueTracks || 0).toLocaleString() : '-';
+    document.getElementById('status-combinations').textContent = (statusData.tracks_loaded || statusData.tracksLoaded || 0).toLocaleString();
+    document.getElementById('status-entries').textContent = (statusData.total_entries || statusData.totalEntries || 0).toLocaleString();
+    document.getElementById('status-drivers').textContent = (driversCount !== undefined ? driversCount.toLocaleString() : '-');
+
+    console.log('Resolved driversCount:', driversCount, 'statusData keys:', Object.keys(statusData || {}));
 }

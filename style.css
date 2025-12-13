@@ -4,10 +4,13 @@
 }
 
 .detail-header-line, #detail-track, #detail-class, #detail-layout {
-    font-size: 1.125rem; /* match .status-section h3 */
-    font-weight: 700;
+    font-size: 1.35rem;
+    font-weight: 800;
     color: var(--text-primary);
-    margin-bottom: 0.2em;
+    margin-bottom: 0.25rem;
+    letter-spacing: 0.015em;
+    padding-bottom: 0.35rem;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
 }
 
 .detail-header-line .detail-label, #detail-track .detail-label, #detail-layout .detail-label, #detail-class .detail-label {

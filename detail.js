@@ -257,7 +257,8 @@ function displayResults(data) {
         paginationHTML += '</div></div>';
     }
     
-    resultsContainer.innerHTML = tableHTML + paginationHTML;
+    // Render pagination both above and below the table for easier navigation
+    resultsContainer.innerHTML = paginationHTML + tableHTML + paginationHTML;
 
     // If a posParam was provided, highlight the matching row in the current page
     if (posParam && !Number.isNaN(posParam)) {

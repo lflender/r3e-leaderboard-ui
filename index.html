@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ludo R3E Tools</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Ludo R3E Tools</h1>
+    </header>
+
+    <main>
+        <div class="tabs">
+            <button class="tab-button active" data-tab="leaderboards">Leaderboards</button>
+            <button class="tab-button" data-tab="track-info">Track Info</button>
+            <button class="tab-button" data-tab="cars-info">Cars Info</button>
+        </div>
+
+        <div class="tab-content">
+            <div id="leaderboards" class="tab-panel active">
+                <div class="search-container">
+                    <input 
+                        type="text" 
+                        id="driver-search" 
+                        placeholder="Search driver" 
+                        autocomplete="off"
+                    >
+                </div>
+                <div id="results-container"></div>
+            </div>
+
+            <div id="track-info" class="tab-panel">
+                <p class="placeholder">Track info coming soon...</p>
+            </div>
+
+            <div id="cars-info" class="tab-panel">
+                <p class="placeholder">Car info coming soon...</p>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Ludo R3E Tools. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

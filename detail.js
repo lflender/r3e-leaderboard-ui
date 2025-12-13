@@ -120,7 +120,7 @@ function displayResults(data) {
         const position = item.Position || item.position || item.Pos || '-';
         const totalEntries = item.TotalEntries || item['Total Entries'] || item.total_entries || item.TotalRacers || item.total_racers;
         const positionDisplay = totalEntries ? `${position} / ${totalEntries}` : position;
-        tableHTML += `<td>${positionDisplay}</td>`;
+        tableHTML += `<td class="no-wrap">${positionDisplay}</td>`;
         
         // Driver Name
         const name = item.Name || item.name || item.DriverName || item.driver_name || '-';

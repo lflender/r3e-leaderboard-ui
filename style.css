@@ -206,14 +206,45 @@ main {
 
 .status-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 1rem 2rem;
+    align-items: center;
+}
+
+/* Make the first status item wider so datetime doesn't wrap */
+/* Keep all status items in equal columns; ensure timestamp doesn't wrap */
+#status-timestamp {
+    white-space: nowrap;
+    font-size: 1.15rem;
 }
 
 .status-item {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    min-width: 0;
+    align-self: stretch;
+}
+
+.status-item .status-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.status-item .status-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* Prevent wrapping for compact fields like "pos / total" */
+.no-wrap {
+    white-space: nowrap;
+}
+
+.status-item .status-value {
+    display: inline-block;
+    min-width: 0;
 }
 
 .status-item-inline {
@@ -221,6 +252,17 @@ main {
     flex-direction: row;
     gap: 2rem;
     align-items: baseline;
+}
+
+.status-section .status-grid .status-item.status-item-inline > div {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+}
+
+@media (max-width: 800px) {
+    .status-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 .status-label {

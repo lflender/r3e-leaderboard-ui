@@ -230,16 +230,17 @@ function displayResults(data) {
             keys.forEach(key => {
                 let value = item[key];
                 
-                // Special handling for Position column - merge with TotalEntries
+                // Special handling for Position column - merge with TotalEntries and prevent wrapping
                 const isPositionKey = key === 'Position' || key === 'position' || key === 'Pos';
                 if (isPositionKey) {
                     const totalEntries = item.TotalEntries || item['Total Entries'] || item.total_entries || item.TotalRacers || item.total_racers;
                     if (totalEntries) {
                         value = `${value} / ${totalEntries}`;
                     }
+                    tableHTML += `<td class="no-wrap">${formatValue(value)}</td>`;
+                } else {
+                    tableHTML += `<td>${formatValue(value)}</td>`;
                 }
-                
-                tableHTML += `<td>${formatValue(value)}</td>`;
             });
             tableHTML += '</tr>';
         });

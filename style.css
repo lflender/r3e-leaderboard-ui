@@ -159,6 +159,39 @@ main {
     color: var(--text-primary);
 }
 
+.driver-group-header {
+    background-color: #1e40af !important;
+    cursor: pointer;
+    user-select: none;
+}
+
+.driver-group-header:hover {
+    background-color: #1e3a8a !important;
+}
+
+.driver-group-header td {
+    padding: 1rem !important;
+    font-weight: 600;
+}
+
+.toggle-icon {
+    display: inline-block;
+    margin-right: 0.5rem;
+    font-size: 0.875rem;
+    transition: transform 0.2s;
+}
+
+.driver-meta {
+    margin-left: 1rem;
+    font-weight: 400;
+    opacity: 0.9;
+    font-size: 0.9rem;
+}
+
+.driver-data-row {
+    transition: all 0.2s;
+}
+
 .no-results {
     text-align: center;
     padding: 3rem;

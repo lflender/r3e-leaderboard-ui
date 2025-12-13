@@ -129,8 +129,13 @@ function displayResults(data) {
         // Position
         const position = item.Position || item.position || item.Pos || '-';
         const totalEntries = item.TotalEntries || item['Total Entries'] || item.total_entries || item.TotalRacers || item.total_racers;
-        const positionDisplay = totalEntries ? `${position} / ${totalEntries}` : position;
-        tableHTML += `<td class="no-wrap">${escapeHtml(positionDisplay)}</td>`;
+        const posNum = String(position || '').trim();
+        const totalNum = totalEntries ? String(totalEntries).trim() : '';
+        if (totalNum) {
+            tableHTML += `<td class="pos-cell"><span class="pos-number">${escapeHtml(posNum)}</span><span class="pos-sep">/</span><span class="pos-total">${escapeHtml(totalNum)}</span></td>`;
+        } else {
+            tableHTML += `<td class="pos-cell"><span class="pos-number">${escapeHtml(posNum)}</span></td>`;
+        }
         
         // Driver Name
         const name = item.Name || item.name || item.DriverName || item.driver_name || '-';

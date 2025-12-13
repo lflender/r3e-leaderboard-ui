@@ -237,10 +237,13 @@ function displayResults(data) {
 
                 if (isPositionKey) {
                     const totalEntries = item.TotalEntries || item['Total Entries'] || item.total_entries || item.TotalRacers || item.total_racers;
-                    if (totalEntries) {
-                        value = `${value} / ${totalEntries}`;
+                    const posNum = String(value || '').trim();
+                    const totalNum = totalEntries ? String(totalEntries).trim() : '';
+                    if (totalNum) {
+                        tableHTML += `<td class="pos-cell"><span class="pos-number">${escapeHtml(posNum)}</span><span class="pos-sep">/</span><span class="pos-total">${escapeHtml(totalNum)}</span></td>`;
+                    } else {
+                        tableHTML += `<td class="pos-cell"><span class="pos-number">${escapeHtml(posNum)}</span></td>`;
                     }
-                    tableHTML += `<td class="no-wrap">${formatValue(value)}</td>`;
                 } else if (isCarClassKey) {
                     tableHTML += `<td class="no-wrap">${formatValue(value)}</td>`;
                 } else if (isLapTimeKey) {

@@ -218,7 +218,10 @@ function displayResults(data) {
         
         // Create data rows for this driver
         driverResults.forEach(item => {
-            tableHTML += `<tr class="driver-data-row ${groupId}">`;
+            // Use TrackID and ClassID for detail view if available
+            const trackId = item.TrackID || item.track_id || item['Track ID'] || '';
+            const classId = item.ClassID || item.class_id || item['Class ID'] || '';
+            tableHTML += `<tr class="driver-data-row ${groupId}" onclick="openDetailView(event, this)" data-trackid="${escapeHtml(trackId)}" data-classid="${escapeHtml(classId)}" data-track="${escapeHtml(item.Track || item.track || '')}" data-class="${escapeHtml(firstEntry.CarClass || firstEntry['Car Class'] || firstEntry.car_class || firstEntry.Class || '')}">`;
             keys.forEach(key => {
                 let value = item[key];
                 
@@ -338,6 +341,32 @@ function goToPage(page) {
     displayResults(allResults);
     // Scroll to top of results
     resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function openDetailView(event, row) {
+    // Don't trigger if clicking on the toggle icon or header
+    if (event.target.closest('.driver-group-header')) {
+        return;
+    }
+    // Prefer IDs for detail view
+    const trackId = row.dataset.trackid;
+    const classId = row.dataset.classid;
+    // Fallback to names if IDs are missing
+    const track = row.dataset.track;
+    const carClass = row.dataset.class;
+    if (trackId && classId) {
+        const url = `detail.html?track=${encodeURIComponent(trackId)}&class=${encodeURIComponent(classId)}`;
+        window.open(url, '_blank');
+    } else if (track && carClass) {
+        const url = `detail.html?track=${encodeURIComponent(track)}&class=${encodeURIComponent(carClass)}`;
+        window.open(url, '_blank');
+    }
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 async function fetchAndDisplayStatus() {

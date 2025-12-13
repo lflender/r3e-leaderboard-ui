@@ -60,6 +60,12 @@ function setDetailTitles(data, trackParam, classParam) {
     document.getElementById('detail-class').textContent = `Class: ${carClassName}`;
 }
 
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 function displayResults(data) {
     const resultsContainer = document.getElementById('detail-results-container');
     
@@ -124,15 +130,22 @@ function displayResults(data) {
         const position = item.Position || item.position || item.Pos || '-';
         const totalEntries = item.TotalEntries || item['Total Entries'] || item.total_entries || item.TotalRacers || item.total_racers;
         const positionDisplay = totalEntries ? `${position} / ${totalEntries}` : position;
-        tableHTML += `<td class="no-wrap">${positionDisplay}</td>`;
+        tableHTML += `<td class="no-wrap">${escapeHtml(positionDisplay)}</td>`;
         
         // Driver Name
         const name = item.Name || item.name || item.DriverName || item.driver_name || '-';
         tableHTML += `<td>${name}</td>`;
         
-        // Lap Time
+        // Lap Time - show delta inline but keep it on one line
         const lapTime = item.LapTime || item['Lap Time'] || item.lap_time || item.Time || '-';
-        tableHTML += `<td>${lapTime}</td>`;
+        const parts = String(lapTime).split(/,\s*/);
+        const main = escapeHtml(parts[0] || '');
+        const delta = escapeHtml(parts.slice(1).join(', '));
+        if (delta) {
+            tableHTML += `<td class="no-wrap">${main} <span class="time-delta-inline">${delta}</span></td>`;
+        } else {
+            tableHTML += `<td class="no-wrap">${main}</td>`;
+        }
         
         // Car
         const car = item.Car || item.car || item.CarName || item.car_name || '-';

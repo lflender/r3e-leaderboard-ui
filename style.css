@@ -38,12 +38,21 @@ header h1 {
     font-weight: 700;
 }
 
+.home-link {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.home-link:hover {
+    text-decoration: underline;
+}
+
 main {
     flex: 1;
-    max-width: 1200px;
+    max-width: 1400px;
     width: 100%;
     margin: 2rem auto;
-    padding: 0 2rem;
+    padding: 0 1.5rem;
 }
 
 .tabs {
@@ -240,6 +249,27 @@ main {
 /* Prevent wrapping for compact fields like "pos / total" */
 .no-wrap {
     white-space: nowrap;
+}
+
+.lap-time-cell .lap-main {
+    display: block;
+    white-space: nowrap;
+}
+.lap-time-cell .time-delta {
+    display: block;
+    white-space: nowrap;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.time-delta-inline {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin-left: 0.4rem;
+}
+
+.lap-time-cell {
+    min-width: 0;
 }
 
 .status-item .status-value {

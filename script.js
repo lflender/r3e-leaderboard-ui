@@ -230,14 +230,33 @@ function displayResults(data) {
             keys.forEach(key => {
                 let value = item[key];
                 
-                // Special handling for Position column - merge with TotalEntries and prevent wrapping
+                // Column type detection
                 const isPositionKey = key === 'Position' || key === 'position' || key === 'Pos';
+                const isCarClassKey = key === 'CarClass' || key === 'Car Class' || key === 'car_class' || key === 'Class' || key === 'class';
+                const isLapTimeKey = key === 'LapTime' || key === 'Lap Time' || key === 'lap_time' || key === 'Time';
+
                 if (isPositionKey) {
                     const totalEntries = item.TotalEntries || item['Total Entries'] || item.total_entries || item.TotalRacers || item.total_racers;
                     if (totalEntries) {
                         value = `${value} / ${totalEntries}`;
                     }
                     tableHTML += `<td class="no-wrap">${formatValue(value)}</td>`;
+                } else if (isCarClassKey) {
+                    tableHTML += `<td class="no-wrap">${formatValue(value)}</td>`;
+                } else if (isLapTimeKey) {
+                    // Prefer delta on a second line after a comma: "1m 23.414s, +01.887s" => "1m 23.414s" and "+01.887s" on new line
+                    const s = String(value || '');
+                    const parts = s.split(/,\s*/);
+                    const main = parts[0] || '';
+                    const delta = parts.slice(1).join(', ');
+                    // Escape HTML and replace spaces with non-breaking spaces for the main time
+                    const escMain = escapeHtml(String(main)).replace(/\s+/g, '&nbsp;');
+                    const escDelta = escapeHtml(String(delta));
+                    if (delta) {
+                        tableHTML += `<td class="lap-time-cell"><div class="lap-main">${escMain}</div><div class="time-delta">${escDelta}</div></td>`;
+                    } else {
+                        tableHTML += `<td class="lap-time-cell">${escMain}</td>`;
+                    }
                 } else {
                     tableHTML += `<td>${formatValue(value)}</td>`;
                 }

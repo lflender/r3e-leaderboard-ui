@@ -4,6 +4,9 @@ const trackParam = urlParams.get('track');
 const classParam = urlParams.get('class');
 const posParam = parseInt(urlParams.get('pos') || '');
 
+// Ensure the pos param is applied only once (so pagination can be changed afterwards)
+let posApplied = false;
+
 // Pagination state
 let currentPage = 1;
 let itemsPerPage = 100;
@@ -88,11 +91,12 @@ function displayResults(data) {
     const totalResults = results.length;
     const totalPages = Math.ceil(totalResults / itemsPerPage);
 
-    // If a posParam was passed, compute the page and set currentPage accordingly
-    if (posParam && !Number.isNaN(posParam)) {
+    // If a posParam was passed, compute the page and set currentPage accordingly (only once)
+    if (!posApplied && posParam && !Number.isNaN(posParam)) {
         const targetIndex = Math.max(0, posParam - 1);
         const targetPage = Math.floor(targetIndex / itemsPerPage) + 1;
         currentPage = Math.min(Math.max(1, targetPage), totalPages);
+        posApplied = true;
     }
 
     const startIndex = (currentPage - 1) * itemsPerPage;

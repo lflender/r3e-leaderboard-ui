@@ -20,6 +20,11 @@ tabButtons.forEach(button => {
 const driverSearch = document.getElementById('driver-search');
 const resultsContainer = document.getElementById('results-container');
 
+// Pagination state
+let currentPage = 1;
+let itemsPerPage = 100;
+let allResults = [];
+
 driverSearch.addEventListener('keypress', async (e) => {
     if (e.key === 'Enter') {
         const searchTerm = driverSearch.value.trim();
@@ -46,6 +51,8 @@ async function searchDriver(driverName) {
         
         const data = await response.json();
         console.log('Received data:', data);
+        allResults = data;
+        currentPage = 1;
         displayResults(data);
     } catch (error) {
         console.error('Search error:', error);
@@ -90,7 +97,7 @@ function displayResults(data) {
         return;
     }
     
-    // Group results by driver name
+    // Group ALL results by driver name FIRST
     const groupedByDriver = {};
     results.forEach(item => {
         const driverName = item.Name || item.name || item.DriverName || item.driver_name || 'Unknown';
@@ -119,8 +126,27 @@ function displayResults(data) {
         });
     });
     
+    // Get sorted driver names (alphabetically)
+    const allDriverNames = Object.keys(groupedByDriver).sort((a, b) => a.localeCompare(b));
+    
+    // Calculate pagination on DRIVER GROUPS, not individual entries
+    const totalDrivers = allDriverNames.length;
+    const totalPages = Math.ceil(totalDrivers / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, totalDrivers);
+    const paginatedDriverNames = allDriverNames.slice(startIndex, endIndex);
+    
+    // Calculate total entries being shown
+    let totalEntriesShown = 0;
+    paginatedDriverNames.forEach(name => {
+        totalEntriesShown += groupedByDriver[name].length;
+    });
+    
+    console.log(`Showing drivers ${startIndex + 1}-${endIndex} of ${totalDrivers} (${totalEntriesShown} entries)`);
+    
     // Get all keys from the first object to create table headers
-    let keys = Object.keys(results[0]);
+    const firstDriverResults = groupedByDriver[allDriverNames[0]];
+    let keys = Object.keys(firstDriverResults[0]);
     console.log('Original keys:', keys);
     
     // Filter out unwanted columns - now including Name, Country, Rank, Team (they'll be in group headers)
@@ -162,10 +188,8 @@ function displayResults(data) {
     
     tableHTML += '</tr></thead><tbody>';
     
-    // Create grouped rows with driver headers - sort driver names alphabetically
-    const sortedDriverNames = Object.keys(groupedByDriver).sort((a, b) => a.localeCompare(b));
-    
-    sortedDriverNames.forEach(driverName => {
+    // Create grouped rows with driver headers - use PAGINATED driver names
+    paginatedDriverNames.forEach(driverName => {
         const driverResults = groupedByDriver[driverName];
         const firstEntry = driverResults[0];
         
@@ -207,7 +231,53 @@ function displayResults(data) {
     });
     
     tableHTML += '</tbody></table>';
-    resultsContainer.innerHTML = tableHTML;
+    
+    // Add pagination controls
+    let paginationHTML = '<div class="pagination">';
+    paginationHTML += `<div class="pagination-info">Showing drivers ${startIndex + 1}-${endIndex} of ${totalDrivers} (${totalEntriesShown} total entries)</div>`;
+    paginationHTML += '<div class="pagination-buttons">';
+    
+    // Previous button
+    if (currentPage > 1) {
+        paginationHTML += `<button onclick="goToPage(${currentPage - 1})" class="page-btn">‹ Previous</button>`;
+    }
+    
+    // Page numbers
+    const maxPagesToShow = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+    
+    if (endPage - startPage < maxPagesToShow - 1) {
+        startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    }
+    
+    if (startPage > 1) {
+        paginationHTML += `<button onclick="goToPage(1)" class="page-btn">1</button>`;
+        if (startPage > 2) {
+            paginationHTML += '<span class="page-ellipsis">...</span>';
+        }
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+        const activeClass = i === currentPage ? 'active' : '';
+        paginationHTML += `<button onclick="goToPage(${i})" class="page-btn ${activeClass}">${i}</button>`;
+    }
+    
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            paginationHTML += '<span class="page-ellipsis">...</span>';
+        }
+        paginationHTML += `<button onclick="goToPage(${totalPages})" class="page-btn">${totalPages}</button>`;
+    }
+    
+    // Next button
+    if (currentPage < totalPages) {
+        paginationHTML += `<button onclick="goToPage(${currentPage + 1})" class="page-btn">Next ›</button>`;
+    }
+    
+    paginationHTML += '</div></div>';
+    
+    resultsContainer.innerHTML = tableHTML + paginationHTML;
 }
 
 function displayError(message) {
@@ -250,4 +320,11 @@ function toggleGroup(groupId) {
             icon.textContent = '▶';
         }
     });
+}
+
+function goToPage(page) {
+    currentPage = page;
+    displayResults(allResults);
+    // Scroll to top of results
+    resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }

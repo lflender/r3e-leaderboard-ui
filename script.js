@@ -535,11 +535,46 @@ async function fetchAndDisplayStatus() {
 }
 
 function displayStatus(data) {
-    // Get the cached data to show last fetch time
+    // Determine last fetch time:
+    // Prefer the API-provided `last_fetch_end` (or similar) field (may be nested),
+    // fall back to the cached timestamp stored locally.
     const cached = localStorage.getItem(STATUS_CACHE_KEY);
     let lastFetchTime = new Date();
     
-    if (cached) {
+    // Helper to find a field by regex (returns the value)
+    function findField(obj, re) {
+        if (!obj || typeof obj !== 'object') return undefined;
+        for (const key of Object.keys(obj)) {
+            try {
+                if (re.test(key)) return obj[key];
+            } catch (e) {}
+            const val = obj[key];
+            if (val && typeof val === 'object') {
+                const found = findField(val, re);
+                if (found !== undefined) return found;
+            }
+        }
+        return undefined;
+    }
+
+    // Try to get `last_fetch_end` (or variants) from the API response
+    let lastFetchValue = undefined;
+    try {
+        lastFetchValue = findField(data, /last[_ ]?fetch[_ ]?end|lastFetchEnd|last_fetch_end/i);
+    } catch (e) {
+        lastFetchValue = undefined;
+    }
+
+    if (lastFetchValue !== undefined && lastFetchValue !== null) {
+        // If numeric (epoch seconds or ms) handle appropriately
+        if (typeof lastFetchValue === 'number') {
+            // Heuristic: if value looks like seconds (10 digits) convert to ms
+            lastFetchTime = (String(lastFetchValue).length <= 10) ? new Date(lastFetchValue * 1000) : new Date(lastFetchValue);
+        } else if (typeof lastFetchValue === 'string') {
+            const parsed = Date.parse(lastFetchValue);
+            if (!Number.isNaN(parsed)) lastFetchTime = new Date(parsed);
+        }
+    } else if (cached) {
         const cachedData = JSON.parse(cached);
         lastFetchTime = new Date(cachedData.timestamp);
     }

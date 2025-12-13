@@ -1,3 +1,20 @@
+/* Detail header lines (Track, Layout, Class) - match other section title sizing */
+#detail-layout {
+    /* kept for backward compatibility if used directly */
+}
+
+.detail-header-line, #detail-track, #detail-class, #detail-layout {
+    font-size: 1.125rem; /* match .status-section h3 */
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.2em;
+}
+
+.detail-header-line .detail-label, #detail-track .detail-label, #detail-layout .detail-label, #detail-class .detail-label {
+    color: var(--primary-color);
+    font-weight: 700;
+    margin-right: 0.25em;
+}
 * {
     margin: 0;
     padding: 0;
@@ -424,7 +441,8 @@ main {
     margin-bottom: 2rem;
     background: #1e293b;
     border-radius: 12px;
-    box-shadow: 0 2px 12px 0 rgba(37, 99, 235, 0.10);
+    /* Remove the blue glow and use a subtle neutral shadow */
+    box-shadow: 0 1px 4px 0 rgba(0,0,0,0.06);
     padding: 1.5rem 2rem;
     outline: none;
     border: none;
@@ -446,7 +464,8 @@ main {
     font-size: 1.35rem;
     font-weight: 700;
     letter-spacing: 0.01em;
-    text-shadow: 0 2px 8px rgba(30, 41, 59, 0.25);
+    /* Remove heavy text shadow so titles are crisp */
+    text-shadow: none;
     outline: none;
     border: none;
 }

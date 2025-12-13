@@ -50,14 +50,35 @@ function setDetailTitles(data, trackParam, classParam) {
         else results = [data];
     }
     let trackName = trackParam || '';
+    let layoutName = '';
     let carClassName = classParam || '';
     if (Array.isArray(results) && results.length > 0) {
         const first = results[0];
-        trackName = first.Track || first.track || trackName;
+        let fullTrack = first.Track || first.track || trackName;
+        // Split on dash (hyphen, en dash, em dash)
+        let match = fullTrack.match(/^(.*?)(?:\s*[-–—]\s*)(.+)$/);
+        if (match) {
+            trackName = match[1].trim();
+            layoutName = match[2].trim();
+        } else {
+            trackName = fullTrack;
+        }
         carClassName = first.CarClass || first['Car Class'] || first.car_class || first.Class || carClassName;
     }
-    document.getElementById('detail-track').textContent = `Track: ${trackName}`;
-    document.getElementById('detail-class').textContent = `Class: ${carClassName}`;
+    document.getElementById('detail-track').innerHTML = `<span class="detail-label">Track:</span> ${escapeHtml(trackName)}`;
+    if (layoutName) {
+        let layoutElem = document.getElementById('detail-layout');
+        if (!layoutElem) {
+            layoutElem = document.createElement('div');
+            layoutElem.id = 'detail-layout';
+            document.getElementById('detail-track').after(layoutElem);
+        }
+        layoutElem.innerHTML = `<span class="detail-label">Layout:</span> ${escapeHtml(layoutName)}`;
+    } else {
+        let layoutElem = document.getElementById('detail-layout');
+        if (layoutElem) layoutElem.remove();
+    }
+    document.getElementById('detail-class').innerHTML = `<span class="detail-label">Class:</span> ${escapeHtml(carClassName)}`;
 }
 
 function escapeHtml(text) {
@@ -131,10 +152,32 @@ function displayResults(data) {
         const totalEntries = item.TotalEntries || item['Total Entries'] || item.total_entries || item.TotalRacers || item.total_racers;
         const posNum = String(position || '').trim();
         const totalNum = totalEntries ? String(totalEntries).trim() : '';
-        if (totalNum) {
-            tableHTML += `<td class="pos-cell"><span class="pos-number">${escapeHtml(posNum)}</span><span class="pos-sep">/</span><span class="pos-total">${escapeHtml(totalNum)}</span></td>`;
+        // Compute color: green for 1, red for last, gradient in between
+        let badgeColor = '';
+        let pos = parseInt(posNum);
+        let total = parseInt(totalNum);
+        if (!isNaN(pos) && !isNaN(total) && total > 1) {
+            if (pos === 1) {
+                badgeColor = '#22c55e'; // bright green
+            } else if (pos === total) {
+                badgeColor = '#ef4444'; // bright red
+            } else {
+                // Interpolate between green and red
+                // 0 = green, 1 = red
+                let t = (pos - 1) / (total - 1);
+                // Green: 34,197,94  Red: 239,68,68
+                let r = Math.round(34 + (239-34)*t);
+                let g = Math.round(197 + (68-197)*t);
+                let b = Math.round(94 + (68-94)*t);
+                badgeColor = `rgb(${r},${g},${b})`;
+            }
         } else {
-            tableHTML += `<td class="pos-cell"><span class="pos-number">${escapeHtml(posNum)}</span></td>`;
+            badgeColor = 'rgba(59,130,246,0.18)'; // fallback
+        }
+        if (totalNum) {
+            tableHTML += `<td class="pos-cell"><span class="pos-number" style="background:${badgeColor}">${escapeHtml(posNum)}</span><span class="pos-sep">/</span><span class="pos-total">${escapeHtml(totalNum)}</span></td>`;
+        } else {
+            tableHTML += `<td class="pos-cell"><span class="pos-number" style="background:${badgeColor}">${escapeHtml(posNum)}</span></td>`;
         }
         
         // Driver Name

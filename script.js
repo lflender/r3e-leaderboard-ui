@@ -239,20 +239,41 @@ function displayResults(data) {
                     const totalEntries = item.TotalEntries || item['Total Entries'] || item.total_entries || item.TotalRacers || item.total_racers;
                     const posNum = String(value || '').trim();
                     const totalNum = totalEntries ? String(totalEntries).trim() : '';
-                    if (totalNum) {
-                        tableHTML += `<td class="pos-cell"><span class="pos-number">${escapeHtml(posNum)}</span><span class="pos-sep">/</span><span class="pos-total">${escapeHtml(totalNum)}</span></td>`;
+                    // Compute color: green for 1, red for last, gradient in between
+                    let badgeColor = '';
+                    let pos = parseInt(posNum);
+                    let total = parseInt(totalNum);
+                    if (!isNaN(pos) && !isNaN(total) && total > 1) {
+                        if (pos === 1) {
+                            badgeColor = '#22c55e'; // bright green
+                        } else if (pos === total) {
+                            badgeColor = '#ef4444'; // bright red
+                        } else {
+                            // Interpolate between green and red
+                            // 0 = green, 1 = red
+                            let t = (pos - 1) / (total - 1);
+                            // Green: 34,197,94  Red: 239,68,68
+                            let r = Math.round(34 + (239-34)*t);
+                            let g = Math.round(197 + (68-197)*t);
+                            let b = Math.round(94 + (68-94)*t);
+                            badgeColor = `rgb(${r},${g},${b})`;
+                        }
                     } else {
-                        tableHTML += `<td class="pos-cell"><span class="pos-number">${escapeHtml(posNum)}</span></td>`;
+                        badgeColor = 'rgba(59,130,246,0.18)'; // fallback
+                    }
+                    if (totalNum) {
+                        tableHTML += `<td class="pos-cell"><span class="pos-number" style="background:${badgeColor}">${escapeHtml(posNum)}</span><span class="pos-sep">/</span><span class="pos-total">${escapeHtml(totalNum)}</span></td>`;
+                    } else {
+                        tableHTML += `<td class="pos-cell"><span class="pos-number" style="background:${badgeColor}">${escapeHtml(posNum)}</span></td>`;
                     }
                 } else if (isCarClassKey) {
                     tableHTML += `<td class="no-wrap">${formatValue(value)}</td>`;
                 } else if (isLapTimeKey) {
-                    // Prefer delta on a second line after a comma: "1m 23.414s, +01.887s" => "1m 23.414s" and "+01.887s" on new line
+                    // ...existing code for lap time...
                     const s = String(value || '');
                     const parts = s.split(/,\s*/);
                     const main = parts[0] || '';
                     const delta = parts.slice(1).join(', ');
-                    // Escape HTML and replace spaces with non-breaking spaces for the main time
                     const escMain = escapeHtml(String(main)).replace(/\s+/g, '&nbsp;');
                     const escDelta = escapeHtml(String(delta));
                     if (delta) {
@@ -260,6 +281,15 @@ function displayResults(data) {
                     } else {
                         tableHTML += `<td class="lap-time-cell">${escMain}</td>`;
                     }
+                } else if (key === 'Track' || key === 'track' || key === 'TrackName' || key === 'track_name') {
+                    // Insert word-break opportunity before dash for nice two-line breaks, preserving spaces
+                    let trackStr = String(value || '');
+                    // Match spaces, dash (any type), spaces
+                    trackStr = trackStr.replace(/(\s+)([-–—])(\s+)/g, '$1<wbr>$2$3');
+                    trackStr = escapeHtml(trackStr);
+                    // Unescape <wbr> (since escapeHtml will escape it)
+                    trackStr = trackStr.replace(/&lt;wbr&gt;/g, '<wbr>');
+                    tableHTML += `<td>${trackStr}</td>`;
                 } else {
                     tableHTML += `<td>${formatValue(value)}</td>`;
                 }

@@ -25,6 +25,13 @@ let currentPage = 1;
 let itemsPerPage = 100;
 let allResults = [];
 
+// Status cache constants
+const STATUS_CACHE_KEY = 'r3e_status_cache';
+const STATUS_CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+// Fetch and display status on page load
+fetchAndDisplayStatus();
+
 driverSearch.addEventListener('keypress', async (e) => {
     if (e.key === 'Enter') {
         const searchTerm = driverSearch.value.trim();
@@ -232,50 +239,54 @@ function displayResults(data) {
     
     tableHTML += '</tbody></table>';
     
-    // Add pagination controls
-    let paginationHTML = '<div class="pagination">';
-    paginationHTML += `<div class="pagination-info">Showing drivers ${startIndex + 1}-${endIndex} of ${totalDrivers} (${totalEntriesShown} total entries)</div>`;
-    paginationHTML += '<div class="pagination-buttons">';
+    // Add pagination controls only if there's more than 1 page
+    let paginationHTML = '';
     
-    // Previous button
-    if (currentPage > 1) {
-        paginationHTML += `<button onclick="goToPage(${currentPage - 1})" class="page-btn">‹ Previous</button>`;
-    }
-    
-    // Page numbers
-    const maxPagesToShow = 5;
-    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
-    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-    
-    if (endPage - startPage < maxPagesToShow - 1) {
-        startPage = Math.max(1, endPage - maxPagesToShow + 1);
-    }
-    
-    if (startPage > 1) {
-        paginationHTML += `<button onclick="goToPage(1)" class="page-btn">1</button>`;
-        if (startPage > 2) {
-            paginationHTML += '<span class="page-ellipsis">...</span>';
+    if (totalPages > 1) {
+        paginationHTML = '<div class="pagination">';
+        paginationHTML += `<div class="pagination-info">Showing drivers ${startIndex + 1}-${endIndex} of ${totalDrivers} (${totalEntriesShown} total entries)</div>`;
+        paginationHTML += '<div class="pagination-buttons">';
+        
+        // Previous button
+        if (currentPage > 1) {
+            paginationHTML += `<button onclick="goToPage(${currentPage - 1})" class="page-btn">‹ Previous</button>`;
         }
-    }
-    
-    for (let i = startPage; i <= endPage; i++) {
-        const activeClass = i === currentPage ? 'active' : '';
-        paginationHTML += `<button onclick="goToPage(${i})" class="page-btn ${activeClass}">${i}</button>`;
-    }
-    
-    if (endPage < totalPages) {
-        if (endPage < totalPages - 1) {
-            paginationHTML += '<span class="page-ellipsis">...</span>';
+        
+        // Page numbers
+        const maxPagesToShow = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+        let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+        
+        if (endPage - startPage < maxPagesToShow - 1) {
+            startPage = Math.max(1, endPage - maxPagesToShow + 1);
         }
-        paginationHTML += `<button onclick="goToPage(${totalPages})" class="page-btn">${totalPages}</button>`;
+        
+        if (startPage > 1) {
+            paginationHTML += `<button onclick="goToPage(1)" class="page-btn">1</button>`;
+            if (startPage > 2) {
+                paginationHTML += '<span class="page-ellipsis">...</span>';
+            }
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+            const activeClass = i === currentPage ? 'active' : '';
+            paginationHTML += `<button onclick="goToPage(${i})" class="page-btn ${activeClass}">${i}</button>`;
+        }
+        
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                paginationHTML += '<span class="page-ellipsis">...</span>';
+            }
+            paginationHTML += `<button onclick="goToPage(${totalPages})" class="page-btn">${totalPages}</button>`;
+        }
+        
+        // Next button
+        if (currentPage < totalPages) {
+            paginationHTML += `<button onclick="goToPage(${currentPage + 1})" class="page-btn">Next ›</button>`;
+        }
+        
+        paginationHTML += '</div></div>';
     }
-    
-    // Next button
-    if (currentPage < totalPages) {
-        paginationHTML += `<button onclick="goToPage(${currentPage + 1})" class="page-btn">Next ›</button>`;
-    }
-    
-    paginationHTML += '</div></div>';
     
     resultsContainer.innerHTML = tableHTML + paginationHTML;
 }
@@ -327,4 +338,74 @@ function goToPage(page) {
     displayResults(allResults);
     // Scroll to top of results
     resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function fetchAndDisplayStatus() {
+    try {
+        // Check if we have cached data
+        const cached = localStorage.getItem(STATUS_CACHE_KEY);
+        let statusData = null;
+        let needsFetch = true;
+        
+        if (cached) {
+            const cachedData = JSON.parse(cached);
+            const cacheAge = Date.now() - cachedData.timestamp;
+            
+            if (cacheAge < STATUS_CACHE_DURATION) {
+                // Cache is still valid
+                statusData = cachedData.data;
+                needsFetch = false;
+                console.log('Using cached status data');
+            } else {
+                console.log('Cache expired, fetching new data');
+            }
+        }
+        
+        // Fetch new data if needed
+        if (needsFetch) {
+            const response = await fetch('http://localhost:8080/api/status');
+            if (response.ok) {
+                statusData = await response.json();
+                
+                // Cache the data
+                const cacheData = {
+                    timestamp: Date.now(),
+                    data: statusData
+                };
+                localStorage.setItem(STATUS_CACHE_KEY, JSON.stringify(cacheData));
+                console.log('Fetched and cached new status data');
+            } else {
+                console.error('Failed to fetch status:', response.status);
+            }
+        }
+        
+        // Display the status data
+        if (statusData) {
+            displayStatus(statusData);
+        }
+    } catch (error) {
+        console.error('Error fetching status:', error);
+    }
+}
+
+function displayStatus(data) {
+    // Get the cached data to show last fetch time
+    const cached = localStorage.getItem(STATUS_CACHE_KEY);
+    let lastFetchTime = new Date();
+    
+    if (cached) {
+        const cachedData = JSON.parse(cached);
+        lastFetchTime = new Date(cachedData.timestamp);
+    }
+    
+    console.log('Status data:', data);
+    
+    // The API returns nested data under the 'data' property
+    const statusData = data.data || data;
+    
+    // Update the display
+    document.getElementById('status-timestamp').textContent = lastFetchTime.toLocaleString();
+    document.getElementById('status-tracks').textContent = (statusData.unique_tracks || 0).toLocaleString();
+    document.getElementById('status-combinations').textContent = (statusData.tracks_loaded || 0).toLocaleString();
+    document.getElementById('status-entries').textContent = (statusData.total_entries || 0).toLocaleString();
 }

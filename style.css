@@ -1,0 +1,688 @@
+/* Detail header lines (Track, Layout, Class) - match other section title sizing */
+#detail-layout {
+    /* kept for backward compatibility if used directly */
+}
+
+.detail-header-line, #detail-track, #detail-class, #detail-layout {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    letter-spacing: 0.015em;
+    padding-bottom: 0.35rem;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+
+.detail-header-line .detail-label, #detail-track .detail-label, #detail-layout .detail-label, #detail-class .detail-label {
+    color: var(--primary-color);
+    font-weight: 700;
+    margin-right: 0.25em;
+}
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #3b82f6;
+    --primary-hover: #60a5fa;
+    --background: #0f172a;
+    --surface: #1e293b;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --border: #334155;
+    --shadow: rgba(0, 0, 0, 0.3);
+    --hover-bg: #334155;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: var(--background);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    background-color: var(--surface);
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 2px 4px var(--shadow);
+}
+
+header h1 {
+    font-size: 2rem;
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+.home-link {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.home-link:hover {
+    text-decoration: underline;
+}
+
+main {
+    flex: 1;
+    max-width: 1400px;
+    width: 100%;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+}
+
+.tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid var(--border);
+}
+
+.tab-button {
+    background: none;
+    border: none;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.tab-button:hover {
+    color: var(--primary-color);
+}
+
+.tab-button.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.tab-content {
+    background-color: var(--surface);
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px var(--shadow);
+    min-height: 400px;
+}
+
+.tab-panel {
+    display: none;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+.search-container {
+    margin-bottom: 2rem;
+}
+
+.search-container {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+#class-filter {
+    padding: 0.78rem 0.9rem;
+    font-size: 0.98rem;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+    color: var(--text-primary);
+    max-width: 420px;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+#class-filter:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.06);
+}
+
+/* Small caret tweak for select */
+.search-container { position: relative; }
+#class-filter { padding-right: 2.5rem; }
+#class-filter::-ms-expand { display: none; }
+
+/* Style options inside the select so they are readable when the native dropdown opens */
+#class-filter option {
+    background-color: transparent;
+    color: var(--text-primary);
+}
+
+/* On hover/active for supported browsers: don't change background, just darken the text */
+#class-filter option:hover,
+#class-filter option:active {
+    background-color: transparent;
+    color: var(--text-secondary);
+}
+
+/* Custom select UI */
+.custom-select {
+    position: relative;
+    display: inline-block;
+    width: 420px;
+}
+.custom-select__toggle {
+    width: 100%;
+    text-align: left;
+    padding: 0.78rem 0.9rem;
+    font-size: 0.98rem;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+    background: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+.custom-select__menu {
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin-top: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    max-height: 240px;
+    overflow: auto;
+    box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+    z-index: 50;
+}
+.custom-select__option {
+    padding: 0.6rem 0.9rem;
+    cursor: pointer;
+    color: var(--text-primary);
+}
+.custom-select__option:hover,
+.custom-select__option[aria-selected="true"] {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+}
+
+#driver-search {
+    width: 100%;
+    max-width: 500px;
+    padding: 0.875rem 1rem;
+    font-size: 1rem;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+#driver-search:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+#results-container {
+    margin-top: 1.5rem;
+}
+
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+}
+
+.error {
+    background-color: #7f1d1d;
+    color: #fecaca;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border: 1px solid #991b1b;
+}
+
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px 0 rgba(30, 41, 59, 0.10);
+}
+
+.results-table thead tr {
+    background: #2563eb;
+}
+
+.results-table th,
+.results-table td {
+    padding: 0.875rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+
+.results-table th {
+    color: #fff;
+    font-size: 1.05rem;
+    font-weight: 700;
+    padding: 0.85rem 1.25rem;
+    border: none;
+    letter-spacing: 0.01em;
+}
+
+.results-table tr:hover {
+    background-color: var(--hover-bg);
+}
+
+.results-table td {
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-primary);
+    font-size: 1.05rem;
+    transition: background 0.2s;
+}
+
+.results-table tr:hover td {
+    background: var(--hover-bg);
+}
+
+.highlight-row td {
+    background-color: rgba(59, 130, 246, 0.08) !important;
+    box-shadow: inset 0 0 12px rgba(59,130,246,0.05);
+    font-weight: 700;
+}
+
+.highlight-row {
+    transition: background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.results-table tr:last-child td {
+    border-bottom: none;
+}
+
+.status-section {
+    margin-top: 3rem;
+    padding: 1.5rem;
+    background-color: var(--surface);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 6px 0 var(--shadow);
+}
+
+.status-section h3 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    font-size: 1.125rem;
+}
+
+.status-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 1rem 2rem;
+    align-items: center;
+}
+
+/* Make the first status item wider so datetime doesn't wrap */
+/* Keep all status items in equal columns; ensure timestamp doesn't wrap */
+#status-timestamp {
+    white-space: nowrap;
+    font-size: 1.15rem;
+}
+
+.status-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+    align-self: stretch;
+}
+
+.status-item .status-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.status-item .status-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* Prevent wrapping for compact fields like "pos / total" */
+.no-wrap {
+    white-space: nowrap;
+}
+
+.lap-time-cell .lap-main {
+    display: block;
+    white-space: nowrap;
+}
+.lap-time-cell .time-delta {
+    display: block;
+    white-space: nowrap;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.time-delta-inline {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin-left: 0.4rem;
+}
+
+/* Position badge styling */
+.pos-cell {
+    white-space: nowrap;
+    /* Use inline layout so badge baseline aligns with text baseline */
+    /* Remove flex and alignment */
+}
+.pos-number {
+    background: rgba(59,130,246,0.18);
+    color: var(--text-primary);
+    padding: 0.18rem 0.6rem;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    text-decoration: none !important;
+    border: none;
+    line-height: 1.2;
+    display: inline-block;
+    vertical-align: baseline;
+}
+.pos-total {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin-left: 0.35rem;
+    text-decoration: none !important;
+}
+.pos-sep {
+    color: var(--text-secondary);
+    opacity: 0.95;
+}
+
+/* Remove underlines and default link styles inside result tables */
+.results-table a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* Ensure table cells vertically center contents */
+.results-table td {
+    vertical-align: middle;
+}
+
+.lap-time-cell {
+    min-width: 0;
+}
+
+.status-item .status-value {
+    display: inline-block;
+    min-width: 0;
+}
+
+.status-item-inline {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    align-items: baseline;
+}
+
+.status-section .status-grid .status-item.status-item-inline > div {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+}
+
+@media (max-width: 800px) {
+    .status-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.status-label {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.status-value {
+    color: var(--text-primary);
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.driver-group-header {
+    background-color: #3b4a6b !important;
+    cursor: pointer;
+    user-select: none;
+    color: #f1f5fa;
+    font-weight: 600;
+    font-size: 1.08rem;
+    border-top: 1px solid #475569;
+    border-bottom: 1px solid #475569;
+    transition: background 0.2s;
+    box-shadow: none;
+}
+
+.driver-group-header:hover {
+    background-color: #4b5d85 !important;
+}
+
+.driver-group-header td {
+    padding: 1rem !important;
+    font-weight: 600;
+    border: none;
+    background: none;
+}
+
+.toggle-icon {
+    display: inline-block;
+    margin-right: 0.5rem;
+    font-size: 0.95rem;
+    transition: transform 0.2s;
+    color: #60a5fa;
+}
+
+.driver-meta {
+    margin-left: 1rem;
+    font-weight: 400;
+    opacity: 0.9;
+    font-size: 0.97rem;
+    color: #a5b4fc;
+}
+
+.country-flag {
+    display: inline-block;
+    margin-right: 0.4rem;
+    font-size: 1.05rem;
+    vertical-align: middle;
+}
+
+.driver-data-row {
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.driver-data-row:hover {
+    background-color: var(--hover-bg);
+}
+
+.detail-subtitle {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin-top: 0.5rem;
+}
+
+.detail-content {
+    background-color: var(--surface);
+    padding: 2.5rem 2rem 2rem 2rem;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px 0 rgba(30, 41, 59, 0.10);
+    margin-top: 2rem;
+}
+
+.detail-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    background: #1e293b;
+    border-radius: 12px;
+    /* Remove the blue glow and use a subtle neutral shadow */
+    box-shadow: 0 1px 4px 0 rgba(0,0,0,0.06);
+    padding: 1.5rem 2rem;
+    outline: none;
+    border: none;
+}
+
+.detail-header h2 {
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.detail-header-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.detail-header-line {
+    color: #fff;
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    /* Remove heavy text shadow so titles are crisp */
+    text-shadow: none;
+    outline: none;
+    border: none;
+}
+
+.back-btn {
+    padding: 0.5rem 1.25rem;
+    background: #fff;
+    color: #2563eb;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    box-shadow: 0 1px 4px 0 rgba(30, 41, 59, 0.10);
+    transition: background 0.2s, color 0.2s;
+    margin-top: 0.5rem;
+}
+
+.back-btn:hover {
+    background: #2563eb;
+    color: #fff;
+}
+
+.no-results {
+    text-align: center;
+    color: #f87171;
+    font-size: 1.2rem;
+    margin: 2rem 0;
+    font-weight: 600;
+}
+
+.pagination {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+}
+
+.pagination-info {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.pagination-buttons {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.page-btn {
+    padding: 0.5rem 0.95rem;
+    background-color: var(--surface);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.page-btn:hover {
+    background-color: var(--hover-bg);
+    border-color: var(--primary-color);
+}
+
+.page-btn.active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    font-weight: 700;
+}
+
+.page-ellipsis {
+    color: var(--text-secondary);
+    padding: 0 0.25rem;
+    font-size: 1.1rem;
+}
+
+footer {
+    background-color: var(--surface);
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--text-secondary);
+    box-shadow: 0 -2px 4px var(--shadow);
+    margin-top: 2rem;
+}
+
+footer p {
+    font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 1.5rem;
+    }
+
+    main {
+        padding: 0 1rem;
+    }
+
+    .tabs {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .tab-button {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--border);
+        border-left: 3px solid transparent;
+    }
+
+    .tab-button.active {
+        border-bottom-color: var(--border);
+        border-left-color: var(--primary-color);
+    }
+
+    .tab-content {
+        padding: 1rem;
+    }
+
+    .results-table {
+        font-size: 0.875rem;
+    }
+
+    .results-table th,
+    .results-table td {
+        padding: 0.5rem;
+    }
+}

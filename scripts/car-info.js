@@ -95,15 +95,26 @@
   }
 
   let wheelFilter = '', transFilter = '';
+  let classFilter = '';
+  // Build class options from data
+  const classOptions = [{ value: '', label: 'All classes' }].concat(data.map(c => ({ value: c.class || '', label: c.class || '' })));
+  // Deduplicate classOptions
+  const seen = new Set();
+  const classOptionsUnique = classOptions.filter(o => {
+    if (seen.has(o.value)) return false; seen.add(o.value); return true;
+  });
   setupCustomSelect('wheel-filter-ui', wheelOptions, v => { wheelFilter = v; renderTable(); });
   setupCustomSelect('trans-filter-ui', transOptions, v => { transFilter = v; renderTable(); });
+  setupCustomSelect('class-filter-ui-cars', classOptionsUnique, v => { classFilter = v; renderTable(); });
 
   function carMatchesFilters(car) {
     const w = (car.wheel_cat || car.wheel || '').toLowerCase();
     const t = (car.transmission_cat || car.transmission || '').toLowerCase();
+    const c = (car.car_class || car.class || '').toLowerCase();
     const wheelOk = !wheelFilter || w === wheelFilter;
     const transOk = !transFilter || t === transFilter;
-    return wheelOk && transOk;
+    const classOk = !classFilter || c === classFilter.toLowerCase();
+    return wheelOk && transOk && classOk;
   }
 
   function renderTable() {

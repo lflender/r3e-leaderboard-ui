@@ -125,9 +125,23 @@
                 <p class="placeholder">Track info coming soon...</p>
             </div>
 
-            <div id="cars-info" class="tab-panel">
-                <p class="placeholder">Car info coming soon...</p>
-            </div>
+                        <div id="cars-info" class="tab-panel">
+                                <div class="search-container" id="cars-search-container">
+                                    <div id="class-filter-ui-cars" class="custom-select" role="listbox" aria-label="Filter by car class">
+                                        <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All classes ▾</button>
+                                        <div class="custom-select__menu" role="presentation" hidden></div>
+                                    </div>
+                                    <div id="wheel-filter-ui" class="custom-select" role="listbox" aria-label="Filter by wheel type">
+                                        <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All wheels ▾</button>
+                                        <div class="custom-select__menu" role="presentation" hidden></div>
+                                    </div>
+                                    <div id="trans-filter-ui" class="custom-select" role="listbox" aria-label="Filter by transmission type">
+                                        <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All transmissions ▾</button>
+                                        <div class="custom-select__menu" role="presentation" hidden></div>
+                                    </div>
+                                </div>
+                                <div id="cars-info-table"></div>
+                        </div>
         </div>
 
         <div id="status-container" class="status-section">
@@ -160,7 +174,8 @@
     <footer>
         <p>&copy; 2025 Ludo R3E Tools. All rights reserved.</p>
     </footer>
-
+    <script src="data/cars.js"></script>
     <script src="script.js"></script>
+    <script src="scripts/car-info.js"></script>
 </body>
 </html>

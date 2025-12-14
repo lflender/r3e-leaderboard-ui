@@ -1,3 +1,33 @@
+/* Car Info table: smaller, stylized font for Power, Weight, Engine, Drive */
+.carinfo-meta {
+    font-size: 0.93em;
+    font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+    color: #b6c2d1;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    opacity: 0.93;
+}
+/* Car Info badges (same as .pos-number, but color-coded) */
+.car-badge {
+    padding: 0.18rem 0.6rem;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    text-decoration: none !important;
+    border: none;
+    line-height: 1.2;
+    display: inline-block;
+    vertical-align: baseline;
+    background: #b3e5fc;
+    color: #222;
+}
+.car-badge.gt { background: #b3e5fc; color: #222; }
+.car-badge.round { background: #ffe082; color: #222; }
+.car-badge[title*="flat"], .car-badge.round-flat { background: #c8e6c9; color: #222; white-space: nowrap; }
+.car-badge.trans { background: #1976d2; color: #fff; }
+.car-badge.trans.sequential { background: #7b1fa2; color: #fff; }
+.car-badge.trans.h { background: #c62828; color: #fff; }
+.car-badge.unknown { background: #eee; color: #888; }
 /* Detail header lines (Track, Layout, Class) - match other section title sizing */
 #detail-layout {
     /* kept for backward compatibility if used directly */

@@ -145,7 +145,9 @@ function displayResults(data) {
     
     // Create rows
     paginatedResults.forEach(item => {
-        tableHTML += '<tr>';
+        const rowTrackId = item.track_id || item.TrackID || item['Track ID'] || trackParam || '';
+        const rowClassId = item.class_id || item.ClassID || item['Class ID'] || item.CarClass || item['Car Class'] || classParam || '';
+        tableHTML += `<tr data-trackid="${escapeHtml(String(rowTrackId))}" data-classid="${escapeHtml(String(rowClassId))}">`;
         
         // Position
         const position = item.Position || item.position || item.Pos || '-';
@@ -273,6 +275,22 @@ function displayResults(data) {
                 const num = parseInt((posText.match(/\d+/) || [''])[0]);
                 if (num === posParam) {
                     r.classList.add('highlight-row');
+                    // Make the highlighted row clickable: open external leaderboard with track and class
+                    const trackId = r.dataset.trackid || trackParam || '';
+                    const classId = r.dataset.classid || classParam || '';
+                    if (trackId) {
+                        const openExternal = () => {
+                            const carClass = classId ? `class-${classId}` : '';
+                            let url = `https://game.raceroom.com/leaderboard/?track=${encodeURIComponent(trackId)}`;
+                            if (carClass) url += `&car_class=${encodeURIComponent(carClass)}`;
+                            window.open(url, '_blank');
+                        };
+                        r.style.cursor = 'pointer';
+                        if (!r.dataset.externalClickAdded) {
+                            r.addEventListener('click', openExternal);
+                            r.dataset.externalClickAdded = '1';
+                        }
+                    }
                     r.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     break;
                 }

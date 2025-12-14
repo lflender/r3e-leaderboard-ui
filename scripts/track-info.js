@@ -278,7 +278,11 @@
     html += '</tr></thead><tbody>';
 
     pageItems.forEach(item => {
-      html += '<tr class="driver-data-row">';
+      // derive IDs and pos for data attributes
+      const trackIdVal = item.track_id || item.TrackID || item.trackId || item.track || item.Track || '';
+      const classIdVal = item.class_id || item.ClassID || item.classId || item.class || item.class_name || item.className || item.ClassName || '';
+      const posVal = item.position || item.Position || item.Pos || item.rank || '';
+      html += `<tr class="driver-data-row" onclick="openDetailView(event, this)" data-trackid="${escapeHtml(String(trackIdVal))}" data-classid="${escapeHtml(String(classIdVal))}" data-position="${escapeHtml(String(posVal))}">`;
       keys.forEach(key => {
         // If synthetic 'Car Class' key, derive value from common fields in the item
         let value;

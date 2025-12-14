@@ -107,7 +107,7 @@
   }
 
   function renderTable() {
-    // Compute min/max year for color gradient
+    // Compute unique sorted years for ordinal coloring
     let allYears = [];
     data.forEach(cls => {
       (cls.cars || []).forEach(car => {
@@ -116,13 +116,15 @@
         if (!isNaN(y)) allYears.push(y);
       });
     });
-    let minYear = Math.min(...allYears), maxYear = Math.max(...allYears);
+    let uniqueYears = Array.from(new Set(allYears)).sort((a, b) => a - b);
 
     function yearColor(year) {
       let y = parseInt(year);
-      if (isNaN(y) || minYear === maxYear) return '#e0e0e0';
+      if (isNaN(y) || uniqueYears.length < 2) return '#e0e0e0';
+      let idx = uniqueYears.indexOf(y);
+      if (idx === -1) return '#e0e0e0';
+      let t = idx / (uniqueYears.length - 1);
       // More pronounced: yellow (#ffd600) to green (#00c853)
-      let t = (y - minYear) / (maxYear - minYear);
       let r = Math.round((1-t)*255 + t*0);
       let g = Math.round((1-t)*214 + t*200);
       let b = Math.round((1-t)*0 + t*83);
@@ -200,10 +202,10 @@
               `<td>${wheelBadge(car.wheel_cat || car.wheel)}</td>` +
               `<td>${transBadge(car.transmission_cat || car.transmission)}</td>` +
               `<td><span style="background:${yearColor(car.year)};color:#222;padding:0.18rem 0.6rem;border-radius:999px;font-weight:800;display:inline-block;min-width:3.5em;text-align:center;">${escapeHtml(car.year || '')}</span></td>` +
-              `<td>${escapeHtml(car.power || '')}</td>` +
-              `<td>${escapeHtml(car.weight || '')}</td>` +
-              `<td>${escapeHtml(car.engine || '')}</td>` +
-              `<td>${escapeHtml(car.drive || '')}</td>` +
+              `<td class="carinfo-meta">${escapeHtml(car.power || '')}</td>` +
+              `<td class="carinfo-meta">${escapeHtml(car.weight || '')}</td>` +
+              `<td class="carinfo-meta">${escapeHtml(car.engine || '')}</td>` +
+              `<td class="carinfo-meta">${escapeHtml(car.drive || '')}</td>` +
               `</tr>`;
     });
   });

@@ -278,7 +278,7 @@ function displayResults(data) {
                 <td colspan="${keys.length}">
                     <span class="toggle-icon">▼</span>
                     <strong>${escapeHtml(displayName)}</strong>
-                    <span class="driver-meta">${flagHtml}${escapeHtml(country)}${rank ? ' | ⭐ Rank ' + rank : ''}${team ? ' | 🏁 Team ' + team : ''}</span>
+                    <span class="driver-meta">${flagHtml}${escapeHtml(country)}${rank ? renderRankStars(rank) : ''}${team ? ' | 🏁 Team ' + team : ''}</span>
                 </td>
             </tr>`;
 
@@ -544,6 +544,16 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// Render rank as stars: D -> 1, C -> 2, B -> 3, A -> 4
+function renderRankStars(rank) {
+    if (!rank) return '';
+    const r = String(rank).trim().toUpperCase();
+    const map = { 'D': 1, 'C': 2, 'B': 3, 'A': 4 };
+    const count = map[r] || 0;
+    if (count === 0) return ` | ⭐ Rank ${escapeHtml(rank)}`;
+    return ' | ' + '⭐'.repeat(count) + ` Rank ${escapeHtml(r)}`;
 }
 
 async function fetchAndDisplayStatus() {

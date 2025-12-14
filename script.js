@@ -18,6 +18,8 @@ tabButtons.forEach(button => {
 
 // Driver search functionality
 const driverSearch = document.getElementById('driver-search');
+const classFilter = document.getElementById('class-filter');
+const classFilterUI = document.getElementById('class-filter-ui');
 const resultsContainer = document.getElementById('results-container');
 
 // Pagination state
@@ -44,12 +46,87 @@ driverSearch.addEventListener('keypress', async (e) => {
     }
 });
 
+// If the class filter is changed and there's an existing search term, re-run the search
+if (classFilter) {
+    classFilter.addEventListener('change', async () => {
+        const searchTerm = driverSearch.value.trim();
+        if (!searchTerm) return;
+        await searchDriver(searchTerm);
+    });
+}
+
+// Setup custom select UI if present
+if (classFilter && classFilterUI) {
+    const toggle = classFilterUI.querySelector('.custom-select__toggle');
+    const menu = classFilterUI.querySelector('.custom-select__menu');
+
+    // Populate menu from hidden select
+    function buildCustomOptions() {
+        menu.innerHTML = '';
+        Array.from(classFilter.options).forEach(opt => {
+            const div = document.createElement('div');
+            div.className = 'custom-select__option';
+            div.textContent = opt.textContent;
+            div.dataset.value = opt.value;
+            if (opt.selected) div.setAttribute('aria-selected', 'true');
+            menu.appendChild(div);
+        });
+    }
+
+    buildCustomOptions();
+
+    function closeMenu() {
+        menu.hidden = true;
+        toggle.setAttribute('aria-expanded', 'false');
+    }
+
+    function openMenu() {
+        menu.hidden = false;
+        toggle.setAttribute('aria-expanded', 'true');
+    }
+
+    toggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (menu.hidden) openMenu(); else closeMenu();
+    });
+
+    // Option click
+    menu.addEventListener('click', async (e) => {
+        const opt = e.target.closest('.custom-select__option');
+        if (!opt) return;
+        const val = opt.dataset.value;
+        // Update hidden select
+        classFilter.value = val;
+        // Update toggle label
+        toggle.textContent = `${opt.textContent} ▾`;
+        // Rebuild to mark selected
+        buildCustomOptions();
+        closeMenu();
+
+        const searchTerm = driverSearch.value.trim();
+        if (searchTerm) await searchDriver(searchTerm);
+    });
+
+    // Close when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!classFilterUI.contains(e.target)) closeMenu();
+    });
+}
+
 async function searchDriver(driverName) {
     // Show loading state
     resultsContainer.innerHTML = '<div class="loading">Searching...</div>';
     
     try {
-        const url = `http://localhost:8080/api/search?driver=${encodeURIComponent(driverName)}`;
+        let url = `http://localhost:8080/api/search?driver=${encodeURIComponent(driverName)}`;
+        try {
+            const selectedClass = classFilter ? classFilter.value : '';
+            if (selectedClass) {
+                url += `&class=${encodeURIComponent(selectedClass)}`;
+            }
+        } catch (e) {
+            // ignore
+        }
         const response = await fetch(url);
         
         if (!response.ok) {
@@ -145,7 +222,9 @@ function displayResults(data) {
                            'Name', 'name', 'DriverName', 'driver_name',
                            'Country', 'country',
                            'Rank', 'rank',
-                           'Team', 'team'];
+                           'Team', 'team',
+                           // Backend time-difference fields (do not display as separate column)
+                           'time_diff', 'timeDiff', 'timeDifference', 'time_diff_s', 'time_diff_seconds'];
     keys = keys.filter(key => !excludeColumns.includes(key));
     console.log('Filtered keys:', keys);
     
@@ -180,23 +259,25 @@ function displayResults(data) {
     
     // Create grouped rows with driver headers - use PAGINATED drivers from backend (or normalized groups)
     paginatedDrivers.forEach(driverObj => {
-        const driverName = driverObj.driver || driverObj.name || driverObj.DriverName || driverObj.driver_name || 'Unknown';
         const driverResults = Array.isArray(driverObj.entries) ? driverObj.entries : [];
         const firstEntry = driverResults[0] || {};
+
+        // Display name: prefer cased name from first entry (preserve original casing)
+        const displayName = firstEntry.name || firstEntry.Name || driverObj.driver || driverObj.name || driverObj.DriverName || driverObj.driver_name || 'Unknown';
 
         // Get driver info from first entry
         const country = firstEntry.country || firstEntry.Country || '-';
         const rank = firstEntry.rank || firstEntry.Rank || '';
         const team = firstEntry.team || firstEntry.Team || '';
-
-        // Create driver header row
-        const groupId = `group-${driverName.replace(/\s+/g, '-')}`;
+        // Create driver header row (use a slugified lowercase id for class names)
+        const slugSource = (driverObj.driver || driverObj.name || firstEntry.name || firstEntry.Name || 'unknown');
+        const groupId = `group-${String(slugSource).replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-]/g, '').toLowerCase()}`;
         const flagHtml = countryToFlag(country) ? '<span class="country-flag">' + countryToFlag(country) + '</span> ' : '';
         tableHTML += `
             <tr class="driver-group-header" data-group="${groupId}" onclick="toggleGroup(this)">
                 <td colspan="${keys.length}">
                     <span class="toggle-icon">▼</span>
-                    <strong>${driverName}</strong>
+                    <strong>${escapeHtml(displayName)}</strong>
                     <span class="driver-meta">${flagHtml}${escapeHtml(country)}${rank ? ' | ⭐ Rank ' + rank : ''}${team ? ' | 🏁 Team ' + team : ''}</span>
                 </td>
             </tr>`;

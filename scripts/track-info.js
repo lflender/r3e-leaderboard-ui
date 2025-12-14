@@ -174,6 +174,9 @@
   // DOM refs
   const rootToggle = document.querySelector('#track-filter-ui .custom-select__toggle');
   const rootMenu = document.querySelector('#track-filter-ui .custom-select__menu');
+  const classToggle = document.querySelector('#track-class-filter-ui .custom-select__toggle');
+  const classMenu = document.querySelector('#track-class-filter-ui .custom-select__menu');
+  const classSelect = document.getElementById('class-filter');
   const tableContainer = document.getElementById('track-info-table');
 
   // Pagination state (separate from leaderboards to avoid conflicts)
@@ -181,6 +184,7 @@
   const trackItemsPerPage = 100;
   let trackAllResults = [];
   let activeTrackId = null; // null => All tracks
+  let activeClassId = null; // null => All classes
 
   function closeMenu() { if (rootMenu) { rootMenu.hidden = true; rootToggle.setAttribute('aria-expanded','false'); } }
   function openMenu() { if (rootMenu) { rootMenu.hidden = false; rootToggle.setAttribute('aria-expanded','true'); } }
@@ -190,6 +194,29 @@
     if (!rootMenu) return;
     const options = [{ value: '', label: 'All tracks' }].concat(TRACKS.map(t => ({ value: String(t.id), label: t.label })));
     rootMenu.innerHTML = options.map(opt => `<div class="custom-select__option" data-value="${escapeHtml(opt.value)}">${escapeHtml(opt.label)}</div>`).join('');
+  }
+
+  // Build class menu from a list of class options (value/label)
+  function buildClassMenu(classOptions) {
+    if (!classMenu) return;
+    const opts = [{ value: '', label: 'All classes' }].concat(classOptions.map(c => ({ value: String(c.value), label: c.label })));
+    classMenu.innerHTML = opts.map(opt => `<div class="custom-select__option" data-value="${escapeHtml(opt.value)}">${escapeHtml(opt.label)}</div>`).join('');
+  }
+
+  // Build class menu from the hidden select `#class-filter` if present
+  function buildClassMenuFromSelect() {
+    if (!classMenu || !classSelect) return false;
+    const options = Array.from(classSelect.options).map(o => ({ value: o.value || '', label: o.textContent || o.text }));
+    // Deduplicate and remove empty placeholder (we'll add 'All classes' ourselves)
+    const seen = new Set();
+    const opts = options.filter(o => {
+      if (!o.value) return false;
+      if (seen.has(o.value)) return false;
+      seen.add(o.value);
+      return true;
+    }).map(o => ({ value: o.value, label: o.label }));
+    buildClassMenu(opts);
+    return true;
   }
 
   // Handle selection
@@ -214,12 +241,41 @@
     });
   }
 
+  // Wire class menu events
+  if (classToggle && classMenu) {
+    classToggle.addEventListener('click', (e) => { e.stopPropagation(); classMenu.hidden ? (classMenu.hidden = false, classToggle.setAttribute('aria-expanded','true')) : (classMenu.hidden = true, classToggle.setAttribute('aria-expanded','false')); });
+    document.addEventListener('click', (e) => { if (!document.getElementById('track-class-filter-ui').contains(e.target)) { classMenu.hidden = true; classToggle.setAttribute('aria-expanded','false'); } });
+    classMenu.addEventListener('click', (e) => {
+      const opt = e.target.closest('.custom-select__option');
+      if (!opt) return;
+      const val = opt.dataset.value;
+      const label = opt.textContent || opt.innerText || 'All classes';
+      activeClassId = val ? (isNaN(Number(val)) ? val : Number(val)) : null;
+      trackCurrentPage = 1;
+      classToggle.textContent = `${label} ▾`;
+      classMenu.hidden = true;
+      // Keep the hidden select in sync if present
+      if (classSelect) {
+        try { classSelect.value = val; } catch (e) {}
+      }
+      fetchAndRender();
+    });
+  }
+
   buildMenu();
+  // Initialize class menu from hidden select if available, otherwise leave empty until data fetch
+  if (!buildClassMenuFromSelect()) {
+    buildClassMenu([]);
+  }
 
   // Fetch data from API (All or per-track)
   async function fetchTopCombinations() {
     let url = 'http://localhost:8080/api/top-combinations';
-    if (activeTrackId) url += `?track=${encodeURIComponent(activeTrackId)}`;
+    const params = new URLSearchParams();
+    if (activeTrackId) params.set('track', String(activeTrackId));
+    if (activeClassId) params.set('class', String(activeClassId));
+    const query = params.toString();
+    if (query) url += `?${query}`;
     try {
       tableContainer.innerHTML = '<div class="loading">Loading...</div>';
       const resp = await fetch(url);
@@ -343,6 +399,31 @@
 
   async function fetchAndRender(){
     const data = await fetchTopCombinations();
+    // Build class options from data (unique class names and optional class ids)
+    try {
+      // If there's a hidden select providing classes, don't overwrite it
+      if (!classSelect) {
+        const classes = [];
+        const seen = new Map();
+        (Array.isArray(data) ? data : []).forEach(item => {
+          // Prefer class id and class_name
+          const cid = item.class_id || item.ClassID || item.classId || item.class || undefined;
+          const cname = item.class_name || item.className || item.ClassName || item.car_class || item.CarClass || item['Car Class'] || item.Class || item.class || undefined;
+          const key = (cid !== undefined && cid !== null) ? String(cid) : (cname ? String(cname) : null);
+          if (!key) return;
+          if (!seen.has(key)) {
+            seen.set(key, true);
+            classes.push({ value: cid !== undefined && cid !== null ? cid : cname, label: cname || String(cid) });
+          }
+        });
+        // Sort by label
+        classes.sort((a,b)=> (String(a.label||'').localeCompare(String(b.label||''))));
+        if (classes.length > 0) buildClassMenu(classes);
+      }
+    } catch (e) {
+      console.warn('Failed to build class menu:', e);
+    }
+
     renderTable(data);
   }
 

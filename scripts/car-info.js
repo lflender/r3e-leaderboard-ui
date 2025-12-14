@@ -27,7 +27,7 @@
     if (!v) return '<span class="car-badge unknown">—</span>';
     if (v === 'gt') return '<span class="car-badge gt">GT</span>';
     if (v === 'round') return '<span class="car-badge round">Round</span>';
-    if (v === 'round (flat)' || v === 'round(flat)' || v === 'round(flat)') return '<span class="car-badge round" title="Round (flat)">Round (flat)</span>';
+    if (v === 'round (flat)' || v === 'round(flat)' || v === 'round(flat)') return '<span class="car-badge round-flat" title="Round (flat)">Round (flat)</span>';
     return `<span class="car-badge unknown">${escapeHtml(cat)}</span>`;
   }
 
@@ -36,7 +36,7 @@
     if (!v) return '<span class="car-badge trans unknown">—</span>';
     if (v === 'paddles') return '<span class="car-badge trans">Paddles</span>';
     if (v === 'sequential') return '<span class="car-badge trans sequential">Sequential</span>';
-    if (v === 'other') return '<span class="car-badge trans h">H</span>';
+    if (v === 'h' || v === 'other') return '<span class="car-badge trans h">H</span>';
     return `<span class="car-badge trans unknown">${escapeHtml(cat)}</span>`;
   }
 

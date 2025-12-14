@@ -14,7 +14,7 @@
 }
 .car-badge.gt { background: #b3e5fc; color: #222; }
 .car-badge.round { background: #ffe082; color: #222; }
-.car-badge[title*="flat"] { background: #c8e6c9; color: #222; }
+.car-badge[title*="flat"], .car-badge.round-flat { background: #c8e6c9; color: #222; white-space: nowrap; }
 .car-badge.trans { background: #1976d2; color: #fff; }
 .car-badge.trans.sequential { background: #7b1fa2; color: #fff; }
 .car-badge.trans.h { background: #c62828; color: #fff; }

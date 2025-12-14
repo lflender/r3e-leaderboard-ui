@@ -8,8 +8,12 @@ OUTPUT = r"c:\Users\lflen\_git\r3e-leaderboard-ui\data\cars.json"
 def normalize_cat_wheel(wheel_raw):
     if not wheel_raw: return ''
     s = wheel_raw.lower()
-    if 'round' in s: return 'round'
-    if 'gt' in s: return 'gt'
+    if 'round' in s and 'flat' in s:
+        return 'round (flat)'
+    if 'round' in s:
+        return 'round'
+    if 'gt' in s:
+        return 'gt'
     return 'other'
 
 def normalize_cat_trans(traw):
@@ -17,6 +21,7 @@ def normalize_cat_trans(traw):
     s = traw.lower()
     if 'pal' in s: return 'paddles'
     if 'seq' in s: return 'sequential'
+    if 'h' in s: return 'h'
     return 'other'
 
 cars_by_class = OrderedDict()

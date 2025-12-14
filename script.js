@@ -104,56 +104,39 @@ function displayResults(data) {
         return;
     }
     
-    // Group ALL results by driver name FIRST
-    const groupedByDriver = {};
-    results.forEach(item => {
-        const driverName = item.Name || item.name || item.DriverName || item.driver_name || 'Unknown';
-        if (!groupedByDriver[driverName]) {
-            groupedByDriver[driverName] = [];
+        // Normalize to an array of driver groups: { driver, entries: [...] }
+        let driverGroups = [];
+        if (results.length > 0 && results[0] && typeof results[0] === 'object' && Array.isArray(results[0].entries) && ('driver' in results[0] || 'name' in results[0])) {
+            // Already grouped by backend
+            driverGroups = results;
+        } else {
+            // Old flat format: group results by driver name while preserving order of appearance
+            const map = new Map();
+            results.forEach(item => {
+                const driverName = item.driver || item.name || item.Name || item.DriverName || item.driver_name || 'Unknown';
+                if (!map.has(driverName)) map.set(driverName, { driver: driverName, entries: [] });
+                map.get(driverName).entries.push(item);
+            });
+            driverGroups = Array.from(map.values());
         }
-        groupedByDriver[driverName].push(item);
-    });
+
+        const totalDrivers = driverGroups.length;
+        const totalPages = Math.ceil(totalDrivers / itemsPerPage);
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = Math.min(startIndex + itemsPerPage, totalDrivers);
+        const paginatedDrivers = driverGroups.slice(startIndex, endIndex);
     
-    // Sort each group by time difference (the +XX.XXXs part)
-    Object.keys(groupedByDriver).forEach(driverName => {
-        groupedByDriver[driverName].sort((a, b) => {
-            const timeA = a.LapTime || a['Lap Time'] || a.lap_time || a.Time || '';
-            const timeB = b.LapTime || b['Lap Time'] || b.lap_time || b.Time || '';
-            
-            // Extract time difference (e.g., "+01.887s" from "1m 23.414s, +01.887s")
-            const diffA = timeA.match(/\+(\d+\.\d+)s/);
-            const diffB = timeB.match(/\+(\d+\.\d+)s/);
-            
-            if (diffA && diffB) {
-                return parseFloat(diffA[1]) - parseFloat(diffB[1]);
-            }
-            
-            // Fallback to string comparison if no difference found
-            return timeA.localeCompare(timeB);
-        });
-    });
-    
-    // Get sorted driver names (alphabetically)
-    const allDriverNames = Object.keys(groupedByDriver).sort((a, b) => a.localeCompare(b));
-    
-    // Calculate pagination on DRIVER GROUPS, not individual entries
-    const totalDrivers = allDriverNames.length;
-    const totalPages = Math.ceil(totalDrivers / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = Math.min(startIndex + itemsPerPage, totalDrivers);
-    const paginatedDriverNames = allDriverNames.slice(startIndex, endIndex);
-    
-    // Calculate total entries being shown
+    // Calculate totals and keys using normalized driverGroups/paginatedDrivers
     let totalEntriesShown = 0;
-    paginatedDriverNames.forEach(name => {
-        totalEntriesShown += groupedByDriver[name].length;
-    });
-    
+    paginatedDrivers.forEach(g => { totalEntriesShown += Array.isArray(g.entries) ? g.entries.length : 0; });
+
     console.log(`Showing drivers ${startIndex + 1}-${endIndex} of ${totalDrivers} (${totalEntriesShown} entries)`);
-    
-    // Get all keys from the first object to create table headers
-    const firstDriverResults = groupedByDriver[allDriverNames[0]];
-    let keys = Object.keys(firstDriverResults[0]);
+
+    // Get all keys from the first entry to create table headers
+    let keys = [];
+    if (paginatedDrivers.length > 0 && Array.isArray(paginatedDrivers[0].entries) && paginatedDrivers[0].entries.length > 0) {
+        keys = Object.keys(paginatedDrivers[0].entries[0]);
+    }
     console.log('Original keys:', keys);
     
     // Filter out unwanted columns - now including Name, Country, Rank, Team (they'll be in group headers)
@@ -195,71 +178,62 @@ function displayResults(data) {
     
     tableHTML += '</tr></thead><tbody>';
     
-    // Create grouped rows with driver headers - use PAGINATED driver names
-    paginatedDriverNames.forEach(driverName => {
-        const driverResults = groupedByDriver[driverName];
-        const firstEntry = driverResults[0];
-        
+    // Create grouped rows with driver headers - use PAGINATED drivers from backend (or normalized groups)
+    paginatedDrivers.forEach(driverObj => {
+        const driverName = driverObj.driver || driverObj.name || driverObj.DriverName || driverObj.driver_name || 'Unknown';
+        const driverResults = Array.isArray(driverObj.entries) ? driverObj.entries : [];
+        const firstEntry = driverResults[0] || {};
+
         // Get driver info from first entry
-        const country = firstEntry.Country || firstEntry.country || '-';
-        const rank = firstEntry.Rank || firstEntry.rank || '-';
-        const team = firstEntry.Team || firstEntry.team || '-';
-        
+        const country = firstEntry.country || firstEntry.Country || '-';
+        const rank = firstEntry.rank || firstEntry.Rank || '';
+        const team = firstEntry.team || firstEntry.Team || '';
+
         // Create driver header row
         const groupId = `group-${driverName.replace(/\s+/g, '-')}`;
-        // Prepare flag HTML (no tooltip) when available
         const flagHtml = countryToFlag(country) ? '<span class="country-flag">' + countryToFlag(country) + '</span> ' : '';
         tableHTML += `
-            <tr class="driver-group-header" onclick="toggleGroup('${groupId}')">
+            <tr class="driver-group-header" data-group="${groupId}" onclick="toggleGroup(this)">
                 <td colspan="${keys.length}">
                     <span class="toggle-icon">▼</span>
                     <strong>${driverName}</strong>
-                    <span class="driver-meta">${flagHtml}${escapeHtml(country)} | ⭐ Rank ${rank} | 🏁 Team ${team}</span>
+                    <span class="driver-meta">${flagHtml}${escapeHtml(country)}${rank ? ' | ⭐ Rank ' + rank : ''}${team ? ' | 🏁 Team ' + team : ''}</span>
                 </td>
             </tr>`;
-        
+
         // Create data rows for this driver
         driverResults.forEach(item => {
-            // Use TrackID and ClassID for detail view if available
-            const trackId = item.TrackID || item.track_id || item['Track ID'] || '';
-            const classId = item.ClassID || item.class_id || item['Class ID'] || '';
-            // Determine numeric position if present
-            const rawPos = item.Position || item.position || item.Pos || '';
+            const trackId = item.track_id || item.TrackID || item['Track ID'] || '';
+            const classId = item.class_id || item.ClassID || item['Class ID'] || '';
+            const rawPos = item.position || item.Position || item.Pos || '';
             const numericPos = parseInt(String(rawPos).replace(/[^0-9]/g, '')) || '';
-            tableHTML += `<tr class="driver-data-row ${groupId}" onclick="openDetailView(event, this)" data-position="${numericPos}" data-trackid="${escapeHtml(trackId)}" data-classid="${escapeHtml(classId)}" data-track="${escapeHtml(item.Track || item.track || '')}" data-class="${escapeHtml(firstEntry.CarClass || firstEntry['Car Class'] || firstEntry.car_class || firstEntry.Class || '')}">`;
+            tableHTML += `<tr class="driver-data-row ${groupId}" onclick="openDetailView(event, this)" data-position="${numericPos}" data-trackid="${escapeHtml(trackId)}" data-classid="${escapeHtml(classId)}" data-track="${escapeHtml(item.track || item.Track || '')}" data-class="${escapeHtml(firstEntry.car_class || firstEntry.CarClass || firstEntry['Car Class'] || firstEntry.Class || '')}">`;
+
             keys.forEach(key => {
                 let value = item[key];
-                
-                // Column type detection
                 const isPositionKey = key === 'Position' || key === 'position' || key === 'Pos';
                 const isCarClassKey = key === 'CarClass' || key === 'Car Class' || key === 'car_class' || key === 'Class' || key === 'class';
                 const isLapTimeKey = key === 'LapTime' || key === 'Lap Time' || key === 'lap_time' || key === 'Time';
 
                 if (isPositionKey) {
-                    const totalEntries = item.TotalEntries || item['Total Entries'] || item.total_entries || item.TotalRacers || item.total_racers;
+                    const totalEntries = item.total_entries || item.TotalEntries || item['Total Entries'] || item.TotalRacers || item.total_racers;
                     const posNum = String(value || '').trim();
                     const totalNum = totalEntries ? String(totalEntries).trim() : '';
-                    // Compute color: green for 1, red for last, gradient in between
                     let badgeColor = '';
                     let pos = parseInt(posNum);
                     let total = parseInt(totalNum);
                     if (!isNaN(pos) && !isNaN(total) && total > 1) {
-                        if (pos === 1) {
-                            badgeColor = '#22c55e'; // bright green
-                        } else if (pos === total) {
-                            badgeColor = '#ef4444'; // bright red
-                        } else {
-                            // Interpolate between green and red
-                            // 0 = green, 1 = red
+                        if (pos === 1) badgeColor = '#22c55e';
+                        else if (pos === total) badgeColor = '#ef4444';
+                        else {
                             let t = (pos - 1) / (total - 1);
-                            // Green: 34,197,94  Red: 239,68,68
                             let r = Math.round(34 + (239-34)*t);
                             let g = Math.round(197 + (68-197)*t);
                             let b = Math.round(94 + (68-94)*t);
                             badgeColor = `rgb(${r},${g},${b})`;
                         }
                     } else {
-                        badgeColor = 'rgba(59,130,246,0.18)'; // fallback
+                        badgeColor = 'rgba(59,130,246,0.18)';
                     }
                     if (totalNum) {
                         tableHTML += `<td class="pos-cell"><span class="pos-number" style="background:${badgeColor}">${escapeHtml(posNum)}</span><span class="pos-sep">/</span><span class="pos-total">${escapeHtml(totalNum)}</span></td>`;
@@ -269,26 +243,18 @@ function displayResults(data) {
                 } else if (isCarClassKey) {
                     tableHTML += `<td class="no-wrap">${formatValue(value)}</td>`;
                 } else if (isLapTimeKey) {
-                    // ...existing code for lap time...
                     const s = String(value || '');
                     const parts = s.split(/,\s*/);
                     const main = parts[0] || '';
                     const delta = parts.slice(1).join(', ');
                     const escMain = escapeHtml(String(main)).replace(/\s+/g, '&nbsp;');
                     const escDelta = escapeHtml(String(delta));
-                    if (delta) {
-                        tableHTML += `<td class="lap-time-cell"><div class="lap-main">${escMain}</div><div class="time-delta">${escDelta}</div></td>`;
-                    } else {
-                        tableHTML += `<td class="lap-time-cell">${escMain}</td>`;
-                    }
+                    if (delta) tableHTML += `<td class="lap-time-cell"><div class="lap-main">${escMain}</div><div class="time-delta">${escDelta}</div></td>`;
+                    else tableHTML += `<td class="lap-time-cell">${escMain}</td>`;
                 } else if (key === 'Track' || key === 'track' || key === 'TrackName' || key === 'track_name') {
-                    // Insert word-break opportunity before dash for nice two-line breaks, preserving spaces
                     let trackStr = String(value || '');
-                    // Match spaces, dash (any type), spaces
                     trackStr = trackStr.replace(/(\s+)([-–—])(\s+)/g, '$1<wbr>$2$3');
-                    trackStr = escapeHtml(trackStr);
-                    // Unescape <wbr> (since escapeHtml will escape it)
-                    trackStr = trackStr.replace(/&lt;wbr&gt;/g, '<wbr>');
+                    trackStr = escapeHtml(trackStr).replace(/&lt;wbr&gt;/g, '<wbr>');
                     tableHTML += `<td>${trackStr}</td>`;
                 } else {
                     tableHTML += `<td>${formatValue(value)}</td>`;
@@ -434,18 +400,31 @@ function countryToFlag(country) {
     return '';
 }
 
-function toggleGroup(groupId) {
-    const rows = document.querySelectorAll(`.${groupId}`);
-    const header = event.target.closest('.driver-group-header');
-    const icon = header.querySelector('.toggle-icon');
-    
+function toggleGroup(target) {
+    // Accept either the header element (passed via onclick="toggleGroup(this)")
+    // or a string group id.
+    let headerElem = null;
+    let group = null;
+    if (target && typeof target === 'object' && target.dataset) {
+        headerElem = target;
+        group = target.dataset.group;
+    } else if (typeof target === 'string') {
+        group = target;
+    } else {
+        return;
+    }
+
+    if (!group) return;
+    const rows = document.querySelectorAll(`.${group}`);
+    const icon = headerElem ? headerElem.querySelector('.toggle-icon') : null;
+
     rows.forEach(row => {
         if (row.style.display === 'none') {
             row.style.display = '';
-            icon.textContent = '▼';
+            if (icon) icon.textContent = '▼';
         } else {
             row.style.display = 'none';
-            icon.textContent = '▶';
+            if (icon) icon.textContent = '▶';
         }
     });
 }

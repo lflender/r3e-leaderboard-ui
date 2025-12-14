@@ -45,8 +45,30 @@
   if(!container) return;
   if(!data || data.length === 0){ container.innerHTML = '<p class="placeholder">No car data available</p>'; return; }
 
+  // Compute min/max year for color gradient
+  let allYears = [];
+  data.forEach(cls => {
+    (cls.cars || []).forEach(car => {
+      let y = parseInt(car.year);
+      if (!isNaN(y)) allYears.push(y);
+    });
+  });
+  let minYear = Math.min(...allYears), maxYear = Math.max(...allYears);
+
+  function yearColor(year) {
+    let y = parseInt(year);
+    if (isNaN(y) || minYear === maxYear) return '#e0e0e0';
+    // More pronounced: yellow (#ffd600) to green (#00c853)
+    let t = (y - minYear) / (maxYear - minYear);
+    // interpolate between #ffd600 (255,214,0) and #00c853 (0,200,83)
+    let r = Math.round((1-t)*255 + t*0);
+    let g = Math.round((1-t)*214 + t*200);
+    let b = Math.round((1-t)*0 + t*83);
+    return `rgb(${r},${g},${b})`;
+  }
+
   let html = '<table class="results-table"><thead><tr>' +
-    '<th>Car</th><th>Wheel</th><th>Transmission</th><th>Year</th><th>Power</th><th>Weight</th><th>Engine</th><th>Drive</th><th>Country</th>' +
+    '<th>Car</th><th>Wheel</th><th>Transmission</th><th>Year</th><th>Power</th><th>Weight</th><th>Engine</th><th>Drive</th>' +
     '</tr></thead><tbody>';
 
   data.forEach(cls => {
@@ -57,16 +79,15 @@
             `<td colspan="9"><span class="toggle-icon">▼</span> <strong>${escapeHtml(className)}</strong></td></tr>`;
     const cars = Array.isArray(cls.cars) ? cls.cars : [];
     cars.forEach(car => {
-      html += `\n<tr class="driver-data-row ${slug}">` +
-              `<td class="no-wrap">${escapeHtml(car.car || '')}</td>` +
+            html += `\n<tr class="driver-data-row ${slug}">` +
+              `<td class="no-wrap"><b>${escapeHtml(car.car || '')}</b></td>` +
               `<td>${wheelBadge(car.wheel_cat || car.wheel)}</td>` +
               `<td>${transBadge(car.transmission_cat || car.transmission)}</td>` +
-              `<td>${escapeHtml(car.year || '')}</td>` +
+              `<td><span style="background:${yearColor(car.year)};color:#222;padding:0.18rem 0.6rem;border-radius:999px;font-weight:800;display:inline-block;min-width:3.5em;text-align:center;">${escapeHtml(car.year || '')}</span></td>` +
               `<td>${escapeHtml(car.power || '')}</td>` +
               `<td>${escapeHtml(car.weight || '')}</td>` +
               `<td>${escapeHtml(car.engine || '')}</td>` +
               `<td>${escapeHtml(car.drive || '')}</td>` +
-              `<td>${escapeHtml(car.country || '')}</td>` +
               `</tr>`;
     });
   });

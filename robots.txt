@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+# No sitemap declared per site owner's preference
+# Crawl-delay: 10

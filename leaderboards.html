@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboards — RaceRoom Leaderboards</title>
+    <meta name="description" content="Search RaceRoom leaderboards for drivers, view positions and results.">
+    <link rel="canonical" href="https://example.com/leaderboards.html">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1><a href="index.html">RaceRoom Leaderboards</a> — Leaderboards</h1>
+    </header>
+
+    <main>
+        <div class="search-container">
+            <input type="text" id="driver-search" placeholder="Search driver" autocomplete="off">
+            <select id="class-filter" aria-label="Filter by car class" hidden>
+                <option value="">All classes</option>
+                <!-- class options are loaded from data/cars.js -->
+            </select>
+            <div id="class-filter-ui" class="custom-select" role="listbox" aria-label="Filter by car class">
+                <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All classes ▾</button>
+                <div class="custom-select__menu" role="presentation" hidden></div>
+            </div>
+        </div>
+        <div id="results-container"></div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Ludo R3E Tools.</p>
+    </footer>
+    <script src="data/cars.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -30,6 +30,25 @@ async function fetchLeaderboardDetails() {
         
         const data = await response.json();
         setDetailTitles(data, trackParam, classParam);
+        // Update document title and meta description for better SEO when query params are present
+        try {
+            const trackLabel = trackParam ? decodeURIComponent(trackParam) : '';
+            const classLabel = classParam ? decodeURIComponent(classParam) : '';
+            const titleParts = ['RaceRoom Leaderboards'];
+            if (trackLabel) titleParts.push(trackLabel);
+            if (classLabel) titleParts.push(classLabel);
+            document.title = titleParts.join(' — ');
+            const desc = `Leaderboard for ${trackLabel || 'track'} ${classLabel ? ' / ' + classLabel : ''} on RaceRoom leaderboards.`;
+            let meta = document.querySelector('meta[name="description"]');
+            if (!meta) {
+                meta = document.createElement('meta');
+                meta.name = 'description';
+                document.head.appendChild(meta);
+            }
+            meta.content = desc;
+        } catch (e) {
+            // ignore
+        }
         allResults = data;
         currentPage = 1;
         displayResults(data);

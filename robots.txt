@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Crawl-delay can be set for polite crawling (optional)
+# Crawl-delay: 10
+
+# Disallow sensitive or staging paths
+# Disallow: /admin/

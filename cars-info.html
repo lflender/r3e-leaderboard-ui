@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Info — RaceRoom Leaderboards</title>
+    <meta name="description" content="RaceRoom car information, specs and classification. Browse cars by class, wheel type, and transmission.">
+    <link rel="canonical" href="https://example.com/cars-info.html">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1><a href="index.html">RaceRoom Leaderboards</a> — Car Info</h1>
+    </header>
+
+    <main>
+        <div class="search-container" id="cars-search-container">
+            <div id="class-filter-ui-cars" class="custom-select" role="listbox" aria-label="Filter by car class">
+                <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All classes ▾</button>
+                <div class="custom-select__menu" role="presentation" hidden></div>
+            </div>
+            <div id="wheel-filter-ui" class="custom-select" role="listbox" aria-label="Filter by wheel type">
+                <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All wheels ▾</button>
+                <div class="custom-select__menu" role="presentation" hidden></div>
+            </div>
+            <div id="trans-filter-ui" class="custom-select" role="listbox" aria-label="Filter by transmission type">
+                <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All transmissions ▾</button>
+                <div class="custom-select__menu" role="presentation" hidden></div>
+            </div>
+        </div>
+        <div id="cars-info-table"></div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Ludo R3E Tools.</p>
+    </footer>
+    <script src="data/cars.js"></script>
+    <script src="scripts/car-info.js"></script>
+</body>
+</html>

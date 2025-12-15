@@ -1,26 +1,13 @@
-// Tab switching functionality
-const tabButtons = document.querySelectorAll('.tab-button');
-const tabPanels = document.querySelectorAll('.tab-panel');
-
-tabButtons.forEach(button => {
-    button.addEventListener('click', () => {
-        const targetTab = button.dataset.tab;
-        
-        // Remove active class from all buttons and panels
-        tabButtons.forEach(btn => btn.classList.remove('active'));
-        tabPanels.forEach(panel => panel.classList.remove('active'));
-        
-        // Add active class to clicked button and corresponding panel
-        button.classList.add('active');
-        document.getElementById(targetTab).classList.add('active');
-    });
-});
-
-// Driver search functionality
+// Make script safe across pages: only initialize search UI if present
 const driverSearch = document.getElementById('driver-search');
 const classFilter = document.getElementById('class-filter');
 const classFilterUI = document.getElementById('class-filter-ui');
 const resultsContainer = document.getElementById('results-container');
+
+if (!driverSearch || !resultsContainer) {
+    // Not on the leaderboards page — export a no-op environment
+    console.log('script.js: leaderboards UI not present on this page — no search initialization');
+} 
 
 // Pagination state
 let currentPage = 1;
@@ -31,86 +18,84 @@ let allResults = [];
 const STATUS_CACHE_KEY = 'r3e_status_cache';
 const STATUS_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
 
-// Fetch and display status on page load
-fetchAndDisplayStatus();
+if (driverSearch && resultsContainer) {
+    // Fetch and display status on page load
+    fetchAndDisplayStatus();
 
-driverSearch.addEventListener('keypress', async (e) => {
-    if (e.key === 'Enter') {
-        const searchTerm = driverSearch.value.trim();
-        
-        if (!searchTerm) {
-            return;
+    driverSearch.addEventListener('keypress', async (e) => {
+        if (e.key === 'Enter') {
+            const searchTerm = driverSearch.value.trim();
+            if (!searchTerm) return;
+            await searchDriver(searchTerm);
         }
-        
-        await searchDriver(searchTerm);
-    }
-});
-
-// If the class filter is changed and there's an existing search term, re-run the search
-if (classFilter) {
-    classFilter.addEventListener('change', async () => {
-        const searchTerm = driverSearch.value.trim();
-        if (!searchTerm) return;
-        await searchDriver(searchTerm);
     });
-}
 
-// Setup custom select UI if present
-if (classFilter && classFilterUI) {
-    const toggle = classFilterUI.querySelector('.custom-select__toggle');
-    const menu = classFilterUI.querySelector('.custom-select__menu');
-
-    // Populate menu from hidden select
-    function buildCustomOptions() {
-        menu.innerHTML = '';
-        Array.from(classFilter.options).forEach(opt => {
-            const div = document.createElement('div');
-            div.className = 'custom-select__option';
-            div.textContent = opt.textContent;
-            div.dataset.value = opt.value;
-            if (opt.selected) div.setAttribute('aria-selected', 'true');
-            menu.appendChild(div);
+    // If the class filter is changed and there's an existing search term, re-run the search
+    if (classFilter) {
+        classFilter.addEventListener('change', async () => {
+            const searchTerm = driverSearch.value.trim();
+            if (!searchTerm) return;
+            await searchDriver(searchTerm);
         });
     }
 
-    buildCustomOptions();
+    // Setup custom select UI if present
+    if (classFilter && classFilterUI) {
+        const toggle = classFilterUI.querySelector('.custom-select__toggle');
+        const menu = classFilterUI.querySelector('.custom-select__menu');
 
-    function closeMenu() {
-        menu.hidden = true;
-        toggle.setAttribute('aria-expanded', 'false');
-    }
+        // Populate menu from hidden select
+        function buildCustomOptions() {
+            menu.innerHTML = '';
+            Array.from(classFilter.options).forEach(opt => {
+                const div = document.createElement('div');
+                div.className = 'custom-select__option';
+                div.textContent = opt.textContent;
+                div.dataset.value = opt.value;
+                if (opt.selected) div.setAttribute('aria-selected', 'true');
+                menu.appendChild(div);
+            });
+        }
 
-    function openMenu() {
-        menu.hidden = false;
-        toggle.setAttribute('aria-expanded', 'true');
-    }
-
-    toggle.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (menu.hidden) openMenu(); else closeMenu();
-    });
-
-    // Option click
-    menu.addEventListener('click', async (e) => {
-        const opt = e.target.closest('.custom-select__option');
-        if (!opt) return;
-        const val = opt.dataset.value;
-        // Update hidden select
-        classFilter.value = val;
-        // Update toggle label
-        toggle.textContent = `${opt.textContent} ▾`;
-        // Rebuild to mark selected
         buildCustomOptions();
-        closeMenu();
 
-        const searchTerm = driverSearch.value.trim();
-        if (searchTerm) await searchDriver(searchTerm);
-    });
+        function closeMenu() {
+            menu.hidden = true;
+            toggle.setAttribute('aria-expanded', 'false');
+        }
 
-    // Close when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!classFilterUI.contains(e.target)) closeMenu();
-    });
+        function openMenu() {
+            menu.hidden = false;
+            toggle.setAttribute('aria-expanded', 'true');
+        }
+
+        toggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (menu.hidden) openMenu(); else closeMenu();
+        });
+
+        // Option click
+        menu.addEventListener('click', async (e) => {
+            const opt = e.target.closest('.custom-select__option');
+            if (!opt) return;
+            const val = opt.dataset.value;
+            // Update hidden select
+            classFilter.value = val;
+            // Update toggle label
+            toggle.textContent = `${opt.textContent} ▾`;
+            // Rebuild to mark selected
+            buildCustomOptions();
+            closeMenu();
+
+            const searchTerm = driverSearch.value.trim();
+            if (searchTerm) await searchDriver(searchTerm);
+        });
+
+        // Close when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!classFilterUI.contains(e.target)) closeMenu();
+        });
+    }
 }
 
 async function searchDriver(driverName) {
@@ -137,6 +122,17 @@ async function searchDriver(driverName) {
         console.log('Received data:', data);
         allResults = data;
         currentPage = 1;
+        // Update title and meta description to reflect search
+        try {
+            document.title = `RaceRoom Leaderboards — Search: ${driverName}`;
+            let meta = document.querySelector('meta[name="description"]');
+            if (!meta) {
+                meta = document.createElement('meta');
+                meta.name = 'description';
+                document.head.appendChild(meta);
+            }
+            meta.content = `Search results for ${driverName} on RaceRoom leaderboards (R3E).`;
+        } catch (e) {}
         displayResults(data);
     } catch (error) {
         console.error('Search error:', error);

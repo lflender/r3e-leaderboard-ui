@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Info — RaceRoom Leaderboards</title>
+    <meta name="description" content="RaceRoom track information and stats. Browse tracks and view related leaderboard stats.">
+    <link rel="canonical" href="https://example.com/track-info.html">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1><a href="index.html">RaceRoom Leaderboards</a> — Track Info</h1>
+    </header>
+
+    <main>
+        <div class="search-container" id="track-search-container">
+            <div id="track-filter-ui" class="custom-select" role="listbox" aria-label="Filter by track">
+                <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All tracks ▾</button>
+                <div class="custom-select__menu" role="presentation" hidden></div>
+            </div>
+            <div id="track-class-filter-ui" class="custom-select" role="listbox" aria-label="Filter by class">
+                <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All classes ▾</button>
+                <div class="custom-select__menu" role="presentation" hidden></div>
+            </div>
+        </div>
+        <div id="track-info-table"></div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Ludo R3E Tools.</p>
+    </footer>
+    <script src="data/cars.js"></script>
+    <script src="scripts/track-info.js"></script>
+</body>
+</html>

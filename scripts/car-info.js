@@ -157,7 +157,10 @@
             html += `\n<tr class="driver-group-header" data-group="${slug}">` +
               `<td colspan="8"><span class="toggle-icon">▼</span> <strong>${escapeHtml(className)}</strong></td></tr>`;
       filteredCars.forEach(car => {
-        html += `\n<tr class="driver-data-row ${slug}">` +
+        // ensure link property exists
+        if (car.link === undefined) car.link = '';
+        const rowLink = escapeHtml(car.link || '');
+        html += `\n<tr class="driver-data-row ${slug}" data-link="${rowLink}">` +
                 `<td class="no-wrap"><b>${escapeHtml(car.car || '')}</b></td>` +
                 `<td>${wheelBadge(car.wheel_cat || car.wheel)}</td>` +
                 `<td>${transBadge(car.transmission_cat || car.transmission)}</td>` +
@@ -210,7 +213,9 @@
           `<td colspan="8"><span class="toggle-icon">▼</span> <strong>${escapeHtml(className)}</strong></td></tr>`;
     const cars = Array.isArray(cls.cars) ? cls.cars : [];
     cars.forEach(car => {
-            html += `\n<tr class="driver-data-row ${slug}">` +
+            if (car.link === undefined) car.link = '';
+            const rowLink = escapeHtml(car.link || '');
+            html += `\n<tr class="driver-data-row ${slug}" data-link="${rowLink}">` +
               `<td class="no-wrap"><b>${escapeHtml(car.car || '')}</b></td>` +
               `<td>${wheelBadge(car.wheel_cat || car.wheel)}</td>` +
               `<td>${transBadge(car.transmission_cat || car.transmission)}</td>` +
@@ -225,4 +230,17 @@
 
   html += '\n</tbody></table>';
   tableContainer.innerHTML = html;
+  // Make rows with a data-link attribute open that link in a new tab
+  Array.from(tableContainer.querySelectorAll('tr.driver-data-row')).forEach(row => {
+    const link = row.getAttribute('data-link') || '';
+    if (link) {
+      row.style.cursor = 'pointer';
+      row.addEventListener('click', (e) => {
+        // don't trigger when clicking interactive elements inside the row
+        const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+        if (tag === 'a' || tag === 'button' || e.target.closest && e.target.closest('.custom-select')) return;
+        try { window.open(link, '_blank'); } catch (err) { console.warn('Failed to open link', err); }
+      });
+    }
+  });
 })();

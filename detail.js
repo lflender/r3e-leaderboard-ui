@@ -182,9 +182,16 @@ function displayResults(data) {
             tableHTML += `<td class="pos-cell"><span class="pos-number" style="background:${badgeColor}">${escapeHtml(posNum)}</span></td>`;
         }
         
-        // Driver Name
+        // Driver Name — if the row is not highlisted, make the name a link to main Leaderboards page with driver search
         const name = item.Name || item.name || item.DriverName || item.driver_name || '-';
-        tableHTML += `<td>${name}</td>`;
+        // Determine highlisted flag from possible fields (backend may use different names)
+        const highlisted = item.highlisted || item.Highlisted || item.highList || item.high_list || item.is_highlisted || item.isHighlisted || item.high_list_flag || false;
+        if (!highlisted) {
+            const encoded = encodeURIComponent(String(name));
+            tableHTML += `<td><a class="detail-driver-link" href="index.html?driver=${encoded}">${escapeHtml(String(name))}</a></td>`;
+        } else {
+            tableHTML += `<td>${escapeHtml(String(name))}</td>`;
+        }
         
         // Lap Time - show delta inline but keep it on one line
         const lapTime = item.LapTime || item['Lap Time'] || item.lap_time || item.Time || '-';

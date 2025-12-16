@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Info — R3E Leaderboards</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1><a href="index.html" class="home-link">RaceRoom Leaderboards</a></h1>
+    </header>
+
+    <main>
+        <div class="tabs">
+            <a class="tab-button" href="index.html">Leaderboards</a>
+            <button class="tab-button active">Track Info</button>
+            <a class="tab-button" href="cars.html">Car Info</a>
+        </div>
+
+        <div class="tab-content">
+            <div id="track-info" class="tab-panel active">
+                <div class="search-container" id="track-search-container">
+                    <div id="track-filter-ui" class="custom-select" role="listbox" aria-label="Filter by track">
+                        <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All tracks ▾</button>
+                        <div class="custom-select__menu" role="presentation" hidden></div>
+                    </div>
+                    <div id="track-class-filter-ui" class="custom-select" role="listbox" aria-label="Filter by class">
+                        <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All classes ▾</button>
+                        <div class="custom-select__menu" role="presentation" hidden></div>
+                    </div>
+                    <select id="class-filter" aria-label="Filter by car class" hidden>
+                        <option value="">All classes</option>
+                    </select>
+                </div>
+                <div id="track-info-table"></div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Ludo R3E Tools</p>
+    </footer>
+
+    <script src="data/cars.js"></script>
+    <script src="script.js"></script>
+    <script src="scripts/track-info.js"></script>
+</body>
+</html>

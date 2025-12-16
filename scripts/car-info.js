@@ -42,8 +42,10 @@
 
   const data = await loadData();
   const tableContainer = document.getElementById('cars-info-table');
+  // If the script is running on the main index page, #cars-info panel may exist.
+  // For standalone cars.html we only require the table container.
   const panelContainer = document.getElementById('cars-info');
-  if(!tableContainer || !panelContainer) return;
+  if(!tableContainer) return;
   if(!data || data.length === 0){ tableContainer.innerHTML = '<p class="placeholder">No car data available</p>'; return; }
 
   // Dropdown options
@@ -143,7 +145,7 @@
     }
 
     let html = '<table class="results-table"><thead><tr>' +
-      '<th>Car</th><th>Wheel</th><th>Transmission</th><th>Year</th><th>Power</th><th>Weight</th><th>Engine</th><th>Drive</th>' +
+      '<th>Car</th><th>Wheel</th><th>Transmission</th><th>Year</th><th>Power</th><th>Weight</th><th>Engine</th>' +
       '</tr></thead><tbody>';
 
     data.forEach(cls => {
@@ -152,8 +154,8 @@
       // Only show group if at least one car matches
       const filteredCars = (cls.cars || []).filter(carMatchesFilters);
       if (filteredCars.length === 0) return;
-      html += `\n<tr class="driver-group-header" data-group="${slug}">` +
-              `<td colspan="9"><span class="toggle-icon">▼</span> <strong>${escapeHtml(className)}</strong></td></tr>`;
+            html += `\n<tr class="driver-group-header" data-group="${slug}">` +
+              `<td colspan="8"><span class="toggle-icon">▼</span> <strong>${escapeHtml(className)}</strong></td></tr>`;
       filteredCars.forEach(car => {
         html += `\n<tr class="driver-data-row ${slug}">` +
                 `<td class="no-wrap"><b>${escapeHtml(car.car || '')}</b></td>` +
@@ -163,7 +165,7 @@
                 `<td>${escapeHtml(car.power || '')}</td>` +
                 `<td>${escapeHtml(car.weight || '')}</td>` +
                 `<td>${escapeHtml(car.engine || '')}</td>` +
-                `<td>${escapeHtml(car.drive || '')}</td>` +
+                `` +
                 `</tr>`;
       });
     });
@@ -197,15 +199,15 @@
   }
 
   let html = '<table class="results-table"><thead><tr>' +
-    '<th>Car</th><th>Wheel</th><th>Transmission</th><th>Year</th><th>Power</th><th>Weight</th><th>Engine</th><th>Drive</th>' +
+    '<th>Car</th><th>Wheel</th><th>Transmission</th><th>Year</th><th>Power</th><th>Weight</th><th>Engine</th>' +
     '</tr></thead><tbody>';
 
   data.forEach(cls => {
     const className = cls.class || 'Uncategorized';
     const slug = `class-${String(className).replace(/\s+/g,'-').replace(/[^a-z0-9\-]/gi,'').toLowerCase()}`;
     // Group header row (same style as driver grouping in leaderboards)
-    html += `\n<tr class="driver-group-header" data-group="${slug}" onclick="toggleGroup(this)">` +
-            `<td colspan="9"><span class="toggle-icon">▼</span> <strong>${escapeHtml(className)}</strong></td></tr>`;
+        html += `\n<tr class="driver-group-header" data-group="${slug}" onclick="toggleGroup(this)">` +
+          `<td colspan="8"><span class="toggle-icon">▼</span> <strong>${escapeHtml(className)}</strong></td></tr>`;
     const cars = Array.isArray(cls.cars) ? cls.cars : [];
     cars.forEach(car => {
             html += `\n<tr class="driver-data-row ${slug}">` +
@@ -216,11 +218,11 @@
               `<td class="carinfo-meta">${escapeHtml(car.power || '')}</td>` +
               `<td class="carinfo-meta">${escapeHtml(car.weight || '')}</td>` +
               `<td class="carinfo-meta">${escapeHtml(car.engine || '')}</td>` +
-              `<td class="carinfo-meta">${escapeHtml(car.drive || '')}</td>` +
+              `` +
               `</tr>`;
     });
   });
 
   html += '\n</tbody></table>';
-  container.innerHTML = html;
+  tableContainer.innerHTML = html;
 })();

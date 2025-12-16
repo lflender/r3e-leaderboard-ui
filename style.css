@@ -141,6 +141,43 @@ main {
     min-height: 400px;
 }
 
+/* Ensure tables are scrollable within their container and fit the same width as other tabs */
+.tab-panel {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+.content-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    width: 100%;
+}
+.results-table {
+    width: 100%;
+    table-layout: auto;
+}
+
+/* Slightly tighter table cells so long names don't push layout */
+.results-table th,
+.results-table td {
+    padding: 0.45rem 0.6rem; /* reduced from ~0.6-0.8 */
+    text-align: left;
+    vertical-align: middle;
+}
+
+/* Allow car names in Car Info to wrap (they were previously forced nowrap) */
+.results-table td.no-wrap {
+    white-space: normal;
+}
+
+/* Ensure search controls and table containers align identically */
+.tab-panel > .search-container,
+.tab-panel > #cars-info-table,
+.tab-panel > #track-info-table,
+.tab-panel > #results-container {
+    max-width: 1100px;
+    margin: 0 auto 1rem auto;
+}
+
 .tab-panel {
     display: none;
 }
@@ -211,6 +248,7 @@ main {
     background: transparent;
     color: var(--text-primary);
     cursor: pointer;
+    white-space: nowrap;
 }
 .custom-select__menu {
     position: absolute;

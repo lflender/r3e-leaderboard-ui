@@ -122,6 +122,7 @@ main {
     border-bottom: 3px solid transparent;
     transition: all 0.3s ease;
     font-weight: 500;
+    text-align: center;
 }
 
 .tab-button:hover {
@@ -194,6 +195,7 @@ main {
     display: flex;
     gap: 0.5rem;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 #class-filter {
@@ -236,7 +238,10 @@ main {
 .custom-select {
     position: relative;
     display: inline-block;
-    width: 420px;
+    /* Make selects flexible so they wrap nicely on smaller screens */
+    flex: 1 1 280px;
+    min-width: 220px;
+    max-width: 420px;
 }
 
 /* Row link anchors: allow browser link preview on hover and style inline content */
@@ -341,6 +346,12 @@ main {
     border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 2px 12px 0 rgba(30, 41, 59, 0.10);
+}
+
+/* Allow horizontal scroll for wide tables on small screens */
+#cars-info-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .results-table thead tr {
@@ -759,6 +770,7 @@ footer p {
         padding: 0.75rem 1rem;
         border-bottom: 1px solid var(--border);
         border-left: 3px solid transparent;
+        display: block;
     }
 
     .tab-button.active {
@@ -777,5 +789,22 @@ footer p {
     .results-table th,
     .results-table td {
         padding: 0.5rem;
+    }
+
+    /* Search filters stack and fill width on mobile */
+    .search-container {
+        gap: 0.5rem 0.75rem;
+    }
+    .custom-select {
+        flex: 1 1 100%;
+        min-width: 100%;
+        max-width: 100%;
+    }
+    .custom-select__toggle {
+        white-space: normal;
+    }
+    /* Keep table usable with horizontal scroll */
+    #cars-info-table {
+        margin-bottom: 0.5rem;
     }
 }

@@ -158,7 +158,7 @@ async function searchDriver(driverName) {
     resultsContainer.innerHTML = '<div class="loading">Searching...</div>';
     
     try {
-        let url = `http://localhost:8080/api/search?driver=${encodeURIComponent(driverName)}`;
+        let url = `/api/search?driver=${encodeURIComponent(driverName)}`;
         try {
             const selectedClass = classFilter ? classFilter.value : '';
             if (selectedClass) {
@@ -619,7 +619,7 @@ async function fetchAndDisplayStatus() {
         
         // Fetch new data if needed
         if (needsFetch) {
-            const response = await fetch('http://localhost:8080/api/status');
+            const response = await fetch('/api/status');
             if (response.ok) {
                 statusData = await response.json();
                 

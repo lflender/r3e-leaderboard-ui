@@ -21,7 +21,7 @@ async function fetchLeaderboardDetails() {
     
     try {
         // Construct API URL - adjust this to match your backend endpoint
-        const url = `http://localhost:8080/api/leaderboard?track=${encodeURIComponent(trackParam)}&class=${encodeURIComponent(classParam)}`;
+        const url = `/api/leaderboard?track=${encodeURIComponent(trackParam)}&class=${encodeURIComponent(classParam)}`;
         const response = await fetch(url);
         
         if (!response.ok) {

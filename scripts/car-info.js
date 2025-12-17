@@ -160,15 +160,16 @@
         // ensure link property exists
         if (car.link === undefined) car.link = '';
         const rowLink = escapeHtml(car.link || '');
+        const linkOpen = rowLink ? `<a class="row-link" href="${rowLink}" target="_blank" rel="noopener">` : '';
+        const linkClose = rowLink ? `</a>` : '';
         html += `\n<tr class="driver-data-row ${slug}" data-link="${rowLink}">` +
-                `<td class="no-wrap"><b>${escapeHtml(car.car || '')}</b></td>` +
-                `<td>${wheelBadge(car.wheel_cat || car.wheel)}</td>` +
-                `<td>${transBadge(car.transmission_cat || car.transmission)}</td>` +
-                `<td><span style="background:${yearColor(car.year)};color:#222;padding:0.18rem 0.6rem;border-radius:999px;font-weight:800;display:inline-block;min-width:3.5em;text-align:center;">${escapeHtml(car.year || '')}</span></td>` +
-                `<td>${escapeHtml(car.power || '')}</td>` +
-                `<td>${escapeHtml(car.weight || '')}</td>` +
-                `<td>${escapeHtml(car.engine || '')}</td>` +
-                `` +
+          `<td>${linkOpen}<b>${escapeHtml(car.car || '')}</b>${linkClose}</td>` +
+                `<td>${linkOpen}${wheelBadge(car.wheel_cat || car.wheel)}${linkClose}</td>` +
+                `<td>${linkOpen}${transBadge(car.transmission_cat || car.transmission)}${linkClose}</td>` +
+                `<td>${linkOpen}<span style="background:${yearColor(car.year)};color:#222;padding:0.18rem 0.6rem;border-radius:999px;font-weight:800;display:inline-block;min-width:3.5em;text-align:center;">${escapeHtml(car.year || '')}</span>${linkClose}</td>` +
+                `<td class="carinfo-meta">${linkOpen}${escapeHtml(car.power || '')}${linkClose}</td>` +
+                `<td class="carinfo-meta">${linkOpen}${escapeHtml(car.weight || '')}${linkClose}</td>` +
+                `<td class="carinfo-meta">${linkOpen}${escapeHtml(car.engine || '')}${linkClose}</td>` +
                 `</tr>`;
       });
     });
@@ -215,15 +216,16 @@
     cars.forEach(car => {
             if (car.link === undefined) car.link = '';
             const rowLink = escapeHtml(car.link || '');
+            const linkOpen = rowLink ? `<a class="row-link" href="${rowLink}" target="_blank" rel="noopener">` : '';
+            const linkClose = rowLink ? `</a>` : '';
             html += `\n<tr class="driver-data-row ${slug}" data-link="${rowLink}">` +
-              `<td class="no-wrap"><b>${escapeHtml(car.car || '')}</b></td>` +
-              `<td>${wheelBadge(car.wheel_cat || car.wheel)}</td>` +
-              `<td>${transBadge(car.transmission_cat || car.transmission)}</td>` +
-              `<td><span style="background:${yearColor(car.year)};color:#222;padding:0.18rem 0.6rem;border-radius:999px;font-weight:800;display:inline-block;min-width:3.5em;text-align:center;">${escapeHtml(car.year || '')}</span></td>` +
-              `<td class="carinfo-meta">${escapeHtml(car.power || '')}</td>` +
-              `<td class="carinfo-meta">${escapeHtml(car.weight || '')}</td>` +
-              `<td class="carinfo-meta">${escapeHtml(car.engine || '')}</td>` +
-              `` +
+              `<td>${linkOpen}<b>${escapeHtml(car.car || '')}</b>${linkClose}</td>` +
+              `<td>${linkOpen}${wheelBadge(car.wheel_cat || car.wheel)}${linkClose}</td>` +
+              `<td>${linkOpen}${transBadge(car.transmission_cat || car.transmission)}${linkClose}</td>` +
+              `<td>${linkOpen}<span style="background:${yearColor(car.year)};color:#222;padding:0.18rem 0.6rem;border-radius:999px;font-weight:800;display:inline-block;min-width:3.5em;text-align:center;">${escapeHtml(car.year || '')}</span>${linkClose}</td>` +
+              `<td class="carinfo-meta">${linkOpen}${escapeHtml(car.power || '')}${linkClose}</td>` +
+              `<td class="carinfo-meta">${linkOpen}${escapeHtml(car.weight || '')}${linkClose}</td>` +
+              `<td class="carinfo-meta">${linkOpen}${escapeHtml(car.engine || '')}${linkClose}</td>` +
               `</tr>`;
     });
   });
@@ -234,13 +236,16 @@
   Array.from(tableContainer.querySelectorAll('tr.driver-data-row')).forEach(row => {
     const link = row.getAttribute('data-link') || '';
     if (link) {
+      // prefer native anchor preview; only add click handler when no anchor exists
+      const hasAnchor = !!row.querySelector('a.row-link');
       row.style.cursor = 'pointer';
-      row.addEventListener('click', (e) => {
-        // don't trigger when clicking interactive elements inside the row
-        const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
-        if (tag === 'a' || tag === 'button' || e.target.closest && e.target.closest('.custom-select')) return;
-        try { window.open(link, '_blank'); } catch (err) { console.warn('Failed to open link', err); }
-      });
+      if (!hasAnchor) {
+        row.addEventListener('click', (e) => {
+          const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+          if (tag === 'a' || tag === 'button' || e.target.closest && e.target.closest('.custom-select')) return;
+          try { window.open(link, '_blank'); } catch (err) { console.warn('Failed to open link', err); }
+        });
+      }
     }
   });
 })();

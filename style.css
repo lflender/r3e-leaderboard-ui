@@ -238,6 +238,31 @@ main {
     display: inline-block;
     width: 420px;
 }
+
+/* Row link anchors: allow browser link preview on hover and style inline content */
+.row-link {
+    color: inherit;
+    text-decoration: none;
+    display: inline-block;
+    width: 100%;
+    white-space: normal; /* allow wrapping of long car names */
+}
+.row-link:hover {
+    text-decoration: underline;
+}
+
+/* Constrain the Power column so very long car names don't force the table wide */
+.results-table th:nth-child(5),
+.results-table td:nth-child(5) {
+    width: 8rem; /* fixed-ish width for Power column */
+    max-width: 8rem;
+}
+/* Ellipsize cell content in the Power column */
+.results-table td:nth-child(5) {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 .custom-select__toggle {
     width: 100%;
     text-align: left;

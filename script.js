@@ -428,6 +428,21 @@ function displayResults(data) {
         const driverResults = Array.isArray(driverObj.entries) ? driverObj.entries : [];
         const firstEntry = driverResults[0] || {};
 
+        // Sort rows by gap time ascending within each driver group
+        // Tie-breaker: total entries count descending (1/577 beats 1/12)
+        try {
+            driverResults.sort((a, b) => {
+                const ga = parseGapMillisFromItem(a);
+                const gb = parseGapMillisFromItem(b);
+                if (ga !== gb) return ga - gb;
+                const ta = getTotalEntriesCount(a);
+                const tb = getTotalEntriesCount(b);
+                return tb - ta; // descending
+            });
+        } catch (e) {
+            // If parsing fails, keep original order
+        }
+
         // Display name: prefer cased name from first entry (preserve original casing)
         const displayName = firstEntry.name || firstEntry.Name || driverObj.driver || driverObj.name || driverObj.DriverName || driverObj.driver_name || 'Unknown';
 
@@ -581,6 +596,32 @@ function displayResults(data) {
     }
     
     resultsContainer.innerHTML = tableHTML + paginationHTML;
+}
+
+// Parse gap time in milliseconds from an item’s lap time field
+function parseGapMillisFromItem(item) {
+    const raw = item.LapTime || item['Lap Time'] || item.lap_time || item.laptime || item.Time || '';
+    const s = String(raw || '');
+    const parts = s.split(/,\s*/);
+    if (parts.length < 2) return 0; // leader row or missing gap
+    const gapStr = parts.slice(1).join(' ');
+    // Patterns supported: 
+    // "+1.234s", "+0m 1.234s", "-0.500s" (optional sign), with optional minutes
+    const m = gapStr.match(/^([+-])?(?:(\d+)m\s*)?(\d+)(?:\.(\d{1,3}))?s$/);
+    if (!m) return Number.MAX_VALUE; // push unknown gaps to the end
+    const sign = m[1] === '-' ? -1 : 1;
+    const minutes = parseInt(m[2] || '0', 10);
+    const seconds = parseInt(m[3] || '0', 10);
+    const millis = parseInt((m[4] || '0').padEnd(3, '0'), 10);
+    const total = ((minutes * 60) + seconds) * 1000 + millis;
+    return sign * total;
+}
+
+// Extract total entries count from various possible fields
+function getTotalEntriesCount(item) {
+    const totalEntries = item.total_entries || item.TotalEntries || item['Total Entries'] || item.TotalRacers || item.total_racers;
+    const n = parseInt(String(totalEntries || '').replace(/[^0-9]/g, ''));
+    return isNaN(n) ? 0 : n;
 }
 
 function displayError(message) {

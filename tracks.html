@@ -41,7 +41,7 @@
             <h3>Database Status</h3>
             <div class="status-grid">
                 <div class="status-item">
-                    <span class="status-label">Last Updated:</span>
+                    <span id="status-timestamp-label" class="status-label">Last Updated:</span>
                     <span id="status-timestamp" class="status-value">-</span>
                 </div>
                 <div class="status-item">
@@ -70,8 +70,16 @@
         <p>hello@r3e-leaderboards.info</p>
     </footer>
 
+    <!-- Core modules - load first -->
+    <script src="modules/utils.js"></script>
+    <script src="modules/data-service.js"></script>
+    <script src="modules/custom-select.js"></script>
+    <script src="modules/pagination.js"></script>
+    <script src="modules/table-renderer.js"></script>
+    
+    <!-- Data and application scripts -->
     <script src="data/cars.js"></script>
     <script src="script.js"></script>
-    <script src="scripts/track-info.js"></script>
+    <script src="modules/track-info.js"></script>
 </body>
 </html>

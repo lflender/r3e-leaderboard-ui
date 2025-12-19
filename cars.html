@@ -45,8 +45,13 @@
     <p>hello@r3e-leaderboards.info</p>
   </footer>
 
+  <!-- Core modules - load first -->
+  <script src="modules/utils.js"></script>
+  <script src="modules/custom-select.js"></script>
+  
+  <!-- Data and application scripts -->
   <script src="data/cars.js"></script>
   <script src="script.js"></script>
-  <script src="scripts/car-info.js"></script>
+  <script src="modules/car-info.js"></script>
 </body>
 </html>

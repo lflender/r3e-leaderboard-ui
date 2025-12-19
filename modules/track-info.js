@@ -1,4 +1,7 @@
 (function(){
+  // Helper function for formatting values
+  const formatValue = R3EUtils.formatValue;
+  
   // Track list provided by user: label and id
   const TRACKS = [
     { id: 12500, label: 'AVUS - 1994' },
@@ -194,14 +197,14 @@
   function buildMenu() {
     if (!rootMenu) return;
     const options = [{ value: '', label: 'All tracks' }].concat(TRACKS.map(t => ({ value: String(t.id), label: t.label })));
-    rootMenu.innerHTML = options.map(opt => `<div class="custom-select__option" data-value="${escapeHtml(opt.value)}">${escapeHtml(opt.label)}</div>`).join('');
+    rootMenu.innerHTML = options.map(opt => `<div class="custom-select__option" data-value="${R3EUtils.escapeHtml(opt.value)}">${R3EUtils.escapeHtml(opt.label)}</div>`).join('');
   }
 
   // Build class menu from a list of class options (value/label)
   function buildClassMenu(classOptions) {
     if (!classMenu) return;
     const opts = [{ value: '', label: 'All classes' }].concat(classOptions.map(c => ({ value: String(c.value), label: c.label })));
-    classMenu.innerHTML = opts.map(opt => `<div class="custom-select__option" data-value="${escapeHtml(opt.value)}">${escapeHtml(opt.label)}</div>`).join('');
+    classMenu.innerHTML = opts.map(opt => `<div class="custom-select__option" data-value="${R3EUtils.escapeHtml(opt.value)}">${R3EUtils.escapeHtml(opt.label)}</div>`).join('');
   }
 
   // Build class menu from the hidden select `#class-filter` if present
@@ -559,7 +562,7 @@
     keys.sort((a,b)=>{ let ia = columnOrder.indexOf(a); let ib = columnOrder.indexOf(b); if (ia===-1) ia=999; if (ib===-1) ib=999; return ia-ib; });
 
     let html = '<table class="results-table"><thead><tr>';
-    keys.forEach(k=> html += `<th>${formatHeader(k)}</th>`);
+    keys.forEach(k=> html += `<th>${R3EUtils.formatHeader(k)}</th>`);
     html += '</tr></thead><tbody>';
 
     pageItems.forEach(item => {
@@ -567,7 +570,7 @@
       const trackIdVal = item.track_id || item.TrackID || item.trackId || item.track || item.Track || '';
       const classIdVal = item.class_id || item.ClassID || item.classId || item.class || item.class_name || item.className || item.ClassName || '';
       const posVal = item.position || item.Position || item.Pos || item.rank || '';
-      html += `<tr class="driver-data-row" onclick="openDetailView(event, this)" data-trackid="${escapeHtml(String(trackIdVal))}" data-classid="${escapeHtml(String(classIdVal))}" data-position="${escapeHtml(String(posVal))}">`;
+      html += `<tr class="driver-data-row" onclick="openDetailView(event, this)" data-trackid="${R3EUtils.escapeHtml(String(trackIdVal))}" data-classid="${R3EUtils.escapeHtml(String(classIdVal))}" data-position="${R3EUtils.escapeHtml(String(posVal))}">`;
       keys.forEach(key => {
         // If synthetic 'Car Class' key, derive value from common fields in the item
         let value;
@@ -579,20 +582,20 @@
         // position handling
         if (key === 'Position' || key === 'position' || key === 'Pos') {
           const posNum = String(value || '');
-          html += `<td class="pos-cell"><span class="pos-number">${escapeHtml(posNum)}</span></td>`;
+          html += `<td class="pos-cell"><span class="pos-number">${R3EUtils.escapeHtml(posNum)}</span></td>`;
         } else if (key === 'LapTime' || key === 'Lap Time' || key === 'lap_time' || key === 'laptime' || key === 'Time') {
           const s = String(value || '');
           const parts = s.split(/,\s*/);
           const main = parts[0] || '';
           const delta = parts.slice(1).join(', ');
-          const escMain = escapeHtml(String(main));
-          const escDelta = escapeHtml(String(delta));
+          const escMain = R3EUtils.escapeHtml(String(main));
+          const escDelta = R3EUtils.escapeHtml(String(delta));
           if (delta) html += `<td class="no-wrap">${escMain} <span class="time-delta-inline">${escDelta}</span></td>`;
           else html += `<td class="no-wrap">${escMain}</td>`;
         } else if (key === 'Track' || key === 'track' || key === 'TrackName' || key === 'track_name') {
           let trackStr = String(value || '');
           trackStr = trackStr.replace(/(\s+)([-–—])(\s+)/g, '$1<wbr>$2$3');
-          trackStr = escapeHtml(trackStr).replace(/&lt;wbr&gt;/g, '<wbr>');
+          trackStr = R3EUtils.escapeHtml(trackStr).replace(/&lt;wbr&gt;/g, '<wbr>');
           html += `<td>${trackStr}</td>`;
         } else {
           html += `<td>${formatValue(value)}</td>`;

@@ -57,6 +57,14 @@
         <p>hello@r3e-leaderboards.info</p>
     </footer>
 
-    <script src="detail.js"></script>
+    <!-- Core modules - load first -->
+    <script src="modules/utils.js"></script>
+    <script src="modules/data-service.js"></script>
+    <script src="modules/custom-select.js"></script>
+    <script src="modules/pagination.js"></script>
+    <script src="modules/table-renderer.js"></script>
+    
+    <!-- Application script -->
+    <script src="modules/detail.js"></script>
 </body>
 </html>

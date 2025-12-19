@@ -513,7 +513,7 @@
       }
       
       combinations.sort((a, b) => (b.entry_count || 0) - (a.entry_count || 0));
-      const limitedCombinations = combinations.slice(0, 100);
+      const limitedCombinations = combinations.slice(0, 1000);
       
       console.log(`Showing ${limitedCombinations.length} combinations`);
       return limitedCombinations;
@@ -603,25 +603,25 @@
 
     html += '</tbody></table>';
 
-    // Pagination controls
+    // Pagination controls (both above and below table for easier navigation)
     let paginationHTML = '';
     if (totalPages > 1) {
       paginationHTML = '<div class="pagination">';
       paginationHTML += `<div class="pagination-info">Showing ${startIndex+1}-${endIndex} of ${totalItems}</div>`;
       paginationHTML += '<div class="pagination-buttons">';
-      if (trackCurrentPage > 1) paginationHTML += `<button onclick="(function(){window.trackInfoGoToPage(${trackCurrentPage-1})})()" class="page-btn">‹ Previous</button>`;
+      if (trackCurrentPage > 1) paginationHTML += `<button onclick="window.trackInfoGoToPage(${trackCurrentPage-1})" class="page-btn">‹ Previous</button>`;
       const maxPagesToShow = 5;
       let startPage = Math.max(1, trackCurrentPage - Math.floor(maxPagesToShow/2));
       let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
       if (endPage - startPage < maxPagesToShow - 1) startPage = Math.max(1, endPage - maxPagesToShow + 1);
-      if (startPage > 1) { paginationHTML += `<button onclick="(function(){window.trackInfoGoToPage(1)})()" class="page-btn">1</button>`; if (startPage > 2) paginationHTML += '<span class="page-ellipsis">...</span>'; }
-      for (let i=startPage;i<=endPage;i++){ const active = i===trackCurrentPage ? 'active' : ''; paginationHTML += `<button onclick="(function(){window.trackInfoGoToPage(${i})})()" class="page-btn ${active}">${i}</button>`; }
-      if (endPage < totalPages) { if (endPage < totalPages - 1) paginationHTML += '<span class="page-ellipsis">...</span>'; paginationHTML += `<button onclick="(function(){window.trackInfoGoToPage(${totalPages})})()" class="page-btn">${totalPages}</button>`; }
-      if (trackCurrentPage < totalPages) paginationHTML += `<button onclick="(function(){window.trackInfoGoToPage(${trackCurrentPage+1})})()" class="page-btn">Next ›</button>`;
+      if (startPage > 1) { paginationHTML += `<button onclick="window.trackInfoGoToPage(1)" class="page-btn">1</button>`; if (startPage > 2) paginationHTML += '<span class="page-ellipsis">...</span>'; }
+      for (let i=startPage;i<=endPage;i++){ const active = i===trackCurrentPage ? 'active' : ''; paginationHTML += `<button onclick="window.trackInfoGoToPage(${i})" class="page-btn ${active}">${i}</button>`; }
+      if (endPage < totalPages) { if (endPage < totalPages - 1) paginationHTML += '<span class="page-ellipsis">...</span>'; paginationHTML += `<button onclick="window.trackInfoGoToPage(${totalPages})" class="page-btn">${totalPages}</button>`; }
+      if (trackCurrentPage < totalPages) paginationHTML += `<button onclick="window.trackInfoGoToPage(${trackCurrentPage+1})" class="page-btn">Next ›</button>`;
       paginationHTML += '</div></div>';
     }
 
-    tableContainer.innerHTML = html + paginationHTML;
+    tableContainer.innerHTML = paginationHTML + html + paginationHTML;
   }
 
   // Expose a global function for pagination buttons to call

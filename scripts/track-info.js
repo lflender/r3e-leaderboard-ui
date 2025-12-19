@@ -185,6 +185,7 @@
   let trackAllResults = [];
   let activeTrackId = null; // null => All tracks
   let activeClassId = null; // null => All classes
+  let activeClassLabel = null; // human-readable label for selected class
 
   function closeMenu() { if (rootMenu) { rootMenu.hidden = true; rootToggle.setAttribute('aria-expanded','false'); } }
   function openMenu() { if (rootMenu) { rootMenu.hidden = false; rootToggle.setAttribute('aria-expanded','true'); } }
@@ -222,6 +223,7 @@
   // Handle selection
   function setSelectedTrack(val, label) {
     activeTrackId = val ? Number(val) : null;
+    console.log('Track selected:', activeTrackId, 'label:', label);
     trackCurrentPage = 1;
     if (rootToggle) rootToggle.textContent = `${label} ▾`;
     closeMenu();
@@ -250,7 +252,10 @@
       if (!opt) return;
       const val = opt.dataset.value;
       const label = opt.textContent || opt.innerText || 'All classes';
-      activeClassId = val ? (isNaN(Number(val)) ? val : Number(val)) : null;
+      console.log('Class option clicked. Raw value:', val, 'label:', label);
+      activeClassId = (val && val !== '') ? Number(val) : null;
+      activeClassLabel = activeClassId ? label : null;
+      console.log('Class selected:', activeClassId, 'label:', activeClassLabel);
       trackCurrentPage = 1;
       classToggle.textContent = `${label} ▾`;
       classMenu.hidden = true;
@@ -268,8 +273,43 @@
     buildClassMenu([]);
   }
 
-  // Local driver index cache (optional, used to derive full class coverage per track)
+  // Local driver index cache
   let DRIVER_INDEX_CACHE = null;
+  
+  // Class menu should be stable: build once and never mutate thereafter.
+  let CLASS_MENU_BUILT = false;
+
+  async function ensureClassMenuBuilt() {
+    if (CLASS_MENU_BUILT) return;
+    // Always build from top_combinations to ensure we have numeric class IDs, not names
+    try {
+      const ts = Date.now();
+      const resp = await fetch(`cache/top_combinations.json?v=${ts}`, { cache: 'no-store' });
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const d = await resp.json();
+      let combos = [];
+      if (Array.isArray(d)) combos = d; else if (d && Array.isArray(d.results)) combos = d.results; else if (d && Array.isArray(d.data)) combos = d.data;
+
+      const classes = [];
+      const seen = new Set();
+      combos.forEach(item => {
+        const cid = item.class_id || item.ClassID || item.classId;
+        const cname = item.class_name || item.className || item.ClassName || item.car_class || item.CarClass || item.Class;
+        if (cid === undefined || cid === null || !cname) return;
+        const key = String(cid);
+        if (seen.has(key)) return;
+        seen.add(key);
+        classes.push({ value: Number(cid), label: cname });
+      });
+      classes.sort((a,b)=> (String(a.label||'').localeCompare(String(b.label||''))));
+      buildClassMenu(classes);
+      CLASS_MENU_BUILT = true;
+    } catch (e) {
+      console.warn('Failed to build class menu from cache:', e);
+      // Keep the existing menu (empty or previously set) but mark as built to avoid mutations
+      CLASS_MENU_BUILT = true;
+    }
+  }
 
   async function loadDriverIndexLocal() {
     if (DRIVER_INDEX_CACHE) return DRIVER_INDEX_CACHE;
@@ -300,12 +340,161 @@
     return JSON.parse(text);
   }
 
+  // Build static track label lookup
+  function buildTrackLabelMap(){ const m = new Map(); TRACKS.forEach(t=> m.set(String(t.id), t.label)); return m; }
+  const TRACK_LABELS = buildTrackLabelMap();
+
+  async function aggregatePerTrackForClass(selectedClassId, classNameFallback){
+    const idx = await loadDriverIndexLocal();
+    if (!idx) return [];
+    const perTrack = new Map();
+    for (const k of Object.keys(idx)){
+      const arr = idx[k] || [];
+      for (let i=0;i<arr.length;i++){
+        const e = arr[i] || {};
+        const cid = e.class_id || e.ClassID || e.classId;
+        if (Number(cid) !== Number(selectedClassId)) continue;
+        const tid = e.track_id || e.TrackID || e.trackId;
+        if (tid === undefined || tid === null) continue;
+        const key = String(tid);
+        const cur = perTrack.get(key) || 0;
+        perTrack.set(key, cur + 1);
+      }
+    }
+    const rows = [];
+    perTrack.forEach((count, key)=>{
+      rows.push({
+        track: TRACK_LABELS.get(key) || key,
+        track_id: Number(key),
+        class_id: Number(selectedClassId),
+        class_name: classNameFallback || String(selectedClassId),
+        entry_count: count
+      });
+    });
+    rows.sort((a,b)=> (b.entry_count||0)-(a.entry_count||0));
+    return rows;
+  }
+
+  async function aggregatePerClassForTrack(selectedTrackId){
+    const idx = await loadDriverIndexLocal();
+    if (!idx) return [];
+    console.log('aggregatePerClassForTrack: driver_index loaded, has', Object.keys(idx).length, 'drivers');
+    const perClass = new Map(); // name -> {id, count}
+    let totalEntries = 0;
+    let matchedEntries = 0;
+    for (const k of Object.keys(idx)){
+      const arr = idx[k] || [];
+      totalEntries += arr.length;
+      for (let i=0;i<arr.length;i++){
+        const e = arr[i] || {};
+        const tid = e.track_id || e.TrackID || e.trackId;
+        if (i === 0 && totalEntries < 10) console.log('Sample entry:', e);
+        if (Number(tid) !== Number(selectedTrackId)) continue;
+        matchedEntries++;
+        const cid = e.class_id || e.ClassID || e.classId;
+        let cname = e.class_name || e.ClassName;
+        if (!cname && e.car_class) {
+          cname = typeof e.car_class === 'string' ? e.car_class : (e.car_class.class?.Name || e.car_class.class?.name);
+        }
+        cname = cname || e.class || e.Class || null;
+        if (!cname) continue;
+        const existing = perClass.get(cname);
+        if (existing) {
+          existing.count++;
+        } else {
+          perClass.set(cname, { id: cid, count: 1 });
+        }
+      }
+    }
+    console.log('Scanned', totalEntries, 'entries, matched', matchedEntries, 'for track', selectedTrackId);
+    const rows = [];
+    perClass.forEach((data, cname)=>{
+      rows.push({
+        track: TRACK_LABELS.get(String(selectedTrackId)) || String(selectedTrackId),
+        track_id: Number(selectedTrackId),
+        class_id: Number(data.id),
+        class_name: cname,
+        entry_count: data.count
+      });
+    });
+    rows.sort((a,b)=> (b.entry_count||0)-(a.entry_count||0));
+    return rows;
+  }
+
+  // Simple: resolve class ID from driver_index by name
+  async function resolveClassId(className) {
+    if (!className) return null;
+    
+    // Scan driver_index to find numeric ID for this class name
+    const idx = await loadDriverIndexLocal();
+    if (!idx) return null;
+    
+    const targetName = String(className).trim().toLowerCase();
+    const counts = new Map();
+    
+    for (const driverKey of Object.keys(idx)) {
+      const entries = idx[driverKey] || [];
+      for (const e of entries) {
+        let cname = e.class_name || e.ClassName;
+        if (!cname && e.car_class) {
+          cname = typeof e.car_class === 'string' ? e.car_class : (e.car_class.class?.Name || e.car_class.class?.name);
+        }
+        cname = cname || e.Class || e.class || '';
+        if (String(cname).trim().toLowerCase() === targetName) {
+          const cid = e.class_id || e.ClassID || e.classId;
+          if (cid !== undefined && cid !== null) {
+            const key = Number(cid);
+            counts.set(key, (counts.get(key) || 0) + 1);
+          }
+        }
+      }
+    }
+    
+    let bestId = null;
+    let bestCount = 0;
+    for (const [cid, count] of counts) {
+      if (count > bestCount) {
+        bestCount = count;
+        bestId = cid;
+      }
+    }
+    
+    return bestId;
+  }
+
   // Fetch data from local cache
   async function fetchTopCombinations() {
     try {
+      console.log('fetchTopCombinations called. activeTrackId:', activeTrackId, 'activeClassId:', activeClassId);
       tableContainer.innerHTML = '<div class="loading">Loading...</div>';
       
-      // Add cache-busting to ensure we get the latest version
+      // Case 1: Filter by class only
+      if (activeClassId && !activeTrackId) {
+        console.log('Filtering by class:', activeClassId, activeClassLabel);
+        const results = await aggregatePerTrackForClass(activeClassId, activeClassLabel || String(activeClassId));
+        console.log('Class filter returned', results.length, 'results:', results.slice(0, 3));
+        return results;
+      }
+      
+      // Case 2: Filter by track only
+      if (activeTrackId && !activeClassId) {
+        console.log('Filtering by track:', activeTrackId);
+        const results = await aggregatePerClassForTrack(activeTrackId);
+        console.log('Track filter returned', results.length, 'results:', results.slice(0, 3));
+        return results;
+      }
+      
+      // Case 3: Both track and class - aggregate by class then filter by track
+      if (activeTrackId && activeClassId) {
+        console.log('Filtering by both track:', activeTrackId, 'and class:', activeClassId);
+        const results = await aggregatePerTrackForClass(activeClassId, activeClassLabel || String(activeClassId));
+        const filtered = results.filter(item => String(item.track_id) === String(activeTrackId));
+        console.log('Both filters returned', filtered.length, 'results');
+        return filtered;
+      }
+      
+      // Case 4: No filters - use top_combinations
+      // Case 4: No filters - use top_combinations
       const timestamp = new Date().getTime();
       const resp = await fetch(`cache/top_combinations.json?v=${timestamp}`, {
         cache: 'no-store'
@@ -314,9 +503,6 @@
       if (!resp.ok) throw new Error('HTTP ' + resp.status);
       const data = await resp.json();
       
-      console.log('Loaded top combinations:', data);
-      
-      // Extract results array
       let combinations = [];
       if (Array.isArray(data)) {
         combinations = data;
@@ -324,95 +510,15 @@
         combinations = data.results;
       } else if (data && Array.isArray(data.data)) {
         combinations = data.data;
-      } else {
-        combinations = [];
       }
       
-      // When filtering by track only, derive ALL classes from driver_index and verify via per-class gz files
-      if (activeTrackId && !activeClassId) {
-        console.log('Deriving classes for track from driver_index:', activeTrackId);
-        const driverIndex = await loadDriverIndexLocal();
-        const classCounts = new Map();
-
-        if (driverIndex) {
-          // Iterate all drivers' entries and accumulate class IDs for this track
-          try {
-            const driverKeys = Object.keys(driverIndex);
-            for (let i = 0; i < driverKeys.length; i++) {
-              const k = driverKeys[i];
-              const entries = driverIndex[k] || [];
-              for (let j = 0; j < entries.length; j++) {
-                const e = entries[j] || {};
-                const tid = e.track_id || e.TrackID || e.trackId;
-                if (String(tid) !== String(activeTrackId)) continue;
-                const cid = e.class_id || e.ClassID || e.classId || e.Class;
-                if (cid === undefined || cid === null) continue;
-                const key = String(cid);
-                classCounts.set(key, (classCounts.get(key) || 0) + 1);
-              }
-            }
-          } catch (err) {
-            console.warn('Error scanning driver index for track classes', err);
-          }
-        }
-
-        // Build a unique list of class IDs to verify from cache files
-        const uniqueClassIds = Array.from(classCounts.keys());
-        console.log(`Found ${uniqueClassIds.length} candidate classes for track ${activeTrackId}`);
-
-        // If driver_index wasn't available, fall back to any classes we saw in top_combinations
-        if (uniqueClassIds.length === 0) {
-          const fromTop = combinations.filter(item => String(item.track_id) === String(activeTrackId)).map(item => String(item.class_id));
-          for (const cid of fromTop) classCounts.set(String(cid), 0);
-        }
-
-        // Fetch each per-class file to get accurate entry_count and class_name
-        const verifyPromises = Array.from(classCounts.entries()).map(async ([cid, approxCount]) => {
-          const filePath = `cache/track_${activeTrackId}/class_${cid}.json.gz`;
-          try {
-            const fileResp = await fetch(`${filePath}?v=${timestamp}`, { cache: 'no-store' });
-            if (!fileResp.ok) {
-              console.warn(`Missing file ${filePath}: ${fileResp.status}`);
-              return { track_id: activeTrackId, class_id: Number(cid), class_name: String(cid), entry_count: approxCount || 0 };
-            }
-            const fileData = await decompressGzipToJson(fileResp);
-            const entryCount = fileData.entry_count || (fileData.track_info && Array.isArray(fileData.track_info.Data) ? fileData.track_info.Data.length : 0) || 0;
-            // Derive class name from the first entry if available, as files typically store per-entry car_class
-            const firstEntry = (fileData.track_info && Array.isArray(fileData.track_info.Data) && fileData.track_info.Data.length > 0) ? fileData.track_info.Data[0] : null;
-            const nestedName = firstEntry?.car_class?.class?.Name || firstEntry?.car_class?.class?.name || null;
-            let className = nestedName || fileData.class_name || null;
-            if (!className) className = String(cid);
-            return { track_id: activeTrackId, class_id: Number(cid), class_name: className || String(cid), entry_count: entryCount };
-          } catch (e) {
-            console.warn(`Error reading ${filePath}`, e);
-            return { track_id: activeTrackId, class_id: Number(cid), class_name: String(cid), entry_count: approxCount || 0 };
-          }
-        });
-
-        const verified = await Promise.all(verifyPromises);
-        verified.sort((a, b) => (b.entry_count || 0) - (a.entry_count || 0));
-        console.log(`Verified ${verified.length} classes for track ${activeTrackId}`);
-        return verified;
-      }
-      
-      // Apply client-side filtering for other cases
-      if (activeClassId) {
-        combinations = combinations.filter(item => {
-          const matchTrack = !activeTrackId || String(item.track_id) === String(activeTrackId);
-          const matchClass = String(item.class_id) === String(activeClassId);
-          return matchTrack && matchClass;
-        });
-      }
-      
-      // Show top 100 for non-track-filtered results
       combinations.sort((a, b) => (b.entry_count || 0) - (a.entry_count || 0));
       const limitedCombinations = combinations.slice(0, 100);
       
       console.log(`Showing ${limitedCombinations.length} combinations`);
-      
       return limitedCombinations;
     } catch (e) {
-      console.error('Failed to fetch top combinations', e);
+      console.error('Failed to fetch data', e);
       return [];
     }
   }
@@ -522,35 +628,15 @@
 
   async function fetchAndRender(){
     const data = await fetchTopCombinations();
-    // Build class options from data (unique class names and optional class ids)
-    try {
-      // If there's a hidden select providing classes, don't overwrite it
-      if (!classSelect) {
-        const classes = [];
-        const seen = new Map();
-        (Array.isArray(data) ? data : []).forEach(item => {
-          // Prefer class id and class_name
-          const cid = item.class_id || item.ClassID || item.classId || item.class || undefined;
-          const cname = item.class_name || item.className || item.ClassName || item.car_class || item.CarClass || item['Car Class'] || item.Class || item.class || undefined;
-          const key = (cid !== undefined && cid !== null) ? String(cid) : (cname ? String(cname) : null);
-          if (!key) return;
-          if (!seen.has(key)) {
-            seen.set(key, true);
-            classes.push({ value: cid !== undefined && cid !== null ? cid : cname, label: cname || String(cid) });
-          }
-        });
-        // Sort by label
-        classes.sort((a,b)=> (String(a.label||'').localeCompare(String(b.label||''))));
-        if (classes.length > 0) buildClassMenu(classes);
-      }
-    } catch (e) {
-      console.warn('Failed to build class menu:', e);
-    }
+    // Ensure class menu is built only once and never mutated
+    await ensureClassMenuBuilt();
 
     renderTable(data);
   }
 
   // Initial load
   fetchAndRender();
+  // Proactively build the class menu from cache on startup so it remains stable
+  ensureClassMenuBuilt();
 
 })();

@@ -20,51 +20,195 @@ async function fetchLeaderboardDetails() {
     resultsContainer.innerHTML = '<div class="loading">Loading...</div>';
     
     try {
-        // Construct API URL - adjust this to match your backend endpoint
-        const url = `/api/leaderboard?track=${encodeURIComponent(trackParam)}&class=${encodeURIComponent(classParam)}`;
-        const response = await fetch(url);
+        // Construct local file path: cache/track_{trackId}/class_{classId}.json.gz
+        const filePath = `cache/track_${trackParam}/class_${classParam}.json.gz`;
+        console.log('Loading leaderboard data from:', filePath);
+        console.log('Track ID:', trackParam, 'Class ID:', classParam);
+        
+        // Add cache-busting
+        const timestamp = new Date().getTime();
+        const response = await fetch(`${filePath}?v=${timestamp}`, {
+            cache: 'no-store'
+        });
+        
+        console.log('Fetch response:', response.status, response.statusText);
         
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`Failed to load data: ${response.status} ${response.statusText}. File path: ${filePath}`);
         }
         
-        const data = await response.json();
+        console.log('Response OK, decompressing...');
+        
+        // Check if DecompressionStream is available
+        if (typeof DecompressionStream === 'undefined') {
+            throw new Error('DecompressionStream is not supported in this browser. Please use a modern browser (Chrome 80+, Firefox 113+, Safari 16.4+)');
+        }
+        
+        // Decompress the gzipped response
+        const decompressedStream = response.body.pipeThrough(new DecompressionStream('gzip'));
+        const decompressedResponse = new Response(decompressedStream);
+        const text = await decompressedResponse.text();
+        
+        console.log('Decompressed text length:', text.length, 'characters');
+        console.log('First 100 characters:', text.substring(0, 100));
+        
+        console.log('Parsing JSON...');
+        const data = JSON.parse(text);
+        
+        console.log('Data type:', typeof data, 'Is array:', Array.isArray(data));
+        console.log('Data keys:', Object.keys(data));
+        console.log('Full data structure:', data);
+        console.log('track_info:', data.track_info);
+        
+        // Check if track_info contains the leaderboard
+        if (data.track_info && typeof data.track_info === 'object') {
+            console.log('track_info keys:', Object.keys(data.track_info));
+        }
+        
+        // Extract leaderboard entries from the data structure
+        let leaderboardData = null;
+        
+        // First check common leaderboard keys
+        const possibleKeys = ['leaderboard', 'entries', 'results', 'data', 'Leaderboard', 'Entries', 'Results'];
+        for (const key of possibleKeys) {
+            if (data[key] && Array.isArray(data[key])) {
+                leaderboardData = data[key];
+                console.log(`Found leaderboard in data.${key}:`, leaderboardData.length, 'entries');
+                break;
+            }
+        }
+        
+        // If not found, check inside track_info
+        if (!leaderboardData && data.track_info) {
+            for (const key of possibleKeys) {
+                if (data.track_info[key] && Array.isArray(data.track_info[key])) {
+                    leaderboardData = data.track_info[key];
+                    console.log(`Found leaderboard in track_info.${key}:`, leaderboardData.length, 'entries');
+                    break;
+                }
+            }
+        }
+        
+        // If still not found, search all keys for any array
+        if (!leaderboardData) {
+            for (const key of Object.keys(data)) {
+                if (Array.isArray(data[key]) && data[key].length > 0) {
+                    leaderboardData = data[key];
+                    console.log(`Found array in data.${key}:`, leaderboardData.length, 'entries');
+                    break;
+                }
+            }
+        }
+        
+        // Last resort: check nested objects
+        if (!leaderboardData) {
+            for (const key of Object.keys(data)) {
+                if (data[key] && typeof data[key] === 'object' && !Array.isArray(data[key])) {
+                    for (const nestedKey of Object.keys(data[key])) {
+                        if (Array.isArray(data[key][nestedKey]) && data[key][nestedKey].length > 0) {
+                            leaderboardData = data[key][nestedKey];
+                            console.log(`Found array in data.${key}.${nestedKey}:`, leaderboardData.length, 'entries');
+                            break;
+                        }
+                    }
+                    if (leaderboardData) break;
+                }
+            }
+        }
+        
+        if (!leaderboardData || !Array.isArray(leaderboardData)) {
+            console.error('Could not find leaderboard array in data structure');
+            throw new Error('Leaderboard data not found in the expected format');
+        }
+        
+        console.log('Using leaderboard data with', leaderboardData.length, 'entries');
+        console.log('First entry sample:', leaderboardData[0]);
+        
+        // Transform the data to match expected format
+        // The data has nested objects like: { driver: {Name: "..."}, car_class: {Name: "..."}, country: {Name: "..."} }
+        // We need to flatten it to: { Name: "...", CarClass: "...", Country: "..." }
+        const totalEntries = leaderboardData.length;
+        const transformedData = leaderboardData.map((entry, index) => {
+            return {
+                Position: entry.class_position !== undefined ? entry.class_position + 1 : (entry.index !== undefined ? entry.index + 1 : index + 1),
+                Name: entry.driver?.Name || entry.driver?.name || entry.Name || 'Unknown',
+                Country: entry.country?.Name || entry.country?.name || entry.Country || '',
+                CarClass: entry.car_class?.Name || entry.car_class?.name || entry.CarClass || '',
+                Car: entry.car?.Name || entry.car?.name || entry.Car || '',
+                LapTime: entry.laptime || entry.lap_time || entry.LapTime || entry.time || '',
+                Rank: entry.rank?.Name || entry.rank?.name || entry.Rank || '',
+                Team: entry.team?.Name || entry.team?.name || entry.Team || '',
+                Difficulty: entry.driving_model || entry.difficulty || entry.Difficulty || '',
+                Track: data.track_info?.Name || data.track_name || '',
+                TotalEntries: totalEntries
+            };
+        });
+        
+        console.log('Transformed data sample:', transformedData[0]);
+        
+        // Pass the full data object to setDetailTitles so it can access track_info
         setDetailTitles(data, trackParam, classParam);
-        allResults = data;
+        allResults = transformedData;
         currentPage = 1;
-        displayResults(data);
+        displayResults(transformedData);
     } catch (error) {
+        console.error('Error loading leaderboard:', error);
+        console.error('Error stack:', error.stack);
         displayError(error.message);
     }
 }
 
 // Try to get track and class names from the first result if available
 function setDetailTitles(data, trackParam, classParam) {
-    let results = data;
-    if (data && typeof data === 'object' && !Array.isArray(data)) {
-        if (data.results) results = data.results;
-        else if (data.data) results = data.data;
-        else if (data.items) results = data.items;
-        else if (data.leaderboard) results = data.leaderboard;
-        else if (data.entries) results = data.entries;
-        else results = [data];
-    }
     let trackName = trackParam || '';
     let layoutName = '';
     let carClassName = classParam || '';
-    if (Array.isArray(results) && results.length > 0) {
-        const first = results[0];
-        let fullTrack = first.Track || first.track || trackName;
-        // Split on dash (hyphen, en dash, em dash)
-        let match = fullTrack.match(/^(.*?)(?:\s*[-–—]\s*)(.+)$/);
-        if (match) {
-            trackName = match[1].trim();
-            layoutName = match[2].trim();
-        } else {
-            trackName = fullTrack;
+    
+    // First, try to get info from track_info if it exists
+    if (data.track_info && typeof data.track_info === 'object') {
+        const trackInfo = data.track_info;
+        const fullTrack = trackInfo.Name || trackInfo.name || trackInfo.Track || trackInfo.track || '';
+        if (fullTrack) {
+            // Split on dash (hyphen, en dash, em dash)
+            const match = fullTrack.match(/^(.*?)(?:\s*[-–—]\s*)(.+)$/);
+            if (match) {
+                trackName = match[1].trim();
+                layoutName = match[2].trim();
+            } else {
+                trackName = fullTrack;
+            }
         }
-        carClassName = first.CarClass || first['Car Class'] || first.car_class || first.Class || carClassName;
+        carClassName = trackInfo.ClassName || trackInfo.class_name || trackInfo.CarClass || trackInfo.car_class || carClassName;
     }
+    
+    // If not found in track_info, try to extract from results array
+    if (!trackName || trackName === trackParam) {
+        let results = data;
+        if (data && typeof data === 'object' && !Array.isArray(data)) {
+            if (data.results) results = data.results;
+            else if (data.data) results = data.data;
+            else if (data.items) results = data.items;
+            else if (data.leaderboard) results = data.leaderboard;
+            else if (data.entries) results = data.entries;
+        }
+        
+        if (Array.isArray(results) && results.length > 0) {
+            const first = results[0];
+            const fullTrack = first.Track || first.track || trackName;
+            if (fullTrack && typeof fullTrack === 'string') {
+                // Split on dash (hyphen, en dash, em dash)
+                const match = fullTrack.match(/^(.*?)(?:\s*[-–—]\s*)(.+)$/);
+                if (match) {
+                    trackName = match[1].trim();
+                    layoutName = match[2].trim();
+                } else {
+                    trackName = fullTrack;
+                }
+            }
+            carClassName = first.CarClass || first['Car Class'] || first.car_class || first.Class || carClassName;
+        }
+    }
+    
     document.getElementById('detail-track').innerHTML = `<span class="detail-label">Track:</span> ${escapeHtml(trackName)}`;
     if (layoutName) {
         let layoutElem = document.getElementById('detail-layout');

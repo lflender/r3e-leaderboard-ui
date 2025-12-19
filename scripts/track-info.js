@@ -268,6 +268,38 @@
     buildClassMenu([]);
   }
 
+  // Local driver index cache (optional, used to derive full class coverage per track)
+  let DRIVER_INDEX_CACHE = null;
+
+  async function loadDriverIndexLocal() {
+    if (DRIVER_INDEX_CACHE) return DRIVER_INDEX_CACHE;
+    try {
+      const ts = Date.now();
+      const resp = await fetch(`cache/driver_index.json?v=${ts}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      });
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const text = await resp.text();
+      DRIVER_INDEX_CACHE = JSON.parse(text);
+      return DRIVER_INDEX_CACHE;
+    } catch (e) {
+      console.warn('Failed to load driver_index.json', e);
+      return null;
+    }
+  }
+
+  async function decompressGzipToJson(resp) {
+    const stream = resp.body.pipeThrough(new DecompressionStream('gzip'));
+    const dec = new Response(stream);
+    const text = await dec.text();
+    return JSON.parse(text);
+  }
+
   // Fetch data from local cache
   async function fetchTopCombinations() {
     try {
@@ -296,16 +328,89 @@
         combinations = [];
       }
       
-      // Apply client-side filtering if track or class is selected
-      if (activeTrackId || activeClassId) {
+      // When filtering by track only, derive ALL classes from driver_index and verify via per-class gz files
+      if (activeTrackId && !activeClassId) {
+        console.log('Deriving classes for track from driver_index:', activeTrackId);
+        const driverIndex = await loadDriverIndexLocal();
+        const classCounts = new Map();
+
+        if (driverIndex) {
+          // Iterate all drivers' entries and accumulate class IDs for this track
+          try {
+            const driverKeys = Object.keys(driverIndex);
+            for (let i = 0; i < driverKeys.length; i++) {
+              const k = driverKeys[i];
+              const entries = driverIndex[k] || [];
+              for (let j = 0; j < entries.length; j++) {
+                const e = entries[j] || {};
+                const tid = e.track_id || e.TrackID || e.trackId;
+                if (String(tid) !== String(activeTrackId)) continue;
+                const cid = e.class_id || e.ClassID || e.classId || e.Class;
+                if (cid === undefined || cid === null) continue;
+                const key = String(cid);
+                classCounts.set(key, (classCounts.get(key) || 0) + 1);
+              }
+            }
+          } catch (err) {
+            console.warn('Error scanning driver index for track classes', err);
+          }
+        }
+
+        // Build a unique list of class IDs to verify from cache files
+        const uniqueClassIds = Array.from(classCounts.keys());
+        console.log(`Found ${uniqueClassIds.length} candidate classes for track ${activeTrackId}`);
+
+        // If driver_index wasn't available, fall back to any classes we saw in top_combinations
+        if (uniqueClassIds.length === 0) {
+          const fromTop = combinations.filter(item => String(item.track_id) === String(activeTrackId)).map(item => String(item.class_id));
+          for (const cid of fromTop) classCounts.set(String(cid), 0);
+        }
+
+        // Fetch each per-class file to get accurate entry_count and class_name
+        const verifyPromises = Array.from(classCounts.entries()).map(async ([cid, approxCount]) => {
+          const filePath = `cache/track_${activeTrackId}/class_${cid}.json.gz`;
+          try {
+            const fileResp = await fetch(`${filePath}?v=${timestamp}`, { cache: 'no-store' });
+            if (!fileResp.ok) {
+              console.warn(`Missing file ${filePath}: ${fileResp.status}`);
+              return { track_id: activeTrackId, class_id: Number(cid), class_name: String(cid), entry_count: approxCount || 0 };
+            }
+            const fileData = await decompressGzipToJson(fileResp);
+            const entryCount = fileData.entry_count || (fileData.track_info && Array.isArray(fileData.track_info.Data) ? fileData.track_info.Data.length : 0) || 0;
+            // Derive class name from the first entry if available, as files typically store per-entry car_class
+            const firstEntry = (fileData.track_info && Array.isArray(fileData.track_info.Data) && fileData.track_info.Data.length > 0) ? fileData.track_info.Data[0] : null;
+            const nestedName = firstEntry?.car_class?.class?.Name || firstEntry?.car_class?.class?.name || null;
+            let className = nestedName || fileData.class_name || null;
+            if (!className) className = String(cid);
+            return { track_id: activeTrackId, class_id: Number(cid), class_name: className || String(cid), entry_count: entryCount };
+          } catch (e) {
+            console.warn(`Error reading ${filePath}`, e);
+            return { track_id: activeTrackId, class_id: Number(cid), class_name: String(cid), entry_count: approxCount || 0 };
+          }
+        });
+
+        const verified = await Promise.all(verifyPromises);
+        verified.sort((a, b) => (b.entry_count || 0) - (a.entry_count || 0));
+        console.log(`Verified ${verified.length} classes for track ${activeTrackId}`);
+        return verified;
+      }
+      
+      // Apply client-side filtering for other cases
+      if (activeClassId) {
         combinations = combinations.filter(item => {
           const matchTrack = !activeTrackId || String(item.track_id) === String(activeTrackId);
-          const matchClass = !activeClassId || String(item.class_id) === String(activeClassId);
+          const matchClass = String(item.class_id) === String(activeClassId);
           return matchTrack && matchClass;
         });
       }
       
-      return combinations;
+      // Show top 100 for non-track-filtered results
+      combinations.sort((a, b) => (b.entry_count || 0) - (a.entry_count || 0));
+      const limitedCombinations = combinations.slice(0, 100);
+      
+      console.log(`Showing ${limitedCombinations.length} combinations`);
+      
+      return limitedCombinations;
     } catch (e) {
       console.error('Failed to fetch top combinations', e);
       return [];

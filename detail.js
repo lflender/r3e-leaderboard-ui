@@ -128,8 +128,12 @@ async function fetchLeaderboardDetails() {
         // Transform the data to match expected format
         // The data structure is: { car_class: { car: {Name: "..."}, class: {Name: "..."} }, driver: {Name: "..."}, ... }
         const totalEntries = leaderboardData.length;
+        // Compute a default class name from track_info or the first entry to use as fallback
+        const defaultClassName = data.track_info?.ClassName || data.track_info?.class_name || null;
+        const firstClassName = leaderboardData[0]?.car_class?.class?.Name || leaderboardData[0]?.car_class?.class?.name || null;
         const transformedData = leaderboardData.map((entry, index) => {
-            const carClass = entry.car_class?.class?.Name || entry.car_class?.class?.name || entry.car_class?.Name || entry.car_class?.name || entry.CarClass || '';
+            let carClass = entry.car_class?.class?.Name || entry.car_class?.class?.name || entry.car_class?.Name || entry.car_class?.name || entry.CarClass || '';
+            if (!carClass) carClass = firstClassName || defaultClassName || '';
             const carName = entry.car_class?.car?.Name || entry.car_class?.car?.name || entry.vehicle?.Name || entry.vehicle?.name || entry.car?.Name || entry.car?.name || entry.Car || '';
             
             return {
@@ -165,7 +169,7 @@ async function fetchLeaderboardDetails() {
 function setDetailTitles(data, trackParam, classParam) {
     let trackName = trackParam || '';
     let layoutName = '';
-    let carClassName = classParam || '';
+    let carClassName = '';
     
     // First, try to get info from track_info if it exists
     if (data.track_info && typeof data.track_info === 'object') {
@@ -181,11 +185,11 @@ function setDetailTitles(data, trackParam, classParam) {
                 trackName = fullTrack;
             }
         }
-        carClassName = trackInfo.ClassName || trackInfo.class_name || trackInfo.CarClass || trackInfo.car_class || carClassName;
+        carClassName = trackInfo.ClassName || trackInfo.class_name || trackInfo.CarClass || trackInfo.car_class || '';
     }
     
     // If not found in track_info, try to extract from results array
-    if (!trackName || trackName === trackParam) {
+    if (!trackName || trackName === trackParam || !carClassName) {
         let results = data;
         if (data && typeof data === 'object' && !Array.isArray(data)) {
             if (data.results) results = data.results;
@@ -193,6 +197,7 @@ function setDetailTitles(data, trackParam, classParam) {
             else if (data.items) results = data.items;
             else if (data.leaderboard) results = data.leaderboard;
             else if (data.entries) results = data.entries;
+            else if (data.track_info && Array.isArray(data.track_info.Data)) results = data.track_info.Data;
         }
         
         if (Array.isArray(results) && results.length > 0) {
@@ -208,9 +213,13 @@ function setDetailTitles(data, trackParam, classParam) {
                     trackName = fullTrack;
                 }
             }
-            carClassName = first.CarClass || first['Car Class'] || first.car_class || first.Class || carClassName;
+            if (!carClassName) {
+                carClassName = first?.car_class?.class?.Name || first?.car_class?.class?.name || first.CarClass || first['Car Class'] || first.car_class || first.Class || '';
+            }
         }
     }
+    // As final fallback, use classParam if still missing
+    if (!carClassName) carClassName = classParam || '';
     
     document.getElementById('detail-track').innerHTML = `<span class="detail-label">Track:</span> ${escapeHtml(trackName)}`;
     if (layoutName) {
@@ -282,7 +291,7 @@ function displayResults(data) {
     // Create table
     let tableHTML = '<table class="results-table"><thead><tr>';
     
-    // Headers for detail view
+    // Headers for detail view (title shows Track and Class)
     const headers = ['Position', 'Driver Name', 'Lap Time', 'Car', 'Difficulty'];
     headers.forEach(header => {
         tableHTML += `<th>${header}</th>`;
@@ -353,7 +362,7 @@ function displayResults(data) {
         
         // Car
         const car = item.Car || item.car || item.CarName || item.car_name || '-';
-        tableHTML += `<td>${car}</td>`;
+        tableHTML += `<td>${escapeHtml(String(car))}</td>`;
         
         // Difficulty
         const difficulty = item.Difficulty || item.difficulty || '-';

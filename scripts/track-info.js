@@ -555,7 +555,7 @@
     }
 
     // Order columns similar to leaderboards
-    const columnOrder = ['CarClass','Car Class','car_class','Class','Car','car','CarName','Track','track','TrackName','LapTime','Lap Time','lap_time','Time','Position','position','Pos'];
+    const columnOrder = ['CarClass','Car Class','car_class','Class','Car','car','CarName','Track','track','TrackName','LapTime','Lap Time','lap_time','laptime','Time','Position','position','Pos'];
     keys.sort((a,b)=>{ let ia = columnOrder.indexOf(a); let ib = columnOrder.indexOf(b); if (ia===-1) ia=999; if (ib===-1) ib=999; return ia-ib; });
 
     let html = '<table class="results-table"><thead><tr>';
@@ -580,14 +580,15 @@
         if (key === 'Position' || key === 'position' || key === 'Pos') {
           const posNum = String(value || '');
           html += `<td class="pos-cell"><span class="pos-number">${escapeHtml(posNum)}</span></td>`;
-        } else if (key === 'LapTime' || key === 'Lap Time' || key === 'lap_time' || key === 'Time') {
+        } else if (key === 'LapTime' || key === 'Lap Time' || key === 'lap_time' || key === 'laptime' || key === 'Time') {
           const s = String(value || '');
           const parts = s.split(/,\s*/);
           const main = parts[0] || '';
           const delta = parts.slice(1).join(', ');
-          const escMain = escapeHtml(String(main)).replace(/\s+/g, '&nbsp;');
-          if (delta) html += `<td class="lap-time-cell"><div class="lap-main">${escMain}</div><div class="time-delta">${escapeHtml(delta)}</div></td>`;
-          else html += `<td class="lap-time-cell">${escMain}</td>`;
+          const escMain = escapeHtml(String(main));
+          const escDelta = escapeHtml(String(delta));
+          if (delta) html += `<td class="no-wrap">${escMain} <span class="time-delta-inline">${escDelta}</span></td>`;
+          else html += `<td class="no-wrap">${escMain}</td>`;
         } else if (key === 'Track' || key === 'track' || key === 'TrackName' || key === 'track_name') {
           let trackStr = String(value || '');
           trackStr = trackStr.replace(/(\s+)([-–—])(\s+)/g, '$1<wbr>$2$3');

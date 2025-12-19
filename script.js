@@ -322,6 +322,7 @@ function displayResults(data) {
                            'Country', 'country',
                            'Rank', 'rank',
                            'Team', 'team',
+                           'found', 'Found',
                            // Backend time-difference fields (do not display as separate column)
                            'time_diff', 'timeDiff', 'timeDifference', 'time_diff_s', 'time_diff_seconds'];
     keys = keys.filter(key => !excludeColumns.includes(key));
@@ -393,7 +394,7 @@ function displayResults(data) {
                 let value = item[key];
                 const isPositionKey = key === 'Position' || key === 'position' || key === 'Pos';
                 const isCarClassKey = key === 'CarClass' || key === 'Car Class' || key === 'car_class' || key === 'Class' || key === 'class';
-                const isLapTimeKey = key === 'LapTime' || key === 'Lap Time' || key === 'lap_time' || key === 'Time';
+                const isLapTimeKey = key === 'LapTime' || key === 'Lap Time' || key === 'lap_time' || key === 'laptime' || key === 'Time';
 
                 if (isPositionKey) {
                     const totalEntries = item.total_entries || item.TotalEntries || item['Total Entries'] || item.TotalRacers || item.total_racers;
@@ -421,16 +422,19 @@ function displayResults(data) {
                         tableHTML += `<td class="pos-cell"><span class="pos-number" style="background:${badgeColor}">${escapeHtml(posNum)}</span></td>`;
                     }
                 } else if (isCarClassKey) {
-                    tableHTML += `<td class="no-wrap">${formatValue(value)}</td>`;
+                    tableHTML += `<td class="no-wrap"><strong>${formatValue(value)}</strong></td>`;
                 } else if (isLapTimeKey) {
                     const s = String(value || '');
                     const parts = s.split(/,\s*/);
-                    const main = parts[0] || '';
-                    const delta = parts.slice(1).join(', ');
-                    const escMain = escapeHtml(String(main)).replace(/\s+/g, '&nbsp;');
+                    const mainClassic = formatClassicLapTime(parts[0] || '');
+                    const delta = parts.slice(1).join(' '); // remove comma between parts
+                    const escMain = escapeHtml(String(mainClassic));
                     const escDelta = escapeHtml(String(delta));
-                    if (delta) tableHTML += `<td class="lap-time-cell"><div class="lap-main">${escMain}</div><div class="time-delta">${escDelta}</div></td>`;
-                    else tableHTML += `<td class="lap-time-cell">${escMain}</td>`;
+                    if (delta) {
+                        tableHTML += `<td class="lap-time-cell">${escMain} <span class="time-delta-inline">${escDelta}</span></td>`;
+                    } else {
+                        tableHTML += `<td class="lap-time-cell">${escMain}</td>`;
+                    }
                 } else if (key === 'Track' || key === 'track' || key === 'TrackName' || key === 'track_name') {
                     let trackStr = String(value || '');
                     trackStr = trackStr.replace(/(\s+)([-–—])(\s+)/g, '$1<wbr>$2$3');
@@ -520,6 +524,17 @@ function formatValue(value) {
         return '-';
     }
     return value;
+}
+
+// Convert raw lap times like "2m 12.524s" or "45.281s" to classic format "2:12:524s"
+function formatClassicLapTime(raw) {
+    const s = String(raw || '').trim();
+    const m = s.match(/^(?:(\d+)m\s*)?(\d+)(?:\.(\d{1,3}))?s$/);
+    if (!m) return raw; // fallback if pattern doesn't match
+    const minutes = parseInt(m[1] || '0', 10);
+    const seconds = parseInt(m[2] || '0', 10);
+    const millis = (m[3] || '').padEnd(3, '0');
+    return `${minutes}:${String(seconds).padStart(2, '0')}:${millis}s`;
 }
 
 // Convert a 2-letter country code to a regional indicator flag emoji.

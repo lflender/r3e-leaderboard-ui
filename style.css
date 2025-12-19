@@ -262,12 +262,7 @@ main {
     width: 8rem; /* fixed-ish width for Power column */
     max-width: 8rem;
 }
-/* Ellipsize cell content in the Power column */
-.results-table td:nth-child(5) {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+/* Removed: ellipsis was truncating lap time column */
 .custom-select__toggle {
     width: 100%;
     text-align: left;
@@ -456,6 +451,12 @@ main {
 /* Prevent wrapping for compact fields like "pos / total" */
 .no-wrap {
     white-space: nowrap;
+}
+
+.lap-time-cell {
+    min-width: 120px;
+    vertical-align: top;
+    text-align: center;
 }
 
 .lap-time-cell .lap-main {

@@ -291,7 +291,7 @@ function displayResults(data) {
     // Create table
     let tableHTML = '<table class="results-table"><thead><tr>';
     
-    // Headers for detail view (title shows Track and Class)
+    // Headers for detail view (title shows Track and Class) - DO NOT ADD MORE COLUMNS
     const headers = ['Position', 'Driver Name', 'Lap Time', 'Car', 'Difficulty'];
     headers.forEach(header => {
         tableHTML += `<th>${header}</th>`;
@@ -349,7 +349,7 @@ function displayResults(data) {
             tableHTML += `<td>${escapeHtml(String(name))}</td>`;
         }
         
-        // Lap Time - show delta inline but keep it on one line
+        // Lap Time - show delta inline with gray styling
         const lapTime = item.LapTime || item['Lap Time'] || item.lap_time || item.Time || '-';
         const parts = String(lapTime).split(/,\s*/);
         const main = escapeHtml(parts[0] || '');

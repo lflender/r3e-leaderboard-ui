@@ -3,6 +3,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const trackParam = urlParams.get('track');
 const classParam = urlParams.get('class');
 const posParam = parseInt(urlParams.get('pos') || '');
+const difficultyParam = urlParams.get('difficulty') || 'All difficulties';
 
 // Ensure the pos param is applied only once (so pagination can be changed afterwards)
 let posApplied = false;
@@ -11,6 +12,7 @@ let posApplied = false;
 let currentPage = 1;
 let itemsPerPage = 100;
 let allResults = [];
+let unfilteredResults = []; // Store all results before filtering
 
 // Fetch and display data
 fetchLeaderboardDetails();
@@ -135,6 +137,9 @@ async function fetchLeaderboardDetails() {
             let carClass = entry.car_class?.class?.Name || entry.car_class?.class?.name || entry.car_class?.Name || entry.car_class?.name || entry.CarClass || '';
             if (!carClass) carClass = firstClassName || defaultClassName || '';
             const carName = entry.car_class?.car?.Name || entry.car_class?.car?.name || entry.vehicle?.Name || entry.vehicle?.name || entry.car?.Name || entry.car?.name || entry.Car || '';
+            // Try to capture numeric class and track IDs if present
+            const classId = entry.class_id || entry.ClassID || entry['Class ID'] || entry.car_class?.class?.Id || entry.car_class?.class?.ID || null;
+            const trackIdFromEntry = entry.track_id || entry.TrackID || entry['Track ID'] || data.track_info?.Id || data.track_info?.ID || null;
             
             return {
                 Position: entry.class_position !== undefined ? entry.class_position + 1 : (entry.index !== undefined ? entry.index + 1 : index + 1),
@@ -147,7 +152,11 @@ async function fetchLeaderboardDetails() {
                 Team: entry.team?.Name || entry.team?.name || entry.Team || '',
                 Difficulty: entry.driving_model || entry.difficulty || entry.Difficulty || '',
                 Track: data.track_info?.Name || data.track_name || '',
-                TotalEntries: totalEntries
+                TotalEntries: totalEntries,
+                ClassID: classId || undefined,
+                TrackID: trackIdFromEntry || undefined,
+                class_id: classId || undefined,
+                track_id: trackIdFromEntry || undefined
             };
         });
         
@@ -155,9 +164,38 @@ async function fetchLeaderboardDetails() {
         
         // Pass the full data object to setDetailTitles so it can access track_info
         setDetailTitles(data, trackParam, classParam);
-        allResults = transformedData;
-        currentPage = 1;
-        displayResults(transformedData);
+        
+        // Store unfiltered results
+        unfilteredResults = transformedData;
+        
+        // Apply difficulty filter if specified in URL
+        if (difficultyParam && difficultyParam !== 'All difficulties') {
+            allResults = transformedData.filter(entry => {
+                const diff = entry.Difficulty || entry.difficulty || entry.driving_model || '';
+                return diff.toLowerCase() === difficultyParam.toLowerCase();
+            });
+        } else {
+            allResults = transformedData;
+        }
+        
+        // If posParam exists, calculate which page contains that position
+        if (posParam && !Number.isNaN(posParam)) {
+            const posIndex = allResults.findIndex(entry => {
+                const pos = entry.Position || entry.position || entry.Pos || 0;
+                return parseInt(String(pos).trim()) === posParam;
+            });
+            
+            if (posIndex !== -1) {
+                // Calculate the page number (1-indexed)
+                currentPage = Math.floor(posIndex / itemsPerPage) + 1;
+            } else {
+                currentPage = 1;
+            }
+        } else {
+            currentPage = 1;
+        }
+        
+        displayResults(allResults);
     } catch (error) {
         console.error('Error loading leaderboard:', error);
         console.error('Error stack:', error.stack);
@@ -291,9 +329,13 @@ function displayResults(data) {
     const totalResults = results.length;
     const totalPages = Math.ceil(totalResults / itemsPerPage);
 
-    // If a posParam was passed, compute the page and set currentPage accordingly (only once)
+    // If a posParam was passed, compute the page from the actual index of that position
     if (!posApplied && posParam && !Number.isNaN(posParam)) {
-        const targetIndex = Math.max(0, posParam - 1);
+        const posIndex = results.findIndex(entry => {
+            const p = parseInt(entry.Position || entry.position || entry.Pos || 0);
+            return p === posParam;
+        });
+        const targetIndex = posIndex !== -1 ? posIndex : Math.max(0, posParam - 1);
         const targetPage = Math.floor(targetIndex / itemsPerPage) + 1;
         currentPage = Math.min(Math.max(1, targetPage), totalPages);
         posApplied = true;
@@ -319,7 +361,8 @@ function displayResults(data) {
     // Create rows
     paginatedResults.forEach(item => {
         const rowTrackId = item.track_id || item.TrackID || item['Track ID'] || trackParam || '';
-        const rowClassId = item.class_id || item.ClassID || item['Class ID'] || item.CarClass || item['Car Class'] || classParam || '';
+        // Prefer numeric class ID; avoid falling back to class name
+        const rowClassId = item.class_id || item.ClassID || item['Class ID'] || '';
         tableHTML += `<tr data-trackid="${escapeHtml(String(rowTrackId))}" data-classid="${escapeHtml(String(rowClassId))}">`;
         
         // Position
@@ -384,9 +427,20 @@ function displayResults(data) {
         const car = item.Car || item.car || item.CarName || item.car_name || '-';
         tableHTML += `<td>${escapeHtml(String(car))}</td>`;
         
-        // Difficulty
+        // Difficulty - render as subtle pill with color scheme
         const difficulty = item.Difficulty || item.difficulty || '-';
-        tableHTML += `<td>${difficulty}</td>`;
+        const diffStr = String(difficulty).trim().toLowerCase();
+        let diffClass = '';
+        if (diffStr === 'get real') diffClass = 'difficulty-get-real';
+        else if (diffStr === 'amateur') diffClass = 'difficulty-amateur';
+        else if (diffStr === 'novice') diffClass = 'difficulty-novice';
+        const titleMap = {
+            'get real': 'Highest realism (best)',
+            'amateur': 'Intermediate realism',
+            'novice': 'Lowest realism (worst)'
+        };
+        const titleText = titleMap[diffStr] || 'Difficulty';
+        tableHTML += `<td class="difficulty-cell"><span class="difficulty-pill ${diffClass}" title="${escapeHtml(titleText)}" aria-label="${escapeHtml(titleText)}">${escapeHtml(String(difficulty))}</span></td>`;
         
         tableHTML += '</tr>';
     });
@@ -463,7 +517,9 @@ function displayResults(data) {
                     const classId = r.dataset.classid || classParam || '';
                     if (trackId) {
                         const openExternal = () => {
-                            const carClass = classId ? `class-${classId}` : '';
+                            // Only append car_class when we have a numeric ID
+                            const isNumericId = /^\d+$/.test(String(classId));
+                            const carClass = isNumericId ? `class-${classId}` : '';
                             let url = `https://game.raceroom.com/leaderboard/?track=${encodeURIComponent(trackId)}`;
                             if (carClass) url += `&car_class=${encodeURIComponent(carClass)}`;
                             window.open(url, '_blank');
@@ -498,4 +554,89 @@ function goToPage(page) {
     displayResults(allResults);
     // Scroll to top of results
     document.getElementById('detail-results-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// Setup difficulty dropdown after DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    const difficultyFilterUI = document.getElementById('difficulty-filter-ui');
+    if (difficultyFilterUI) {
+        const difficultyToggle = difficultyFilterUI.querySelector('.custom-select__toggle');
+        const difficultyMenu = difficultyFilterUI.querySelector('.custom-select__menu');
+        const difficultyOptions = difficultyFilterUI.querySelectorAll('.custom-select__option');
+
+        // Set initial difficulty from URL param
+        if (difficultyParam && difficultyParam !== 'All difficulties') {
+            difficultyToggle.textContent = `${difficultyParam} ▾`;
+            difficultyOptions.forEach(opt => {
+                opt.removeAttribute('aria-selected');
+                if (opt.textContent.trim() === difficultyParam) {
+                    opt.setAttribute('aria-selected', 'true');
+                }
+            });
+        }
+
+        function closeDifficultyMenu() {
+            difficultyMenu.hidden = true;
+            difficultyToggle.setAttribute('aria-expanded', 'false');
+        }
+
+        function openDifficultyMenu() {
+            difficultyMenu.hidden = false;
+            difficultyToggle.setAttribute('aria-expanded', 'true');
+        }
+
+        difficultyToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (difficultyMenu.hidden) openDifficultyMenu(); else closeDifficultyMenu();
+        });
+
+        // Option click
+        difficultyMenu.addEventListener('click', (e) => {
+            const opt = e.target.closest('.custom-select__option');
+            if (!opt) return;
+            const val = opt.textContent.trim();
+            // Update toggle label
+            difficultyToggle.textContent = `${val} ▾`;
+            // Mark selected
+            difficultyOptions.forEach(o => o.removeAttribute('aria-selected'));
+            opt.setAttribute('aria-selected', 'true');
+            closeDifficultyMenu();
+
+            // Filter and redisplay results
+            filterAndDisplayResults();
+        });
+
+        // Close when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!difficultyFilterUI.contains(e.target)) closeDifficultyMenu();
+        });
+    }
+});
+
+function filterAndDisplayResults() {
+    const difficultyToggle = document.querySelector('#difficulty-filter-ui .custom-select__toggle');
+    const selectedDifficulty = difficultyToggle ? difficultyToggle.textContent.replace(' ▾', '').trim() : 'All difficulties';
+    
+    if (selectedDifficulty === 'All difficulties') {
+        allResults = unfilteredResults;
+    } else {
+        allResults = unfilteredResults.filter(entry => {
+            const diff = entry.Difficulty || entry.difficulty || entry.driving_model || '';
+            return diff.toLowerCase() === selectedDifficulty.toLowerCase();
+        });
+    }
+    
+    // Recompute the page for the highlighted position within the filtered results
+    posApplied = false; // allow displayResults() to recalculate based on posParam
+    if (posParam && !Number.isNaN(posParam)) {
+        const posIndex = allResults.findIndex(entry => {
+            const pos = parseInt(entry.Position || entry.position || entry.Pos || 0);
+            return pos === posParam;
+        });
+        currentPage = posIndex !== -1 ? (Math.floor(posIndex / itemsPerPage) + 1) : 1;
+    } else {
+        currentPage = 1;
+    }
+    
+    displayResults(allResults);
 }

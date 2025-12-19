@@ -79,7 +79,13 @@ driverSearch.addEventListener('keypress', async (e) => {
         if (!searchTerm) {
             return;
         }
-        
+        // Update the URL with the current driver search term without reloading
+        try {
+            const url = new URL(window.location.href);
+            url.searchParams.set('driver', searchTerm);
+            window.history.replaceState({}, '', url);
+        } catch (_) { /* ignore URL update errors */ }
+
         await searchDriver(searchTerm);
     }
 });
@@ -166,6 +172,50 @@ if (classFilter && classFilterUI) {
     });
 }
 
+// Setup difficulty custom select
+const difficultyFilterUI = document.getElementById('difficulty-filter-ui');
+if (difficultyFilterUI) {
+    const difficultyToggle = difficultyFilterUI.querySelector('.custom-select__toggle');
+    const difficultyMenu = difficultyFilterUI.querySelector('.custom-select__menu');
+    const difficultyOptions = difficultyFilterUI.querySelectorAll('.custom-select__option');
+
+    function closeDifficultyMenu() {
+        difficultyMenu.hidden = true;
+        difficultyToggle.setAttribute('aria-expanded', 'false');
+    }
+
+    function openDifficultyMenu() {
+        difficultyMenu.hidden = false;
+        difficultyToggle.setAttribute('aria-expanded', 'true');
+    }
+
+    difficultyToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (difficultyMenu.hidden) openDifficultyMenu(); else closeDifficultyMenu();
+    });
+
+    // Option click
+    difficultyMenu.addEventListener('click', async (e) => {
+        const opt = e.target.closest('.custom-select__option');
+        if (!opt) return;
+        const val = opt.textContent.trim();
+        // Update toggle label
+        difficultyToggle.textContent = `${val} ▾`;
+        // Mark selected
+        difficultyOptions.forEach(o => o.removeAttribute('aria-selected'));
+        opt.setAttribute('aria-selected', 'true');
+        closeDifficultyMenu();
+
+        const searchTerm = driverSearch.value.trim();
+        if (searchTerm) await searchDriver(searchTerm);
+    });
+
+    // Close when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!difficultyFilterUI.contains(e.target)) closeDifficultyMenu();
+    });
+}
+
 async function loadDriverIndex() {
     try {
         console.log('Starting to load driver index from cache/driver_index.json...');
@@ -236,17 +286,27 @@ async function searchDriver(driverName) {
         // Find matching drivers
         for (const [driverKey, driverEntries] of Object.entries(driverIndex)) {
             if (driverKey.toLowerCase().includes(searchTerm)) {
-                // Apply class filter if selected
+                // Apply class and difficulty filters if selected
                 let filteredEntries = driverEntries;
                 
                 try {
                     const selectedClass = classFilter ? classFilter.value : '';
-                    if (selectedClass) {
-                        filteredEntries = driverEntries.filter(entry => {
+                    const difficultyToggle = document.querySelector('#difficulty-filter-ui .custom-select__toggle');
+                    const selectedDifficulty = difficultyToggle ? difficultyToggle.textContent.replace(' ▾', '').trim() : 'All difficulties';
+                    
+                    filteredEntries = driverEntries.filter(entry => {
+                        // Class filter
+                        if (selectedClass) {
                             const entryClass = entry.car_class || entry.CarClass || entry['Car Class'] || entry.Class || '';
-                            return entryClass === selectedClass;
-                        });
-                    }
+                            if (entryClass !== selectedClass) return false;
+                        }
+                        // Difficulty filter
+                        if (selectedDifficulty !== 'All difficulties') {
+                            const entryDifficulty = entry.difficulty || entry.Difficulty || entry.driving_model || '';
+                            if (entryDifficulty !== selectedDifficulty) return false;
+                        }
+                        return true;
+                    });
                 } catch (e) {
                     // ignore filter errors
                 }
@@ -262,6 +322,12 @@ async function searchDriver(driverName) {
         }
         
         console.log('Search results:', results.length, 'drivers found');
+        // Keep the address bar in sync with the current search term
+        try {
+            const url = new URL(window.location.href);
+            url.searchParams.set('driver', driverName.trim());
+            window.history.replaceState({}, '', url);
+        } catch (_) { /* ignore URL update errors */ }
         allResults = results;
         currentPage = 1;
         displayResults(results);
@@ -441,6 +507,20 @@ function displayResults(data) {
                     trackStr = trackStr.replace(/(\s+)([-–—])(\s+)/g, '$1<wbr>$2$3');
                     trackStr = escapeHtml(trackStr).replace(/&lt;wbr&gt;/g, '<wbr>');
                     tableHTML += `<td>${trackStr}</td>`;
+                } else if (key === 'Difficulty' || key === 'difficulty' || key === 'driving_model') {
+                    const diffStr = String(value || '').trim().toLowerCase();
+                    let diffClass = '';
+                    if (diffStr === 'get real') diffClass = 'difficulty-get-real';
+                    else if (diffStr === 'amateur') diffClass = 'difficulty-amateur';
+                    else if (diffStr === 'novice') diffClass = 'difficulty-novice';
+                    const titleMap = {
+                        'get real': 'Highest realism (gold)',
+                        'amateur': 'Intermediate realism (silver)',
+                        'novice': 'Lowest realism (bronze)'
+                    };
+                    const titleText = titleMap[diffStr] || 'Difficulty';
+                    const escVal = escapeHtml(String(value || ''));
+                    tableHTML += `<td class="difficulty-cell"><span class="difficulty-pill ${diffClass}" title="${titleText}" aria-label="${titleText}">${escVal}</span></td>`;
                 } else {
                     tableHTML += `<td>${formatValue(value)}</td>`;
                 }
@@ -648,13 +728,24 @@ function openDetailView(event, row) {
     const track = row.dataset.track;
     const carClass = row.dataset.class;
     const pos = row.dataset.position;
+    
+    // Get current difficulty selection
+    const difficultyToggle = document.querySelector('#difficulty-filter-ui .custom-select__toggle');
+    const selectedDifficulty = difficultyToggle ? difficultyToggle.textContent.replace(' ▾', '').trim() : 'All difficulties';
+    
     if (trackId && classId) {
         let url = `detail.html?track=${encodeURIComponent(trackId)}&class=${encodeURIComponent(classId)}`;
         if (pos) url += `&pos=${encodeURIComponent(pos)}`;
+        if (selectedDifficulty !== 'All difficulties') {
+            url += `&difficulty=${encodeURIComponent(selectedDifficulty)}`;
+        }
         window.open(url, '_blank');
     } else if (track && carClass) {
         let url = `detail.html?track=${encodeURIComponent(track)}&class=${encodeURIComponent(carClass)}`;
         if (pos) url += `&pos=${encodeURIComponent(pos)}`;
+        if (selectedDifficulty !== 'All difficulties') {
+            url += `&difficulty=${encodeURIComponent(selectedDifficulty)}`;
+        }
         window.open(url, '_blank');
     }
 }

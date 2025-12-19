@@ -131,18 +131,21 @@
     });
     let uniqueYears = Array.from(new Set(allYears)).sort((a, b) => a - b);
 
-    function yearColor(year) {
-      let y = parseInt(year);
-      if (isNaN(y) || uniqueYears.length < 2) return '#e0e0e0';
-      let idx = uniqueYears.indexOf(y);
-      if (idx === -1) return '#e0e0e0';
-      let t = idx / (uniqueYears.length - 1);
-      // More pronounced: yellow (#ffd600) to green (#00c853)
-      let r = Math.round((1-t)*255 + t*0);
-      let g = Math.round((1-t)*214 + t*200);
-      let b = Math.round((1-t)*0 + t*83);
-      return `rgb(${r},${g},${b})`;
-    }
+      function yearColor(year) {
+        let y = parseInt(year);
+        if (isNaN(y) || uniqueYears.length < 2) return '#e0e0e0';
+        let idx = uniqueYears.indexOf(y);
+        if (idx === -1) return '#e0e0e0';
+        let t = idx / (uniqueYears.length - 1);
+        // Apply gamma to emphasize newer years (keep yellow→green tones)
+        const gamma = 2.2;
+        const tg = Math.pow(Math.min(Math.max(t, 0), 1), gamma);
+        // interpolate between #ffd600 (255,214,0) and #00c853 (0,200,83)
+        let r = Math.round((1 - tg) * 255 + tg * 0);
+        let g = Math.round((1 - tg) * 214 + tg * 200);
+        let b = Math.round((1 - tg) * 0   + tg * 83);
+        return `rgb(${r},${g},${b})`;
+      }
 
     let html = '<table class="results-table"><thead><tr>' +
       '<th>Car</th><th>Wheel</th><th>Transmission</th><th>Year</th><th>Power</th><th>Weight</th><th>Engine</th>' +
@@ -190,17 +193,18 @@
   });
   let minYear = Math.min(...allYears), maxYear = Math.max(...allYears);
 
-  function yearColor(year) {
-    let y = parseInt(year);
-    if (isNaN(y) || minYear === maxYear) return '#e0e0e0';
-    // More pronounced: yellow (#ffd600) to green (#00c853)
-    let t = (y - minYear) / (maxYear - minYear);
-    // interpolate between #ffd600 (255,214,0) and #00c853 (0,200,83)
-    let r = Math.round((1-t)*255 + t*0);
-    let g = Math.round((1-t)*214 + t*200);
-    let b = Math.round((1-t)*0 + t*83);
-    return `rgb(${r},${g},${b})`;
-  }
+    function yearColor(year) {
+      let y = parseInt(year);
+      if (isNaN(y) || minYear === maxYear) return '#e0e0e0';
+      // Yellow (#ffd600) to green (#00c853) with gamma for stronger contrast
+      let t = (y - minYear) / (maxYear - minYear);
+      const gamma = 2.2;
+      const tg = Math.pow(Math.min(Math.max(t, 0), 1), gamma);
+      let r = Math.round((1 - tg) * 255 + tg * 0);
+      let g = Math.round((1 - tg) * 214 + tg * 200);
+      let b = Math.round((1 - tg) * 0   + tg * 83);
+      return `rgb(${r},${g},${b})`;
+    }
 
   let html = '<table class="results-table"><thead><tr>' +
     '<th>Car</th><th>Wheel</th><th>Transmission</th><th>Year</th><th>Power</th><th>Weight</th><th>Engine</th>' +

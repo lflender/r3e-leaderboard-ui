@@ -123,18 +123,21 @@ async function fetchLeaderboardDetails() {
         
         console.log('Using leaderboard data with', leaderboardData.length, 'entries');
         console.log('First entry sample:', leaderboardData[0]);
+        console.log('car_class structure:', leaderboardData[0]?.car_class);
         
         // Transform the data to match expected format
-        // The data has nested objects like: { driver: {Name: "..."}, car_class: {Name: "..."}, country: {Name: "..."} }
-        // We need to flatten it to: { Name: "...", CarClass: "...", Country: "..." }
+        // The data structure is: { car_class: { car: {Name: "..."}, class: {Name: "..."} }, driver: {Name: "..."}, ... }
         const totalEntries = leaderboardData.length;
         const transformedData = leaderboardData.map((entry, index) => {
+            const carClass = entry.car_class?.class?.Name || entry.car_class?.class?.name || entry.car_class?.Name || entry.car_class?.name || entry.CarClass || '';
+            const carName = entry.car_class?.car?.Name || entry.car_class?.car?.name || entry.vehicle?.Name || entry.vehicle?.name || entry.car?.Name || entry.car?.name || entry.Car || '';
+            
             return {
                 Position: entry.class_position !== undefined ? entry.class_position + 1 : (entry.index !== undefined ? entry.index + 1 : index + 1),
                 Name: entry.driver?.Name || entry.driver?.name || entry.Name || 'Unknown',
                 Country: entry.country?.Name || entry.country?.name || entry.Country || '',
-                CarClass: entry.car_class?.Name || entry.car_class?.name || entry.CarClass || '',
-                Car: entry.car?.Name || entry.car?.name || entry.Car || '',
+                CarClass: carClass,
+                Car: carName,
                 LapTime: entry.laptime || entry.lap_time || entry.LapTime || entry.time || '',
                 Rank: entry.rank?.Name || entry.rank?.name || entry.Rank || '',
                 Team: entry.team?.Name || entry.team?.name || entry.Team || '',

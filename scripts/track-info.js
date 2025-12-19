@@ -268,25 +268,44 @@
     buildClassMenu([]);
   }
 
-  // Fetch data from API (All or per-track)
+  // Fetch data from local cache
   async function fetchTopCombinations() {
-    let url = '/api/top-combinations';
-    const params = new URLSearchParams();
-    if (activeTrackId) params.set('track', String(activeTrackId));
-    if (activeClassId) params.set('class', String(activeClassId));
-    const query = params.toString();
-    if (query) url += `?${query}`;
     try {
       tableContainer.innerHTML = '<div class="loading">Loading...</div>';
-      const resp = await fetch(url);
+      
+      // Add cache-busting to ensure we get the latest version
+      const timestamp = new Date().getTime();
+      const resp = await fetch(`cache/top_combinations.json?v=${timestamp}`, {
+        cache: 'no-store'
+      });
+      
       if (!resp.ok) throw new Error('HTTP ' + resp.status);
       const data = await resp.json();
-      // Normalize: expect array or object with data/results
-      if (Array.isArray(data)) return data;
-      if (data && Array.isArray(data.data)) return data.data;
-      if (data && Array.isArray(data.results)) return data.results;
-      // If single object with entries, wrap
-      return Array.isArray(data) ? data : (data.entries || data.items || []);
+      
+      console.log('Loaded top combinations:', data);
+      
+      // Extract results array
+      let combinations = [];
+      if (Array.isArray(data)) {
+        combinations = data;
+      } else if (data && Array.isArray(data.results)) {
+        combinations = data.results;
+      } else if (data && Array.isArray(data.data)) {
+        combinations = data.data;
+      } else {
+        combinations = [];
+      }
+      
+      // Apply client-side filtering if track or class is selected
+      if (activeTrackId || activeClassId) {
+        combinations = combinations.filter(item => {
+          const matchTrack = !activeTrackId || String(item.track_id) === String(activeTrackId);
+          const matchClass = !activeClassId || String(item.class_id) === String(activeClassId);
+          return matchTrack && matchClass;
+        });
+      }
+      
+      return combinations;
     } catch (e) {
       console.error('Failed to fetch top combinations', e);
       return [];

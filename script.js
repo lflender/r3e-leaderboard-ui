@@ -16,6 +16,13 @@ tabButtons.forEach(button => {
     });
 });
 
+// Utility function - define early so it's available for all code
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 // Driver search functionality
 const driverSearch = document.getElementById('driver-search');
 const classFilter = document.getElementById('class-filter');
@@ -51,6 +58,12 @@ populateClassFilterFromCarsData();
 let currentPage = 1;
 let itemsPerPage = 100;
 let allResults = [];
+
+// Driver index data (loaded from driver_index.json)
+let driverIndex = null;
+
+// Load driver index on page load
+loadDriverIndex();
 
 // Status cache constants
 const STATUS_CACHE_KEY = 'r3e_status_cache';
@@ -153,31 +166,105 @@ if (classFilter && classFilterUI) {
     });
 }
 
+async function loadDriverIndex() {
+    try {
+        console.log('Starting to load driver index from cache/driver_index.json...');
+        // Add cache-busting to ensure we get the latest version
+        const timestamp = new Date().getTime();
+        const response = await fetch(`cache/driver_index.json?v=${timestamp}`, {
+            cache: 'no-store',
+            headers: {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+            }
+        });
+        
+        console.log('Fetch response status:', response.status, response.statusText);
+        
+        if (!response.ok) {
+            throw new Error(`Failed to load driver index: ${response.status} ${response.statusText}`);
+        }
+        
+        console.log('Response OK, parsing JSON...');
+        const text = await response.text();
+        console.log('Received text length:', text.length, 'characters');
+        
+        driverIndex = JSON.parse(text);
+        console.log('Driver index loaded successfully:', Object.keys(driverIndex).length, 'drivers');
+        console.log('First 3 driver keys:', Object.keys(driverIndex).slice(0, 3));
+    } catch (error) {
+        console.error('Error loading driver index:', error);
+        console.error('Error details:', error.message, error.stack);
+        driverIndex = {};
+    }
+}
+
 async function searchDriver(driverName) {
     // Show loading state
     resultsContainer.innerHTML = '<div class="loading">Searching...</div>';
     
+    // Wait for driver index to load if not already loaded
+    if (driverIndex === null) {
+        let attempts = 0;
+        while (driverIndex === null && attempts < 50) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            attempts++;
+        }
+        if (driverIndex === null) {
+            displayError('Driver index failed to load. Please refresh the page.');
+            return;
+        }
+    }
+    
+    // Check if driverIndex is empty
+    if (!driverIndex || Object.keys(driverIndex).length === 0) {
+        displayError('Driver index is empty. Please ensure driver_index.json contains data.');
+        console.error('Driver index is empty or not loaded');
+        return;
+    }
+    
     try {
-        let url = `/api/search?driver=${encodeURIComponent(driverName)}`;
-        try {
-            const selectedClass = classFilter ? classFilter.value : '';
-            if (selectedClass) {
-                url += `&class=${encodeURIComponent(selectedClass)}`;
+        // Search for the driver (case-insensitive)
+        const searchTerm = driverName.trim().toLowerCase();
+        console.log('Searching for:', searchTerm);
+        console.log('Total drivers in index:', Object.keys(driverIndex).length);
+        console.log('Sample driver keys:', Object.keys(driverIndex).slice(0, 5));
+        
+        const results = [];
+        
+        // Find matching drivers
+        for (const [driverKey, driverEntries] of Object.entries(driverIndex)) {
+            if (driverKey.toLowerCase().includes(searchTerm)) {
+                // Apply class filter if selected
+                let filteredEntries = driverEntries;
+                
+                try {
+                    const selectedClass = classFilter ? classFilter.value : '';
+                    if (selectedClass) {
+                        filteredEntries = driverEntries.filter(entry => {
+                            const entryClass = entry.car_class || entry.CarClass || entry['Car Class'] || entry.Class || '';
+                            return entryClass === selectedClass;
+                        });
+                    }
+                } catch (e) {
+                    // ignore filter errors
+                }
+                
+                // Only add if there are entries after filtering
+                if (filteredEntries.length > 0) {
+                    results.push({
+                        driver: driverEntries[0].name || driverKey,
+                        entries: filteredEntries
+                    });
+                }
             }
-        } catch (e) {
-            // ignore
-        }
-        const response = await fetch(url);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        const data = await response.json();
-        console.log('Received data:', data);
-        allResults = data;
+        console.log('Search results:', results.length, 'drivers found');
+        allResults = results;
         currentPage = 1;
-        displayResults(data);
+        displayResults(results);
     } catch (error) {
         console.error('Search error:', error);
         displayError(error.message);
@@ -188,23 +275,8 @@ function displayResults(data) {
     console.log('Data type:', typeof data);
     console.log('Is array:', Array.isArray(data));
     
-    // Handle different response formats
+    // Data should already be in the correct format from searchDriver
     let results = data;
-    
-    // If data is an object with a results/data/items property, extract it
-    if (data && typeof data === 'object' && !Array.isArray(data)) {
-        console.log('Data keys:', Object.keys(data));
-        
-        if (data.results) results = data.results;
-        else if (data.data) results = data.data;
-        else if (data.items) results = data.items;
-        else if (data.leaderboard) results = data.leaderboard;
-        else if (data.entries) results = data.entries;
-        else {
-            // If it's a single object with properties, wrap it in an array
-            results = [data];
-        }
-    }
     
     console.log('Results after processing:', results);
     console.log('Results is array:', Array.isArray(results));
@@ -221,21 +293,8 @@ function displayResults(data) {
         return;
     }
     
-        // Normalize to an array of driver groups: { driver, entries: [...] }
-        let driverGroups = [];
-        if (results.length > 0 && results[0] && typeof results[0] === 'object' && Array.isArray(results[0].entries) && ('driver' in results[0] || 'name' in results[0])) {
-            // Already grouped by backend
-            driverGroups = results;
-        } else {
-            // Old flat format: group results by driver name while preserving order of appearance
-            const map = new Map();
-            results.forEach(item => {
-                const driverName = item.driver || item.name || item.Name || item.DriverName || item.driver_name || 'Unknown';
-                if (!map.has(driverName)) map.set(driverName, { driver: driverName, entries: [] });
-                map.get(driverName).entries.push(item);
-            });
-            driverGroups = Array.from(map.values());
-        }
+    // Data is already grouped by driver from searchDriver function
+    let driverGroups = results;
 
         const totalDrivers = driverGroups.length;
         const totalPages = Math.ceil(totalDrivers / itemsPerPage);
@@ -443,8 +502,6 @@ function displayError(message) {
     resultsContainer.innerHTML = `
         <div class="error">
             <strong>Error:</strong> ${message}
-            <br><br>
-            <small>Make sure the backend server is running on http://localhost:8080</small>
         </div>
     `;
 }
@@ -580,12 +637,6 @@ function openDetailView(event, row) {
     }
 }
 
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
 // Render rank as stars: D -> 1, C -> 2, B -> 3, A -> 4
 function renderRankStars(rank) {
     if (!rank) return '';
@@ -597,134 +648,79 @@ function renderRankStars(rank) {
 }
 
 async function fetchAndDisplayStatus() {
+    // Since we're working with local data now, calculate status from the driver index
     try {
-        // Check if we have cached data
-        const cached = localStorage.getItem(STATUS_CACHE_KEY);
-        let statusData = null;
-        let needsFetch = true;
-        
-        if (cached) {
-            const cachedData = JSON.parse(cached);
-            const cacheAge = Date.now() - cachedData.timestamp;
-            
-            if (cacheAge < STATUS_CACHE_DURATION) {
-                // Cache is still valid
-                statusData = cachedData.data;
-                needsFetch = false;
-                console.log('Using cached status data');
-            } else {
-                console.log('Cache expired, fetching new data');
+        // Wait for driver index to load
+        if (driverIndex === null) {
+            let attempts = 0;
+            while (driverIndex === null && attempts < 50) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+                attempts++;
             }
         }
         
-        // Fetch new data if needed
-        if (needsFetch) {
-            const response = await fetch('/api/status');
-            if (response.ok) {
-                statusData = await response.json();
+        if (!driverIndex || Object.keys(driverIndex).length === 0) {
+            console.log('Driver index not yet loaded, skipping status display');
+            return;
+        }
+        
+        // Calculate statistics from the driver index
+        const uniqueTracks = new Set();
+        const trackClassCombinations = new Set();
+        let totalEntries = 0;
+        const totalDrivers = Object.keys(driverIndex).length;
+        
+        for (const [driverKey, entries] of Object.entries(driverIndex)) {
+            entries.forEach(entry => {
+                const track = entry.track || entry.Track || '';
+                const trackId = entry.track_id || entry.TrackID || '';
+                const classId = entry.class_id || entry.ClassID || '';
+                const carClass = entry.car_class || entry.CarClass || '';
                 
-                // Cache the data
-                const cacheData = {
-                    timestamp: Date.now(),
-                    data: statusData
-                };
-                localStorage.setItem(STATUS_CACHE_KEY, JSON.stringify(cacheData));
-                console.log('Fetched and cached new status data');
-            } else {
-                console.error('Failed to fetch status:', response.status);
-            }
+                if (track) uniqueTracks.add(track);
+                if (trackId && classId) trackClassCombinations.add(`${trackId}-${classId}`);
+                else if (track && carClass) trackClassCombinations.add(`${track}-${carClass}`);
+                
+                totalEntries++;
+            });
         }
         
-        // Display the status data
-        if (statusData) {
-            displayStatus(statusData);
-        }
+        const statusData = {
+            unique_tracks: uniqueTracks.size,
+            track_class_combination: trackClassCombinations.size,
+            total_entries: totalEntries,
+            total_indexed_drivers: totalDrivers
+        };
+        
+        displayStatus({ data: statusData });
     } catch (error) {
-        console.error('Error fetching status:', error);
+        console.error('Error calculating status:', error);
     }
 }
 
 function displayStatus(data) {
-    // Determine last fetch time:
-    // Prefer the API-provided `last_fetch_end` (or similar) field (may be nested),
-    // fall back to the cached timestamp stored locally.
-    const cached = localStorage.getItem(STATUS_CACHE_KEY);
-    let lastFetchTime = new Date();
-    
-    // Helper to find a field by regex (returns the value)
-    function findField(obj, re) {
-        if (!obj || typeof obj !== 'object') return undefined;
-        for (const key of Object.keys(obj)) {
-            try {
-                if (re.test(key)) return obj[key];
-            } catch (e) {}
-            const val = obj[key];
-            if (val && typeof val === 'object') {
-                const found = findField(val, re);
-                if (found !== undefined) return found;
-            }
-        }
-        return undefined;
-    }
-
-    // Try to get `last_fetch_end` (or variants) from the API response
-    let lastFetchValue = undefined;
-    try {
-        lastFetchValue = findField(data, /last[_ ]?fetch[_ ]?end|lastFetchEnd|last_fetch_end/i);
-    } catch (e) {
-        lastFetchValue = undefined;
-    }
-
-    if (lastFetchValue !== undefined && lastFetchValue !== null) {
-        // If numeric (epoch seconds or ms) handle appropriately
-        if (typeof lastFetchValue === 'number') {
-            // Heuristic: if value looks like seconds (10 digits) convert to ms
-            lastFetchTime = (String(lastFetchValue).length <= 10) ? new Date(lastFetchValue * 1000) : new Date(lastFetchValue);
-        } else if (typeof lastFetchValue === 'string') {
-            const parsed = Date.parse(lastFetchValue);
-            if (!Number.isNaN(parsed)) lastFetchTime = new Date(parsed);
-        }
-    } else if (cached) {
-        const cachedData = JSON.parse(cached);
-        lastFetchTime = new Date(cachedData.timestamp);
-    }
+    // Use current time as "last updated" for local data
+    const lastFetchTime = new Date();
     
     console.log('Status data:', data);
     
-    // The API returns nested data under the 'data' property
+    // The data is in the 'data' property
     const statusData = data.data || data;
 
-    // Helper: recursively search for a numeric field matching a key pattern
-    function findNumericField(obj, re) {
-        if (!obj || typeof obj !== 'object') return undefined;
-        for (const key of Object.keys(obj)) {
-            try {
-                if (re.test(key) && typeof obj[key] === 'number') return obj[key];
-            } catch (e) {}
-            const val = obj[key];
-            if (val && typeof val === 'object') {
-                const found = findNumericField(val, re);
-                if (found !== undefined) return found;
-            }
-        }
-        return undefined;
-    }
+    // Extract driver count
+    let driversCount = statusData.total_indexed_drivers || statusData.total_drivers || statusData.totalIndexedDrivers || 0;
 
-    // Try common property names first, then fall back to recursive search
-    let driversCount = undefined;
-    if (statusData && typeof statusData === 'object') {
-        if (typeof statusData.total_indexed_drivers === 'number') driversCount = statusData.total_indexed_drivers;
-        else if (typeof statusData.total_drivers === 'number') driversCount = statusData.total_drivers;
-        else if (typeof statusData.totalIndexedDrivers === 'number') driversCount = statusData.totalIndexedDrivers;
-        else driversCount = findNumericField(statusData, /total[_ ]?indexed[_ ]?drivers|total[_ ]?drivers|indexed[_ ]?drivers|totalDrivers|totalIndexedDrivers/i);
-    }
-
-    // Update the display (show '-' if value missing)
+    // Update the display
     document.getElementById('status-timestamp').textContent = lastFetchTime.toLocaleString();
-    document.getElementById('status-tracks').textContent = (statusData.unique_tracks || statusData.uniqueTracks || '-').toLocaleString ? (statusData.unique_tracks || statusData.uniqueTracks || 0).toLocaleString() : '-';
+    document.getElementById('status-tracks').textContent = (statusData.unique_tracks || statusData.uniqueTracks || 0).toLocaleString();
     document.getElementById('status-combinations').textContent = (statusData.track_class_combination || 0).toLocaleString();
     document.getElementById('status-entries').textContent = (statusData.total_entries || statusData.totalEntries || 0).toLocaleString();
-    document.getElementById('status-drivers').textContent = (driversCount !== undefined ? driversCount.toLocaleString() : '-');
+    document.getElementById('status-drivers').textContent = driversCount.toLocaleString();
 
-    console.log('Resolved driversCount:', driversCount, 'statusData keys:', Object.keys(statusData || {}));
+    console.log('Status displayed:', {
+        drivers: driversCount,
+        tracks: statusData.unique_tracks,
+        combinations: statusData.track_class_combination,
+        entries: statusData.total_entries
+    });
 }

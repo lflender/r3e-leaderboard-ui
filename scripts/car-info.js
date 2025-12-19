@@ -42,8 +42,10 @@
 
   const data = await loadData();
   const tableContainer = document.getElementById('cars-info-table');
+  // If the script is running on the main index page, #cars-info panel may exist.
+  // For standalone cars.html we only require the table container.
   const panelContainer = document.getElementById('cars-info');
-  if(!tableContainer || !panelContainer) return;
+  if(!tableContainer) return;
   if(!data || data.length === 0){ tableContainer.innerHTML = '<p class="placeholder">No car data available</p>'; return; }
 
   // Dropdown options
@@ -143,7 +145,7 @@
     }
 
     let html = '<table class="results-table"><thead><tr>' +
-      '<th>Car</th><th>Wheel</th><th>Transmission</th><th>Year</th><th>Power</th><th>Weight</th><th>Engine</th><th>Drive</th>' +
+      '<th>Car</th><th>Wheel</th><th>Transmission</th><th>Year</th><th>Power</th><th>Weight</th><th>Engine</th>' +
       '</tr></thead><tbody>';
 
     data.forEach(cls => {
@@ -152,18 +154,22 @@
       // Only show group if at least one car matches
       const filteredCars = (cls.cars || []).filter(carMatchesFilters);
       if (filteredCars.length === 0) return;
-      html += `\n<tr class="driver-group-header" data-group="${slug}">` +
-              `<td colspan="9"><span class="toggle-icon">▼</span> <strong>${escapeHtml(className)}</strong></td></tr>`;
+            html += `\n<tr class="driver-group-header" data-group="${slug}">` +
+              `<td colspan="8"><span class="toggle-icon">▼</span> <strong>${escapeHtml(className)}</strong></td></tr>`;
       filteredCars.forEach(car => {
-        html += `\n<tr class="driver-data-row ${slug}">` +
-                `<td class="no-wrap"><b>${escapeHtml(car.car || '')}</b></td>` +
-                `<td>${wheelBadge(car.wheel_cat || car.wheel)}</td>` +
-                `<td>${transBadge(car.transmission_cat || car.transmission)}</td>` +
-                `<td><span style="background:${yearColor(car.year)};color:#222;padding:0.18rem 0.6rem;border-radius:999px;font-weight:800;display:inline-block;min-width:3.5em;text-align:center;">${escapeHtml(car.year || '')}</span></td>` +
-                `<td>${escapeHtml(car.power || '')}</td>` +
-                `<td>${escapeHtml(car.weight || '')}</td>` +
-                `<td>${escapeHtml(car.engine || '')}</td>` +
-                `<td>${escapeHtml(car.drive || '')}</td>` +
+        // ensure link property exists
+        if (car.link === undefined) car.link = '';
+        const rowLink = escapeHtml(car.link || '');
+        const linkOpen = rowLink ? `<a class="row-link" href="${rowLink}" target="_blank" rel="noopener">` : '';
+        const linkClose = rowLink ? `</a>` : '';
+        html += `\n<tr class="driver-data-row ${slug}" data-link="${rowLink}">` +
+          `<td>${linkOpen}<b>${escapeHtml(car.car || '')}</b>${linkClose}</td>` +
+                `<td>${linkOpen}${wheelBadge(car.wheel_cat || car.wheel)}${linkClose}</td>` +
+                `<td>${linkOpen}${transBadge(car.transmission_cat || car.transmission)}${linkClose}</td>` +
+                `<td>${linkOpen}<span style="background:${yearColor(car.year)};color:#222;padding:0.18rem 0.6rem;border-radius:999px;font-weight:800;display:inline-block;min-width:3.5em;text-align:center;">${escapeHtml(car.year || '')}</span>${linkClose}</td>` +
+                `<td class="carinfo-meta">${linkOpen}${escapeHtml(car.power || '')}${linkClose}</td>` +
+                `<td class="carinfo-meta">${linkOpen}${escapeHtml(car.weight || '')}${linkClose}</td>` +
+                `<td class="carinfo-meta">${linkOpen}${escapeHtml(car.engine || '')}${linkClose}</td>` +
                 `</tr>`;
       });
     });
@@ -197,30 +203,49 @@
   }
 
   let html = '<table class="results-table"><thead><tr>' +
-    '<th>Car</th><th>Wheel</th><th>Transmission</th><th>Year</th><th>Power</th><th>Weight</th><th>Engine</th><th>Drive</th>' +
+    '<th>Car</th><th>Wheel</th><th>Transmission</th><th>Year</th><th>Power</th><th>Weight</th><th>Engine</th>' +
     '</tr></thead><tbody>';
 
   data.forEach(cls => {
     const className = cls.class || 'Uncategorized';
     const slug = `class-${String(className).replace(/\s+/g,'-').replace(/[^a-z0-9\-]/gi,'').toLowerCase()}`;
     // Group header row (same style as driver grouping in leaderboards)
-    html += `\n<tr class="driver-group-header" data-group="${slug}" onclick="toggleGroup(this)">` +
-            `<td colspan="9"><span class="toggle-icon">▼</span> <strong>${escapeHtml(className)}</strong></td></tr>`;
+        html += `\n<tr class="driver-group-header" data-group="${slug}" onclick="toggleGroup(this)">` +
+          `<td colspan="8"><span class="toggle-icon">▼</span> <strong>${escapeHtml(className)}</strong></td></tr>`;
     const cars = Array.isArray(cls.cars) ? cls.cars : [];
     cars.forEach(car => {
-            html += `\n<tr class="driver-data-row ${slug}">` +
-              `<td class="no-wrap"><b>${escapeHtml(car.car || '')}</b></td>` +
-              `<td>${wheelBadge(car.wheel_cat || car.wheel)}</td>` +
-              `<td>${transBadge(car.transmission_cat || car.transmission)}</td>` +
-              `<td><span style="background:${yearColor(car.year)};color:#222;padding:0.18rem 0.6rem;border-radius:999px;font-weight:800;display:inline-block;min-width:3.5em;text-align:center;">${escapeHtml(car.year || '')}</span></td>` +
-              `<td class="carinfo-meta">${escapeHtml(car.power || '')}</td>` +
-              `<td class="carinfo-meta">${escapeHtml(car.weight || '')}</td>` +
-              `<td class="carinfo-meta">${escapeHtml(car.engine || '')}</td>` +
-              `<td class="carinfo-meta">${escapeHtml(car.drive || '')}</td>` +
+            if (car.link === undefined) car.link = '';
+            const rowLink = escapeHtml(car.link || '');
+            const linkOpen = rowLink ? `<a class="row-link" href="${rowLink}" target="_blank" rel="noopener">` : '';
+            const linkClose = rowLink ? `</a>` : '';
+            html += `\n<tr class="driver-data-row ${slug}" data-link="${rowLink}">` +
+              `<td>${linkOpen}<b>${escapeHtml(car.car || '')}</b>${linkClose}</td>` +
+              `<td>${linkOpen}${wheelBadge(car.wheel_cat || car.wheel)}${linkClose}</td>` +
+              `<td>${linkOpen}${transBadge(car.transmission_cat || car.transmission)}${linkClose}</td>` +
+              `<td>${linkOpen}<span style="background:${yearColor(car.year)};color:#222;padding:0.18rem 0.6rem;border-radius:999px;font-weight:800;display:inline-block;min-width:3.5em;text-align:center;">${escapeHtml(car.year || '')}</span>${linkClose}</td>` +
+              `<td class="carinfo-meta">${linkOpen}${escapeHtml(car.power || '')}${linkClose}</td>` +
+              `<td class="carinfo-meta">${linkOpen}${escapeHtml(car.weight || '')}${linkClose}</td>` +
+              `<td class="carinfo-meta">${linkOpen}${escapeHtml(car.engine || '')}${linkClose}</td>` +
               `</tr>`;
     });
   });
 
   html += '\n</tbody></table>';
-  container.innerHTML = html;
+  tableContainer.innerHTML = html;
+  // Make rows with a data-link attribute open that link in a new tab
+  Array.from(tableContainer.querySelectorAll('tr.driver-data-row')).forEach(row => {
+    const link = row.getAttribute('data-link') || '';
+    if (link) {
+      // prefer native anchor preview; only add click handler when no anchor exists
+      const hasAnchor = !!row.querySelector('a.row-link');
+      row.style.cursor = 'pointer';
+      if (!hasAnchor) {
+        row.addEventListener('click', (e) => {
+          const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+          if (tag === 'a' || tag === 'button' || e.target.closest && e.target.closest('.custom-select')) return;
+          try { window.open(link, '_blank'); } catch (err) { console.warn('Failed to open link', err); }
+        });
+      }
+    }
+  });
 })();

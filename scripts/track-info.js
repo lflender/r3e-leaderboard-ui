@@ -270,7 +270,7 @@
 
   // Fetch data from API (All or per-track)
   async function fetchTopCombinations() {
-    let url = 'http://localhost:8080/api/top-combinations';
+    let url = '/api/top-combinations';
     const params = new URLSearchParams();
     if (activeTrackId) params.set('track', String(activeTrackId));
     if (activeClassId) params.set('class', String(activeClassId));
@@ -289,7 +289,6 @@
       return Array.isArray(data) ? data : (data.entries || data.items || []);
     } catch (e) {
       console.error('Failed to fetch top combinations', e);
-      tableContainer.innerHTML = `<div class="error"><strong>Error:</strong> ${escapeHtml(String(e.message || e))}<br><small>Make sure backend is running on http://localhost:8080</small></div>`;
       return [];
     }
   }

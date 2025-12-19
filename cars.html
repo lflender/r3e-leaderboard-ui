@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Car Info — R3E Leaderboards</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1><a href="index.html" class="home-link">RaceRoom Leaderboards</a></h1>
+  </header>
+
+    <main>
+    <div class="tabs">
+      <a class="tab-button" href="index.html">Leaderboards</a>
+      <a class="tab-button" href="tracks.html">Track Info</a>
+      <button class="tab-button active">Car Info</button>
+    </div>
+
+    <div class="tab-content">
+      <div id="cars-info" class="tab-panel active">
+        <div class="search-container" id="cars-search-container">
+          <div id="class-filter-ui-cars" class="custom-select" role="listbox" aria-label="Filter by car class">
+            <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All classes ▾</button>
+            <div class="custom-select__menu" role="presentation" hidden></div>
+          </div>
+          <div id="wheel-filter-ui" class="custom-select" role="listbox" aria-label="Filter by wheel type">
+            <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All wheels ▾</button>
+            <div class="custom-select__menu" role="presentation" hidden></div>
+          </div>
+          <div id="trans-filter-ui" class="custom-select" role="listbox" aria-label="Filter by transmission type">
+            <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All transmissions ▾</button>
+            <div class="custom-select__menu" role="presentation" hidden></div>
+          </div>
+        </div>
+        <div id="cars-info-table"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy;RaceRoom Leaderboards</p>
+    <p>Website not affiliated with RaceRoom™. The RaceRoom™ brand belongs to its rightful owner.</p>
+    <p>hello@r3e-leaderboards.info</p>
+  </footer>
+
+  <script src="data/cars.js"></script>
+  <script src="script.js"></script>
+  <script src="scripts/car-info.js"></script>
+</body>
+</html>

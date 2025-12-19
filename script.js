@@ -1,5 +1,5 @@
 // Tab switching functionality
-const tabButtons = document.querySelectorAll('.tab-button');
+const tabButtons = Array.from(document.querySelectorAll('.tab-button')).filter(b => b.dataset && b.dataset.tab);
 const tabPanels = document.querySelectorAll('.tab-panel');
 
 tabButtons.forEach(button => {
@@ -21,6 +21,31 @@ const driverSearch = document.getElementById('driver-search');
 const classFilter = document.getElementById('class-filter');
 const classFilterUI = document.getElementById('class-filter-ui');
 const resultsContainer = document.getElementById('results-container');
+
+// If CARS_DATA is available (from data/cars.js), populate the hidden class select
+function populateClassFilterFromCarsData() {
+    if (!classFilter) return;
+    if (!window.CARS_DATA || !Array.isArray(window.CARS_DATA)) return;
+    // Build options from CARS_DATA.classes (each entry has `class` property)
+    const seen = new Set();
+    // Keep the initial placeholder
+    const opts = [{ value: '', label: 'All classes' }];
+    window.CARS_DATA.forEach(entry => {
+        const cls = entry.class || entry.car_class || entry.CarClass || '';
+        if (!cls) return;
+        if (seen.has(cls)) return;
+        seen.add(cls);
+        // No reliable id in cars data; store label in value
+        opts.push({ value: cls, label: cls });
+    });
+    // Sort options by label (skip first placeholder)
+    const sorted = opts.slice(1).sort((a,b)=>String(a.label).localeCompare(String(b.label)));
+    // Rebuild select
+    classFilter.innerHTML = '<option value="">All classes</option>' + sorted.map(o=>`<option value="${escapeHtml(o.value)}">${escapeHtml(o.label)}</option>`).join('');
+}
+
+// Try to populate now (if data already loaded), otherwise wait for DOM load where data script runs before script.js
+populateClassFilterFromCarsData();
 
 // Pagination state
 let currentPage = 1;
@@ -54,6 +79,21 @@ if (classFilter) {
         await searchDriver(searchTerm);
     });
 }
+
+// If the URL includes a driver query param (e.g. index.html?driver=Name), pre-fill and run the search
+(function handleUrlDriverParam(){
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const driver = params.get('driver') || params.get('query');
+        if (driver && driverSearch) {
+            driverSearch.value = driver;
+            // Wait a tick for any select population, then run search
+            setTimeout(()=>{ searchDriver(driver); }, 50);
+        }
+    } catch (e) {
+        // ignore
+    }
+})();
 
 // Setup custom select UI if present
 if (classFilter && classFilterUI) {
@@ -118,7 +158,7 @@ async function searchDriver(driverName) {
     resultsContainer.innerHTML = '<div class="loading">Searching...</div>';
     
     try {
-        let url = `http://localhost:8080/api/search?driver=${encodeURIComponent(driverName)}`;
+        let url = `/api/search?driver=${encodeURIComponent(driverName)}`;
         try {
             const selectedClass = classFilter ? classFilter.value : '';
             if (selectedClass) {
@@ -579,7 +619,7 @@ async function fetchAndDisplayStatus() {
         
         // Fetch new data if needed
         if (needsFetch) {
-            const response = await fetch('http://localhost:8080/api/status');
+            const response = await fetch('/api/status');
             if (response.ok) {
                 statusData = await response.json();
                 
@@ -682,7 +722,7 @@ function displayStatus(data) {
     // Update the display (show '-' if value missing)
     document.getElementById('status-timestamp').textContent = lastFetchTime.toLocaleString();
     document.getElementById('status-tracks').textContent = (statusData.unique_tracks || statusData.uniqueTracks || '-').toLocaleString ? (statusData.unique_tracks || statusData.uniqueTracks || 0).toLocaleString() : '-';
-    document.getElementById('status-combinations').textContent = (statusData.tracks_loaded || statusData.tracksLoaded || 0).toLocaleString();
+    document.getElementById('status-combinations').textContent = (statusData.track_class_combination || 0).toLocaleString();
     document.getElementById('status-entries').textContent = (statusData.total_entries || statusData.totalEntries || 0).toLocaleString();
     document.getElementById('status-drivers').textContent = (driversCount !== undefined ? driversCount.toLocaleString() : '-');
 

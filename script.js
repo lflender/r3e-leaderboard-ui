@@ -427,10 +427,11 @@ function displayResults(data) {
                     const s = String(value || '');
                     const parts = s.split(/,\s*/);
                     const mainClassic = formatClassicLapTime(parts[0] || '');
-                    const delta = parts.slice(1).join(' '); // remove comma between parts
+                    const deltaRaw = parts.slice(1).join(' '); // remove comma between parts
+                    const deltaClassic = deltaRaw ? formatClassicLapTime(deltaRaw) : '';
                     const escMain = escapeHtml(String(mainClassic));
-                    const escDelta = escapeHtml(String(delta));
-                    if (delta) {
+                    const escDelta = escapeHtml(String(deltaClassic));
+                    if (escDelta) {
                         tableHTML += `<td class="lap-time-cell">${escMain} <span class="time-delta-inline">${escDelta}</span></td>`;
                     } else {
                         tableHTML += `<td class="lap-time-cell">${escMain}</td>`;
@@ -529,12 +530,18 @@ function formatValue(value) {
 // Convert raw lap times like "2m 12.524s" or "45.281s" to classic format "2:12:524s"
 function formatClassicLapTime(raw) {
     const s = String(raw || '').trim();
-    const m = s.match(/^(?:(\d+)m\s*)?(\d+)(?:\.(\d{1,3}))?s$/);
+    // Handle optional +/- prefix for gap times
+    const m = s.match(/^([+-])?(?:(\d+)m\s*)?(\d+)(?:\.(\d{1,3}))?s$/);
     if (!m) return raw; // fallback if pattern doesn't match
-    const minutes = parseInt(m[1] || '0', 10);
-    const seconds = parseInt(m[2] || '0', 10);
-    const millis = (m[3] || '').padEnd(3, '0');
-    return `${minutes}:${String(seconds).padStart(2, '0')}:${millis}s`;
+    const sign = m[1] || '';
+    const minutes = parseInt(m[2] || '0', 10);
+    const seconds = parseInt(m[3] || '0', 10);
+    const millis = (m[4] || '').padEnd(3, '0');
+    // Omit minutes if 0
+    if (minutes === 0) {
+        return `${sign}${seconds}:${millis}s`;
+    }
+    return `${sign}${minutes}:${String(seconds).padStart(2, '0')}:${millis}s`;
 }
 
 // Convert a 2-letter country code to a regional indicator flag emoji.

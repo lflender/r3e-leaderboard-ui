@@ -243,6 +243,23 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+// Convert raw lap times like "2m 12.524s" or "45.281s" to classic format "2:12:524s"
+function formatClassicLapTime(raw) {
+    const s = String(raw || '').trim();
+    // Handle optional +/- prefix for gap times
+    const m = s.match(/^([+-])?(?:(\d+)m\s*)?(\d+)(?:\.(\d{1,3}))?s$/);
+    if (!m) return raw; // fallback if pattern doesn't match
+    const sign = m[1] || '';
+    const minutes = parseInt(m[2] || '0', 10);
+    const seconds = parseInt(m[3] || '0', 10);
+    const millis = (m[4] || '').padEnd(3, '0');
+    // Omit minutes if 0
+    if (minutes === 0) {
+        return `${sign}${seconds}:${millis}s`;
+    }
+    return `${sign}${minutes}:${String(seconds).padStart(2, '0')}:${millis}s`;
+}
+
 function displayResults(data) {
     const resultsContainer = document.getElementById('detail-results-container');
     
@@ -349,15 +366,18 @@ function displayResults(data) {
             tableHTML += `<td>${escapeHtml(String(name))}</td>`;
         }
         
-        // Lap Time - show delta inline with gray styling
+        // Lap Time - apply classic format to both main and gap, show delta inline with gray styling
         const lapTime = item.LapTime || item['Lap Time'] || item.lap_time || item.Time || '-';
         const parts = String(lapTime).split(/,\s*/);
-        const main = escapeHtml(parts[0] || '');
-        const delta = escapeHtml(parts.slice(1).join(', '));
-        if (delta) {
-            tableHTML += `<td class="no-wrap">${main} <span class="time-delta-inline">${delta}</span></td>`;
+        const mainClassic = formatClassicLapTime(parts[0] || '');
+        const deltaRaw = parts.slice(1).join(' '); // remove comma between parts
+        const deltaClassic = deltaRaw ? formatClassicLapTime(deltaRaw) : '';
+        const escMain = escapeHtml(String(mainClassic));
+        const escDelta = escapeHtml(String(deltaClassic));
+        if (escDelta) {
+            tableHTML += `<td class="no-wrap">${escMain} <span class="time-delta-inline no-wrap">${escDelta}</span></td>`;
         } else {
-            tableHTML += `<td class="no-wrap">${main}</td>`;
+            tableHTML += `<td class="no-wrap">${escMain}</td>`;
         }
         
         // Car

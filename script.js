@@ -333,6 +333,17 @@ function goToPage(page) {
     resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+// (moved) openDetailView is now defined globally below
+
+    // Make functions globally accessible for driver search page
+    window.goToPage = goToPage;
+
+} // End of isDriverSearchPage block
+
+// ===========================================
+// Global Functions (Available on all pages)
+// ===========================================
+
 /**
  * Toggle driver group visibility
  * @param {HTMLElement|string} target - Header element or group ID
@@ -366,17 +377,8 @@ function toggleGroup(target) {
     });
 }
 
-// (moved) openDetailView is now defined globally below
-
-    // Make functions globally accessible for driver search page
-    window.goToPage = goToPage;
-    window.toggleGroup = toggleGroup;
-
-} // End of isDriverSearchPage block
-
-// ===========================================
-// Global Functions (Available on all pages)
-// ===========================================
+// Make toggleGroup available globally for all pages (driver search, cars, tracks)
+window.toggleGroup = toggleGroup;
 /**
  * Open detail view for a leaderboard entry
  * Works on both Driver and Track pages

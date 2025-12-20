@@ -1,6 +1,6 @@
 /* Car Info table: smaller, stylized font for Power, Weight, Engine, Drive */
 .carinfo-meta {
-    font-size: 0.93em;
+    font-size: 0.87em !important;
     font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
     color: #b6c2d1;
     font-weight: 500;
@@ -808,14 +808,83 @@ main {
 footer {
     background-color: var(--surface);
     padding: 1.5rem;
-    text-align: center;
     color: var(--text-secondary);
     box-shadow: 0 -2px 4px var(--shadow);
     margin-top: 2rem;
 }
 
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.footer-text {
+    text-align: center;
+    flex: 1;
+}
+
 footer p {
     font-size: 0.875rem;
+}
+
+.footer-donate {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 180px;
+}
+
+.paypal-button {
+    background: #0070ba;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    white-space: nowrap;
+    width: 100%;
+}
+
+.paypal-button:hover {
+    background: #005a94;
+}
+
+.paypal-button span {
+    display: inline-block;
+}
+
+.raceroom-button {
+    background: #8b2020;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    white-space: nowrap;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.raceroom-button:hover {
+    background: #6d1919;
+}
+
+.raceroom-button span {
+    display: inline-block;
 }
 
 @media (max-width: 768px) {
@@ -1045,8 +1114,8 @@ footer p {
 
     /* Car/track info tables */
     .car-badge {
-        font-size: 0.8rem;
-        padding: 0.15rem 0.5rem;
+        font-size: 0.7rem;
+        padding: 0.12rem 0.4rem;
     }
 
     /* Footer adjustments */
@@ -1055,8 +1124,18 @@ footer p {
         margin-top: 1.5rem;
     }
 
+    .footer-content {
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+
     footer p {
         font-size: 0.8rem;
+    }
+
+    .paypal-button {
+        font-size: 0.85rem;
+        padding: 0.45rem 0.85rem;
     }
 
     /* Track Info table: make columns more compact on mobile */

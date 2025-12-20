@@ -114,7 +114,7 @@
       // Only show group if at least one car matches
       const filteredCars = (cls.cars || []).filter(carMatchesFilters);
       if (filteredCars.length === 0) return;
-            html += `\n<tr class="driver-group-header" data-group="${slug}">` +
+            html += `\n<tr class="driver-group-header" data-group="${slug}" onclick="toggleGroup(this)">` +
               `<td colspan="8"><span class="toggle-icon">▼</span> <strong>${R3EUtils.escapeHtml(className)}</strong></td></tr>`;
       filteredCars.forEach(car => {
         if (car.link === undefined) car.link = '';

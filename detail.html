@@ -63,9 +63,27 @@
     </main>
 
     <footer>
-        <p>&copy;RaceRoom Leaderboards</p>
-        <p>Website not affiliated with RaceRoom™.<br/>The RaceRoom™ brand belongs to its rightful owner.</p><br/>
-        <p>hello@r3e-leaderboards.info</p>
+        <div class="footer-content">
+            <div class="footer-text">
+                <p>&copy;RaceRoom Leaderboards</p>
+                <p>Website not affiliated with RaceRoom™.<br/>The RaceRoom™ brand belongs to its rightful owner.</p><br/>
+                <p>hello@r3e-leaderboards.info</p>
+            </div>
+            <div class="footer-donate">
+                <form action="https://www.paypal.com/donate" method="post" target="_blank">
+                    <input type="hidden" name="business" value="ludovic@fastmail.com" />
+                    <input type="hidden" name="no_recurring" value="0" />
+                    <input type="hidden" name="currency_code" value="USD" />
+                    <input type="hidden" name="item_name" value="Support RaceRoom Leaderboards" />
+                    <button type="submit" class="paypal-button" title="Buy me a coffee">
+                        <span>☕ Buy me a coffee</span>
+                    </button>
+                </form>
+                <a href="https://game.raceroom.com/store/" target="_blank" rel="noopener" class="raceroom-button" title="Support RaceRoom">
+                    <span>🏁 Support RaceRoom</span>
+                </a>
+            </div>
+        </div>
     </footer>
 
     <!-- Core modules - load first -->

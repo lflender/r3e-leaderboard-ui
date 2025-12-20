@@ -160,6 +160,9 @@ driverSearch.addEventListener('keypress', async (e) => {
         const searchTerm = driverSearch.value.trim();
         if (!searchTerm) return;
         
+        // Close keyboard on mobile
+        e.target.blur();
+        
         R3EUtils.updateUrlParam('driver', searchTerm);
         await searchDriver(searchTerm);
     }

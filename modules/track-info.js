@@ -583,6 +583,9 @@
         if (key === 'Position' || key === 'position' || key === 'Pos') {
           const posNum = String(value || '');
           html += `<td class="pos-cell"><span class="pos-number">${R3EUtils.escapeHtml(posNum)}</span></td>`;
+        } else if (key === 'Car Class' || key === 'car_class' || key === 'Class' || key === 'CarClass') {
+          // Car class cell: allow wrapping and target with class for mobile sizing
+          html += `<td class="class-cell">${formatValue(value)}</td>`;
         } else if (key === 'LapTime' || key === 'Lap Time' || key === 'lap_time' || key === 'laptime' || key === 'Time') {
           const s = String(value || '');
           const parts = s.split(/,\s*/);
@@ -596,7 +599,7 @@
           let trackStr = String(value || '');
           trackStr = trackStr.replace(/(\s+)([-–—])(\s+)/g, '$1<wbr>$2$3');
           trackStr = R3EUtils.escapeHtml(trackStr).replace(/&lt;wbr&gt;/g, '<wbr>');
-          html += `<td>${trackStr}</td>`;
+          html += `<td class="track-cell">${trackStr}</td>`;
         } else {
           html += `<td>${formatValue(value)}</td>`;
         }

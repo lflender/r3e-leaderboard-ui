@@ -20,6 +20,10 @@ let itemsPerPage = 100;
 let allResults = [];
 let unfilteredResults = [];
 
+// Car filter
+let carFilterSelect = null;
+let availableCars = [];
+
 // ===========================================
 // Initialize
 // ===========================================
@@ -56,6 +60,9 @@ async function fetchLeaderboardDetails() {
         
         // Store unfiltered results
         unfilteredResults = transformedData;
+        
+        // Build car filter from data
+        buildCarFilter(transformedData);
         
         // Apply difficulty filter if specified
         if (difficultyParam && difficultyParam !== 'All difficulties') {
@@ -296,6 +303,34 @@ function displayResults(data) {
     const endIndex = Math.min(startIndex + itemsPerPage, totalResults);
     const paginatedResults = results.slice(startIndex, endIndex);
     
+    // Check if car filter is active
+    const carToggle = document.querySelector('#car-filter-ui .custom-select__toggle');
+    const selectedCar = carToggle ? carToggle.textContent.replace(' ▾', '').trim() : 'All cars';
+    const isCarFilterActive = selectedCar !== 'All cars';
+    
+    // Add filtered and absolute position data when car filter is active
+    if (isCarFilterActive) {
+        paginatedResults.forEach((item, filteredIndex) => {
+            // Calculate filtered position (position within the current filtered results)
+            const actualFilteredIndex = startIndex + filteredIndex;
+            item.filteredPosition = actualFilteredIndex + 1;
+            item.filteredTotal = totalResults;
+            
+            // Find absolute position in unfiltered results
+            const originalPos = item.Position || item.position || item.Pos;
+            const itemName = item.Name || item.name;
+            const absoluteEntry = unfilteredResults.find(entry => {
+                const entryPos = entry.Position || entry.position || entry.Pos;
+                const entryName = entry.Name || entry.name;
+                return entryPos === originalPos && entryName === itemName;
+            });
+            if (absoluteEntry) {
+                item.absolutePosition = absoluteEntry.Position || absoluteEntry.position || absoluteEntry.Pos;
+                item.absoluteTotal = absoluteEntry.TotalEntries || unfilteredResults.length;
+            }
+        });
+    }
+    
     // Create table
     const headers = ['Position', 'Driver Name', 'Lap Time', 'Car', 'Difficulty'];
     let tableHTML = '<table class="results-table"><thead><tr>';
@@ -303,7 +338,7 @@ function displayResults(data) {
     tableHTML += '</tr></thead><tbody>';
     
     paginatedResults.forEach(item => {
-        tableHTML += renderDetailRow(item);
+        tableHTML += renderDetailRow(item, isCarFilterActive);
     });
     
     tableHTML += '</tbody></table>';
@@ -325,14 +360,23 @@ function displayResults(data) {
 /**
  * Render detail row
  * @param {Object} item - Data item
+ * @param {boolean} showAbsolutePosition - Whether to show absolute position
  * @returns {string} HTML string
  */
-function renderDetailRow(item) {
+function renderDetailRow(item, showAbsolutePosition = false) {
     const position = item.Position || item.position || item.Pos || '-';
     const totalEntries = R3EUtils.getTotalEntriesCount(item);
     const posNum = String(position).trim();
     const totalNum = totalEntries ? String(totalEntries).trim() : '';
     const badgeColor = R3EUtils.getPositionBadgeColor(parseInt(posNum), parseInt(totalNum));
+    
+    // When car filter is active, we swap the display:
+    // - Small label shows filtered position (position within the car filter)
+    // - Main badge shows absolute position (position across all cars)
+    const filteredPos = item.filteredPosition ? String(item.filteredPosition).trim() : null;
+    const filteredTotal = item.filteredTotal ? String(item.filteredTotal).trim() : null;
+    const absolutePos = item.absolutePosition ? String(item.absolutePosition).trim() : null;
+    const absoluteTotal = item.absoluteTotal ? String(item.absoluteTotal).trim() : null;
     
     const name = item.Name || item.name || '-';
     const highlisted = item.highlisted || item.Highlisted || false;
@@ -358,11 +402,26 @@ function renderDetailRow(item) {
     let html = `<tr data-trackid="${R3EUtils.escapeHtml(String(rowTrackId))}" data-classid="${R3EUtils.escapeHtml(String(rowClassId))}">`;
     
     // Position
-    if (totalNum) {
-        html += `<td class="pos-cell"><span class="pos-number" style="background:${badgeColor}">${R3EUtils.escapeHtml(posNum)}</span><span class="pos-sep">/</span><span class="pos-total">${R3EUtils.escapeHtml(totalNum)}</span></td>`;
-    } else {
-        html += `<td class="pos-cell"><span class="pos-number" style="background:${badgeColor}">${R3EUtils.escapeHtml(posNum)}</span></td>`;
+    html += '<td class="pos-cell">';
+    
+    // When car filter is active, show filtered position in small label
+    if (showAbsolutePosition && filteredPos && filteredTotal) {
+        html += `<span class="absolute-pos-label">${R3EUtils.escapeHtml(filteredPos)}/${R3EUtils.escapeHtml(filteredTotal)}</span> `;
     }
+    
+    // Main position display - show absolute position when filter is active, otherwise normal position
+    if (showAbsolutePosition && absolutePos && absoluteTotal) {
+        const absoluteBadgeColor = R3EUtils.getPositionBadgeColor(parseInt(absolutePos), parseInt(absoluteTotal));
+        html += `<span class="pos-number" style="background:${absoluteBadgeColor}">${R3EUtils.escapeHtml(absolutePos)}</span>`;
+        html += `<span class="pos-sep">/</span><span class="pos-total">${R3EUtils.escapeHtml(absoluteTotal)}</span>`;
+    } else {
+        html += `<span class="pos-number" style="background:${badgeColor}">${R3EUtils.escapeHtml(posNum)}</span>`;
+        if (totalNum) {
+            html += `<span class="pos-sep">/</span><span class="pos-total">${R3EUtils.escapeHtml(totalNum)}</span>`;
+        }
+    }
+    
+    html += '</td>';
     
     // Driver name
     if (!highlisted) {
@@ -499,21 +558,62 @@ function goToPage(page) {
 }
 
 /**
- * Filter and display results by difficulty
+ * Build car filter from data
+ */
+function buildCarFilter(data) {
+    // Extract unique cars
+    const carsSet = new Set();
+    data.forEach(entry => {
+        const car = entry.Car || entry.car || '';
+        if (car && car !== '-') {
+            carsSet.add(car);
+        }
+    });
+    
+    availableCars = Array.from(carsSet).sort();
+    
+    // Only show car filter if there are 2 or more cars
+    if (availableCars.length > 1 && carFilterSelect) {
+        // Update car filter options
+        const carOptions = [
+            { value: '', label: 'All cars' },
+            ...availableCars.map(car => ({ value: car, label: car }))
+        ];
+        
+        carFilterSelect.setOptions(carOptions);
+        
+        const carFilterContainer = document.getElementById('car-filter-ui');
+        if (carFilterContainer) {
+            carFilterContainer.style.display = '';
+        }
+    }
+}
+
+/**
+ * Filter and display results by difficulty and car
  */
 function filterAndDisplayResults() {
     const difficultyToggle = document.querySelector('#difficulty-filter-ui .custom-select__toggle');
     const selectedDifficulty = difficultyToggle ? 
         difficultyToggle.textContent.replace(' ▾', '').trim() : 'All difficulties';
     
-    if (selectedDifficulty === 'All difficulties') {
-        allResults = unfilteredResults;
-    } else {
-        allResults = unfilteredResults.filter(entry => {
-            const diff = entry.Difficulty || entry.difficulty || entry.driving_model || '';
-            return diff.toLowerCase() === selectedDifficulty.toLowerCase();
-        });
-    }
+    const carToggle = document.querySelector('#car-filter-ui .custom-select__toggle');
+    const selectedCar = carToggle ? 
+        carToggle.textContent.replace(' ▾', '').trim() : 'All cars';
+    
+    // Apply both filters
+    allResults = unfilteredResults.filter(entry => {
+        // Difficulty filter
+        const diff = entry.Difficulty || entry.difficulty || entry.driving_model || '';
+        const difficultyMatch = selectedDifficulty === 'All difficulties' || 
+            diff.toLowerCase() === selectedDifficulty.toLowerCase();
+        
+        // Car filter
+        const car = entry.Car || entry.car || '';
+        const carMatch = selectedCar === 'All cars' || car === selectedCar;
+        
+        return difficultyMatch && carMatch;
+    });
     
     posApplied = false;
     if (posParam && !Number.isNaN(posParam)) {
@@ -530,9 +630,16 @@ function filterAndDisplayResults() {
 }
 
 // ===========================================
-// Difficulty Filter Setup
+// Filter Setup
 // ===========================================
 document.addEventListener('DOMContentLoaded', () => {
+    // Car filter - will be populated dynamically when data loads
+    const carOptions = [{ value: '', label: 'All cars' }];
+    carFilterSelect = new CustomSelect('car-filter-ui', carOptions, () => {
+        filterAndDisplayResults();
+    });
+    
+    // Difficulty filter
     const difficultyOptions = [
         { value: '', label: 'All difficulties' },
         { value: 'Get Real', label: 'Get Real' },

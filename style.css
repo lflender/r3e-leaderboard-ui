@@ -543,6 +543,17 @@ main {
     opacity: 0.95;
 }
 
+/* Absolute position label (shown when car filter is active) */
+.absolute-pos-label {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    font-weight: 500;
+    opacity: 0.85;
+    margin-right: 0.4rem;
+    display: inline-block;
+    vertical-align: baseline;
+}
+
 /* Remove underlines and default link styles inside result tables */
 .results-table a {
     color: inherit;
@@ -677,8 +688,20 @@ main {
 }
 
 .detail-header .custom-select {
-    margin-left: auto;
     min-width: 200px;
+}
+
+#car-filter-ui {
+    margin-left: auto;
+}
+
+#difficulty-filter-ui {
+    margin-left: 1rem;
+}
+
+/* When car filter is hidden, difficulty filter takes its place */
+#car-filter-ui[style*="display: none"] + #difficulty-filter-ui {
+    margin-left: auto;
 }
 
 .detail-header h2 {
@@ -926,9 +949,18 @@ footer p {
     }
 
     .detail-header .custom-select {
-        order: 3;
         margin-left: 0;
         min-width: 100%;
+    }
+    
+    #car-filter-ui {
+        order: 3;
+        margin-left: 0;
+    }
+    
+    #difficulty-filter-ui {
+        order: 4;
+        margin-left: 0;
     }
 
     .back-btn {

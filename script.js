@@ -363,41 +363,7 @@ function toggleGroup(target) {
     });
 }
 
-/**
- * Open detail view for a leaderboard entry
- * @param {Event} event - Click event
- * @param {HTMLElement} row - Table row element
- */
-function openDetailView(event, row) {
-    if (event.target.closest('.driver-group-header')) {
-        return;
-    }
-    
-    const trackId = row.dataset.trackid;
-    const classId = row.dataset.classid;
-    const track = row.dataset.track;
-    const carClass = row.dataset.class;
-    const pos = row.dataset.position;
-    
-    const difficultyToggle = document.querySelector('#difficulty-filter-ui .custom-select__toggle');
-    const selectedDifficulty = difficultyToggle ? 
-        difficultyToggle.textContent.replace(' ▾', '').trim() : 'All difficulties';
-    
-    let url = '';
-    if (trackId && classId) {
-        url = `detail.html?track=${encodeURIComponent(trackId)}&class=${encodeURIComponent(classId)}`;
-    } else if (track && carClass) {
-        url = `detail.html?track=${encodeURIComponent(track)}&class=${encodeURIComponent(carClass)}`;
-    }
-    
-    if (url) {
-        if (pos) url += `&pos=${encodeURIComponent(pos)}`;
-        if (selectedDifficulty !== 'All difficulties') {
-            url += `&difficulty=${encodeURIComponent(selectedDifficulty)}`;
-        }
-        window.open(url, '_blank');
-    }
-}
+// (moved) openDetailView is now defined globally below
 
     // Make functions globally accessible for driver search page
     window.goToPage = goToPage;
@@ -408,4 +374,40 @@ function openDetailView(event, row) {
 // ===========================================
 // Global Functions (Available on all pages)
 // ===========================================
+/**
+ * Open detail view for a leaderboard entry
+ * Works on both Driver and Track pages
+ * @param {Event} event - Click event
+ * @param {HTMLElement} row - Table row element
+ */
+function openDetailView(event, row) {
+    if (event && event.target && event.target.closest && event.target.closest('.driver-group-header')) {
+        return;
+    }
+
+    const trackId = row?.dataset?.trackid;
+    const classId = row?.dataset?.classid;
+    const track = row?.dataset?.track;
+    const carClass = row?.dataset?.class;
+    const pos = row?.dataset?.position;
+
+    const difficultyToggle = document.querySelector('#difficulty-filter-ui .custom-select__toggle');
+    const selectedDifficulty = difficultyToggle ?
+        difficultyToggle.textContent.replace(' ▾', '').trim() : 'All difficulties';
+
+    let url = '';
+    if (trackId && classId) {
+        url = `detail.html?track=${encodeURIComponent(trackId)}&class=${encodeURIComponent(classId)}`;
+    } else if (track && carClass) {
+        url = `detail.html?track=${encodeURIComponent(track)}&class=${encodeURIComponent(carClass)}`;
+    }
+
+    if (url) {
+        if (pos) url += `&pos=${encodeURIComponent(pos)}`;
+        if (selectedDifficulty !== 'All difficulties') {
+            url += `&difficulty=${encodeURIComponent(selectedDifficulty)}`;
+        }
+        window.open(url, '_blank');
+    }
+}
 window.openDetailView = openDetailView;

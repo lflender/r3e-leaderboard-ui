@@ -24,6 +24,9 @@ let unfilteredResults = [];
 let carFilterSelect = null;
 let availableCars = [];
 
+// Track last action time to prevent premature "no results" display
+let lastActionTime = 0;
+
 // ===========================================
 // Initialize
 // ===========================================
@@ -279,6 +282,12 @@ function displayResults(data) {
     });
     
     if (results.length === 0) {
+        // Only show "no results" if enough time has passed since last action
+        const timeSinceAction = Date.now() - lastActionTime;
+        if (timeSinceAction < 500) {
+            resultsContainer.innerHTML = '<div class="loading">Loading...</div>';
+            return;
+        }
         resultsContainer.innerHTML = '<div class="no-results">No results found</div>';
         return;
     }
@@ -593,6 +602,7 @@ function buildCarFilter(data) {
  * Filter and display results by difficulty and car
  */
 function filterAndDisplayResults() {
+    lastActionTime = Date.now();
     const difficultyToggle = document.querySelector('#difficulty-filter-ui .custom-select__toggle');
     const selectedDifficulty = difficultyToggle ? 
         difficultyToggle.textContent.replace(' ▾', '').trim() : 'All difficulties';

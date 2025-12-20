@@ -36,6 +36,9 @@ let currentPage = 1;
 let itemsPerPage = 100;
 let allResults = [];
 
+// Track last search time to prevent premature "no results" display
+let lastSearchTime = 0;
+
 // ===========================================
 // Initialize Data Service
 // ===========================================
@@ -191,6 +194,7 @@ if (classFilter) {
  * @param {string} driverName - Driver name to search
  */
 async function searchDriver(driverName) {
+    lastSearchTime = Date.now();
     resultsContainer.innerHTML = '<div class="loading">Searching...</div>';
     
     try {
@@ -228,6 +232,12 @@ function displayResults(data) {
     }
     
     if (data.length === 0) {
+        // Only show "no results" if enough time has passed since last search
+        const timeSinceSearch = Date.now() - lastSearchTime;
+        if (timeSinceSearch < 500) {
+            resultsContainer.innerHTML = '<div class="loading">Loading...</div>';
+            return;
+        }
         resultsContainer.innerHTML = '<div class="no-results">No results found</div>';
         return;
     }

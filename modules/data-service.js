@@ -158,8 +158,10 @@ class DataService {
             });
         }
         
-        // Try to fetch status.json to get fetch_in_progress
+        // Try to fetch status.json to get fetch_in_progress and timestamps
         let fetchInProgress = false;
+        let lastIndexUpdate = null;
+        let lastScrapeEnd = null;
         try {
             const timestamp = new Date().getTime();
             const response = await fetch(`cache/status.json?v=${timestamp}`, {
@@ -169,6 +171,8 @@ class DataService {
             if (response.ok) {
                 const statusJson = await response.json();
                 fetchInProgress = statusJson.fetch_in_progress === true;
+                lastIndexUpdate = statusJson.last_index_update || null;
+                lastScrapeEnd = statusJson.last_scrape_end || null;
             }
         } catch (error) {
             // If status.json doesn't exist, default to false
@@ -180,7 +184,9 @@ class DataService {
             track_class_combination: trackClassCombinations.size,
             total_entries: totalEntries,
             total_indexed_drivers: totalDrivers,
-            fetch_in_progress: fetchInProgress
+            fetch_in_progress: fetchInProgress,
+            last_index_update: lastIndexUpdate,
+            last_scrape_end: lastScrapeEnd
         };
     }
     

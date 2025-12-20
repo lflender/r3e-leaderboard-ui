@@ -61,7 +61,6 @@ async function fetchAndDisplayStatus() {
 }
 
 function displayStatus(data) {
-    const lastFetchTime = new Date();
     const statusData = data.data || data;
     
     const driversCount = statusData.total_indexed_drivers || statusData.total_drivers || 0;
@@ -79,7 +78,18 @@ function displayStatus(data) {
         timestampLabelEl.textContent = fetchInProgress ? 'Last partial update:' : 'Last complete update:';
     }
     
-    if (timestampEl) timestampEl.textContent = lastFetchTime.toLocaleString();
+    // Use appropriate timestamp from status.json
+    if (timestampEl) {
+        let timestamp = fetchInProgress ? statusData.last_index_update : statusData.last_scrape_end;
+        if (timestamp) {
+            // Parse the timestamp and format it
+            const date = new Date(timestamp);
+            timestampEl.textContent = date.toLocaleString();
+        } else {
+            timestampEl.textContent = '-';
+        }
+    }
+    
     if (tracksEl) tracksEl.textContent = (statusData.unique_tracks || 0).toLocaleString();
     if (combinationsEl) combinationsEl.textContent = (statusData.track_class_combination || 0).toLocaleString();
     if (entriesEl) entriesEl.textContent = (statusData.total_entries || 0).toLocaleString();

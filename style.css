@@ -28,11 +28,8 @@
 .car-badge.trans.sequential { background: #7b1fa2; color: #fff; }
 .car-badge.trans.h { background: #c62828; color: #fff; }
 .car-badge.unknown { background: #eee; color: #888; }
-/* Detail header lines (Track, Layout, Class) - match other section title sizing */
-#detail-layout {
-    /* kept for backward compatibility if used directly */
-}
 
+/* Detail header lines (Track, Layout, Class) - match other section title sizing */
 .detail-header-line, #detail-track, #detail-class, #detail-layout {
     font-size: 1.35rem;
     font-weight: 800;
@@ -58,7 +55,6 @@
 
 :root {
     --primary-color: #3b82f6;
-    --primary-hover: #60a5fa;
     --background: #0f172a;
     --surface: #1e293b;
     --text-primary: #f1f5f9;
@@ -193,14 +189,11 @@ main {
 }
 
 .search-container {
-    margin-bottom: 2rem;
-}
-
-.search-container {
     display: flex;
     gap: 1rem;
     align-items: center;
     flex-wrap: wrap;
+    margin-bottom: 2rem;
 }
 
 #class-filter {
@@ -222,7 +215,6 @@ main {
 }
 
 /* Small caret tweak for select */
-.search-container { position: relative; }
 #class-filter { padding-right: 2.5rem; }
 #class-filter::-ms-expand { display: none; }
 
@@ -262,10 +254,28 @@ main {
 /* Constrain the Power column so very long car names don't force the table wide */
 .results-table th:nth-child(5),
 .results-table td:nth-child(5) {
-    width: 8rem; /* fixed-ish width for Power column */
+    width: 8rem;
     max-width: 8rem;
 }
-/* Removed: ellipsis was truncating lap time column */
+
+/* Car Info table specific column widths */
+#cars-info-table .results-table th:nth-child(1),
+#cars-info-table .results-table td:nth-child(1) {
+    white-space: nowrap;
+}
+
+#cars-info-table .results-table th:nth-child(5),
+#cars-info-table .results-table td:nth-child(5) {
+    width: 6.5rem;
+    max-width: 6.5rem;
+}
+
+#cars-info-table .results-table th:nth-child(7),
+#cars-info-table .results-table td:nth-child(7) {
+    width: 7rem;
+    max-width: 7rem;
+}
+
 .custom-select__toggle {
     width: 100%;
     text-align: left;
@@ -709,17 +719,6 @@ main {
     gap: 0.5rem;
 }
 
-.detail-header-line {
-    color: #fff;
-    font-size: 1.35rem;
-    font-weight: 700;
-    letter-spacing: 0.01em;
-    /* Remove heavy text shadow so titles are crisp */
-    text-shadow: none;
-    outline: none;
-    border: none;
-}
-
 .back-btn {
     padding: 0.5rem 1.25rem;
     background: #fff;
@@ -1044,6 +1043,13 @@ footer p {
         max-width: none;
     }
     
+    /* Car Info page: all 3 dropdowns stack vertically, each on its own line */
+    #cars-search-container .custom-select {
+        flex: 1 1 100%;
+        min-width: 100%;
+        max-width: 100%;
+    }
+    
     .custom-select__toggle {
         white-space: normal;
         padding: 0.7rem 0.9rem;
@@ -1174,11 +1180,17 @@ footer p {
         padding: 0.12rem 0.4rem;
     }
 
-    /* Make Power column narrower on mobile for Car Info page */
+    /* Make Power and Engine columns narrower on mobile for Car Info page */
     #cars-info-table .results-table th:nth-child(5),
     #cars-info-table .results-table td:nth-child(5) {
-        width: 5.5rem;
-        max-width: 5.5rem;
+        width: 4rem;
+        max-width: 4rem;
+    }
+    
+    #cars-info-table .results-table th:nth-child(7),
+    #cars-info-table .results-table td:nth-child(7) {
+        width: 4.5rem;
+        max-width: 4.5rem;
     }
 
     /* Footer adjustments */
@@ -1239,11 +1251,17 @@ footer p {
         font-size: 0.85rem;
     }
 
-    /* Make Power column even narrower on extra small screens for Car Info page */
+    /* Make Power and Engine columns even narrower on extra small screens for Car Info page */
     #cars-info-table .results-table th:nth-child(5),
     #cars-info-table .results-table td:nth-child(5) {
-        width: 4.5rem;
-        max-width: 4.5rem;
+        width: 3.5rem;
+        max-width: 3.5rem;
+    }
+    
+    #cars-info-table .results-table th:nth-child(7),
+    #cars-info-table .results-table td:nth-child(7) {
+        width: 4rem;
+        max-width: 4rem;
     }
 
     /* Further reduce special elements */

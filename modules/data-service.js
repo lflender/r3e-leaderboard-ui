@@ -193,11 +193,43 @@ class DataService {
             throw new Error('Driver index is empty');
         }
         
-        const searchTerm = driverName.trim().toLowerCase();
+        let searchTerm = driverName.trim();
+        let isExactSearch = false;
+        
+        // Check if search term is wrapped in quotes for exact matching
+        if ((searchTerm.startsWith('"') && searchTerm.endsWith('"')) ||
+            (searchTerm.startsWith("'") && searchTerm.endsWith("'"))) {
+            isExactSearch = true;
+            searchTerm = searchTerm.slice(1, -1).trim(); // Remove quotes
+        }
+        
+        const searchLower = searchTerm.toLowerCase();
         const results = [];
         
         for (const [driverKey, driverEntries] of Object.entries(driverIndex)) {
-            if (!driverKey.toLowerCase().includes(searchTerm)) {
+            const driverLower = driverKey.toLowerCase();
+            let matches = false;
+            
+            if (isExactSearch) {
+                // Exact word/phrase matching with word boundaries
+                const words = searchLower.split(/\s+/);
+                if (words.length === 1) {
+                    // Single word: match as whole word using word boundary
+                    const wordRegex = new RegExp(`\\b${words[0].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+                    matches = wordRegex.test(driverKey);
+                } else {
+                    // Multiple words: each word must be complete, in order, with any amount of space between
+                    const escapedWords = words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+                    const pattern = escapedWords.map(w => `\\b${w}\\b`).join('\\s+');
+                    const phraseRegex = new RegExp(pattern, 'i');
+                    matches = phraseRegex.test(driverKey);
+                }
+            } else {
+                // Partial matching (current behavior)
+                matches = driverLower.includes(searchLower);
+            }
+            
+            if (!matches) {
                 continue;
             }
             

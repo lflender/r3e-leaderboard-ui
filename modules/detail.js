@@ -286,6 +286,12 @@ function displayResults(data) {
         const timeSinceAction = Date.now() - lastActionTime;
         if (timeSinceAction < 500) {
             resultsContainer.innerHTML = '<div class="loading">Loading...</div>';
+            // Schedule showing "no results" after the delay
+            setTimeout(() => {
+                if (resultsContainer.innerHTML.includes('Loading')) {
+                    resultsContainer.innerHTML = '<div class="no-results">No results found</div>';
+                }
+            }, 500 - timeSinceAction);
             return;
         }
         resultsContainer.innerHTML = '<div class="no-results">No results found</div>';

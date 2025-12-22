@@ -244,6 +244,12 @@ function displayResults(data) {
         const timeSinceSearch = Date.now() - lastSearchTime;
         if (timeSinceSearch < 500) {
             resultsContainer.innerHTML = '<div class="loading">Loading...</div>';
+            // Schedule showing "no results" after the delay
+            setTimeout(() => {
+                if (resultsContainer.innerHTML.includes('Loading')) {
+                    resultsContainer.innerHTML = '<div class="no-results">No results found</div>';
+                }
+            }, 500 - timeSinceSearch);
             return;
         }
         resultsContainer.innerHTML = '<div class="no-results">No results found</div>';

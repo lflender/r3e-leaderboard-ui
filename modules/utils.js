@@ -25,6 +25,10 @@ function escapeHtml(text) {
  * @returns {string} Formatted header
  */
 function formatHeader(key) {
+    // Special case for class_name
+    if (key === 'class_name' || key === 'className' || key === 'ClassName') {
+        return 'Car class';
+    }
     return key
         .replace(/([A-Z])/g, ' $1')
         .replace(/_/g, ' ')

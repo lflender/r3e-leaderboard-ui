@@ -862,7 +862,7 @@ footer p {
 }
 
 .raceroom-button {
-    background: #8b2020;
+    background: #691313;
     color: white;
     border: none;
     padding: 0.5rem 1rem;
@@ -880,7 +880,7 @@ footer p {
 }
 
 .raceroom-button:hover {
-    background: #6d1919;
+    background: #a32929;
 }
 
 .raceroom-button span {

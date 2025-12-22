@@ -29,6 +29,11 @@ function formatHeader(key) {
     if (key === 'class_name' || key === 'className' || key === 'ClassName') {
         return 'Car class';
     }
+    // Normalize known entry count fields to a concise label
+    const lower = String(key || '').toLowerCase();
+    if (lower === 'entry_count' || lower === 'total_entries' || lower === 'totalracers' || lower === 'total_racers') {
+        return 'Entries';
+    }
     return key
         .replace(/([A-Z])/g, ' $1')
         .replace(/_/g, ' ')

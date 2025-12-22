@@ -7,8 +7,9 @@
 class DataService {
     constructor() {
         this.driverIndex = null;
+        // Disable status caching: status.json is precomputed and should be fetched fresh
         this.statusCache = null;
-        this.CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+        this.CACHE_DURATION = 0;
         this.STATUS_CACHE_KEY = 'r3e_status_cache';
     }
     
@@ -132,48 +133,32 @@ class DataService {
      * @returns {Promise<Object>} Status data
      */
     async calculateStatus() {
-        // Return cached status if available and fresh
-        const now = Date.now();
-        if (this.statusCache && (now - this.statusCache.ts) < this.CACHE_DURATION) {
-            return this.statusCache.data;
-        }
+        // Always fetch fresh status.json without caching
         try {
-            const cachedRaw = localStorage.getItem(this.STATUS_CACHE_KEY);
-            if (cachedRaw) {
-                const cached = JSON.parse(cachedRaw);
-                if (cached && cached.data && cached.ts && (now - cached.ts) < this.CACHE_DURATION) {
-                    this.statusCache = cached;
-                    return cached.data;
-                }
-            }
-        } catch (e) {
-            // Ignore localStorage errors
-        }
-
-        // Fetch status from server-calculated status.json
-        try {
-            const timestamp = new Date().getTime();
-            const response = await fetch(`cache/status.json?v=${timestamp}`, {
+            const response = await fetch(`cache/status.json?v=${Date.now()}`, {
                 method: 'GET',
-                headers: { 'Accept': 'application/json' }
+                cache: 'no-store',
+                headers: {
+                    'Accept': 'application/json',
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                }
             });
-            
+
             if (!response.ok) {
-                console.error('Failed to fetch status.json:', response.status);
+                console.error('Failed to fetch status.json:', response.status, response.statusText);
                 return null;
             }
-            
-            const statusData = await response.json();
-            
-            // Cache the fetched status for 5 minutes
-            this.statusCache = { ts: Date.now(), data: statusData };
+
+            // Use text + JSON.parse to avoid potential BOM/issues
+            const text = await response.text();
             try {
-                localStorage.setItem(this.STATUS_CACHE_KEY, JSON.stringify(this.statusCache));
+                return JSON.parse(text);
             } catch (e) {
-                // Ignore localStorage errors
+                console.error('Invalid JSON in status.json:', e);
+                return null;
             }
-            
-            return statusData;
         } catch (error) {
             console.error('Error fetching status.json:', error);
             return null;

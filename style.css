@@ -992,6 +992,24 @@ footer p {
         font-size: 0.75rem;
     }
 
+    /* Reduce Driver column width on mobile */
+    .results-table th:nth-child(2),
+    .results-table td:nth-child(2) {
+        max-width: 7rem;
+    }
+
+    .results-table th:nth-child(4),
+    .results-table td:nth-child(4) {
+        max-width: 7rem;
+    }
+
+    /* Reduce Difficulty column width on mobile */
+    .results-table th:nth-child(5),
+    .results-table td:nth-child(5) {
+        width: 4rem;
+        max-width: 4rem;
+    }
+
     /* Position badges stay readable */
     .pos-number {
         font-size: 0.7rem;

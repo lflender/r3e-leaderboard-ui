@@ -66,7 +66,7 @@ async function fetchAndDisplayStatus() {
 function displayStatus(data) {
     const statusData = data.data || data;
     
-    const driversCount = statusData.total_indexed_drivers || statusData.total_drivers || 0;
+    const driversCount = statusData.total_drivers || 0;
     const fetchInProgress = statusData.fetch_in_progress === true;
     
     const timestampEl = document.getElementById('status-timestamp');
@@ -85,16 +85,24 @@ function displayStatus(data) {
     if (timestampEl) {
         let timestamp = fetchInProgress ? statusData.last_index_update : statusData.last_scrape_end;
         if (timestamp) {
-            // Parse the timestamp and format it
+            // Parse the timestamp and format it in 24-hour format
             const date = new Date(timestamp);
-            timestampEl.textContent = date.toLocaleString();
+            timestampEl.textContent = date.toLocaleString('en-GB', { 
+                year: 'numeric', 
+                month: '2-digit', 
+                day: '2-digit', 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false 
+            });
         } else {
             timestampEl.textContent = '-';
         }
     }
     
-    if (tracksEl) tracksEl.textContent = (statusData.unique_tracks || 0).toLocaleString();
-    if (combinationsEl) combinationsEl.textContent = (statusData.track_class_combination || 0).toLocaleString();
+    if (tracksEl) tracksEl.textContent = (statusData.total_unique_tracks || 0).toLocaleString();
+    if (combinationsEl) combinationsEl.textContent = (statusData.track_count || 0).toLocaleString();
     if (entriesEl) entriesEl.textContent = (statusData.total_entries || 0).toLocaleString();
     if (driversEl) driversEl.textContent = driversCount.toLocaleString();
 }

@@ -128,66 +128,56 @@ class DataService {
     }
     
     /**
-     * Calculates status from driver index
+     * Fetches status from server-provided cache/status.json
      * @returns {Promise<Object>} Status data
      */
     async calculateStatus() {
-        const driverIndex = await this.waitForDriverIndex();
-        
-        if (!driverIndex || Object.keys(driverIndex).length === 0) {
-            return null;
+        // Return cached status if available and fresh
+        const now = Date.now();
+        if (this.statusCache && (now - this.statusCache.ts) < this.CACHE_DURATION) {
+            return this.statusCache.data;
         }
-        
-        const uniqueTracks = new Set();
-        const trackClassCombinations = new Set();
-        let totalEntries = 0;
-        const totalDrivers = Object.keys(driverIndex).length;
-        
-        for (const [driverKey, entries] of Object.entries(driverIndex)) {
-            entries.forEach(entry => {
-                const track = entry.track || entry.Track || '';
-                const trackId = entry.track_id || entry.TrackID || '';
-                const classId = entry.class_id || entry.ClassID || '';
-                const carClass = entry.car_class || entry.CarClass || '';
-                
-                if (track) uniqueTracks.add(track);
-                if (trackId && classId) trackClassCombinations.add(`${trackId}-${classId}`);
-                else if (track && carClass) trackClassCombinations.add(`${track}-${carClass}`);
-                
-                totalEntries++;
-            });
+        try {
+            const cachedRaw = localStorage.getItem(this.STATUS_CACHE_KEY);
+            if (cachedRaw) {
+                const cached = JSON.parse(cachedRaw);
+                if (cached && cached.data && cached.ts && (now - cached.ts) < this.CACHE_DURATION) {
+                    this.statusCache = cached;
+                    return cached.data;
+                }
+            }
+        } catch (e) {
+            // Ignore localStorage errors
         }
-        
-        // Try to fetch status.json to get fetch_in_progress and timestamps
-        let fetchInProgress = false;
-        let lastIndexUpdate = null;
-        let lastScrapeEnd = null;
+
+        // Fetch status from server-calculated status.json
         try {
             const timestamp = new Date().getTime();
             const response = await fetch(`cache/status.json?v=${timestamp}`, {
                 method: 'GET',
                 headers: { 'Accept': 'application/json' }
             });
-            if (response.ok) {
-                const statusJson = await response.json();
-                fetchInProgress = statusJson.fetch_in_progress === true;
-                lastIndexUpdate = statusJson.last_index_update || null;
-                lastScrapeEnd = statusJson.last_scrape_end || null;
+            
+            if (!response.ok) {
+                console.error('Failed to fetch status.json:', response.status);
+                return null;
             }
+            
+            const statusData = await response.json();
+            
+            // Cache the fetched status for 5 minutes
+            this.statusCache = { ts: Date.now(), data: statusData };
+            try {
+                localStorage.setItem(this.STATUS_CACHE_KEY, JSON.stringify(this.statusCache));
+            } catch (e) {
+                // Ignore localStorage errors
+            }
+            
+            return statusData;
         } catch (error) {
-            // If status.json doesn't exist, default to false
-            console.log('status.json not available, defaulting fetch_in_progress to false');
+            console.error('Error fetching status.json:', error);
+            return null;
         }
-        
-        return {
-            unique_tracks: uniqueTracks.size,
-            track_class_combination: trackClassCombinations.size,
-            total_entries: totalEntries,
-            total_indexed_drivers: totalDrivers,
-            fetch_in_progress: fetchInProgress,
-            last_index_update: lastIndexUpdate,
-            last_scrape_end: lastScrapeEnd
-        };
     }
     
     /**

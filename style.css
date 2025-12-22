@@ -1118,6 +1118,13 @@ footer p {
         padding: 0.12rem 0.4rem;
     }
 
+    /* Make Power column narrower on mobile for Car Info page */
+    #cars-info-table .results-table th:nth-child(5),
+    #cars-info-table .results-table td:nth-child(5) {
+        width: 5.5rem;
+        max-width: 5.5rem;
+    }
+
     /* Footer adjustments */
     footer {
         padding: 1.25rem 0.75rem;
@@ -1151,11 +1158,11 @@ footer p {
     /* Narrow position column */
     #track-info-table .pos-cell { width: 8%; }
     /* Compact car class column */
-    #track-info-table .class-cell { width: 18%; white-space: normal; word-break: break-word; }
+    #track-info-table .class-cell { width: 16%; white-space: normal; word-break: break-word; }
     /* Wider track name column with line-break support */
-    #track-info-table .track-cell { width: 40%; word-break: break-word; }
-    /* Lap time column a bit narrower */
-    #track-info-table .no-wrap { width: 24%; }
+    #track-info-table .track-cell { width: 42%; word-break: break-word; }
+    /* Entry count column narrower */
+    #track-info-table .no-wrap { width: 18%; }
 }
 
 /* Extra small screens (under 480px) */
@@ -1205,9 +1212,16 @@ footer p {
         padding: 0.3rem 0.25rem;
     }
     #track-info-table .pos-cell { width: 10%; }
-    #track-info-table .class-cell { width: 20%; }
-    #track-info-table .track-cell { width: 42%; }
-    #track-info-table .no-wrap { width: 22%; }
+    #track-info-table .class-cell { width: 18%; }
+    #track-info-table .track-cell { width: 44%; }
+    #track-info-table .no-wrap { width: 16%; }
+
+    /* Make Power column even narrower on extra small screens for Car Info page */
+    #cars-info-table .results-table th:nth-child(5),
+    #cars-info-table .results-table td:nth-child(5) {
+        width: 4.5rem;
+        max-width: 4.5rem;
+    }
 
     /* Further reduce special elements */
     .pos-number {

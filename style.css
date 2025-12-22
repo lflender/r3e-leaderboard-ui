@@ -467,10 +467,11 @@ main {
     align-items: center;
 }
 
-/* Make the first status item wider so datetime doesn't wrap */
-/* Keep all status items in equal columns; ensure timestamp doesn't wrap */
+/* Status timestamp: allow wrapping to avoid column overlap */
 #status-timestamp {
-    white-space: nowrap;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
     font-size: 1.15rem;
 }
 
@@ -848,7 +849,7 @@ footer p {
 }
 
 .paypal-button:hover {
-    background: #005a94;
+    background: #0f94ec;
 }
 
 .paypal-button span {

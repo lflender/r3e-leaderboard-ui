@@ -515,7 +515,16 @@
         combinations = data.data;
       }
       
-      combinations.sort((a, b) => (b.entry_count || 0) - (a.entry_count || 0));
+      combinations.sort((a, b) => {
+        // Primary sort: entry count descending
+        const countDiff = (b.entry_count || 0) - (a.entry_count || 0);
+        if (countDiff !== 0) return countDiff;
+        
+        // Secondary sort: track name alphabetically
+        const trackA = String(a.track || a.Track || a.track_name || a.TrackName || '');
+        const trackB = String(b.track || b.Track || b.track_name || b.TrackName || '');
+        return trackA.localeCompare(trackB);
+      });
       const limitedCombinations = combinations.slice(0, 1000);
       
       console.log(`Showing ${limitedCombinations.length} combinations`);

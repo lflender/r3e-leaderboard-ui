@@ -251,6 +251,40 @@ main {
     text-decoration: underline;
 }
 
+/* Inline info icon with tooltip for car descriptions */
+.info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1em;
+    height: 1em;
+    margin-left: 0.25em;
+    border-radius: 999px;
+    background: var(--primary-color);
+    color: #fff;
+    font-weight: 900;
+    font-size: 0.72em;
+    line-height: 1em;
+    vertical-align: middle; /* align with text */
+    position: relative;
+    top: -1px; /* nudge up slightly */
+    cursor: help;
+    z-index: 2;
+}
+
+/* Keep last word + info icon together */
+.no-wrap-tail {
+    white-space: nowrap;
+}
+
+/* Hide info icon on mobile devices (no hover tooltips) */
+@media (hover: none), (pointer: coarse) {
+    .info-icon { display: none !important; }
+}
+@media (max-width: 768px) {
+    .info-icon { display: none !important; }
+}
+
 /* Constrain the Power column so very long car names don't force the table wide */
 .results-table th:nth-child(5),
 .results-table td:nth-child(5) {
@@ -274,6 +308,14 @@ main {
 #cars-info-table .results-table td:nth-child(7) {
     width: 7rem;
     max-width: 7rem;
+}
+
+/* Slightly reduce horizontal padding on Car Info page */
+#cars-info-table .results-table th {
+    padding: 0.85rem 0.9rem;
+}
+#cars-info-table .results-table td {
+    padding: 0.75rem 0.9rem;
 }
 
 .custom-select__toggle {

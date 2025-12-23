@@ -121,8 +121,14 @@
         const rowLink = R3EUtils.escapeHtml(car.link || '');
         const linkOpen = rowLink ? `<a class="row-link" href="${rowLink}" target="_blank" rel="noopener">` : '';
         const linkClose = rowLink ? `</a>` : '';
+        const infoIcon = car.description ? `<span class="info-icon" title="${R3EUtils.escapeHtml(car.description)}" aria-label="More info" role="img">i</span>` : '';
+        const carName = String(car.car || '');
+        const lastSpace = carName.lastIndexOf(' ');
+        const carNameHtml = (lastSpace >= 0)
+          ? `<b>${R3EUtils.escapeHtml(carName.slice(0, lastSpace))}</b><span class="no-wrap-tail"> <b>${R3EUtils.escapeHtml(carName.slice(lastSpace + 1))}</b> ${infoIcon}</span>`
+          : `<span class="no-wrap-tail"><b>${R3EUtils.escapeHtml(carName)}</b> ${infoIcon}</span>`;
         html += `\n<tr class="driver-data-row ${slug}" data-link="${rowLink}">` +
-          `<td>${linkOpen}<b>${R3EUtils.escapeHtml(car.car || '')}</b>${linkClose}</td>` +
+          `<td>${linkOpen}${carNameHtml}${linkClose}</td>` +
                 `<td>${linkOpen}${wheelBadge(car.wheel_cat || car.wheel)}${linkClose}</td>` +
                 `<td>${linkOpen}${transBadge(car.transmission_cat || car.transmission)}${linkClose}</td>` +
                 `<td>${linkOpen}<span style="background:${yearColor(car.year)};color:#222;padding:0.18rem 0.6rem;border-radius:999px;font-weight:800;display:inline-block;min-width:3.5em;text-align:center;">${R3EUtils.escapeHtml(car.year || '')}</span>${linkClose}</td>` +
@@ -178,8 +184,14 @@
             const rowLink = R3EUtils.escapeHtml(car.link || '');
             const linkOpen = rowLink ? `<a class="row-link" href="${rowLink}" target="_blank" rel="noopener">` : '';
             const linkClose = rowLink ? `</a>` : '';
+            const infoIcon = car.description ? `<span class="info-icon" title="${R3EUtils.escapeHtml(car.description)}" aria-label="More info" role="img">i</span>` : '';
+            const carName = String(car.car || '');
+            const lastSpace = carName.lastIndexOf(' ');
+            const carNameHtml = (lastSpace >= 0)
+              ? `<b>${R3EUtils.escapeHtml(carName.slice(0, lastSpace))}</b><span class="no-wrap-tail"> <b>${R3EUtils.escapeHtml(carName.slice(lastSpace + 1))}</b> ${infoIcon}</span>`
+              : `<span class="no-wrap-tail"><b>${R3EUtils.escapeHtml(carName)}</b> ${infoIcon}</span>`;
             html += `\n<tr class="driver-data-row ${slug}" data-link="${rowLink}">` +
-              `<td>${linkOpen}<b>${R3EUtils.escapeHtml(car.car || '')}</b>${linkClose}</td>` +
+              `<td>${linkOpen}${carNameHtml}${linkClose}</td>` +
               `<td>${linkOpen}${wheelBadge(car.wheel_cat || car.wheel)}${linkClose}</td>` +
               `<td>${linkOpen}${transBadge(car.transmission_cat || car.transmission)}${linkClose}</td>` +
               `<td>${linkOpen}<span style="background:${yearColor(car.year)};color:#222;padding:0.18rem 0.6rem;border-radius:999px;font-weight:800;display:inline-block;min-width:3.5em;text-align:center;">${R3EUtils.escapeHtml(car.year || '')}</span>${linkClose}</td>` +

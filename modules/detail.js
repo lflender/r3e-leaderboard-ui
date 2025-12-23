@@ -171,9 +171,9 @@ function transformLeaderboardData(leaderboardData, data) {
         const trackIdFromEntry = entry.track_id || entry.TrackID || entry['Track ID'] || 
                                 data.track_info?.Id || data.track_info?.ID || null;
         
+        // Use array index as position - leaderboard data is already sorted by position
         return {
-            Position: entry.class_position !== undefined ? entry.class_position + 1 : 
-                     (entry.index !== undefined ? entry.index + 1 : index + 1),
+            Position: index + 1,
             Name: entry.driver?.Name || entry.driver?.name || entry.Name || 'Unknown',
             Country: entry.country?.Name || entry.country?.name || entry.Country || '',
             CarClass: carClass,
@@ -516,10 +516,14 @@ function highlightPositionRow(targetPos) {
         rows.forEach(r => r.classList.remove('highlight-row'));
         
         for (const r of rows) {
-            const td = r.querySelector('td');
-            if (!td) continue;
-            const posText = String(td.textContent || '');
-            const num = parseInt((posText.match(/\d+/) || [''])[0]);
+            const posCell = r.querySelector('td.pos-cell');
+            if (!posCell) continue;
+            
+            // Look for the main position badge (pos-number span)
+            const posBadge = posCell.querySelector('.pos-number');
+            if (!posBadge) continue;
+            
+            const num = parseInt(posBadge.textContent.trim());
             if (num === targetPos) {
                 r.classList.add('highlight-row');
                 

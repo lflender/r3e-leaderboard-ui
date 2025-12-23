@@ -75,6 +75,7 @@ function displayStatus(data) {
     const combinationsEl = document.getElementById('status-combinations');
     const entriesEl = document.getElementById('status-entries');
     const driversEl = document.getElementById('status-drivers');
+    const statusLedEl = document.getElementById('status-led');
     
     // Update the label based on fetch_in_progress
     if (timestampLabelEl) {
@@ -105,6 +106,43 @@ function displayStatus(data) {
     if (combinationsEl) combinationsEl.textContent = (statusData.track_count || 0).toLocaleString();
     if (entriesEl) entriesEl.textContent = (statusData.total_entries || 0).toLocaleString();
     if (driversEl) driversEl.textContent = driversCount.toLocaleString();
+    
+    // Update status LED
+    if (statusLedEl) {
+        const uniqueTracks = statusData.total_unique_tracks || 0;
+        // Use TRACKS_DATA length if available, otherwise hardcode expected count (177 as of Dec 2025)
+        const expectedTracks = (window.TRACKS_DATA && window.TRACKS_DATA.length) || 177;
+        
+        // Parse last update timestamp
+        let lastUpdateTime = null;
+        const timestamp = fetchInProgress ? statusData.last_index_update : statusData.last_scrape_end;
+        if (timestamp) {
+            lastUpdateTime = new Date(timestamp);
+        }
+        
+        // Calculate LED status - RED has HIGHEST PRIORITY
+        let ledClass = 'green';
+        let ledTitle = 'OK';
+        
+        // RED: if unique tracks < expected tracks (HIGHEST PRIORITY - check first)
+        if (uniqueTracks < expectedTracks) {
+            ledClass = 'red';
+            ledTitle = 'Error';
+        }
+        // YELLOW: if last update > 24 hours ago (only if not red)
+        else if (lastUpdateTime) {
+            const now = new Date();
+            const hoursSinceUpdate = (now - lastUpdateTime) / (1000 * 60 * 60);
+            if (hoursSinceUpdate > 24) {
+                ledClass = 'yellow';
+                ledTitle = 'Stale';
+            }
+        }
+        
+        // Apply LED class and title
+        statusLedEl.className = `status-led ${ledClass}`;
+        statusLedEl.title = ledTitle;
+    }
 }
 
 // Fetch status on page load

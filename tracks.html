@@ -3,13 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Track Info — R3E Leaderboards</title>
+    <title>Track Info — RaceRoom Leaderboards Explorer</title>
+    <meta name="description" content="View RaceRoom (R3E) track/class combinations with entry counts and filters.">
+    <link rel="canonical" href="https://r3e-leaderboards.info/tracks.html">
+    <meta name="robots" content="index, follow">
+    <!-- Open Graph -->
+    <meta property="og:site_name" content="RaceRoom Leaderboards Explorer">
+    <meta property="og:title" content="Track Info — RaceRoom Leaderboards Explorer">
+    <meta property="og:description" content="Browse track/class combinations and entries for RaceRoom leaderboards.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://r3e-leaderboards.info/tracks.html">
+    <meta property="og:image" content="https://r3e-leaderboards.info/og-image.png">
     
     <!-- Analytics -->
     <script data-goatcounter="https://r3e-leaderboards.goatcounter.com/count"
             async src="//gc.zgo.at/count.js"></script>
     
     <link rel="stylesheet" href="style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Track Info",
+        "url": "https://r3e-leaderboards.info/tracks.html"
+    }
+    </script>
 </head>
 <body>
     <header>
@@ -96,13 +114,9 @@
     <!-- Core modules - load first -->
     <script src="modules/utils.js"></script>
     <script src="modules/data-service.js"></script>
-    <script src="modules/custom-select.js"></script>
-    <script src="modules/pagination.js"></script>
-    <script src="modules/table-renderer.js"></script>
     
     <!-- Data and application scripts -->
     <script src="data/tracks.js"></script>
-    <script src="data/cars.js"></script>
     <script src="script.js"></script>
     <script src="modules/track-info.js"></script>
 </body>

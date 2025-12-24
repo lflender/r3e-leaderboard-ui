@@ -259,11 +259,18 @@ class DataService {
             return [];
         }
         
+        const normalizeClassName = (name) => {
+            const n = String(name || '');
+            // WTCR rebranding applies from 2018 onward; fix mislabelled WTCC 2018-2020
+            return n.replace(/^WTCC\s(2018|2019|2020)\b/, 'WTCR $1');
+        };
+
         const seen = new Set();
         const options = [];
         
         window.CARS_DATA.forEach(entry => {
-            const cls = entry.class || entry.car_class || entry.CarClass || '';
+            const clsRaw = entry.class || entry.car_class || entry.CarClass || '';
+            const cls = normalizeClassName(clsRaw);
             if (!cls || seen.has(cls)) return;
             seen.add(cls);
             options.push({ value: cls, label: cls });

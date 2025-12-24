@@ -54,8 +54,14 @@
 
   let wheelFilter = '', transFilter = '', classFilter = '';
   
-  // Build class options from data
-  const classOptions = [{ value: '', label: 'All classes' }].concat(data.map(c => ({ value: c.class || '', label: c.class || '' })));
+  // Build class options from data (normalize WTCC 2018-2020 -> WTCR)
+  const normalizeClassName = (name) => String(name || '').replace(/^WTCC\s(2018|2019|2020)\b/, 'WTCR $1');
+  const classOptions = [{ value: '', label: 'All classes' }].concat(
+    data.map(c => {
+      const n = normalizeClassName(c.class || '');
+      return { value: n, label: n };
+    })
+  );
   const seen = new Set();
   const classOptionsUnique = classOptions.filter(o => {
     if (seen.has(o.value)) return false; seen.add(o.value); return true;

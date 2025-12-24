@@ -10,6 +10,7 @@ class StatusDisplay {
             timestampLabel: document.getElementById('status-timestamp-label'),
             tracks: document.getElementById('status-tracks'),
             combinations: document.getElementById('status-combinations'),
+            totalCombinations: document.getElementById('status-total-combinations'),
             entries: document.getElementById('status-entries'),
             drivers: document.getElementById('status-drivers'),
             led: document.getElementById('status-led')
@@ -85,6 +86,9 @@ class StatusDisplay {
         }
         if (this.elements.combinations) {
             this.elements.combinations.textContent = (statusData.track_count || 0).toLocaleString();
+        }
+        if (this.elements.totalCombinations) {
+            this.elements.totalCombinations.textContent = (statusData.total_fetched_combinations || 0).toLocaleString();
         }
         if (this.elements.entries) {
             this.elements.entries.textContent = (statusData.total_entries || 0).toLocaleString();

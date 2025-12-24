@@ -536,6 +536,36 @@ function highlightPositionRow(targetPos) {
                 const rTime = String(r.dataset.time || '').trim();
                 if (rName === dLower && (!timeParam || rTime === String(timeParam).trim())) {
                     r.classList.add('highlight-row');
+                    
+                    // Add external link handler for highlighted row
+                    const trackId = r.dataset.trackid || trackParam || '';
+                    const classId = r.dataset.classid || classParam || '';
+                    if (trackId) {
+                        const isNumericId = /^\d+$/.test(String(classId));
+                        const carClass = isNumericId ? `class-${classId}` : '';
+                        const openExternal = (e) => {
+                            let url = `https://game.raceroom.com/leaderboard/?track=${encodeURIComponent(trackId)}`;
+                            if (carClass) url += `&car_class=${encodeURIComponent(carClass)}`;
+                            window.open(url, '_blank');
+                        };
+                        r.style.cursor = 'pointer';
+                        if (!r.dataset.externalClickAdded) {
+                            r.addEventListener('click', openExternal);
+                            r.dataset.externalClickAdded = '1';
+                        }
+                        // Prevent driver name links from navigating in highlighted rows
+                        const nameLink = r.querySelector('a.detail-driver-link');
+                        if (nameLink && !nameLink.dataset.preventDefault) {
+                            nameLink.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                openExternal(e);
+                            });
+                            nameLink.style.cursor = 'pointer';
+                            nameLink.dataset.preventDefault = '1';
+                        }
+                    }
+                    
                     // If a position was provided, enforce it visually on the highlighted row
                     if (posParam && !Number.isNaN(posParam)) {
                         const posCell = r.querySelector('td.pos-cell');
@@ -577,7 +607,7 @@ function highlightPositionRow(targetPos) {
                 if (trackId) {
                     const isNumericId = /^\d+$/.test(String(classId));
                     const carClass = isNumericId ? `class-${classId}` : '';
-                    const openExternal = () => {
+                    const openExternal = (e) => {
                         let url = `https://game.raceroom.com/leaderboard/?track=${encodeURIComponent(trackId)}`;
                         if (carClass) url += `&car_class=${encodeURIComponent(carClass)}`;
                         window.open(url, '_blank');
@@ -586,6 +616,17 @@ function highlightPositionRow(targetPos) {
                     if (!r.dataset.externalClickAdded) {
                         r.addEventListener('click', openExternal);
                         r.dataset.externalClickAdded = '1';
+                    }
+                    // Prevent driver name links from navigating in highlighted rows
+                    const nameLink = r.querySelector('a.detail-driver-link');
+                    if (nameLink && !nameLink.dataset.preventDefault) {
+                        nameLink.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            openExternal(e);
+                        });
+                        nameLink.style.cursor = 'pointer';
+                        nameLink.dataset.preventDefault = '1';
                     }
                 }
                 // Ensure displayed position matches the requested one when provided

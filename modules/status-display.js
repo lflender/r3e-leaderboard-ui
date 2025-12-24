@@ -50,7 +50,8 @@ class StatusDisplay {
         const statusData = data.data || data;
         
         const driversCount = statusData.total_drivers || 0;
-        const fetchInProgress = statusData.fetch_in_progress === true;
+        // Check both boolean and string "true" values, default to false
+        const fetchInProgress = (statusData.fetch_in_progress === true || statusData.fetch_in_progress === 'true');
         
         // Update timestamp label
         if (this.elements.timestampLabel) {
@@ -143,6 +144,8 @@ class StatusDisplay {
         this.elements.led.className = `status-led ${ledClass}`;
         if (fetchInProgress) {
             this.elements.led.classList.add('fetching');
+        } else {
+            this.elements.led.classList.remove('fetching');
         }
         this.elements.led.title = ledTitle;
     }

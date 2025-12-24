@@ -460,6 +460,8 @@ function openDetailView(event, row) {
     const track = row?.dataset?.track;
     const carClass = row?.dataset?.class;
     const pos = row?.dataset?.position;
+    const driverName = row?.dataset?.name || row?.dataset?.driver || '';
+    const lapTime = row?.dataset?.time || '';
 
     const difficultyToggle = document.querySelector('#difficulty-filter-ui .custom-select__toggle');
     const selectedDifficulty = difficultyToggle ?
@@ -474,6 +476,8 @@ function openDetailView(event, row) {
 
     if (url) {
         if (pos) url += `&pos=${encodeURIComponent(pos)}`;
+        if (driverName) url += `&driver=${encodeURIComponent(driverName)}`;
+        if (lapTime) url += `&time=${encodeURIComponent(lapTime)}`;
         if (selectedDifficulty !== 'All difficulties') {
             url += `&difficulty=${encodeURIComponent(selectedDifficulty)}`;
         }

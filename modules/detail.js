@@ -10,6 +10,8 @@ const trackParam = R3EUtils.getUrlParam('track');
 const classParam = R3EUtils.getUrlParam('class');
 const posParam = parseInt(R3EUtils.getUrlParam('pos') || '');
 const difficultyParam = R3EUtils.getUrlParam('difficulty') || 'All difficulties';
+const driverParam = R3EUtils.getUrlParam('driver') || '';
+const timeParam = R3EUtils.getUrlParam('time') || '';
 
 // Ensure pos param is applied only once
 let posApplied = false;
@@ -77,20 +79,28 @@ async function fetchLeaderboardDetails() {
             allResults = transformedData;
         }
         
-        // Calculate page containing position
-        if (posParam && !Number.isNaN(posParam)) {
-            const posIndex = allResults.findIndex(entry => {
+        // Calculate page containing the target entry (prefer driver/time match, fallback to position)
+        currentPage = 1;
+        let targetIdx = -1;
+        if (driverParam) {
+            const dLower = String(driverParam).toLowerCase();
+            targetIdx = allResults.findIndex(entry => {
+                const nm = (entry.Name || entry.name || '').toLowerCase();
+                const time = String(entry.LapTime || entry['Lap Time'] || entry.lap_time || '').trim();
+                if (timeParam) {
+                    return nm === dLower && time === String(timeParam).trim();
+                }
+                return nm === dLower;
+            });
+        }
+        if (targetIdx === -1 && posParam && !Number.isNaN(posParam)) {
+            targetIdx = allResults.findIndex(entry => {
                 const pos = entry.Position || entry.position || entry.Pos || 0;
                 return parseInt(String(pos).trim()) === posParam;
             });
-            
-            if (posIndex !== -1) {
-                currentPage = Math.floor(posIndex / itemsPerPage) + 1;
-            } else {
-                currentPage = 1;
-            }
-        } else {
-            currentPage = 1;
+        }
+        if (targetIdx !== -1) {
+            currentPage = Math.floor(targetIdx / itemsPerPage) + 1;
         }
         
         displayResults(allResults);
@@ -158,6 +168,11 @@ function transformLeaderboardData(leaderboardData, data) {
                           leaderboardData[0]?.car_class?.class?.name || null;
     
     return leaderboardData.map((entry, index) => {
+        // Prefer the original position from the source if available; fallback to array index
+        let originalPos = entry.Position || entry.position || entry.Pos || entry.rank;
+        const resolvedPosition = parseInt(String(originalPos ?? '').replace(/[^0-9]/g, ''), 10);
+        const position = Number.isFinite(resolvedPosition) && resolvedPosition > 0 ? resolvedPosition : (index + 1);
+        
         let carClass = entry.car_class?.class?.Name || entry.car_class?.class?.name || 
                       entry.car_class?.Name || entry.car_class?.name || entry.CarClass || '';
         if (!carClass) carClass = firstClassName || defaultClassName || '';
@@ -173,7 +188,7 @@ function transformLeaderboardData(leaderboardData, data) {
         
         // Use array index as position - leaderboard data is already sorted by position
         return {
-            Position: index + 1,
+            Position: position,
             Name: entry.driver?.Name || entry.driver?.name || entry.Name || 'Unknown',
             Country: entry.country?.Name || entry.country?.name || entry.Country || '',
             CarClass: carClass,
@@ -414,7 +429,9 @@ function renderDetailRow(item, showAbsolutePosition = false) {
     const rowTrackId = item.track_id || item.TrackID || trackParam || '';
     const rowClassId = item.class_id || item.ClassID || '';
     
-    let html = `<tr data-trackid="${R3EUtils.escapeHtml(String(rowTrackId))}" data-classid="${R3EUtils.escapeHtml(String(rowClassId))}">`;
+    const rowName = item.Name || item.name || '';
+    const rowTime = item.LapTime || item['Lap Time'] || item.lap_time || '';
+    let html = `<tr data-trackid="${R3EUtils.escapeHtml(String(rowTrackId))}" data-classid="${R3EUtils.escapeHtml(String(rowClassId))}" data-name="${R3EUtils.escapeHtml(String(rowName))}" data-time="${R3EUtils.escapeHtml(String(rowTime))}">`;
     
     // Position
     html += '<td class="pos-cell">';
@@ -515,6 +532,38 @@ function highlightPositionRow(targetPos) {
         const rows = document.querySelectorAll('#detail-results-container table.results-table tbody tr');
         rows.forEach(r => r.classList.remove('highlight-row'));
         
+        // First try to match by driver/time if provided
+        if (driverParam) {
+            const dLower = String(driverParam).toLowerCase();
+            for (const r of rows) {
+                const rName = (r.dataset.name || '').toLowerCase();
+                const rTime = String(r.dataset.time || '').trim();
+                if (rName === dLower && (!timeParam || rTime === String(timeParam).trim())) {
+                    r.classList.add('highlight-row');
+                    // If a position was provided, enforce it visually on the highlighted row
+                    if (posParam && !Number.isNaN(posParam)) {
+                        const posCell = r.querySelector('td.pos-cell');
+                        if (posCell) {
+                            const posBadge = posCell.querySelector('.pos-number');
+                            const posTotalEl = posCell.querySelector('.pos-total');
+                            if (posBadge) {
+                                posBadge.textContent = String(posParam);
+                                const totalEntries = posTotalEl ? parseInt(posTotalEl.textContent.trim()) : (unfilteredResults?.length || 0);
+                                const color = R3EUtils.getPositionBadgeColor(parseInt(posParam), parseInt(totalEntries || 0));
+                                posBadge.style.background = color;
+                            }
+                            if (posTotalEl && (!posTotalEl.textContent || posTotalEl.textContent.trim() === '')) {
+                                posTotalEl.textContent = String(unfilteredResults?.length || '');
+                            }
+                        }
+                    }
+                    r.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    return;
+                }
+            }
+        }
+
+        // Fallback to matching by position number
         for (const r of rows) {
             const posCell = r.querySelector('td.pos-cell');
             if (!posCell) continue;
@@ -541,6 +590,20 @@ function highlightPositionRow(targetPos) {
                     if (!r.dataset.externalClickAdded) {
                         r.addEventListener('click', openExternal);
                         r.dataset.externalClickAdded = '1';
+                    }
+                }
+                // Ensure displayed position matches the requested one when provided
+                if (posParam && !Number.isNaN(posParam)) {
+                    const posBadge = r.querySelector('td.pos-cell .pos-number');
+                    const posTotalEl = r.querySelector('td.pos-cell .pos-total');
+                    if (posBadge) {
+                        posBadge.textContent = String(posParam);
+                        const totalEntries = posTotalEl ? parseInt(posTotalEl.textContent.trim()) : (unfilteredResults?.length || 0);
+                        const color = R3EUtils.getPositionBadgeColor(parseInt(posParam), parseInt(totalEntries || 0));
+                        posBadge.style.background = color;
+                    }
+                    if (posTotalEl && (!posTotalEl.textContent || posTotalEl.textContent.trim() === '')) {
+                        posTotalEl.textContent = String(unfilteredResults?.length || '');
                     }
                 }
                 r.scrollIntoView({ behavior: 'smooth', block: 'center' });

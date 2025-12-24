@@ -146,12 +146,17 @@ class TableRenderer {
         
         const groupId = this.getGroupIdForItem(firstEntry);
         
+        const driverName = firstEntry.name || firstEntry.Name || '';
+        const rawLapTime = item.LapTime || item['Lap Time'] || item.lap_time || item.laptime || item.Time || '';
+        
         let html = `<tr class="driver-data-row ${groupId}" onclick="openDetailView(event, this)" 
-                    data-position="${numericPos}" 
-                    data-trackid="${R3EUtils.escapeHtml(String(trackId))}" 
-                    data-classid="${R3EUtils.escapeHtml(String(classId))}" 
-                    data-track="${R3EUtils.escapeHtml(item.track || item.Track || '')}" 
-                    data-class="${R3EUtils.escapeHtml(firstEntry.car_class || firstEntry.CarClass || firstEntry['Car Class'] || firstEntry.Class || '')}">`;
+                data-position="${numericPos}" 
+                data-trackid="${R3EUtils.escapeHtml(String(trackId))}" 
+                data-classid="${R3EUtils.escapeHtml(String(classId))}" 
+                data-track="${R3EUtils.escapeHtml(item.track || item.Track || '')}" 
+                data-class="${R3EUtils.escapeHtml(firstEntry.car_class || firstEntry.CarClass || firstEntry['Car Class'] || firstEntry.Class || '')}"
+                data-name="${R3EUtils.escapeHtml(String(driverName))}"
+                data-time="${R3EUtils.escapeHtml(String(rawLapTime))}">`;
         
         keys.forEach(key => {
             html += this.renderCell(item, key);

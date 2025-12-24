@@ -41,7 +41,6 @@
   // Handle selection
   function setSelectedTrack(val, label) {
     activeTrackId = val ? Number(val) : null;
-    console.log('Track selected:', activeTrackId, 'label:', label);
     trackCurrentPage = 1;
     if (rootToggle) rootToggle.textContent = `${label} ▾`;
     closeMenu();
@@ -71,7 +70,6 @@
   new CustomSelect('track-class-filter-ui', classOptions, async (value) => {
     activeClassId = value || null;
     activeClassLabel = value || null;
-    console.log('Class selected:', activeClassId);
     trackCurrentPage = 1;
     if (classSelect) {
       try { classSelect.value = value; } catch (e) {}
@@ -149,7 +147,6 @@
   async function aggregatePerClassForTrack(selectedTrackId){
     const idx = await loadDriverIndexLocal();
     if (!idx) return [];
-    console.log('aggregatePerClassForTrack: driver_index loaded, has', Object.keys(idx).length, 'drivers');
     const perClass = new Map(); // name -> {id, count}
     let totalEntries = 0;
     let matchedEntries = 0;
@@ -159,7 +156,6 @@
       for (let i=0;i<arr.length;i++){
         const e = arr[i] || {};
         const tid = e.track_id || e.TrackID || e.trackId;
-        if (i === 0 && totalEntries < 10) console.log('Sample entry:', e);
         if (Number(tid) !== Number(selectedTrackId)) continue;
         matchedEntries++;
         const cid = e.class_id || e.ClassID || e.classId;
@@ -177,7 +173,6 @@
         }
       }
     }
-    console.log('Scanned', totalEntries, 'entries, matched', matchedEntries, 'for track', selectedTrackId);
     const rows = [];
     perClass.forEach((data, cname)=>{
       rows.push({
@@ -236,7 +231,6 @@
   // Fetch data from local cache
   async function fetchTopCombinations() {
     try {
-      console.log('fetchTopCombinations called. activeTrackId:', activeTrackId, 'activeClassId:', activeClassId);
       tableContainer.innerHTML = '<div class="loading">Loading...</div>';
       
       // Load all combinations from cache
@@ -290,7 +284,6 @@
       
       const limitedCombinations = filtered.slice(0, 1000);
       
-      console.log(`Showing ${limitedCombinations.length} combinations (filtered from ${combinations.length})`);
       return limitedCombinations;
     } catch (e) {
       console.error('Failed to fetch data', e);
@@ -300,10 +293,6 @@
 
   // Render table using the same style/formatting as leaderboards
   function renderTable(data) {
-    console.log('renderTable called with data:', data ? data.length : 0, 'items');
-    if (data && data.length > 0) {
-      console.log('First item:', data[0]);
-    }
     trackAllResults = Array.isArray(data) ? data : [];
     if (trackAllResults.length === 0) {
       tableContainer.innerHTML = '<div class="no-results">No results found</div>';
@@ -412,11 +401,8 @@
   window.trackInfoGoToPage = function(page){ trackCurrentPage = page; renderTable(trackAllResults); const el = document.getElementById('track-info'); if (el) el.scrollIntoView({behavior:'smooth', block:'start'}); };
 
   async function fetchAndRender(){
-    console.log('fetchAndRender - activeTrackId:', activeTrackId, 'activeClassId:', activeClassId);
-    
     // BOTH track and class selected - scan driver_index for the specific combination
     if (activeTrackId && activeClassId) {
-      console.log('Both track and class selected - filtering driver_index');
       const numericClassId = await resolveClassId(activeClassId);
       if (numericClassId === null) {
         console.warn('Could not resolve class ID for:', activeClassId);
@@ -426,31 +412,26 @@
       // Get all tracks for this class, then filter by selected track
       const allTracksForClass = await aggregatePerTrackForClass(numericClassId, activeClassId);
       const filtered = allTracksForClass.filter(row => Number(row.track_id) === Number(activeTrackId));
-      console.log('Filtered to', filtered.length, 'rows for track+class combination');
       renderTable(filtered);
     }
     // Only class selected - aggregate from driver_index for all tracks with this class
     else if (activeClassId) {
-      console.log('Class only selected - using aggregatePerTrackForClass with classId:', activeClassId);
       const numericClassId = await resolveClassId(activeClassId);
       if (numericClassId === null) {
         console.warn('Could not resolve class ID for:', activeClassId);
         tableContainer.innerHTML = '<div class="no-results">No results found for this class</div>';
         return;
       }
-      console.log('Resolved class ID:', numericClassId);
       const data = await aggregatePerTrackForClass(numericClassId, activeClassId);
       renderTable(data);
     }
     // Only track selected - aggregate from driver_index for all classes at this track
     else if (activeTrackId) {
-      console.log('Track only selected - using aggregatePerClassForTrack with trackId:', activeTrackId);
       const data = await aggregatePerClassForTrack(activeTrackId);
       renderTable(data);
     }
     // No filters - show top combinations
     else {
-      console.log('No filters - using fetchTopCombinations');
       const data = await fetchTopCombinations();
       renderTable(data);
     }

@@ -152,8 +152,6 @@ class DriverSearch {
                 difficulty: selectedDifficulty
             });
             
-            console.log('Search results:', results.length, 'drivers found');
-            
             this.allResults = results;
             this.currentPage = 1;
             this.displayResults(results);
@@ -202,8 +200,6 @@ class DriverSearch {
         paginatedDrivers.forEach(g => { 
             totalEntriesShown += Array.isArray(g.entries) ? g.entries.length : 0; 
         });
-        
-        console.log(`Showing drivers ${startIndex + 1}-${endIndex} of ${totalDrivers} (${totalEntriesShown} entries)`);
         
         // Get keys from first entry
         let keys = [];

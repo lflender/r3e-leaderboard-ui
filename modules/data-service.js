@@ -23,7 +23,6 @@ class DataService {
         }
         
         try {
-            console.log('Loading driver index from cache/driver_index.json...');
             const timestamp = new Date().getTime();
             const response = await fetch(`cache/driver_index.json?v=${timestamp}`, {
                 cache: 'no-store',
@@ -40,7 +39,6 @@ class DataService {
             
             const text = await response.text();
             this.driverIndex = JSON.parse(text);
-            console.log('Driver index loaded:', Object.keys(this.driverIndex).length, 'drivers');
             return this.driverIndex;
         } catch (error) {
             console.error('Error loading driver index:', error);
@@ -76,7 +74,6 @@ class DataService {
      */
     async fetchLeaderboardDetails(trackId, classId) {
         const filePath = `cache/track_${trackId}/class_${classId}.json.gz`;
-        console.log('Loading leaderboard data from:', filePath);
         
         const timestamp = new Date().getTime();
         const response = await fetch(`${filePath}?v=${timestamp}`, {

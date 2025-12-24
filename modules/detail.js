@@ -44,8 +44,6 @@ async function fetchLeaderboardDetails() {
     resultsContainer.innerHTML = '<div class="loading">Loading...</div>';
     
     try {
-        console.log('Loading leaderboard data for track:', trackParam, 'class:', classParam);
-        
         const data = await dataService.fetchLeaderboardDetails(trackParam, classParam);
         
         // Extract leaderboard array from data structure
@@ -54,8 +52,6 @@ async function fetchLeaderboardDetails() {
         if (!leaderboardData || !Array.isArray(leaderboardData)) {
             throw new Error('Leaderboard data not found in the expected format');
         }
-        
-        console.log('Using leaderboard data with', leaderboardData.length, 'entries');
         
         // Transform data to consistent format
         const transformedData = transformLeaderboardData(leaderboardData, data);

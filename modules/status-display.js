@@ -33,7 +33,6 @@ class StatusDisplay {
             const statusData = await dataService.calculateStatus();
             
             if (!statusData) {
-                console.log('Status data not available yet');
                 return;
             }
             

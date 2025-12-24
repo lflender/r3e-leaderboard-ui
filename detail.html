@@ -11,6 +11,11 @@
         <meta property="og:type" content="website">
         <meta property="og:url" content="https://r3e-leaderboards.info/detail.html">
         <meta name="twitter:card" content="summary">
+        
+        <!-- Analytics -->
+        <script data-goatcounter="https://r3e-leaderboards.goatcounter.com/count"
+                async src="//gc.zgo.at/count.js"></script>
+        
         <link rel="stylesheet" href="style.css">
         <script type="application/ld+json">
         {
@@ -25,17 +30,33 @@
 </head>
 <body>
     <header>
-        <h1><a href="index.html" class="home-link">Ludo R3E Tools</a></h1>
+        <h1><a href="index.html" class="home-link">RaceRoom Leaderboards Explorer</a></h1>
         <p id="detail-subtitle" class="detail-subtitle"></p>
     </header>
 
     <main>
+        <button onclick="window.close()" class="back-btn">← Back</button>
+        
         <div class="detail-content">
             <div class="detail-header">
-                <button onclick="window.close()" class="back-btn">← Back</button>
                 <div class="detail-header-info">
                     <div id="detail-track" class="detail-header-line"></div>
                     <div id="detail-class" class="detail-header-line"></div>
+                </div>
+                <div id="car-filter-ui" class="custom-select" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-label="Filter by car" style="display:none;">
+                    <button class="custom-select__toggle" type="button">All cars ▾</button>
+                    <div class="custom-select__menu" role="listbox" hidden>
+                        <div class="custom-select__option" role="option" aria-selected="true">All cars</div>
+                    </div>
+                </div>
+                <div id="difficulty-filter-ui" class="custom-select" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-label="Filter by difficulty">
+                    <button class="custom-select__toggle" type="button">All difficulties ▾</button>
+                    <div class="custom-select__menu" role="listbox" hidden>
+                        <div class="custom-select__option" role="option" aria-selected="true">All difficulties</div>
+                        <div class="custom-select__option" role="option">Get Real</div>
+                        <div class="custom-select__option" role="option">Amateur</div>
+                        <div class="custom-select__option" role="option">Novice</div>
+                    </div>
                 </div>
             </div>
             <div id="detail-results-container"></div>
@@ -43,11 +64,37 @@
     </main>
 
     <footer>
-        <p>&copy;RaceRoom Leaderboards</p>
-        <p>Website not affiliated with RaceRoom™. The RaceRoom™ brand belongs to its rightful owner.</p>
-        <p>hello@r3e-leaderboards.info</p>
+        <div class="footer-content">
+            <div class="footer-text">
+                <p>&copy;RaceRoom Leaderboards</p>
+                <p>Website not affiliated with RaceRoom™.<br/>The RaceRoom™ brand belongs to its rightful owner.</p><br/>
+                <p>hello@r3e-leaderboards.info</p>
+            </div>
+            <div class="footer-donate">
+                <form action="https://www.paypal.com/donate" method="post" target="_blank">
+                    <input type="hidden" name="business" value="ludovic@fastmail.com" />
+                    <input type="hidden" name="no_recurring" value="0" />
+                    <input type="hidden" name="currency_code" value="EUR" />
+                    <input type="hidden" name="item_name" value="Support RaceRoom Leaderboards Explorer" />
+                    <button type="submit" class="paypal-button" title="Buy me a coffee">
+                        <span>☕ Buy me a coffee</span>
+                    </button>
+                </form>
+                <a href="https://game.raceroom.com/store/" target="_blank" rel="noopener" class="raceroom-button" title="Support RaceRoom">
+                    <span>🏁 Support RaceRoom</span>
+                </a>
+            </div>
+        </div>
     </footer>
 
-    <script src="detail.js"></script>
+    <!-- Core modules - load first -->
+    <script src="modules/utils.js"></script>
+    <script src="modules/data-service.js"></script>
+    <script src="modules/custom-select.js"></script>
+    <script src="modules/pagination.js"></script>
+    <script src="modules/table-renderer.js"></script>
+    
+    <!-- Application script -->
+    <script src="modules/detail.js"></script>
 </body>
 </html>

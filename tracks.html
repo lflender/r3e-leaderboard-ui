@@ -3,19 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Track Info — R3E Leaderboards</title>
+    <title>Track Info — RaceRoom Leaderboards Explorer</title>
+    <meta name="description" content="View RaceRoom (R3E) track/class combinations with entry counts and filters.">
+    <link rel="canonical" href="https://r3e-leaderboards.info/tracks.html">
+    <meta name="robots" content="index, follow">
+    <!-- Open Graph -->
+    <meta property="og:site_name" content="RaceRoom Leaderboards Explorer">
+    <meta property="og:title" content="Track Info — RaceRoom Leaderboards Explorer">
+    <meta property="og:description" content="Browse track/class combinations and entries for RaceRoom leaderboards.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://r3e-leaderboards.info/tracks.html">
+    <meta property="og:image" content="https://r3e-leaderboards.info/og-image.png">
+    
+    <!-- Analytics -->
+    <script data-goatcounter="https://r3e-leaderboards.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
+    
     <link rel="stylesheet" href="style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Track Info",
+        "url": "https://r3e-leaderboards.info/tracks.html"
+    }
+    </script>
 </head>
 <body>
     <header>
-        <h1><a href="index.html" class="home-link">RaceRoom Leaderboards</a></h1>
+        <h1><a href="index.html" class="home-link">RaceRoom Leaderboards Explorer</a></h1>
     </header>
 
     <main>
         <div class="tabs">
-            <a class="tab-button" href="index.html">Leaderboards</a>
+            <a class="tab-button" href="index.html">Driver Info</a>
             <button class="tab-button active">Track Info</button>
             <a class="tab-button" href="cars.html">Car Info</a>
+            <a class="tab-button" href="news.html">News</a>
         </div>
 
         <div class="tab-content">
@@ -38,10 +62,10 @@
         </div>
 
         <div id="status-container" class="status-section">
-            <h3>Database Status</h3>
+            <h3>Database Status <span id="status-led" class="status-led" title="Status indicator"></span></h3>
             <div class="status-grid">
                 <div class="status-item">
-                    <span class="status-label">Last Updated:</span>
+                    <span id="status-timestamp-label" class="status-label">Last Updated:</span>
                     <span id="status-timestamp" class="status-value">-</span>
                 </div>
                 <div class="status-item">
@@ -65,13 +89,36 @@
     </main>
 
     <footer>
-        <p>&copy;RaceRoom Leaderboards</p>
-        <p>Website not affiliated with RaceRoom™. The RaceRoom™ brand belongs to its rightful owner.</p>
-        <p>hello@r3e-leaderboards.info</p>
+        <div class="footer-content">
+            <div class="footer-text">
+                <p>&copy;RaceRoom Leaderboards Explorer</p>
+                <p>Website not affiliated with RaceRoom™.<br/>The RaceRoom™ brand belongs to its rightful owner.</p><br/>
+                <p>hello@r3e-leaderboards.info</p>
+            </div>
+            <div class="footer-donate">
+                <form action="https://www.paypal.com/donate" method="post" target="_blank">
+                    <input type="hidden" name="business" value="ludovic@fastmail.com" />
+                    <input type="hidden" name="no_recurring" value="0" />
+                    <input type="hidden" name="currency_code" value="EUR" />
+                    <input type="hidden" name="item_name" value="Support RaceRoom Leaderboards Explorer" />
+                    <button type="submit" class="paypal-button" title="Buy me a coffee">
+                        <span>☕ Buy me a coffee</span>
+                    </button>
+                </form>
+                <a href="https://game.raceroom.com/store/" target="_blank" rel="noopener" class="raceroom-button" title="Support RaceRoom">
+                    <span>🏁 Support RaceRoom</span>
+                </a>
+            </div>
+        </div>
     </footer>
 
-    <script src="data/cars.js"></script>
+    <!-- Core modules - load first -->
+    <script src="modules/utils.js"></script>
+    <script src="modules/data-service.js"></script>
+    
+    <!-- Data and application scripts -->
+    <script src="data/tracks.js"></script>
     <script src="script.js"></script>
-    <script src="scripts/track-info.js"></script>
+    <script src="modules/track-info.js"></script>
 </body>
 </html>

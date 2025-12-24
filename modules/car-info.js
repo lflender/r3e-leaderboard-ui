@@ -14,13 +14,6 @@
     }
   }
 
-  function escapeHtml(s){
-    if (s === null || s === undefined) return '';
-    const d = document.createElement('div'); d.textContent = String(s); return d.innerHTML;
-  }
-
-
-  // Color and label maps for badges
   // Badge label and class mapping for Wheel and Transmission
   function wheelBadge(cat){
     const v = (cat || '').toLowerCase().trim();
@@ -28,7 +21,7 @@
     if (v === 'gt') return '<span class="car-badge gt">GT</span>';
     if (v === 'round') return '<span class="car-badge round">Round</span>';
     if (v === 'round (flat)' || v === 'round(flat)' || v === 'round(flat)') return '<span class="car-badge round-flat" title="Round (flat)">Round (flat)</span>';
-    return `<span class="car-badge unknown">${escapeHtml(cat)}</span>`;
+    return `<span class="car-badge unknown">${R3EUtils.escapeHtml(cat)}</span>`;
   }
 
   function transBadge(cat){
@@ -37,14 +30,11 @@
     if (v === 'paddles') return '<span class="car-badge trans">Paddles</span>';
     if (v === 'sequential') return '<span class="car-badge trans sequential">Sequential</span>';
     if (v === 'h' || v === 'other') return '<span class="car-badge trans h">H</span>';
-    return `<span class="car-badge trans unknown">${escapeHtml(cat)}</span>`;
+    return `<span class="car-badge trans unknown">${R3EUtils.escapeHtml(cat)}</span>`;
   }
 
   const data = await loadData();
   const tableContainer = document.getElementById('cars-info-table');
-  // If the script is running on the main index page, #cars-info panel may exist.
-  // For standalone cars.html we only require the table container.
-  const panelContainer = document.getElementById('cars-info');
   if(!tableContainer) return;
   if(!data || data.length === 0){ tableContainer.innerHTML = '<p class="placeholder">No car data available</p>'; return; }
 
@@ -62,52 +52,19 @@
     { value: 'h', label: 'H' }
   ];
 
-  // Custom select UI (reuse from Leaderboards)
-  function setupCustomSelect(id, options, onChange) {
-    const root = document.getElementById(id);
-    if (!root) return;
-    const toggle = root.querySelector('.custom-select__toggle');
-    const menu = root.querySelector('.custom-select__menu');
-    let currentValue = '';
-    function closeMenu() {
-      menu.hidden = true;
-      toggle.setAttribute('aria-expanded', 'false');
-    }
-    function openMenu() {
-      menu.hidden = false;
-      toggle.setAttribute('aria-expanded', 'true');
-    }
-    function setValue(val) {
-      currentValue = val;
-      const opt = options.find(o => o.value === val) || options[0];
-      toggle.innerHTML = opt.label + ' ▾';
-      onChange(val);
-      closeMenu();
-    }
-    toggle.onclick = e => {
-      menu.hidden ? openMenu() : closeMenu();
-    };
-    menu.innerHTML = options.map(opt => `<div class="custom-select__option" data-value="${opt.value}">${opt.label}</div>`).join('');
-    menu.onclick = e => {
-      const v = e.target.getAttribute('data-value');
-      if (v !== null) setValue(v);
-    };
-    document.addEventListener('click', e => { if (!root.contains(e.target)) closeMenu(); });
-    setValue('');
-  }
-
-  let wheelFilter = '', transFilter = '';
-  let classFilter = '';
+  let wheelFilter = '', transFilter = '', classFilter = '';
+  
   // Build class options from data
   const classOptions = [{ value: '', label: 'All classes' }].concat(data.map(c => ({ value: c.class || '', label: c.class || '' })));
-  // Deduplicate classOptions
   const seen = new Set();
   const classOptionsUnique = classOptions.filter(o => {
     if (seen.has(o.value)) return false; seen.add(o.value); return true;
   });
-  setupCustomSelect('wheel-filter-ui', wheelOptions, v => { wheelFilter = v; renderTable(); });
-  setupCustomSelect('trans-filter-ui', transOptions, v => { transFilter = v; renderTable(); });
-  setupCustomSelect('class-filter-ui-cars', classOptionsUnique, v => { classFilter = v; renderTable(); });
+  
+  // Use the new CustomSelect component
+  new CustomSelect('wheel-filter-ui', wheelOptions, v => { wheelFilter = v; renderTable(); });
+  new CustomSelect('trans-filter-ui', transOptions, v => { transFilter = v; renderTable(); });
+  new CustomSelect('class-filter-ui-cars', classOptionsUnique, v => { classFilter = v; renderTable(); });
 
   function carMatchesFilters(car) {
     const w = (car.wheel_cat || car.wheel || '').toLowerCase();
@@ -131,18 +88,21 @@
     });
     let uniqueYears = Array.from(new Set(allYears)).sort((a, b) => a - b);
 
-    function yearColor(year) {
-      let y = parseInt(year);
-      if (isNaN(y) || uniqueYears.length < 2) return '#e0e0e0';
-      let idx = uniqueYears.indexOf(y);
-      if (idx === -1) return '#e0e0e0';
-      let t = idx / (uniqueYears.length - 1);
-      // More pronounced: yellow (#ffd600) to green (#00c853)
-      let r = Math.round((1-t)*255 + t*0);
-      let g = Math.round((1-t)*214 + t*200);
-      let b = Math.round((1-t)*0 + t*83);
-      return `rgb(${r},${g},${b})`;
-    }
+      function yearColor(year) {
+        let y = parseInt(year);
+        if (isNaN(y) || uniqueYears.length < 2) return '#e0e0e0';
+        let idx = uniqueYears.indexOf(y);
+        if (idx === -1) return '#e0e0e0';
+        let t = idx / (uniqueYears.length - 1);
+        // Apply gamma to emphasize newer years (keep yellow→green tones)
+        const gamma = 2.2;
+        const tg = Math.pow(Math.min(Math.max(t, 0), 1), gamma);
+        // interpolate between #ffd600 (255,214,0) and #00c853 (0,200,83)
+        let r = Math.round((1 - tg) * 255 + tg * 0);
+        let g = Math.round((1 - tg) * 214 + tg * 200);
+        let b = Math.round((1 - tg) * 0   + tg * 83);
+        return `rgb(${r},${g},${b})`;
+      }
 
     let html = '<table class="results-table"><thead><tr>' +
       '<th>Car</th><th>Wheel</th><th>Transmission</th><th>Year</th><th>Power</th><th>Weight</th><th>Engine</th>' +
@@ -154,22 +114,27 @@
       // Only show group if at least one car matches
       const filteredCars = (cls.cars || []).filter(carMatchesFilters);
       if (filteredCars.length === 0) return;
-            html += `\n<tr class="driver-group-header" data-group="${slug}">` +
-              `<td colspan="8"><span class="toggle-icon">▼</span> <strong>${escapeHtml(className)}</strong></td></tr>`;
+            html += `\n<tr class="driver-group-header" data-group="${slug}" onclick="toggleGroup(this)">` +
+              `<td colspan="8"><span class="toggle-icon">▼</span> <strong>${R3EUtils.escapeHtml(className)}</strong></td></tr>`;
       filteredCars.forEach(car => {
-        // ensure link property exists
         if (car.link === undefined) car.link = '';
-        const rowLink = escapeHtml(car.link || '');
+        const rowLink = R3EUtils.escapeHtml(car.link || '');
         const linkOpen = rowLink ? `<a class="row-link" href="${rowLink}" target="_blank" rel="noopener">` : '';
         const linkClose = rowLink ? `</a>` : '';
+        const infoIcon = car.description ? `<span class="info-icon" title="${R3EUtils.escapeHtml(car.description)}" aria-label="More info" role="img">i</span>` : '';
+        const carName = String(car.car || '');
+        const lastSpace = carName.lastIndexOf(' ');
+        const carNameHtml = (lastSpace >= 0)
+          ? `<b>${R3EUtils.escapeHtml(carName.slice(0, lastSpace))}</b><span class="no-wrap-tail"> <b>${R3EUtils.escapeHtml(carName.slice(lastSpace + 1))}</b> ${infoIcon}</span>`
+          : `<span class="no-wrap-tail"><b>${R3EUtils.escapeHtml(carName)}</b> ${infoIcon}</span>`;
         html += `\n<tr class="driver-data-row ${slug}" data-link="${rowLink}">` +
-          `<td>${linkOpen}<b>${escapeHtml(car.car || '')}</b>${linkClose}</td>` +
+          `<td>${linkOpen}${carNameHtml}${linkClose}</td>` +
                 `<td>${linkOpen}${wheelBadge(car.wheel_cat || car.wheel)}${linkClose}</td>` +
                 `<td>${linkOpen}${transBadge(car.transmission_cat || car.transmission)}${linkClose}</td>` +
-                `<td>${linkOpen}<span style="background:${yearColor(car.year)};color:#222;padding:0.18rem 0.6rem;border-radius:999px;font-weight:800;display:inline-block;min-width:3.5em;text-align:center;">${escapeHtml(car.year || '')}</span>${linkClose}</td>` +
-                `<td class="carinfo-meta">${linkOpen}${escapeHtml(car.power || '')}${linkClose}</td>` +
-                `<td class="carinfo-meta">${linkOpen}${escapeHtml(car.weight || '')}${linkClose}</td>` +
-                `<td class="carinfo-meta">${linkOpen}${escapeHtml(car.engine || '')}${linkClose}</td>` +
+                `<td>${linkOpen}<span style="background:${yearColor(car.year)};color:#222;padding:0.18rem 0.6rem;border-radius:999px;font-weight:800;display:inline-block;min-width:3.5em;text-align:center;">${R3EUtils.escapeHtml(car.year || '')}</span>${linkClose}</td>` +
+                `<td class="carinfo-meta">${linkOpen}${R3EUtils.escapeHtml(car.power || '')}${linkClose}</td>` +
+                `<td class="carinfo-meta">${linkOpen}${R3EUtils.escapeHtml(car.weight || '')}${linkClose}</td>` +
+                `<td class="carinfo-meta">${linkOpen}${R3EUtils.escapeHtml(car.engine || '')}${linkClose}</td>` +
                 `</tr>`;
       });
     });
@@ -190,17 +155,18 @@
   });
   let minYear = Math.min(...allYears), maxYear = Math.max(...allYears);
 
-  function yearColor(year) {
-    let y = parseInt(year);
-    if (isNaN(y) || minYear === maxYear) return '#e0e0e0';
-    // More pronounced: yellow (#ffd600) to green (#00c853)
-    let t = (y - minYear) / (maxYear - minYear);
-    // interpolate between #ffd600 (255,214,0) and #00c853 (0,200,83)
-    let r = Math.round((1-t)*255 + t*0);
-    let g = Math.round((1-t)*214 + t*200);
-    let b = Math.round((1-t)*0 + t*83);
-    return `rgb(${r},${g},${b})`;
-  }
+    function yearColor(year) {
+      let y = parseInt(year);
+      if (isNaN(y) || minYear === maxYear) return '#e0e0e0';
+      // Yellow (#ffd600) to green (#00c853) with gamma for stronger contrast
+      let t = (y - minYear) / (maxYear - minYear);
+      const gamma = 2.2;
+      const tg = Math.pow(Math.min(Math.max(t, 0), 1), gamma);
+      let r = Math.round((1 - tg) * 255 + tg * 0);
+      let g = Math.round((1 - tg) * 214 + tg * 200);
+      let b = Math.round((1 - tg) * 0   + tg * 83);
+      return `rgb(${r},${g},${b})`;
+    }
 
   let html = '<table class="results-table"><thead><tr>' +
     '<th>Car</th><th>Wheel</th><th>Transmission</th><th>Year</th><th>Power</th><th>Weight</th><th>Engine</th>' +
@@ -211,21 +177,27 @@
     const slug = `class-${String(className).replace(/\s+/g,'-').replace(/[^a-z0-9\-]/gi,'').toLowerCase()}`;
     // Group header row (same style as driver grouping in leaderboards)
         html += `\n<tr class="driver-group-header" data-group="${slug}" onclick="toggleGroup(this)">` +
-          `<td colspan="8"><span class="toggle-icon">▼</span> <strong>${escapeHtml(className)}</strong></td></tr>`;
+          `<td colspan="8"><span class="toggle-icon">▼</span> <strong>${R3EUtils.escapeHtml(className)}</strong></td></tr>`;
     const cars = Array.isArray(cls.cars) ? cls.cars : [];
     cars.forEach(car => {
             if (car.link === undefined) car.link = '';
-            const rowLink = escapeHtml(car.link || '');
+            const rowLink = R3EUtils.escapeHtml(car.link || '');
             const linkOpen = rowLink ? `<a class="row-link" href="${rowLink}" target="_blank" rel="noopener">` : '';
             const linkClose = rowLink ? `</a>` : '';
+            const infoIcon = car.description ? `<span class="info-icon" title="${R3EUtils.escapeHtml(car.description)}" aria-label="More info" role="img">i</span>` : '';
+            const carName = String(car.car || '');
+            const lastSpace = carName.lastIndexOf(' ');
+            const carNameHtml = (lastSpace >= 0)
+              ? `<b>${R3EUtils.escapeHtml(carName.slice(0, lastSpace))}</b><span class="no-wrap-tail"> <b>${R3EUtils.escapeHtml(carName.slice(lastSpace + 1))}</b> ${infoIcon}</span>`
+              : `<span class="no-wrap-tail"><b>${R3EUtils.escapeHtml(carName)}</b> ${infoIcon}</span>`;
             html += `\n<tr class="driver-data-row ${slug}" data-link="${rowLink}">` +
-              `<td>${linkOpen}<b>${escapeHtml(car.car || '')}</b>${linkClose}</td>` +
+              `<td>${linkOpen}${carNameHtml}${linkClose}</td>` +
               `<td>${linkOpen}${wheelBadge(car.wheel_cat || car.wheel)}${linkClose}</td>` +
               `<td>${linkOpen}${transBadge(car.transmission_cat || car.transmission)}${linkClose}</td>` +
-              `<td>${linkOpen}<span style="background:${yearColor(car.year)};color:#222;padding:0.18rem 0.6rem;border-radius:999px;font-weight:800;display:inline-block;min-width:3.5em;text-align:center;">${escapeHtml(car.year || '')}</span>${linkClose}</td>` +
-              `<td class="carinfo-meta">${linkOpen}${escapeHtml(car.power || '')}${linkClose}</td>` +
-              `<td class="carinfo-meta">${linkOpen}${escapeHtml(car.weight || '')}${linkClose}</td>` +
-              `<td class="carinfo-meta">${linkOpen}${escapeHtml(car.engine || '')}${linkClose}</td>` +
+              `<td>${linkOpen}<span style="background:${yearColor(car.year)};color:#222;padding:0.18rem 0.6rem;border-radius:999px;font-weight:800;display:inline-block;min-width:3.5em;text-align:center;">${R3EUtils.escapeHtml(car.year || '')}</span>${linkClose}</td>` +
+              `<td class="carinfo-meta">${linkOpen}${R3EUtils.escapeHtml(car.power || '')}${linkClose}</td>` +
+              `<td class="carinfo-meta">${linkOpen}${R3EUtils.escapeHtml(car.weight || '')}${linkClose}</td>` +
+              `<td class="carinfo-meta">${linkOpen}${R3EUtils.escapeHtml(car.engine || '')}${linkClose}</td>` +
               `</tr>`;
     });
   });

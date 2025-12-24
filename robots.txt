@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
-# No sitemap declared per site owner's preference
+# Optional: adjust crawl rate if needed
 # Crawl-delay: 10
+
+# Declare sitemap for better discovery
+Sitemap: https://r3e-leaderboards.info/sitemap.xml

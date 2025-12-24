@@ -3,29 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RaceRoom Leaderboards — R3E Leaderboards & Car Info</title>
+    <title>RaceRoom Leaderboards Explorer — R3E Leaderboards & Car Info</title>
     <meta name="description" content="Search RaceRoom (R3E) leaderboards, browse track information and view car specifications. Community-driven R3E leaderboard search.">
     <link rel="canonical" href="https://r3e-leaderboards.info/">
     <meta name="author" content="Ludo R3E Tools">
     <meta name="robots" content="index, follow">
     <!-- Open Graph -->
-    <meta property="og:site_name" content="RaceRoom Leaderboards">
-    <meta property="og:title" content="RaceRoom Leaderboards — R3E Leaderboards & Car Info">
+    <meta property="og:site_name" content="RaceRoom Leaderboards Explorer">
+    <meta property="og:title" content="RaceRoom Leaderboards Explorer — R3E Leaderboards & Car Info">
     <meta property="og:description" content="Search RaceRoom leaderboards, browse track information and find car specs for R3E.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://r3e-leaderboards.info/">
     <meta property="og:image" content="https://r3e-leaderboards.info/og-image.png">
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="RaceRoom Leaderboards — R3E Leaderboards & Car Info">
-    <meta name="twitter:description" content="Search RaceRoom leaderboards, browse track information and find car specs for R3E.">
-    <meta name="twitter:image" content="https://r3e-leaderboards.info/og-image.png">
+    
+    <!-- Analytics -->
+    <script data-goatcounter="https://r3e-leaderboards.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
+    
     <link rel="stylesheet" href="style.css">
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
         "@type": "WebSite",
-        "name": "RaceRoom Leaderboards",
+        "name": "RaceRoom Leaderboards Explorer",
         "url": "https://r3e-leaderboards.info/",
         "potentialAction": {
             "@type": "SearchAction",
@@ -37,14 +37,15 @@
 </head>
 <body>
     <header>
-        <h1><a href="index.html" class="home-link">RaceRoom Leaderboards</a></h1>
+        <h1><a href="index.html" class="home-link">RaceRoom Leaderboards Explorer</a></h1>
     </header>
 
     <main>
         <div class="tabs">
-            <button class="tab-button active" data-tab="leaderboards">Leaderboards</button>
+            <button class="tab-button active" data-tab="leaderboards">Driver Info</button>
             <a class="tab-button" href="tracks.html">Track Info</a>
             <a class="tab-button" href="cars.html">Car Info</a>
+            <a class="tab-button" href="news.html">News</a>
         </div>
 
         <div class="tab-content">
@@ -63,36 +64,25 @@
                         <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All classes ▾</button>
                         <div class="custom-select__menu" role="presentation" hidden></div>
                     </div>
+                    <div id="difficulty-filter-ui" class="custom-select" role="listbox" aria-label="Filter by difficulty">
+                        <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All difficulties ▾</button>
+                        <div class="custom-select__menu" role="presentation" hidden>
+                            <div class="custom-select__option" data-value="">All difficulties</div>
+                            <div class="custom-select__option" data-value="Get Real">Get Real</div>
+                            <div class="custom-select__option" data-value="Amateur">Amateur</div>
+                            <div class="custom-select__option" data-value="Novice">Novice</div>
+                        </div>
+                    </div>
                 </div>
                 <div id="results-container"></div>
             </div>
-
-            <!-- Track Info moved to standalone tracks.html -->
-
-                        <div id="cars-info" class="tab-panel">
-                                <div class="search-container" id="cars-search-container">
-                                    <div id="class-filter-ui-cars" class="custom-select" role="listbox" aria-label="Filter by car class">
-                                        <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All classes ▾</button>
-                                        <div class="custom-select__menu" role="presentation" hidden></div>
-                                    </div>
-                                    <div id="wheel-filter-ui" class="custom-select" role="listbox" aria-label="Filter by wheel type">
-                                        <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All wheels ▾</button>
-                                        <div class="custom-select__menu" role="presentation" hidden></div>
-                                    </div>
-                                    <div id="trans-filter-ui" class="custom-select" role="listbox" aria-label="Filter by transmission type">
-                                        <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All transmissions ▾</button>
-                                        <div class="custom-select__menu" role="presentation" hidden></div>
-                                    </div>
-                                </div>
-                                <div id="cars-info-table"></div>
-                        </div>
         </div>
 
         <div id="status-container" class="status-section">
-            <h3>Database Status</h3>
+            <h3>Database Status <span id="status-led" class="status-led" title="Status indicator"></span></h3>
             <div class="status-grid">
                 <div class="status-item">
-                    <span class="status-label">Last Updated:</span>
+                    <span id="status-timestamp-label" class="status-label">Last Updated:</span>
                     <span id="status-timestamp" class="status-value">-</span>
                 </div>
                 <div class="status-item">
@@ -116,13 +106,39 @@
     </main>
 
     <footer>
-        <p>&copy;RaceRoom Leaderboards</p>
-        <p>Website not affiliated with RaceRoom™. The RaceRoom™ brand belongs to its rightful owner.</p>
-        <p>hello@r3e-leaderboards.info</p>
+        <div class="footer-content">
+            <div class="footer-text">
+                <p>&copy;RaceRoom Leaderboards Explorer</p>
+                <p>Website not affiliated with RaceRoom™.<br/>The RaceRoom™ brand belongs to its rightful owner.</p><br/>
+                <p>hello@r3e-leaderboards.info</p>
+            </div>
+            <div class="footer-donate">
+                <form action="https://www.paypal.com/donate" method="post" target="_blank">
+                    <input type="hidden" name="business" value="ludovic@fastmail.com" />
+                    <input type="hidden" name="no_recurring" value="0" />
+                    <input type="hidden" name="currency_code" value="EUR" />
+                    <input type="hidden" name="item_name" value="Support RaceRoom Leaderboards Explorer" />
+                    <button type="submit" class="paypal-button" title="Buy me a coffee">
+                        <span>☕ Buy me a coffee</span>
+                    </button>
+                </form>
+                <a href="https://game.raceroom.com/store/" target="_blank" rel="noopener" class="raceroom-button" title="Support RaceRoom">
+                    <span>🏁 Support RaceRoom</span>
+                </a>
+            </div>
+        </div>
     </footer>
-    <script src="data/cars.js"></script>
+    <!-- Core modules - load first -->
+    <script src="modules/utils.js"></script>
+    <script src="modules/data-service.js"></script>
+    <script src="modules/custom-select.js"></script>
+    <script src="modules/pagination.js"></script>
+    <script src="modules/table-renderer.js"></script>
+    
+    <!-- Data files -->
+    <script src="data/tracks.js"></script>
+    
+    <!-- Application script -->
     <script src="script.js"></script>
-    <!-- Track Info script moved to standalone tracks.html -->
-    <script src="scripts/car-info.js"></script>
 </body>
 </html>

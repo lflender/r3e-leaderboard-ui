@@ -1228,6 +1228,13 @@ footer p {
         max-width: 100%;
     }
     
+    /* Track Info page: dropdowns stack vertically for consistency */
+    #track-search-container .custom-select {
+        flex: 1 1 100%;
+        min-width: 100%;
+        max-width: 100%;
+    }
+    
     .custom-select__toggle {
         white-space: normal;
         padding: 0.7rem 0.9rem;

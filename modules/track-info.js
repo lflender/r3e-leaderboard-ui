@@ -38,22 +38,6 @@
     classMenu.innerHTML = opts.map(opt => `<div class="custom-select__option" data-value="${R3EUtils.escapeHtml(opt.value)}">${R3EUtils.escapeHtml(opt.label)}</div>`).join('');
   }
 
-  // Build class menu from the hidden select `#class-filter` if present
-  function buildClassMenuFromSelect() {
-    if (!classMenu || !classSelect) return false;
-    const options = Array.from(classSelect.options).map(o => ({ value: o.value || '', label: o.textContent || o.text }));
-    // Deduplicate and remove empty placeholder (we'll add 'All classes' ourselves)
-    const seen = new Set();
-    const opts = options.filter(o => {
-      if (!o.value) return false;
-      if (seen.has(o.value)) return false;
-      seen.add(o.value);
-      return true;
-    }).map(o => ({ value: o.value, label: o.label }));
-    buildClassMenu(opts);
-    return true;
-  }
-
   // Handle selection
   function setSelectedTrack(val, label) {
     activeTrackId = val ? Number(val) : null;
@@ -77,73 +61,26 @@
     });
   }
 
-  // Wire class menu events
-  if (classToggle && classMenu) {
-    classToggle.addEventListener('click', (e) => { e.stopPropagation(); classMenu.hidden ? (classMenu.hidden = false, classToggle.setAttribute('aria-expanded','true')) : (classMenu.hidden = true, classToggle.setAttribute('aria-expanded','false')); });
-    document.addEventListener('click', (e) => { if (!document.getElementById('track-class-filter-ui').contains(e.target)) { classMenu.hidden = true; classToggle.setAttribute('aria-expanded','false'); } });
-    classMenu.addEventListener('click', (e) => {
-      const opt = e.target.closest('.custom-select__option');
-      if (!opt) return;
-      const val = opt.dataset.value;
-      const label = opt.textContent || opt.innerText || 'All classes';
-      console.log('Class option clicked. Raw value:', val, 'label:', label);
-      activeClassId = (val && val !== '') ? Number(val) : null;
-      activeClassLabel = activeClassId ? label : null;
-      console.log('Class selected:', activeClassId, 'label:', activeClassLabel);
-      trackCurrentPage = 1;
-      classToggle.textContent = `${label} ▾`;
-      classMenu.hidden = true;
-      // Keep the hidden select in sync if present
-      if (classSelect) {
-        try { classSelect.value = val; } catch (e) {}
-      }
-      fetchAndRender();
-    });
-  }
-
   buildMenu();
-  // Initialize class menu from hidden select if available, otherwise leave empty until data fetch
-  if (!buildClassMenuFromSelect()) {
-    buildClassMenu([]);
-  }
+  
+  // Initialize class menu - EXACT SAME WAY AS DRIVER INFO PAGE
+  const classOptions = [{ value: '', label: 'All classes' }].concat(
+    dataService.getClassOptionsFromCarsData()
+  );
+  
+  new CustomSelect('track-class-filter-ui', classOptions, async (value) => {
+    activeClassId = value || null;
+    activeClassLabel = value || null;
+    console.log('Class selected:', activeClassId);
+    trackCurrentPage = 1;
+    if (classSelect) {
+      try { classSelect.value = value; } catch (e) {}
+    }
+    fetchAndRender();
+  });
 
   // Local driver index cache
   let DRIVER_INDEX_CACHE = null;
-  
-  // Class menu should be stable: build once and never mutate thereafter.
-  let CLASS_MENU_BUILT = false;
-
-  async function ensureClassMenuBuilt() {
-    if (CLASS_MENU_BUILT) return;
-    // Always build from top_combinations to ensure we have numeric class IDs, not names
-    try {
-      const ts = Date.now();
-      const resp = await fetch(`cache/top_combinations.json?v=${ts}`, { cache: 'no-store' });
-      if (!resp.ok) throw new Error('HTTP ' + resp.status);
-      const d = await resp.json();
-      let combos = [];
-      if (Array.isArray(d)) combos = d; else if (d && Array.isArray(d.results)) combos = d.results; else if (d && Array.isArray(d.data)) combos = d.data;
-
-      const classes = [];
-      const seen = new Set();
-      combos.forEach(item => {
-        const cid = item.class_id || item.ClassID || item.classId;
-        const cname = item.class_name || item.className || item.ClassName || item.car_class || item.CarClass || item.Class;
-        if (cid === undefined || cid === null || !cname) return;
-        const key = String(cid);
-        if (seen.has(key)) return;
-        seen.add(key);
-        classes.push({ value: Number(cid), label: cname });
-      });
-      classes.sort((a,b)=> (String(a.label||'').localeCompare(String(b.label||''))));
-      buildClassMenu(classes);
-      CLASS_MENU_BUILT = true;
-    } catch (e) {
-      console.warn('Failed to build class menu from cache:', e);
-      // Keep the existing menu (empty or previously set) but mark as built to avoid mutations
-      CLASS_MENU_BUILT = true;
-    }
-  }
 
   async function loadDriverIndexLocal() {
     if (DRIVER_INDEX_CACHE) return DRIVER_INDEX_CACHE;
@@ -302,33 +239,7 @@
       console.log('fetchTopCombinations called. activeTrackId:', activeTrackId, 'activeClassId:', activeClassId);
       tableContainer.innerHTML = '<div class="loading">Loading...</div>';
       
-      // Case 1: Filter by class only
-      if (activeClassId && !activeTrackId) {
-        console.log('Filtering by class:', activeClassId, activeClassLabel);
-        const results = await aggregatePerTrackForClass(activeClassId, activeClassLabel || String(activeClassId));
-        console.log('Class filter returned', results.length, 'results:', results.slice(0, 3));
-        return results;
-      }
-      
-      // Case 2: Filter by track only
-      if (activeTrackId && !activeClassId) {
-        console.log('Filtering by track:', activeTrackId);
-        const results = await aggregatePerClassForTrack(activeTrackId);
-        console.log('Track filter returned', results.length, 'results:', results.slice(0, 3));
-        return results;
-      }
-      
-      // Case 3: Both track and class - aggregate by class then filter by track
-      if (activeTrackId && activeClassId) {
-        console.log('Filtering by both track:', activeTrackId, 'and class:', activeClassId);
-        const results = await aggregatePerTrackForClass(activeClassId, activeClassLabel || String(activeClassId));
-        const filtered = results.filter(item => String(item.track_id) === String(activeTrackId));
-        console.log('Both filters returned', filtered.length, 'results');
-        return filtered;
-      }
-      
-      // Case 4: No filters - use top_combinations
-      // Case 4: No filters - use top_combinations
+      // Load all combinations from cache
       const timestamp = new Date().getTime();
       const resp = await fetch(`cache/top_combinations.json?v=${timestamp}`, {
         cache: 'no-store'
@@ -346,7 +257,27 @@
         combinations = data.data;
       }
       
-      combinations.sort((a, b) => {
+      // Apply filters
+      let filtered = combinations;
+      
+      // Filter by track if selected
+      if (activeTrackId) {
+        filtered = filtered.filter(item => {
+          const tid = item.track_id || item.TrackID || item.trackId;
+          return Number(tid) === Number(activeTrackId);
+        });
+      }
+      
+      // Filter by class if selected (using class NAME like other pages)
+      if (activeClassId) {
+        filtered = filtered.filter(item => {
+          const className = item.class_name || item.ClassName || item.car_class || item.CarClass || item.Class || item.class || '';
+          return String(className).trim() === String(activeClassId).trim();
+        });
+      }
+      
+      // Sort filtered results
+      filtered.sort((a, b) => {
         // Primary sort: entry count descending
         const countDiff = (b.entry_count || 0) - (a.entry_count || 0);
         if (countDiff !== 0) return countDiff;
@@ -356,9 +287,10 @@
         const trackB = String(b.track || b.Track || b.track_name || b.TrackName || '');
         return trackA.localeCompare(trackB);
       });
-      const limitedCombinations = combinations.slice(0, 1000);
       
-      console.log(`Showing ${limitedCombinations.length} combinations`);
+      const limitedCombinations = filtered.slice(0, 1000);
+      
+      console.log(`Showing ${limitedCombinations.length} combinations (filtered from ${combinations.length})`);
       return limitedCombinations;
     } catch (e) {
       console.error('Failed to fetch data', e);
@@ -368,6 +300,10 @@
 
   // Render table using the same style/formatting as leaderboards
   function renderTable(data) {
+    console.log('renderTable called with data:', data ? data.length : 0, 'items');
+    if (data && data.length > 0) {
+      console.log('First item:', data[0]);
+    }
     trackAllResults = Array.isArray(data) ? data : [];
     if (trackAllResults.length === 0) {
       tableContainer.innerHTML = '<div class="no-results">No results found</div>';
@@ -476,16 +412,51 @@
   window.trackInfoGoToPage = function(page){ trackCurrentPage = page; renderTable(trackAllResults); const el = document.getElementById('track-info'); if (el) el.scrollIntoView({behavior:'smooth', block:'start'}); };
 
   async function fetchAndRender(){
-    const data = await fetchTopCombinations();
-    // Ensure class menu is built only once and never mutated
-    await ensureClassMenuBuilt();
-
-    renderTable(data);
+    console.log('fetchAndRender - activeTrackId:', activeTrackId, 'activeClassId:', activeClassId);
+    
+    // BOTH track and class selected - scan driver_index for the specific combination
+    if (activeTrackId && activeClassId) {
+      console.log('Both track and class selected - filtering driver_index');
+      const numericClassId = await resolveClassId(activeClassId);
+      if (numericClassId === null) {
+        console.warn('Could not resolve class ID for:', activeClassId);
+        tableContainer.innerHTML = '<div class="no-results">No results found for this class</div>';
+        return;
+      }
+      // Get all tracks for this class, then filter by selected track
+      const allTracksForClass = await aggregatePerTrackForClass(numericClassId, activeClassId);
+      const filtered = allTracksForClass.filter(row => Number(row.track_id) === Number(activeTrackId));
+      console.log('Filtered to', filtered.length, 'rows for track+class combination');
+      renderTable(filtered);
+    }
+    // Only class selected - aggregate from driver_index for all tracks with this class
+    else if (activeClassId) {
+      console.log('Class only selected - using aggregatePerTrackForClass with classId:', activeClassId);
+      const numericClassId = await resolveClassId(activeClassId);
+      if (numericClassId === null) {
+        console.warn('Could not resolve class ID for:', activeClassId);
+        tableContainer.innerHTML = '<div class="no-results">No results found for this class</div>';
+        return;
+      }
+      console.log('Resolved class ID:', numericClassId);
+      const data = await aggregatePerTrackForClass(numericClassId, activeClassId);
+      renderTable(data);
+    }
+    // Only track selected - aggregate from driver_index for all classes at this track
+    else if (activeTrackId) {
+      console.log('Track only selected - using aggregatePerClassForTrack with trackId:', activeTrackId);
+      const data = await aggregatePerClassForTrack(activeTrackId);
+      renderTable(data);
+    }
+    // No filters - show top combinations
+    else {
+      console.log('No filters - using fetchTopCombinations');
+      const data = await fetchTopCombinations();
+      renderTable(data);
+    }
   }
 
   // Initial load
   fetchAndRender();
-  // Proactively build the class menu from cache on startup so it remains stable
-  ensureClassMenuBuilt();
 
 })();

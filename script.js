@@ -122,12 +122,12 @@ function displayStatus(data) {
         
         // Calculate LED status - RED has HIGHEST PRIORITY
         let ledClass = 'green';
-        let ledTitle = 'OK';
+        let ledTitle = 'Ready';
         
         // RED: if unique tracks < expected tracks (HIGHEST PRIORITY - check first)
         if (uniqueTracks < expectedTracks) {
             ledClass = 'red';
-            ledTitle = 'Error';
+            ledTitle = 'Incomplete';
         }
         // YELLOW: if last update > 24 hours ago (only if not red)
         else if (lastUpdateTime) {
@@ -141,6 +141,9 @@ function displayStatus(data) {
         
         // Apply LED class and title
         statusLedEl.className = `status-led ${ledClass}`;
+        if (fetchInProgress) {
+            statusLedEl.classList.add('fetching');
+        }
         statusLedEl.title = ledTitle;
     }
 }

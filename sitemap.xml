@@ -13,16 +13,21 @@
   <url>
     <loc>https://r3e-leaderboards.info/tracks.html</loc>
     <priority>0.8</priority>
-    <changefreq>weekly</changefreq>
+    <changefreq>daily</changefreq>
   </url>
   <url>
     <loc>https://r3e-leaderboards.info/cars.html</loc>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
     <changefreq>weekly</changefreq>
   </url>
   <url>
     <loc>https://r3e-leaderboards.info/detail.html</loc>
-    <priority>0.6</priority>
+    <priority>0.5</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://r3e-leaderboards.info/news.html</loc>
+    <priority>0.7</priority>
     <changefreq>weekly</changefreq>
   </url>
 </urlset>

@@ -82,23 +82,33 @@
 
   async function loadDriverIndexLocal() {
     if (DRIVER_INDEX_CACHE) return DRIVER_INDEX_CACHE;
-    try {
-      const ts = Date.now();
-      const resp = await fetch(`cache/driver_index.json?v=${ts}`, {
-        cache: 'no-store',
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        }
-      });
-      if (!resp.ok) throw new Error('HTTP ' + resp.status);
-      const text = await resp.text();
-      DRIVER_INDEX_CACHE = JSON.parse(text);
-      return DRIVER_INDEX_CACHE;
-    } catch (e) {
-      console.warn('Failed to load driver_index.json', e);
-      return null;
+    const maxAttempts = 10;
+    const baseDelayMs = 250;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const ts = Date.now();
+        const resp = await fetch(`cache/driver_index.json?v=${ts}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          }
+        });
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        const text = await resp.text();
+        if (!text || text.trim().length === 0) throw new Error('Empty body');
+        const parsed = JSON.parse(text);
+        if (!parsed || typeof parsed !== 'object') throw new Error('Invalid JSON');
+        if (Object.keys(parsed).length === 0) throw new Error('Empty index');
+        DRIVER_INDEX_CACHE = parsed;
+        return DRIVER_INDEX_CACHE;
+      } catch (e) {
+        const delay = baseDelayMs * Math.min(20, attempt);
+        console.warn(`Driver index attempt ${attempt}/${maxAttempts} failed:`, e && e.message ? e.message : e);
+        if (attempt === maxAttempts) return null;
+        await new Promise(r => setTimeout(r, delay));
+      }
     }
   }
 

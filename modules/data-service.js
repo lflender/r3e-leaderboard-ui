@@ -21,29 +21,47 @@ class DataService {
         if (this.driverIndex) {
             return this.driverIndex;
         }
-        
-        try {
-            const timestamp = new Date().getTime();
-            const response = await fetch(`cache/driver_index.json?v=${timestamp}`, {
-                cache: 'no-store',
-                headers: {
-                    'Cache-Control': 'no-cache, no-store, must-revalidate',
-                    'Pragma': 'no-cache',
-                    'Expires': '0'
+
+        const maxAttempts = 10;
+        const baseDelayMs = 250;
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                const timestamp = new Date().getTime();
+                const response = await fetch(`cache/driver_index.json?v=${timestamp}`, {
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error(`Failed to load driver index: ${response.status} ${response.statusText}`);
                 }
-            });
-            
-            if (!response.ok) {
-                throw new Error(`Failed to load driver index: ${response.status} ${response.statusText}`);
+                const text = await response.text();
+                if (!text || text.trim().length === 0) {
+                    throw new Error('Driver index response is empty');
+                }
+                const parsed = JSON.parse(text);
+                if (!parsed || typeof parsed !== 'object') {
+                    throw new Error('Driver index is not an object');
+                }
+                const keyCount = Object.keys(parsed).length;
+                if (keyCount === 0) {
+                    throw new Error('Driver index is empty');
+                }
+                this.driverIndex = parsed;
+                return this.driverIndex;
+            } catch (error) {
+                const delay = baseDelayMs * Math.min(20, attempt);
+                console.warn(`Driver index load attempt ${attempt}/${maxAttempts} failed:`, error?.message || error);
+                if (attempt === maxAttempts) {
+                    console.error('Giving up loading driver index after retries');
+                    this.driverIndex = {};
+                    return {};
+                }
+                await new Promise(r => setTimeout(r, delay));
             }
-            
-            const text = await response.text();
-            this.driverIndex = JSON.parse(text);
-            return this.driverIndex;
-        } catch (error) {
-            console.error('Error loading driver index:', error);
-            this.driverIndex = {};
-            return {};
         }
     }
     

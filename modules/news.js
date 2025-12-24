@@ -12,8 +12,30 @@
     return d.toLocaleString('en-GB', { year:'numeric', month:'short', day:'2-digit', hour:'2-digit', minute:'2-digit', hour12:false });
   }
 
-  function stripHtml(html){
-    return String(html).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+  function htmlToTextWithBreaks(html){
+    let s = String(html || '');
+    // Convert common block/line-break tags to newlines
+    s = s.replace(/<\s*br\s*\/?\s*>/gi, '\n');
+    s = s.replace(/<\s*\/p\s*>/gi, '\n');
+    s = s.replace(/<\s*p\b[^>]*>/gi, '');
+    s = s.replace(/<\s*li\b[^>]*>/gi, '\u2022 '); // bullet "• "
+    s = s.replace(/<\s*\/li\s*>/gi, '\n');
+    s = s.replace(/<\s*h[1-6]\b[^>]*>/gi, '');
+    s = s.replace(/<\s*\/h[1-6]\s*>/gi, '\n');
+    s = s.replace(/<\s*div\b[^>]*>/gi, '');
+    s = s.replace(/<\s*\/div\s*>/gi, '\n');
+    s = s.replace(/<\s*\/?(ul|ol|table|tr|thead|tbody)\b[^>]*>/gi, '\n');
+    // Strip remaining tags
+    s = s.replace(/<[^>]+>/g, '');
+    // Normalize whitespace but keep newlines
+    s = s
+      .replace(/\u00A0/g, ' ') // nbsp
+      .replace(/\r/g, '')
+      .replace(/[\t ]+\n/g, '\n')
+      .replace(/\n{2,}/g, '\n')
+      .replace(/[ \t]{2,}/g, ' ')
+      .trim();
+    return s;
   }
 
   function extractImageUrl(html){
@@ -38,8 +60,13 @@
       const title = R3EUtils.escapeHtml(item.title || '');
       const url = item.link || item.guid || '';
       const date = formatDate(item.pubDate || new Date().toISOString());
-      const excerptSrc = stripHtml(item.description || item.content || '');
-      const excerpt = R3EUtils.escapeHtml(excerptSrc).slice(0, 400);
+      const raw = item.description || item.content || '';
+      const textWithBreaks = htmlToTextWithBreaks(raw);
+      const MAX_LINES = 6;
+      const lines = textWithBreaks.split('\n');
+      const isTruncated = lines.length > MAX_LINES;
+      const preview = lines.slice(0, MAX_LINES).join('\n').trim();
+      const excerpt = R3EUtils.escapeHtml(preview);
       const PATCH_THUMB = 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/211500/012ec96f1060dc6dc2cfa123ad073ba41c3bd6fa/header.jpg?t=1764085909';
       const thumb = isPatchNotes(item) ? PATCH_THUMB : (item.thumbnail || extractImageUrl(item.content || item.description || ''));
       const thumbHtml = thumb ? `<a href="${R3EUtils.escapeHtml(url)}" target="_blank" rel="noopener" class="news-thumb-link"><img class="news-thumb" src="${R3EUtils.escapeHtml(thumb)}" alt="" loading="lazy"></a>` : '';
@@ -49,7 +76,7 @@
           <div class="news-body">
             <h2 class="news-title"><a href="${R3EUtils.escapeHtml(url)}" target="_blank" rel="noopener">${title}</a></h2>
             <div class="news-meta">${date}</div>
-            <p class="news-excerpt">${excerpt}${excerptSrc.length > 400 ? '…' : ''}</p>
+            <div class="news-excerpt">${excerpt}${isTruncated ? '…' : ''}</div>
             <div class="news-actions"><a class="news-link" href="${R3EUtils.escapeHtml(url)}" target="_blank" rel="noopener">Read on Steam →</a></div>
           </div>
         </article>`;

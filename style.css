@@ -626,6 +626,10 @@ main {
 .news-excerpt {
     color: rgba(255,255,255,0.85);
     margin: 0.25rem 0 0.5rem;
+    white-space: pre-line;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, "Noto Sans", sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.45;
 }
 .news-actions { margin-top: 0.25rem; }
 .news-link { color: #7ec8ff; }

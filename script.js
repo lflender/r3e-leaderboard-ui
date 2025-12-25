@@ -13,5 +13,21 @@
 // ===========================================
 // Initialize Data Service
 // ===========================================
-// Load driver index on page load
-dataService.loadDriverIndex();
+// Load driver index with page-aware, idle scheduling to avoid UI stutter
+(() => {
+	const isDriverPage = !!document.getElementById('driver-search');
+	const preload = () => {
+		try { dataService.loadDriverIndex(); } catch (_) {}
+	};
+	if (isDriverPage) {
+		// Driver Search needs index ASAP
+		preload();
+	} else {
+		// Other pages (e.g., Track Info): defer to idle time
+		if (typeof requestIdleCallback === 'function') {
+			requestIdleCallback(preload, { timeout: 3000 });
+		} else {
+			setTimeout(preload, 1000);
+		}
+	}
+})();

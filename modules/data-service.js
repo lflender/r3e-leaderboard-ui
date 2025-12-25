@@ -7,10 +7,12 @@
 class DataService {
     constructor() {
         this.driverIndex = null;
+        this.driverIndexPromise = null; // single-flight promise for index loading
         // Disable status caching: status.json is precomputed and should be fetched fresh
         this.statusCache = null;
         this.CACHE_DURATION = 0;
         this.STATUS_CACHE_KEY = 'r3e_status_cache';
+        this.DRIVER_INDEX_CACHE_KEY = 'r3e_driver_index_cache';
     }
     
     /**
@@ -18,51 +20,75 @@ class DataService {
      * @returns {Promise<Object>} Driver index object
      */
     async loadDriverIndex() {
+        // Return immediately if already loaded
         if (this.driverIndex) {
             return this.driverIndex;
         }
 
+        // Serve cached index (stale-while-revalidate) to avoid empty UI on refresh
+        const cached = this._getCachedDriverIndex();
+        if (cached) {
+            this.driverIndex = cached;
+            // Kick off a background refresh without blocking the UI
+            setTimeout(() => { this._refreshDriverIndexInBackground(); }, 0);
+            return this.driverIndex;
+        }
+
+        // Ensure single-flight: reuse ongoing promise if present
+        if (this.driverIndexPromise) {
+            return this.driverIndexPromise;
+        }
+
         const maxAttempts = 10;
         const baseDelayMs = 250;
-        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-            try {
-                const timestamp = new Date().getTime();
-                const response = await fetch(`cache/driver_index.json?v=${timestamp}`, {
-                    cache: 'no-store',
-                    headers: {
-                        'Cache-Control': 'no-cache, no-store, must-revalidate',
-                        'Pragma': 'no-cache',
-                        'Expires': '0'
+        this.driverIndexPromise = (async () => {
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                try {
+                    const controller = new AbortController();
+                    const timeout = setTimeout(() => controller.abort(), 8000);
+                    const timestamp = new Date().getTime();
+                    const response = await fetch(`cache/driver_index.json?v=${timestamp}`, {
+                        cache: 'no-store',
+                        headers: {
+                            'Cache-Control': 'no-cache, no-store, must-revalidate',
+                            'Pragma': 'no-cache',
+                            'Expires': '0'
+                        },
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeout);
+                    if (!response.ok) {
+                        throw new Error(`Failed to load driver index: ${response.status} ${response.statusText}`);
                     }
-                });
-                if (!response.ok) {
-                    throw new Error(`Failed to load driver index: ${response.status} ${response.statusText}`);
+                    const text = await response.text();
+                    if (!text || text.trim().length === 0) {
+                        throw new Error('Driver index response is empty');
+                    }
+                    const parsed = JSON.parse(text);
+                    if (!parsed || typeof parsed !== 'object') {
+                        throw new Error('Driver index is not an object');
+                    }
+                    const keyCount = Object.keys(parsed).length;
+                    if (keyCount === 0) {
+                        throw new Error('Driver index is empty');
+                    }
+                    this.driverIndex = parsed;
+                    this._saveDriverIndexToCache(parsed);
+                    return this.driverIndex;
+                } catch (error) {
+                    const delay = baseDelayMs * Math.min(20, attempt);
+                    console.warn(`Driver index load attempt ${attempt}/${maxAttempts} failed:`, error?.message || error);
+                    if (attempt === maxAttempts) {
+                        console.error('Giving up loading driver index after retries');
+                        // Do not overwrite with empty object; preserve null so callers can decide
+                        throw error;
+                    }
+                    await new Promise(r => setTimeout(r, delay));
                 }
-                const text = await response.text();
-                if (!text || text.trim().length === 0) {
-                    throw new Error('Driver index response is empty');
-                }
-                const parsed = JSON.parse(text);
-                if (!parsed || typeof parsed !== 'object') {
-                    throw new Error('Driver index is not an object');
-                }
-                const keyCount = Object.keys(parsed).length;
-                if (keyCount === 0) {
-                    throw new Error('Driver index is empty');
-                }
-                this.driverIndex = parsed;
-                return this.driverIndex;
-            } catch (error) {
-                const delay = baseDelayMs * Math.min(20, attempt);
-                console.warn(`Driver index load attempt ${attempt}/${maxAttempts} failed:`, error?.message || error);
-                if (attempt === maxAttempts) {
-                    console.error('Giving up loading driver index after retries');
-                    this.driverIndex = {};
-                    return {};
-                }
-                await new Promise(r => setTimeout(r, delay));
             }
-        }
+        })();
+
+        return this.driverIndexPromise;
     }
     
     /**
@@ -71,16 +97,25 @@ class DataService {
      * @returns {Promise<Object>} Driver index
      */
     async waitForDriverIndex(maxAttempts = 50) {
+        // If already loaded, return immediately
         if (this.driverIndex !== null) {
             return this.driverIndex;
         }
-        
-        let attempts = 0;
-        while (this.driverIndex === null && attempts < maxAttempts) {
-            await new Promise(resolve => setTimeout(resolve, 100));
-            attempts++;
+
+        // Ensure loading is started and await the single-flight promise with timeout aligned to retries
+        const promise = this.loadDriverIndex();
+        if (promise && typeof promise.then === 'function') {
+            try {
+                // Align timeout with retry window (~12s)
+                const timeoutMs = Math.max(5000, maxAttempts * 250);
+                return await this._withTimeout(promise, timeoutMs);
+            } catch (e) {
+                console.error('waitForDriverIndex timed out or failed:', e?.message || e);
+                return this.driverIndex || {};
+            }
         }
-        
+
+        // Fallback if loadDriverIndex returned synchronously (cached)
         return this.driverIndex || {};
     }
     
@@ -190,7 +225,7 @@ class DataService {
         const driverIndex = await this.waitForDriverIndex();
         
         if (!driverIndex || Object.keys(driverIndex).length === 0) {
-            throw new Error('Driver index is empty');
+            throw new Error('Driver index is loading or unavailable. Please try again in a moment.');
         }
         
         let searchTerm = driverName.trim();
@@ -266,6 +301,75 @@ class DataService {
         }
         
         return results;
+    }
+
+    // -------- Internal helpers for index caching --------
+    _getCachedDriverIndex() {
+        try {
+            const raw = localStorage.getItem(this.DRIVER_INDEX_CACHE_KEY);
+            if (!raw) return null;
+            const parsed = JSON.parse(raw);
+            if (!parsed || typeof parsed !== 'object') return null;
+            if (Object.keys(parsed).length === 0) return null;
+            return parsed;
+        } catch (_) {
+            return null;
+        }
+    }
+
+    _saveDriverIndexToCache(idx) {
+        try {
+            localStorage.setItem(this.DRIVER_INDEX_CACHE_KEY, JSON.stringify(idx));
+        } catch (_) {
+            // Ignore storage errors (quota, privacy mode)
+        }
+    }
+
+    async _refreshDriverIndexInBackground() {
+        try {
+            const maxAttempts = 5;
+            const baseDelayMs = 250;
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                try {
+                    const controller = new AbortController();
+                    const timeout = setTimeout(() => controller.abort(), 8000);
+                    const timestamp = new Date().getTime();
+                    const response = await fetch(`cache/driver_index.json?v=${timestamp}`, {
+                        cache: 'no-store',
+                        headers: {
+                            'Cache-Control': 'no-cache, no-store, must-revalidate',
+                            'Pragma': 'no-cache',
+                            'Expires': '0'
+                        },
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeout);
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    const text = await response.text();
+                    if (!text || text.trim().length === 0) throw new Error('Empty response');
+                    const parsed = JSON.parse(text);
+                    if (!parsed || typeof parsed !== 'object' || Object.keys(parsed).length === 0) {
+                        throw new Error('Invalid index');
+                    }
+                    this.driverIndex = parsed;
+                    this._saveDriverIndexToCache(parsed);
+                    return;
+                } catch (e) {
+                    if (attempt === maxAttempts) return;
+                    await new Promise(r => setTimeout(r, baseDelayMs * Math.min(20, attempt)));
+                }
+            }
+        } catch (_) {
+            // Swallow background refresh failures
+        }
+    }
+
+    _withTimeout(promise, ms) {
+        return new Promise((resolve, reject) => {
+            const t = setTimeout(() => reject(new Error('Timeout')), ms);
+            promise.then(v => { clearTimeout(t); resolve(v); })
+                   .catch(e => { clearTimeout(t); reject(e); });
+        });
     }
     
     /**

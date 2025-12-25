@@ -77,39 +77,18 @@
     fetchAndRender();
   });
 
-  // Local driver index cache
+  // Local driver index cache (populated via dataService for single-flight behavior)
   let DRIVER_INDEX_CACHE = null;
 
   async function loadDriverIndexLocal() {
     if (DRIVER_INDEX_CACHE) return DRIVER_INDEX_CACHE;
-    const maxAttempts = 10;
-    const baseDelayMs = 250;
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      try {
-        const ts = Date.now();
-        const resp = await fetch(`cache/driver_index.json?v=${ts}`, {
-          cache: 'no-store',
-          headers: {
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0'
-          }
-        });
-        if (!resp.ok) throw new Error('HTTP ' + resp.status);
-        const text = await resp.text();
-        if (!text || text.trim().length === 0) throw new Error('Empty body');
-        const parsed = JSON.parse(text);
-        if (!parsed || typeof parsed !== 'object') throw new Error('Invalid JSON');
-        if (Object.keys(parsed).length === 0) throw new Error('Empty index');
-        DRIVER_INDEX_CACHE = parsed;
-        return DRIVER_INDEX_CACHE;
-      } catch (e) {
-        const delay = baseDelayMs * Math.min(20, attempt);
-        console.warn(`Driver index attempt ${attempt}/${maxAttempts} failed:`, e && e.message ? e.message : e);
-        if (attempt === maxAttempts) return null;
-        await new Promise(r => setTimeout(r, delay));
-      }
+    // Reuse centralized loader to avoid duplicate fetches and leverage stale cache
+    const idx = await dataService.waitForDriverIndex();
+    if (idx && Object.keys(idx).length > 0) {
+      DRIVER_INDEX_CACHE = idx;
+      return DRIVER_INDEX_CACHE;
     }
+    return null;
   }
 
   async function decompressGzipToJson(resp) {
@@ -411,6 +390,10 @@
   window.trackInfoGoToPage = function(page){ trackCurrentPage = page; renderTable(trackAllResults); const el = document.getElementById('track-info'); if (el) el.scrollIntoView({behavior:'smooth', block:'start'}); };
 
   async function fetchAndRender(){
+    // Show a loading indicator during initial heavy aggregations
+    if (tableContainer && (activeTrackId || activeClassId)) {
+      tableContainer.innerHTML = '<div class="loading">Loading...</div>';
+    }
     // BOTH track and class selected - scan driver_index for the specific combination
     if (activeTrackId && activeClassId) {
       const numericClassId = await resolveClassId(activeClassId);

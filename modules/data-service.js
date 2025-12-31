@@ -9,10 +9,14 @@ class DataService {
         this.driverIndex = null;
         this.driverIndexPromise = null; // single-flight promise for index loading
         // Disable status caching: status.json is precomputed and should be fetched fresh
-        this.statusCache = null;
+        this.statusCache = null; // last good status (fallback only, not used to avoid fresh fetches)
+        this.statusPromise = null; // single-flight promise for status fetch
         this.CACHE_DURATION = 0;
         this.STATUS_CACHE_KEY = 'r3e_status_cache';
         this.DRIVER_INDEX_CACHE_KEY = 'r3e_driver_index_cache';
+        // Minimal index change detection via status.json
+        this.lastIndexUpdate = null;
+        this.indexRevalidatorStarted = false;
     }
     
     /**
@@ -31,6 +35,9 @@ class DataService {
             this.driverIndex = cached;
             // Kick off a background refresh without blocking the UI
             setTimeout(() => { this._refreshDriverIndexInBackground(); }, 0);
+            // Initialize baseline lastIndexUpdate and start periodic revalidation
+            setTimeout(() => { this._updateLastIndexFromStatus(); }, 0);
+            this._startIndexStatusRevalidator();
             return this.driverIndex;
         }
 
@@ -74,6 +81,9 @@ class DataService {
                     }
                     this.driverIndex = parsed;
                     this._saveDriverIndexToCache(parsed);
+                    // Update baseline and start periodic revalidation
+                    setTimeout(() => { this._updateLastIndexFromStatus(); }, 0);
+                    this._startIndexStatusRevalidator();
                     return this.driverIndex;
                 } catch (error) {
                     const delay = baseDelayMs * Math.min(20, attempt);
@@ -183,36 +193,62 @@ class DataService {
      * @returns {Promise<Object>} Status data
      */
     async calculateStatus() {
-        // Always fetch fresh status.json without caching
-        try {
-            const response = await fetch(`cache/status.json?v=${Date.now()}`, {
-                method: 'GET',
-                cache: 'no-store',
-                headers: {
-                    'Accept': 'application/json',
-                    'Cache-Control': 'no-cache, no-store, must-revalidate',
-                    'Pragma': 'no-cache',
-                    'Expires': '0'
-                }
-            });
-
-            if (!response.ok) {
-                console.error('Failed to fetch status.json:', response.status, response.statusText);
-                return null;
-            }
-
-            // Use text + JSON.parse to avoid potential BOM/issues
-            const text = await response.text();
-            try {
-                return JSON.parse(text);
-            } catch (e) {
-                console.error('Invalid JSON in status.json:', e);
-                return null;
-            }
-        } catch (error) {
-            console.error('Error fetching status.json:', error);
-            return null;
+        // Single-flight: reuse ongoing fetch to avoid concurrent reads and races
+        if (this.statusPromise) {
+            return this.statusPromise;
         }
+
+        this.statusPromise = (async () => {
+            // Always fetch fresh status.json without caching
+            try {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 5000);
+                const response = await fetch(`cache/status.json?v=${Date.now()}`, {
+                    method: 'GET',
+                    cache: 'no-store',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    },
+                    signal: controller.signal
+                });
+                clearTimeout(timeout);
+
+                if (!response.ok) {
+                    console.error('Failed to fetch status.json:', response.status, response.statusText);
+                    // Graceful fallback: return last good status if present
+                    return this.statusCache || null;
+                }
+
+                // Use text + JSON.parse to avoid potential BOM/issues
+                const text = await response.text();
+                let parsed = null;
+                try {
+                    parsed = JSON.parse(text);
+                } catch (e) {
+                    console.error('Invalid JSON in status.json:', e);
+                    // Graceful fallback
+                    return this.statusCache || null;
+                }
+
+                // Minimal validation
+                if (parsed && typeof parsed === 'object') {
+                    this.statusCache = parsed; // update fallback
+                }
+                return parsed;
+            } catch (error) {
+                console.error('Error fetching status.json:', error);
+                // Graceful fallback
+                return this.statusCache || null;
+            } finally {
+                // Allow future calls to start a fresh fetch
+                this.statusPromise = null;
+            }
+        })();
+
+        return this.statusPromise;
     }
     
     /**
@@ -353,6 +389,8 @@ class DataService {
                     }
                     this.driverIndex = parsed;
                     this._saveDriverIndexToCache(parsed);
+                    // After refresh, also update baseline status timestamp
+                    setTimeout(() => { this._updateLastIndexFromStatus(); }, 0);
                     return;
                 } catch (e) {
                     if (attempt === maxAttempts) return;
@@ -370,6 +408,51 @@ class DataService {
             promise.then(v => { clearTimeout(t); resolve(v); })
                    .catch(e => { clearTimeout(t); reject(e); });
         });
+    }
+
+    // -------- Minimal index change detection via status.json --------
+    async _updateLastIndexFromStatus() {
+        try {
+            const status = await this.calculateStatus();
+            const latest = status && (status.last_index_update || status.last_scrape_end) || null;
+            if (latest) this.lastIndexUpdate = String(latest);
+        } catch (_) { /* ignore */ }
+    }
+
+    _startIndexStatusRevalidator() {
+        if (this.indexRevalidatorStarted) return;
+        this.indexRevalidatorStarted = true;
+
+        const baseIntervalMs = 10 * 60 * 1000; // 10 minutes
+        const jitterMs = Math.floor(Math.random() * 60 * 1000); // up to 60s jitter
+
+        const runCheck = async () => {
+            try {
+                if (typeof document !== 'undefined' && document.hidden) return; // skip when hidden
+                const status = await this.calculateStatus();
+                const latest = status && (status.last_index_update || status.last_scrape_end) || null;
+                if (!latest) return;
+                const latestStr = String(latest);
+                if (!this.lastIndexUpdate) {
+                    this.lastIndexUpdate = latestStr;
+                    return;
+                }
+                if (latestStr !== this.lastIndexUpdate) {
+                    this.lastIndexUpdate = latestStr;
+                    await this._refreshDriverIndexInBackground();
+                }
+            } catch (_) { /* ignore */ }
+        };
+
+        // Re-check when tab becomes visible
+        if (typeof document !== 'undefined') {
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) setTimeout(runCheck, 500);
+            });
+        }
+
+        setTimeout(runCheck, 2000 + jitterMs); // initial check shortly after load
+        setInterval(runCheck, baseIntervalMs + jitterMs);
     }
     
     /**

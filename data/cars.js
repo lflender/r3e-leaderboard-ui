@@ -4428,10 +4428,10 @@ window.CARS_DATA =
     ]
   },
   {
-    "class": "WTCC 2018",
+    "class": "WTCR 2018",
     "cars": [
       {
-        "car_class": "WTCC 2018",
+        "car_class": "WTCR 2018",
         "car": "Alfa Romeo Giulietta TCR",
         "wheel": "Round",
         "wheel_cat": "round",
@@ -4447,7 +4447,7 @@ window.CARS_DATA =
         "description": "To create unbeatable race cars is the passion of Romeo Ferraris and the realization of the Alfa Romeo Giulietta TCR is a big milestone for the Italian company. Every component has been designed by Romeo Ferraris, and they are proud to represent Alfa Romeo, a brand with a long successful history in touring cars, in the FIA WTCR presented by OSCARO. Powered by a 4-cylinder engine of 1.742 cm3, the Giulietta TCR made its first appearance in the 2016 season in Bahrain."
       },
       {
-        "car_class": "WTCC 2018",
+        "car_class": "WTCR 2018",
         "car": "Audi RS 3 LMS",
         "wheel": "GT",
         "wheel_cat": "gt",
@@ -4463,7 +4463,7 @@ window.CARS_DATA =
         "description": "The Audi RS 3 LMS is being developed by Audi Sport customer racing for the relatively new TCR category. This factory-built entry-level race car with its massively flared fenders and low front splitter is reminiscent of a DTM race car, albeit much closer to the production model. The four-cylinder TFSI engine unit delivers up to 350 HP and lets the car accelerate from 0 to 100 km/h in about 4.5 seconds and achieves a top speed of up to 265 km/h."
       },
       {
-        "car_class": "WTCC 2018",
+        "car_class": "WTCR 2018",
         "car": "CUPRA TCR",
         "wheel": "Round",
         "wheel_cat": "round",
@@ -4479,7 +4479,7 @@ window.CARS_DATA =
         "description": "Right from the first glance, the curves of the CUPRA are making a clear statement of sportiness. The previous model has been improved in performance and lets you fully enjoy the 350 HP, an increased steering angle and a steering wheel with even more functions. The CUPRA TCR is ready for the challenges of racing today."
       },
       {
-        "car_class": "WTCC 2018",
+        "car_class": "WTCR 2018",
         "car": "Honda Civic TCR",
         "wheel": "Round",
         "wheel_cat": "round",
@@ -4495,7 +4495,7 @@ window.CARS_DATA =
         "description": "After the great success of the previous version based of the FK1 model, J.A.S. Motorsport extend their commitment on the TCR series with the latest version of the Honda Civic hatchback (FK7). The car is completely different compared to the 2016-17 Civic TCR model, having more aero, more complex suspension geometry and new electronics. The car is eligible in every TCR national championship and will compete also in the new FIA WTCR presented by OSCARO."
       },
       {
-        "car_class": "WTCC 2018",
+        "car_class": "WTCR 2018",
         "car": "Hyundai i30 N TCR",
         "wheel": "Round",
         "wheel_cat": "round",
@@ -4511,7 +4511,7 @@ window.CARS_DATA =
         "description": "The creation of the i30 N TCR represents Hyundai Motorsport’s first steps into circuit racing, and entrance into one of the fastest growing categories in motorsport. The design phase of the TCR project began in September 2016, with the first completed test car running in April 2017. Based on the road-going i30 model, in line with the TCR regulations the i30 N TCR is powered by a two-litre turbocharged engine connected to a six-speed sequential gearbox."
       },
       {
-        "car_class": "WTCC 2018",
+        "car_class": "WTCR 2018",
         "car": "Peugeot 308 TCR",
         "wheel": "Round",
         "wheel_cat": "round",
@@ -4527,7 +4527,7 @@ window.CARS_DATA =
         "description": "The Peugeot 308 TCR is a technical evolution of the 308 Racing Cup, which was created based on the Peugeot 308 GTi by Peugeot Sport. The four-cylinder turbocharged engine with 350 HP provides a torque of 420 Nm at 3000 rpm. Due to its characteristics, the Peugeot 308 TCR is the perfect choice if you want to compete against the strongest opponents."
       },
       {
-        "car_class": "WTCC 2018",
+        "car_class": "WTCR 2018",
         "car": "Volkswagen Golf GTI TCR",
         "wheel": "Round",
         "wheel_cat": "round",
@@ -4545,10 +4545,10 @@ window.CARS_DATA =
     ]
   },
   {
-    "class": "WTCC 2019",
+    "class": "WTCR 2019",
     "cars": [
       {
-        "car_class": "WTCC 2019",
+        "car_class": "WTCR 2019",
         "car": "Alfa Romeo Giulietta TCR",
         "wheel": "Round",
         "wheel_cat": "round",
@@ -4564,7 +4564,7 @@ window.CARS_DATA =
         "description": "To create unbeatable race cars is the passion of Romeo Ferraris and the realization of the Alfa Romeo Giulietta TCR is a big milestone for the Italian company. Every component has been designed by Romeo Ferraris, and they are proud to represent Alfa Romeo, a brand with a long successful history in touring cars, in the FIA WTCR presented by OSCARO. Powered by a 4-cylinder engine of 1.742 cm3, the Giulietta TCR made its first appearance in the 2016 season in Bahrain."
       },
       {
-        "car_class": "WTCC 2019",
+        "car_class": "WTCR 2019",
         "car": "Audi RS 3 LMS",
         "wheel": "GT",
         "wheel_cat": "gt",
@@ -4580,7 +4580,7 @@ window.CARS_DATA =
         "description": "The Audi RS 3 LMS is being developed by Audi Sport customer racing for the relatively new TCR category. This factory-built entry-level race car with its massively flared fenders and low front splitter is reminiscent of a DTM race car, albeit much closer to the production model. The four-cylinder TFSI engine unit delivers up to 350 HP and lets the car accelerate from 0 to 100 km/h in about 4.5 seconds and achieves a top speed of up to 265 km/h."
       },
       {
-        "car_class": "WTCC 2019",
+        "car_class": "WTCR 2019",
         "car": "CUPRA TCR",
         "wheel": "GT",
         "wheel_cat": "gt",
@@ -4596,7 +4596,7 @@ window.CARS_DATA =
         "description": "Right from the first glance, the curves of the CUPRA are making a clear statement of sportiness. The previous model has been improved in performance and lets you fully enjoy the 350 HP, an increased steering angle and a steering wheel with even more functions. The CUPRA TCR is ready for the challenges of racing today."
       },
       {
-        "car_class": "WTCC 2019",
+        "car_class": "WTCR 2019",
         "car": "Honda Civic TCR",
         "wheel": "Round",
         "wheel_cat": "round",
@@ -4612,7 +4612,7 @@ window.CARS_DATA =
         "description": "After the great success of the previous version based of the FK1 model, J.A.S. Motorsport extend their commitment on the TCR series with the latest version of the Honda Civic hatchback (FK7). The car is completely different compared to the 2016-17 Civic TCR model, having more aero, more complex suspension geometry and new electronics. The car is eligible in every TCR national championship and will compete also in the new FIA WTCR presented by OSCARO."
       },
       {
-        "car_class": "WTCC 2019",
+        "car_class": "WTCR 2019",
         "car": "Hyundai i30 N TCR",
         "wheel": "Round",
         "wheel_cat": "round",
@@ -4644,7 +4644,7 @@ window.CARS_DATA =
         "description": "The Lynk & Co 03 TCR is constructed by Geely Group Motorsport and raced by Cyan Racing for their inaugural FIA WTCR season with Lynk & Co. The car is powered by a 2.0-litre four-cylinder turbo charged engine, producing 350hp and 420Nm as per the regulations. The development of the car was aided by Cyan Racing with drivers Yvan Muller, Thed Björk, Andy Priaulx and Yann Ehrlacher."
       },
       {
-        "car_class": "WTCC 2019",
+        "car_class": "WTCR 2019",
         "car": "Volkswagen Golf GTI TCR",
         "wheel": "Round",
         "wheel_cat": "round",
@@ -4662,10 +4662,10 @@ window.CARS_DATA =
     ]
   },
   {
-    "class": "WTCC 2020",
+    "class": "WTCR 2020",
     "cars": [
       {
-        "car_class": "WTCC 2020",
+        "car_class": "WTCR 2020",
         "car": "Alfa Romeo Giulietta TCR",
         "wheel": "Round",
         "wheel_cat": "round",
@@ -4681,7 +4681,7 @@ window.CARS_DATA =
         "description": "To create unbeatable race cars is the passion of Romeo Ferraris and the realization of the Alfa Romeo Giulietta TCR is a big milestone for the Italian company. Every component has been designed by Romeo Ferraris, and they are proud to represent Alfa Romeo, a brand with a long successful history in touring cars, in the FIA WTCR presented by OSCARO. Powered by a 4-cylinder engine of 1.742 cm3, the Giulietta TCR made its first appearance in the 2016 season in Bahrain."
       },
       {
-        "car_class": "WTCC 2020",
+        "car_class": "WTCR 2020",
         "car": "Audi RS 3 LMS",
         "wheel": "GT",
         "wheel_cat": "gt",
@@ -4697,7 +4697,7 @@ window.CARS_DATA =
         "description": "The Audi RS 3 LMS is being developed by Audi Sport customer racing for the relatively new TCR category. This factory-built entry-level race car with its massively flared fenders and low front splitter is reminiscent of a DTM race car, albeit much closer to the production model. The four-cylinder TFSI engine unit delivers up to 350 HP and lets the car accelerate from 0 to 100 km/h in about 4.5 seconds and achieves a top speed of up to 265 km/h."
       },
       {
-        "car_class": "WTCC 2020",
+        "car_class": "WTCR 2020",
         "car": "CUPRA Leon Competición",
         "wheel": "Round",
         "wheel_cat": "round",
@@ -4713,7 +4713,7 @@ window.CARS_DATA =
         "description": "A new breed of racing cars take shape with 3D printing technology, powered by a 2.0 TSI 340hp engine delivering up to 265 kmph and 410 Nm of torque, with a faster 6-gear sequential gearbox and improved weight distribution."
       },
       {
-        "car_class": "WTCC 2020",
+        "car_class": "WTCR 2020",
         "car": "Honda Civic TCR",
         "wheel": "Round",
         "wheel_cat": "round",
@@ -4729,7 +4729,7 @@ window.CARS_DATA =
         "description": "After the great success of the previous version based of the FK1 model, J.A.S. Motorsport extend their commitment on the TCR series with the latest version of the Honda Civic hatchback (FK7). The car is completely different compared to the 2016-17 Civic TCR model, having more aero, more complex suspension geometry and new electronics. The car is eligible in every TCR national championship and will compete also in the new FIA WTCR presented by OSCARO."
       },
       {
-        "car_class": "WTCC 2020",
+        "car_class": "WTCR 2020",
         "car": "Hyundai i30 N TCR",
         "wheel": "Round",
         "wheel_cat": "round",
@@ -4745,7 +4745,7 @@ window.CARS_DATA =
         "description": "The creation of the i30 N TCR represents Hyundai Motorsport’s first steps into circuit racing, and entrance into one of the fastest growing categories in motorsport. The design phase of the TCR project began in September 2016, with the first completed test car running in April 2017. Based on the road-going i30 model, in line with the TCR regulations the i30 N TCR is powered by a two-litre turbocharged engine connected to a six-speed sequential gearbox."
       },
       {
-        "car_class": "WTCC 2020",
+        "car_class": "WTCR 2020",
         "car": "Lynk & Co 03 TCR",
         "wheel": "Round",
         "wheel_cat": "round",
@@ -4761,7 +4761,7 @@ window.CARS_DATA =
         "description": "The Lynk & Co 03 TCR is constructed by Geely Group Motorsport and raced by Cyan Racing for their inaugural FIA WTCR season with Lynk & Co. The car is powered by a 2.0-litre four-cylinder turbo charged engine, producing 350hp and 420Nm as per the regulations. The development of the car was aided by Cyan Racing with drivers Yvan Muller, Thed Björk, Andy Priaulx and Yann Ehrlacher."
       },
       {
-        "car_class": "WTCC 2020",
+        "car_class": "WTCR 2020",
         "car": "Renault Mégane RS TCR",
         "wheel": "GT",
         "wheel_cat": "gt",
@@ -4779,10 +4779,10 @@ window.CARS_DATA =
     ]
   },
   {
-    "class": "WTCC 2021",
+    "class": "WTCR 2021",
     "cars": [
       {
-        "car_class": "WTCC 2021",
+        "car_class": "WTCR 2021",
         "car": "Audi RS 3 LMS 2021",
         "wheel": "GT",
         "wheel_cat": "gt",
@@ -4798,7 +4798,7 @@ window.CARS_DATA =
         "description": "After the release of 4th generation of Audi A3, Audi brought this evolution of the RS 3 LMS to FIA WTCR 2021"
       },
       {
-        "car_class": "WTCC 2021",
+        "car_class": "WTCR 2021",
         "car": "CUPRA Leon Competición",
         "wheel": "Round",
         "wheel_cat": "round",
@@ -4814,7 +4814,7 @@ window.CARS_DATA =
         "description": "A new breed of racing cars take shape with 3D printing technology, powered by a 2.0 TSI 340hp engine delivering up to 265 kmph and 410 Nm of torque, with a faster 6-gear sequential gearbox and improved weight distribution."
       },
       {
-        "car_class": "WTCC 2021",
+        "car_class": "WTCR 2021",
         "car": "Honda Civic TCR",
         "wheel": "Round",
         "wheel_cat": "round",
@@ -4830,7 +4830,7 @@ window.CARS_DATA =
         "description": "After the great success of the previous version based of the FK1 model, J.A.S. Motorsport extend their commitment on the TCR series with the latest version of the Honda Civic hatchback (FK7). The car is completely different compared to the 2016-17 Civic TCR model, having more aero, more complex suspension geometry and new electronics. The car is eligible in every TCR national championship and will compete also in the new FIA WTCR presented by OSCARO."
       },
       {
-        "car_class": "WTCC 2021",
+        "car_class": "WTCR 2021",
         "car": "Hyundai Elantra TCR 2021",
         "wheel": "GT",
         "wheel_cat": "gt",
@@ -4846,7 +4846,7 @@ window.CARS_DATA =
         "description": "In 2020 a third car, based on the TCR regulations, was unveiled by Hyundai Motorsport Customer Racing based on the Hyundai Elantra saloon model. The car made its competitive debut at the 2021 Michelin Pilot Challenge season opener at the Daytona International Speedway"
       },
       {
-        "car_class": "WTCC 2021",
+        "car_class": "WTCR 2021",
         "car": "Lada Vesta TCR",
         "wheel": "Round",
         "wheel_cat": "round",
@@ -4862,7 +4862,7 @@ window.CARS_DATA =
         "description": "LADA Vesta Sport TCR became the first Russian car built according to the requirements of the international TCR class. Already in their first race, the pilots driving this car won the winning double! Since 2017, the car has been presented in the Russian series of circuit races, where the pilots of the LADA Sport ROSNEFT team are consistently the leaders of the peleton."
       },
       {
-        "car_class": "WTCC 2021",
+        "car_class": "WTCR 2021",
         "car": "Lynk & Co 03 TCR",
         "wheel": "Round",
         "wheel_cat": "round",
@@ -4880,10 +4880,10 @@ window.CARS_DATA =
     ]
   },
   {
-    "class": "WTCC 2022",
+    "class": "WTCR 2022",
     "cars": [
       {
-        "car_class": "WTCC 2022",
+        "car_class": "WTCR 2022",
         "car": "Audi RS 3 LMS 2021",
         "wheel": "GT",
         "wheel_cat": "gt",
@@ -4899,7 +4899,7 @@ window.CARS_DATA =
         "description": "After the release of 4th generation of Audi A3, Audi brought this evolution of the RS 3 LMS to FIA WTCR 2021"
       },
       {
-        "car_class": "WTCC 2022",
+        "car_class": "WTCR 2022",
         "car": "CUPRA Leon Competición",
         "wheel": "Round",
         "wheel_cat": "round",
@@ -4915,7 +4915,7 @@ window.CARS_DATA =
         "description": "A new breed of racing cars take shape with 3D printing technology, powered by a 2.0 TSI 340hp engine delivering up to 265 kmph and 410 Nm of torque, with a faster 6-gear sequential gearbox and improved weight distribution."
       },
       {
-        "car_class": "WTCC 2022",
+        "car_class": "WTCR 2022",
         "car": "Honda Civic TCR",
         "wheel": "Round",
         "wheel_cat": "round",
@@ -4931,7 +4931,7 @@ window.CARS_DATA =
         "description": "After the great success of the previous version based of the FK1 model, J.A.S. Motorsport extend their commitment on the TCR series with the latest version of the Honda Civic hatchback (FK7). The car is completely different compared to the 2016-17 Civic TCR model, having more aero, more complex suspension geometry and new electronics. The car is eligible in every TCR national championship and will compete also in the new FIA WTCR presented by OSCARO."
       },
       {
-        "car_class": "WTCC 2022",
+        "car_class": "WTCR 2022",
         "car": "Hyundai Elantra TCR 2022",
         "wheel": "GT",
         "wheel_cat": "gt",
@@ -4947,7 +4947,7 @@ window.CARS_DATA =
         "description": "In 2020 a third car, based on the TCR regulations, was unveiled by Hyundai Motorsport Customer Racing based on the Hyundai Elantra saloon model. The car made its competitive debut at the 2021 Michelin Pilot Challenge season opener at the Daytona International Speedway"
       },
       {
-        "car_class": "WTCC 2022",
+        "car_class": "WTCR 2022",
         "car": "Lynk & Co 03 TCR",
         "wheel": "Round",
         "wheel_cat": "round",

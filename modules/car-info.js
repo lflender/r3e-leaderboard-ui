@@ -54,23 +54,24 @@
 
   let wheelFilter = '', transFilter = '', classFilter = '';
   
-  // Build class options from data (normalize WTCC 2018-2020 -> WTCR)
-  const normalizeClassName = (name) => String(name || '').replace(/^WTCC\s(2018|2019|2020)\b/, 'WTCR $1');
-  const classOptions = [{ value: '', label: 'All classes' }].concat(
-    data.map(c => {
-      const n = normalizeClassName(c.class || '');
-      return { value: n, label: n };
-    })
-  );
-  const seen = new Set();
-  const classOptionsUnique = classOptions.filter(o => {
-    if (seen.has(o.value)) return false; seen.add(o.value); return true;
+  // Build class options from data
+  const classOptions = [{ value: '', label: 'All classes' }];
+  const classesSet = new Set();
+  data.forEach(cls => {
+    const className = (cls.class || '').trim();
+    if (className && className !== '-') {
+      classesSet.add(className);
+    }
+  });
+  const uniqueClasses = Array.from(classesSet).sort();
+  uniqueClasses.forEach(cls => {
+    classOptions.push({ value: cls, label: cls });
   });
   
   // Use the new CustomSelect component
   new CustomSelect('wheel-filter-ui', wheelOptions, v => { wheelFilter = v; renderTable(); });
   new CustomSelect('trans-filter-ui', transOptions, v => { transFilter = v; renderTable(); });
-  new CustomSelect('class-filter-ui-cars', classOptionsUnique, v => { classFilter = v; renderTable(); });
+  new CustomSelect('class-filter-ui-cars', classOptions, v => { classFilter = v; renderTable(); });
 
   function carMatchesFilters(car) {
     const w = (car.wheel_cat || car.wheel || '').toLowerCase();

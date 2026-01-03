@@ -139,6 +139,68 @@ const ISO_COUNTRY_CODES = [
 ];
 
 /**
+ * Manual country name to ISO code mappings for special cases
+ */
+const COUNTRY_NAME_MAP = {
+    'netherlands': 'NL',
+    'netherland': 'NL',
+    'the netherlands': 'NL',
+    'czech republic': 'CZ',
+    'czechia': 'CZ',
+    'antigua and barbuda': 'AG',
+    'antigua & barbuda': 'AG',
+    'romania': 'RO',
+    'bosnia and herzegovina': 'BA',
+    'bosnia & herzegovina': 'BA',
+    'moldova': 'MD',
+    'moldova, republic of': 'MD',
+    'republic of moldova': 'MD',
+    'bolivia': 'BO',
+    'bolivia, plurinational state of': 'BO',
+    'brunei': 'BN',
+    'brunei darussalam': 'BN',
+    'iran': 'IR',
+    'iran, islamic republic of': 'IR',
+    'islamic republic of iran': 'IR',
+    'trinidad and tobago': 'TT',
+    'trinidad & tobago': 'TT',
+    'sint maarten': 'SX',
+    'sint maarten (dutch part)': 'SX',
+    'taiwan': 'TW',
+    'taiwan, province of china': 'TW',
+    'chinese taipei': 'TW',
+    'hong kong': 'HK',
+    'hongkong': 'HK',
+    'venezuela': 'VE',
+    'venezuela, bolivarian republic of': 'VE',
+    'bolivarian republic of venezuela': 'VE',
+    'swaziland': 'SZ',
+    'eswatini': 'SZ',
+    'turkey': 'TR',
+    'türkiye': 'TR',
+    'turkiye': 'TR',
+    'palestine': 'PS',
+    'palestine, state of': 'PS',
+    'state of palestine': 'PS',
+    'vietnam': 'VN',
+    'korea, democratic people\'s republic of': 'KP',
+    'democratic people\'s republic of korea': 'KP',
+    'viet nam': 'VN',
+    'united states': 'US',
+    'usa': 'US',
+    'united kingdom': 'GB',
+    'uk': 'GB',
+    'great britain': 'GB',
+    'korea': 'KR',
+    'south korea': 'KR',
+    'republic of korea': 'KR',
+    'korea, republic of': 'KR',
+    'north korea': 'KP',
+    'russia': 'RU',
+    'russian federation': 'RU'
+};
+
+/**
  * Resolves a country name to an ISO code using Intl.DisplayNames
  * @param {string} name - Country name
  * @returns {string|null} Country code or null
@@ -146,13 +208,18 @@ const ISO_COUNTRY_CODES = [
 function findCountryCodeByName(name) {
     if (!name) return null;
     const nm = String(name).trim().toLowerCase();
+    
+    // Check manual mappings first
+    if (COUNTRY_NAME_MAP[nm]) return COUNTRY_NAME_MAP[nm];
+    
     try {
         const disp = new Intl.DisplayNames(['en'], { type: 'region' });
         for (const code of ISO_COUNTRY_CODES) {
             const display = disp.of(code);
             if (!display) continue;
             const d = String(display).toLowerCase();
-            if (d === nm || d.includes(nm) || nm.includes(d)) return code;
+            // Use exact match only to avoid false positives
+            if (d === nm) return code;
         }
     } catch (e) {
         // Intl or DisplayNames not available

@@ -405,6 +405,8 @@ function renderDetailRow(item, showAbsolutePosition = false) {
     const absoluteTotal = item.absoluteTotal ? String(item.absoluteTotal).trim() : null;
     
     const name = item.Name || item.name || '-';
+    const country = item.Country || item.country || '';
+    const flag = R3EUtils.countryToFlag(country);
     const highlisted = item.highlisted || item.Highlisted || false;
     
     const lapTime = item.LapTime || item['Lap Time'] || item.lap_time || '-';
@@ -454,9 +456,9 @@ function renderDetailRow(item, showAbsolutePosition = false) {
     // Driver name
     if (!highlisted) {
         const encoded = encodeURIComponent(String(name));
-        html += `<td><a class="detail-driver-link" href="index.html?driver=${encoded}">${R3EUtils.escapeHtml(String(name))}</a></td>`;
+        html += `<td><a class="detail-driver-link" href="index.html?driver=${encoded}">${flag}${R3EUtils.escapeHtml(String(name))}</a></td>`;
     } else {
-        html += `<td>${R3EUtils.escapeHtml(String(name))}</td>`;
+        html += `<td>${flag}${R3EUtils.escapeHtml(String(name))}</td>`;
     }
     
     // Lap time

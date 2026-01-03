@@ -267,19 +267,30 @@ class TableRenderer {
      * @returns {string} HTML string
      */
     renderTrackCell(value) {
+        return TableRenderer.renderTrackCellStatic(value);
+    }
+    
+    /**
+     * Static method to render track cell (can be used outside of class instances)
+     * @param {string} value - Track name
+     * @param {string} tdClass - Optional CSS class for td element
+     * @returns {string} HTML string
+     */
+    static renderTrackCellStatic(value, tdClass = '') {
         let trackStr = String(value || '');
+        const classAttr = tdClass ? ` class="${tdClass}"` : '';
         
         // Split track name and layout (e.g., "Donington Park - Grand Prix")
         const parts = trackStr.split(/\s*[-–—]\s+/);
         if (parts.length >= 2) {
             const trackName = R3EUtils.escapeHtml(parts[0]);
             const layoutName = R3EUtils.escapeHtml(parts.slice(1).join(' - '));
-            return `<td>${trackName} <span class="track-layout">${layoutName}</span></td>`;
+            return `<td${classAttr}>${trackName} <span class="track-layout">${layoutName}</span></td>`;
         } else {
             // No layout part, just return track name with word break
             trackStr = trackStr.replace(/(\s+)([-–—])(\s+)/g, '$1<wbr>$2$3');
             trackStr = R3EUtils.escapeHtml(trackStr).replace(/&lt;wbr&gt;/g, '<wbr>');
-            return `<td>${trackStr}</td>`;
+            return `<td${classAttr}>${trackStr}</td>`;
         }
     }
     

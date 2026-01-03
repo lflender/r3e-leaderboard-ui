@@ -4,30 +4,43 @@
  */
 
 // ===========================================
-// URL Parameters & State
+// State Management
 // ===========================================
-const trackParam = R3EUtils.getUrlParam('track');
-const classParam = R3EUtils.getUrlParam('class');
-const posParam = parseInt(R3EUtils.getUrlParam('pos') || '');
-const difficultyParam = R3EUtils.getUrlParam('difficulty') || 'All difficulties';
-const driverParam = R3EUtils.getUrlParam('driver') || '';
-const timeParam = R3EUtils.getUrlParam('time') || '';
+const DetailState = {
+    // URL Parameters
+    trackParam: R3EUtils.getUrlParam('track'),
+    classParam: R3EUtils.getUrlParam('class'),
+    posParam: parseInt(R3EUtils.getUrlParam('pos') || ''),
+    difficultyParam: R3EUtils.getUrlParam('difficulty') || 'All difficulties',
+    driverParam: R3EUtils.getUrlParam('driver') || '',
+    timeParam: R3EUtils.getUrlParam('time') || '',
+    
+    // State
+    posApplied: false,
+    currentPage: 1,
+    itemsPerPage: 100,
+    allResults: [],
+    unfilteredResults: [],
+    carFilterSelect: null,
+    availableCars: [],
+    lastActionTime: 0
+};
 
-// Ensure pos param is applied only once
-let posApplied = false;
-
-// Pagination state
-let currentPage = 1;
-let itemsPerPage = 100;
-let allResults = [];
-let unfilteredResults = [];
-
-// Car filter
-let carFilterSelect = null;
-let availableCars = [];
-
-// Track last action time to prevent premature "no results" display
-let lastActionTime = 0;
+// Backward compatibility - keep old variable names pointing to DetailState
+const trackParam = DetailState.trackParam;
+const classParam = DetailState.classParam;
+const posParam = DetailState.posParam;
+const difficultyParam = DetailState.difficultyParam;
+const driverParam = DetailState.driverParam;
+const timeParam = DetailState.timeParam;
+let posApplied = DetailState.posApplied;
+let currentPage = DetailState.currentPage;
+let itemsPerPage = DetailState.itemsPerPage;
+let allResults = DetailState.allResults;
+let unfilteredResults = DetailState.unfilteredResults;
+let carFilterSelect = DetailState.carFilterSelect;
+let availableCars = DetailState.availableCars;
+let lastActionTime = DetailState.lastActionTime;
 
 // ===========================================
 // Initialize
@@ -164,42 +177,15 @@ function transformLeaderboardData(leaderboardData, data) {
                           leaderboardData[0]?.car_class?.class?.name || null;
     
     return leaderboardData.map((entry, index) => {
-        // Prefer the original position from the source if available; fallback to array index
-        let originalPos = entry.Position || entry.position || entry.Pos || entry.rank;
-        const resolvedPosition = parseInt(String(originalPos ?? '').replace(/[^0-9]/g, ''), 10);
-        const position = Number.isFinite(resolvedPosition) && resolvedPosition > 0 ? resolvedPosition : (index + 1);
+        // Use DataNormalizer for consistent field extraction
+        const normalized = DataNormalizer.normalizeLeaderboardEntry(entry, data, index, totalEntries);
         
-        let carClass = entry.car_class?.class?.Name || entry.car_class?.class?.name || 
-                      entry.car_class?.Name || entry.car_class?.name || entry.CarClass || '';
-        if (!carClass) carClass = firstClassName || defaultClassName || '';
+        // Override car class with firstClassName or defaultClassName if empty
+        if (!normalized.CarClass) {
+            normalized.CarClass = firstClassName || defaultClassName || '';
+        }
         
-        const carName = entry.car_class?.car?.Name || entry.car_class?.car?.name || 
-                       entry.vehicle?.Name || entry.vehicle?.name || 
-                       entry.car?.Name || entry.car?.name || entry.Car || '';
-        
-        const classId = entry.class_id || entry.ClassID || entry['Class ID'] || 
-                       entry.car_class?.class?.Id || entry.car_class?.class?.ID || null;
-        const trackIdFromEntry = entry.track_id || entry.TrackID || entry['Track ID'] || 
-                                data.track_info?.Id || data.track_info?.ID || null;
-        
-        // Use array index as position - leaderboard data is already sorted by position
-        return {
-            Position: position,
-            Name: entry.driver?.Name || entry.driver?.name || entry.Name || 'Unknown',
-            Country: entry.country?.Name || entry.country?.name || entry.Country || '',
-            CarClass: carClass,
-            Car: carName,
-            LapTime: entry.laptime || entry.lap_time || entry.LapTime || entry.time || '',
-            Rank: entry.rank?.Name || entry.rank?.name || entry.Rank || '',
-            Team: entry.team?.Name || entry.team?.name || entry.Team || '',
-            Difficulty: entry.driving_model || entry.difficulty || entry.Difficulty || '',
-            Track: data.track_info?.Name || data.track_name || '',
-            TotalEntries: totalEntries,
-            ClassID: classId || undefined,
-            TrackID: trackIdFromEntry || undefined,
-            class_id: classId || undefined,
-            track_id: trackIdFromEntry || undefined
-        };
+        return normalized;
     });
 }
 
@@ -390,45 +376,47 @@ function displayResults(data) {
  * @returns {string} HTML string
  */
 function renderDetailRow(item, showAbsolutePosition = false) {
-    const position = item.Position || item.position || item.Pos || '-';
+    // Extract fields using helper functions
+    const position = DataNormalizer.extractPosition(item);
+    const name = DataNormalizer.extractName(item);
+    const country = DataNormalizer.extractCountry(item);
+    const car = DataNormalizer.extractCar(item);
+    const difficulty = DataNormalizer.extractDifficulty(item);
+    const lapTime = DataNormalizer.extractLapTime(item);
+    
     const totalEntries = R3EUtils.getTotalEntriesCount(item);
     const posNum = String(position).trim();
     const totalNum = totalEntries ? String(totalEntries).trim() : '';
     const badgeColor = R3EUtils.getPositionBadgeColor(parseInt(posNum), parseInt(totalNum));
     
-    // When car filter is active, we swap the display:
-    // - Small label shows filtered position (position within the car filter)
-    // - Main badge shows absolute position (position across all cars)
+    const flag = R3EUtils.countryToFlag(country);
+    const highlisted = item.highlisted || item.Highlisted || false;
+    
+    // Position details for filtering
     const filteredPos = item.filteredPosition ? String(item.filteredPosition).trim() : null;
     const filteredTotal = item.filteredTotal ? String(item.filteredTotal).trim() : null;
     const absolutePos = item.absolutePosition ? String(item.absolutePosition).trim() : null;
     const absoluteTotal = item.absoluteTotal ? String(item.absoluteTotal).trim() : null;
     
-    const name = item.Name || item.name || '-';
-    const country = item.Country || item.country || '';
-    const flag = R3EUtils.countryToFlag(country);
-    const highlisted = item.highlisted || item.Highlisted || false;
-    
-    const lapTime = item.LapTime || item['Lap Time'] || item.lap_time || '-';
+    // Lap time parsing
     const parts = String(lapTime).split(/,\s*/);
     const mainClassic = R3EUtils.formatClassicLapTime(parts[0] || '');
     const deltaRaw = parts.slice(1).join(' ');
     const deltaClassic = deltaRaw ? R3EUtils.formatClassicLapTime(deltaRaw) : '';
     
-    const car = item.Car || item.car || '-';
-    
-    const difficulty = item.Difficulty || item.difficulty || '-';
+    // Difficulty class
     const diffStr = String(difficulty).trim().toLowerCase();
     let diffClass = '';
     if (diffStr === 'get real') diffClass = 'difficulty-get-real';
     else if (diffStr === 'amateur') diffClass = 'difficulty-amateur';
     else if (diffStr === 'novice') diffClass = 'difficulty-novice';
     
-    const rowTrackId = item.track_id || item.TrackID || trackParam || '';
-    const rowClassId = item.class_id || item.ClassID || '';
+    // Data attributes
+    const rowTrackId = DataNormalizer.extractTrackId(item) || trackParam || '';
+    const rowClassId = DataNormalizer.extractClassId(item) || '';
+    const rowName = name;
+    const rowTime = lapTime;
     
-    const rowName = item.Name || item.name || '';
-    const rowTime = item.LapTime || item['Lap Time'] || item.lap_time || '';
     let html = `<tr data-trackid="${R3EUtils.escapeHtml(String(rowTrackId))}" data-classid="${R3EUtils.escapeHtml(String(rowClassId))}" data-name="${R3EUtils.escapeHtml(String(rowName))}" data-time="${R3EUtils.escapeHtml(String(rowTime))}">`;
     
     // Position
@@ -710,31 +698,58 @@ function buildCarFilter(data) {
     }
 }
 
+// ===========================================
+// Filter Helpers
+// ===========================================
+
+/**
+ * Gets selected filter value from UI
+ * @param {string} selector - CSS selector for filter UI
+ * @param {string} defaultValue - Default value if not found
+ * @returns {string} Selected filter value
+ */
+function getSelectedFilter(selector, defaultValue) {
+    const toggle = document.querySelector(`${selector} .custom-select__toggle`);
+    return toggle ? toggle.textContent.replace(' ▾', '').trim() : defaultValue;
+}
+
+/**
+ * Checks if entry matches difficulty filter
+ * @param {Object} entry - Data entry
+ * @param {string} selectedDifficulty - Selected difficulty
+ * @returns {boolean} True if matches
+ */
+function matchesDifficultyFilter(entry, selectedDifficulty) {
+    if (selectedDifficulty === 'All difficulties') return true;
+    const diff = getField(entry, FIELD_NAMES.DIFFICULTY);
+    return diff.toLowerCase() === selectedDifficulty.toLowerCase();
+}
+
+/**
+ * Checks if entry matches car filter
+ * @param {Object} entry - Data entry
+ * @param {string} selectedCar - Selected car
+ * @returns {boolean} True if matches
+ */
+function matchesCarFilter(entry, selectedCar) {
+    if (selectedCar === 'All cars') return true;
+    const car = getField(entry, FIELD_NAMES.CAR);
+    return car === selectedCar;
+}
+
 /**
  * Filter and display results by difficulty and car
  */
 function filterAndDisplayResults() {
     lastActionTime = Date.now();
-    const difficultyToggle = document.querySelector('#difficulty-filter-ui .custom-select__toggle');
-    const selectedDifficulty = difficultyToggle ? 
-        difficultyToggle.textContent.replace(' ▾', '').trim() : 'All difficulties';
     
-    const carToggle = document.querySelector('#car-filter-ui .custom-select__toggle');
-    const selectedCar = carToggle ? 
-        carToggle.textContent.replace(' ▾', '').trim() : 'All cars';
+    const selectedDifficulty = getSelectedFilter('#difficulty-filter-ui', 'All difficulties');
+    const selectedCar = getSelectedFilter('#car-filter-ui', 'All cars');
     
-    // Apply both filters
+    // Apply both filters using helper functions
     allResults = unfilteredResults.filter(entry => {
-        // Difficulty filter
-        const diff = entry.Difficulty || entry.difficulty || entry.driving_model || '';
-        const difficultyMatch = selectedDifficulty === 'All difficulties' || 
-            diff.toLowerCase() === selectedDifficulty.toLowerCase();
-        
-        // Car filter
-        const car = entry.Car || entry.car || '';
-        const carMatch = selectedCar === 'All cars' || car === selectedCar;
-        
-        return difficultyMatch && carMatch;
+        return matchesDifficultyFilter(entry, selectedDifficulty) && 
+               matchesCarFilter(entry, selectedCar);
     });
     
     posApplied = false;

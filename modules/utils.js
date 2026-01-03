@@ -117,8 +117,10 @@ function getTotalEntriesCount(item) {
 }
 
 // ========================================
-// Country & Flag Utilities
+// Country & Flag Utilities (Delegated to flag-helper.js)
 // ========================================
+// These functions are now provided by modules/flag-helper.js
+// Kept here for backward compatibility
 
 /**
  * Converts a 2-letter country code to a regional indicator flag emoji
@@ -126,105 +128,16 @@ function getTotalEntriesCount(item) {
  * @returns {string} Flag emoji or empty string
  */
 function codeToFlag(code) {
-    if (!code || code.length !== 2) return '';
-    const A = 'A'.charCodeAt(0);
-    return String.fromCodePoint(...[...code.toUpperCase()].map(c => 0x1F1E6 + (c.charCodeAt(0) - A)));
+    return window.FlagHelper ? window.FlagHelper.codeToFlag(code) : '';
 }
 
 /**
- * ISO 3166-1 alpha-2 country codes
- */
-const ISO_COUNTRY_CODES = [
-    'AF','AX','AL','DZ','AS','AD','AO','AI','AQ','AG','AR','AM','AW','AU','AT','AZ','BS','BH','BD','BB','BY','BE','BZ','BJ','BM','BT','BO','BQ','BA','BW','BV','BR','IO','BN','BG','BF','BI','KH','CM','CA','CV','KY','CF','TD','CL','CN','CX','CC','CO','KM','CG','CD','CK','CR','CI','HR','CU','CW','CY','CZ','DK','DJ','DM','DO','EC','EG','SV','GQ','ER','EE','SZ','ET','FK','FO','FJ','FI','FR','GF','PF','TF','GA','GM','GE','DE','GH','GI','GR','GL','GD','GP','GU','GT','GG','GN','GW','GY','HT','HM','VA','HN','HK','HU','IS','IN','ID','IR','IQ','IE','IM','IL','IT','JM','JP','JE','JO','KZ','KE','KI','KP','KR','KW','KG','LA','LV','LB','LS','LR','LY','LI','LT','LU','MO','MG','MW','MY','MV','ML','MT','MH','MQ','MR','MU','YT','MX','FM','MD','MC','MN','ME','MS','MA','MZ','MM','NA','NR','NP','NL','NC','NZ','NI','NE','NG','NU','NF','MK','MP','NO','OM','PK','PW','PS','PA','PG','PY','PE','PH','PN','PL','PT','PR','QA','RE','RO','RU','RW','BL','SH','KN','LC','MF','PM','VC','WS','SM','ST','SA','SN','RS','SC','SL','SG','SX','SK','SI','SB','SO','ZA','GS','SS','ES','LK','SD','SR','SJ','SE','CH','SY','TW','TJ','TZ','TH','TL','TG','TK','TO','TT','TN','TR','TM','TC','TV','UG','UA','AE','GB','US','UM','UY','UZ','VU','VE','VN','VG','VI','WF','EH','YE','ZM','ZW'
-];
-
-/**
- * Manual country name to ISO code mappings for special cases
- */
-const COUNTRY_NAME_MAP = {
-    'netherlands': 'NL',
-    'netherland': 'NL',
-    'the netherlands': 'NL',
-    'czech republic': 'CZ',
-    'czechia': 'CZ',
-    'antigua and barbuda': 'AG',
-    'antigua & barbuda': 'AG',
-    'romania': 'RO',
-    'bosnia and herzegovina': 'BA',
-    'bosnia & herzegovina': 'BA',
-    'moldova': 'MD',
-    'moldova, republic of': 'MD',
-    'republic of moldova': 'MD',
-    'bolivia': 'BO',
-    'bolivia, plurinational state of': 'BO',
-    'brunei': 'BN',
-    'brunei darussalam': 'BN',
-    'iran': 'IR',
-    'iran, islamic republic of': 'IR',
-    'islamic republic of iran': 'IR',
-    'trinidad and tobago': 'TT',
-    'trinidad & tobago': 'TT',
-    'sint maarten': 'SX',
-    'sint maarten (dutch part)': 'SX',
-    'taiwan': 'TW',
-    'taiwan, province of china': 'TW',
-    'chinese taipei': 'TW',
-    'hong kong': 'HK',
-    'hongkong': 'HK',
-    'venezuela': 'VE',
-    'venezuela, bolivarian republic of': 'VE',
-    'bolivarian republic of venezuela': 'VE',
-    'swaziland': 'SZ',
-    'eswatini': 'SZ',
-    'turkey': 'TR',
-    'türkiye': 'TR',
-    'turkiye': 'TR',
-    'palestine': 'PS',
-    'palestine, state of': 'PS',
-    'state of palestine': 'PS',
-    'vietnam': 'VN',
-    'korea, democratic people\'s republic of': 'KP',
-    'democratic people\'s republic of korea': 'KP',
-    'viet nam': 'VN',
-    'united states': 'US',
-    'usa': 'US',
-    'united kingdom': 'GB',
-    'uk': 'GB',
-    'great britain': 'GB',
-    'korea': 'KR',
-    'south korea': 'KR',
-    'republic of korea': 'KR',
-    'korea, republic of': 'KR',
-    'north korea': 'KP',
-    'russia': 'RU',
-    'russian federation': 'RU'
-};
-
-/**
- * Resolves a country name to an ISO code using Intl.DisplayNames
+ * Resolves a country name to an ISO code
  * @param {string} name - Country name
  * @returns {string|null} Country code or null
  */
 function findCountryCodeByName(name) {
-    if (!name) return null;
-    const nm = String(name).trim().toLowerCase();
-    
-    // Check manual mappings first
-    if (COUNTRY_NAME_MAP[nm]) return COUNTRY_NAME_MAP[nm];
-    
-    try {
-        const disp = new Intl.DisplayNames(['en'], { type: 'region' });
-        for (const code of ISO_COUNTRY_CODES) {
-            const display = disp.of(code);
-            if (!display) continue;
-            const d = String(display).toLowerCase();
-            // Use exact match only to avoid false positives
-            if (d === nm) return code;
-        }
-    } catch (e) {
-        // Intl or DisplayNames not available
-    }
-    return null;
+    return window.FlagHelper ? window.FlagHelper.findCountryCodeByName(name) : null;
 }
 
 /**
@@ -233,29 +146,7 @@ function findCountryCodeByName(name) {
  * @returns {string} Flag emoji with space or empty string
  */
 function countryToFlag(country) {
-    if (!country) return '';
-    const s = String(country).trim();
-    
-    // If it already contains regional indicator symbols or emoji, return it
-    try {
-        if (/\p{Regional_Indicator}/u.test(s) || /[\u{1F1E6}-\u{1F1FF}]/u.test(s)) return s + ' ';
-    } catch (e) {}
-
-    // If it's a 2-letter code (e.g., GB, US), convert
-    if (/^[A-Za-z]{2}$/.test(s)) {
-        return codeToFlag(s) + ' ';
-    }
-
-    // If value contains a country code in parentheses like "United Kingdom (GB)", extract
-    const paren = s.match(/\(([A-Za-z]{2})\)$/);
-    if (paren) return codeToFlag(paren[1]) + ' ';
-
-    // Try to map the full country name to an ISO code
-    const mapped = findCountryCodeByName(s);
-    if (mapped) return codeToFlag(mapped) + ' ';
-
-    // Nothing matched — return empty
-    return '';
+    return window.FlagHelper ? window.FlagHelper.countryToFlag(country) : '';
 }
 
 // ========================================

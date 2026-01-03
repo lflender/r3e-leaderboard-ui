@@ -353,9 +353,18 @@
           else html += `<td class="no-wrap">${escMain}</td>`;
         } else if (key === 'Track' || key === 'track' || key === 'TrackName' || key === 'track_name') {
           let trackStr = String(value || '');
-          trackStr = trackStr.replace(/(\s+)([-–—])(\s+)/g, '$1<wbr>$2$3');
-          trackStr = R3EUtils.escapeHtml(trackStr).replace(/&lt;wbr&gt;/g, '<wbr>');
-          html += `<td class="track-cell">${trackStr}</td>`;
+          // Split track name and layout (e.g., "Donington Park - Grand Prix")
+          const parts = trackStr.split(/\s*[-–—]\s+/);
+          if (parts.length >= 2) {
+            const trackName = R3EUtils.escapeHtml(parts[0]);
+            const layoutName = R3EUtils.escapeHtml(parts.slice(1).join(' - '));
+            html += `<td class="track-cell">${trackName} <span class="track-layout">${layoutName}</span></td>`;
+          } else {
+            // No layout part, just return track name with word break
+            trackStr = trackStr.replace(/(\s+)([-–—])(\s+)/g, '$1<wbr>$2$3');
+            trackStr = R3EUtils.escapeHtml(trackStr).replace(/&lt;wbr&gt;/g, '<wbr>');
+            html += `<td class="track-cell">${trackStr}</td>`;
+          }
         } else {
           html += `<td>${formatValue(value)}</td>`;
         }

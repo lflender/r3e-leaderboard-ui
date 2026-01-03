@@ -262,15 +262,25 @@ class TableRenderer {
     }
     
     /**
-     * Renders track cell with word break
+     * Renders track cell with word break and styled layout part
      * @param {string} value - Track name
      * @returns {string} HTML string
      */
     renderTrackCell(value) {
         let trackStr = String(value || '');
-        trackStr = trackStr.replace(/(\s+)([-–—])(\s+)/g, '$1<wbr>$2$3');
-        trackStr = R3EUtils.escapeHtml(trackStr).replace(/&lt;wbr&gt;/g, '<wbr>');
-        return `<td>${trackStr}</td>`;
+        
+        // Split track name and layout (e.g., "Donington Park - Grand Prix")
+        const parts = trackStr.split(/\s*[-–—]\s+/);
+        if (parts.length >= 2) {
+            const trackName = R3EUtils.escapeHtml(parts[0]);
+            const layoutName = R3EUtils.escapeHtml(parts.slice(1).join(' - '));
+            return `<td>${trackName} <span class="track-layout">${layoutName}</span></td>`;
+        } else {
+            // No layout part, just return track name with word break
+            trackStr = trackStr.replace(/(\s+)([-–—])(\s+)/g, '$1<wbr>$2$3');
+            trackStr = R3EUtils.escapeHtml(trackStr).replace(/&lt;wbr&gt;/g, '<wbr>');
+            return `<td>${trackStr}</td>`;
+        }
     }
     
     /**

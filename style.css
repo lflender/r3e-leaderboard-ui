@@ -1535,3 +1535,11 @@ footer p {
     font-size: 0.8rem;
     padding: 0.12rem 0.45rem;
 }
+
+/* Track layout styling in result tables */
+.track-layout {
+    font-size: 0.85em;
+    color: #999;
+    font-style: italic;
+    font-weight: 400;
+}

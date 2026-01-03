@@ -178,6 +178,75 @@ class Pagination {
 }
 
 /**
+ * Static helper to generate pagination HTML without creating an instance
+ * @param {Object} options - Pagination options
+ * @param {number} options.startIndex - Start index (0-based)
+ * @param {number} options.endIndex - End index (exclusive)
+ * @param {number} options.total - Total items
+ * @param {number} options.currentPage - Current page number
+ * @param {number} options.totalPages - Total pages
+ * @param {string} options.onPageChange - Function name to call on page change (e.g., "goToPage")
+ * @returns {string} Pagination HTML
+ */
+function generatePaginationHTML(options) {
+    const { startIndex, endIndex, total, currentPage, totalPages, onPageChange } = options;
+    
+    if (totalPages <= 1) return '';
+    
+    // Build info text
+    const info = `Showing ${startIndex + 1}-${endIndex} of ${total}`;
+    
+    // Build buttons HTML
+    let buttons = '';
+    
+    // Previous button
+    if (currentPage > 1) {
+        buttons += `<button onclick="${onPageChange}(${currentPage - 1})" class="page-btn">‹ Previous</button>`;
+    }
+    
+    // Page number buttons
+    const maxPagesToShow = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+    
+    if (endPage - startPage < maxPagesToShow - 1) {
+        startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    }
+    
+    // First page + ellipsis
+    if (startPage > 1) {
+        buttons += `<button onclick="${onPageChange}(1)" class="page-btn">1</button>`;
+        if (startPage > 2) {
+            buttons += '<span class="page-ellipsis">...</span>';
+        }
+    }
+    
+    // Page number range
+    for (let i = startPage; i <= endPage; i++) {
+        const activeClass = i === currentPage ? 'active' : '';
+        buttons += `<button onclick="${onPageChange}(${i})" class="page-btn ${activeClass}">${i}</button>`;
+    }
+    
+    // Ellipsis + last page
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            buttons += '<span class="page-ellipsis">...</span>';
+        }
+        buttons += `<button onclick="${onPageChange}(${totalPages})" class="page-btn">${totalPages}</button>`;
+    }
+    
+    // Next button
+    if (currentPage < totalPages) {
+        buttons += `<button onclick="${onPageChange}(${currentPage + 1})" class="page-btn">Next ›</button>`;
+    }
+    
+    return `<div class="pagination">
+    <div class="pagination-info">${info}</div>
+    <div class="pagination-buttons">${buttons}</div>
+</div>`;
+}
+
+/**
  * Legacy helper function - creates pagination and returns goToPage function
  * @param {Array} data - Data to paginate
  * @param {number} itemsPerPage - Items per page
@@ -206,3 +275,4 @@ function createPagination(data, itemsPerPage, displayCallback, scrollTarget) {
 // Export for use in other modules
 window.Pagination = Pagination;
 window.createPagination = createPagination;
+window.generatePaginationHTML = generatePaginationHTML;

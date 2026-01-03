@@ -117,39 +117,6 @@ function getTotalEntriesCount(item) {
 }
 
 // ========================================
-// Country & Flag Utilities (Delegated to flag-helper.js)
-// ========================================
-// These functions are now provided by modules/flag-helper.js
-// Kept here for backward compatibility
-
-/**
- * Converts a 2-letter country code to a regional indicator flag emoji
- * @param {string} code - 2-letter country code
- * @returns {string} Flag emoji or empty string
- */
-function codeToFlag(code) {
-    return window.FlagHelper ? window.FlagHelper.codeToFlag(code) : '';
-}
-
-/**
- * Resolves a country name to an ISO code
- * @param {string} name - Country name
- * @returns {string|null} Country code or null
- */
-function findCountryCodeByName(name) {
-    return window.FlagHelper ? window.FlagHelper.findCountryCodeByName(name) : null;
-}
-
-/**
- * Converts a country value (name or code) to a flag emoji
- * @param {string} country - Country name or code
- * @returns {string} Flag emoji with space or empty string
- */
-function countryToFlag(country) {
-    return window.FlagHelper ? window.FlagHelper.countryToFlag(country) : '';
-}
-
-// ========================================
 // UI & Display Utilities
 // ========================================
 
@@ -230,7 +197,7 @@ function updateUrlParam(paramName, value) {
 // Export utilities for use in other modules
 // ========================================
 
-// Make utilities available globally for backward compatibility
+// Make utilities available globally
 window.R3EUtils = {
     escapeHtml,
     formatHeader,
@@ -238,9 +205,6 @@ window.R3EUtils = {
     formatClassicLapTime,
     parseGapMillisFromItem,
     getTotalEntriesCount,
-    codeToFlag,
-    findCountryCodeByName,
-    countryToFlag,
     renderRankStars,
     getPositionBadgeColor,
     getUrlParam,

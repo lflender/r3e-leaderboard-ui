@@ -54,7 +54,7 @@ fetchLeaderboardDetails();
 // Main Fetch Function
 // ===========================================
 async function fetchLeaderboardDetails() {
-    resultsContainer.innerHTML = '<div class="loading">Loading...</div>';
+    await TemplateHelper.showLoading(resultsContainer);
     
     try {
         const data = await dataService.fetchLeaderboardDetails(trackParam, classParam);
@@ -115,7 +115,7 @@ async function fetchLeaderboardDetails() {
         displayResults(allResults);
     } catch (error) {
         console.error('Error loading leaderboard:', error);
-        displayError(error.message);
+        await displayError(error.message);
     }
 }
 
@@ -268,7 +268,7 @@ function setDetailTitles(data, trackParam, classParam) {
  * Display results
  * @param {Array} data - Results data
  */
-function displayResults(data) {
+async function displayResults(data) {
     let results = Array.isArray(data) ? data.slice() : [];
     
     // Sort by position
@@ -282,16 +282,16 @@ function displayResults(data) {
         // Only show "no results" if enough time has passed since last action
         const timeSinceAction = Date.now() - lastActionTime;
         if (timeSinceAction < 500) {
-            resultsContainer.innerHTML = '<div class="loading">Loading...</div>';
+            await TemplateHelper.showLoading(resultsContainer);
             // Schedule showing "no results" after the delay
-            setTimeout(() => {
+            setTimeout(async () => {
                 if (resultsContainer.innerHTML.includes('Loading')) {
-                    resultsContainer.innerHTML = '<div class="no-results">No results found</div>';
+                    await TemplateHelper.showNoResults(resultsContainer);
                 }
             }, 500 - timeSinceAction);
             return;
         }
-        resultsContainer.innerHTML = '<div class="no-results">No results found</div>';
+        await TemplateHelper.showNoResults(resultsContainer);
         return;
     }
     
@@ -345,20 +345,23 @@ function displayResults(data) {
     
     // Create table
     const headers = ['Position', 'Driver Name', 'Lap Time', 'Car', 'Difficulty'];
-    let tableHTML = '<table class="results-table"><thead><tr>';
-    headers.forEach(h => tableHTML += `<th>${h}</th>`);
-    tableHTML += '</tr></thead><tbody>';
-    
+    let rowsHtml = '';
     paginatedResults.forEach(item => {
-        tableHTML += renderDetailRow(item, isCarFilterActive);
+        rowsHtml += renderDetailRow(item, isCarFilterActive);
     });
-    
-    tableHTML += '</tbody></table>';
+    const tableHTML = TemplateHelper.generateTable(headers, rowsHtml);
     
     // Pagination
     let paginationHTML = '';
     if (totalPages > 1) {
-        paginationHTML = generateDetailPaginationHTML(startIndex, endIndex, totalResults, currentPage, totalPages);
+        paginationHTML = TemplateHelper.generatePagination({
+            startIndex,
+            endIndex,
+            total: totalResults,
+            currentPage,
+            totalPages,
+            onPageChange: 'goToPage'
+        });
     }
     
     resultsContainer.innerHTML = paginationHTML + tableHTML + paginationHTML;
@@ -389,7 +392,7 @@ function renderDetailRow(item, showAbsolutePosition = false) {
     const totalNum = totalEntries ? String(totalEntries).trim() : '';
     const badgeColor = R3EUtils.getPositionBadgeColor(parseInt(posNum), parseInt(totalNum));
     
-    const flag = R3EUtils.countryToFlag(country);
+    const flag = FlagHelper.countryToFlag(country);
     const highlisted = item.highlisted || item.Highlisted || false;
     
     // Position details for filtering
@@ -463,49 +466,6 @@ function renderDetailRow(item, showAbsolutePosition = false) {
     html += `<td class="difficulty-cell"><span class="difficulty-pill ${diffClass}">${R3EUtils.escapeHtml(String(difficulty))}</span></td>`;
     
     html += '</tr>';
-    return html;
-}
-
-/**
- * Generate pagination HTML for detail view
- */
-function generateDetailPaginationHTML(startIndex, endIndex, totalResults, currentPage, totalPages) {
-    let html = '<div class="pagination">';
-    html += `<div class="pagination-info">Showing ${startIndex + 1}-${endIndex} of ${totalResults} results</div>`;
-    html += '<div class="pagination-buttons">';
-    
-    if (currentPage > 1) {
-        html += `<button onclick="goToPage(${currentPage - 1})" class="page-btn">‹ Previous</button>`;
-    }
-    
-    const maxPagesToShow = 5;
-    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
-    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-    
-    if (endPage - startPage < maxPagesToShow - 1) {
-        startPage = Math.max(1, endPage - maxPagesToShow + 1);
-    }
-    
-    if (startPage > 1) {
-        html += `<button onclick="goToPage(1)" class="page-btn">1</button>`;
-        if (startPage > 2) html += '<span class="page-ellipsis">...</span>';
-    }
-    
-    for (let i = startPage; i <= endPage; i++) {
-        const activeClass = i === currentPage ? 'active' : '';
-        html += `<button onclick="goToPage(${i})" class="page-btn ${activeClass}">${i}</button>`;
-    }
-    
-    if (endPage < totalPages) {
-        if (endPage < totalPages - 1) html += '<span class="page-ellipsis">...</span>';
-        html += `<button onclick="goToPage(${totalPages})" class="page-btn">${totalPages}</button>`;
-    }
-    
-    if (currentPage < totalPages) {
-        html += `<button onclick="goToPage(${currentPage + 1})" class="page-btn">Next ›</button>`;
-    }
-    
-    html += '</div></div>';
     return html;
 }
 
@@ -644,14 +604,12 @@ function highlightPositionRow(targetPos) {
  * Display error
  * @param {string} message - Error message
  */
-function displayError(message) {
-    resultsContainer.innerHTML = `
-        <div class="error">
-            <strong>Error:</strong> ${message}
-            <br><br>
-            <small>Make sure the data files are available</small>
-        </div>
-    `;
+async function displayError(message) {
+    await TemplateHelper.showError(
+        resultsContainer,
+        message,
+        'Make sure the data files are available'
+    );
 }
 
 /**

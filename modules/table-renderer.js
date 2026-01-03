@@ -117,7 +117,7 @@ class TableRenderer {
         const slugSource = driverObj.driver || driverObj.name || firstEntry.name || firstEntry.Name || 'unknown';
         const groupId = `group-${String(slugSource).replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-]/g, '').toLowerCase()}`;
         
-        const flagHtml = R3EUtils.countryToFlag(country) ? `<span class="country-flag">${R3EUtils.countryToFlag(country)}</span> ` : '';
+        const flagHtml = FlagHelper.countryToFlag(country) ? `<span class="country-flag">${FlagHelper.countryToFlag(country)}</span> ` : '';
         const rankHtml = rank ? R3EUtils.renderRankStars(rank) : '';
         const teamHtml = team ? ` | 🏁 Team ${team}` : '';
         

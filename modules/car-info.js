@@ -58,7 +58,10 @@
   const data = await loadData();
   const tableContainer = document.getElementById('cars-info-table');
   if(!tableContainer) return;
-  if(!data || data.length === 0){ tableContainer.innerHTML = '<p class="placeholder">No car data available</p>'; return; }
+  if(!data || data.length === 0){ 
+    tableContainer.innerHTML = '<p class="placeholder">No car data available</p>'; 
+    return; 
+  }
 
   // Dropdown options
   const wheelOptions = [

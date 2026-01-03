@@ -137,7 +137,7 @@ class DriverSearch {
      */
     async searchDriver(driverName) {
         this.lastSearchTime = Date.now();
-        this.elements.resultsContainer.innerHTML = '<div class="loading">Searching...</div>';
+        await TemplateHelper.showLoading(this.elements.resultsContainer, 'Searching...');
         
         try {
             // Get current filters
@@ -165,7 +165,7 @@ class DriverSearch {
      * Display search results
      * @param {Array} data - Search results
      */
-    displayResults(data) {
+    async displayResults(data) {
         if (!Array.isArray(data)) {
             this.displayError('Invalid response format');
             return;
@@ -175,16 +175,16 @@ class DriverSearch {
             // Only show "no results" if enough time has passed since last search
             const timeSinceSearch = Date.now() - this.lastSearchTime;
             if (timeSinceSearch < 500) {
-                this.elements.resultsContainer.innerHTML = '<div class="loading">Loading...</div>';
+                await TemplateHelper.showLoading(this.elements.resultsContainer);
                 // Schedule showing "no results" after the delay
-                setTimeout(() => {
+                setTimeout(async () => {
                     if (this.elements.resultsContainer.innerHTML.includes('Loading')) {
-                        this.elements.resultsContainer.innerHTML = '<div class="no-results">No results found</div>';
+                        await TemplateHelper.showNoResults(this.elements.resultsContainer);
                     }
                 }, 500 - timeSinceSearch);
                 return;
             }
-            this.elements.resultsContainer.innerHTML = '<div class="no-results">No results found</div>';
+            await TemplateHelper.showNoResults(this.elements.resultsContainer);
             return;
         }
         

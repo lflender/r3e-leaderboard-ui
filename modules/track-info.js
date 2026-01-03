@@ -220,7 +220,7 @@
   // Fetch data from local cache
   async function fetchTopCombinations() {
     try {
-      tableContainer.innerHTML = '<div class="loading">Loading...</div>';
+      await TemplateHelper.showLoading(tableContainer);
       
       // Load all combinations from cache
       const timestamp = new Date().getTime();
@@ -281,10 +281,10 @@
   }
 
   // Render table using the same style/formatting as leaderboards
-  function renderTable(data) {
+  async function renderTable(data) {
     trackAllResults = Array.isArray(data) ? data : [];
     if (trackAllResults.length === 0) {
-      tableContainer.innerHTML = '<div class="no-results">No results found</div>';
+      await TemplateHelper.showNoResults(tableContainer);
       return;
     }
 

@@ -441,10 +441,16 @@ function renderDetailRow(item, showAbsolutePosition = false) {
     // Main position display - show absolute position when filter is active, otherwise normal position
     if (showAbsolutePosition && absolutePos && absoluteTotal) {
         const absoluteBadgeColor = R3EUtils.getPositionBadgeColor(parseInt(absolutePos), parseInt(absoluteTotal));
-        html += `<span class="pos-number" style="background:${absoluteBadgeColor}">${R3EUtils.escapeHtml(absolutePos)}</span>`;
+        const absPos = parseInt(absolutePos);
+        const absTotal = parseInt(absoluteTotal);
+        const podiumClass = (absTotal >= 4 && (absPos === 1 || absPos === 2 || absPos === 3)) ? ` pos-${absPos}` : '';
+        html += `<span class="pos-number${podiumClass}" style="background:${absoluteBadgeColor}">${R3EUtils.escapeHtml(absolutePos)}</span>`;
         html += `<span class="pos-sep">/</span><span class="pos-total">${R3EUtils.escapeHtml(absoluteTotal)}</span>`;
     } else {
-        html += `<span class="pos-number" style="background:${badgeColor}">${R3EUtils.escapeHtml(posNum)}</span>`;
+        const pos = parseInt(posNum);
+        const total = parseInt(totalNum);
+        const podiumClass = (total >= 4 && (pos === 1 || pos === 2 || pos === 3)) ? ` pos-${pos}` : '';
+        html += `<span class="pos-number${podiumClass}" style="background:${badgeColor}">${R3EUtils.escapeHtml(posNum)}</span>`;
         if (totalNum) {
             html += `<span class="pos-sep">/</span><span class="pos-total">${R3EUtils.escapeHtml(totalNum)}</span>`;
         }

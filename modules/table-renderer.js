@@ -280,6 +280,11 @@ class TableRenderer {
         let trackStr = String(value || '');
         const classAttr = tdClass ? ` class="${tdClass}"` : '';
         
+        // Normalize track name to fix known inconsistencies
+        if (window.DataNormalizer && window.DataNormalizer.normalizeTrackName) {
+            trackStr = window.DataNormalizer.normalizeTrackName(trackStr);
+        }
+        
         // Split track name and layout (e.g., "Donington Park - Grand Prix")
         const parts = trackStr.split(/\s*[-–—]\s+/);
         if (parts.length >= 2) {

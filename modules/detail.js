@@ -202,7 +202,11 @@ function setDetailTitles(data, trackParam, classParam) {
     
     // Try to get info from track_info
     if (data.track_info && typeof data.track_info === 'object') {
-        const fullTrack = String(data.track_info.Name || data.track_info.name || '');
+        let fullTrack = String(data.track_info.Name || data.track_info.name || '');
+        // Normalize track name to fix known inconsistencies
+        if (fullTrack && window.DataNormalizer && window.DataNormalizer.normalizeTrackName) {
+            fullTrack = window.DataNormalizer.normalizeTrackName(fullTrack);
+        }
         if (fullTrack && fullTrack !== '') {
             const match = fullTrack.match(/^(.*?)(?:\s*[-–—]\s*)(.+)$/);
             if (match) {
@@ -225,7 +229,11 @@ function setDetailTitles(data, trackParam, classParam) {
             if (fullTrackRaw && typeof fullTrackRaw === 'object') {
                 fullTrackRaw = fullTrackRaw.Name || fullTrackRaw.name || '';
             }
-            const fullTrack = String(fullTrackRaw || '');
+            let fullTrack = String(fullTrackRaw || '');
+            // Normalize track name to fix known inconsistencies
+            if (fullTrack && window.DataNormalizer && window.DataNormalizer.normalizeTrackName) {
+                fullTrack = window.DataNormalizer.normalizeTrackName(fullTrack);
+            }
             if (fullTrack && fullTrack !== '' && fullTrack !== 'undefined' && fullTrack !== '[object Object]') {
                 const match = fullTrack.match(/^(.*?)(?:\s*[-–—]\s*)(.+)$/);
                 if (match) {

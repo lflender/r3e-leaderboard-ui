@@ -47,6 +47,10 @@ function normalizeLeaderboardEntry(entry, data = {}, index = 0, totalEntries = 0
                              data.track_info?.ID || 
                              null;
     
+    // Extract and normalize track name
+    const rawTrackName = data.track_info?.Name || data.track_name || '';
+    const trackName = normalizeTrackName(rawTrackName);
+    
     return {
         Position: position,
         Name: entry.driver?.Name || entry.driver?.name || getField(entry, FIELD_NAMES.NAME, 'Unknown'),
@@ -57,7 +61,7 @@ function normalizeLeaderboardEntry(entry, data = {}, index = 0, totalEntries = 0
         Rank: entry.rank?.Name || entry.rank?.name || getField(entry, FIELD_NAMES.RANK),
         Team: entry.team?.Name || entry.team?.name || getField(entry, FIELD_NAMES.TEAM),
         Difficulty: getField(entry, FIELD_NAMES.DIFFICULTY),
-        Track: data.track_info?.Name || data.track_name || '',
+        Track: trackName,
         TotalEntries: totalEntries || getField(entry, FIELD_NAMES.TOTAL_ENTRIES, 0),
         ClassID: classId || undefined,
         TrackID: trackIdFromEntry || undefined,
@@ -138,6 +142,33 @@ function extractClassId(item) {
     return getField(item, FIELD_NAMES.CLASS_ID, '');
 }
 
+/**
+ * Normalizes track names to fix known inconsistencies
+ * Handles Brands Hatch naming variations without breaking if source data is corrected
+ * @param {string} trackName - Raw track name
+ * @returns {string} Normalized track name
+ */
+function normalizeTrackName(trackName) {
+    if (!trackName || typeof trackName !== 'string') {
+        return trackName;
+    }
+    
+    // Fix Brands Hatch naming inconsistencies
+    // Handle both current incorrect format and prevent double-replacement if already correct
+    if (trackName.includes('Brands Hatch')) {
+        // Replace 'Brands Hatch Grand Prix - Grand Prix' with 'Brands Hatch - Grand Prix'
+        // But don't break 'Brands Hatch - Grand Prix' (already correct)
+        trackName = trackName.replace(/^Brands Hatch Grand Prix\s*-\s*Grand Prix$/i, 'Brands Hatch - Grand Prix');
+        trackName = trackName.replace(/^Brands Hatch Grand\s+-\s+Grand Prix$/i, 'Brands Hatch - Grand Prix');
+        
+        // Replace 'Brands Hatch Indy - Indy' with 'Brands Hatch - Indy'
+        // But don't break 'Brands Hatch - Indy' (already correct)
+        trackName = trackName.replace(/^Brands Hatch Indy\s*-\s*Indy$/i, 'Brands Hatch - Indy');
+    }
+    
+    return trackName;
+}
+
 // Make available globally
 if (typeof window !== 'undefined') {
     window.DataNormalizer = {
@@ -149,6 +180,7 @@ if (typeof window !== 'undefined') {
         extractDifficulty,
         extractCountry,
         extractTrackId,
-        extractClassId
+        extractClassId,
+        normalizeTrackName
     };
 }

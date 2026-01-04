@@ -30,9 +30,10 @@ class TableRenderer {
      * Renders a complete results table with driver grouping
      * @param {Array} driverGroups - Array of driver group objects
      * @param {Array} keys - Column keys to display
+     * @param {string} sortBy - Optional sort key: 'gap' (default) or 'gapPercent'
      * @returns {string} HTML string
      */
-    renderDriverGroupedTable(driverGroups, keys = null) {
+    renderDriverGroupedTable(driverGroups, keys = null, sortBy = 'gap') {
         if (!keys && driverGroups.length > 0 && driverGroups[0].entries && driverGroups[0].entries.length > 0) {
             keys = Object.keys(driverGroups[0].entries[0]);
             keys = this.filterAndSortKeys(keys);
@@ -42,11 +43,32 @@ class TableRenderer {
             return '<div class="no-results">No data to display</div>';
         }
         
+        // Add GapPercent column after LapTime if not already present
+        const lapTimeIndex = keys.findIndex(k => ['LapTime', 'Lap Time', 'lap_time', 'laptime', 'Time'].includes(k));
+        if (lapTimeIndex !== -1 && !keys.includes('GapPercent')) {
+            keys.splice(lapTimeIndex + 1, 0, 'GapPercent');
+        }
+        
         let html = '<table class="results-table"><thead><tr>';
         
-        // Create headers
+        // Create headers with sorting capability
         keys.forEach(key => {
-            html += `<th>${R3EUtils.formatHeader(key)}</th>`;
+            const isLapTimeKey = ['LapTime', 'Lap Time', 'lap_time', 'laptime', 'Time'].includes(key);
+            const isGapPercentKey = key === 'GapPercent';
+            const isPositionKey = ['Position', 'position', 'Pos'].includes(key);
+            
+            if (isPositionKey) {
+                const activeClass = sortBy === 'position' ? ' sort-active' : '';
+                html += `<th class="sortable${activeClass}" onclick="window.sortDriverGroups('position')" title="Click to sort by position">${R3EUtils.formatHeader(key)}</th>`;
+            } else if (isLapTimeKey) {
+                const activeClass = sortBy === 'gap' ? ' sort-active' : '';
+                html += `<th class="sortable${activeClass}" onclick="window.sortDriverGroups('gap')" title="Click to sort by gap time">${R3EUtils.formatHeader(key)}</th>`;
+            } else if (isGapPercentKey) {
+                const activeClass = sortBy === 'gapPercent' ? ' sort-active' : '';
+                html += `<th class="sortable${activeClass}" onclick="window.sortDriverGroups('gapPercent')" title="Click to sort by gap percentage">Gap %</th>`;
+            } else {
+                html += `<th>${R3EUtils.formatHeader(key)}</th>`;
+            }
         });
         
         html += '</tr></thead><tbody>';
@@ -58,15 +80,18 @@ class TableRenderer {
             
             const firstEntry = driverResults[0] || {};
             
-            // Sort entries within group
-            this.sortDriverEntries(driverResults);
+            // Sort entries within group based on sortBy parameter
+            this.sortDriverEntries(driverResults, sortBy);
+            
+            // Get reference time from the first (leader) entry for percentage calculation
+            const referenceTime = this.extractReferenceTime(driverResults);
             
             // Render driver header
             html += this.renderDriverHeader(driverObj, firstEntry, keys.length);
             
             // Render data rows for this driver
             driverResults.forEach(item => {
-                html += this.renderDataRow(item, keys, firstEntry);
+                html += this.renderDataRow(item, keys, firstEntry, referenceTime);
             });
         });
         
@@ -136,9 +161,10 @@ class TableRenderer {
      * @param {Object} item - Data item
      * @param {Array} keys - Column keys
      * @param {Object} firstEntry - First entry for group (for class info)
+     * @param {string} referenceTime - Reference lap time for percentage calculation
      * @returns {string} HTML string
      */
-    renderDataRow(item, keys, firstEntry) {
+    renderDataRow(item, keys, firstEntry, referenceTime = null) {
         const trackId = item.track_id || item.TrackID || item['Track ID'] || '';
         const classId = item.class_id || item.ClassID || item['Class ID'] || '';
         const rawPos = item.position || item.Position || item.Pos || '';
@@ -159,7 +185,11 @@ class TableRenderer {
                 data-time="${R3EUtils.escapeHtml(String(rawLapTime))}">`;
         
         keys.forEach(key => {
-            html += this.renderCell(item, key);
+            if (key === 'GapPercent') {
+                html += this.renderGapPercentCell(item, referenceTime);
+            } else {
+                html += this.renderCell(item, key);
+            }
         });
         
         html += '</tr>';
@@ -347,22 +377,119 @@ class TableRenderer {
     }
     
     /**
-     * Sorts driver entries by gap time
+     * Sorts driver entries by gap time, gap percentage, or position
      * @param {Array} entries - Driver entries
+     * @param {string} sortBy - Sort key: 'gap' (default), 'gapPercent', or 'position'
      */
-    sortDriverEntries(entries) {
+    sortDriverEntries(entries, sortBy = 'gap') {
         try {
-            entries.sort((a, b) => {
-                const ga = R3EUtils.parseGapMillisFromItem(a);
-                const gb = R3EUtils.parseGapMillisFromItem(b);
-                if (ga !== gb) return ga - gb;
-                const ta = R3EUtils.getTotalEntriesCount(a);
-                const tb = R3EUtils.getTotalEntriesCount(b);
-                return tb - ta; // descending
-            });
+            if (sortBy === 'position') {
+                // Sort by position
+                entries.sort((a, b) => {
+                    const posA = parseInt(a.Position || a.position || a.Pos || 999999);
+                    const posB = parseInt(b.Position || b.position || b.Pos || 999999);
+                    if (posA !== posB) return posA - posB;
+                    const ta = R3EUtils.getTotalEntriesCount(a);
+                    const tb = R3EUtils.getTotalEntriesCount(b);
+                    return tb - ta; // descending
+                });
+            } else if (sortBy === 'gapPercent') {
+                // Sort by gap percentage
+                const referenceTime = this.extractReferenceTime(entries);
+                entries.sort((a, b) => {
+                    const percentA = this.calculateGapPercentValue(a, referenceTime);
+                    const percentB = this.calculateGapPercentValue(b, referenceTime);
+                    if (percentA !== percentB) return percentA - percentB;
+                    const ta = R3EUtils.getTotalEntriesCount(a);
+                    const tb = R3EUtils.getTotalEntriesCount(b);
+                    return tb - ta; // descending
+                });
+            } else {
+                // Sort by gap time (default)
+                entries.sort((a, b) => {
+                    const ga = R3EUtils.parseGapMillisFromItem(a);
+                    const gb = R3EUtils.parseGapMillisFromItem(b);
+                    if (ga !== gb) return ga - gb;
+                    const ta = R3EUtils.getTotalEntriesCount(a);
+                    const tb = R3EUtils.getTotalEntriesCount(b);
+                    return tb - ta; // descending
+                });
+            }
         } catch (e) {
             // If parsing fails, keep original order
         }
+    }
+    
+    /**
+     * Extracts the reference time (fastest lap) from driver entries
+     * @param {Array} entries - Driver entries
+     * @returns {string} Reference lap time
+     */
+    extractReferenceTime(entries) {
+        if (!entries || entries.length === 0) return '';
+        
+        // Find the entry with the smallest gap (should be first, but let's be safe)
+        let minGap = Number.MAX_VALUE;
+        let referenceEntry = entries[0];
+        
+        entries.forEach(entry => {
+            const gap = R3EUtils.parseGapMillisFromItem(entry);
+            if (gap < minGap) {
+                minGap = gap;
+                referenceEntry = entry;
+            }
+        });
+        
+        // Extract the lap time (first part before comma)
+        const raw = referenceEntry.LapTime || referenceEntry['Lap Time'] || 
+                   referenceEntry.lap_time || referenceEntry.laptime || 
+                   referenceEntry.Time || '';
+        const s = String(raw || '');
+        const parts = s.split(/,\s*/);
+        return parts[0] || '';
+    }
+    
+    /**
+     * Calculates gap percentage as a numeric value for sorting
+     * @param {Object} item - Data item
+     * @param {string} referenceTime - Not used, kept for API compatibility
+     * @returns {number} Percentage value (e.g., 100.5)
+     */
+    calculateGapPercentValue(item, referenceTime) {
+        if (!item) return 100;
+        
+        const raw = item.LapTime || item['Lap Time'] || item.lap_time || item.laptime || item.Time || '';
+        const s = String(raw || '');
+        if (!s) return 100;
+        
+        const parts = s.split(/,\s*/);
+        const lapTime = parts[0] || '';
+        
+        // If this is the reference (no gap), return 100
+        if (parts.length < 2) return 100;
+        
+        const lapMillis = R3EUtils.parseLapTimeToMillis(lapTime);
+        if (lapMillis === 0) return 100;
+        
+        const gapMillis = R3EUtils.parseGapMillisFromItem(item);
+        if (gapMillis === 0 || gapMillis === Number.MAX_VALUE) return 100;
+        
+        // Calculate reference time: reference = lapTime - gap
+        const refMillis = lapMillis - gapMillis;
+        if (refMillis <= 0) return 100;
+        
+        return (lapMillis / refMillis) * 100;
+    }
+    
+    /**
+     * Renders gap percentage cell
+     * @param {Object} item - Data item
+     * @param {string} referenceTime - Reference lap time
+     * @returns {string} HTML string
+     */
+    renderGapPercentCell(item, referenceTime) {
+        const percentage = R3EUtils.calculateGapPercentage(item, referenceTime);
+        return `<td class="gap-percent-cell">${R3EUtils.escapeHtml(percentage)}</td>`;
     }
     
     /**

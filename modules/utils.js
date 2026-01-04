@@ -116,6 +116,105 @@ function getTotalEntriesCount(item) {
     return isNaN(n) ? 0 : n;
 }
 
+/**
+ * Parses a lap time string and returns milliseconds
+ * Supports formats: "1:59:530s", "55.395s", "1:23.456s", "1m 26.693s"
+ * @param {string} timeStr - Lap time string
+ * @returns {number} Time in milliseconds
+ */
+function parseLapTimeToMillis(timeStr) {
+    if (!timeStr) return 0;
+    const s = String(timeStr).trim().replace(/s$/i, '');
+    
+    // Format 1: minutes:seconds:milliseconds (e.g., "1:59:530" or "2:00:705")
+    let m = s.match(/^(\d+):(\d+):(\d+)$/);
+    if (m) {
+        const minutes = parseInt(m[1], 10);
+        const seconds = parseInt(m[2], 10);
+        const millis = parseInt(m[3], 10);
+        return ((minutes * 60) + seconds) * 1000 + millis;
+    }
+    
+    // Format 2: minutes:seconds.milliseconds (e.g., "1:23.456")
+    m = s.match(/^(\d+):(\d+)\.(\d+)$/);
+    if (m) {
+        const minutes = parseInt(m[1], 10);
+        const seconds = parseInt(m[2], 10);
+        const millis = parseInt((m[3] + '000').substring(0, 3), 10);
+        return ((minutes * 60) + seconds) * 1000 + millis;
+    }
+    
+    // Format 3: Xm Y.Zs (e.g., "1m 26.693" or "2m 03.404")
+    m = s.match(/^(\d+)m\s+(\d+)\.(\d+)$/);
+    if (m) {
+        const minutes = parseInt(m[1], 10);
+        const seconds = parseInt(m[2], 10);
+        const millis = parseInt((m[3] + '000').substring(0, 3), 10);
+        return ((minutes * 60) + seconds) * 1000 + millis;
+    }
+    
+    // Format 4: seconds.milliseconds (e.g., "55.395")
+    m = s.match(/^(\d+)\.(\d+)$/);
+    if (m) {
+        const seconds = parseInt(m[1], 10);
+        const millis = parseInt((m[2] + '000').substring(0, 3), 10);
+        return seconds * 1000 + millis;
+    }
+    
+    return 0;
+}
+
+/**
+ * Calculates the gap percentage between a lap time and reference time
+ * @param {Object} item - Data item containing lap time with gap
+ * @param {string} referenceTime - Not used, kept for API compatibility
+ * @returns {string} Percentage string (e.g., "101.0%" or "-" for reference)
+ */
+function calculateGapPercentage(item, referenceTime) {
+    if (!item) return '-';
+    
+    const raw = item.LapTime || item['Lap Time'] || item.lap_time || item.laptime || item.Time || '';
+    const s = String(raw || '');
+    if (!s) return '-';
+    
+    // Parse the lap time (first part before comma) and gap (after comma)
+    const parts = s.split(/,\s*/);
+    const lapTime = parts[0] || '';
+    
+    // If this is the reference (no gap), return "-"
+    if (parts.length < 2) return '-';
+    
+    const lapMillis = parseLapTimeToMillis(lapTime);
+    if (lapMillis === 0) {
+        console.log('Failed to parse lap time:', lapTime);
+        return '-';
+    }
+    
+    // Parse the gap time (e.g., "+1.175s" or "+0m 1.175s")
+    const gapMillis = parseGapMillisFromItem(item);
+    console.log('Item:', item, 'Lap:', lapTime, 'LapMillis:', lapMillis, 'GapMillis:', gapMillis);
+    
+    if (gapMillis === 0 || gapMillis === Number.MAX_VALUE) {
+        console.log('Invalid gap:', gapMillis, 'for item:', s);
+        return '-';
+    }
+    
+    // Calculate reference time: reference = lapTime - gap
+    const refMillis = lapMillis - gapMillis;
+    if (refMillis <= 0) {
+        console.log('Invalid refMillis:', refMillis);
+        return '-';
+    }
+    
+    // Calculate percentage: (lapTime / refTime) * 100
+    const percentage = (lapMillis / refMillis) * 100;
+    
+    console.log('Percentage:', percentage, 'for lap:', lapMillis, 'ref:', refMillis);
+    
+    // Round to 1 decimal place
+    return percentage.toFixed(1) + '%';
+}
+
 // ========================================
 // UI & Display Utilities
 // ========================================
@@ -205,6 +304,8 @@ window.R3EUtils = {
     formatClassicLapTime,
     parseGapMillisFromItem,
     getTotalEntriesCount,
+    parseLapTimeToMillis,
+    calculateGapPercentage,
     renderRankStars,
     getPositionBadgeColor,
     getUrlParam,

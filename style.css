@@ -285,13 +285,6 @@ main {
     .info-icon { display: none !important; }
 }
 
-/* Constrain the Power column so very long car names don't force the table wide */
-.results-table th:nth-child(5),
-.results-table td:nth-child(5) {
-    width: 8rem;
-    max-width: 8rem;
-}
-
 /* Car Info table specific column widths */
 #cars-info-table .results-table th:nth-child(1),
 #cars-info-table .results-table td:nth-child(1) {
@@ -442,7 +435,7 @@ main {
 
 .results-table th,
 .results-table td {
-    padding: 0.875rem;
+    padding: 0.65rem;
     text-align: left;
     border-bottom: 1px solid var(--border);
 }
@@ -451,9 +444,34 @@ main {
     color: #fff;
     font-size: 1.05rem;
     font-weight: 700;
-    padding: 0.85rem 1.25rem;
+    padding: 0.7rem 0.8rem;
     border: none;
     letter-spacing: 0.01em;
+}
+
+.results-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+}
+
+.results-table th.sortable:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.results-table th.sortable.sort-active {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.results-table th.sortable::after {
+    content: ' ⇅';
+    opacity: 0.5;
+    font-size: 0.9em;
+}
+
+.results-table th.sortable.sort-active::after {
+    content: ' ▼';
+    opacity: 1;
 }
 
 .results-table tr:hover {
@@ -461,7 +479,7 @@ main {
 }
 
 .results-table td {
-    padding: 0.75rem;
+    padding: 0.6rem;
     border-bottom: 1px solid var(--border);
     background: var(--surface);
     color: var(--text-primary);
@@ -658,9 +676,9 @@ main {
 }
 
 .lap-time-cell {
-    min-width: 100px;
-    max-width: 110px;
-    width: 110px;
+    min-width: 80px;
+    max-width: 80px;
+    width: 80px;
     vertical-align: top;
     text-align: center;
 }
@@ -670,6 +688,8 @@ main {
     white-space: nowrap;
 }
 .lap-time-cell .time-delta {
+    display: block;
+    white-space: nowrap;
     display: block;
     white-space: nowrap;
     color: var(--text-secondary);
@@ -1045,8 +1065,24 @@ footer p {
 /* Difficulty color scheme - subtle pill styling */
 .difficulty-cell { 
     white-space: nowrap;
-    max-width: 100px;
+    max-width: 75px;
+    width: 75px;
+}
+
+/* Gap percentage column styling */
+.gap-percent-cell {
+    white-space: nowrap;
+    text-align: center;
+    max-width: 75px;
+    width: 75px;
+}
+
+/* Lap time column - slightly constrain width */
+.lap-time-cell {
     width: 100px;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .difficulty-pill {
     display: inline-block;
@@ -1224,22 +1260,21 @@ footer p {
         font-size: 0.75rem;
     }
 
-    /* Reduce Driver column width on mobile */
-    .results-table th:nth-child(2),
-    .results-table td:nth-child(2) {
-        max-width: 7rem;
-    }
-
     .results-table th:nth-child(4),
     .results-table td:nth-child(4) {
         max-width: 7rem;
     }
 
-    /* Reduce Difficulty column width on mobile */
     .results-table th:nth-child(5),
     .results-table td:nth-child(5) {
-        width: 4rem;
-        max-width: 4rem;
+        width: 4.5rem;
+        max-width: 4.5rem;
+    }
+
+    .results-table th:nth-child(6),
+    .results-table td:nth-child(6) {
+        width: 3rem;
+        max-width: 3rem;
     }
 
     /* Position badges stay readable */

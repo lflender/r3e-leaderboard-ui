@@ -23,6 +23,9 @@ class DriverSearch {
         this.itemsPerPage = 100;
         this.allResults = [];
         
+        // Sort state
+        this.currentSortBy = 'gap'; // 'gap' or 'gapPercent'
+        
         // Track last search time to prevent premature "no results" display
         this.lastSearchTime = 0;
         
@@ -44,6 +47,9 @@ class DriverSearch {
         
         // Make goToPage available globally for pagination buttons
         window.goToPage = (page) => this.goToPage(page);
+        
+        // Make sortDriverGroups available globally for sorting
+        window.sortDriverGroups = (sortBy) => this.sortDriverGroups(sortBy);
     }
 
     /**
@@ -242,7 +248,7 @@ class DriverSearch {
         }
         
         // Render table
-        const tableHTML = tableRenderer.renderDriverGroupedTable(paginatedDrivers, keys);
+        const tableHTML = tableRenderer.renderDriverGroupedTable(paginatedDrivers, keys, this.currentSortBy);
         
         // Generate pagination HTML
         let paginationHTML = '';
@@ -319,6 +325,16 @@ class DriverSearch {
         this.currentPage = page;
         this.displayResults(this.allResults);
         this.elements.resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    
+    /**
+     * Sort driver groups by gap time or gap percentage
+     * @param {string} sortBy - Sort key: 'gap' or 'gapPercent'
+     */
+    sortDriverGroups(sortBy) {
+        if (this.currentSortBy === sortBy) return; // Already sorted by this
+        this.currentSortBy = sortBy;
+        this.displayResults(this.allResults);
     }
 }
 

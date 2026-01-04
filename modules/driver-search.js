@@ -25,6 +25,10 @@ class DriverSearch {
         
         // Track last search time to prevent premature "no results" display
         this.lastSearchTime = 0;
+        
+        // Debounce timer for live search
+        this.searchDebounceTimer = null;
+        this.minSearchLength = 3;
 
         this.init();
     }
@@ -96,11 +100,38 @@ class DriverSearch {
      * Setup event listeners
      */
     setupEventListeners() {
-        // Search input enter key
+        // Live search as user types (with debounce)
+        this.elements.driverSearch.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.trim();
+            
+            // Clear previous timer
+            if (this.searchDebounceTimer) {
+                clearTimeout(this.searchDebounceTimer);
+            }
+            
+            // Clear results if less than minimum length
+            if (searchTerm.length < this.minSearchLength) {
+                this.elements.resultsContainer.innerHTML = '';
+                return;
+            }
+            
+            // Debounce: wait 300ms after user stops typing
+            this.searchDebounceTimer = setTimeout(async () => {
+                R3EUtils.updateUrlParam('driver', searchTerm);
+                await this.searchDriver(searchTerm);
+            }, 300);
+        });
+        
+        // Search input enter key (immediate search, no debounce)
         this.elements.driverSearch.addEventListener('keypress', async (e) => {
             if (e.key === 'Enter') {
                 const searchTerm = this.elements.driverSearch.value.trim();
-                if (!searchTerm) return;
+                if (searchTerm.length < this.minSearchLength) return;
+                
+                // Cancel debounced search
+                if (this.searchDebounceTimer) {
+                    clearTimeout(this.searchDebounceTimer);
+                }
                 
                 // Close keyboard on mobile
                 e.target.blur();

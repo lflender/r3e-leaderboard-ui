@@ -1352,6 +1352,10 @@ footer p {
     .driver-group-header strong {
         font-size: 0.85rem;
     }
+    
+    .driver-group-header td {
+        padding: 0.65rem !important;
+    }
 
     .driver-meta {
         font-size: 0.75rem;
@@ -1522,17 +1526,34 @@ footer p {
         padding: 0.12rem 0.4rem;
     }
 
+    /* Reduce horizontal padding for Car Info table on mobile */
+    #cars-info-table .results-table th {
+        padding: 0.7rem 0.3rem;
+        font-size: 0.9rem;
+    }
+    #cars-info-table .results-table td {
+        padding: 0.6rem 0.3rem;
+        font-size: 0.75rem;
+    }
+
     /* Make Power and Engine columns narrower on mobile for Car Info page */
     #cars-info-table .results-table th:nth-child(5),
     #cars-info-table .results-table td:nth-child(5) {
-        width: 4rem;
-        max-width: 4rem;
+        width: 3.5rem;
+        max-width: 3.5rem;
     }
     
     #cars-info-table .results-table th:nth-child(7),
     #cars-info-table .results-table td:nth-child(7) {
-        width: 4.5rem;
-        max-width: 4.5rem;
+        width: 4rem;
+        max-width: 4rem;
+    }
+    
+    /* Weight column - allow more width */
+    #cars-info-table .results-table th:nth-child(6),
+    #cars-info-table .results-table td:nth-child(6) {
+        width: auto;
+        min-width: 4.2rem;
     }
 
     /* Footer adjustments */

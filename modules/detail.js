@@ -401,6 +401,7 @@ function renderDetailRow(item, showAbsolutePosition = false) {
     const badgeColor = R3EUtils.getPositionBadgeColor(parseInt(posNum), parseInt(totalNum));
     
     const flag = FlagHelper.countryToFlag(country);
+    const flagHtml = flag ? `<span class="country-flag">${flag}</span>` : '';
     const highlisted = item.highlisted || item.Highlisted || false;
     
     // Position details for filtering
@@ -461,9 +462,9 @@ function renderDetailRow(item, showAbsolutePosition = false) {
     // Driver name
     if (!highlisted) {
         const encoded = encodeURIComponent(String(name));
-        html += `<td><a class="detail-driver-link" href="index.html?driver=${encoded}">${flag}${R3EUtils.escapeHtml(String(name))}</a></td>`;
+        html += `<td><a class="detail-driver-link" href="index.html?driver=${encoded}">${flagHtml}${R3EUtils.escapeHtml(String(name))}</a></td>`;
     } else {
-        html += `<td>${flag}${R3EUtils.escapeHtml(String(name))}</td>`;
+        html += `<td>${flagHtml}${R3EUtils.escapeHtml(String(name))}</td>`;
     }
     
     // Lap time

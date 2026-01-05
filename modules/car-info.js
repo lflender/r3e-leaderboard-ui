@@ -34,25 +34,11 @@
   }
 
   function countryFlag(country){
-    const countryMap = {
-      'Germany': '🇩🇪',
-      'USA': '🇺🇸',
-      'UK': '🇬🇧',
-      'Japan': '🇯🇵',
-      'Italy': '🇮🇹',
-      'France': '🇫🇷',
-      'Spain': '🇪🇸',
-      'Sweden': '🇸🇪',
-      'Austria': '🇦🇹',
-      'Denmark': '🇩🇰',
-      'Ireland': '🇮🇪',
-      'South Korea': '🇰🇷',
-      'Russia': '🇷🇺',
-      'China': '🇨🇳',
-      'Czech Republic': '🇨🇿',
-      'Various': '🏁'
-    };
-    return countryMap[country] || '';
+    // Use FlagHelper if available, otherwise return empty
+    if (typeof FlagHelper !== 'undefined' && FlagHelper.countryToFlag) {
+      return FlagHelper.countryToFlag(country);
+    }
+    return '';
   }
 
   const data = await loadData();
@@ -155,11 +141,12 @@
         const linkClose = rowLink ? `</a>` : '';
         const infoIcon = car.description ? `<span class="info-icon" title="${R3EUtils.escapeHtml(car.description)}" aria-label="More info" role="img">i</span>` : '';
         const flag = countryFlag(car.country || '');
+        const flagHtml = flag ? `<span class="country-flag">${flag}</span>` : '';
         const carName = String(car.car || '');
         const lastSpace = carName.lastIndexOf(' ');
         const carNameHtml = (lastSpace >= 0)
-          ? `${flag} <b>${R3EUtils.escapeHtml(carName.slice(0, lastSpace))}</b><span class="no-wrap-tail"> <b>${R3EUtils.escapeHtml(carName.slice(lastSpace + 1))}</b> ${infoIcon}</span>`
-          : `<span class="no-wrap-tail">${flag} <b>${R3EUtils.escapeHtml(carName)}</b> ${infoIcon}</span>`;
+          ? `${flagHtml}<b>${R3EUtils.escapeHtml(carName.slice(0, lastSpace))}</b><span class="no-wrap-tail"> <b>${R3EUtils.escapeHtml(carName.slice(lastSpace + 1))}</b> ${infoIcon}</span>`
+          : `<span class="no-wrap-tail">${flagHtml}<b>${R3EUtils.escapeHtml(carName)}</b> ${infoIcon}</span>`;
         html += `\n<tr class="driver-data-row ${slug}" data-link="${rowLink}">` +
           `<td>${linkOpen}${carNameHtml}${linkClose}</td>` +
                 `<td>${linkOpen}${wheelBadge(car.wheel_cat || car.wheel)}${linkClose}</td>` +
@@ -219,11 +206,12 @@
             const linkClose = rowLink ? `</a>` : '';
             const infoIcon = car.description ? `<span class="info-icon" title="${R3EUtils.escapeHtml(car.description)}" aria-label="More info" role="img">i</span>` : '';
             const flag = countryFlag(car.country || '');
+            const flagHtml = flag ? `<span class="country-flag">${flag}</span>` : '';
             const carName = String(car.car || '');
             const lastSpace = carName.lastIndexOf(' ');
             const carNameHtml = (lastSpace >= 0)
-              ? `${flag} <b>${R3EUtils.escapeHtml(carName.slice(0, lastSpace))}</b><span class="no-wrap-tail"> <b>${R3EUtils.escapeHtml(carName.slice(lastSpace + 1))}</b> ${infoIcon}</span>`
-              : `<span class="no-wrap-tail">${flag} <b>${R3EUtils.escapeHtml(carName)}</b> ${infoIcon}</span>`;
+              ? `${flagHtml}<b>${R3EUtils.escapeHtml(carName.slice(0, lastSpace))}</b><span class="no-wrap-tail"> <b>${R3EUtils.escapeHtml(carName.slice(lastSpace + 1))}</b> ${infoIcon}</span>`
+              : `<span class="no-wrap-tail">${flagHtml}<b>${R3EUtils.escapeHtml(carName)}</b> ${infoIcon}</span>`;
             html += `\n<tr class="driver-data-row ${slug}" data-link="${rowLink}">` +
               `<td>${linkOpen}${carNameHtml}${linkClose}</td>` +
               `<td>${linkOpen}${wheelBadge(car.wheel_cat || car.wheel)}${linkClose}</td>` +

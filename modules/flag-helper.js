@@ -4,17 +4,6 @@
  */
 
 /**
- * Converts a 2-letter country code to a regional indicator flag emoji
- * @param {string} code - 2-letter country code
- * @returns {string} Flag emoji or empty string
- */
-function codeToFlag(code) {
-    if (!code || code.length !== 2) return '';
-    const A = 'A'.charCodeAt(0);
-    return String.fromCodePoint(...[...code.toUpperCase()].map(c => 0x1F1E6 + (c.charCodeAt(0) - A)));
-}
-
-/**
  * Resolves a country name to an ISO code using manual mappings and Intl.DisplayNames
  * @param {string} name - Country name
  * @returns {string|null} Country code or null
@@ -47,40 +36,48 @@ function findCountryCodeByName(name) {
 }
 
 /**
- * Converts a country value (name or code) to a flag emoji
+ * Converts a country value (name or code) to a flag HTML element using CSS flag icons
  * @param {string} country - Country name or code
- * @returns {string} Flag emoji with space or empty string
+ * @returns {string} Flag HTML element or empty string
  */
 function countryToFlag(country) {
     if (!country) return '';
     const s = String(country).trim();
     
-    // If it already contains regional indicator symbols or emoji, return it
-    try {
-        if (/\p{Regional_Indicator}/u.test(s) || /[\u{1F1E6}-\u{1F1FF}]/u.test(s)) return s + ' ';
-    } catch (e) {}
-
-    // If it's a 2-letter code (e.g., GB, US), convert
-    if (/^[A-Za-z]{2}$/.test(s)) {
-        return codeToFlag(s) + ' ';
+    // Special case for "Various" - use custom RaceRoom icon
+    if (s.toLowerCase() === 'various') {
+        return `<img src="https://s1.cdn.autoevolution.com/images/news/race-flags-indy-racing-league-8367_12.jpg" alt="Various" class="various-flag-icon" style="width: 1.3em; height: 1em; vertical-align: middle; display: inline-block;">`;
     }
-
-    // If value contains a country code in parentheses like "United Kingdom (GB)", extract
+    
+    let code = null;
+    
+    // First, check if value contains a country code in parentheses like "United Kingdom (GB)"
     const paren = s.match(/\(([A-Za-z]{2})\)$/);
-    if (paren) return codeToFlag(paren[1]) + ' ';
-
-    // Try to map the full country name to an ISO code
-    const mapped = findCountryCodeByName(s);
-    if (mapped) return codeToFlag(mapped) + ' ';
-
-    // Nothing matched — return empty
+    if (paren) {
+        code = paren[1].toLowerCase();
+    }
+    // Try to map the country name/alias to an ISO code (handles UK→GB, USA→US, etc.)
+    else {
+        const mapped = findCountryCodeByName(s);
+        if (mapped) {
+            code = mapped.toLowerCase();
+        }
+        // If no mapping found and it's a 2-letter code, assume it's already a valid ISO code
+        else if (/^[A-Za-z]{2}$/.test(s)) {
+            code = s.toLowerCase();
+        }
+    }
+    
+    if (code) {
+        return `<span class="fi fi-${code}"></span>`;
+    }
+    
     return '';
 }
 
 // Make available globally
 if (typeof window !== 'undefined') {
     window.FlagHelper = {
-        codeToFlag,
         findCountryCodeByName,
         countryToFlag
     };

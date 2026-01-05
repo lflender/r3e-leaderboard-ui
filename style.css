@@ -877,9 +877,14 @@ main {
 
 .country-flag {
     display: inline-block;
-    margin-right: 0.4rem;
-    font-size: 1.05rem;
+    margin-right: 0.65rem;
     vertical-align: middle;
+    line-height: 1;
+}
+
+.country-flag .fi {
+    font-size: 1em;
+    line-height: 1;
 }
 
 .driver-data-row {
@@ -1361,8 +1366,8 @@ footer p {
         font-size: 0.75rem;
     }
 
-    .country-flag {
-        font-size: 0.85rem;
+    .country-flag .fi {
+        font-size: 0.9em;
     }
 
     /* Search filters: keep gap consistent */
@@ -1656,7 +1661,7 @@ footer p {
         font-size: 0.7rem;
     }
 
-    .country-flag {
-        font-size: 0.8rem;
+    .country-flag .fi {
+        font-size: 0.85em;
     }
 }

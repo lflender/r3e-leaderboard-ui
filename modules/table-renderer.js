@@ -65,7 +65,7 @@ class TableRenderer {
                 html += `<th class="sortable${activeClass}" onclick="window.sortDriverGroups('gap')" title="Click to sort by gap time">${R3EUtils.formatHeader(key)}</th>`;
             } else if (isGapPercentKey) {
                 const activeClass = sortBy === 'gapPercent' ? ' sort-active' : '';
-                html += `<th class="sortable${activeClass}" onclick="window.sortDriverGroups('gapPercent')" title="Click to sort by gap percentage">Gap %</th>`;
+                html += `<th class="sortable${activeClass}" onclick="window.sortDriverGroups('gapPercent')" title="Click to sort by lap time percentage against reference time">Lap %</th>`;
             } else {
                 html += `<th>${R3EUtils.formatHeader(key)}</th>`;
             }
@@ -142,7 +142,7 @@ class TableRenderer {
         const slugSource = driverObj.driver || driverObj.name || firstEntry.name || firstEntry.Name || 'unknown';
         const groupId = `group-${String(slugSource).replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-]/g, '').toLowerCase()}`;
         
-        const flagHtml = FlagHelper.countryToFlag(country) ? `<span class="country-flag">${FlagHelper.countryToFlag(country)}</span> ` : '';
+        const flagHtml = FlagHelper.countryToFlag(country) ? `<span class="country-flag">${FlagHelper.countryToFlag(country)}</span>` : '';
         const rankHtml = rank ? R3EUtils.renderRankStars(rank) : '';
         const teamHtml = team ? ` | 🏁 Team ${team}` : '';
         

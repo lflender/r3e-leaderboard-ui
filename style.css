@@ -285,13 +285,6 @@ main {
     .info-icon { display: none !important; }
 }
 
-/* Constrain the Power column so very long car names don't force the table wide */
-.results-table th:nth-child(5),
-.results-table td:nth-child(5) {
-    width: 8rem;
-    max-width: 8rem;
-}
-
 /* Car Info table specific column widths */
 #cars-info-table .results-table th:nth-child(1),
 #cars-info-table .results-table td:nth-child(1) {
@@ -442,7 +435,7 @@ main {
 
 .results-table th,
 .results-table td {
-    padding: 0.875rem;
+    padding: 0.65rem;
     text-align: left;
     border-bottom: 1px solid var(--border);
 }
@@ -451,9 +444,34 @@ main {
     color: #fff;
     font-size: 1.05rem;
     font-weight: 700;
-    padding: 0.85rem 1.25rem;
+    padding: 0.7rem 0.8rem;
     border: none;
     letter-spacing: 0.01em;
+}
+
+.results-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+}
+
+.results-table th.sortable:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.results-table th.sortable.sort-active {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.results-table th.sortable::after {
+    content: ' ⇅';
+    opacity: 0.5;
+    font-size: 0.9em;
+}
+
+.results-table th.sortable.sort-active::after {
+    content: ' ▼';
+    opacity: 1;
 }
 
 .results-table tr:hover {
@@ -461,7 +479,7 @@ main {
 }
 
 .results-table td {
-    padding: 0.75rem 1.25rem;
+    padding: 0.6rem;
     border-bottom: 1px solid var(--border);
     background: var(--surface);
     color: var(--text-primary);
@@ -513,7 +531,6 @@ main {
     border-radius: 50%;
     background: #666;
     box-shadow: 0 0 4px rgba(0,0,0,0.3);
-    animation: pulse 2s ease-in-out infinite;
 }
 
 .status-led.green {
@@ -553,8 +570,8 @@ main {
 
 .status-grid {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 1rem 2rem;
+    grid-template-columns: 1.5fr repeat(5, 1fr);
+    gap: 1rem 1.5rem;
     align-items: center;
 }
 
@@ -626,6 +643,10 @@ main {
 .news-excerpt {
     color: rgba(255,255,255,0.85);
     margin: 0.25rem 0 0.5rem;
+    white-space: pre-line;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, "Noto Sans", sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.45;
 }
 .news-actions { margin-top: 0.25rem; }
 .news-link { color: #7ec8ff; }
@@ -655,7 +676,9 @@ main {
 }
 
 .lap-time-cell {
-    min-width: 120px;
+    min-width: 80px;
+    max-width: 80px;
+    width: 80px;
     vertical-align: top;
     text-align: center;
 }
@@ -665,6 +688,8 @@ main {
     white-space: nowrap;
 }
 .lap-time-cell .time-delta {
+    display: block;
+    white-space: nowrap;
     display: block;
     white-space: nowrap;
     color: var(--text-secondary);
@@ -696,6 +721,49 @@ main {
     display: inline-block;
     vertical-align: baseline;
 }
+
+/* Position 1 - Shiny Gold Character */
+.pos-number.pos-1 {
+    color: #ffd700;
+    text-shadow: 0 0 1px #000,
+                 0 0 2px #000,
+                 1px 1px 0 #000,
+                 -1px -1px 0 #000,
+                 1px -1px 0 #000,
+                 -1px 1px 0 #000,
+                 0 0 10px rgba(255, 215, 0, 0.8),
+                 0 0 20px rgba(255, 215, 0, 0.5);
+    font-weight: 900;
+}
+
+/* Position 2 - Shiny Silver Character */
+.pos-number.pos-2 {
+    color: #b8b8b8;
+    text-shadow: 0 0 1px #000,
+                 0 0 2px #000,
+                 1px 1px 0 #000,
+                 -1px -1px 0 #000,
+                 1px -1px 0 #000,
+                 -1px 1px 0 #000,
+                 0 0 8px rgba(184, 184, 184, 0.8),
+                 0 0 16px rgba(184, 184, 184, 0.5);
+    font-weight: 900;
+}
+
+/* Position 3 - Shiny Bronze Character */
+.pos-number.pos-3 {
+    color: #cd7f32;
+    text-shadow: 0 0 1px #000,
+                 0 0 2px #000,
+                 1px 1px 0 #000,
+                 -1px -1px 0 #000,
+                 1px -1px 0 #000,
+                 -1px 1px 0 #000,
+                 0 0 8px rgba(205, 127, 50, 0.8),
+                 0 0 16px rgba(205, 127, 50, 0.5);
+    font-weight: 900;
+}
+
 .pos-total {
     color: var(--text-secondary);
     font-size: 0.95rem;
@@ -809,9 +877,14 @@ main {
 
 .country-flag {
     display: inline-block;
-    margin-right: 0.4rem;
-    font-size: 1.05rem;
+    margin-right: 0.65rem;
     vertical-align: middle;
+    line-height: 1;
+}
+
+.country-flag .fi {
+    font-size: 1em;
+    line-height: 1;
 }
 
 .driver-data-row {
@@ -1037,6 +1110,94 @@ footer p {
     display: inline-block;
 }
 
+/* Difficulty color scheme - subtle pill styling */
+.difficulty-cell { 
+    white-space: nowrap;
+    max-width: 75px;
+    width: 75px;
+}
+
+/* Gap percentage column styling */
+.gap-percent-cell {
+    white-space: nowrap;
+    text-align: center;
+    max-width: 75px;
+    width: 75px;
+}
+
+/* Lap time column - slightly constrain width */
+.lap-time-cell {
+    width: 100px;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.difficulty-pill {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    line-height: 1;
+}
+.difficulty-pill.difficulty-get-real {
+    /* Gold */
+    background-color: rgba(255, 215, 0, 0.14);
+    border-color: rgba(255, 215, 0, 0.30);
+    border-style: solid;
+    border-width: 1px;
+}
+.difficulty-pill.difficulty-amateur {
+    /* Silver */
+    background-color: rgba(192, 192, 192, 0.14);
+    border-color: rgba(192, 192, 192, 0.30);
+    border-style: solid;
+    border-width: 1px;
+}
+.difficulty-pill.difficulty-novice {
+    /* Bronze */
+    background-color: rgba(205, 127, 50, 0.14);
+    border-color: rgba(205, 127, 50, 0.30);
+    border-style: solid;
+    border-width: 1px;
+}
+
+/* Apply subtle cell background for leaderboards table cells as well */
+.difficulty-get-real { background-color: rgba(255, 215, 0, 0.10); }
+.difficulty-amateur { background-color: rgba(192, 192, 192, 0.10); }
+.difficulty-novice { background-color: rgba(205, 127, 50, 0.10); }
+
+/* Legend for difficulty meanings */
+.difficulty-legend {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+.difficulty-legend .legend-label {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+.difficulty-legend .difficulty-pill {
+    font-weight: 700;
+    font-size: 0.8rem;
+    padding: 0.12rem 0.45rem;
+}
+
+/* Track layout styling in result tables */
+.track-layout {
+    font-size: 0.85em;
+    color: #999;
+    font-style: italic;
+    font-weight: 400;
+}
+
+/* Driver Info page: put track layout on new line */
+#results-container .track-layout {
+    white-space: nowrap;
+    display: block;
+}
+
 /* Track Info table mobile optimization - apply for all small screens */
 @media (max-width: 768px) {
     #track-info-table {
@@ -1147,22 +1308,21 @@ footer p {
         font-size: 0.75rem;
     }
 
-    /* Reduce Driver column width on mobile */
-    .results-table th:nth-child(2),
-    .results-table td:nth-child(2) {
-        max-width: 7rem;
-    }
-
     .results-table th:nth-child(4),
     .results-table td:nth-child(4) {
         max-width: 7rem;
     }
 
-    /* Reduce Difficulty column width on mobile */
     .results-table th:nth-child(5),
     .results-table td:nth-child(5) {
-        width: 4rem;
-        max-width: 4rem;
+        width: 4.5rem;
+        max-width: 4.5rem;
+    }
+
+    .results-table th:nth-child(6),
+    .results-table td:nth-child(6) {
+        width: 3rem;
+        max-width: 3rem;
     }
 
     /* Position badges stay readable */
@@ -1187,17 +1347,27 @@ footer p {
         padding: 0.1rem 0.35rem !important;
     }
 
+    .difficulty-cell { 
+        white-space: nowrap;
+        max-width: 70px;
+        width: 70px;
+    }
+
     /* Driver names and metadata */
     .driver-group-header strong {
         font-size: 0.85rem;
+    }
+    
+    .driver-group-header td {
+        padding: 0.65rem !important;
     }
 
     .driver-meta {
         font-size: 0.75rem;
     }
 
-    .country-flag {
-        font-size: 0.85rem;
+    .country-flag .fi {
+        font-size: 0.9em;
     }
 
     /* Search filters: keep gap consistent */
@@ -1219,6 +1389,13 @@ footer p {
     
     /* Car Info page: all 3 dropdowns stack vertically, each on its own line */
     #cars-search-container .custom-select {
+        flex: 1 1 100%;
+        min-width: 100%;
+        max-width: 100%;
+    }
+    
+    /* Track Info page: dropdowns stack vertically for consistency */
+    #track-search-container .custom-select {
         flex: 1 1 100%;
         min-width: 100%;
         max-width: 100%;
@@ -1354,17 +1531,34 @@ footer p {
         padding: 0.12rem 0.4rem;
     }
 
+    /* Reduce horizontal padding for Car Info table on mobile */
+    #cars-info-table .results-table th {
+        padding: 0.7rem 0.3rem;
+        font-size: 0.9rem;
+    }
+    #cars-info-table .results-table td {
+        padding: 0.6rem 0.3rem;
+        font-size: 0.75rem;
+    }
+
     /* Make Power and Engine columns narrower on mobile for Car Info page */
     #cars-info-table .results-table th:nth-child(5),
     #cars-info-table .results-table td:nth-child(5) {
-        width: 4rem;
-        max-width: 4rem;
+        width: 3.5rem;
+        max-width: 3.5rem;
     }
     
     #cars-info-table .results-table th:nth-child(7),
     #cars-info-table .results-table td:nth-child(7) {
-        width: 4.5rem;
-        max-width: 4.5rem;
+        width: 4rem;
+        max-width: 4rem;
+    }
+    
+    /* Weight column - allow more width */
+    #cars-info-table .results-table th:nth-child(6),
+    #cars-info-table .results-table td:nth-child(6) {
+        width: auto;
+        min-width: 4.2rem;
     }
 
     /* Footer adjustments */
@@ -1467,61 +1661,7 @@ footer p {
         font-size: 0.7rem;
     }
 
-    .country-flag {
-        font-size: 0.8rem;
+    .country-flag .fi {
+        font-size: 0.85em;
     }
-}
-
-/* Difficulty color scheme - subtle pill styling */
-.difficulty-cell { white-space: nowrap; }
-.difficulty-pill {
-    display: inline-block;
-    padding: 0.15rem 0.5rem;
-    border-radius: 999px;
-    font-weight: 700;
-    font-size: 0.85rem;
-    line-height: 1;
-}
-.difficulty-pill.difficulty-get-real {
-    /* Gold */
-    background-color: rgba(255, 215, 0, 0.14);
-    border-color: rgba(255, 215, 0, 0.30);
-    border-style: solid;
-    border-width: 1px;
-}
-.difficulty-pill.difficulty-amateur {
-    /* Silver */
-    background-color: rgba(192, 192, 192, 0.14);
-    border-color: rgba(192, 192, 192, 0.30);
-    border-style: solid;
-    border-width: 1px;
-}
-.difficulty-pill.difficulty-novice {
-    /* Bronze */
-    background-color: rgba(205, 127, 50, 0.14);
-    border-color: rgba(205, 127, 50, 0.30);
-    border-style: solid;
-    border-width: 1px;
-}
-
-/* Apply subtle cell background for leaderboards table cells as well */
-.difficulty-get-real { background-color: rgba(255, 215, 0, 0.10); }
-.difficulty-amateur { background-color: rgba(192, 192, 192, 0.10); }
-.difficulty-novice { background-color: rgba(205, 127, 50, 0.10); }
-
-/* Legend for difficulty meanings */
-.difficulty-legend {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-left: auto;
-}
-.difficulty-legend .legend-label {
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-}
-.difficulty-legend .difficulty-pill {
-    font-weight: 700;
-    font-size: 0.8rem;
-    padding: 0.12rem 0.45rem;
 }

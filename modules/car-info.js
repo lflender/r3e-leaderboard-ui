@@ -33,10 +33,21 @@
     return `<span class="car-badge trans unknown">${R3EUtils.escapeHtml(cat)}</span>`;
   }
 
+  function countryFlag(country){
+    // Use FlagHelper if available, otherwise return empty
+    if (typeof FlagHelper !== 'undefined' && FlagHelper.countryToFlag) {
+      return FlagHelper.countryToFlag(country);
+    }
+    return '';
+  }
+
   const data = await loadData();
   const tableContainer = document.getElementById('cars-info-table');
   if(!tableContainer) return;
-  if(!data || data.length === 0){ tableContainer.innerHTML = '<p class="placeholder">No car data available</p>'; return; }
+  if(!data || data.length === 0){ 
+    tableContainer.innerHTML = '<p class="placeholder">No car data available</p>'; 
+    return; 
+  }
 
   // Dropdown options
   const wheelOptions = [
@@ -55,16 +66,23 @@
   let wheelFilter = '', transFilter = '', classFilter = '';
   
   // Build class options from data
-  const classOptions = [{ value: '', label: 'All classes' }].concat(data.map(c => ({ value: c.class || '', label: c.class || '' })));
-  const seen = new Set();
-  const classOptionsUnique = classOptions.filter(o => {
-    if (seen.has(o.value)) return false; seen.add(o.value); return true;
+  const classOptions = [{ value: '', label: 'All classes' }];
+  const classesSet = new Set();
+  data.forEach(cls => {
+    const className = (cls.class || '').trim();
+    if (className && className !== '-') {
+      classesSet.add(className);
+    }
+  });
+  const uniqueClasses = Array.from(classesSet).sort();
+  uniqueClasses.forEach(cls => {
+    classOptions.push({ value: cls, label: cls });
   });
   
   // Use the new CustomSelect component
   new CustomSelect('wheel-filter-ui', wheelOptions, v => { wheelFilter = v; renderTable(); });
   new CustomSelect('trans-filter-ui', transOptions, v => { transFilter = v; renderTable(); });
-  new CustomSelect('class-filter-ui-cars', classOptionsUnique, v => { classFilter = v; renderTable(); });
+  new CustomSelect('class-filter-ui-cars', classOptions, v => { classFilter = v; renderTable(); });
 
   function carMatchesFilters(car) {
     const w = (car.wheel_cat || car.wheel || '').toLowerCase();
@@ -122,11 +140,13 @@
         const linkOpen = rowLink ? `<a class="row-link" href="${rowLink}" target="_blank" rel="noopener">` : '';
         const linkClose = rowLink ? `</a>` : '';
         const infoIcon = car.description ? `<span class="info-icon" title="${R3EUtils.escapeHtml(car.description)}" aria-label="More info" role="img">i</span>` : '';
+        const flag = countryFlag(car.country || '');
+        const flagHtml = flag ? `<span class="country-flag">${flag}</span>` : '';
         const carName = String(car.car || '');
         const lastSpace = carName.lastIndexOf(' ');
         const carNameHtml = (lastSpace >= 0)
-          ? `<b>${R3EUtils.escapeHtml(carName.slice(0, lastSpace))}</b><span class="no-wrap-tail"> <b>${R3EUtils.escapeHtml(carName.slice(lastSpace + 1))}</b> ${infoIcon}</span>`
-          : `<span class="no-wrap-tail"><b>${R3EUtils.escapeHtml(carName)}</b> ${infoIcon}</span>`;
+          ? `${flagHtml}<b>${R3EUtils.escapeHtml(carName.slice(0, lastSpace))}</b><span class="no-wrap-tail"> <b>${R3EUtils.escapeHtml(carName.slice(lastSpace + 1))}</b> ${infoIcon}</span>`
+          : `<span class="no-wrap-tail">${flagHtml}<b>${R3EUtils.escapeHtml(carName)}</b> ${infoIcon}</span>`;
         html += `\n<tr class="driver-data-row ${slug}" data-link="${rowLink}">` +
           `<td>${linkOpen}${carNameHtml}${linkClose}</td>` +
                 `<td>${linkOpen}${wheelBadge(car.wheel_cat || car.wheel)}${linkClose}</td>` +
@@ -185,11 +205,13 @@
             const linkOpen = rowLink ? `<a class="row-link" href="${rowLink}" target="_blank" rel="noopener">` : '';
             const linkClose = rowLink ? `</a>` : '';
             const infoIcon = car.description ? `<span class="info-icon" title="${R3EUtils.escapeHtml(car.description)}" aria-label="More info" role="img">i</span>` : '';
+            const flag = countryFlag(car.country || '');
+            const flagHtml = flag ? `<span class="country-flag">${flag}</span>` : '';
             const carName = String(car.car || '');
             const lastSpace = carName.lastIndexOf(' ');
             const carNameHtml = (lastSpace >= 0)
-              ? `<b>${R3EUtils.escapeHtml(carName.slice(0, lastSpace))}</b><span class="no-wrap-tail"> <b>${R3EUtils.escapeHtml(carName.slice(lastSpace + 1))}</b> ${infoIcon}</span>`
-              : `<span class="no-wrap-tail"><b>${R3EUtils.escapeHtml(carName)}</b> ${infoIcon}</span>`;
+              ? `${flagHtml}<b>${R3EUtils.escapeHtml(carName.slice(0, lastSpace))}</b><span class="no-wrap-tail"> <b>${R3EUtils.escapeHtml(carName.slice(lastSpace + 1))}</b> ${infoIcon}</span>`
+              : `<span class="no-wrap-tail">${flagHtml}<b>${R3EUtils.escapeHtml(carName)}</b> ${infoIcon}</span>`;
             html += `\n<tr class="driver-data-row ${slug}" data-link="${rowLink}">` +
               `<td>${linkOpen}${carNameHtml}${linkClose}</td>` +
               `<td>${linkOpen}${wheelBadge(car.wheel_cat || car.wheel)}${linkClose}</td>` +

@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RaceRoom Leaderboards Explorer — R3E Leaderboards & Car Info</title>
-    <meta name="description" content="Search RaceRoom (R3E) leaderboards, browse track information and view car specifications. Community-driven R3E leaderboard search.">
+    <meta name="description" content="Search RaceRoom leaderboards, browse track information and view car specifications.">
     <link rel="canonical" href="https://r3e-leaderboards.info/">
     <meta name="author" content="Ludo R3E Tools">
     <meta name="robots" content="index, follow">
+    <meta name="keywords" content="raceroom, leaderboards, r3e, racing, times, drivers, tracks, cars, explorer">
     <!-- Open Graph -->
     <meta property="og:site_name" content="RaceRoom Leaderboards Explorer">
     <meta property="og:title" content="RaceRoom Leaderboards Explorer — R3E Leaderboards & Car Info">
@@ -21,6 +22,7 @@
             async src="//gc.zgo.at/count.js"></script>
     
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"/>
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -56,6 +58,7 @@
                         id="driver-search" 
                         placeholder="Search driver" 
                         autocomplete="off"
+                        autofocus
                     >
                     <select id="class-filter" aria-label="Filter by car class" hidden>
                         <option value="">All classes</option>
@@ -94,6 +97,10 @@
                     <span id="status-combinations" class="status-value">-</span>
                 </div>
                 <div class="status-item">
+                    <span class="status-label">Total Combinations:</span>
+                    <span id="status-total-combinations" class="status-value">-</span>
+                </div>
+                <div class="status-item">
                     <span class="status-label">Total Drivers:</span>
                     <span id="status-drivers" class="status-value">-</span>
                 </div>
@@ -129,13 +136,26 @@
         </div>
     </footer>
     <!-- Core modules - load first -->
+    <script src="data/country-mappings.js"></script>
+    <script src="modules/flag-helper.js"></script>
+    <script src="modules/template-loader.js"></script>
+    <script src="modules/template-helper.js"></script>
+    <script src="modules/field-mappings.js"></script>
+    <script src="modules/data-normalizer.js"></script>
     <script src="modules/utils.js"></script>
     <script src="modules/data-service.js"></script>
     <script src="modules/custom-select.js"></script>
     <script src="modules/pagination.js"></script>
     <script src="modules/table-renderer.js"></script>
     
+    <!-- Feature modules -->
+    <script src="modules/tab-manager.js"></script>
+    <script src="modules/status-display.js"></script>
+    <script src="modules/driver-search.js"></script>
+    <script src="modules/navigation.js"></script>
+    
     <!-- Data files -->
+    <script src="data/cars.js"></script>
     <script src="data/tracks.js"></script>
     
     <!-- Application script -->

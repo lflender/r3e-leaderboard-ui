@@ -116,79 +116,103 @@ function getTotalEntriesCount(item) {
     return isNaN(n) ? 0 : n;
 }
 
-// ========================================
-// Country & Flag Utilities
-// ========================================
-
 /**
- * Converts a 2-letter country code to a regional indicator flag emoji
- * @param {string} code - 2-letter country code
- * @returns {string} Flag emoji or empty string
+ * Parses a lap time string and returns milliseconds
+ * Supports formats: "1:59:530s", "55.395s", "1:23.456s", "1m 26.693s"
+ * @param {string} timeStr - Lap time string
+ * @returns {number} Time in milliseconds
  */
-function codeToFlag(code) {
-    if (!code || code.length !== 2) return '';
-    const A = 'A'.charCodeAt(0);
-    return String.fromCodePoint(...[...code.toUpperCase()].map(c => 0x1F1E6 + (c.charCodeAt(0) - A)));
-}
-
-/**
- * ISO 3166-1 alpha-2 country codes
- */
-const ISO_COUNTRY_CODES = [
-    'AF','AX','AL','DZ','AS','AD','AO','AI','AQ','AG','AR','AM','AW','AU','AT','AZ','BS','BH','BD','BB','BY','BE','BZ','BJ','BM','BT','BO','BQ','BA','BW','BV','BR','IO','BN','BG','BF','BI','KH','CM','CA','CV','KY','CF','TD','CL','CN','CX','CC','CO','KM','CG','CD','CK','CR','CI','HR','CU','CW','CY','CZ','DK','DJ','DM','DO','EC','EG','SV','GQ','ER','EE','SZ','ET','FK','FO','FJ','FI','FR','GF','PF','TF','GA','GM','GE','DE','GH','GI','GR','GL','GD','GP','GU','GT','GG','GN','GW','GY','HT','HM','VA','HN','HK','HU','IS','IN','ID','IR','IQ','IE','IM','IL','IT','JM','JP','JE','JO','KZ','KE','KI','KP','KR','KW','KG','LA','LV','LB','LS','LR','LY','LI','LT','LU','MO','MG','MW','MY','MV','ML','MT','MH','MQ','MR','MU','YT','MX','FM','MD','MC','MN','ME','MS','MA','MZ','MM','NA','NR','NP','NL','NC','NZ','NI','NE','NG','NU','NF','MK','MP','NO','OM','PK','PW','PS','PA','PG','PY','PE','PH','PN','PL','PT','PR','QA','RE','RO','RU','RW','BL','SH','KN','LC','MF','PM','VC','WS','SM','ST','SA','SN','RS','SC','SL','SG','SX','SK','SI','SB','SO','ZA','GS','SS','ES','LK','SD','SR','SJ','SE','CH','SY','TW','TJ','TZ','TH','TL','TG','TK','TO','TT','TN','TR','TM','TC','TV','UG','UA','AE','GB','US','UM','UY','UZ','VU','VE','VN','VG','VI','WF','EH','YE','ZM','ZW'
-];
-
-/**
- * Resolves a country name to an ISO code using Intl.DisplayNames
- * @param {string} name - Country name
- * @returns {string|null} Country code or null
- */
-function findCountryCodeByName(name) {
-    if (!name) return null;
-    const nm = String(name).trim().toLowerCase();
-    try {
-        const disp = new Intl.DisplayNames(['en'], { type: 'region' });
-        for (const code of ISO_COUNTRY_CODES) {
-            const display = disp.of(code);
-            if (!display) continue;
-            const d = String(display).toLowerCase();
-            if (d === nm || d.includes(nm) || nm.includes(d)) return code;
-        }
-    } catch (e) {
-        // Intl or DisplayNames not available
-    }
-    return null;
-}
-
-/**
- * Converts a country value (name or code) to a flag emoji
- * @param {string} country - Country name or code
- * @returns {string} Flag emoji with space or empty string
- */
-function countryToFlag(country) {
-    if (!country) return '';
-    const s = String(country).trim();
+function parseLapTimeToMillis(timeStr) {
+    if (!timeStr) return 0;
+    const s = String(timeStr).trim().replace(/s$/i, '');
     
-    // If it already contains regional indicator symbols or emoji, return it
-    try {
-        if (/\p{Regional_Indicator}/u.test(s) || /[\u{1F1E6}-\u{1F1FF}]/u.test(s)) return s + ' ';
-    } catch (e) {}
-
-    // If it's a 2-letter code (e.g., GB, US), convert
-    if (/^[A-Za-z]{2}$/.test(s)) {
-        return codeToFlag(s) + ' ';
+    // Format 1: minutes:seconds:milliseconds (e.g., "1:59:530" or "2:00:705")
+    let m = s.match(/^(\d+):(\d+):(\d+)$/);
+    if (m) {
+        const minutes = parseInt(m[1], 10);
+        const seconds = parseInt(m[2], 10);
+        const millis = parseInt(m[3], 10);
+        return ((minutes * 60) + seconds) * 1000 + millis;
     }
+    
+    // Format 2: minutes:seconds.milliseconds (e.g., "1:23.456")
+    m = s.match(/^(\d+):(\d+)\.(\d+)$/);
+    if (m) {
+        const minutes = parseInt(m[1], 10);
+        const seconds = parseInt(m[2], 10);
+        const millis = parseInt((m[3] + '000').substring(0, 3), 10);
+        return ((minutes * 60) + seconds) * 1000 + millis;
+    }
+    
+    // Format 3: Xm Y.Zs (e.g., "1m 26.693" or "2m 03.404")
+    m = s.match(/^(\d+)m\s+(\d+)\.(\d+)$/);
+    if (m) {
+        const minutes = parseInt(m[1], 10);
+        const seconds = parseInt(m[2], 10);
+        const millis = parseInt((m[3] + '000').substring(0, 3), 10);
+        return ((minutes * 60) + seconds) * 1000 + millis;
+    }
+    
+    // Format 4: seconds.milliseconds (e.g., "55.395")
+    m = s.match(/^(\d+)\.(\d+)$/);
+    if (m) {
+        const seconds = parseInt(m[1], 10);
+        const millis = parseInt((m[2] + '000').substring(0, 3), 10);
+        return seconds * 1000 + millis;
+    }
+    
+    return 0;
+}
 
-    // If value contains a country code in parentheses like "United Kingdom (GB)", extract
-    const paren = s.match(/\(([A-Za-z]{2})\)$/);
-    if (paren) return codeToFlag(paren[1]) + ' ';
-
-    // Try to map the full country name to an ISO code
-    const mapped = findCountryCodeByName(s);
-    if (mapped) return codeToFlag(mapped) + ' ';
-
-    // Nothing matched — return empty
-    return '';
+/**
+ * Calculates the gap percentage between a lap time and reference time
+ * @param {Object} item - Data item containing lap time with gap
+ * @param {string} referenceTime - Not used, kept for API compatibility
+ * @returns {string} Percentage string (e.g., "101.0%" or "-" for reference)
+ */
+function calculateGapPercentage(item, referenceTime) {
+    if (!item) return '-';
+    
+    const raw = item.LapTime || item['Lap Time'] || item.lap_time || item.laptime || item.Time || '';
+    const s = String(raw || '');
+    if (!s) return '-';
+    
+    // Parse the lap time (first part before comma) and gap (after comma)
+    const parts = s.split(/,\s*/);
+    const lapTime = parts[0] || '';
+    
+    // If this is the reference (no gap), return "-"
+    if (parts.length < 2) return '-';
+    
+    const lapMillis = parseLapTimeToMillis(lapTime);
+    if (lapMillis === 0) {
+        console.log('Failed to parse lap time:', lapTime);
+        return '-';
+    }
+    
+    // Parse the gap time (e.g., "+1.175s" or "+0m 1.175s")
+    const gapMillis = parseGapMillisFromItem(item);
+    console.log('Item:', item, 'Lap:', lapTime, 'LapMillis:', lapMillis, 'GapMillis:', gapMillis);
+    
+    if (gapMillis === 0 || gapMillis === Number.MAX_VALUE) {
+        console.log('Invalid gap:', gapMillis, 'for item:', s);
+        return '-';
+    }
+    
+    // Calculate reference time: reference = lapTime - gap
+    const refMillis = lapMillis - gapMillis;
+    if (refMillis <= 0) {
+        console.log('Invalid refMillis:', refMillis);
+        return '-';
+    }
+    
+    // Calculate percentage: (lapTime / refTime) * 100
+    const percentage = (lapMillis / refMillis) * 100;
+    
+    console.log('Percentage:', percentage, 'for lap:', lapMillis, 'ref:', refMillis);
+    
+    // Round to 1 decimal place
+    return percentage.toFixed(1) + '%';
 }
 
 // ========================================
@@ -272,7 +296,7 @@ function updateUrlParam(paramName, value) {
 // Export utilities for use in other modules
 // ========================================
 
-// Make utilities available globally for backward compatibility
+// Make utilities available globally
 window.R3EUtils = {
     escapeHtml,
     formatHeader,
@@ -280,9 +304,8 @@ window.R3EUtils = {
     formatClassicLapTime,
     parseGapMillisFromItem,
     getTotalEntriesCount,
-    codeToFlag,
-    findCountryCodeByName,
-    countryToFlag,
+    parseLapTimeToMillis,
+    calculateGapPercentage,
     renderRankStars,
     getPositionBadgeColor,
     getUrlParam,

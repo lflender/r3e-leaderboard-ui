@@ -77,6 +77,10 @@
                     <span id="status-combinations" class="status-value">-</span>
                 </div>
                 <div class="status-item">
+                    <span class="status-label">Total Combinations:</span>
+                    <span id="status-total-combinations" class="status-value">-</span>
+                </div>
+                <div class="status-item">
                     <span class="status-label">Total Drivers:</span>
                     <span id="status-drivers" class="status-value">-</span>
                 </div>
@@ -113,10 +117,24 @@
     </footer>
 
     <!-- Core modules - load first -->
+    <script src="data/country-mappings.js"></script>
+    <script src="modules/flag-helper.js"></script>
+    <script src="modules/template-loader.js"></script>
+    <script src="modules/template-helper.js"></script>
+    <script src="modules/field-mappings.js"></script>
+    <script src="modules/data-normalizer.js"></script>
     <script src="modules/utils.js"></script>
     <script src="modules/data-service.js"></script>
+    <script src="modules/custom-select.js"></script>
+    <script src="modules/table-renderer.js"></script>
+    
+    <!-- Feature modules -->
+    <script src="modules/tab-manager.js"></script>
+    <script src="modules/status-display.js"></script>
+    <script src="modules/navigation.js"></script>
     
     <!-- Data and application scripts -->
+    <script src="data/cars.js"></script>
     <script src="data/tracks.js"></script>
     <script src="script.js"></script>
     <script src="modules/track-info.js"></script>

@@ -20,6 +20,7 @@
           async src="//gc.zgo.at/count.js"></script>
   
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"/>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -88,9 +89,19 @@
   </footer>
 
   <!-- Core modules -->
+  <script src="data/country-mappings.js"></script>
+  <script src="modules/flag-helper.js"></script>
+  <script src="modules/template-loader.js"></script>
+  <script src="modules/template-helper.js"></script>
+  <script src="modules/field-mappings.js"></script>
   <script src="modules/utils.js"></script>
   <script src="modules/data-service.js"></script>
   <script src="modules/custom-select.js"></script>
+  
+  <!-- Feature modules -->
+  <script src="modules/tab-manager.js"></script>
+  <script src="modules/status-display.js"></script>
+  <script src="modules/navigation.js"></script>
   
   <!-- Car Info specific -->
   <script src="data/cars.js"></script>

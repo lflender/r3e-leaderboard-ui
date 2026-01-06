@@ -7,10 +7,16 @@
 class DataService {
     constructor() {
         this.driverIndex = null;
+        this.driverIndexPromise = null; // single-flight promise for index loading
         // Disable status caching: status.json is precomputed and should be fetched fresh
-        this.statusCache = null;
+        this.statusCache = null; // last good status (fallback only, not used to avoid fresh fetches)
+        this.statusPromise = null; // single-flight promise for status fetch
         this.CACHE_DURATION = 0;
         this.STATUS_CACHE_KEY = 'r3e_status_cache';
+        this.DRIVER_INDEX_CACHE_KEY = 'r3e_driver_index_cache';
+        // Minimal index change detection via status.json
+        this.lastIndexUpdate = null;
+        this.indexRevalidatorStarted = false;
     }
     
     /**
@@ -18,35 +24,81 @@ class DataService {
      * @returns {Promise<Object>} Driver index object
      */
     async loadDriverIndex() {
+        // Return immediately if already loaded
         if (this.driverIndex) {
             return this.driverIndex;
         }
-        
-        try {
-            console.log('Loading driver index from cache/driver_index.json...');
-            const timestamp = new Date().getTime();
-            const response = await fetch(`cache/driver_index.json?v=${timestamp}`, {
-                cache: 'no-store',
-                headers: {
-                    'Cache-Control': 'no-cache, no-store, must-revalidate',
-                    'Pragma': 'no-cache',
-                    'Expires': '0'
-                }
-            });
-            
-            if (!response.ok) {
-                throw new Error(`Failed to load driver index: ${response.status} ${response.statusText}`);
-            }
-            
-            const text = await response.text();
-            this.driverIndex = JSON.parse(text);
-            console.log('Driver index loaded:', Object.keys(this.driverIndex).length, 'drivers');
+
+        // Serve cached index (stale-while-revalidate) to avoid empty UI on refresh
+        const cached = this._getCachedDriverIndex();
+        if (cached) {
+            this.driverIndex = cached;
+            // Kick off a background refresh without blocking the UI
+            setTimeout(() => { this._refreshDriverIndexInBackground(); }, 0);
+            // Initialize baseline lastIndexUpdate and start periodic revalidation
+            setTimeout(() => { this._updateLastIndexFromStatus(); }, 0);
+            this._startIndexStatusRevalidator();
             return this.driverIndex;
-        } catch (error) {
-            console.error('Error loading driver index:', error);
-            this.driverIndex = {};
-            return {};
         }
+
+        // Ensure single-flight: reuse ongoing promise if present
+        if (this.driverIndexPromise) {
+            return this.driverIndexPromise;
+        }
+
+        const maxAttempts = 10;
+        const baseDelayMs = 250;
+        this.driverIndexPromise = (async () => {
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                try {
+                    const controller = new AbortController();
+                    const timeout = setTimeout(() => controller.abort(), 8000);
+                    const timestamp = new Date().getTime();
+                    const response = await fetch(`cache/driver_index.json?v=${timestamp}`, {
+                        cache: 'no-store',
+                        headers: {
+                            'Cache-Control': 'no-cache, no-store, must-revalidate',
+                            'Pragma': 'no-cache',
+                            'Expires': '0'
+                        },
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeout);
+                    if (!response.ok) {
+                        throw new Error(`Failed to load driver index: ${response.status} ${response.statusText}`);
+                    }
+                    const text = await response.text();
+                    if (!text || text.trim().length === 0) {
+                        throw new Error('Driver index response is empty');
+                    }
+                    const parsed = JSON.parse(text);
+                    if (!parsed || typeof parsed !== 'object') {
+                        throw new Error('Driver index is not an object');
+                    }
+                    const keyCount = Object.keys(parsed).length;
+                    if (keyCount === 0) {
+                        throw new Error('Driver index is empty');
+                    }
+                    this.driverIndex = parsed;
+                    this._saveDriverIndexToCache(parsed);
+                    // Update baseline and start periodic revalidation
+                    setTimeout(() => { this._updateLastIndexFromStatus(); }, 0);
+                    this._startIndexStatusRevalidator();
+                    return this.driverIndex;
+                } catch (error) {
+                    const delay = baseDelayMs * Math.min(20, attempt);
+                    console.warn(`Driver index load attempt ${attempt}/${maxAttempts} failed:`, error?.message || error);
+                    if (attempt === maxAttempts) {
+                        console.error('Giving up loading driver index after retries');
+                        // Do not overwrite with empty object; preserve null so callers can decide
+                        throw error;
+                    }
+                    await new Promise(r => setTimeout(r, delay));
+                }
+            }
+        })();
+
+        return this.driverIndexPromise;
     }
     
     /**
@@ -55,16 +107,25 @@ class DataService {
      * @returns {Promise<Object>} Driver index
      */
     async waitForDriverIndex(maxAttempts = 50) {
+        // If already loaded, return immediately
         if (this.driverIndex !== null) {
             return this.driverIndex;
         }
-        
-        let attempts = 0;
-        while (this.driverIndex === null && attempts < maxAttempts) {
-            await new Promise(resolve => setTimeout(resolve, 100));
-            attempts++;
+
+        // Ensure loading is started and await the single-flight promise with timeout aligned to retries
+        const promise = this.loadDriverIndex();
+        if (promise && typeof promise.then === 'function') {
+            try {
+                // Align timeout with retry window (~12s)
+                const timeoutMs = Math.max(5000, maxAttempts * 250);
+                return await this._withTimeout(promise, timeoutMs);
+            } catch (e) {
+                console.error('waitForDriverIndex timed out or failed:', e?.message || e);
+                return this.driverIndex || {};
+            }
         }
-        
+
+        // Fallback if loadDriverIndex returned synchronously (cached)
         return this.driverIndex || {};
     }
     
@@ -76,7 +137,6 @@ class DataService {
      */
     async fetchLeaderboardDetails(trackId, classId) {
         const filePath = `cache/track_${trackId}/class_${classId}.json.gz`;
-        console.log('Loading leaderboard data from:', filePath);
         
         const timestamp = new Date().getTime();
         const response = await fetch(`${filePath}?v=${timestamp}`, {
@@ -133,36 +193,62 @@ class DataService {
      * @returns {Promise<Object>} Status data
      */
     async calculateStatus() {
-        // Always fetch fresh status.json without caching
-        try {
-            const response = await fetch(`cache/status.json?v=${Date.now()}`, {
-                method: 'GET',
-                cache: 'no-store',
-                headers: {
-                    'Accept': 'application/json',
-                    'Cache-Control': 'no-cache, no-store, must-revalidate',
-                    'Pragma': 'no-cache',
-                    'Expires': '0'
-                }
-            });
-
-            if (!response.ok) {
-                console.error('Failed to fetch status.json:', response.status, response.statusText);
-                return null;
-            }
-
-            // Use text + JSON.parse to avoid potential BOM/issues
-            const text = await response.text();
-            try {
-                return JSON.parse(text);
-            } catch (e) {
-                console.error('Invalid JSON in status.json:', e);
-                return null;
-            }
-        } catch (error) {
-            console.error('Error fetching status.json:', error);
-            return null;
+        // Single-flight: reuse ongoing fetch to avoid concurrent reads and races
+        if (this.statusPromise) {
+            return this.statusPromise;
         }
+
+        this.statusPromise = (async () => {
+            // Always fetch fresh status.json without caching
+            try {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 5000);
+                const response = await fetch(`cache/status.json?v=${Date.now()}`, {
+                    method: 'GET',
+                    cache: 'no-store',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    },
+                    signal: controller.signal
+                });
+                clearTimeout(timeout);
+
+                if (!response.ok) {
+                    console.error('Failed to fetch status.json:', response.status, response.statusText);
+                    // Graceful fallback: return last good status if present
+                    return this.statusCache || null;
+                }
+
+                // Use text + JSON.parse to avoid potential BOM/issues
+                const text = await response.text();
+                let parsed = null;
+                try {
+                    parsed = JSON.parse(text);
+                } catch (e) {
+                    console.error('Invalid JSON in status.json:', e);
+                    // Graceful fallback
+                    return this.statusCache || null;
+                }
+
+                // Minimal validation
+                if (parsed && typeof parsed === 'object') {
+                    this.statusCache = parsed; // update fallback
+                }
+                return parsed;
+            } catch (error) {
+                console.error('Error fetching status.json:', error);
+                // Graceful fallback
+                return this.statusCache || null;
+            } finally {
+                // Allow future calls to start a fresh fetch
+                this.statusPromise = null;
+            }
+        })();
+
+        return this.statusPromise;
     }
     
     /**
@@ -175,7 +261,7 @@ class DataService {
         const driverIndex = await this.waitForDriverIndex();
         
         if (!driverIndex || Object.keys(driverIndex).length === 0) {
-            throw new Error('Driver index is empty');
+            throw new Error('Driver index is loading or unavailable. Please try again in a moment.');
         }
         
         let searchTerm = driverName.trim();
@@ -252,6 +338,122 @@ class DataService {
         
         return results;
     }
+
+    // -------- Internal helpers for index caching --------
+    _getCachedDriverIndex() {
+        try {
+            const raw = localStorage.getItem(this.DRIVER_INDEX_CACHE_KEY);
+            if (!raw) return null;
+            const parsed = JSON.parse(raw);
+            if (!parsed || typeof parsed !== 'object') return null;
+            if (Object.keys(parsed).length === 0) return null;
+            return parsed;
+        } catch (_) {
+            return null;
+        }
+    }
+
+    _saveDriverIndexToCache(idx) {
+        try {
+            localStorage.setItem(this.DRIVER_INDEX_CACHE_KEY, JSON.stringify(idx));
+        } catch (_) {
+            // Ignore storage errors (quota, privacy mode)
+        }
+    }
+
+    async _refreshDriverIndexInBackground() {
+        try {
+            const maxAttempts = 5;
+            const baseDelayMs = 250;
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                try {
+                    const controller = new AbortController();
+                    const timeout = setTimeout(() => controller.abort(), 8000);
+                    const timestamp = new Date().getTime();
+                    const response = await fetch(`cache/driver_index.json?v=${timestamp}`, {
+                        cache: 'no-store',
+                        headers: {
+                            'Cache-Control': 'no-cache, no-store, must-revalidate',
+                            'Pragma': 'no-cache',
+                            'Expires': '0'
+                        },
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeout);
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    const text = await response.text();
+                    if (!text || text.trim().length === 0) throw new Error('Empty response');
+                    const parsed = JSON.parse(text);
+                    if (!parsed || typeof parsed !== 'object' || Object.keys(parsed).length === 0) {
+                        throw new Error('Invalid index');
+                    }
+                    this.driverIndex = parsed;
+                    this._saveDriverIndexToCache(parsed);
+                    // After refresh, also update baseline status timestamp
+                    setTimeout(() => { this._updateLastIndexFromStatus(); }, 0);
+                    return;
+                } catch (e) {
+                    if (attempt === maxAttempts) return;
+                    await new Promise(r => setTimeout(r, baseDelayMs * Math.min(20, attempt)));
+                }
+            }
+        } catch (_) {
+            // Swallow background refresh failures
+        }
+    }
+
+    _withTimeout(promise, ms) {
+        return new Promise((resolve, reject) => {
+            const t = setTimeout(() => reject(new Error('Timeout')), ms);
+            promise.then(v => { clearTimeout(t); resolve(v); })
+                   .catch(e => { clearTimeout(t); reject(e); });
+        });
+    }
+
+    // -------- Minimal index change detection via status.json --------
+    async _updateLastIndexFromStatus() {
+        try {
+            const status = await this.calculateStatus();
+            const latest = status && (status.last_index_update || status.last_scrape_end) || null;
+            if (latest) this.lastIndexUpdate = String(latest);
+        } catch (_) { /* ignore */ }
+    }
+
+    _startIndexStatusRevalidator() {
+        if (this.indexRevalidatorStarted) return;
+        this.indexRevalidatorStarted = true;
+
+        const baseIntervalMs = 10 * 60 * 1000; // 10 minutes
+        const jitterMs = Math.floor(Math.random() * 60 * 1000); // up to 60s jitter
+
+        const runCheck = async () => {
+            try {
+                if (typeof document !== 'undefined' && document.hidden) return; // skip when hidden
+                const status = await this.calculateStatus();
+                const latest = status && (status.last_index_update || status.last_scrape_end) || null;
+                if (!latest) return;
+                const latestStr = String(latest);
+                if (!this.lastIndexUpdate) {
+                    this.lastIndexUpdate = latestStr;
+                    return;
+                }
+                if (latestStr !== this.lastIndexUpdate) {
+                    this.lastIndexUpdate = latestStr;
+                    await this._refreshDriverIndexInBackground();
+                }
+            } catch (_) { /* ignore */ }
+        };
+
+        // Re-check when tab becomes visible
+        if (typeof document !== 'undefined') {
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) setTimeout(runCheck, 500);
+            });
+        }
+
+        setTimeout(runCheck, 2000 + jitterMs); // initial check shortly after load
+        setInterval(runCheck, baseIntervalMs + jitterMs);
+    }
     
     /**
      * Populates class filter from cars data
@@ -261,7 +463,7 @@ class DataService {
         if (!window.CARS_DATA || !Array.isArray(window.CARS_DATA)) {
             return [];
         }
-        
+
         const seen = new Set();
         const options = [];
         

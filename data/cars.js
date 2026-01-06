@@ -2918,7 +2918,7 @@ window.CARS_DATA =
         "weight": "1490",
         "engine": "V8",
         "drive": "RWD",
-        "country": "UK",
+        "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/german-nationals/mclaren/mclaren-mercedes-slr-722-gt",
         "description": "The 722 GT is a leaner and meaner race ready version of the already extreme McLaren-Mercedes SLR. With only 21 of them ever built, this is a rare opportunity to hear the supercharged v8 AMG engine come to life. Enjoy!"
       }

@@ -877,8 +877,8 @@ main {
 
 .country-flag {
     display: inline-block;
-    margin-right: 0.65rem;
-    vertical-align: middle;
+    margin-right: 0.6rem;
+    vertical-align: -1px;
     line-height: 1;
 }
 
@@ -1366,6 +1366,10 @@ footer p {
         font-size: 0.75rem;
     }
 
+    .country-flag {
+        margin-right: 0.4rem;
+    }
+    
     .country-flag .fi {
         font-size: 0.9em;
     }
@@ -1659,6 +1663,10 @@ footer p {
 
     .driver-meta {
         font-size: 0.7rem;
+    }
+
+    .country-flag {
+        margin-right: 0.35rem;
     }
 
     .country-flag .fi {

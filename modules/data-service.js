@@ -14,6 +14,8 @@ class DataService {
         this.CACHE_DURATION = 0;
         this.STATUS_CACHE_KEY = 'r3e_status_cache';
         this.DRIVER_INDEX_CACHE_KEY = 'r3e_driver_index_cache';
+        // Disable expensive localStorage caching of the giant index to keep UI responsive
+        this.ENABLE_INDEX_LOCAL_CACHE = false;
         // Minimal index change detection via status.json
         this.lastIndexUpdate = null;
         this.indexRevalidatorStarted = false;
@@ -71,7 +73,7 @@ class DataService {
                     if (!text || text.trim().length === 0) {
                         throw new Error('Driver index response is empty');
                     }
-                    const parsed = JSON.parse(text);
+                    const parsed = await this._parseJsonWhenIdle(text);
                     if (!parsed || typeof parsed !== 'object') {
                         throw new Error('Driver index is not an object');
                     }
@@ -340,7 +342,21 @@ class DataService {
     }
 
     // -------- Internal helpers for index caching --------
+    async _parseJsonWhenIdle(text) {
+        if (typeof requestIdleCallback === 'function') {
+            return await new Promise((resolve, reject) => {
+                requestIdleCallback(() => {
+                    try { resolve(JSON.parse(text)); }
+                    catch (e) { reject(e); }
+                }, { timeout: 2000 });
+            });
+        }
+        // Fallback: parse immediately
+        return JSON.parse(text);
+    }
+
     _getCachedDriverIndex() {
+        if (!this.ENABLE_INDEX_LOCAL_CACHE) return null;
         try {
             const raw = localStorage.getItem(this.DRIVER_INDEX_CACHE_KEY);
             if (!raw) return null;
@@ -354,6 +370,7 @@ class DataService {
     }
 
     _saveDriverIndexToCache(idx) {
+        if (!this.ENABLE_INDEX_LOCAL_CACHE) return;
         try {
             localStorage.setItem(this.DRIVER_INDEX_CACHE_KEY, JSON.stringify(idx));
         } catch (_) {
@@ -383,7 +400,7 @@ class DataService {
                     if (!response.ok) throw new Error(`HTTP ${response.status}`);
                     const text = await response.text();
                     if (!text || text.trim().length === 0) throw new Error('Empty response');
-                    const parsed = JSON.parse(text);
+                    const parsed = await this._parseJsonWhenIdle(text);
                     if (!parsed || typeof parsed !== 'object' || Object.keys(parsed).length === 0) {
                         throw new Error('Invalid index');
                     }

@@ -713,10 +713,10 @@ window.CARS_DATA =
     ]
   },
   {
-    "class": "BMW M2351 Racing Cup",
+    "class": "BMW M235i Racing Cup",
     "cars": [
       {
-        "car_class": "BMW M2351 Racing Cup",
+        "car_class": "BMW M235i Racing Cup",
         "car": "BMW M235i Racing",
         "wheel": "Round",
         "wheel_cat": "round",
@@ -755,10 +755,10 @@ window.CARS_DATA =
     ]
   },
   {
-    "class": "Cupra e-Racer",
+    "class": "CUPRA Leon e-Racer",
     "cars": [
       {
-        "car_class": "Cupra e-Racer",
+        "car_class": "CUPRA Leon e-Racer",
         "car": "CUPRA Leon e-Racer",
         "wheel": "GT",
         "wheel_cat": "gt",
@@ -4057,10 +4057,10 @@ window.CARS_DATA =
     ]
   },
   {
-    "class": "Trucks Racing",
+    "class": "Truck Racing",
     "cars": [
       {
-        "car_class": "Trucks Racing",
+        "car_class": "Truck Racing",
         "car": "RaceRoom Truck",
         "wheel": "Round",
         "wheel_cat": "round",

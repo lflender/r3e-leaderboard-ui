@@ -33,6 +33,15 @@
     return `<span class="car-badge trans unknown">${R3EUtils.escapeHtml(cat)}</span>`;
   }
 
+  function driveBadge(drive){
+    const v = (drive || '').toUpperCase().trim();
+    if (!v) return '<span class="car-badge drive unknown">—</span>';
+    if (v === 'RWD') return '<span class="car-badge drive rwd">RWD</span>';
+    if (v === 'FWD') return '<span class="car-badge drive fwd">FWD</span>';
+    if (v === '4WD' || v === 'AWD') return '<span class="car-badge drive awd">4WD</span>';
+    return `<span class="car-badge drive unknown">${R3EUtils.escapeHtml(drive)}</span>`;
+  }
+
   function countryFlag(country){
     // Use FlagHelper if available, otherwise return empty
     if (typeof FlagHelper !== 'undefined' && FlagHelper.countryToFlag) {
@@ -123,7 +132,7 @@
       }
 
     let html = '<table class="results-table"><thead><tr>' +
-      '<th>Car</th><th>Wheel</th><th>Transmission</th><th>Year</th><th>Power</th><th>Weight</th><th>Engine</th>' +
+      '<th>Car</th><th>Wheel</th><th>Transmission</th><th>Drive</th><th>Year</th><th>Power</th><th>Weight</th><th>Engine</th>' +
       '</tr></thead><tbody>';
 
     data.forEach(cls => {
@@ -133,7 +142,7 @@
       const filteredCars = (cls.cars || []).filter(carMatchesFilters);
       if (filteredCars.length === 0) return;
             html += `\n<tr class="driver-group-header" data-group="${slug}" onclick="toggleGroup(this)">` +
-              `<td colspan="8"><span class="toggle-icon">▼</span> <strong>${R3EUtils.escapeHtml(className)}</strong></td></tr>`;
+              `<td colspan="9"><span class="toggle-icon">▼</span> <strong>${R3EUtils.escapeHtml(className)}</strong></td></tr>`;
       filteredCars.forEach(car => {
         if (car.link === undefined) car.link = '';
         const rowLink = R3EUtils.escapeHtml(car.link || '');
@@ -151,6 +160,7 @@
           `<td>${linkOpen}${carNameHtml}${linkClose}</td>` +
                 `<td>${linkOpen}${wheelBadge(car.wheel_cat || car.wheel)}${linkClose}</td>` +
                 `<td>${linkOpen}${transBadge(car.transmission_cat || car.transmission)}${linkClose}</td>` +
+                `<td>${linkOpen}${driveBadge(car.drive)}${linkClose}</td>` +
                 `<td>${linkOpen}<span style="background:${yearColor(car.year)};color:#222;padding:0.18rem 0.6rem;border-radius:999px;font-weight:800;display:inline-block;min-width:3.5em;text-align:center;">${R3EUtils.escapeHtml(car.year || '')}</span>${linkClose}</td>` +
                 `<td class="carinfo-meta">${linkOpen}${R3EUtils.escapeHtml(car.power || '')}${linkClose}</td>` +
                 `<td class="carinfo-meta">${linkOpen}${R3EUtils.escapeHtml(car.weight || '')}${linkClose}</td>` +
@@ -189,7 +199,7 @@
     }
 
   let html = '<table class="results-table"><thead><tr>' +
-    '<th>Car</th><th>Wheel</th><th>Transmission</th><th>Year</th><th>Power</th><th>Weight</th><th>Engine</th>' +
+    '<th>Car</th><th>Wheel</th><th>Transmission</th><th>Drive</th><th>Year</th><th>Power</th><th>Weight</th><th>Engine</th>' +
     '</tr></thead><tbody>';
 
   data.forEach(cls => {
@@ -197,7 +207,7 @@
     const slug = `class-${String(className).replace(/\s+/g,'-').replace(/[^a-z0-9\-]/gi,'').toLowerCase()}`;
     // Group header row (same style as driver grouping in leaderboards)
         html += `\n<tr class="driver-group-header" data-group="${slug}" onclick="toggleGroup(this)">` +
-          `<td colspan="8"><span class="toggle-icon">▼</span> <strong>${R3EUtils.escapeHtml(className)}</strong></td></tr>`;
+          `<td colspan="9"><span class="toggle-icon">▼</span> <strong>${R3EUtils.escapeHtml(className)}</strong></td></tr>`;
     const cars = Array.isArray(cls.cars) ? cls.cars : [];
     cars.forEach(car => {
             if (car.link === undefined) car.link = '';
@@ -216,6 +226,7 @@
               `<td>${linkOpen}${carNameHtml}${linkClose}</td>` +
               `<td>${linkOpen}${wheelBadge(car.wheel_cat || car.wheel)}${linkClose}</td>` +
               `<td>${linkOpen}${transBadge(car.transmission_cat || car.transmission)}${linkClose}</td>` +
+              `<td>${linkOpen}${driveBadge(car.drive)}${linkClose}</td>` +
               `<td>${linkOpen}<span style="background:${yearColor(car.year)};color:#222;padding:0.18rem 0.6rem;border-radius:999px;font-weight:800;display:inline-block;min-width:3.5em;text-align:center;">${R3EUtils.escapeHtml(car.year || '')}</span>${linkClose}</td>` +
               `<td class="carinfo-meta">${linkOpen}${R3EUtils.escapeHtml(car.power || '')}${linkClose}</td>` +
               `<td class="carinfo-meta">${linkOpen}${R3EUtils.escapeHtml(car.weight || '')}${linkClose}</td>` +

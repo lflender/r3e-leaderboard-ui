@@ -477,7 +477,6 @@ main {
     border-bottom: 1px solid var(--border);
     background: var(--surface);
     color: var(--text-primary);
-    font-size: 1.05rem;
     transition: background 0.2s;
 }
 
@@ -670,9 +669,6 @@ main {
 }
 
 .lap-time-cell {
-    min-width: 80px;
-    max-width: 80px;
-    width: 80px;
     vertical-align: top;
     text-align: center;
 }
@@ -1107,22 +1103,16 @@ footer p {
 /* Difficulty color scheme - subtle pill styling */
 .difficulty-cell { 
     white-space: nowrap;
-    max-width: 75px;
-    width: 75px;
 }
 
 /* Gap percentage column styling */
 .gap-percent-cell {
     white-space: nowrap;
     text-align: center;
-    max-width: 75px;
-    width: 75px;
 }
 
 /* Lap time column - slightly constrain width */
 .lap-time-cell {
-    width: 100px;
-    max-width: 100px;
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -1302,23 +1292,6 @@ footer p {
         font-size: 0.75rem;
     }
 
-    .results-table th:nth-child(4),
-    .results-table td:nth-child(4) {
-        max-width: 7rem;
-    }
-
-    .results-table th:nth-child(5),
-    .results-table td:nth-child(5) {
-        width: 4.5rem;
-        max-width: 4.5rem;
-    }
-
-    .results-table th:nth-child(6),
-    .results-table td:nth-child(6) {
-        width: 3rem;
-        max-width: 3rem;
-    }
-
     /* Position badges stay readable */
     .pos-number {
         font-size: 0.7rem;
@@ -1343,8 +1316,6 @@ footer p {
 
     .difficulty-cell { 
         white-space: nowrap;
-        max-width: 70px;
-        width: 70px;
     }
 
     /* Driver names and metadata */
@@ -1539,7 +1510,6 @@ footer p {
     #cars-info-table .results-table td {
         padding: 0.6rem 0.3rem;
         font-size: 0.75rem;
-        line-height: 0.9;
     }
 
     #cars-info-table .results-table th:nth-child(1),

@@ -286,9 +286,9 @@ class TableRenderer {
         const escDelta = R3EUtils.escapeHtml(String(deltaClassic));
         
         if (escDelta) {
-            return `<td class="lap-time-cell">${escMain} <span class="time-delta-inline">${escDelta}</span></td>`;
+            return `<td class="lap-time-cell"><span class="lap-main">${escMain}</span><span class="time-delta">${escDelta}</span></td>`;
         } else {
-            return `<td class="lap-time-cell">${escMain}</td>`;
+            return `<td class="lap-time-cell"><span class="lap-main">${escMain}</span></td>`;
         }
     }
     

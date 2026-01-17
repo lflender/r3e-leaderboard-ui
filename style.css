@@ -1,3 +1,24 @@
+/**
+ * R3E Leaderboard UI - Main Stylesheet
+ * 
+ * Organization:
+ * 1. Car Info specific styles (badges, meta info)
+ * 2. Global styles and CSS custom properties
+ * 3. Layout (header, main, footer)
+ * 4. Navigation (tabs)
+ * 5. Search and filters (custom selects)
+ * 6. Tables (results tables, cells, badges)
+ * 7. Status display
+ * 8. News section
+ * 9. Pagination
+ * 10. Media queries (tablet and mobile)
+ * 
+ * Note: Some elements use inline styles in JS for dynamic coloring:
+ * - Position badges: gradient based on rank
+ * - Year badges in car info: gradient based on year
+ * These are marked with data-color attributes for reference.
+ */
+
 /* Car Info table: smaller, stylized font for Power, Weight, Engine, Drive */
 .carinfo-meta {
     font-size: 0.87em !important;
@@ -62,6 +83,10 @@
     --border: #334155;
     --shadow: rgba(0, 0, 0, 0.3);
     --hover-bg: #334155;
+    --pos-badge-default: rgba(59,130,246,0.18);
+    --pos-badge-first: #22c55e;
+    --pos-badge-last: #ef4444;
+    --year-badge-text: #222;
 }
 
 body {
@@ -153,9 +178,15 @@ main {
     margin: 0 auto;
     width: 100%;
 }
+
 .results-table {
     width: 100%;
     table-layout: auto;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px 0 rgba(30, 41, 59, 0.10);
 }
 
 /* Slightly tighter table cells so long names don't push layout */
@@ -378,15 +409,6 @@ main {
     border-radius: 8px;
     margin-bottom: 1rem;
     border: 1px solid #991b1b;
-}
-
-.results-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 1rem;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 2px 12px 0 rgba(30, 41, 59, 0.10);
 }
 
 /* Allow horizontal scroll for wide tables on small screens */
@@ -677,9 +699,8 @@ main {
     display: block;
     white-space: nowrap;
 }
+
 .lap-time-cell .time-delta {
-    display: block;
-    white-space: nowrap;
     display: block;
     white-space: nowrap;
     color: var(--text-secondary);
@@ -695,11 +716,9 @@ main {
 /* Position badge styling */
 .pos-cell {
     white-space: nowrap;
-    /* Use inline layout so badge baseline aligns with text baseline */
-    /* Remove flex and alignment */
 }
 .pos-number {
-    background: rgba(59,130,246,0.18);
+    background: var(--pos-badge-default);
     color: var(--text-primary);
     padding: 0.18rem 0.6rem;
     border-radius: 999px;
@@ -782,18 +801,29 @@ main {
     text-decoration: none;
 }
 
-/* Ensure table cells vertically center contents */
-.results-table td {
+/* Year badge coloring (dynamic via data attributes handled by JS) */
+.car-badge.year-badge {
+    color: var(--year-badge-text);
+}
+
+/* Various flag icon styling */
+.various-flag-icon {
+    width: 1.3em;
+    height: 1em;
     vertical-align: middle;
-}
-
-.lap-time-cell {
-    min-width: 0;
-}
-
-.status-item .status-value {
     display: inline-block;
-    min-width: 0;
+}
+
+/* News section styling */
+.news-actions-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.news-error-details {
+    margin-top: 0.5rem;
 }
 
 .status-item-inline {
@@ -1111,11 +1141,6 @@ footer p {
     text-align: center;
 }
 
-/* Lap time column - slightly constrain width */
-.lap-time-cell {
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
 .difficulty-pill {
     display: inline-block;
     padding: 0.15rem 0.5rem;

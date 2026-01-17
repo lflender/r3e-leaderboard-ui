@@ -251,6 +251,7 @@ class TableRenderer {
     
     /**
      * Renders position cell with badge
+     * Note: Uses inline style for dynamic background color based on position/total ratio
      * @param {Object} item - Data item
      * @returns {string} HTML string
      */
@@ -265,9 +266,9 @@ class TableRenderer {
         const podiumClass = (total >= 4 && (pos === 1 || pos === 2 || pos === 3)) ? ` pos-${pos}` : '';
         
         if (totalNum) {
-            return `<td class="pos-cell"><span class="pos-number${podiumClass}" style="background:${badgeColor}">${R3EUtils.escapeHtml(posNum)}</span><span class="pos-sep">/</span><span class="pos-total">${R3EUtils.escapeHtml(totalNum)}</span></td>`;
+            return `<td class="pos-cell"><span class="pos-number${podiumClass}" data-color="${badgeColor}" style="background:${badgeColor}">${R3EUtils.escapeHtml(posNum)}</span><span class="pos-sep">/</span><span class="pos-total">${R3EUtils.escapeHtml(totalNum)}</span></td>`;
         } else {
-            return `<td class="pos-cell"><span class="pos-number${podiumClass}" style="background:${badgeColor}">${R3EUtils.escapeHtml(posNum)}</span></td>`;
+            return `<td class="pos-cell"><span class="pos-number${podiumClass}" data-color="${badgeColor}" style="background:${badgeColor}">${R3EUtils.escapeHtml(posNum)}</span></td>`;
         }
     }
     

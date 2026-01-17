@@ -214,86 +214,24 @@
 
     html += '\n</tbody></table>';
     tableContainer.innerHTML = html;
+
+    // Make rows with a data-link attribute open that link in a new tab
+    Array.from(tableContainer.querySelectorAll('tr.driver-data-row')).forEach(row => {
+      const link = row.getAttribute('data-link') || '';
+      if (link) {
+        // prefer native anchor preview; only add click handler when no anchor exists
+        const hasAnchor = !!row.querySelector('a.row-link');
+        row.style.cursor = 'pointer';
+        if (!hasAnchor) {
+          row.addEventListener('click', (e) => {
+            const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+            if (tag === 'a' || tag === 'button' || (e.target.closest && e.target.closest('.custom-select'))) return;
+            try { window.open(link, '_blank'); } catch (err) { console.warn('Failed to open link', err); }
+          });
+        }
+      }
+    });
   }
 
   renderTable();
-
-  // Compute min/max year for color gradient
-  let allYears = [];
-  data.forEach(cls => {
-    (cls.cars || []).forEach(car => {
-      let y = parseInt(car.year);
-      if (!isNaN(y)) allYears.push(y);
-    });
-  });
-  let minYear = Math.min(...allYears), maxYear = Math.max(...allYears);
-
-    function yearColor(year) {
-      let y = parseInt(year);
-      if (isNaN(y) || minYear === maxYear) return '#e0e0e0';
-      // Yellow (#ffd600) to green (#00c853) with gamma for stronger contrast
-      let t = (y - minYear) / (maxYear - minYear);
-      const gamma = 2.2;
-      const tg = Math.pow(Math.min(Math.max(t, 0), 1), gamma);
-      let r = Math.round((1 - tg) * 255 + tg * 0);
-      let g = Math.round((1 - tg) * 214 + tg * 200);
-      let b = Math.round((1 - tg) * 0   + tg * 83);
-      return `rgb(${r},${g},${b})`;
-    }
-
-  let html = '<table class="results-table"><thead><tr>' +
-    '<th>Car</th><th>Wheel</th><th>Transmission</th><th>Drive</th><th>Year</th><th>Power</th><th>Weight</th><th>Engine</th>' +
-    '</tr></thead><tbody>';
-
-  data.forEach(cls => {
-    const className = cls.class || 'Uncategorized';
-    const slug = `class-${String(className).replace(/\s+/g,'-').replace(/[^a-z0-9\-]/gi,'').toLowerCase()}`;
-    // Group header row (same style as driver grouping in leaderboards)
-        html += `\n<tr class="driver-group-header" data-group="${slug}" onclick="toggleGroup(this)">` +
-          `<td colspan="9"><span class="toggle-icon">▼</span> <strong>${R3EUtils.escapeHtml(className)}</strong></td></tr>`;
-    const cars = Array.isArray(cls.cars) ? cls.cars : [];
-    cars.forEach(car => {
-            if (car.link === undefined) car.link = '';
-            const rowLink = R3EUtils.escapeHtml(car.link || '');
-            const linkOpen = rowLink ? `<a class="row-link" href="${rowLink}" target="_blank" rel="noopener">` : '';
-            const linkClose = rowLink ? `</a>` : '';
-            const infoIcon = car.description ? `<span class="info-icon" title="${R3EUtils.escapeHtml(car.description)}" aria-label="More info" role="img">i</span>` : '';
-            const flag = countryFlag(car.country || '');
-            const flagHtml = flag ? `<span class="country-flag">${flag}</span>` : '';
-            const carName = String(car.car || '');
-            const lastSpace = carName.lastIndexOf(' ');
-            const carNameHtml = (lastSpace >= 0)
-              ? `${flagHtml}<b>${R3EUtils.escapeHtml(carName.slice(0, lastSpace))}</b><span class="no-wrap-tail"> <b>${R3EUtils.escapeHtml(carName.slice(lastSpace + 1))}</b> ${infoIcon}</span>`
-              : `<span class="no-wrap-tail">${flagHtml}<b>${R3EUtils.escapeHtml(carName)}</b> ${infoIcon}</span>`;
-            html += `\n<tr class="driver-data-row ${slug}" data-link="${rowLink}">` +
-              `<td>${linkOpen}${carNameHtml}${linkClose}</td>` +
-              `<td>${linkOpen}${wheelBadge(car.wheel_cat || car.wheel)}${linkClose}</td>` +
-              `<td>${linkOpen}${transBadge(car.transmission_cat || car.transmission)}${linkClose}</td>` +
-              `<td>${linkOpen}${driveBadge(car.drive)}${linkClose}</td>` +
-              `<td>${linkOpen}<span style="background:${yearColor(car.year)};color:#222;padding:0.18rem 0.6rem;border-radius:999px;font-weight:800;display:inline-block;min-width:3.5em;text-align:center;">${R3EUtils.escapeHtml(car.year || '')}</span>${linkClose}</td>` +
-              `<td class="carinfo-meta">${linkOpen}${R3EUtils.escapeHtml(car.power || '')}${linkClose}</td>` +
-              `<td class="carinfo-meta">${linkOpen}${R3EUtils.escapeHtml(car.weight || '')}${linkClose}</td>` +
-              `<td class="carinfo-meta">${linkOpen}${R3EUtils.escapeHtml(car.engine || '')}${linkClose}</td>` +
-              `</tr>`;
-    });
-  });
-
-  html += '\n</tbody></table>';
-  tableContainer.innerHTML = html;
-  // Make rows with a data-link attribute open that link in a new tab
-  Array.from(tableContainer.querySelectorAll('tr.driver-data-row')).forEach(row => {
-    const link = row.getAttribute('data-link') || '';
-    if (link) {
-      // prefer native anchor preview; only add click handler when no anchor exists
-      const hasAnchor = !!row.querySelector('a.row-link');
-      row.style.cursor = 'pointer';
-      if (!hasAnchor) {
-        row.addEventListener('click', (e) => {
-          const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
-          if (tag === 'a' || tag === 'button' || e.target.closest && e.target.closest('.custom-select')) return;
-          try { window.open(link, '_blank'); } catch (err) { console.warn('Failed to open link', err); }
-        });
-      }
-    }
-  });
 })();

@@ -20,6 +20,11 @@
   let activeTrackId = null; // null => All tracks
   let activeClassId = null; // null => All classes
   let activeClassLabel = null; // human-readable label for selected class
+  let combineMode = false; // When true, combine all classes in superclass by track
+
+  // DOM refs for combine checkbox
+  const combineContainer = document.getElementById('combine-checkbox-container');
+  const combineCheckbox = document.getElementById('combine-checkbox');
 
   function closeMenu() { if (rootMenu) { rootMenu.hidden = true; rootToggle.setAttribute('aria-expanded','false'); } }
   function openMenu() { if (rootMenu) { rootMenu.hidden = false; rootToggle.setAttribute('aria-expanded','true'); } }
@@ -77,8 +82,29 @@
     if (classSelect) {
       try { classSelect.value = value; } catch (e) {}
     }
+    
+    // Show/hide combine checkbox based on whether a superclass is selected
+    const isSuperclass = value && value.startsWith('superclass:');
+    if (combineContainer) {
+      combineContainer.style.display = isSuperclass ? 'flex' : 'none';
+    }
+    // Reset combine mode when changing filter
+    if (!isSuperclass && combineCheckbox) {
+      combineCheckbox.checked = false;
+      combineMode = false;
+    }
+    
     fetchAndRender();
   });
+
+  // Handle combine checkbox changes
+  if (combineCheckbox) {
+    combineCheckbox.addEventListener('change', () => {
+      combineMode = combineCheckbox.checked;
+      trackCurrentPage = 1;
+      fetchAndRender();
+    });
+  }
 
   // Local driver index cache (populated via dataService for single-flight behavior)
   let DRIVER_INDEX_CACHE = null;
@@ -133,6 +159,52 @@
       });
     });
     rows.sort((a,b)=> (b.entry_count||0)-(a.entry_count||0));
+    return rows;
+  }
+
+  // Aggregate by track for a superclass, combining all classes in the superclass
+  async function aggregateByTrackForSuperclass(superclassName) {
+    const idx = await loadDriverIndexLocal();
+    if (!idx) return [];
+    
+    // Get all class IDs that belong to this superclass
+    const superclassClassIds = new Set();
+    const classIdMap = await resolveMultipleClassIds(
+      window.CARS_DATA
+        .filter(entry => entry.superclass === superclassName)
+        .map(entry => entry.class || entry.car_class || '')
+        .filter(c => c)
+    );
+    classIdMap.forEach((id, name) => {
+      if (id !== null) superclassClassIds.add(Number(id));
+    });
+    
+    // Aggregate by track
+    const perTrack = new Map();
+    for (const k of Object.keys(idx)) {
+      const arr = idx[k] || [];
+      for (let i = 0; i < arr.length; i++) {
+        const e = arr[i] || {};
+        const cid = Number(e.class_id || e.ClassID || e.classId);
+        if (!superclassClassIds.has(cid)) continue;
+        const tid = e.track_id || e.TrackID || e.trackId;
+        if (tid === undefined || tid === null) continue;
+        const key = String(tid);
+        const cur = perTrack.get(key) || 0;
+        perTrack.set(key, cur + 1);
+      }
+    }
+    
+    const rows = [];
+    perTrack.forEach((count, key) => {
+      rows.push({
+        track: TRACK_LABELS.get(key) || key,
+        track_id: Number(key),
+        superclass: superclassName,
+        entry_count: count
+      });
+    });
+    rows.sort((a, b) => (b.entry_count || 0) - (a.entry_count || 0));
     return rows;
   }
 
@@ -382,16 +454,23 @@
     // Determine keys from first item and ensure Car Class column exists
     let keys = pageItems.length > 0 ? Object.keys(pageItems[0]) : [];
     // Keep 'class_name' so we can display it when backend returns it.
-    const excludeColumns = ['ClassID','TrackID','TotalEntries','class_id','track_id','total_entries','Name','name','DriverName','driver_name','Country','country','Rank','rank','Team','team','time_diff','timeDiff','timeDifference'];
+    let excludeColumns = ['ClassID','TrackID','TotalEntries','class_id','track_id','total_entries','Name','name','DriverName','driver_name','Country','country','Rank','rank','Team','team','time_diff','timeDiff','timeDifference'];
+    
+    // In combine mode, also exclude class-related columns since we're showing combined data
+    if (combineMode) {
+      excludeColumns = excludeColumns.concat(['class_name','className','ClassName','car_class','CarClass','Car Class','Class','class','superclass']);
+    }
+    
     keys = keys.filter(k => !excludeColumns.includes(k));
 
-    // Ensure a `Car Class` column is present (normalize various field names)
-    // Prefer backend's `class_name` (snake_case) or variants like className, ClassName
-    const carClassFields = ['class_name','className','ClassName','car_class','CarClass','Car Class','Class','class'];
-    const hasCarClass = keys.some(k => carClassFields.includes(k));
-    if (!hasCarClass) {
-      // Add synthetic key so we can render it; we'll compute value from item on render
-      keys.unshift('Car Class');
+    // Ensure a `Car Class` column is present (normalize various field names) - but NOT in combine mode
+    if (!combineMode) {
+      const carClassFields = ['class_name','className','ClassName','car_class','CarClass','Car Class','Class','class'];
+      const hasCarClass = keys.some(k => carClassFields.includes(k));
+      if (!hasCarClass) {
+        // Add synthetic key so we can render it; we'll compute value from item on render
+        keys.unshift('Car Class');
+      }
     }
 
     // Order columns similar to leaderboards
@@ -406,10 +485,11 @@
       // derive IDs and pos for data attributes
       const trackIdVal = item.track_id || item.TrackID || item.trackId || item.track || item.Track || '';
       const classIdVal = item.class_id || item.ClassID || item.classId || item.class || item.class_name || item.className || item.ClassName || '';
+      const superclassVal = item.superclass || ''; // For combined mode
       const posVal = item.position || item.Position || item.Pos || item.rank || '';
       const nameVal = item.Name || item.name || item.DriverName || '';
       const timeVal = item.LapTime || item['Lap Time'] || item.lap_time || item.laptime || item.Time || '';
-      html += `<tr class="driver-data-row" onclick="openDetailView(event, this)" data-trackid="${R3EUtils.escapeHtml(String(trackIdVal))}" data-classid="${R3EUtils.escapeHtml(String(classIdVal))}" data-position="${R3EUtils.escapeHtml(String(posVal))}" data-name="${R3EUtils.escapeHtml(String(nameVal))}" data-time="${R3EUtils.escapeHtml(String(timeVal))}">`;
+      html += `<tr class="driver-data-row" onclick="openDetailView(event, this)" data-trackid="${R3EUtils.escapeHtml(String(trackIdVal))}" data-classid="${R3EUtils.escapeHtml(String(classIdVal))}" data-superclass="${R3EUtils.escapeHtml(String(superclassVal))}" data-position="${R3EUtils.escapeHtml(String(posVal))}" data-name="${R3EUtils.escapeHtml(String(nameVal))}" data-time="${R3EUtils.escapeHtml(String(timeVal))}">`;
       keys.forEach(key => {
         // If synthetic 'Car Class' key, derive value from common fields in the item
         let value;
@@ -497,32 +577,40 @@
     // BOTH track and class selected
     if (activeTrackId && activeClassId) {
       if (isSuperclassFilter) {
-        // Superclass: aggregate across all classes in the superclass for this track
         const superclassName = activeClassId.replace('superclass:', '');
-        const superclassClasses = new Set();
-        if (window.CARS_DATA && Array.isArray(window.CARS_DATA)) {
-          window.CARS_DATA.forEach(entry => {
-            if (entry.superclass === superclassName) {
-              const cls = entry.class || entry.car_class || entry.CarClass || '';
-              if (cls) superclassClasses.add(cls);
-            }
-          });
-        }
         
-        // Get data for each class and combine
-        const allResults = [];
-        const classIdMap = await resolveMultipleClassIds(Array.from(superclassClasses));
-        for (const className of superclassClasses) {
-          const classId = classIdMap.get(className);
-          if (classId !== null) {
-            const classData = await aggregatePerTrackForClass(classId, className);
-            const filtered = classData.filter(row => Number(row.track_id) === Number(activeTrackId));
-            allResults.push(...filtered);
+        if (combineMode) {
+          // Combine mode: show single row with combined entry count
+          const data = await aggregateByTrackForSuperclass(superclassName);
+          const filtered = data.filter(row => Number(row.track_id) === Number(activeTrackId));
+          renderTable(filtered);
+        } else {
+          // Non-combine mode: show each class separately for this track
+          const superclassClasses = new Set();
+          if (window.CARS_DATA && Array.isArray(window.CARS_DATA)) {
+            window.CARS_DATA.forEach(entry => {
+              if (entry.superclass === superclassName) {
+                const cls = entry.class || entry.car_class || entry.CarClass || '';
+                if (cls) superclassClasses.add(cls);
+              }
+            });
           }
+          
+          // Get data for each class and combine
+          const allResults = [];
+          const classIdMap = await resolveMultipleClassIds(Array.from(superclassClasses));
+          for (const className of superclassClasses) {
+            const classId = classIdMap.get(className);
+            if (classId !== null) {
+              const classData = await aggregatePerTrackForClass(classId, className);
+              const filtered = classData.filter(row => Number(row.track_id) === Number(activeTrackId));
+              allResults.push(...filtered);
+            }
+          }
+          // Sort combined results by entry_count descending
+          allResults.sort((a, b) => (b.entry_count || 0) - (a.entry_count || 0));
+          renderTable(allResults);
         }
-        // Sort combined results by entry_count descending
-        allResults.sort((a, b) => (b.entry_count || 0) - (a.entry_count || 0));
-        renderTable(allResults);
       } else {
         // Single class
         const numericClassId = await resolveClassId(activeClassId);
@@ -539,31 +627,38 @@
     // Only class selected
     else if (activeClassId) {
       if (isSuperclassFilter) {
-        // Superclass: aggregate across all classes in the superclass
         const superclassName = activeClassId.replace('superclass:', '');
-        const superclassClasses = new Set();
-        if (window.CARS_DATA && Array.isArray(window.CARS_DATA)) {
-          window.CARS_DATA.forEach(entry => {
-            if (entry.superclass === superclassName) {
-              const cls = entry.class || entry.car_class || entry.CarClass || '';
-              if (cls) superclassClasses.add(cls);
-            }
-          });
-        }
         
-        // Get data for each class and combine
-        const allResults = [];
-        const classIdMap = await resolveMultipleClassIds(Array.from(superclassClasses));
-        for (const className of superclassClasses) {
-          const classId = classIdMap.get(className);
-          if (classId !== null) {
-            const classData = await aggregatePerTrackForClass(classId, className);
-            allResults.push(...classData);
+        // If combine mode, aggregate by track (combining all classes)
+        if (combineMode) {
+          const data = await aggregateByTrackForSuperclass(superclassName);
+          renderTable(data);
+        } else {
+          // Non-combine mode: show each class separately
+          const superclassClasses = new Set();
+          if (window.CARS_DATA && Array.isArray(window.CARS_DATA)) {
+            window.CARS_DATA.forEach(entry => {
+              if (entry.superclass === superclassName) {
+                const cls = entry.class || entry.car_class || entry.CarClass || '';
+                if (cls) superclassClasses.add(cls);
+              }
+            });
           }
+          
+          // Get data for each class and combine
+          const allResults = [];
+          const classIdMap = await resolveMultipleClassIds(Array.from(superclassClasses));
+          for (const className of superclassClasses) {
+            const classId = classIdMap.get(className);
+            if (classId !== null) {
+              const classData = await aggregatePerTrackForClass(classId, className);
+              allResults.push(...classData);
+            }
+          }
+          // Sort combined results by entry_count descending
+          allResults.sort((a, b) => (b.entry_count || 0) - (a.entry_count || 0));
+          renderTable(allResults);
         }
-        // Sort combined results by entry_count descending
-        allResults.sort((a, b) => (b.entry_count || 0) - (a.entry_count || 0));
-        renderTable(allResults);
       } else {
         // Single class
         const numericClassId = await resolveClassId(activeClassId);

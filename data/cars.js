@@ -3321,7 +3321,7 @@
         "power": "184",
         "weight": "1140kg",
         "engine": "",
-        "drive": "FWD",
+        "drive": "RWD",
         "country": "Japan",
         "link": "https://game.raceroom.com/en/store/cars/mazda-mx-5-cup/mazda/mazda-mx-5-cup-2019-nd2",
         "description": "The Mazda MX-5 Cup car is a high-performance race car designed for competition in the Mazda MX-5 Cup racing series. Built on the iconic Mazda MX-5 roadster platform, the Cup car features a range of modifications and enhancements that make it a formidable competitor on the track. With its lightweight design, powerful engine, and sharp handling, the MX-5 Cup car delivers an exhilarating driving experience that is sure to thrill any racing enthusiast."

@@ -192,7 +192,6 @@ function calculateGapPercentage(item, referenceTime) {
     
     // Parse the gap time (e.g., "+1.175s" or "+0m 1.175s")
     const gapMillis = parseGapMillisFromItem(item);
-    console.log('Item:', item, 'Lap:', lapTime, 'LapMillis:', lapMillis, 'GapMillis:', gapMillis);
     
     if (gapMillis === 0 || gapMillis === Number.MAX_VALUE) {
         console.log('Invalid gap:', gapMillis, 'for item:', s);
@@ -208,8 +207,6 @@ function calculateGapPercentage(item, referenceTime) {
     
     // Calculate percentage: (lapTime / refTime) * 100
     const percentage = (lapMillis / refMillis) * 100;
-    
-    console.log('Percentage:', percentage, 'for lap:', lapMillis, 'ref:', refMillis);
     
     // Round to 1 decimal place
     return percentage.toFixed(1) + '%';

@@ -53,6 +53,12 @@
                         <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All classes ▾</button>
                         <div class="custom-select__menu" role="presentation" hidden></div>
                     </div>
+                    <div id="combine-checkbox-container" style="display: none; margin-left: 0.5rem; align-items: center;">
+                        <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; user-select: none; font-size: 0.95rem; white-space: nowrap;">
+                            <input type="checkbox" id="combine-checkbox" style="cursor: pointer; width: 1rem; height: 1rem; accent-color: var(--accent-color, #4a9eff);">
+                            <span>Combine</span>
+                        </label>
+                    </div>
                     <select id="class-filter" aria-label="Filter by car class" hidden>
                         <option value="">All classes</option>
                     </select>

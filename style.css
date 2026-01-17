@@ -291,25 +291,19 @@ main {
     white-space: nowrap;
 }
 
-#cars-info-table .results-table th:nth-child(5),
-#cars-info-table .results-table td:nth-child(5) {
-    width: 6.5rem;
-    max-width: 6.5rem;
-}
-
-#cars-info-table .results-table th:nth-child(7),
-#cars-info-table .results-table td:nth-child(7) {
-    width: 7rem;
-    max-width: 7rem;
-}
-
-/* Slightly reduce horizontal padding on Car Info page */
+/* Reduce horizontal padding on Car Info page */
 #cars-info-table .results-table th {
-    padding: 0.85rem 0.9rem;
+    padding: 0.7rem 0.65rem;
 }
 #cars-info-table .results-table td {
-    padding: 0.75rem 0.9rem;
+    padding: 0.65rem 0.65rem;
 }
+
+/* Drive badges styling */
+.car-badge.drive { font-weight: 700; }
+.car-badge.drive.rwd { background: #35cbe6; color: #fff; }
+.car-badge.drive.fwd { background: #755377; color: #fff; }
+.car-badge.drive.awd { background: #f0b5e8; color: #fff; }
 
 .custom-select__toggle {
     width: 100%;
@@ -877,8 +871,8 @@ main {
 
 .country-flag {
     display: inline-block;
-    margin-right: 0.65rem;
-    vertical-align: middle;
+    margin-right: 0.6rem;
+    vertical-align: -1px;
     line-height: 1;
 }
 
@@ -1366,6 +1360,11 @@ footer p {
         font-size: 0.75rem;
     }
 
+    .country-flag {
+        vertical-align: 0;
+        margin-right: 0.4rem;
+    }
+    
     .country-flag .fi {
         font-size: 0.9em;
     }
@@ -1529,6 +1528,7 @@ footer p {
     .car-badge {
         font-size: 0.7rem;
         padding: 0.12rem 0.4rem;
+        line-height: 1;
     }
 
     /* Reduce horizontal padding for Car Info table on mobile */
@@ -1539,26 +1539,13 @@ footer p {
     #cars-info-table .results-table td {
         padding: 0.6rem 0.3rem;
         font-size: 0.75rem;
+        line-height: 0.9;
     }
 
-    /* Make Power and Engine columns narrower on mobile for Car Info page */
-    #cars-info-table .results-table th:nth-child(5),
-    #cars-info-table .results-table td:nth-child(5) {
-        width: 3.5rem;
-        max-width: 3.5rem;
-    }
-    
-    #cars-info-table .results-table th:nth-child(7),
-    #cars-info-table .results-table td:nth-child(7) {
-        width: 4rem;
-        max-width: 4rem;
-    }
-    
-    /* Weight column - allow more width */
-    #cars-info-table .results-table th:nth-child(6),
-    #cars-info-table .results-table td:nth-child(6) {
-        width: auto;
-        min-width: 4.2rem;
+    #cars-info-table .results-table th:nth-child(1),
+    #cars-info-table .results-table td:nth-child(1) {
+        width: 15rem;
+        max-width: 15rem;
     }
 
     /* Footer adjustments */
@@ -1619,19 +1606,6 @@ footer p {
         font-size: 0.85rem;
     }
 
-    /* Make Power and Engine columns even narrower on extra small screens for Car Info page */
-    #cars-info-table .results-table th:nth-child(5),
-    #cars-info-table .results-table td:nth-child(5) {
-        width: 3.5rem;
-        max-width: 3.5rem;
-    }
-    
-    #cars-info-table .results-table th:nth-child(7),
-    #cars-info-table .results-table td:nth-child(7) {
-        width: 4rem;
-        max-width: 4rem;
-    }
-
     /* Further reduce special elements */
     .pos-number {
         font-size: 0.65rem;
@@ -1659,6 +1633,10 @@ footer p {
 
     .driver-meta {
         font-size: 0.7rem;
+    }
+
+    .country-flag {
+        margin-right: 0.35rem;
     }
 
     .country-flag .fi {

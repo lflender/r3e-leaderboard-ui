@@ -14,6 +14,8 @@ class DataService {
         this.CACHE_DURATION = 0;
         this.STATUS_CACHE_KEY = 'r3e_status_cache';
         this.DRIVER_INDEX_CACHE_KEY = 'r3e_driver_index_cache';
+        // Disable expensive localStorage caching of the giant index to keep UI responsive
+        this.ENABLE_INDEX_LOCAL_CACHE = false;
         // Minimal index change detection via status.json
         this.lastIndexUpdate = null;
         this.indexRevalidatorStarted = false;
@@ -71,7 +73,7 @@ class DataService {
                     if (!text || text.trim().length === 0) {
                         throw new Error('Driver index response is empty');
                     }
-                    const parsed = JSON.parse(text);
+                    const parsed = await this._parseJsonWhenIdle(text);
                     if (!parsed || typeof parsed !== 'object') {
                         throw new Error('Driver index is not an object');
                     }
@@ -308,16 +310,35 @@ class DataService {
             
             // Apply class filter
             if (filters.classId || filters.className) {
-                filteredEntries = filteredEntries.filter(entry => {
-                    const entryClass = entry.car_class || entry.CarClass || entry['Car Class'] || entry.Class || entry.class || '';
-                    if (filters.classId) {
-                        return entryClass === filters.classId;
+                const filterValue = filters.classId || filters.className;
+                
+                // Check if this is a superclass filter
+                if (filterValue.startsWith('superclass:')) {
+                    const superclassName = filterValue.replace('superclass:', '');
+                    
+                    // Get all classes that belong to this superclass
+                    const superclassClasses = new Set();
+                    if (window.CARS_DATA && Array.isArray(window.CARS_DATA)) {
+                        window.CARS_DATA.forEach(entry => {
+                            if (entry.superclass === superclassName) {
+                                const cls = entry.class || entry.car_class || entry.CarClass || '';
+                                if (cls) superclassClasses.add(cls);
+                            }
+                        });
                     }
-                    if (filters.className) {
-                        return entryClass === filters.className;
-                    }
-                    return true;
-                });
+                    
+                    // Filter entries by any of the classes in this superclass
+                    filteredEntries = filteredEntries.filter(entry => {
+                        const entryClass = entry.car_class || entry.CarClass || entry['Car Class'] || entry.Class || entry.class || '';
+                        return superclassClasses.has(entryClass);
+                    });
+                } else {
+                    // Regular class filter
+                    filteredEntries = filteredEntries.filter(entry => {
+                        const entryClass = entry.car_class || entry.CarClass || entry['Car Class'] || entry.Class || entry.class || '';
+                        return entryClass === filterValue;
+                    });
+                }
             }
             
             // Apply difficulty filter
@@ -340,7 +361,21 @@ class DataService {
     }
 
     // -------- Internal helpers for index caching --------
+    async _parseJsonWhenIdle(text) {
+        if (typeof requestIdleCallback === 'function') {
+            return await new Promise((resolve, reject) => {
+                requestIdleCallback(() => {
+                    try { resolve(JSON.parse(text)); }
+                    catch (e) { reject(e); }
+                }, { timeout: 2000 });
+            });
+        }
+        // Fallback: parse immediately
+        return JSON.parse(text);
+    }
+
     _getCachedDriverIndex() {
+        if (!this.ENABLE_INDEX_LOCAL_CACHE) return null;
         try {
             const raw = localStorage.getItem(this.DRIVER_INDEX_CACHE_KEY);
             if (!raw) return null;
@@ -354,6 +389,7 @@ class DataService {
     }
 
     _saveDriverIndexToCache(idx) {
+        if (!this.ENABLE_INDEX_LOCAL_CACHE) return;
         try {
             localStorage.setItem(this.DRIVER_INDEX_CACHE_KEY, JSON.stringify(idx));
         } catch (_) {
@@ -383,7 +419,7 @@ class DataService {
                     if (!response.ok) throw new Error(`HTTP ${response.status}`);
                     const text = await response.text();
                     if (!text || text.trim().length === 0) throw new Error('Empty response');
-                    const parsed = JSON.parse(text);
+                    const parsed = await this._parseJsonWhenIdle(text);
                     if (!parsed || typeof parsed !== 'object' || Object.keys(parsed).length === 0) {
                         throw new Error('Invalid index');
                     }
@@ -472,6 +508,41 @@ class DataService {
             if (!cls || seen.has(cls)) return;
             seen.add(cls);
             options.push({ value: cls, label: cls });
+        });
+        
+        return options.sort((a, b) => a.label.localeCompare(b.label));
+    }
+
+    /**
+     * Get unique superclass options with classes that belong to each
+     * @returns {Array<{value: string, label: string, classes: Array<string>}>} Superclass options with associated classes
+     */
+    getSuperclassOptions() {
+        if (!window.CARS_DATA || !Array.isArray(window.CARS_DATA)) {
+            return [];
+        }
+        
+        const superclassMap = new Map();
+        
+        window.CARS_DATA.forEach(entry => {
+            const superclass = entry.superclass;
+            const cls = entry.class || entry.car_class || entry.CarClass || '';
+            
+            if (superclass && cls) {
+                if (!superclassMap.has(superclass)) {
+                    superclassMap.set(superclass, []);
+                }
+                superclassMap.get(superclass).push(cls);
+            }
+        });
+        
+        const options = [];
+        superclassMap.forEach((classes, superclass) => {
+            options.push({
+                value: `superclass:${superclass}`,
+                label: `Category: ${superclass}`,
+                classes: classes
+            });
         });
         
         return options.sort((a, b) => a.label.localeCompare(b.label));

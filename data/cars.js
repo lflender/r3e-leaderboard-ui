@@ -1,7 +1,7 @@
-﻿// This file is auto-generated from data/cars.json for offline use
-window.CARS_DATA = 
+﻿window.CARS_DATA = 
 [
   {
+    "superclass": "GT3",
     "class": "ADAC GT Masters 2013",
     "cars": [
       {
@@ -15,7 +15,7 @@ window.CARS_DATA =
         "power": "585bhp",
         "weight": "1350kg with driver",
         "engine": "5.2L V10",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2014/audi/audi-r8-lms-ultra",
         "description": "The Audi R8 LMS ULTRA is the successor to the most successful super sports car in ADAC GT Masters history. Quick, dependable and popular with drivers, the Ultra is a great example of racing engineering and always a potential winner."
@@ -31,7 +31,7 @@ window.CARS_DATA =
         "power": "575bhp",
         "weight": "1330kg with driver",
         "engine": "4.4L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2013/bmw/bmw-z4-gt3",
         "description": "This compact convertible roadster entered the ADAC GT Masters in the 2012 season and became a strong contender from the outset. The V8 engine turns up to 9,000 rpm and comes with good torque curves and excellent performance characteristics."
@@ -47,7 +47,7 @@ window.CARS_DATA =
         "power": "620 bhp",
         "weight": "1395kg (with driver)",
         "engine": "7.9L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "USA",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2013/chevrolet/chevrolet-camaro-gt3",
         "description": "The Camaro is considered a ‘wild newcomer’ to the European GT racing scene and its aggressive appearance serves to underline the performance of the brutal engine and its incredible braking power. It is a bold beast and it draws attention."
@@ -63,7 +63,7 @@ window.CARS_DATA =
         "power": "590bhp",
         "weight": "1355kg with driver",
         "engine": "6.2L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "USA",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2013/chevrolet/chevrolet-corvette-z06r-gt3",
         "description": "The Callaway Competition developed Corvette has been in the ADAC GT Masters from the start and has been improved each season. The highly competitive Z06.R marks a new high for Corvette fans, and easily has potential to claim a podium spot."
@@ -79,7 +79,7 @@ window.CARS_DATA =
         "power": "575bhp",
         "weight": "1325 kg with driver",
         "engine": "5L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "USA",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2013/ford/ford-gt-gt3",
         "description": "This is a slightly down-tuned version of the Ford GT GT1, but it is a class winner in its own right. The retro design lines, owing back to the iconic Ford GT40 of the 1960’s, and a superb V8 engine makes it an instant classic."
@@ -95,7 +95,7 @@ window.CARS_DATA =
         "power": "600bhp",
         "weight": "1405kg with driver",
         "engine": "6.3L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2013/mercedes-benz/mercedes-benz-sls-amg-gt3",
         "description": "Since the debut season in 2011, the spectacular gullwing Mercedes model has been one of the most popular sports cars in the ADAC GT Masters. It looks fantastic, sounds even better and it is capable of winning races."
@@ -111,7 +111,7 @@ window.CARS_DATA =
         "power": "600bhp",
         "weight": "1370kg with driver",
         "engine": "3.8L V6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Japan",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2013/nissan/nissan-gt-r-gt3",
         "description": "Nissan is the only Japanese marque in the GT Masters so the GT-R will ensure you plenty of fans at the track. The GT-R GT3 uses Nissans proven, punchy and extremely reliable 3.8 V6 twin-turbo engine. It is high tech lightning from the East."
@@ -119,6 +119,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "GT3",
     "class": "ADAC GT Masters 2014",
     "cars": [
       {
@@ -132,7 +133,7 @@ window.CARS_DATA =
         "power": "585bhp",
         "weight": "1350kg with driver",
         "engine": "5.2L V10",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2014/audi/audi-r8-lms-ultra",
         "description": "The Audi R8 LMS ultra is the successor to the Audi R8 LMS introduced in 2012. With many wins since 2009, the R8 is one of the most successful sports cars in the ADAC GT Masters."
@@ -148,7 +149,7 @@ window.CARS_DATA =
         "power": "575bhp",
         "weight": "1330kg with driver",
         "engine": "4.4L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2014/bmw/bmw-z4-gt3",
         "description": "The BMW Z4 GT3 is one of the lightest sports cars in ADAC GT Masters. In 2013 this compact and agile BMW claimed its first Nürburgring 24 Hours podium."
@@ -164,7 +165,7 @@ window.CARS_DATA =
         "power": "620 bhp",
         "weight": "1395kg (with driver)",
         "engine": "7.9L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "USA",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2014/chevrolet/chevrolet-camaro-gt3",
         "description": "This American born Chevrolet Camaro GT3 was developed by the experienced team at Reiter Engineering and has a number of modifications for the 2014 Championship season."
@@ -180,7 +181,7 @@ window.CARS_DATA =
         "power": "590bhp",
         "weight": "1355kg with driver",
         "engine": "6.2L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "USA",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2014/corvette/chevrolet-corvette-z06r-gt3",
         "description": "The Corvette Z06.R GT3 developed by Callaway Competition has raced in the ADAC GT Masters line-up since the series began and has been given improvements for each season by the Heilbronn based team."
@@ -196,7 +197,7 @@ window.CARS_DATA =
         "power": "575bhp",
         "weight": "1340kg with driver",
         "engine": "3.8L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "UK",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2014/mclaren/mclaren-mp4-12c-gt3",
         "description": "The McLaren MP4-12C GT3 was created by the successful Formula 1 team and is the only current GT3 sports car to have a carbon fibre monocoque. Apart from Nissan, McLaren is the only manufacturer to utilise turbo technology for the 12C GT3’s V8 engine."
@@ -212,7 +213,7 @@ window.CARS_DATA =
         "power": "600bhp",
         "weight": "1405kg with driver\t6.3L V8",
         "engine": "6.3L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2014/mercedes-benz/mercedes-benz-sls-amg-gt3",
         "description": "The Mercedes-Benz SLS GT3 was built for the track and conquers short and long distance races with ease. This striking and athletic car is a favorite among fans of ADAC GT Masters."
@@ -220,6 +221,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "GT3",
     "class": "ADAC GT Masters 2015",
     "cars": [
       {
@@ -233,7 +235,7 @@ window.CARS_DATA =
         "power": "585bhp",
         "weight": "1350kg with driver",
         "engine": "5.2L V10",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2015/audi/audi-r8-lms-ultra",
         "description": "The Audi R8 LMS ultra is the successor to the Audi R8 LMS introduced in 2012. With many wins since 2009, the R8 is one of the most successful sports cars in the ADAC GT Masters. The new 2015 Pirelli suits the competition better than this nimble car and will make it a real challenge to take to the win"
@@ -249,7 +251,7 @@ window.CARS_DATA =
         "power": "575bhp",
         "weight": "1330kg with driver",
         "engine": "4.4L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2015/bmw/bmw-z4-gt3",
         "description": "The BMW Z4 GT3 is one of the lightest sports cars in ADAC GT Masters. In 2013 this compact and agile BMW claimed its first Nürburgring 24 Hours podium. The new 2015 Pirelli suits the competition better than this nimble car and will make it a real challenge to take to the win."
@@ -265,7 +267,7 @@ window.CARS_DATA =
         "power": "575bhp",
         "weight": "1360kg with driver",
         "engine": "4.0L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "UK",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2015/bentley/bentley-continental-gt3",
         "description": "\"Limits are there to be broken and breaking them is in Bentley’s blood. Bring the iconic silhouette of the Continental GT, introduce race configuration in it and on a track, Bentley luxury looks just a little different. Experience the Bentley GT3 and enjoy the luxury performance!\""
@@ -281,7 +283,7 @@ window.CARS_DATA =
         "power": "620 bhp",
         "weight": "1395kg (with driver)",
         "engine": "7.9L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "USA",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2015/chevrolet/chevrolet-camaro-gt3",
         "description": "This American born Chevrolet Camaro GT3 was developed by the experienced team at Reiter Engineering and has a number of modifications for the 2014 Championship season. The new 2015 Pirelli tyres will help this car put the massive amounts of power through to the tarmac."
@@ -297,7 +299,7 @@ window.CARS_DATA =
         "power": "590bhp",
         "weight": "1355kg with driver",
         "engine": "6.2L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "USA",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2015/corvette/chevrolet-corvette-z06r-gt3-gtm15",
         "description": "The Corvette Z06.R GT3 developed by Callaway Competition has raced in the ADAC GT Masters line-up since the series began and has been given improvements for each season by the Heilbronn based team. The new 2015 Pirelli tyres will help this car put the massive amounts of power through to the tarmac."
@@ -313,7 +315,7 @@ window.CARS_DATA =
         "power": "600bhp",
         "weight": "1405kg with driver\t6.3L V8",
         "engine": "6.3L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2015/mercedes-benz/mercedes-benz-sls-amg-gt3",
         "description": "The Mercedes-Benz SLS GT3 was built for the track and conquers short and long distance races with ease. This striking and athletic car looks fantastic, sounds even better and it is capable of winning races. You will never go wrong picking this V8 masterpiece."
@@ -337,6 +339,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "GT3",
     "class": "ADAC GT Masters 2018",
     "cars": [
       {
@@ -350,7 +353,7 @@ window.CARS_DATA =
         "power": "570bhp",
         "weight": "1340kg with driver",
         "engine": "5.2L V10",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2018/audi/audi-r8-lms",
         "description": "The latest generation of the Audi R8 LMS is following in the footsteps of its successful predecessor, featuring even more race car technology. It combines lightweight qualities with a unique safety concept and a highly efficient 585 HP V-10 engine."
@@ -366,7 +369,7 @@ window.CARS_DATA =
         "power": "590bhp",
         "weight": "1395kg with driver",
         "engine": "4.4L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2018/bmw/bmw-m6-gt3",
         "description": "This is the new king of the GT racing class as far as BMW are concerned. Top of the line and ready to dominate wherever GT's race. It is mean, it is fast and it is a winning machine in the right hands. But it is not an easy beast to tame, so handle with care!\n\nThe new 2016 trump card from BMW is powered by a 4.4-litre V8 engine with M TwinPower Turbo technology, which has been modified for use in motor racing. The power train has dry sump lubrication and generates up to 585 hp – with the whole car weighing less than 1,300 kilograms."
@@ -382,7 +385,7 @@ window.CARS_DATA =
         "power": "585bhp",
         "weight": "1375kg with driver",
         "engine": "6.2L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "USA",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2018/chevrolet/callaway-corvette-c7-gt3-r",
         "description": "The all new Callaway Corvette C7 GT3-R builds on the famous Corvette Z06.R GT3 and once again comes with more performance and aerodynamics. This astonishing racing car was developed by the company Callaway Competition based in Leingarten (Heilbronn, Germany), and has a 6.2-liter V-8 under its hood producing up to 600 HP, making it the quickest race-spec C7 developed as of yet."
@@ -398,7 +401,7 @@ window.CARS_DATA =
         "power": "590bhp",
         "weight": "1390kg with driver",
         "engine": "6.3L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2018/mercedes/mercedes-amg-gt3",
         "description": "The Mercedes-AMG GT3 was developed with the ambition to win. Based on the production version of the GT and with the wealth of experience acquired from the achievements of the SLS AMG GT3. It pairs high-class technology with a spectacular design. It impresses with maximum safety, precise dynamics and easy driveability."
@@ -406,6 +409,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "GT3",
     "class": "ADAC GT Masters 2020",
     "cars": [
       {
@@ -419,7 +423,7 @@ window.CARS_DATA =
         "power": "570bhp",
         "weight": "1390kg with driver",
         "engine": "5.2L V10",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2020/audi/audi-r8-lms-gt3-evo",
         "description": "The Audi R8 LMS GT3 Evo is the top product in the Audi Sport customer racing program.It is an evolution of the very successful R8 LMS GT3, Audi has been developing for the past few years. In 2019 it was revised to improve its drivability and aerodynamic efficenc, making it a successfull competitor in many international GT championships."
@@ -435,7 +439,7 @@ window.CARS_DATA =
         "power": "577 bhp",
         "weight": "1410kg with driver",
         "engine": "4.0L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "UK",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2020/bentley/bentley-continental-gt3-evo",
         "description": "The new and improved Bentley Continental GT3 Evo, designed and built by M-Sport, has a highly efficient aerodynamic shape and its more rearward weight distribution makes it more agile than its predecessor, while staying true to its unique characteristics and beautiful twin-turbo V8 engine note."
@@ -451,7 +455,7 @@ window.CARS_DATA =
         "power": "590bhp",
         "weight": "1395kg with driver",
         "engine": "4.4L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2020/bmw/bmw-m6-gt3",
         "description": "This is the new king of the GT racing class as far as BMW are concerned. Top of the line and ready to dominate wherever GT's race. It is mean, it is fast and it is a winning machine in the right hands. But it is not an easy beast to tame, so handle with care!\n\nThe new 2016 trump card from BMW is powered by a 4.4-litre V8 engine with M TwinPower Turbo technology, which has been modified for use in motor racing. The power train has dry sump lubrication and generates up to 585 hp – with the whole car weighing less than 1,300 kilograms."
@@ -467,7 +471,7 @@ window.CARS_DATA =
         "power": "585bhp",
         "weight": "1375kg with driver",
         "engine": "6.2L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "USA",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2020/chevrolet/callaway-corvette-c7-gt3-r",
         "description": "The all new Callaway Corvette C7 GT3-R builds on the famous Corvette Z06.R GT3 and once again comes with more performance and aerodynamics. This astonishing racing car was developed by the company Callaway Competition based in Leingarten (Heilbronn, Germany), and has a 6.2-liter V-8 under its hood producing up to 600 HP, making it the quickest race-spec C7 developed as of yet."
@@ -483,7 +487,7 @@ window.CARS_DATA =
         "power": "590bhp",
         "weight": "1390kg with driver",
         "engine": "6.3L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2020/mercedes/mercedes-amg-gt3",
         "description": "The Mercedes-AMG GT3 was developed with the ambition to win. Based on the production version of the GT and with the wealth of experience acquired from the achievements of the SLS AMG GT3. It pairs high-class technology with a spectacular design. It impresses with maximum safety, precise dynamics and easy driveability."
@@ -499,7 +503,7 @@ window.CARS_DATA =
         "power": "585hp",
         "weight": "1390kg with driver",
         "engine": "6.3L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2020/mercedes/mercedes-amg-gt3-2020",
         "description": "The new Mercedes-AMG GT3 impresses with a new design aesthetic, thanks to an eye-catching front apron, distinctive flics and a new front diffuser. The car had its Customer Racing debut at the beginning of 2020 and lead many teams to victories since then."
@@ -515,7 +519,7 @@ window.CARS_DATA =
         "power": "570bhp",
         "weight": "1345kg with driver",
         "engine": "4.0L Flat-6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2020/porsche/porsche-911-gt3-r-2019",
         "description": "Based on the road-approved 911 GT3 RS, the new 911 GT3 R is a 911 through and through. Its carbon-fiber bodywork, further improved aerodynamics, highly adjustable double wishbone front suspension and the four-valve flat-six engine in the rear make it a strong contender in the most demanding races in the world."
@@ -523,6 +527,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "GT3",
     "class": "ADAC GT Masters 2021",
     "cars": [
       {
@@ -536,7 +541,7 @@ window.CARS_DATA =
         "power": "570bhp",
         "weight": "1390kg with driver",
         "engine": "5.2L V10",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2021/audi/audi-r8-lms-gt3-evo",
         "description": "The Audi R8 LMS GT3 Evo is the top product in the Audi Sport customer racing program.It is an evolution of the very successful R8 LMS GT3, Audi has been developing for the past few years. In 2019 it was revised to improve its drivability and aerodynamic efficenc, making it a successfull competitor in many international GT championships."
@@ -552,7 +557,7 @@ window.CARS_DATA =
         "power": "590bhp",
         "weight": "1395kg with driver",
         "engine": "4.4L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2021/bmw/bmw-m6-gt3",
         "description": "This is the new king of the GT racing class as far as BMW are concerned. Top of the line and ready to dominate wherever GT's race. It is mean, it is fast and it is a winning machine in the right hands. But it is not an easy beast to tame, so handle with care!\n\nThe new 2016 trump card from BMW is powered by a 4.4-litre V8 engine with M TwinPower Turbo technology, which has been modified for use in motor racing. The power train has dry sump lubrication and generates up to 585 hp – with the whole car weighing less than 1,300 kilograms."
@@ -568,7 +573,7 @@ window.CARS_DATA =
         "power": "585bhp",
         "weight": "1375kg with driver",
         "engine": "6.2L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "USA",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2021/chevrolet/callaway-corvette-c7-gt3-r",
         "description": "The all new Callaway Corvette C7 GT3-R builds on the famous Corvette Z06.R GT3 and once again comes with more performance and aerodynamics. This astonishing racing car was developed by the company Callaway Competition based in Leingarten (Heilbronn, Germany), and has a 6.2-liter V-8 under its hood producing up to 600 HP, making it the quickest race-spec C7 developed as of yet."
@@ -584,7 +589,7 @@ window.CARS_DATA =
         "power": "590bhp",
         "weight": "1390kg with driver",
         "engine": "6.3L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2021/mercedes/mercedes-amg-gt3-2020",
         "description": "The new Mercedes-AMG GT3 impresses with a new design aesthetic, thanks to an eye-catching front apron, distinctive flics and a new front diffuser. The car had its Customer Racing debut at the beginning of 2020 and lead many teams to victories since then."
@@ -600,7 +605,7 @@ window.CARS_DATA =
         "power": "570bhp",
         "weight": "1345kg with driver",
         "engine": "4.0L Flat-6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/adac-gt-masters-2021/porsche/porsche-911-gt3-r-2019",
         "description": "Based on the road-approved 911 GT3 RS, the new 911 GT3 R is a 911 through and through. Its carbon-fiber bodywork, further improved aerodynamics, highly adjustable double wishbone front suspension and the four-valve flat-six engine in the rear make it a strong contender in the most demanding races in the world."
@@ -629,6 +634,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "Audi Cup",
     "class": "Audi Sport TT Cup 2015",
     "cars": [
       {
@@ -642,7 +648,7 @@ window.CARS_DATA =
         "power": "310hp (P2P +30)",
         "weight": "1125kg",
         "engine": "2.0L Inline 4",
-        "drive": "",
+        "drive": "FWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/audi-sport-tt-cup-2015/audi/audi-tt-cup-2015",
         "description": "The Audi Sport TT cup is an all-new race sports machine purpose built for the track. The 2 liter TFSI engine pushes out up to 340 HP to propel a weight of just 1125 kg. Combined with the race oriented geometry and setup of the car, this makes for one very responsive and exciting ride.\n\nGerman racing ace, Markus Winkelhock, said about this new car “The TT cup is a genuine race car, ideal for rookies, yet challenging to drive.\" The car will easily follow your lead right up to the limit, but if you want to win you'll have to learn to tame it beyond that. Luckily, exploring the unknown is FUN in this nimble and powerful ride."
@@ -650,6 +656,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "Audi Cup",
     "class": "Audi Sport TT Cup 2016",
     "cars": [
       {
@@ -663,7 +670,7 @@ window.CARS_DATA =
         "power": "310hp (P2P +30)",
         "weight": "1125kg",
         "engine": "2.0L Inline 4",
-        "drive": "",
+        "drive": "FWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/audi-sport-tt-cup-2016/audi/audi-tt-cup-2016",
         "description": "The Audi Sport TT is an all-new race sports machine purpose built for the track. The 2 liter TFSI engine pushes out up to 340 HP to propel a weight of just 1.125 kg. Combined with the race oriented geometry and setup of the car, this makes of one very responsive and exiting ride.\n\nGerman racing ace, Markus Winkelhock, said about this new car “The TT cup is a genuine race car, ideal for rookies, yet challenging to drive.\"\" The car will easily follow your lead right up to the limit, but if you want to win you'll have to learn to tame it beyond that. Luckily, exploring the unknown is FUN in this nimble and powerful ride."
@@ -705,7 +712,7 @@ window.CARS_DATA =
         "power": "450bhp",
         "weight": "1620kg with driver",
         "engine": "",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/bmw-m2-cup/bmw/bmw-m2-cs-racing-2021",
         "description": "The BMW M2 CS Racing is a precision-engineered track machine. The RaceRoom version features the Powerstick upgrade, boosting the 3.0-liter inline-6 turbo engine from 365 to 450 horsepower, alongside larger brakes and improved cooling. This race car delivers exceptional handling, agility, and performance. Designed for both amateur and professional racers, the M2 CS Racing combines cutting-edge technology with BMW's motorsport heritage to dominate any circuit."
@@ -713,10 +720,10 @@ window.CARS_DATA =
     ]
   },
   {
-    "class": "BMW M2351 Racing Cup",
+    "class": "BMW M235i Racing Cup",
     "cars": [
       {
-        "car_class": "BMW M2351 Racing Cup",
+        "car_class": "BMW M235i Racing Cup",
         "car": "BMW M235i Racing",
         "wheel": "Round",
         "wheel_cat": "round",
@@ -726,7 +733,7 @@ window.CARS_DATA =
         "power": "333bhp @ 5800 rpm",
         "weight": "1565kg with driver",
         "engine": "",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/bmw-m235i-racing-cup/bmw/bmw-m235i-racing",
         "description": "With the impressive performance figures, the BMW M235i Racing - a production-based coupé - meets all the basic requirements of a successful entry-level racing car. The car is used in series and events such as the VLN Endurance Championship and the Nürburgring 24 Hours on the Nürburgring-Nordschleife.\n\nThe sleek bodywork is propelled by the most powerful petrol engine developed so far for a BMW M Performance Automobile: a six-cylinder in-line engine with M Performance TwinPower Turbo technology. With a capacity of 2,979ccm, the racing version is capable of generating 333hp (245kW).\n\nMotorsport-specific driving aids such as ABS, DSC and traction control provide the required support motorsport newcomers will benefit from. The car comes with mechanical limited-slip differential, ABS, DSC and traction control to help tame the power, and it is fitted with features such as the FIA-certified safety cell and the modern safety tank."
@@ -747,31 +754,10 @@ window.CARS_DATA =
         "power": "480 ps @ 7000 rpm",
         "weight": "1060kg",
         "engine": "V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/c-klasse-dtm-2005/mercedes/amg-mercedes-c-klasse-dtm",
         "description": "The AMG-Mercedes C-Klasse DTM 2005 is the successor to the AMG-Mercedes CLK DTM and led Gary Paffett to become champion of the DTM 2005 season in a nail-biting duel for the driver's crown. With a score of 5 : 3 race victories, the title went to Paffett, who switched to Formula 1 as a test driver after the season."
-      }
-    ]
-  },
-  {
-    "class": "Cupra e-Racer",
-    "cars": [
-      {
-        "car_class": "Cupra e-Racer",
-        "car": "CUPRA Leon e-Racer",
-        "wheel": "GT",
-        "wheel_cat": "gt",
-        "transmission": "Palettes",
-        "transmission_cat": "paddles",
-        "year": "2020",
-        "power": "670hp",
-        "weight": "1680kg with driver",
-        "engine": "Fully-electric",
-        "drive": "",
-        "country": "Spain",
-        "link": "https://game.raceroom.com/en/store/cars/cupra-leon-e-racer/cupra/cupra-leon-e-racer",
-        "description": "The new CUPRA Leon E-Racer shows the future of racing. The world’s first 100% electric racing car. Going from 0 to 100 in just over 3 seconds, it can reach speeds of up to 270 km/h. All on electric power."
       }
     ]
   },
@@ -789,7 +775,7 @@ window.CARS_DATA =
         "power": "385 BHP @ 7500 RPM",
         "weight": "1380 Kg",
         "engine": "3.8l flat-6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/cayman-gt4-trophy-by-manthey-racing/porsche/porsche-cayman-gt4-clubsport",
         "description": "The Porsche Cayman GT4 Clubsport was specifically developed for the demands of the track in series like the VLN Endurance Championship on the Nürburgring, the GT4 European Series, and many more. It features a 3.8-litre mid-mounted flat engine, producing 385 hp and 420 Nm maximum torque."
@@ -835,6 +821,65 @@ window.CARS_DATA =
         "country": "Ireland",
         "link": "https://game.raceroom.com/en/store/cars/crossle-9s/crossle/crossle-9s",
         "description": "The Crosslé 9S is a classic sports racer with a modern twist. Conceived in 1965 and built by the original manufacturers in the same factory as in 1957, the 9S combines vintage charm with modern reliability and performance. With its appealing classic shape and powerful Ford Zetec engine, the 9S is a thrilling car to drive on the track. Whether you're a racing enthusiast looking to experience the thrill of driving a classic sports car or a collector looking to add a unique and iconic vehicle to your collection, the Crosslé 9S is sure to provide an unforgettable driving experience."
+      }
+    ]
+  },
+  {
+    "superclass": "e-Sedan",
+    "class": "CUPRA Leon e-Racer",
+    "cars": [
+      {
+        "car_class": "CUPRA Leon e-Racer",
+        "car": "CUPRA Leon e-Racer",
+        "wheel": "GT",
+        "wheel_cat": "gt",
+        "transmission": "Palettes",
+        "transmission_cat": "paddles",
+        "year": "2020",
+        "power": "670hp",
+        "weight": "1680kg with driver",
+        "engine": "Fully-electric",
+        "drive": "RWD",
+        "country": "Spain",
+        "link": "https://game.raceroom.com/en/store/cars/cupra-leon-e-racer/cupra/cupra-leon-e-racer",
+        "description": "The new CUPRA Leon E-Racer shows the future of racing. The world’s first 100% electric racing car. Going from 0 to 100 in just over 3 seconds, it can reach speeds of up to 270 km/h. All on electric power."
+      }
+    ]
+  },
+  {
+    "class": "Drift",
+    "cars": [
+      {
+        "car_class": "Drift",
+        "car": "BMW E30 M3 Drift",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "Seq",
+        "transmission_cat": "sequential",
+        "year": "2021",
+        "power": "600",
+        "weight": "",
+        "engine": "V8",
+        "drive": "RWD",
+        "country": "Germany",
+        "link": "https://game.raceroom.com/en/store/cars/drift/bmw/bmw-e30-m3-drift",
+        "description": "This ‘80s icon sports custom wide wheel arches, a lowered stance, and aggressive bodywork by the Red Bull Driftbrothers—all designed to maximize drift control and style. Its classic lines are retained but amplified for modern performance. Channel motorsport history with every sideways slide."
+      },
+      {
+        "car_class": "Drift",
+        "car": "BMW G82 M4 Drift",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "Seq",
+        "transmission_cat": "sequential",
+        "year": "2021",
+        "power": "",
+        "weight": "",
+        "engine": "",
+        "drive": "RWD",
+        "country": "Germany",
+        "link": "https://game.raceroom.com/en/store/cars/drift/bmw/bmw-g82-m4-drift",
+        "description": "Futuristic and fearless, the Driftbrothers’ G82 M4 stands out with a striking body kit, massive aero components, and a stunning exhaust setup routed through the rear window area. Harness its turbocharged power as you carve the track with head-turning flair."
       }
     ]
   },
@@ -953,7 +998,7 @@ window.CARS_DATA =
         "power": "505 bhp",
         "weight": "1120kg with driver",
         "engine": "V6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/dtm-1995/mercedes/amg-mercedes-c-klasse-dtm",
         "description": "The AMG-Mercedes C-Klasse DTM 1995 stands as a true legend in touring car history, symbolizing the pinnacle of German engineering and racing excellence. Competing in both the Deutsche Tourenwagen Meisterschaft (DTM) and the International Touring Car Series (ITC), this car helped define an era. Driven by Bernd Schneider, it dominated the 1995 season, securing both the DTM and ITC titles. With its advanced aerodynamics and powerful V6 engine, the C-Klasse is a perfect blend of speed, precision, and dominance on the track. Get ready to experience the ultimate in motorsport heritage."
@@ -969,7 +1014,7 @@ window.CARS_DATA =
         "power": "494 bhp",
         "weight": "1160kg with driver",
         "engine": "V6",
-        "drive": "",
+        "drive": "4WD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/dtm-1995/opel/opel-calibra-v6-dtm",
         "description": "The Opel Calibra V6 4x4 DTM 1995 is a showcase of German innovation and engineering prowess. As Opel’s weapon of choice in the 1995 DTM season, the Calibra was a marvel with its advanced all-wheel-drive system and a powerful V6 engine, making it a force to be reckoned with on the track. Driven by talents like Manuel Reuter, the Calibra’s sleek design and technical sophistication led it to be one of the standout performers of the season. Take control of the Calibra and experience the perfect fusion of speed, control, and cutting-edge technology."
@@ -981,22 +1026,6 @@ window.CARS_DATA =
     "cars": [
       {
         "car_class": "DTM 2002",
-        "car": "AMG-Mercedes CLK-DTM 2002",
-        "wheel": "GT",
-        "wheel_cat": "gt",
-        "transmission": "Seq",
-        "transmission_cat": "sequential",
-        "year": "2002",
-        "power": "",
-        "weight": "",
-        "engine": "",
-        "drive": "",
-        "country": "Germany",
-        "link": "https://game.raceroom.com/en/store/cars/dtm-2002/mercedes/amg-mercedes-clk-dtm-2002",
-        "description": "The AMG-Mercedes CLK-DTM represented Mercedes’ full factory effort in the 2002 DTM season, built to the championship’s Class 1 regulations with a naturally-aspirated 4.0-litre V8 and rear-wheel drive. It formed the core of Mercedes’ multi-car lineup and scored several race wins and podiums during the year, keeping the manufacturer in contention for both titles."
-      },
-      {
-        "car_class": "DTM 2002",
         "car": "Abt-Audi TT-R",
         "wheel": "GT",
         "wheel_cat": "gt",
@@ -1006,10 +1035,26 @@ window.CARS_DATA =
         "power": "",
         "weight": "",
         "engine": "",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/dtm-2002/audi/abt-audi-tt-r",
         "description": "In 2002, with driver Laurent Aiello at the wheel, the Abt Sportsline’s TT-R secured the DTM Drivers’ Championship, a major upset against factory efforts from Mercedes and Opel. The car is powered by a naturally-aspirated V8 engine and adhered to the rear-wheel-drive, 4.0-litre V8 technical regulations of the series at the time."
+      },
+      {
+        "car_class": "DTM 2002",
+        "car": "AMG-Mercedes CLK-DTM 2002",
+        "wheel": "GT",
+        "wheel_cat": "gt",
+        "transmission": "Seq",
+        "transmission_cat": "sequential",
+        "year": "2002",
+        "power": "",
+        "weight": "",
+        "engine": "",
+        "drive": "RWD",
+        "country": "Germany",
+        "link": "https://game.raceroom.com/en/store/cars/dtm-2002/mercedes/amg-mercedes-clk-dtm-2002",
+        "description": "The AMG-Mercedes CLK-DTM represented Mercedes’ full factory effort in the 2002 DTM season, built to the championship’s Class 1 regulations with a naturally-aspirated 4.0-litre V8 and rear-wheel drive. It formed the core of Mercedes’ multi-car lineup and scored several race wins and podiums during the year, keeping the manufacturer in contention for both titles."
       },
       {
         "car_class": "DTM 2002",
@@ -1022,7 +1067,7 @@ window.CARS_DATA =
         "power": "",
         "weight": "",
         "engine": "",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/dtm-2002/opel/opel-astra-v8-coupe",
         "description": "Opel’s Astra V8 Coupé was the brand’s official works entry for the 2002 DTM season, designed to the same 4.0-litre, V8, rear-wheel-drive regulations as its rivals from Abt-Audi and Mercedes. Fielded by Opel Performance, the car achieved multiple podium finishes and played a key role in the tight manufacturer battle that defined the early-2000s era of DTM."
@@ -1043,7 +1088,7 @@ window.CARS_DATA =
         "power": "460 ps @ 6750 rpm",
         "weight": "1080kg",
         "engine": "V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/dtm-2003/mercedes/amg-mercedes-clk-dtm",
         "description": "The AMG-Mercedes CLK DTM 2003 absolutely dominated the season with 9 wins out of 10 races. \"Mister DTM\" Bernd Schneider managed to secure the championship ahead of Christijan Albers and his team mate Marcel Fässler, making it an all AMG-Mercedes Top 3."
@@ -1051,6 +1096,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "DTM 2010s",
     "class": "DTM 2013",
     "cars": [
       {
@@ -1104,6 +1150,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "DTM 2010s",
     "class": "DTM 2014",
     "cars": [
       {
@@ -1157,6 +1204,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "DTM 2010s",
     "class": "DTM 2015",
     "cars": [
       {
@@ -1210,6 +1258,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "DTM 2010s",
     "class": "DTM 2016",
     "cars": [
       {
@@ -1276,7 +1325,7 @@ window.CARS_DATA =
         "power": "580 bhp",
         "weight": "1070kg with driver",
         "engine": "2.0L in-line 4",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/dtm-2020/audi/audi-rs-5-dtm-2020",
         "description": "Audi Sport has been using the RS 5 Coupé in the DTM since 2013. The championship car of the 2020 season is back at the start with the four-cylinder turbo of the Audi RS 5 DTM. It is the most efficient and powerful engine in Audi's DTM history. The engineers got over 610 hp from the 2-liter engine. Audi has impressively demonstrated the superiority of its technology by winning the title in all categories."
@@ -1292,7 +1341,7 @@ window.CARS_DATA =
         "power": "580 bhp",
         "weight": "1070kg with driver",
         "engine": "2.0L in-line 4",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/dtm-2020/bmw/bmw-m4-dtm-2020",
         "description": "The new BMW M4 DTM is the most powerful DTM car that BMW M Motorsport has ever built. Fitted with concentrated turbo power, it is ready to continue BMW’s success story in the DTM. More than 600 hp, significantly reduced vehicle weight, top speeds of up to 300 km/h and the push-to-pass function, introduced for the 2019 season, make the most hotly contested touring car series even faster and more spectacular."
@@ -1300,6 +1349,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "GT3",
     "class": "DTM 2021",
     "cars": [
       {
@@ -1313,7 +1363,7 @@ window.CARS_DATA =
         "power": "570bhp",
         "weight": "1390kg with driver",
         "engine": "5.2L V10",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/dtm-2021/audi/audi-r8-lms-gt3-evo-dtm",
         "description": "The Audi R8 LMS GT3 Evo is the top product in the Audi Sport customer racing program.It is an evolution of the very successful R8 LMS GT3, Audi has been developing for the past few years. In 2019 it was revised to improve its drivability and aerodynamic efficenc, making it a successfull competitor in many international GT championships."
@@ -1329,7 +1379,7 @@ window.CARS_DATA =
         "power": "590bhp",
         "weight": "1395kg with driver",
         "engine": "4.4L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/dtm-2021/bmw/bmw-m6-gt3-dtm",
         "description": "This is the new king of the GT racing class as far as BMW are concerned. Top of the line and ready to dominate wherever GT's race. It is mean, it is fast and it is a winning machine in the right hands. But it is not an easy beast to tame, so handle with care!\n\nThe new 2016 trump card from BMW is powered by a 4.4-litre V8 engine with M TwinPower Turbo technology, which has been modified for use in motor racing. The power train has dry sump lubrication and generates up to 585 hp – with the whole car weighing less than 1,300 kilograms."
@@ -1345,7 +1395,7 @@ window.CARS_DATA =
         "power": "560bhp",
         "weight": "1370kg with driver",
         "engine": "3.9L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "Italy",
         "link": "https://game.raceroom.com/en/store/cars/dtm-2021/ferrari/ferrari-488-gt3-evo-2020-dtm",
         "description": "The 488 GT3 Evo 2020 is the latest evolution of Ferrari’s beautiful apex predator, competing at the pinnacle of GT racing. It further improves on the original 488 GT3 and features refined aerodynamics and a lightened chassis.\n\nThis is Ferrari’s most successful racer ever, which is saying something for a marque with such a pedigree. 488s have now won more than 420 races around the world in the crucible that is GT3. An Evo took the Teams Championship in the 2021 DTM season: just one of well over a hundred titles that have now been won in a 488."
@@ -1361,7 +1411,7 @@ window.CARS_DATA =
         "power": "575bhp",
         "weight": "1390kg with driver",
         "engine": "4.0L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "UK",
         "link": "https://game.raceroom.com/en/store/cars/dtm-2021/mclaren/mclaren-720s-gt3-dtm",
         "description": "The McLaren 720S GT3 features groundbreaking updates on bodywork, aerodynamics and suspension compared to its predecessor. The car pushes the boundaries of what is possible under the extreme pressures of endurance racing. The race-prepared version of the M840T 4.0 litre twin turbo V8 engine delivers impressive performance and makes it one of the most advanced cars in the GT Racing world."
@@ -1377,7 +1427,7 @@ window.CARS_DATA =
         "power": "585hp",
         "weight": "1390kg with driver",
         "engine": "6.3L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/dtm-2021/mercedes/mercedes-amg-gt3-2020-dtm",
         "description": "The new Mercedes-AMG GT3 impresses with a new design aesthetic, thanks to an eye-catching front apron, distinctive flics and a new front diffuser. The car had its Customer Racing debut at the beginning of 2020 and lead many teams to victories since then."
@@ -1393,7 +1443,7 @@ window.CARS_DATA =
         "power": "570bhp",
         "weight": "1345kg with driver",
         "engine": "4.0L Flat-6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/dtm-2021/porsche/porsche-911-gt3-r-2019-dtm",
         "description": "Based on the road-approved 911 GT3 RS, the new 911 GT3 R is a 911 through and through. Its carbon-fiber bodywork, further improved aerodynamics, highly adjustable double wishbone front suspension and the four-valve flat-six engine in the rear make it a strong contender in the most demanding races in the world."
@@ -1401,6 +1451,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "GT3",
     "class": "DTM 2023",
     "cars": [
       {
@@ -1414,7 +1465,7 @@ window.CARS_DATA =
         "power": "570bhp",
         "weight": "1390kg with driver",
         "engine": "5.2L V10",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/dtm-2023/audi/audi-r8-lms-gt3-evo-ii-dtm",
         "description": "Audi’s GT3 Evo II continues to sharpen the razor that is the R8 LMS. Even faster, with even more efficient aero and uprated suspension, its growling V10 powerplant is instantly recognisable. Developed in 2008 and first raced in 2009, almost 300 R8s have been produced across two model generations and multiple evolutions. R8s have notched up 13 overall victories in 24-hour endurance races and eight in 12-hour events – along with countless individual race wins – to cement the model’s place in GT3’s pantheon."
@@ -1430,7 +1481,7 @@ window.CARS_DATA =
         "power": "545bhp",
         "weight": "1385Kg with driver",
         "engine": "3.0l L6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/dtm-2023/bmw/bmw-m4-gt3-dtm",
         "description": "BMW’s 2022 GT3 weapon is as fast as it is aggressive-looking, but it's also part of a new generation of driver-friendly GT machines that feature the latest KW suspension technology. This cutting-edge racer has already notched up multiple victories for BMW, including the 2023 Dubai 24 Hours"
@@ -1446,7 +1497,7 @@ window.CARS_DATA =
         "power": "545bhp",
         "weight": "1390kg with driver",
         "engine": "2.9L V6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Italy",
         "link": "https://game.raceroom.com/en/store/cars/dtm-2023/ferrari/ferrari-296-gt3-dtm",
         "description": "Every new Ferrari is special, and the 296 GT3 is no exception. Modern and daring in design, this mid-rear engined monster delivers 600hp from its 2.9-litre, twin-turbocharged V6, and the car won in its debut appearance at the Nürburging 24 Hours, held on the fearsome Nordschleife circuit"
@@ -1462,7 +1513,7 @@ window.CARS_DATA =
         "power": "585bhp",
         "weight": "1390Kg with driver",
         "engine": "6.3l V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/dtm-2023/mercedes/mercedes-amg-gt3-2020-dtm",
         "description": "The new Mercedes-AMG GT3 impresses with a new design aesthetic, thanks to an eye-catching front apron, distinctive flics and a new front diffuser. The car had its Customer Racing debut at the beginning of 2020 and lead many teams to victories since then."
@@ -1478,7 +1529,7 @@ window.CARS_DATA =
         "power": "575hp",
         "weight": "1385kg with driver",
         "engine": "4.0l flat-6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/dtm-2023/porsche/porsche-911-gt3-r-992-dtm",
         "description": "GT racing isn't GT racing without a Porsche in the mix, and the 992-shape GT3 R keeps Porsche at the forefront of the category. It's more powerful than ever, but also optimised for drivability with a wider track, massive aero and optimised traction."
@@ -1486,6 +1537,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "GT3",
     "class": "DTM 2024",
     "cars": [
       {
@@ -1499,7 +1551,7 @@ window.CARS_DATA =
         "power": "570bhp",
         "weight": "1390kg with driver",
         "engine": "5.2L V10",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/dtm-2024/audi/audi-r8-lms-gt3-evo-ii-dtm",
         "description": "Audi’s GT3 Evo II continues to sharpen the razor that is the R8 LMS. Even faster, with even more efficient aero and uprated suspension, its growling V10 powerplant is instantly recognisable. Developed in 2008 and first raced in 2009, almost 300 R8s have been produced across two model generations and multiple evolutions. R8s have notched up 13 overall victories in 24-hour endurance races and eight in 12-hour events – along with countless individual race wins – to cement the model’s place in GT3’s pantheon."
@@ -1515,7 +1567,7 @@ window.CARS_DATA =
         "power": "545bhp",
         "weight": "1385Kg with driver",
         "engine": "3.0l L6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/dtm-2024/bmw/bmw-m4-gt3-dtm",
         "description": "BMW’s 2022 GT3 weapon is as fast as it is aggressive-looking, but it's also part of a new generation of driver-friendly GT machines that feature the latest KW suspension technology. This cutting-edge racer has already notched up multiple victories for BMW, including the 2023 Dubai 24 Hours"
@@ -1531,7 +1583,7 @@ window.CARS_DATA =
         "power": "545bhp",
         "weight": "1390kg with driver",
         "engine": "2.9L V6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Italy",
         "link": "https://game.raceroom.com/en/store/cars/dtm-2024/ferrari/ferrari-296-gt3-dtm",
         "description": "Every new Ferrari is special, and the 296 GT3 is no exception. Modern and daring in design, this mid-rear engined monster delivers 600hp from its 2.9-litre, twin-turbocharged V6, and the car won in its debut appearance at the Nürburging 24 Hours, held on the fearsome Nordschleife circuit"
@@ -1547,7 +1599,7 @@ window.CARS_DATA =
         "power": "570bhp",
         "weight": "1380kg with driver",
         "engine": "5.2L V10",
-        "drive": "",
+        "drive": "RWD",
         "country": "Italy",
         "link": "https://game.raceroom.com/en/store/cars/dtm-2024/lamborghini/lamborghini-huracan-gt3-evo-ii-dtm",
         "description": "Experience the pinnacle of Italian motorsport engineering with the Lamborghini Huracán GT3 EVO2. This latest evolution of the Huracán GT3 series boasts enhanced aerodynamics, cutting-edge technology, and a formidable naturally aspirated V10 engine. Designed for uncompromising performance, the EVO2 features improved downforce and handling, making it a dominant force on the track. Get behind the wheel of this racing masterpiece and unleash the raw power and agility that only Lamborghini can deliver."
@@ -1563,7 +1615,7 @@ window.CARS_DATA =
         "power": "575bhp",
         "weight": "1390kg with driver",
         "engine": "4.0L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "UK",
         "link": "https://game.raceroom.com/en/store/cars/dtm-2024/mclaren/mclaren-720s-gt3-evo-dtm",
         "description": "Introducing the McLaren 720S GT3 EVO, the ultimate expression of British racing excellence. Building on the success of its predecessor, the GT3 EVO brings upgraded aerodynamics, refined suspension, and an even more responsive twin-turbocharged V8 engine. Engineered for superior speed and precision, this car offers an unparalleled driving experience. Step into the cockpit and feel the synergy of innovation and performance as you conquer the track with the McLaren 720S GT3 EVO."
@@ -1579,7 +1631,7 @@ window.CARS_DATA =
         "power": "585bhp",
         "weight": "1390Kg with driver",
         "engine": "6.3l V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/dtm-2024/mercedes/mercedes-amg-gt3-2020-dtm",
         "description": "The new Mercedes-AMG GT3 impresses with a new design aesthetic, thanks to an eye-catching front apron, distinctive flics and a new front diffuser. The car had its Customer Racing debut at the beginning of 2020 and lead many teams to victories since then."
@@ -1595,7 +1647,7 @@ window.CARS_DATA =
         "power": "575hp",
         "weight": "1385kg with driver",
         "engine": "4.0l flat-6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/dtm-2024/porsche/porsche-911-gt3-r-992-dtm",
         "description": "GT racing isn't GT racing without a Porsche in the mix, and the 992-shape GT3 R keeps Porsche at the forefront of the category. It's more powerful than ever, but also optimised for drivability with a wider track, massive aero and optimised traction."
@@ -1603,6 +1655,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "GT3",
     "class": "DTM 2025",
     "cars": [
       {
@@ -1616,7 +1669,7 @@ window.CARS_DATA =
         "power": "570bhp",
         "weight": "1390kg with driver",
         "engine": "5.2L V10",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/dtm-2025/audi/audi-r8-lms-gt3-evo-ii-dtm",
         "description": "Audi’s GT3 Evo II continues to sharpen the razor that is the R8 LMS. Even faster, with even more efficient aero and uprated suspension, its growling V10 powerplant is instantly recognisable. Developed in 2008 and first raced in 2009, almost 300 R8s have been produced across two model generations and multiple evolutions. R8s have notched up 13 overall victories in 24-hour endurance races and eight in 12-hour events – along with countless individual race wins – to cement the model’s place in GT3’s pantheon."
@@ -1632,7 +1685,7 @@ window.CARS_DATA =
         "power": "545bhp",
         "weight": "1385Kg with driver",
         "engine": "3.0l L6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/dtm-2025/bmw/bmw-m4-gt3-evo-dtm",
         "description": "BMW’s 2022 GT3 weapon is as fast as it is aggressive-looking, but it's also part of a new generation of driver-friendly GT machines that feature the latest KW suspension technology. This cutting-edge racer has already notched up multiple victories for BMW, including the 2023 Dubai 24 Hours"
@@ -1648,7 +1701,7 @@ window.CARS_DATA =
         "power": "545bhp",
         "weight": "1390kg with driver",
         "engine": "2.9L V6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Italy",
         "link": "https://game.raceroom.com/en/store/cars/dtm-2025/ferrari/ferrari-296-gt3-dtm",
         "description": "Every new Ferrari is special, and the 296 GT3 is no exception. Modern and daring in design, this mid-rear engined monster delivers 600hp from its 2.9-litre, twin-turbocharged V6, and the car won in its debut appearance at the Nürburging 24 Hours, held on the fearsome Nordschleife circuit"
@@ -1664,7 +1717,7 @@ window.CARS_DATA =
         "power": "570bhp",
         "weight": "1380kg with driver",
         "engine": "5.2L V10",
-        "drive": "",
+        "drive": "RWD",
         "country": "Italy",
         "link": "https://game.raceroom.com/en/store/cars/dtm-2025/lamborghini/lamborghini-huracan-gt3-evo-ii-dtm",
         "description": "Experience the pinnacle of Italian motorsport engineering with the Lamborghini Huracán GT3 EVO2. This latest evolution of the Huracán GT3 series boasts enhanced aerodynamics, cutting-edge technology, and a formidable naturally aspirated V10 engine. Designed for uncompromising performance, the EVO2 features improved downforce and handling, making it a dominant force on the track. Get behind the wheel of this racing masterpiece and unleash the raw power and agility that only Lamborghini can deliver."
@@ -1680,7 +1733,7 @@ window.CARS_DATA =
         "power": "575bhp",
         "weight": "1390kg with driver",
         "engine": "4.0L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "UK",
         "link": "https://game.raceroom.com/en/store/cars/dtm-2025/mclaren/mclaren-720s-gt3-evo-dtm",
         "description": "Introducing the McLaren 720S GT3 EVO, the ultimate expression of British racing excellence. Building on the success of its predecessor, the GT3 EVO brings upgraded aerodynamics, refined suspension, and an even more responsive twin-turbocharged V8 engine. Engineered for superior speed and precision, this car offers an unparalleled driving experience. Step into the cockpit and feel the synergy of innovation and performance as you conquer the track with the McLaren 720S GT3 EVO."
@@ -1696,7 +1749,7 @@ window.CARS_DATA =
         "power": "585bhp",
         "weight": "1390Kg with driver",
         "engine": "6.3l V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/dtm-2025/mercedes/mercedes-amg-gt3-2020-dtm",
         "description": "The new Mercedes-AMG GT3 impresses with a new design aesthetic, thanks to an eye-catching front apron, distinctive flics and a new front diffuser. The car had its Customer Racing debut at the beginning of 2020 and lead many teams to victories since then."
@@ -1712,7 +1765,7 @@ window.CARS_DATA =
         "power": "575hp",
         "weight": "1385kg with driver",
         "engine": "4.0l flat-6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/dtm-2025/porsche/porsche-911-gt3-r-992-dtm",
         "description": "GT racing isn't GT racing without a Porsche in the mix, and the 992-shape GT3 R keeps Porsche at the forefront of the category. It's more powerful than ever, but also optimised for drivability with a wider track, massive aero and optimised traction."
@@ -1720,39 +1773,24 @@ window.CARS_DATA =
     ]
   },
   {
-    "class": "Drift",
+    "superclass": "e-Sedan",
+    "class": "Ford Mustang Mach E",
     "cars": [
       {
-        "car_class": "Drift",
-        "car": "BMW E30 M3 Drift",
+        "car_class": "Ford Mustang Mach E",
+        "car": "Ford Mustang Mach-E 1400",
         "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
-        "transmission_cat": "sequential",
+        "transmission": "Palettes",
+        "transmission_cat": "paddles",
         "year": "2021",
-        "power": "600",
-        "weight": "",
-        "engine": "V8",
-        "drive": "RWD",
-        "country": "Germany",
-        "link": "https://game.raceroom.com/en/store/cars/drift/bmw/bmw-e30-m3-drift",
-        "description": "This ‘80s icon sports custom wide wheel arches, a lowered stance, and aggressive bodywork by the Red Bull Driftbrothers—all designed to maximize drift control and style. Its classic lines are retained but amplified for modern performance. Channel motorsport history with every sideways slide."
-      },
-      {
-        "car_class": "Drift",
-        "car": "BMW G82 M4 Drift",
-        "wheel": "Round",
-        "wheel_cat": "round",
-        "transmission": "Seq",
-        "transmission_cat": "sequential",
-        "year": "2021",
-        "power": "",
-        "weight": "",
-        "engine": "",
-        "drive": "",
-        "country": "Germany",
-        "link": "https://game.raceroom.com/en/store/cars/drift/bmw/bmw-g82-m4-drift",
-        "description": "Futuristic and fearless, the Driftbrothers’ G82 M4 stands out with a striking body kit, massive aero components, and a stunning exhaust setup routed through the rear window area. Harness its turbocharged power as you carve the track with head-turning flair."
+        "power": "1400 HP",
+        "weight": "2600kg with driver",
+        "engine": "Fully-electric engine",
+        "drive": "4WD",
+        "country": "USA",
+        "link": "https://game.raceroom.com/en/store/cars/ford-mustang-mach-e/ford/ford-mustang-mach-e-1400",
+        "description": "Following on the heels of the all-electric Mustang Cobra Jet 1400, Mustang Mach-E 1400 is projecting 1,400 peak horsepower and more than 2,300 lb. of downforce at 160 mph from its seven motors and ultra-high-performance battery"
       }
     ]
   },
@@ -1770,7 +1808,7 @@ window.CARS_DATA =
         "power": "675",
         "weight": "785 kg including driver",
         "engine": "V6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Various",
         "link": "https://game.raceroom.com/en/store/cars/fr-us-cup/raceroom/formula-raceroom-us",
         "description": "Top of the food chain in american formula racing, the Formula RaceRoom US is ready to take on the world.\n\nYou get a turbocharged engine, insane aerodynamic grip and a driving feel like nothing else. This car has enough going on to keep you very busy during a lap, and during a full race."
@@ -1812,7 +1850,7 @@ window.CARS_DATA =
         "power": "1050 bhp",
         "weight": "769 kg",
         "engine": "1.6L V6-T Hybrid",
-        "drive": "",
+        "drive": "RWD",
         "country": "Various",
         "link": "https://game.raceroom.com/en/store/cars/fr-x-22-cup/raceroom/formula-raceroom-x-22",
         "description": "The Formula RaceRoom X-22 is the new benchmark in Open-Wheel Racing. The V6 Turbo Hybrid engine delivers over 1000 HP and the elegant aerodynamic design defining the beautiful silhouette of the car has been purposely built to allow close racing. The car features adjustable Engine Maps and MGU-K modes, as well as 3 different tyre compounds and Halo visibility options, so nothing stands in your way to your next victory on track."
@@ -1833,7 +1871,7 @@ window.CARS_DATA =
         "power": "680 bhp@ 12500",
         "weight": "560kg (including driver)",
         "engine": "",
-        "drive": "",
+        "drive": "RWD",
         "country": "Various",
         "link": "https://game.raceroom.com/en/store/cars/fr-x-90-cup/raceroom/formula-rr-90-v8",
         "description": "The FR 90 V8 takes you back to an era of open wheel racing that undeniably featured some of the most beautiful designs in motorsports history and the times of raw engine power producing an incredible sound environment, that to this day makes the hair stand up on every true motorsport fan."
@@ -1849,7 +1887,7 @@ window.CARS_DATA =
         "power": "680 bhp@ 12750",
         "weight": "560kg (including driver)",
         "engine": "",
-        "drive": "",
+        "drive": "RWD",
         "country": "Various",
         "link": "https://game.raceroom.com/en/store/cars/fr-x-90-cup/raceroom/formula-rr-90-v10",
         "description": "The FR 90 V10 takes you back to an era of open wheel racing that undeniably featured some of the most beautiful designs in motorsports history and the times of raw engine power producing an incredible sound environment, that to this day makes the hair stand up on every true motorsport fan."
@@ -1865,7 +1903,7 @@ window.CARS_DATA =
         "power": "680 bhp @ 13000",
         "weight": "560kg (including driver)",
         "engine": "",
-        "drive": "",
+        "drive": "RWD",
         "country": "Various",
         "link": "https://game.raceroom.com/en/store/cars/fr-x-90-cup/raceroom/formula-rr-90-v12",
         "description": "The FR 90 V12 takes you back to an era of open wheel racing that undeniably featured some of the most beautiful designs in motorsports history and the times of raw engine power producing an incredible sound environment, that to this day makes the hair stand up on every true motorsport fan."
@@ -1936,23 +1974,251 @@ window.CARS_DATA =
     ]
   },
   {
-    "class": "Ford Mustang Mach E",
+    "class": "German Nationals",
     "cars": [
       {
-        "car_class": "Ford Mustang Mach E",
-        "car": "Ford Mustang Mach-E 1400",
+        "car_class": "German Nationals",
+        "car": "Carlsson C25 GT",
         "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
-        "transmission_cat": "paddles",
-        "year": "2021",
-        "power": "1400 HP",
-        "weight": "2600kg with driver",
-        "engine": "Fully-electric engine",
-        "drive": "",
+        "transmission": "Seq",
+        "transmission_cat": "sequential",
+        "year": "2012",
+        "power": "650+",
+        "weight": "1490",
+        "engine": "V12",
+        "drive": "RWD",
+        "country": "Germany",
+        "link": "https://game.raceroom.com/en/store/cars/german-nationals/carlsson/carlsson-c25-gt",
+        "description": "Extreme luxury made race ready with the use of a track day kit and racing slicks. This rare one-off race version of the Carlsson C25 GT is powered by a turbo-charged V12 power plant delivering all the power and torque any race driver would ever need."
+      },
+      {
+        "car_class": "German Nationals",
+        "car": "McLaren-Mercedes SLR 722 GT",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "Seq",
+        "transmission_cat": "sequential",
+        "year": "2007",
+        "power": "600+",
+        "weight": "1490",
+        "engine": "V8",
+        "drive": "RWD",
+        "country": "Germany",
+        "link": "https://game.raceroom.com/en/store/cars/german-nationals/mclaren/mclaren-mercedes-slr-722-gt",
+        "description": "The 722 GT is a leaner and meaner race ready version of the already extreme McLaren-Mercedes SLR. With only 21 of them ever built, this is a rare opportunity to hear the supercharged v8 AMG engine come to life. Enjoy!"
+      }
+    ]
+  },
+  {
+    "class": "Group 2",
+    "cars": [
+      {
+        "car_class": "Group 2",
+        "car": "Volkswagen Scirocco Gr2",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "H",
+        "transmission_cat": "h",
+        "year": "1976",
+        "power": "176hp",
+        "weight": "855kg with driver",
+        "engine": "1.6L in-line 4",
+        "drive": "FWD",
+        "country": "Germany",
+        "link": "https://game.raceroom.com/en/store/cars/group-2/volkswagen/volkswagen-scirocco-gr2",
+        "description": "The Scirocco was one of Volkswagen's first successful race cars based on a production model. Its success in the 70s convinced Volkswagen to become more involved in motorsports. The 1.6 litre engine has plenty of grunt and sounds magnificent. The car is an absolute gem in the historic racing scene."
+      }
+    ]
+  },
+  {
+    "class": "Group 4",
+    "cars": [
+      {
+        "car_class": "Group 4",
+        "car": "BMW M1 Gr. 4",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "H",
+        "transmission_cat": "h",
+        "year": "1979",
+        "power": "465bhp",
+        "weight": "1235kg",
+        "engine": "3.5L straight-6",
+        "drive": "RWD",
+        "country": "Germany",
+        "link": "https://game.raceroom.com/en/store/cars/group-4/bmw/bmw-m1-gr-4",
+        "description": "The futuristic center engine BMW M1 was hand-built between 1978 and 1981 as a homologation special for sports car racing. Only 456 M1s were built, making it one of BMW's rarest models, but the design also makes it one of the most famous BMW's ever.\n\nWith its stunning looks and high revving, glorious sounding straight six, the BMW M1 is an iconic race car of the past. This Group 4 version was raced worldwide by privateer teams in endurance races. Compared to the one-make Procar version, this car has beefed-up components and a reduced rev limit, aimed at improving reliability."
+      },
+      {
+        "car_class": "Group 4",
+        "car": "Porsche 934 Turbo RSR",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "H",
+        "transmission_cat": "h",
+        "year": "1976",
+        "power": "485hp",
+        "weight": "1190kg with driver",
+        "engine": "3.0L flat-6",
+        "drive": "RWD",
+        "country": "Germany",
+        "link": "https://game.raceroom.com/en/store/cars/group-4/porsche/porsche-934-turbo-rsr",
+        "description": "The Porsche 934 RSR with its 480+ HP turbo-charged engine was introduced for the 1976 racing season, to compete in the Group 4 regulated series, which meant that at least 400 models had to be produced, and so it is one of the last examples of a road-legal racecar. With many championship wins and a 4th overall finish in the 1979 Le Mans 24 Hours, the 934 is a true racing legend."
+      }
+    ]
+  },
+  {
+    "class": "Group 5",
+    "cars": [
+      {
+        "car_class": "Group 5",
+        "car": "BMW 320 Turbo",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "H",
+        "transmission_cat": "h",
+        "year": "1980",
+        "power": "650",
+        "weight": "875",
+        "engine": "Inline-4",
+        "drive": "RWD",
+        "country": "Germany",
+        "link": "https://game.raceroom.com/en/store/cars/group-5/bmw/bmw-320-turbo",
+        "description": "This car ruled racing tracks in the late 70s, winning countless races and even more hearts. A feisty 2L Formula 2 racing engine mated to a huge turbo provides what feels like endless power for this lightweight racecar."
+      },
+      {
+        "car_class": "Group 5",
+        "car": "Chevrolet Corvette Greenwood 1977",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "H",
+        "transmission_cat": "h",
+        "year": "1977",
+        "power": "900",
+        "weight": "1309",
+        "engine": "V8",
+        "drive": "RWD",
         "country": "USA",
-        "link": "https://game.raceroom.com/en/store/cars/ford-mustang-mach-e/ford/ford-mustang-mach-e-1400",
-        "description": "Following on the heels of the all-electric Mustang Cobra Jet 1400, Mustang Mach-E 1400 is projecting 1,400 peak horsepower and more than 2,300 lb. of downforce at 160 mph from its seven motors and ultra-high-performance battery"
+        "link": "https://game.raceroom.com/en/store/cars/group-5/chevrolet/chevrolet-corvette-greenwood-1977",
+        "description": "Nicknamed 'Batmobile' by the press and often hailed as the fastest Corvette in the world, the Greenwood was a pioneer in widebody design and was quickly copied by notable manufacturers. Full of grunt and capable of well over 200 MPH, the Chevrolet Greenwood Corvette is a must have for any fan of '70s motorsport."
+      },
+      {
+        "car_class": "Group 5",
+        "car": "Chevrolet Dekon Monza",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "H",
+        "transmission_cat": "h",
+        "year": "1975",
+        "power": "650",
+        "weight": "1030",
+        "engine": "V8",
+        "drive": "RWD",
+        "country": "USA",
+        "link": "https://game.raceroom.com/en/store/cars/group-5/chevrolet/chevrolet-dekon-monza",
+        "description": "The Chevrolet Monza Dekon raced in the IMSA GT Series and found success next to the best GT cars of its era. Built for the AAGT Class and powered by a Corvette engine, the Monza proved unbeatable during the mid '70s and went on to compete in over a decade of racing in the IMSA Series."
+      },
+      {
+        "car_class": "Group 5",
+        "car": "Fabcar 935",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "H",
+        "transmission_cat": "h",
+        "year": "1983",
+        "power": "800",
+        "weight": "1025",
+        "engine": "Boxer-6",
+        "drive": "RWD",
+        "country": "Germany",
+        "link": "https://game.raceroom.com/en/store/cars/group-5/fabcar/fabcar-935",
+        "description": "The Fabcar 935 was commissioned by Bob Akin in 1983. Meant to be the 'last 935' the focus for this car was reliability and weight reduction. Dave Klym of Fabcar succeeded in this effort and significantly reduced the weight of the car and after a brief testing period the Fabcar 935 went on to compete in many endurance races."
+      },
+      {
+        "car_class": "Group 5",
+        "car": "Nissan Silvia Turbo",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "H",
+        "transmission_cat": "h",
+        "year": "1981",
+        "power": "650",
+        "weight": "1050",
+        "engine": "Inline-4",
+        "drive": "RWD",
+        "country": "Japan",
+        "link": "https://game.raceroom.com/en/store/cars/group-5/nissan/nissan-silvia-turbo",
+        "description": "Audacious styling and Formula car engineering come together in the Nissan Silvia Turbo. Built to Group 5 regulations with the Skyline’s twin-carb engine, this extraordinary race car packed over 500 HP into a light and agile frame. Racing in the Fuji Grand Championship Series, this car was one of a few iconic Nissan Silvia to grace the racetrack in its era.​"
+      },
+      {
+        "car_class": "Group 5",
+        "car": "Nissan Skyline 2000RS",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "H",
+        "transmission_cat": "h",
+        "year": "1981",
+        "power": "650",
+        "weight": "1005",
+        "engine": "Inline-4",
+        "drive": "RWD",
+        "country": "Japan",
+        "link": "https://game.raceroom.com/en/store/cars/group-5/nissan/nissan-skyline-2000rs",
+        "description": "The Skyline name is synonymous with great handling, and this 80’es icon from Japan is no exception. The mean looking body panels hide a well-balanced engine and chassis package, making it a competitive and fun drive."
+      },
+      {
+        "car_class": "Group 5",
+        "car": "Zakspeed Capri",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "H",
+        "transmission_cat": "h",
+        "year": "1979",
+        "power": "600",
+        "weight": "830",
+        "engine": "Inline-4",
+        "drive": "RWD",
+        "country": "Germany",
+        "link": "https://game.raceroom.com/en/store/cars/group-5/zakspeed/zakspeed-capri",
+        "description": "A true blast from the past, the Capri was the poster car of a decade and it is still a handful to tame for any driver. Get in the mirror of your opponents, and the sight of this cars bold and aggressive lines might just make them move over."
+      }
+    ]
+  },
+  {
+    "class": "Group C",
+    "cars": [
+      {
+        "car_class": "Group C",
+        "car": "Nissan R90CK",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "H",
+        "transmission_cat": "h",
+        "year": "1990",
+        "power": "773 hp",
+        "weight": "1033kg (with driver)",
+        "engine": "V8",
+        "drive": "RWD",
+        "country": "Japan",
+        "link": "https://game.raceroom.com/en/store/cars/group-c/nissan/nissan-r90ck",
+        "description": "The legendary Nissan R90CK is a Group C race car built for competition in the World Sportscar Championship (WSC) in 1990 and the North American IMSA GT Championship later on. This wickedly-fast prototype is powered by a 3.5-liter twin-turbo V8 that produces 700+ HP, which in low-downforce configuration can lead to top-speeds upwards of 350 km/h."
+      },
+      {
+        "car_class": "Group C",
+        "car": "Porsche 962 C Team Joest",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "H",
+        "transmission_cat": "h",
+        "year": "1992",
+        "power": "735 hp",
+        "weight": "1057kg with driver",
+        "engine": "3.2L flat-6",
+        "drive": "RWD",
+        "country": "Germany",
+        "link": "https://game.raceroom.com/en/store/cars/group-c/porsche/porsche-962-c-team-joest",
+        "description": "The Porsche 962 C Team Joest is one of the most recognizable sportscars ever built. It replaced the 956 at the end of 1984 to comply with IMSA's GTP regulations, but would later also compete in the European Group C series. This specific 962 was developed by Joest Racing and is equipped with a 5-speed gearbox, a 700 HP twin-turbo charged engine at an approximate weight of 850 kg, producing top speeds close to 350 km/h."
       }
     ]
   },
@@ -1970,7 +2236,7 @@ window.CARS_DATA =
         "power": "635bhp",
         "weight": "1435kg with driver",
         "engine": "5.2L V10",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/gt2/audi/audi-r8-lms-gt2-2019",
         "description": "The R8 LMS GT2 is the most powerful sports car in the history of the Audi customer racing program. Aimed at gentleman drivers from around the world, it combines great handling with a unique design. The 640 hp V10 engine make it a spectacular addition to any collector's garage."
@@ -1986,7 +2252,7 @@ window.CARS_DATA =
         "power": "600 hp",
         "weight": "950 kg",
         "engine": "Turbocharged inline-four",
-        "drive": "",
+        "drive": "RWD",
         "country": "Austria",
         "link": "https://game.raceroom.com/en/store/cars/gt2/ktm/ktm-x-bow-gt2",
         "description": "The sister car to the X-Bow GTX but with 600hp on tap, KTM's entry into the modern GT2 category has mini-protoype looks and performance to spare. With an emphasis on straight-line speed, it'll shine on the straights, but will require finesse in the braking zones."
@@ -2002,7 +2268,7 @@ window.CARS_DATA =
         "power": "700bhp",
         "weight": "1475kg with driver",
         "engine": "3.8L Flat-6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/gt2/porsche/porsche-911-gt2-rs-clubsport",
         "description": "The new 911 GT2 RS Clubsport is the most powerful, non-street legal, GT customer sports car Porsche has ever built – a high-performance turnkey race car created for track day and Clubsport events on race tracks around the globe. In an exclusive limited edition of 200 units globally."
@@ -2023,7 +2289,7 @@ window.CARS_DATA =
         "power": "592bhp",
         "weight": "1335kg with driver",
         "engine": "",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/gte/bmw/bmw-m8-gte",
         "description": "The BMW M8 GTE is a top-tier racing machine designed to excel in endurance racing. Introduced at the 2017 Frankfurt Motor Show, the M8 GTE marked BMW's return to Le Mans and other prestigious racing events after a six-year hiatus. This race car is powered by a modified version of the 4.4-liter BMW S63 twin-turbo V8 engine, optimized for performance and efficiency under racing conditions. The M8 GTE boasts advanced aerodynamics, a lightweight construction utilizing carbon fiber, and a highly optimized chassis for superior handling and stability. With its robust performance and cutting-edge technology, the BMW M8 GTE has competed in major championships like the FIA World Endurance Championship and the IMSA WeatherTech SportsCar Championship, securing notable victories and proving its dominance on the track. This car is a testament to BMW's commitment to motorsport excellence, combining innovative engineering with the brand's rich racing heritage to deliver a vehicle capable of competing at the highest levels of international motorsport."
@@ -2039,7 +2305,7 @@ window.CARS_DATA =
         "power": "610bhp",
         "weight": "1335kg with driver",
         "engine": "F6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/gte/porsche/porsche-911-rsr-2019",
         "description": "The new Porsche 911 RSR is the epitome of an endurance-race car. Ready for the FIA World Endurance Championship and the North American IMSA WeatherTech SportsCar Championship. Equipped with a 4.2 litre boxer engine, flipped drivetrain and a new exhaust system, now opening to the sides to maximize reliability, the car is built to compete in the toughest long-distance races in the world."
@@ -2286,6 +2552,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "GT3",
     "class": "GTR 3",
     "cars": [
       {
@@ -2299,7 +2566,7 @@ window.CARS_DATA =
         "power": "570bhp",
         "weight": "1340kg with driver",
         "engine": "5.2L V10",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/gtr-3/audi/audi-r8-lms",
         "description": "The latest generation of the Audi R8 LMS is following in the footsteps of its successful predecessor, featuring even more race car technology. It combines lightweight qualities with a unique safety concept and a highly efficient 585 HP V-10 engine."
@@ -2315,7 +2582,7 @@ window.CARS_DATA =
         "power": "570bhp",
         "weight": "1390kg with driver",
         "engine": "5.2L V10",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/gtr-3/audi/audi-r8-lms-gt3-evo",
         "description": "The Audi R8 LMS GT3 Evo is the top product in the Audi Sport customer racing program.It is an evolution of the very successful R8 LMS GT3, Audi has been developing for the past few years. In 2019 it was revised to improve its drivability and aerodynamic efficenc, making it a successfull competitor in many international GT championships."
@@ -2331,7 +2598,7 @@ window.CARS_DATA =
         "power": "570bhp",
         "weight": "1390kg with driver",
         "engine": "5.2L V10",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/gtr-3/audi/audi-r8-lms-gt3-evo-ii",
         "description": "Audi’s GT3 Evo II continues to sharpen the razor that is the R8 LMS. Even faster, with even more efficient aero and uprated suspension, its growling V10 powerplant is instantly recognisable. Developed in 2008 and first raced in 2009, almost 300 R8s have been produced across two model generations and multiple evolutions. R8s have notched up 13 overall victories in 24-hour endurance races and eight in 12-hour events – along with countless individual race wins – to cement the model’s place in GT3’s pantheon."
@@ -2347,7 +2614,7 @@ window.CARS_DATA =
         "power": "585bhp",
         "weight": "1350kg with driver",
         "engine": "5.2L V10",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/gtr-3/audi/audi-r8-lms-ultra",
         "description": "The 2012 Audi R8 LMS Ultra is powered by a 5.2 litre V10 engine that delivers a total of 570 HP and features various improvements in aerodynamics such as front hood louvres and a new rear wing."
@@ -2363,7 +2630,7 @@ window.CARS_DATA =
         "power": "580 bhp",
         "weight": "1325 kg with driver",
         "engine": "4.4L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/gtr-3/alpina/bmw-alpina-b6-gt3",
         "description": "German manufacturer ALPINA returned to international motor racing in 2009 with the newly developed BMW ALPINA B6 GT3 race car. The V8 powered engine produces 530hp which makes the car very competitive in the GT3 category."
@@ -2379,7 +2646,7 @@ window.CARS_DATA =
         "power": "545bhp",
         "weight": "1385kg with driver",
         "engine": "3.0l L6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/gtr-3/bmw/bmw-m4-gt3",
         "description": "BMW’s 2022 GT3 weapon is as fast as it is aggressive-looking, but it's also part of a new generation of driver-friendly GT machines that feature the latest KW suspension technology. This cutting-edge racer has already notched up multiple victories for BMW, including the 2023 Dubai 24 Hours"
@@ -2395,7 +2662,7 @@ window.CARS_DATA =
         "power": "590bhp",
         "weight": "1395kg with driver",
         "engine": "4.4L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/gtr-3/bmw/bmw-m6-gt3",
         "description": "This is the new king of the GT racing class as far as BMW are concerned. Top of the line and ready to dominate wherever GT's race. It is mean, it is fast and it is a winning machine in the right hands. But it is not an easy beast to tame, so handle with care!\n\nThe new 2016 trump card from BMW is powered by a 4.4-litre V8 engine with M TwinPower Turbo technology, which has been modified for use in motor racing. The power train has dry sump lubrication and generates up to 585 hp – with the whole car weighing less than 1,300 kilograms."
@@ -2411,7 +2678,7 @@ window.CARS_DATA =
         "power": "575bhp",
         "weight": "1330kg with driver",
         "engine": "4.4L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/gtr-3/bmw/bmw-z4-gt3",
         "description": "BMW Motorsport has developed the BMW Z4 GT3 specifically for the 2012 season. The V8 engine turns up to 9,000 rpm and comes with good torque curves and excellent performance characteristics."
@@ -2427,7 +2694,7 @@ window.CARS_DATA =
         "power": "575bhp",
         "weight": "1360kg with driver",
         "engine": "4.0L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "UK",
         "link": "https://game.raceroom.com/en/store/cars/gtr-3/bentley/bentley-continental-gt3",
         "description": "\"Limits are there to be broken and breaking them is in Bentley’s blood. Bring the iconic silhouette of the Continental GT, introduce race configuration in it and on a track, Bentley luxury looks just a little different. Experience the Bentley GT3 and enjoy the luxury performance!\""
@@ -2443,7 +2710,7 @@ window.CARS_DATA =
         "power": "",
         "weight": "1410kg with driver",
         "engine": "4.0L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "UK",
         "link": "https://game.raceroom.com/en/store/cars/gtr-3/bentley/bentley-continental-gt3-evo",
         "description": "The new and improved Bentley Continental GT3 Evo, designed and built by M-Sport, has a highly efficient aerodynamic shape and its more rearward weight distribution makes it more agile than its predecessor, while staying true to its unique characteristics and beautiful twin-turbo V8 engine note."
@@ -2459,7 +2726,7 @@ window.CARS_DATA =
         "power": "585bhp",
         "weight": "1375kg with driver",
         "engine": "6.2L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "USA",
         "link": "https://game.raceroom.com/en/store/cars/gtr-3/chevrolet/callaway-corvette-c7-gt3-r",
         "description": "The all new Callaway Corvette C7 GT3-R builds on the famous Corvette Z06.R GT3 and once again comes with more performance and aerodynamics. This astonishing racing car was developed by the company Callaway Competition based in Leingarten (Heilbronn, Germany), and has a 6.2-liter V-8 under its hood producing up to 600 HP, making it the quickest race-spec C7 developed as of yet."
@@ -2475,7 +2742,7 @@ window.CARS_DATA =
         "power": "620 bhp",
         "weight": "1395 kg (with driver)",
         "engine": "7.9L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "USA",
         "link": "https://game.raceroom.com/en/store/cars/gtr-3/chevrolet/chevrolet-camaro-gt3",
         "description": "Hard pumped V8 muscle packed into an aggressive body design, this is the 2012 GT3 Camaro. On the track it is deceptively fast and agile despite its size. This is not just a loud brute monster, it is a thoroughbred racing machine."
@@ -2491,7 +2758,7 @@ window.CARS_DATA =
         "power": "590bhp",
         "weight": "1355kg with driver",
         "engine": "6.2L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "USA",
         "link": "https://game.raceroom.com/en/store/cars/gtr-3/chevrolet/chevrolet-corvette-z06r-gt3",
         "description": "Powered by a 5.5 litre V8, this Corvette produces a thunderous rumble that will be felt by spectators from miles away. With roughly 525 Hp and a well balanced chassis, not only does it sound nice, it also goes like the wind."
@@ -2507,7 +2774,7 @@ window.CARS_DATA =
         "power": "545bhp",
         "weight": "1390kg with driver",
         "engine": "2.9L V6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Italy",
         "link": "https://game.raceroom.com/en/store/cars/gtr-3/ferrari/ferrari-296-gt3",
         "description": "Every new Ferrari is special, and the 296 GT3 is no exception. Modern and daring in design, this mid-rear engined monster delivers 600hp from its 2.9-litre, twin-turbocharged V6, and the car won in its debut appearance at the Nürburging 24 Hours, held on the fearsome Nordschleife circuit"
@@ -2523,7 +2790,7 @@ window.CARS_DATA =
         "power": "560bhp",
         "weight": "1370kg with driver",
         "engine": "3.9L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "Italy",
         "link": "https://game.raceroom.com/en/store/cars/gtr-3/ferrari/ferrari-488-gt3-evo-2020",
         "description": "The 488 GT3 Evo 2020 is the latest evolution of Ferrari’s beautiful apex predator, competing at the pinnacle of GT racing. It further improves on the original 488 GT3 and features refined aerodynamics and a lightened chassis.\n\nThis is Ferrari’s most successful racer ever, which is saying something for a marque with such a pedigree. 488s have now won more than 420 races around the world in the crucible that is GT3. An Evo took the Teams Championship in the 2021 DTM season: just one of well over a hundred titles that have now been won in a 488."
@@ -2539,7 +2806,7 @@ window.CARS_DATA =
         "power": "575bhp",
         "weight": "1325 kg with driver",
         "engine": "5L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "USA",
         "link": "https://game.raceroom.com/en/store/cars/gtr-3/ford/ford-gt-gt3",
         "description": "The retro design lines, owing back to the iconic Ford GT40 of the 1960’s, and a superb V8 engine makes the Ford GT an instant classic for fans and drivers alike. Developed in tandem with it's bigger brother in the GT1 class, this GT3 entry ticks all the boxes of a potential race winner."
@@ -2555,7 +2822,7 @@ window.CARS_DATA =
         "power": "630bhp",
         "weight": "1435kg with driver",
         "engine": "5.3L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "USA",
         "link": "https://game.raceroom.com/en/store/cars/gtr-3/ford/ford-mustang-gt3",
         "description": "The race prepped Mustang gets its grunt from a 5.3l V8 powerplant, producing well over 550 HP. It is loud, direct, fast and great fun to drive. Push it to the limit and see if you can hang on to this high-spirited pony."
@@ -2571,7 +2838,7 @@ window.CARS_DATA =
         "power": "570bhp",
         "weight": "1380kg with driver",
         "engine": "5.2L V10",
-        "drive": "",
+        "drive": "RWD",
         "country": "Italy",
         "link": "https://game.raceroom.com/en/store/cars/gtr-3/lamborghini/lamborghini-huracan-gt3-evo-ii",
         "description": "-"
@@ -2587,7 +2854,7 @@ window.CARS_DATA =
         "power": "570bhp",
         "weight": "1350kg with driver",
         "engine": "3.8L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "UK",
         "link": "https://game.raceroom.com/en/store/cars/gtr-3/mclaren/mclaren-650s-gt3",
         "description": "The 650S GT3 is the latest generation track-focused racer from McLaren, designed and optimised to compete in GT3 championships across the globe. Since its debut in 2015 the 650S GT3 has claimed multiple championships and race wins worldwide, becoming one of the most successful GT3 cars to date. With a carbon fibre Monocell chassis and an award winning 3.8-litre V8 Twin turbo engine at its heart, this evolution of the highly successful 12C GT3 improves on its elder in almost every aspect, from aerodynamics and drivability to safety and cooling. The result is a car with a huge presence and the versatility to be competitive on every type of circuit and in a variety of track conditions."
@@ -2603,7 +2870,7 @@ window.CARS_DATA =
         "power": "575bhp",
         "weight": "1390kg with driver",
         "engine": "4.0L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "UK",
         "link": "https://game.raceroom.com/en/store/cars/gtr-3/mclaren/mclaren-720s-gt3",
         "description": "The McLaren 720S GT3 features groundbreaking updates on bodywork, aerodynamics and suspension compared to its predecessor. The car pushes the boundaries of what is possible under the extreme pressures of endurance racing. The race-prepared version of the M840T 4.0 litre twin turbo V8 engine delivers impressive performance and makes it one of the most advanced cars in the GT Racing world."
@@ -2619,7 +2886,7 @@ window.CARS_DATA =
         "power": "575bhp",
         "weight": "1340kg with driver",
         "engine": "3.8L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "UK",
         "link": "https://game.raceroom.com/en/store/cars/gtr-3/mclaren/mclaren-mp4-12c-gt3",
         "description": "The McLaren MP4-12C GT3 is based on a revolutionary lightweight design and a one piece molded carbon chassis. Powered by McLaren's all new 600hp strong turbo charged V8 the MP4-12C GT3 is a force to be reckoned with."
@@ -2635,7 +2902,7 @@ window.CARS_DATA =
         "power": "590bhp",
         "weight": "1390kg with driver",
         "engine": "6.3L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/gtr-3/mercedes/mercedes-amg-gt3",
         "description": "The Mercedes-AMG GT3 was developed with the ambition to win. Based on the production version of the GT and with the wealth of experience acquired from the achievements of the SLS AMG GT3. It pairs high-class technology with a spectacular design. It impresses with maximum safety, precise dynamics and easy driveability."
@@ -2651,7 +2918,7 @@ window.CARS_DATA =
         "power": "585hp",
         "weight": "1390kg with driver",
         "engine": "6.3L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/gtr-3/mercedes/mercedes-amg-gt3-2020",
         "description": "The new Mercedes-AMG GT3 impresses with a new design aesthetic, thanks to an eye-catching front apron, distinctive flics and a new front diffuser. The car had its Customer Racing debut at the beginning of 2020 and lead many teams to victories since then."
@@ -2667,7 +2934,7 @@ window.CARS_DATA =
         "power": "600bhp",
         "weight": "1405kg with driver",
         "engine": "6.3L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/gtr-3/mercedes-benz/mercedes-benz-sls-amg-gt3",
         "description": "The Mercedes-Benz SLS GT3 was built for the track and conquers short and long distance races with ease. This striking and athletic car looks fantastic, sounds even better and it is capable of winning races. You will never go wrong picking this V8 masterpiece."
@@ -2683,7 +2950,7 @@ window.CARS_DATA =
         "power": "600bhp",
         "weight": "1370kg with driver",
         "engine": "3.8L V6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Japan",
         "link": "https://game.raceroom.com/en/store/cars/gtr-3/nissan/nissan-gt-r-gt3",
         "description": "Every car fan knows the distinct shape of the powerful \"GT-R\" and it will always ensure you plenty of fans at the track. The GT-R GT3 uses Nissan's proven, punchy and extremely reliable 3.8 V6 twin-turbo engine. It is high tech lightning from the East."
@@ -2699,7 +2966,7 @@ window.CARS_DATA =
         "power": "560bhp",
         "weight": "1305kg with driver",
         "engine": "4.3L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "Italy",
         "link": "https://game.raceroom.com/en/store/cars/gtr-3/p4-5/p4-5-competizione-gt3",
         "description": "The P4/5 Competizione is the racing version of a custom built exotic car. It has an all carbon-fibre body and power comes from the V8 Ferrari 430 GT2 engine. The P4/5 is a unique drive, enjoy it and make sure to bring it home in one piece."
@@ -2715,7 +2982,7 @@ window.CARS_DATA =
         "power": "570bhp",
         "weight": "1345kg with driver",
         "engine": "4.0L Flat-6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/gtr-3/porsche/porsche-911-gt3-r-2019",
         "description": "Based on the road-approved 911 GT3 RS, the new 911 GT3 R is a 911 through and through. Its carbon-fiber bodywork, further improved aerodynamics, highly adjustable double wishbone front suspension and the four-valve flat-six engine in the rear make it a strong contender in the most demanding races in the world."
@@ -2731,7 +2998,7 @@ window.CARS_DATA =
         "power": "575hp",
         "weight": "1385kg with driver",
         "engine": "4.0l flat-6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/gtr-3/porsche/porsche-911-gt3-r-992",
         "description": "GT racing isn't GT racing without a Porsche in the mix, and the 992-shape GT3 R keeps Porsche at the forefront of the category. It's more powerful than ever, but also optimised for drivability with a wider track, massive aero and optimised traction."
@@ -2752,7 +3019,7 @@ window.CARS_DATA =
         "power": "450bhp",
         "weight": "1605kg with driver",
         "engine": "5.2L V10",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/gtr-4/audi/audi-r8-lms-gt4-2020",
         "description": "The Audi R8 LMS GT4 has achieved many victories worldwide and was updated for the 2020 season.The car is very close to its road car counterpart, as it shares roughly 60% of its components, but the 5.2-litre V10 engine in combination with the /-speed transmission makes it a real athlete.The R8 LMS GT4 is racing successfully in many Sprint and Endurance Races around the world."
@@ -2768,7 +3035,7 @@ window.CARS_DATA =
         "power": "430bhp",
         "weight": "1570kg with driver",
         "engine": "",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/gtr-4/bmw/bmw-m4-gt4-f82",
         "description": "The BMW M4 GT4 made his debut in the various international GT4 series in 2018. It is powered by a straight-six engine with M TwinPower Turbo technology which produces breath-taking acceleration and a brilliant engine roar. The car was crowned “Race Car of the Year” at the 2018 Professional MotorSport World Expo Awards, in recognition of its impressive successes."
@@ -2784,7 +3051,7 @@ window.CARS_DATA =
         "power": "550bhp",
         "weight": "1585kg with driver",
         "engine": "",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/gtr-4/bmw/bmw-m4-gt4-g82",
         "description": "The BMW M4 GT4 (G82) is a high-performance racing machine designed for competitive track use. Equipped with a 3.0-liter, inline-6 turbocharged engine delivering up to 431 horsepower, this car boasts exceptional speed, precision handling, and advanced aerodynamics. Built on BMW's renowned M4 platform, the GT4 version integrates motorsport-specific features and technologies to ensure dominance in the GT4 class. Ideal for both seasoned and amateur racers, the M4 GT4 combines reliability, agility, and raw power."
@@ -2800,7 +3067,7 @@ window.CARS_DATA =
         "power": "353BHP",
         "weight": "1300kg",
         "engine": "L4",
-        "drive": "",
+        "drive": "RWD",
         "country": "Austria",
         "link": "https://game.raceroom.com/en/store/cars/gtr-4/ktm/ktm-x-bow-gt4",
         "description": "The KTM X-BOW GT4 is the extreme, closed-circuit race version of the KTM X-Bow. Built by Reiter Engineering in Kirchanschöring, Bavaria for the popular GT4 class, it features a full carbon-fibre chassis, highly efficient aerodynamics and 4 cylinder turbo-charged engine producing 353 hp."
@@ -2816,7 +3083,7 @@ window.CARS_DATA =
         "power": "355bhp",
         "weight": "1300kg",
         "engine": "V6",
-        "drive": "",
+        "drive": "RWD",
         "country": "UK",
         "link": "https://game.raceroom.com/en/store/cars/gtr-4/lotus-cars/lotus-evora-gt4",
         "description": "The Evora GT4 by British car manufacturer \"Lotus Cars\" combines a lightweight chassis with a powerful 350+ HP engine and an excellent aerodynamic package. The car complies with GT4 race regulations and raced at the Dubai 24 hours, Silverstone 1000km, Sepang 12 hours, Bathurst 12 hours and various GT championships around the globe."
@@ -2832,7 +3099,7 @@ window.CARS_DATA =
         "power": "425bhp",
         "weight": "1540kg with driver",
         "engine": "",
-        "drive": "",
+        "drive": "RWD",
         "country": "UK",
         "link": "https://game.raceroom.com/en/store/cars/gtr-4/mclaren/mclaren-570s-gt4",
         "description": "The 570s GT4 is much more than 'just' another baby GT3: this is a thoroughbred supercar with aero to match. It features a poweful twin-turbo V8 engine with a benign, compliant chassis that'll encourage you to push the car to the limit."
@@ -2848,7 +3115,7 @@ window.CARS_DATA =
         "power": "415bhp",
         "weight": "1545kg",
         "engine": "4.0L V8",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/gtr-4/mercedes/mercedes-amg-gt4-2020",
         "description": "The Mercedes-AMG GT4 has officially been launched in 2020 and has quickly become one of the most successful cars in the booming GT4 segment worldwide. The \"little brother\" of the Mercedes-AMG GT3 is powered by a 4.0-litre V8 engine with direct injection and biturbo charging and is the the perfect way to enter the fascinating world of GT racing."
@@ -2864,7 +3131,7 @@ window.CARS_DATA =
         "power": "420bhp",
         "weight": "1435kg with driver",
         "engine": "3.8L Flat-6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/gtr-4/porsche/porsche-718-cayman-gt4-clubsport",
         "description": "The new 718 Cayman GT4 Clubsport represents pure motorsport. The recipe is well known and proven: lightweight, well-balanced performance. Whether driving it at a track day or in wheel-to-wheel competition, it is in its element. But be careful: the more you drive it, the less you want to stop."
@@ -2880,259 +3147,10 @@ window.CARS_DATA =
         "power": "385 BHP @ 7500 RPM",
         "weight": "1300 Kg",
         "engine": "3.8l flat 6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/gtr-4/porsche/porsche-cayman-gt4-cs-mr",
         "description": "Based on the Porsche Cayman GT4 Clubsport racecar the GT4 CS MR has been fitted with a comprehensive upgrade kit developed by Manthey-Racing. With the upgrade, the vehicle qualifies as a GT4 homologated racing car, thereby allowing it to participate in national and international races in the GT4 category. The biggest differences of the GT4 homologated car compared to the CS version are its lower weight due to the carbon fibre doors and bonnet, its adjustable wings, dampers and the in-car adjustable brake bias."
-      }
-    ]
-  },
-  {
-    "class": "German Nationals",
-    "cars": [
-      {
-        "car_class": "German Nationals",
-        "car": "Carlsson C25 GT",
-        "wheel": "Round",
-        "wheel_cat": "round",
-        "transmission": "Seq",
-        "transmission_cat": "sequential",
-        "year": "2012",
-        "power": "650+",
-        "weight": "1490",
-        "engine": "V12",
-        "drive": "RWD",
-        "country": "Germany",
-        "link": "https://game.raceroom.com/en/store/cars/german-nationals/carlsson/carlsson-c25-gt",
-        "description": "Extreme luxury made race ready with the use of a track day kit and racing slicks. This rare one-off race version of the Carlsson C25 GT is powered by a turbo-charged V12 power plant delivering all the power and torque any race driver would ever need."
-      },
-      {
-        "car_class": "German Nationals",
-        "car": "McLaren-Mercedes SLR 722 GT",
-        "wheel": "Round",
-        "wheel_cat": "round",
-        "transmission": "Seq",
-        "transmission_cat": "sequential",
-        "year": "2007",
-        "power": "600+",
-        "weight": "1490",
-        "engine": "V8",
-        "drive": "RWD",
-        "country": "UK",
-        "link": "https://game.raceroom.com/en/store/cars/german-nationals/mclaren/mclaren-mercedes-slr-722-gt",
-        "description": "The 722 GT is a leaner and meaner race ready version of the already extreme McLaren-Mercedes SLR. With only 21 of them ever built, this is a rare opportunity to hear the supercharged v8 AMG engine come to life. Enjoy!"
-      }
-    ]
-  },
-  {
-    "class": "Group 2",
-    "cars": [
-      {
-        "car_class": "Group 2",
-        "car": "Volkswagen Scirocco Gr2",
-        "wheel": "Round",
-        "wheel_cat": "round",
-        "transmission": "H",
-        "transmission_cat": "h",
-        "year": "1976",
-        "power": "176hp",
-        "weight": "855kg with driver",
-        "engine": "1.6L in-line 4",
-        "drive": "",
-        "country": "Germany",
-        "link": "https://game.raceroom.com/en/store/cars/group-2/volkswagen/volkswagen-scirocco-gr2",
-        "description": "The Scirocco was one of Volkswagen's first successful race cars based on a production model. Its success in the 70s convinced Volkswagen to become more involved in motorsports. The 1.6 litre engine has plenty of grunt and sounds magnificent. The car is an absolute gem in the historic racing scene."
-      }
-    ]
-  },
-  {
-    "class": "Group 4",
-    "cars": [
-      {
-        "car_class": "Group 4",
-        "car": "BMW M1 Gr. 4",
-        "wheel": "Round",
-        "wheel_cat": "round",
-        "transmission": "H",
-        "transmission_cat": "h",
-        "year": "1979",
-        "power": "465bhp",
-        "weight": "1235kg",
-        "engine": "3.5L straight-6",
-        "drive": "",
-        "country": "Germany",
-        "link": "https://game.raceroom.com/en/store/cars/group-4/bmw/bmw-m1-gr-4",
-        "description": "The futuristic center engine BMW M1 was hand-built between 1978 and 1981 as a homologation special for sports car racing. Only 456 M1s were built, making it one of BMW's rarest models, but the design also makes it one of the most famous BMW's ever.\n\nWith its stunning looks and high revving, glorious sounding straight six, the BMW M1 is an iconic race car of the past. This Group 4 version was raced worldwide by privateer teams in endurance races. Compared to the one-make Procar version, this car has beefed-up components and a reduced rev limit, aimed at improving reliability."
-      },
-      {
-        "car_class": "Group 4",
-        "car": "Porsche 934 Turbo RSR",
-        "wheel": "Round",
-        "wheel_cat": "round",
-        "transmission": "H",
-        "transmission_cat": "h",
-        "year": "1976",
-        "power": "485hp",
-        "weight": "1190kg with driver",
-        "engine": "3.0L flat-6",
-        "drive": "",
-        "country": "Germany",
-        "link": "https://game.raceroom.com/en/store/cars/group-4/porsche/porsche-934-turbo-rsr",
-        "description": "The Porsche 934 RSR with its 480+ HP turbo-charged engine was introduced for the 1976 racing season, to compete in the Group 4 regulated series, which meant that at least 400 models had to be produced, and so it is one of the last examples of a road-legal racecar. With many championship wins and a 4th overall finish in the 1979 Le Mans 24 Hours, the 934 is a true racing legend."
-      }
-    ]
-  },
-  {
-    "class": "Group 5",
-    "cars": [
-      {
-        "car_class": "Group 5",
-        "car": "BMW 320 Turbo",
-        "wheel": "Round",
-        "wheel_cat": "round",
-        "transmission": "H",
-        "transmission_cat": "h",
-        "year": "1980",
-        "power": "650",
-        "weight": "875",
-        "engine": "Inline-4",
-        "drive": "RWD",
-        "country": "Germany",
-        "link": "https://game.raceroom.com/en/store/cars/group-5/bmw/bmw-320-turbo",
-        "description": "This car ruled racing tracks in the late 70s, winning countless races and even more hearts. A feisty 2L Formula 2 racing engine mated to a huge turbo provides what feels like endless power for this lightweight racecar."
-      },
-      {
-        "car_class": "Group 5",
-        "car": "Chevrolet Corvette Greenwood 1977",
-        "wheel": "Round",
-        "wheel_cat": "round",
-        "transmission": "H",
-        "transmission_cat": "h",
-        "year": "1977",
-        "power": "900",
-        "weight": "1309",
-        "engine": "V8",
-        "drive": "RWD",
-        "country": "USA",
-        "link": "https://game.raceroom.com/en/store/cars/group-5/chevrolet/chevrolet-corvette-greenwood-1977",
-        "description": "Nicknamed 'Batmobile' by the press and often hailed as the fastest Corvette in the world, the Greenwood was a pioneer in widebody design and was quickly copied by notable manufacturers. Full of grunt and capable of well over 200 MPH, the Chevrolet Greenwood Corvette is a must have for any fan of '70s motorsport."
-      },
-      {
-        "car_class": "Group 5",
-        "car": "Chevrolet Dekon Monza",
-        "wheel": "Round",
-        "wheel_cat": "round",
-        "transmission": "H",
-        "transmission_cat": "h",
-        "year": "1975",
-        "power": "650",
-        "weight": "1030",
-        "engine": "V8",
-        "drive": "RWD",
-        "country": "USA",
-        "link": "https://game.raceroom.com/en/store/cars/group-5/chevrolet/chevrolet-dekon-monza",
-        "description": "The Chevrolet Monza Dekon raced in the IMSA GT Series and found success next to the best GT cars of its era. Built for the AAGT Class and powered by a Corvette engine, the Monza proved unbeatable during the mid '70s and went on to compete in over a decade of racing in the IMSA Series."
-      },
-      {
-        "car_class": "Group 5",
-        "car": "Fabcar 935",
-        "wheel": "Round",
-        "wheel_cat": "round",
-        "transmission": "H",
-        "transmission_cat": "h",
-        "year": "1983",
-        "power": "800",
-        "weight": "1025",
-        "engine": "Boxer-6",
-        "drive": "RWD",
-        "country": "Germany",
-        "link": "https://game.raceroom.com/en/store/cars/group-5/fabcar/fabcar-935",
-        "description": "The Fabcar 935 was commissioned by Bob Akin in 1983. Meant to be the 'last 935' the focus for this car was reliability and weight reduction. Dave Klym of Fabcar succeeded in this effort and significantly reduced the weight of the car and after a brief testing period the Fabcar 935 went on to compete in many endurance races."
-      },
-      {
-        "car_class": "Group 5",
-        "car": "Nissan Silvia Turbo",
-        "wheel": "Round",
-        "wheel_cat": "round",
-        "transmission": "H",
-        "transmission_cat": "h",
-        "year": "1981",
-        "power": "650",
-        "weight": "1050",
-        "engine": "Inline-4",
-        "drive": "RWD",
-        "country": "Japan",
-        "link": "https://game.raceroom.com/en/store/cars/group-5/nissan/nissan-silvia-turbo",
-        "description": "Audacious styling and Formula car engineering come together in the Nissan Silvia Turbo. Built to Group 5 regulations with the Skyline’s twin-carb engine, this extraordinary race car packed over 500 HP into a light and agile frame. Racing in the Fuji Grand Championship Series, this car was one of a few iconic Nissan Silvia to grace the racetrack in its era.​"
-      },
-      {
-        "car_class": "Group 5",
-        "car": "Nissan Skyline 2000RS",
-        "wheel": "Round",
-        "wheel_cat": "round",
-        "transmission": "H",
-        "transmission_cat": "h",
-        "year": "1981",
-        "power": "650",
-        "weight": "1005",
-        "engine": "Inline-4",
-        "drive": "RWD",
-        "country": "Japan",
-        "link": "https://game.raceroom.com/en/store/cars/group-5/nissan/nissan-skyline-2000rs",
-        "description": "The Skyline name is synonymous with great handling, and this 80’es icon from Japan is no exception. The mean looking body panels hide a well-balanced engine and chassis package, making it a competitive and fun drive."
-      },
-      {
-        "car_class": "Group 5",
-        "car": "Zakspeed Capri",
-        "wheel": "Round",
-        "wheel_cat": "round",
-        "transmission": "H",
-        "transmission_cat": "h",
-        "year": "1979",
-        "power": "600",
-        "weight": "830",
-        "engine": "Inline-4",
-        "drive": "RWD",
-        "country": "Germany",
-        "link": "https://game.raceroom.com/en/store/cars/group-5/zakspeed/zakspeed-capri",
-        "description": "A true blast from the past, the Capri was the poster car of a decade and it is still a handful to tame for any driver. Get in the mirror of your opponents, and the sight of this cars bold and aggressive lines might just make them move over."
-      }
-    ]
-  },
-  {
-    "class": "Group C",
-    "cars": [
-      {
-        "car_class": "Group C",
-        "car": "Nissan R90CK",
-        "wheel": "Round",
-        "wheel_cat": "round",
-        "transmission": "H",
-        "transmission_cat": "h",
-        "year": "1990",
-        "power": "773 hp",
-        "weight": "1033kg (with driver)",
-        "engine": "V8",
-        "drive": "RWD",
-        "country": "Japan",
-        "link": "https://game.raceroom.com/en/store/cars/group-c/nissan/nissan-r90ck",
-        "description": "The legendary Nissan R90CK is a Group C race car built for competition in the World Sportscar Championship (WSC) in 1990 and the North American IMSA GT Championship later on. This wickedly-fast prototype is powered by a 3.5-liter twin-turbo V8 that produces 700+ HP, which in low-downforce configuration can lead to top-speeds upwards of 350 km/h."
-      },
-      {
-        "car_class": "Group C",
-        "car": "Porsche 962 C Team Joest",
-        "wheel": "Round",
-        "wheel_cat": "round",
-        "transmission": "H",
-        "transmission_cat": "h",
-        "year": "1992",
-        "power": "735 hp",
-        "weight": "1057kg with driver",
-        "engine": "3.2L flat-6",
-        "drive": "",
-        "country": "Germany",
-        "link": "https://game.raceroom.com/en/store/cars/group-c/porsche/porsche-962-c-team-joest",
-        "description": "The Porsche 962 C Team Joest is one of the most recognizable sportscars ever built. It replaced the 956 at the end of 1984 to comply with IMSA's GTP regulations, but would later also compete in the European Group C series. This specific 962 was developed by Joest Racing and is equipped with a 5-speed gearbox, a 700 HP twin-turbo charged engine at an approximate weight of 850 kg, producing top speeds close to 350 km/h."
       }
     ]
   },
@@ -3187,7 +3205,7 @@ window.CARS_DATA =
         "power": "",
         "weight": "",
         "engine": "",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/hypercars/bmw/bmw-m-hybrid-v8",
         "description": "Developed under LMDh regulations, the BMW M Hybrid V8 marks the brand’s return to top-level endurance racing. Built on a Dallara chassis, it combines a twin-turbo V8 internal combustion engine with a standardized hybrid system, as mandated by the rules. The M Hybrid V8 represents a new generation of prototypes, blending high performance, hybrid technology, and unmistakable BMW design."
@@ -3203,7 +3221,7 @@ window.CARS_DATA =
         "power": "",
         "weight": "",
         "engine": "",
-        "drive": "",
+        "drive": "RWD",
         "country": "Italy",
         "link": "https://game.raceroom.com/en/store/cars/hypercars/lamborghini/lamborghini-sc63",
         "description": "The Lamborghini SC63 is the manufacturer’s first top-class endurance prototype, built for LMDh and GTP competition. It uses a Ligier chassis and a Lamborghini-designed twin-turbo V8 engine, paired with the standardized hybrid system required by the regulations. The SC63 marks Lamborghini’s entry into high-level prototype racing, combining aggressive styling, advanced engineering, and performance built for world-class endurance events."
@@ -3219,7 +3237,7 @@ window.CARS_DATA =
         "power": "",
         "weight": "",
         "engine": "",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/hypercars/porsche/porsche-963",
         "description": "The Porsche 963 is an LMDh prototype built for endurance racing at the highest level. It features a Multimatic chassis and a twin-turbo V8 engine derived from the Porsche 918 Spyder, paired with a spec hybrid system in compliance with LMDh regulations. With a design rooted in Porsche’s long-standing prototype tradition, the 963 continues the legacy of icons like the 956 and 962."
@@ -3240,7 +3258,7 @@ window.CARS_DATA =
         "power": "",
         "weight": "",
         "engine": "",
-        "drive": "",
+        "drive": "RWD",
         "country": "Austria",
         "link": "https://game.raceroom.com/en/store/cars/ktm-gtx/ktm/ktm-x-bow-gtx",
         "description": "The latest evolution of KTM's quirky X-Bow is the GTX: a 532hp, turbocharged monster with GT3 levels of performance and sharp, angular design cues that set it apart from the pack. Co-developed with German racing specialists Reiter Engineering, the GTX has its own standalone class where driver skill be the deciding factor."
@@ -3282,7 +3300,7 @@ window.CARS_DATA =
         "power": "620bhp",
         "weight": "930kg with driver",
         "engine": "",
-        "drive": "",
+        "drive": "RWD",
         "country": "Japan",
         "link": "https://game.raceroom.com/en/store/cars/mazda-dpi/mazda/mazda-rt24-p-dpi",
         "description": "Mazda's entry into DPi protoype class raced from 2017 to 2021, and ended up winning some of the classic North American races, including Road Atlanta, Sebring and Daytona. Developed around the core of an LMP2 chassis, it became so much more. Its two-litre turbo engine somehow puts out an insane 600hp, carbon wrapped in a super efficient aerodynamic package."
@@ -3303,7 +3321,7 @@ window.CARS_DATA =
         "power": "184",
         "weight": "1140kg",
         "engine": "",
-        "drive": "",
+        "drive": "RWD",
         "country": "Japan",
         "link": "https://game.raceroom.com/en/store/cars/mazda-mx-5-cup/mazda/mazda-mx-5-cup-2019-nd2",
         "description": "The Mazda MX-5 Cup car is a high-performance race car designed for competition in the Mazda MX-5 Cup racing series. Built on the iconic Mazda MX-5 roadster platform, the Cup car features a range of modifications and enhancements that make it a formidable competitor on the track. With its lightweight design, powerful engine, and sharp handling, the MX-5 Cup car delivers an exhilarating driving experience that is sure to thrill any racing enthusiast."
@@ -3483,7 +3501,7 @@ window.CARS_DATA =
         "power": "250hp",
         "weight": "1245kg with driver",
         "engine": "2.5l 4-cylinder",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/porsche-944-turbo-cup/porsche/porsche-944-turbo-cup",
         "description": "1987's 944 Turbo Cup was a radical departure in design terms for Porsche: front engined, water cooled and a 'normal' coupé shape. But it still delivered a true 'Porsche' driving experience, and the success of its one-make championships laid the groundwork for the 911-based Porsche Carrera Cup that would succeed it"
@@ -3491,6 +3509,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "Classics",
     "class": "Porsche 964 Cup",
     "cars": [
       {
@@ -3504,7 +3523,7 @@ window.CARS_DATA =
         "power": "265",
         "weight": "1158kg with driver",
         "engine": "3.6L flat-6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/porsche-964-cup/porsche/porsche-911-carrera-cup-964",
         "description": "The Porsche 911 Carrera Cup (964) was manufactured between 1990 and 1994 and used in the Carrera Cup series during those years. The car is equipped with a 5 speed gearbox and a 3.6l flat-six engine producing 250+ HP. The timeless design of the 911 silhouette, its playful driving properties and the unique engine note make the 964 an all-time Porsche classic."
@@ -3525,7 +3544,7 @@ window.CARS_DATA =
         "power": "485 BHP @ 7500rpm",
         "weight": "1205 Kg",
         "engine": "4.0l flat-6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/porsche-9912-gt3-cup/porsche/porsche-911-gt3-cup-9912-endurance",
         "description": "The latest incarnation of the Porsche 911 GT3 Cup is based on the seventh generation of this sports car icon, and it lives up to its calling: uncompromising performance on the race track. The four-liter six-cylinder boxer unit delivers up to 485 hp. The drive force is transmitted to the rear axle by six-speed sequential dog-type transmission. The fate of the 911 GT3 Cup is played out in the Porsche one-make championships, where the only thing that counts is the performance of the individual driver."
@@ -3546,7 +3565,7 @@ window.CARS_DATA =
         "power": "503 bhp @ 8400rpm",
         "weight": "1260 kg",
         "engine": "4.0l flat-6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/porsche-992-gt3-cup/porsche/porsche-911-gt3-cup-992-endurance",
         "description": "The Endurace-spec version of the 911 GT3 Cup adds in Porsche Motorsport ABS and Traction Control, optimised for longer-distance racing than the standard sprint version. The 992 GT3 Cup represents a huge step forward, and is more advanced than the GT3 R model of just a few generations ago."
@@ -3554,6 +3573,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "Porsche Cup",
     "class": "Porsche Carrera Cup Deutschland 2019",
     "cars": [
       {
@@ -3567,7 +3587,7 @@ window.CARS_DATA =
         "power": "485 BHP @ 7500rpm",
         "weight": "1205 Kg",
         "engine": "4.0l flat-6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/porsche-carrera-cup-deutschland-2019/porsche/porsche-911-gt3-cup",
         "description": "The latest incarnation of the Porsche 911 GT3 Cup is based on the seventh generation of this sports car icon, and it lives up to its calling: uncompromising performance on the race track. The four-liter six-cylinder boxer unit delivers up to 485 hp. The drive force is transmitted to the rear axle by six-speed sequential dog-type transmission. The fate of the 911 GT3 Cup is played out in the Porsche one-make championships, where the only thing that counts is the performance of the individual driver."
@@ -3575,6 +3595,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "Porsche Cup",
     "class": "Porsche Carrera Cup Deutschland 2023",
     "cars": [
       {
@@ -3588,7 +3609,7 @@ window.CARS_DATA =
         "power": "503 bhp @ 8400rpm",
         "weight": "1260 kg",
         "engine": "4.0l flat-6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/porsche-carrera-cup-deutschland-2023/porsche/porsche-911-gt3-cup-992",
         "description": "The new 992-shape GT3 Cup was introduced for the 2022 season and has tipped the sales of Porsche's iconic Cup racer model over the 5,000 unit mark across its seven generations. With no ABS or traction control, but more power than ever, it takes skill and finesse to master: but it's a car that will reward the effort you put in"
@@ -3596,6 +3617,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "Porsche Cup",
     "class": "Porsche Carrera Cup North America 2024",
     "cars": [
       {
@@ -3609,7 +3631,7 @@ window.CARS_DATA =
         "power": "503 bhp @ 8400rpm",
         "weight": "1260 kg",
         "engine": "4.0l flat-6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/porsche-carrera-cup-north-america-2024/porsche/porsche-911-gt3-cup-992",
         "description": "The 992-shaped GT3 Cup is back for the 2024 Carrera Cup North America with striking new liveries. Still free of ABS and traction control, it provides a raw and unfiltered racing experience that demands true driving skill. In return, it rewards every ounce of precision and finesse you bring to the track—making it a standout in single-make racing."
@@ -3617,6 +3639,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "Porsche Cup",
     "class": "Porsche Carrera Cup Scandinavia",
     "cars": [
       {
@@ -3630,7 +3653,7 @@ window.CARS_DATA =
         "power": "485 BHP @ 7500rpm",
         "weight": "1205 Kg",
         "engine": "4.0l flat-6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/porsche-carrera-cup-scandinavia/porsche/porsche-911-gt3-cup-9912",
         "description": "The 991.2 incarnation of the Porsche 911 GT3 Cup is based on the seventh generation of this sports car icon, and it lives up to its calling: uncompromising performance on the race track. The four-liter six-cylinder boxer unit delivers up to 485 hp. The drive force is transmitted to the rear axle by six-speed sequential dog-type transmission. The fate of the 911 GT3 Cup is played out in the Porsche one-make championships, where the only thing that counts is the performance of the individual driver."
@@ -3651,7 +3674,7 @@ window.CARS_DATA =
         "power": "365bhp",
         "weight": "745kg with driver",
         "engine": "2.0l 4 cylinder",
-        "drive": "",
+        "drive": "RWD",
         "country": "Czech Republic",
         "link": "https://game.raceroom.com/en/store/cars/praga-r1/praga/praga-r1",
         "description": "The Praga R1 is a high-performance race car designed and built by the Czech manufacturer Praga Cars. With its sleek, aerodynamic design, the R1 is capable of delivering an exhilarating downforce feeling. The Praga R1 is also raced by simracer Jimmy Broadbent, who made the transition from virtual to real-life racing and won the title in the 2022 season with his team mate Gordie Mutch."
@@ -3672,7 +3695,7 @@ window.CARS_DATA =
         "power": "470bhp",
         "weight": "1130kg",
         "engine": "3.5L straight-6",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/procar/bmw/bmw-m1-procar",
         "description": "The futuristic center engine BMW M1 was hand-built between 1978 and 1981 as a homologation special for sports car racing. Only 456 M1s were built, making it one of BMW's rarest models, but the design also makes it one of the most famous BMW's ever."
@@ -3762,7 +3785,7 @@ window.CARS_DATA =
         "power": "300bhp",
         "weight": "1055kg with driver",
         "engine": "2-litre 4-cylinder",
-        "drive": "",
+        "drive": "FWD",
         "country": "Italy",
         "link": "https://game.raceroom.com/en/store/cars/super-touring/alfa-romeo/alfa-romeo-156-super-touring",
         "description": "The Alfa Romeo 156 is one of the most iconic touring cars of the late 1990s, dominating championships with its sharp handling and distinctive style. Developed to Super Touring regulations, it became a fan favorite thanks to its aggressive performance and unmistakable Italian flair. Now faithfully recreated in RaceRoom, the 156 delivers a thrilling drive and brings a new level of authenticity to your Super Touring battles."
@@ -3778,7 +3801,7 @@ window.CARS_DATA =
         "power": "305bhp",
         "weight": "1120kg with driver",
         "engine": "",
-        "drive": "",
+        "drive": "4WD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/super-touring/audi/audi-a4-super-touring-1995",
         "description": "The Audi A4 Super Touring embodied the cutting edge of German engineering in the mid-1990s. Armed with a punchy four-cylinder engine and Audi’s signature all-wheel-drive prowess, it excelled in variable conditions. Its precise handling and aerodynamic refinement allowed it to contest fiercely for honors in the intensely competitive Super Touring arena. Take the wheel and feel the meticulous craftsmanship that made this A4 a benchmark of the era."
@@ -3794,7 +3817,7 @@ window.CARS_DATA =
         "power": "300bhp",
         "weight": "1080kg with driver",
         "engine": "",
-        "drive": "",
+        "drive": "RWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/super-touring/bmw/bmw-320i-e36-super-touring",
         "description": "The BMW 320i E36 Super Touring represented the pinnacle of balanced performance in ‘90s touring car racing. Its responsive engine, rear-wheel-drive layout, and finely tuned chassis delivered a harmony of agility and control. Renowned for its composed handling and relentless consistency, the E36 set standards that defined a generation. Experience a machine that rewarded technique and nerve, earning its place in Super Touring legend."
@@ -3810,7 +3833,7 @@ window.CARS_DATA =
         "power": "310bhp",
         "weight": "1055kg with driver",
         "engine": "2-litre 4-cylinder",
-        "drive": "",
+        "drive": "FWD",
         "country": "Japan",
         "link": "https://game.raceroom.com/en/store/cars/super-touring/honda/honda-accord-super-touring",
         "description": "The Honda Accord Super Touring brought Japanese precision and reliability to Europe’s fiercely competitive touring car scene. Light on its feet and responsive in the corners, it leveraged a high-revving engine and front-wheel-drive stability to challenge established rivals. Its clean lines and focused engineering captured the spirit of a golden era, proving that determination and innovation could yield championship-worthy performances."
@@ -3826,7 +3849,7 @@ window.CARS_DATA =
         "power": "300bhp",
         "weight": "1055kg with driver",
         "engine": "",
-        "drive": "",
+        "drive": "FWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/super-touring/opel/opel-vectra-super-touring",
         "description": "A cornerstone of German touring car history, the Opel Vectra was a fierce competitor in the Super Touring era. Built to the highest standards of the time, the Vectra combined stability, precision, and raw competitiveness, going wheel-to-wheel with the best in the field. A true icon of classic touring car racing."
@@ -3842,7 +3865,7 @@ window.CARS_DATA =
         "power": "298bhp",
         "weight": "1055kg with driver",
         "engine": "2.0L 4-cylinder",
-        "drive": "",
+        "drive": "FWD",
         "country": "France",
         "link": "https://game.raceroom.com/en/store/cars/super-touring/renault/renault-laguna-super-touring",
         "description": "The Renault Laguna Supertouring is a race-prepared sedan developed to meet the Super Touring regulations of the late 1990s. Campaigned in series like the BTCC, it featured a naturally aspirated 2.0L engine, sequential gearbox, and a competition-focused aerodynamic package. Known for its agility and lightweight design, the Laguna achieved success against fierce international touring car rivals."
@@ -3858,7 +3881,7 @@ window.CARS_DATA =
         "power": "300bhp",
         "weight": "1055kg with driver",
         "engine": "2-litre 5-cylinder",
-        "drive": "",
+        "drive": "FWD",
         "country": "Sweden",
         "link": "https://game.raceroom.com/en/store/cars/super-touring/volvo/volvo-850-super-touring",
         "description": "The Volvo 850 Super Touring broke the mold, bringing a touch of Scandinavian originality to the grid. Known for its robust build and stable handling, it defied expectations with surprisingly nimble dynamics. Showcasing a spirited engine and a chassis honed through relentless development, the 850 reinforced Volvo’s racing credentials and became a fan favorite, reminding everyone that high performance comes in all shapes and sizes."
@@ -3874,7 +3897,7 @@ window.CARS_DATA =
         "power": "302bhp",
         "weight": "1055kg with driver",
         "engine": "2-litre 5-cylinder",
-        "drive": "",
+        "drive": "FWD",
         "country": "Sweden",
         "link": "https://game.raceroom.com/en/store/cars/super-touring/volvo/volvo-s40-super-touring",
         "description": "The Volvo S40 Super Touring refined the brand’s approach, blending Swedish engineering with a sleeker, more compact form. Built for agility and consistent pace, it combined balanced handling, efficient aerodynamics, and a confident engine package. On track, the S40 delivered predictability and poise, securing Volvo’s standing as a serious contender in top-tier touring car competition."
@@ -3903,6 +3926,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "WTCR",
     "class": "Touring Cars Cup",
     "cars": [
       {
@@ -3932,7 +3956,7 @@ window.CARS_DATA =
         "power": "340bhp",
         "weight": "1325kg with driver",
         "engine": "2.0L in-line 4",
-        "drive": "",
+        "drive": "FWD",
         "country": "Japan",
         "link": "https://game.raceroom.com/en/store/cars/touring-cars-cup/honda/honda-civic-tcr",
         "description": "After the great success of the previous version based of the FK1 model, J.A.S. Motorsport extend their commitment on the TCR series with the latest version of the Honda Civic hatchback (FK7). The car is completely different compared to the 2016-17 Civic TCR model, having more aero, more complex suspension geometry and new electronics. The car is eligible in every TCR national championship and will compete also in the new FIA WTCR presented by OSCARO."
@@ -3980,7 +4004,7 @@ window.CARS_DATA =
         "power": "339bhp",
         "weight": "1315kg with driver",
         "engine": "2.0L in-line 4",
-        "drive": "",
+        "drive": "FWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/touring-cars-cup/opel/opel-astra",
         "description": "The Opel Astra TCR has everything it takes to achieve success in a highly competitive environment. The Astra TCR has been developed and built in cooperation with Opel’s seasoned, long-term partner, Kissling Motorsport."
@@ -3988,6 +4012,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "Classics",
     "class": "Touring Classics",
     "cars": [
       {
@@ -4057,10 +4082,10 @@ window.CARS_DATA =
     ]
   },
   {
-    "class": "Trucks Racing",
+    "class": "Truck Racing",
     "cars": [
       {
-        "car_class": "Trucks Racing",
+        "car_class": "Truck Racing",
         "car": "RaceRoom Truck",
         "wheel": "Round",
         "wheel_cat": "round",
@@ -4091,7 +4116,7 @@ window.CARS_DATA =
         "power": "500 kW (680 HP)",
         "weight": "< 1,100 kg (incl. driver)",
         "engine": "",
-        "drive": "",
+        "drive": "4WD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/volkswagen-id-r/volkswagen/volkswagen-id-r",
         "description": "Volkswagen is driving electromobility forward at pace. The racing spearhead of this type of drive is the fully-electric ID. R. The thoroughbred sports car consists of a highly efficient carbon monocoque with lightweight bodywork and a high downforce aerodynamic setup. The two electric motors with a maximum system performance of 500 kW (680 hp) transmit their power to all four wheels."
@@ -4184,6 +4209,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "WTCC",
     "class": "WTCC 2014",
     "cars": [
       {
@@ -4237,6 +4263,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "WTCC",
     "class": "WTCC 2015",
     "cars": [
       {
@@ -4290,6 +4317,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "WTCC",
     "class": "WTCC 2016",
     "cars": [
       {
@@ -4359,6 +4387,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "WTCC",
     "class": "WTCC 2017",
     "cars": [
       {
@@ -4428,6 +4457,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "WTCR",
     "class": "WTCR 2018",
     "cars": [
       {
@@ -4457,7 +4487,7 @@ window.CARS_DATA =
         "power": "338 bhp",
         "weight": "1315 kg",
         "engine": "L4",
-        "drive": "",
+        "drive": "FWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/wtcr-2018/audi/audi-rs-3-lms",
         "description": "The Audi RS 3 LMS is being developed by Audi Sport customer racing for the relatively new TCR category. This factory-built entry-level race car with its massively flared fenders and low front splitter is reminiscent of a DTM race car, albeit much closer to the production model. The four-cylinder TFSI engine unit delivers up to 350 HP and lets the car accelerate from 0 to 100 km/h in about 4.5 seconds and achieves a top speed of up to 265 km/h."
@@ -4473,7 +4503,7 @@ window.CARS_DATA =
         "power": "335 bhp",
         "weight": "1305 kg",
         "engine": "L4",
-        "drive": "",
+        "drive": "FWD",
         "country": "Spain",
         "link": "https://game.raceroom.com/en/store/cars/wtcr-2018/cupra/cupra-tcr",
         "description": "Right from the first glance, the curves of the CUPRA are making a clear statement of sportiness. The previous model has been improved in performance and lets you fully enjoy the 350 HP, an increased steering angle and a steering wheel with even more functions. The CUPRA TCR is ready for the challenges of racing today."
@@ -4521,7 +4551,7 @@ window.CARS_DATA =
         "power": "330 bhp",
         "weight": "1285 kg",
         "engine": "L4",
-        "drive": "",
+        "drive": "FWD",
         "country": "France",
         "link": "https://game.raceroom.com/en/store/cars/wtcr-2018/peugeot/peugeot-308-tcr",
         "description": "The Peugeot 308 TCR is a technical evolution of the 308 Racing Cup, which was created based on the Peugeot 308 GTi by Peugeot Sport. The four-cylinder turbocharged engine with 350 HP provides a torque of 420 Nm at 3000 rpm. Due to its characteristics, the Peugeot 308 TCR is the perfect choice if you want to compete against the strongest opponents."
@@ -4537,7 +4567,7 @@ window.CARS_DATA =
         "power": "338 bhp",
         "weight": "1315 kg",
         "engine": "L4",
-        "drive": "",
+        "drive": "FWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/wtcr-2018/volkswagen/volkswagen-golf-gti-tcr",
         "description": "To bring the GTI genes on the racetrack, Volkswagen has developed the Golf GTI TCR. 18-inch racing rims, a body that is roughly 15 centimetres wider than the production Golf, and a striking aluminium rear wing guarantee optimal handling. The 2-litre turbo engine with direct fuel injection generates 243 kW (330 hp) and produces 420 Nm of torque."
@@ -4545,6 +4575,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "WTCR",
     "class": "WTCR 2019",
     "cars": [
       {
@@ -4558,7 +4589,7 @@ window.CARS_DATA =
         "power": "340bhp",
         "weight": "1305kg with driver",
         "engine": "1.75L in-line 4",
-        "drive": "",
+        "drive": "FWD",
         "country": "Italy",
         "link": "https://game.raceroom.com/en/store/cars/wtcr-2019/romeo-ferraris/alfa-romeo-giulietta-tcr",
         "description": "To create unbeatable race cars is the passion of Romeo Ferraris and the realization of the Alfa Romeo Giulietta TCR is a big milestone for the Italian company. Every component has been designed by Romeo Ferraris, and they are proud to represent Alfa Romeo, a brand with a long successful history in touring cars, in the FIA WTCR presented by OSCARO. Powered by a 4-cylinder engine of 1.742 cm3, the Giulietta TCR made its first appearance in the 2016 season in Bahrain."
@@ -4574,7 +4605,7 @@ window.CARS_DATA =
         "power": "340bhp",
         "weight": "1315kg with driver",
         "engine": "2.0L in-line 4",
-        "drive": "",
+        "drive": "FWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/wtcr-2019/audi/audi-rs-3-lms",
         "description": "The Audi RS 3 LMS is being developed by Audi Sport customer racing for the relatively new TCR category. This factory-built entry-level race car with its massively flared fenders and low front splitter is reminiscent of a DTM race car, albeit much closer to the production model. The four-cylinder TFSI engine unit delivers up to 350 HP and lets the car accelerate from 0 to 100 km/h in about 4.5 seconds and achieves a top speed of up to 265 km/h."
@@ -4590,7 +4621,7 @@ window.CARS_DATA =
         "power": "340bhp",
         "weight": "1305kg with driver",
         "engine": "2.0L in-line 4",
-        "drive": "",
+        "drive": "FWD",
         "country": "Spain",
         "link": "https://game.raceroom.com/en/store/cars/wtcr-2019/cupra/cupra-tcr",
         "description": "Right from the first glance, the curves of the CUPRA are making a clear statement of sportiness. The previous model has been improved in performance and lets you fully enjoy the 350 HP, an increased steering angle and a steering wheel with even more functions. The CUPRA TCR is ready for the challenges of racing today."
@@ -4606,7 +4637,7 @@ window.CARS_DATA =
         "power": "340bhp",
         "weight": "1325kg with driver",
         "engine": "2.0L in-line 4",
-        "drive": "",
+        "drive": "FWD",
         "country": "Japan",
         "link": "https://game.raceroom.com/en/store/cars/wtcr-2019/honda/honda-civic-tcr",
         "description": "After the great success of the previous version based of the FK1 model, J.A.S. Motorsport extend their commitment on the TCR series with the latest version of the Honda Civic hatchback (FK7). The car is completely different compared to the 2016-17 Civic TCR model, having more aero, more complex suspension geometry and new electronics. The car is eligible in every TCR national championship and will compete also in the new FIA WTCR presented by OSCARO."
@@ -4622,7 +4653,7 @@ window.CARS_DATA =
         "power": "340bhp",
         "weight": "1365kg with driver",
         "engine": "2.0L in-line 4",
-        "drive": "",
+        "drive": "FWD",
         "country": "South Korea",
         "link": "https://game.raceroom.com/en/store/cars/wtcr-2019/hyundai/hyundai-i30-n-tcr",
         "description": "The creation of the i30 N TCR represents Hyundai Motorsport’s first steps into circuit racing, and entrance into one of the fastest growing categories in motorsport. The design phase of the TCR project began in September 2016, with the first completed test car running in April 2017. Based on the road-going i30 model, in line with the TCR regulations the i30 N TCR is powered by a two-litre turbocharged engine connected to a six-speed sequential gearbox."
@@ -4638,7 +4669,7 @@ window.CARS_DATA =
         "power": "340bhp",
         "weight": "1355kg with driver",
         "engine": "2.0L in-line 4",
-        "drive": "",
+        "drive": "FWD",
         "country": "China",
         "link": "https://game.raceroom.com/en/store/cars/wtcr-2019/lynk-co/lynk-co-03-tcr",
         "description": "The Lynk & Co 03 TCR is constructed by Geely Group Motorsport and raced by Cyan Racing for their inaugural FIA WTCR season with Lynk & Co. The car is powered by a 2.0-litre four-cylinder turbo charged engine, producing 350hp and 420Nm as per the regulations. The development of the car was aided by Cyan Racing with drivers Yvan Muller, Thed Björk, Andy Priaulx and Yann Ehrlacher."
@@ -4654,7 +4685,7 @@ window.CARS_DATA =
         "power": "340bhp",
         "weight": "1315kg with driver",
         "engine": "2.0L in-line 4",
-        "drive": "",
+        "drive": "FWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/wtcr-2019/volkswagen/volkswagen-golf-gti-tcr",
         "description": "To bring the GTI genes on the racetrack, Volkswagen has developed the Golf GTI TCR. 18-inch racing rims, a body that is roughly 15 centimetres wider than the production Golf, and a striking aluminium rear wing guarantee optimal handling. The 2-litre turbo engine with direct fuel injection generates 243 kW (330 hp) and produces 420 Nm of torque."
@@ -4662,6 +4693,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "WTCR",
     "class": "WTCR 2020",
     "cars": [
       {
@@ -4675,7 +4707,7 @@ window.CARS_DATA =
         "power": "340bhp",
         "weight": "1305kg with driver",
         "engine": "1.75L in-line 4",
-        "drive": "",
+        "drive": "FWD",
         "country": "Italy",
         "link": "https://game.raceroom.com/en/store/cars/wtcr-2020/romeo-ferraris/alfa-romeo-giulietta-tcr",
         "description": "To create unbeatable race cars is the passion of Romeo Ferraris and the realization of the Alfa Romeo Giulietta TCR is a big milestone for the Italian company. Every component has been designed by Romeo Ferraris, and they are proud to represent Alfa Romeo, a brand with a long successful history in touring cars, in the FIA WTCR presented by OSCARO. Powered by a 4-cylinder engine of 1.742 cm3, the Giulietta TCR made its first appearance in the 2016 season in Bahrain."
@@ -4707,7 +4739,7 @@ window.CARS_DATA =
         "power": "340bhp",
         "weight": "1305kg with driver",
         "engine": "2.0L in-line 4",
-        "drive": "",
+        "drive": "FWD",
         "country": "Spain",
         "link": "https://game.raceroom.com/en/store/cars/wtcr-2020/cupra/cupra-leon-competicion",
         "description": "A new breed of racing cars take shape with 3D printing technology, powered by a 2.0 TSI 340hp engine delivering up to 265 kmph and 410 Nm of torque, with a faster 6-gear sequential gearbox and improved weight distribution."
@@ -4723,7 +4755,7 @@ window.CARS_DATA =
         "power": "340bhp",
         "weight": "1325kg with driver",
         "engine": "2.0L in-line 4",
-        "drive": "",
+        "drive": "FWD",
         "country": "Japan",
         "link": "https://game.raceroom.com/en/store/cars/wtcr-2020/honda/honda-civic-tcr",
         "description": "After the great success of the previous version based of the FK1 model, J.A.S. Motorsport extend their commitment on the TCR series with the latest version of the Honda Civic hatchback (FK7). The car is completely different compared to the 2016-17 Civic TCR model, having more aero, more complex suspension geometry and new electronics. The car is eligible in every TCR national championship and will compete also in the new FIA WTCR presented by OSCARO."
@@ -4755,7 +4787,7 @@ window.CARS_DATA =
         "power": "340bhp",
         "weight": "1355kg with driver",
         "engine": "2.0L in-line 4",
-        "drive": "",
+        "drive": "FWD",
         "country": "China",
         "link": "https://game.raceroom.com/en/store/cars/wtcr-2020/lynk-co/lynk-co-03-tcr",
         "description": "The Lynk & Co 03 TCR is constructed by Geely Group Motorsport and raced by Cyan Racing for their inaugural FIA WTCR season with Lynk & Co. The car is powered by a 2.0-litre four-cylinder turbo charged engine, producing 350hp and 420Nm as per the regulations. The development of the car was aided by Cyan Racing with drivers Yvan Muller, Thed Björk, Andy Priaulx and Yann Ehrlacher."
@@ -4771,7 +4803,7 @@ window.CARS_DATA =
         "power": "340hp",
         "weight": "1295kg with driver",
         "engine": "1.8L in-line 4",
-        "drive": "",
+        "drive": "FWD",
         "country": "France",
         "link": "https://game.raceroom.com/en/store/cars/wtcr-2020/renault/renault-megane-rs-tcr",
         "description": "The Renault Mégane RS TCR project development started in early 2017 using the Renault Mégane RS as a base. The TCR car made its racing debut in 2018.\n\nThis began a successful new chapter for Vuković Motorsport in International Motorsport, with several podium finishes, pole positions and wins across the globe.\n\nFor the 2020 season,Vuković Motorsport was the only new Team to the FIA WTCR series.\n\nIt was a steep learning curve for the team, but they managed to deliver exciting battles and scored great results against the biggest manufacturers in the automobile industry."
@@ -4779,6 +4811,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "WTCR",
     "class": "WTCR 2021",
     "cars": [
       {
@@ -4792,7 +4825,7 @@ window.CARS_DATA =
         "power": "345bhp",
         "weight": "1385kg with driver",
         "engine": "L4",
-        "drive": "",
+        "drive": "FWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/wtcr-2021/audi/audi-rs-3-lms-2021",
         "description": "After the release of 4th generation of Audi A3, Audi brought this evolution of the RS 3 LMS to FIA WTCR 2021"
@@ -4808,7 +4841,7 @@ window.CARS_DATA =
         "power": "340bhp",
         "weight": "1305kg with driver",
         "engine": "2.0L in-line 4",
-        "drive": "",
+        "drive": "FWD",
         "country": "Spain",
         "link": "https://game.raceroom.com/en/store/cars/wtcr-2021/cupra/cupra-leon-competicion",
         "description": "A new breed of racing cars take shape with 3D printing technology, powered by a 2.0 TSI 340hp engine delivering up to 265 kmph and 410 Nm of torque, with a faster 6-gear sequential gearbox and improved weight distribution."
@@ -4824,7 +4857,7 @@ window.CARS_DATA =
         "power": "340bhp",
         "weight": "1325kg with driver",
         "engine": "2.0L in-line 4",
-        "drive": "",
+        "drive": "FWD",
         "country": "Japan",
         "link": "https://game.raceroom.com/en/store/cars/wtcr-2021/honda/honda-civic-tcr",
         "description": "After the great success of the previous version based of the FK1 model, J.A.S. Motorsport extend their commitment on the TCR series with the latest version of the Honda Civic hatchback (FK7). The car is completely different compared to the 2016-17 Civic TCR model, having more aero, more complex suspension geometry and new electronics. The car is eligible in every TCR national championship and will compete also in the new FIA WTCR presented by OSCARO."
@@ -4840,7 +4873,7 @@ window.CARS_DATA =
         "power": "340bhp",
         "weight": "1365kg with driver",
         "engine": "2.0L in-line 4",
-        "drive": "",
+        "drive": "FWD",
         "country": "South Korea",
         "link": "https://game.raceroom.com/en/store/cars/wtcr-2021/hyundai/hyundai-elantra-tcr-2021",
         "description": "In 2020 a third car, based on the TCR regulations, was unveiled by Hyundai Motorsport Customer Racing based on the Hyundai Elantra saloon model. The car made its competitive debut at the 2021 Michelin Pilot Challenge season opener at the Daytona International Speedway"
@@ -4856,7 +4889,7 @@ window.CARS_DATA =
         "power": "345bhp",
         "weight": "1345kg with driver",
         "engine": "2.0L in-line 4",
-        "drive": "",
+        "drive": "FWD",
         "country": "Russia",
         "link": "https://game.raceroom.com/en/store/cars/wtcr-2021/lada/lada-vesta-tcr",
         "description": "LADA Vesta Sport TCR became the first Russian car built according to the requirements of the international TCR class. Already in their first race, the pilots driving this car won the winning double! Since 2017, the car has been presented in the Russian series of circuit races, where the pilots of the LADA Sport ROSNEFT team are consistently the leaders of the peleton."
@@ -4872,7 +4905,7 @@ window.CARS_DATA =
         "power": "340bhp",
         "weight": "1355kg with driver",
         "engine": "2.0L in-line 4",
-        "drive": "",
+        "drive": "FWD",
         "country": "China",
         "link": "https://game.raceroom.com/en/store/cars/wtcr-2021/lynk-co/lynk-co-03-tcr",
         "description": "The Lynk & Co 03 TCR is constructed by Geely Group Motorsport and raced by Cyan Racing for their inaugural FIA WTCR season with Lynk & Co. The car is powered by a 2.0-litre four-cylinder turbo charged engine, producing 350hp and 420Nm as per the regulations. The development of the car was aided by Cyan Racing with drivers Yvan Muller, Thed Björk, Andy Priaulx and Yann Ehrlacher."
@@ -4880,6 +4913,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "WTCR",
     "class": "WTCR 2022",
     "cars": [
       {
@@ -4893,7 +4927,7 @@ window.CARS_DATA =
         "power": "345bhp",
         "weight": "1385kg with driver",
         "engine": "L4",
-        "drive": "",
+        "drive": "FWD",
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/wtcr-2022/audi/audi-rs-3-lms-2021",
         "description": "After the release of 4th generation of Audi A3, Audi brought this evolution of the RS 3 LMS to FIA WTCR 2021"
@@ -4909,7 +4943,7 @@ window.CARS_DATA =
         "power": "340bhp",
         "weight": "1305kg with driver",
         "engine": "2.0L in-line 4",
-        "drive": "",
+        "drive": "FWD",
         "country": "Spain",
         "link": "https://game.raceroom.com/en/store/cars/wtcr-2022/cupra/cupra-leon-competicion",
         "description": "A new breed of racing cars take shape with 3D printing technology, powered by a 2.0 TSI 340hp engine delivering up to 265 kmph and 410 Nm of torque, with a faster 6-gear sequential gearbox and improved weight distribution."
@@ -4925,7 +4959,7 @@ window.CARS_DATA =
         "power": "340bhp",
         "weight": "1325kg with driver",
         "engine": "2.0L in-line 4",
-        "drive": "",
+        "drive": "FWD",
         "country": "Japan",
         "link": "https://game.raceroom.com/en/store/cars/wtcr-2022/honda/honda-civic-tcr",
         "description": "After the great success of the previous version based of the FK1 model, J.A.S. Motorsport extend their commitment on the TCR series with the latest version of the Honda Civic hatchback (FK7). The car is completely different compared to the 2016-17 Civic TCR model, having more aero, more complex suspension geometry and new electronics. The car is eligible in every TCR national championship and will compete also in the new FIA WTCR presented by OSCARO."
@@ -4941,7 +4975,7 @@ window.CARS_DATA =
         "power": "340bhp",
         "weight": "1365kg with driver",
         "engine": "2.0L in-line 4",
-        "drive": "",
+        "drive": "FWD",
         "country": "South Korea",
         "link": "https://game.raceroom.com/en/store/cars/wtcr-2022/hyundai/hyundai-elantra-tcr-2022",
         "description": "In 2020 a third car, based on the TCR regulations, was unveiled by Hyundai Motorsport Customer Racing based on the Hyundai Elantra saloon model. The car made its competitive debut at the 2021 Michelin Pilot Challenge season opener at the Daytona International Speedway"
@@ -4957,7 +4991,7 @@ window.CARS_DATA =
         "power": "340bhp",
         "weight": "1355kg with driver",
         "engine": "2.0L in-line 4",
-        "drive": "",
+        "drive": "FWD",
         "country": "China",
         "link": "https://game.raceroom.com/en/store/cars/wtcr-2022/lynk-co/lynk-co-03-tcr",
         "description": "The Lynk & Co 03 TCR is constructed by Geely Group Motorsport and raced by Cyan Racing for their inaugural FIA WTCR season with Lynk & Co. The car is powered by a 2.0-litre four-cylinder turbo charged engine, producing 350hp and 420Nm as per the regulations. The development of the car was aided by Cyan Racing with drivers Yvan Muller, Thed Björk, Andy Priaulx and Yann Ehrlacher."
@@ -4978,7 +5012,7 @@ window.CARS_DATA =
         "power": "670 bhp",
         "weight": "1184 kg",
         "engine": "Mercedes-Benz V12",
-        "drive": "",
+        "drive": "RWD",
         "country": "Italy",
         "link": "https://game.raceroom.com/en/store/cars/zonda-r-cup/pagani/pagani-zonda-r",
         "description": "The racing version of the famous Italian hypercar is stripped of all niceties and aimed squarely at producing most power and most downforce at the least weight. The result is a lightning fast car with great direction change capabilities."

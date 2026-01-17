@@ -28,6 +28,10 @@ class DriverSearch {
         
         // Track last search time to prevent premature "no results" display
         this.lastSearchTime = 0;
+        this.lastSearchTerm = ''; // Store last search term for filter changes
+        
+        // Filter values
+        this.selectedClass = ''; // Store selected class/superclass filter
         
         // Debounce timer for live search
         this.searchDebounceTimer = null;
@@ -75,14 +79,23 @@ class DriverSearch {
     setupCustomSelects() {
         // Class filter custom select
         if (this.elements.classFilter && this.elements.classFilterUI) {
-            const classOptions = [{ value: '', label: 'All classes' }].concat(
-                dataService.getClassOptionsFromCarsData()
-            );
+            // Get superclass options first
+            const superclassOptions = dataService.getSuperclassOptions();
             
-            new CustomSelect('class-filter-ui', classOptions, async (value) => {
-                this.elements.classFilter.value = value;
-                const searchTerm = this.elements.driverSearch.value.trim();
-                if (searchTerm) await this.searchDriver(searchTerm);
+            // Get regular class options
+            const classOptions = dataService.getClassOptionsFromCarsData();
+            
+            // Combine: All classes, then Category: superclass entries, then regular classes
+            const allOptions = [{ value: '', label: 'All classes' }]
+                .concat(superclassOptions)
+                .concat(classOptions);
+            
+            new CustomSelect('class-filter-ui', allOptions, async (value) => {
+                this.selectedClass = value; // Store directly in the class property
+                // Re-search with the last search term if we have one
+                if (this.lastSearchTerm) {
+                    await this.searchDriver(this.lastSearchTerm);
+                }
             });
         }
 
@@ -96,8 +109,10 @@ class DriverSearch {
             ];
             
             new CustomSelect('difficulty-filter-ui', difficultyOptions, async (value) => {
-                const searchTerm = this.elements.driverSearch.value.trim();
-                if (searchTerm) await this.searchDriver(searchTerm);
+                // Re-search with the last search term if we have one
+                if (this.lastSearchTerm) {
+                    await this.searchDriver(this.lastSearchTerm);
+                }
             });
         }
     }
@@ -174,11 +189,12 @@ class DriverSearch {
      */
     async searchDriver(driverName) {
         this.lastSearchTime = Date.now();
+        this.lastSearchTerm = driverName; // Store the search term
         await TemplateHelper.showLoading(this.elements.resultsContainer, 'Searching...');
         
         try {
             // Get current filters
-            const selectedClass = this.elements.classFilter ? this.elements.classFilter.value : '';
+            const selectedClass = this.selectedClass || '';
             const difficultyToggle = document.querySelector('#difficulty-filter-ui .custom-select__toggle');
             const selectedDifficulty = difficultyToggle ? 
                 difficultyToggle.textContent.replace(' ▾', '').trim() : 'All difficulties';

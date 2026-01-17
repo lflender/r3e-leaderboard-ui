@@ -63,6 +63,7 @@ class Navigation {
 
         const trackId = row?.dataset?.trackid;
         const classId = row?.dataset?.classid;
+        const superclass = row?.dataset?.superclass; // For combined mode
         const track = row?.dataset?.track;
         const carClass = row?.dataset?.class;
         const pos = row?.dataset?.position;
@@ -74,7 +75,10 @@ class Navigation {
             difficultyToggle.textContent.replace(' ▾', '').trim() : 'All difficulties';
 
         let url = '';
-        if (trackId && classId) {
+        // If superclass is set, use it instead of classId (for combined view)
+        if (trackId && superclass) {
+            url = `detail.html?track=${encodeURIComponent(trackId)}&superclass=${encodeURIComponent(superclass)}`;
+        } else if (trackId && classId) {
             url = `detail.html?track=${encodeURIComponent(trackId)}&class=${encodeURIComponent(classId)}`;
         } else if (track && carClass) {
             url = `detail.html?track=${encodeURIComponent(track)}&class=${encodeURIComponent(carClass)}`;

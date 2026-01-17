@@ -310,16 +310,35 @@ class DataService {
             
             // Apply class filter
             if (filters.classId || filters.className) {
-                filteredEntries = filteredEntries.filter(entry => {
-                    const entryClass = entry.car_class || entry.CarClass || entry['Car Class'] || entry.Class || entry.class || '';
-                    if (filters.classId) {
-                        return entryClass === filters.classId;
+                const filterValue = filters.classId || filters.className;
+                
+                // Check if this is a superclass filter
+                if (filterValue.startsWith('superclass:')) {
+                    const superclassName = filterValue.replace('superclass:', '');
+                    
+                    // Get all classes that belong to this superclass
+                    const superclassClasses = new Set();
+                    if (window.CARS_DATA && Array.isArray(window.CARS_DATA)) {
+                        window.CARS_DATA.forEach(entry => {
+                            if (entry.superclass === superclassName) {
+                                const cls = entry.class || entry.car_class || entry.CarClass || '';
+                                if (cls) superclassClasses.add(cls);
+                            }
+                        });
                     }
-                    if (filters.className) {
-                        return entryClass === filters.className;
-                    }
-                    return true;
-                });
+                    
+                    // Filter entries by any of the classes in this superclass
+                    filteredEntries = filteredEntries.filter(entry => {
+                        const entryClass = entry.car_class || entry.CarClass || entry['Car Class'] || entry.Class || entry.class || '';
+                        return superclassClasses.has(entryClass);
+                    });
+                } else {
+                    // Regular class filter
+                    filteredEntries = filteredEntries.filter(entry => {
+                        const entryClass = entry.car_class || entry.CarClass || entry['Car Class'] || entry.Class || entry.class || '';
+                        return entryClass === filterValue;
+                    });
+                }
             }
             
             // Apply difficulty filter
@@ -489,6 +508,41 @@ class DataService {
             if (!cls || seen.has(cls)) return;
             seen.add(cls);
             options.push({ value: cls, label: cls });
+        });
+        
+        return options.sort((a, b) => a.label.localeCompare(b.label));
+    }
+
+    /**
+     * Get unique superclass options with classes that belong to each
+     * @returns {Array<{value: string, label: string, classes: Array<string>}>} Superclass options with associated classes
+     */
+    getSuperclassOptions() {
+        if (!window.CARS_DATA || !Array.isArray(window.CARS_DATA)) {
+            return [];
+        }
+        
+        const superclassMap = new Map();
+        
+        window.CARS_DATA.forEach(entry => {
+            const superclass = entry.superclass;
+            const cls = entry.class || entry.car_class || entry.CarClass || '';
+            
+            if (superclass && cls) {
+                if (!superclassMap.has(superclass)) {
+                    superclassMap.set(superclass, []);
+                }
+                superclassMap.get(superclass).push(cls);
+            }
+        });
+        
+        const options = [];
+        superclassMap.forEach((classes, superclass) => {
+            options.push({
+                value: `superclass:${superclass}`,
+                label: `Category: ${superclass}`,
+                classes: classes
+            });
         });
         
         return options.sort((a, b) => a.label.localeCompare(b.label));

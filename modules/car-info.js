@@ -75,7 +75,8 @@
   let wheelFilter = '', transFilter = '', classFilter = '';
   
   // Build class options from data
-  const classOptions = [{ value: '', label: 'All classes' }];
+  const superclassOptions = dataService.getSuperclassOptions();
+  const regularClassOptions = [];
   const classesSet = new Set();
   data.forEach(cls => {
     const className = (cls.class || '').trim();
@@ -85,8 +86,13 @@
   });
   const uniqueClasses = Array.from(classesSet).sort();
   uniqueClasses.forEach(cls => {
-    classOptions.push({ value: cls, label: cls });
+    regularClassOptions.push({ value: cls, label: cls });
   });
+  
+  // Combine: All classes, then Category: superclass entries, then regular classes
+  const classOptions = [{ value: '', label: 'All classes' }]
+    .concat(superclassOptions)
+    .concat(regularClassOptions);
   
   // Use the new CustomSelect component
   new CustomSelect('wheel-filter-ui', wheelOptions, v => { wheelFilter = v; renderTable(); });
@@ -99,7 +105,18 @@
     const c = (car.car_class || car.class || '').toLowerCase();
     const wheelOk = !wheelFilter || w === wheelFilter;
     const transOk = !transFilter || t === transFilter;
-    const classOk = !classFilter || c === classFilter.toLowerCase();
+    
+    // Handle class filter - check if it's a superclass filter
+    let classOk = true;
+    if (classFilter) {
+      if (classFilter.startsWith('superclass:')) {
+        // For superclass, we'll handle filtering at the class level in renderTable
+        classOk = true;
+      } else {
+        classOk = c === classFilter.toLowerCase();
+      }
+    }
+    
     return wheelOk && transOk && classOk;
   }
 
@@ -135,14 +152,40 @@
       '<th>Car</th><th>Wheel</th><th>Transmission</th><th>Drive</th><th>Year</th><th>Power</th><th>Weight</th><th>Engine</th>' +
       '</tr></thead><tbody>';
 
+    // Check if we're filtering by superclass
+    const isSuperclassFilter = classFilter && classFilter.startsWith('superclass:');
+    let superclassClasses = new Set();
+    if (isSuperclassFilter) {
+      const superclassName = classFilter.replace('superclass:', '');
+      data.forEach(cls => {
+        if (cls.superclass === superclassName) {
+          const className = (cls.class || '').trim();
+          if (className) superclassClasses.add(className);
+        }
+      });
+    }
+
     data.forEach(cls => {
       const className = cls.class || 'Uncategorized';
+      
+      // Skip this class if we're filtering by superclass and it's not in the set
+      if (isSuperclassFilter && !superclassClasses.has(className)) {
+        return;
+      }
+      
       const slug = `class-${String(className).replace(/\s+/g,'-').replace(/[^a-z0-9\-]/gi,'').toLowerCase()}`;
       // Only show group if at least one car matches
       const filteredCars = (cls.cars || []).filter(carMatchesFilters);
       if (filteredCars.length === 0) return;
-            html += `\n<tr class="driver-group-header" data-group="${slug}" onclick="toggleGroup(this)">` +
-              `<td colspan="9"><span class="toggle-icon">▼</span> <strong>${R3EUtils.escapeHtml(className)}</strong></td></tr>`;
+      
+      // Build class header with optional superclass
+      const superclass = cls.superclass;
+      const classHeaderText = superclass 
+        ? `${R3EUtils.escapeHtml(className)} (${R3EUtils.escapeHtml(superclass)})`
+        : R3EUtils.escapeHtml(className);
+      
+      html += `\n<tr class="driver-group-header" data-group="${slug}" onclick="toggleGroup(this)">` +
+              `<td colspan="9"><span class="toggle-icon">▼</span> <strong>${classHeaderText}</strong></td></tr>`;
       filteredCars.forEach(car => {
         if (car.link === undefined) car.link = '';
         const rowLink = R3EUtils.escapeHtml(car.link || '');

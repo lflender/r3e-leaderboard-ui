@@ -1,7 +1,7 @@
-﻿// This file is auto-generated from data/cars.json for offline use
-window.CARS_DATA = 
+﻿window.CARS_DATA = 
 [
   {
+    "superclass": "GT3",
     "class": "ADAC GT Masters 2013",
     "cars": [
       {
@@ -119,6 +119,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "GT3",
     "class": "ADAC GT Masters 2014",
     "cars": [
       {
@@ -220,6 +221,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "GT3",
     "class": "ADAC GT Masters 2015",
     "cars": [
       {
@@ -337,6 +339,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "GT3",
     "class": "ADAC GT Masters 2018",
     "cars": [
       {
@@ -406,6 +409,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "GT3",
     "class": "ADAC GT Masters 2020",
     "cars": [
       {
@@ -523,6 +527,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "GT3",
     "class": "ADAC GT Masters 2021",
     "cars": [
       {
@@ -629,6 +634,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "Audi Cup",
     "class": "Audi Sport TT Cup 2015",
     "cars": [
       {
@@ -650,6 +656,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "Audi Cup",
     "class": "Audi Sport TT Cup 2016",
     "cars": [
       {
@@ -818,6 +825,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "e-Sedan",
     "class": "CUPRA Leon e-Racer",
     "cars": [
       {
@@ -1088,6 +1096,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "DTM 2010s",
     "class": "DTM 2013",
     "cars": [
       {
@@ -1141,6 +1150,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "DTM 2010s",
     "class": "DTM 2014",
     "cars": [
       {
@@ -1194,6 +1204,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "DTM 2010s",
     "class": "DTM 2015",
     "cars": [
       {
@@ -1247,6 +1258,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "DTM 2010s",
     "class": "DTM 2016",
     "cars": [
       {
@@ -1337,6 +1349,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "GT3",
     "class": "DTM 2021",
     "cars": [
       {
@@ -1438,6 +1451,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "GT3",
     "class": "DTM 2023",
     "cars": [
       {
@@ -1523,6 +1537,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "GT3",
     "class": "DTM 2024",
     "cars": [
       {
@@ -1640,6 +1655,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "GT3",
     "class": "DTM 2025",
     "cars": [
       {
@@ -1757,6 +1773,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "e-Sedan",
     "class": "Ford Mustang Mach E",
     "cars": [
       {
@@ -2535,6 +2552,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "GT3",
     "class": "GTR 3",
     "cars": [
       {
@@ -3491,6 +3509,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "Classics",
     "class": "Porsche 964 Cup",
     "cars": [
       {
@@ -3554,6 +3573,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "Porsche Cup",
     "class": "Porsche Carrera Cup Deutschland 2019",
     "cars": [
       {
@@ -3575,6 +3595,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "Porsche Cup",
     "class": "Porsche Carrera Cup Deutschland 2023",
     "cars": [
       {
@@ -3596,6 +3617,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "Porsche Cup",
     "class": "Porsche Carrera Cup North America 2024",
     "cars": [
       {
@@ -3617,6 +3639,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "Porsche Cup",
     "class": "Porsche Carrera Cup Scandinavia",
     "cars": [
       {
@@ -3903,6 +3926,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "WTCR",
     "class": "Touring Cars Cup",
     "cars": [
       {
@@ -3988,6 +4012,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "Classics",
     "class": "Touring Classics",
     "cars": [
       {
@@ -4184,6 +4209,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "WTCC",
     "class": "WTCC 2014",
     "cars": [
       {
@@ -4237,6 +4263,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "WTCC",
     "class": "WTCC 2015",
     "cars": [
       {
@@ -4290,6 +4317,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "WTCC",
     "class": "WTCC 2016",
     "cars": [
       {
@@ -4359,6 +4387,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "WTCC",
     "class": "WTCC 2017",
     "cars": [
       {
@@ -4428,6 +4457,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "WTCR",
     "class": "WTCR 2018",
     "cars": [
       {
@@ -4545,6 +4575,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "WTCR",
     "class": "WTCR 2019",
     "cars": [
       {
@@ -4662,6 +4693,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "WTCR",
     "class": "WTCR 2020",
     "cars": [
       {
@@ -4779,6 +4811,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "WTCR",
     "class": "WTCR 2021",
     "cars": [
       {
@@ -4880,6 +4913,7 @@ window.CARS_DATA =
     ]
   },
   {
+    "superclass": "WTCR",
     "class": "WTCR 2022",
     "cars": [
       {

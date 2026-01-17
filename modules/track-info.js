@@ -62,10 +62,13 @@
 
   buildMenu();
   
-  // Initialize class menu - EXACT SAME WAY AS DRIVER INFO PAGE
-  const classOptions = [{ value: '', label: 'All classes' }].concat(
-    dataService.getClassOptionsFromCarsData()
-  );
+  // Initialize class menu with superclass categories
+  const superclassOptions = dataService.getSuperclassOptions();
+  const regularClassOptions = dataService.getClassOptionsFromCarsData();
+  
+  const classOptions = [{ value: '', label: 'All classes' }]
+    .concat(superclassOptions)
+    .concat(regularClassOptions);
   
   new CustomSelect('track-class-filter-ui', classOptions, async (value) => {
     activeClassId = value || null;
@@ -217,6 +220,63 @@
     return bestId;
   }
 
+  // Resolve multiple class names to their IDs in one pass
+  async function resolveMultipleClassIds(classNames) {
+    const result = new Map();
+    if (!classNames || classNames.length === 0) return result;
+    
+    const idx = await loadDriverIndexLocal();
+    if (!idx) return result;
+    
+    // Build a map of lowercase class names to their counts
+    const classNameMap = new Map(); // className -> Map<classId, count>
+    classNames.forEach(name => {
+      classNameMap.set(String(name).trim().toLowerCase(), new Map());
+    });
+    
+    for (const driverKey of Object.keys(idx)) {
+      const entries = idx[driverKey] || [];
+      for (const e of entries) {
+        let cname = e.class_name || e.ClassName;
+        if (!cname && e.car_class) {
+          cname = typeof e.car_class === 'string' ? e.car_class : (e.car_class.class?.Name || e.car_class.class?.name);
+        }
+        cname = cname || e.Class || e.class || '';
+        const cnameKey = String(cname).trim().toLowerCase();
+        
+        if (classNameMap.has(cnameKey)) {
+          const cid = e.class_id || e.ClassID || e.classId;
+          if (cid !== undefined && cid !== null) {
+            const counts = classNameMap.get(cnameKey);
+            const key = Number(cid);
+            counts.set(key, (counts.get(key) || 0) + 1);
+          }
+        }
+      }
+    }
+    
+    // Find best ID for each class
+    classNames.forEach(className => {
+      const cnameKey = String(className).trim().toLowerCase();
+      const counts = classNameMap.get(cnameKey);
+      if (counts && counts.size > 0) {
+        let bestId = null;
+        let bestCount = 0;
+        for (const [cid, count] of counts) {
+          if (count > bestCount) {
+            bestCount = count;
+            bestId = cid;
+          }
+        }
+        result.set(className, bestId);
+      } else {
+        result.set(className, null);
+      }
+    });
+    
+    return result;
+  }
+
   // Fetch data from local cache
   async function fetchTopCombinations() {
     try {
@@ -253,10 +313,33 @@
       
       // Filter by class if selected (using class NAME like other pages)
       if (activeClassId) {
-        filtered = filtered.filter(item => {
-          const className = item.class_name || item.ClassName || item.car_class || item.CarClass || item.Class || item.class || '';
-          return String(className).trim() === String(activeClassId).trim();
-        });
+        // Check if this is a superclass filter
+        if (activeClassId.startsWith('superclass:')) {
+          const superclassName = activeClassId.replace('superclass:', '');
+          
+          // Get all classes that belong to this superclass
+          const superclassClasses = new Set();
+          if (window.CARS_DATA && Array.isArray(window.CARS_DATA)) {
+            window.CARS_DATA.forEach(entry => {
+              if (entry.superclass === superclassName) {
+                const cls = entry.class || entry.car_class || entry.CarClass || '';
+                if (cls) superclassClasses.add(cls);
+              }
+            });
+          }
+          
+          // Filter by any class in this superclass
+          filtered = filtered.filter(item => {
+            const className = item.class_name || item.ClassName || item.car_class || item.CarClass || item.Class || item.class || '';
+            return superclassClasses.has(String(className).trim());
+          });
+        } else {
+          // Regular class filter
+          filtered = filtered.filter(item => {
+            const className = item.class_name || item.ClassName || item.car_class || item.CarClass || item.Class || item.class || '';
+            return String(className).trim() === String(activeClassId).trim();
+          });
+        }
       }
       
       // Sort filtered results
@@ -407,29 +490,91 @@
     if (tableContainer && (activeTrackId || activeClassId)) {
       tableContainer.innerHTML = '<div class="loading">Loading...</div>';
     }
-    // BOTH track and class selected - scan driver_index for the specific combination
+    
+    // Check if activeClassId is a superclass filter
+    const isSuperclassFilter = activeClassId && activeClassId.startsWith('superclass:');
+    
+    // BOTH track and class selected
     if (activeTrackId && activeClassId) {
-      const numericClassId = await resolveClassId(activeClassId);
-      if (numericClassId === null) {
-        console.warn('Could not resolve class ID for:', activeClassId);
-        tableContainer.innerHTML = '<div class="no-results">No results found for this class</div>';
-        return;
+      if (isSuperclassFilter) {
+        // Superclass: aggregate across all classes in the superclass for this track
+        const superclassName = activeClassId.replace('superclass:', '');
+        const superclassClasses = new Set();
+        if (window.CARS_DATA && Array.isArray(window.CARS_DATA)) {
+          window.CARS_DATA.forEach(entry => {
+            if (entry.superclass === superclassName) {
+              const cls = entry.class || entry.car_class || entry.CarClass || '';
+              if (cls) superclassClasses.add(cls);
+            }
+          });
+        }
+        
+        // Get data for each class and combine
+        const allResults = [];
+        const classIdMap = await resolveMultipleClassIds(Array.from(superclassClasses));
+        for (const className of superclassClasses) {
+          const classId = classIdMap.get(className);
+          if (classId !== null) {
+            const classData = await aggregatePerTrackForClass(classId, className);
+            const filtered = classData.filter(row => Number(row.track_id) === Number(activeTrackId));
+            allResults.push(...filtered);
+          }
+        }
+        // Sort combined results by entry_count descending
+        allResults.sort((a, b) => (b.entry_count || 0) - (a.entry_count || 0));
+        renderTable(allResults);
+      } else {
+        // Single class
+        const numericClassId = await resolveClassId(activeClassId);
+        if (numericClassId === null) {
+          console.warn('Could not resolve class ID for:', activeClassId);
+          tableContainer.innerHTML = '<div class="no-results">No results found for this class</div>';
+          return;
+        }
+        const allTracksForClass = await aggregatePerTrackForClass(numericClassId, activeClassId);
+        const filtered = allTracksForClass.filter(row => Number(row.track_id) === Number(activeTrackId));
+        renderTable(filtered);
       }
-      // Get all tracks for this class, then filter by selected track
-      const allTracksForClass = await aggregatePerTrackForClass(numericClassId, activeClassId);
-      const filtered = allTracksForClass.filter(row => Number(row.track_id) === Number(activeTrackId));
-      renderTable(filtered);
     }
-    // Only class selected - aggregate from driver_index for all tracks with this class
+    // Only class selected
     else if (activeClassId) {
-      const numericClassId = await resolveClassId(activeClassId);
-      if (numericClassId === null) {
-        console.warn('Could not resolve class ID for:', activeClassId);
-        tableContainer.innerHTML = '<div class="no-results">No results found for this class</div>';
-        return;
+      if (isSuperclassFilter) {
+        // Superclass: aggregate across all classes in the superclass
+        const superclassName = activeClassId.replace('superclass:', '');
+        const superclassClasses = new Set();
+        if (window.CARS_DATA && Array.isArray(window.CARS_DATA)) {
+          window.CARS_DATA.forEach(entry => {
+            if (entry.superclass === superclassName) {
+              const cls = entry.class || entry.car_class || entry.CarClass || '';
+              if (cls) superclassClasses.add(cls);
+            }
+          });
+        }
+        
+        // Get data for each class and combine
+        const allResults = [];
+        const classIdMap = await resolveMultipleClassIds(Array.from(superclassClasses));
+        for (const className of superclassClasses) {
+          const classId = classIdMap.get(className);
+          if (classId !== null) {
+            const classData = await aggregatePerTrackForClass(classId, className);
+            allResults.push(...classData);
+          }
+        }
+        // Sort combined results by entry_count descending
+        allResults.sort((a, b) => (b.entry_count || 0) - (a.entry_count || 0));
+        renderTable(allResults);
+      } else {
+        // Single class
+        const numericClassId = await resolveClassId(activeClassId);
+        if (numericClassId === null) {
+          console.warn('Could not resolve class ID for:', activeClassId);
+          tableContainer.innerHTML = '<div class="no-results">No results found for this class</div>';
+          return;
+        }
+        const data = await aggregatePerTrackForClass(numericClassId, activeClassId);
+        renderTable(data);
       }
-      const data = await aggregatePerTrackForClass(numericClassId, activeClassId);
-      renderTable(data);
     }
     // Only track selected - aggregate from driver_index for all classes at this track
     else if (activeTrackId) {

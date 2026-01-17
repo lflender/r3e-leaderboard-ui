@@ -1539,6 +1539,7 @@ footer p {
     #cars-info-table .results-table td {
         padding: 0.6rem 0.3rem;
         font-size: 0.75rem;
+        line-height: 0.9;
     }
 
     #cars-info-table .results-table th:nth-child(1),

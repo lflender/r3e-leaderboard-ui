@@ -42,9 +42,20 @@ class CustomSelect {
      * Builds the dropdown menu from options
      */
     buildMenu() {
-        this.menu.innerHTML = this.options.map(opt => 
-            `<div class="custom-select__option" data-value="${R3EUtils.escapeHtml(opt.value)}">${R3EUtils.escapeHtml(opt.label)}</div>`
-        ).join('');
+        this.menu.innerHTML = this.options.map(opt => {
+            const escapedValue = R3EUtils.escapeHtml(opt.value);
+            const escapedLabel = R3EUtils.escapeHtml(opt.label);
+            
+            // Format label with bold prefix for Category: and Combined:
+            let formattedLabel = escapedLabel;
+            if (escapedLabel.startsWith('Category: ')) {
+                formattedLabel = '<strong>Category:</strong> ' + escapedLabel.substring(10);
+            } else if (escapedLabel.startsWith('Combined: ')) {
+                formattedLabel = '<strong>Combined:</strong> ' + escapedLabel.substring(10);
+            }
+            
+            return `<div class="custom-select__option" data-value="${escapedValue}">${formattedLabel}</div>`;
+        }).join('');
     }
     
     /**
@@ -106,7 +117,15 @@ class CustomSelect {
         const opt = this.options.find(o => o.value === value) || this.options[0];
         
         if (opt) {
-            this.toggle.innerHTML = `${opt.label} ▾`;
+            // Format label with bold prefix for Category: and Combined:
+            let formattedLabel = opt.label;
+            if (formattedLabel.startsWith('Category: ')) {
+                formattedLabel = '<strong>Category:</strong> ' + formattedLabel.substring(10);
+            } else if (formattedLabel.startsWith('Combined: ')) {
+                formattedLabel = '<strong>Combined:</strong> ' + formattedLabel.substring(10);
+            }
+            
+            this.toggle.innerHTML = `${formattedLabel} ▾`;
         }
         
         this.updateSelectedState();

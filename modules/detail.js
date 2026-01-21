@@ -694,10 +694,18 @@ async function displayResults(data) {
         });
     }
     
-    // Create table
-    const headers = DetailState.isCombinedView 
-        ? ['Position', 'Driver Name', 'Lap Time', 'Lap %', 'Class', 'Car', 'Difficulty', 'Date']
-        : ['Position', 'Driver Name', 'Lap Time', 'Lap %', 'Car', 'Difficulty', 'Date'];
+    // Create table headers using ColumnConfig for consistency
+    // For detail page, we want: Position, Driver Name, Lap Time, Lap %, [Class if combined], Car, Difficulty, Date
+    const baseColumns = ['Position', 'Name', 'LapTime', 'GapPercent', 'Car', 'Difficulty', 'date_time'];
+    const columnsWithClass = ['Position', 'Name', 'LapTime', 'GapPercent', 'CarClass', 'Car', 'Difficulty', 'date_time'];
+    const columnKeys = DetailState.isCombinedView ? columnsWithClass : baseColumns;
+    
+    // Get display names from ColumnConfig
+    const headers = columnKeys.map(key => {
+        if (key === 'Name') return 'Driver Name'; // Special case for detail page
+        return window.ColumnConfig ? window.ColumnConfig.getDisplayName(key) : key;
+    });
+    
     let rowsHtml = '';
     paginatedResults.forEach(item => {
         rowsHtml += renderDetailRow(item, isCarFilterActive);

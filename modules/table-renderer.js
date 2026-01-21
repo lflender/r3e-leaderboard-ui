@@ -168,19 +168,12 @@ class TableRenderer {
             window.ColumnConfig.getDisplayName(key) : 
             R3EUtils.formatHeader(key);
         
-        // Check if this is a sortable column
+        // Check if this is a sortable column using ColumnConfig
         const sortConfig = window.ColumnConfig ? 
             window.ColumnConfig.getSortConfig(key) : null;
         
-        // Fallback check for sortable columns
-        const isPositionKey = ['Position', 'position', 'Pos'].includes(key);
-        const isLapTimeKey = ['LapTime', 'Lap Time', 'lap_time', 'laptime', 'Time'].includes(key);
-        const isGapPercentKey = key === 'GapPercent';
-        
-        if (sortConfig || isPositionKey || isLapTimeKey || isGapPercentKey) {
-            let sortKey = sortConfig ? sortConfig.sortKey : 
-                (isPositionKey ? 'position' : (isLapTimeKey ? 'gap' : 'gapPercent'));
-            
+        if (sortConfig) {
+            const sortKey = sortConfig.sortKey;
             const activeClass = sortBy === sortKey ? ' sort-active' : '';
             const title = `Click to sort by ${displayName.toLowerCase()}`;
             

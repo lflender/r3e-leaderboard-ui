@@ -473,12 +473,20 @@
       }
     }
 
-    // Order columns similar to leaderboards
-    const columnOrder = ['CarClass','Car Class','car_class','Class','Car','car','CarName','Track','track','TrackName','LapTime','Lap Time','lap_time','laptime','Time','Position','position','Pos','date_time','Date'];
-    keys.sort((a,b)=>{ let ia = columnOrder.indexOf(a); let ib = columnOrder.indexOf(b); if (ia===-1) ia=999; if (ib===-1) ib=999; return ia-ib; });
+    // Order columns using ColumnConfig for consistency
+    if (window.ColumnConfig) {
+      keys = window.ColumnConfig.getOrderedColumns(keys, { addSynthetic: false });
+    } else {
+      // Fallback: basic ordering
+      const columnOrder = ['CarClass','Car Class','car_class','Class','Car','car','CarName','Track','track','TrackName','LapTime','Lap Time','lap_time','laptime','Time','Position','position','Pos','date_time','Date'];
+      keys.sort((a,b)=>{ let ia = columnOrder.indexOf(a); let ib = columnOrder.indexOf(b); if (ia===-1) ia=999; if (ib===-1) ib=999; return ia-ib; });
+    }
 
     let html = '<table class="results-table"><thead><tr>';
-    keys.forEach(k=> html += `<th>${R3EUtils.formatHeader(k)}</th>`);
+    keys.forEach(k => {
+      const displayName = window.ColumnConfig ? window.ColumnConfig.getDisplayName(k) : R3EUtils.formatHeader(k);
+      html += `<th>${displayName}</th>`;
+    });
     html += '</tr></thead><tbody>';
 
     pageItems.forEach(item => {

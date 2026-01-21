@@ -21,8 +21,11 @@ class TableRenderer {
             'CarClass', 'Car Class', 'car_class', 'Class',
             'Car', 'car', 'CarName',
             'Track', 'track', 'TrackName', 'track_name',
-            'LapTime', 'Lap Time', 'lap_time', 'Time',
-            'Position', 'position', 'Pos'
+            'Position', 'position', 'Pos',
+            'LapTime', 'Lap Time', 'lap_time', 'laptime', 'Time',
+            'GapPercent',
+            'Difficulty', 'difficulty',
+            'Date', 'date_time', 'dateTime'
         ];
     }
     
@@ -36,6 +39,12 @@ class TableRenderer {
     renderDriverGroupedTable(driverGroups, keys = null, sortBy = 'gap') {
         if (!keys && driverGroups.length > 0 && driverGroups[0].entries && driverGroups[0].entries.length > 0) {
             keys = Object.keys(driverGroups[0].entries[0]);
+            
+            // Add Date key BEFORE filtering so it gets processed
+            if (!keys.includes('Date') && !keys.includes('date_time')) {
+                keys.push('Date');
+            }
+            
             keys = this.filterAndSortKeys(keys);
         }
         
@@ -47,6 +56,11 @@ class TableRenderer {
         const lapTimeIndex = keys.findIndex(k => ['LapTime', 'Lap Time', 'lap_time', 'laptime', 'Time'].includes(k));
         if (lapTimeIndex !== -1 && !keys.includes('GapPercent')) {
             keys.splice(lapTimeIndex + 1, 0, 'GapPercent');
+        }
+        
+        // Always ensure Date column is present at the END (this is backup)
+        if (!keys.includes('Date') && !keys.includes('date_time')) {
+            keys.push('Date');
         }
         
         let html = '<table class="results-table"><thead><tr>';
@@ -233,8 +247,14 @@ class TableRenderer {
         const isLapTimeKey = ['LapTime', 'Lap Time', 'lap_time', 'laptime', 'Time'].includes(key);
         const isTrackKey = ['Track', 'track', 'TrackName', 'track_name'].includes(key);
         const isDifficultyKey = ['Difficulty', 'difficulty', 'driving_model'].includes(key);
+        const isDateKey = ['Date', 'date_time', 'dateTime'].includes(key);
         
-        if (isPositionKey) {
+        if (isDateKey) {
+            // Try multiple field sources for date data
+            const dateValue = value || item.date_time || item.dateTime || item.Date;
+            const formattedDate = dateValue ? R3EUtils.formatDate(dateValue) : '—';
+            return `<td class="date-cell">${R3EUtils.escapeHtml(formattedDate)}</td>`;
+        } else if (isPositionKey) {
             return this.renderPositionCell(item);
         } else if (isCarClassKey) {
             return `<td class="no-wrap"><strong>${R3EUtils.formatValue(value)}</strong></td>`;

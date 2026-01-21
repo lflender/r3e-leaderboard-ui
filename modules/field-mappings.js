@@ -39,7 +39,10 @@ const FIELD_NAMES = {
     CLASS_ID: ['class_id', 'ClassID', 'classId', 'Class ID'],
     
     // Entry count fields
-    TOTAL_ENTRIES: ['TotalEntries', 'total_entries', 'entry_count', 'EntryCount']
+    TOTAL_ENTRIES: ['TotalEntries', 'total_entries', 'entry_count', 'EntryCount'],
+    
+    // Date/Time fields
+    DATE_TIME: ['date_time', 'dateTime', 'Date', 'DateTime']
 };
 
 /**

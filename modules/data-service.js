@@ -350,14 +350,106 @@ class DataService {
             }
             
             if (filteredEntries.length > 0) {
+                // Enhance entries with date_time from cache files
+                const enhancedEntries = await this.enhanceEntriesWithDateTime(filteredEntries);
+                
                 results.push({
                     driver: driverEntries[0].name || driverKey,
-                    entries: filteredEntries
+                    entries: enhancedEntries // Use enhanced entries with date_time
                 });
             }
         }
         
         return results;
+    }
+
+    /**
+     * Enhance entries with date_time from cache files
+     * @param {Array} entries - Entry objects from driver index
+     * @returns {Promise<Array>} Enhanced entries with date_time
+     */
+    async enhanceEntriesWithDateTime(entries) {
+        const enhancedEntries = [];
+        
+        for (const entry of entries) {
+            try {
+                // Get track and class IDs
+                const trackId = entry.track_id || entry.TrackID;
+                const classId = entry.class_id || entry.ClassID;
+                const filePath = `cache/track_${trackId}/class_${classId}.json.gz`;
+                
+                // Fetch the gzipped cache file
+                const timestamp = new Date().getTime();
+                const response = await fetch(`${filePath}?v=${timestamp}`, {
+                    cache: 'no-store'
+                });
+                
+                if (!response.ok) {
+                    enhancedEntries.push(entry); // Add without date_time
+                    continue;
+                }
+                
+                // Decompress the gzipped response
+                const decompressedStream = response.body.pipeThrough(new DecompressionStream('gzip'));
+                const decompressedResponse = new Response(decompressedStream);
+                const text = await decompressedResponse.text();
+                const cacheData = JSON.parse(text);
+                
+                const leaderboard = cacheData.track_info?.Data || cacheData.Data || [];
+                
+                // Find matching entry by name
+                const driverName = entry.name;
+                const matchingEntry = leaderboard.find(cacheEntry => {
+                    const cacheDriverName = cacheEntry.driver?.name || cacheEntry.driver?.Name || cacheEntry.name;
+                    return cacheDriverName === driverName;
+                });
+                
+                if (matchingEntry && matchingEntry.date_time) {
+                    enhancedEntries.push({
+                        ...entry,
+                        date_time: matchingEntry.date_time
+                    });
+                } else {
+                    enhancedEntries.push(entry); // Add without date_time
+                }
+                
+            } catch (error) {
+                enhancedEntries.push(entry); // Add without date_time on error
+            }
+        }
+        
+        return enhancedEntries;
+    }
+    
+    /**
+     * Extract leaderboard array from cache data
+     * @param {Object} data - Cache file data
+     * @returns {Array} Leaderboard entries
+     */
+    extractLeaderboardArray(data) {
+        if (data.track_info && data.track_info.Data && Array.isArray(data.track_info.Data)) {
+            return data.track_info.Data;
+        }
+        
+        // Try other possible locations
+        const possibleKeys = ['Data', 'data', 'entries', 'leaderboard'];
+        for (const key of possibleKeys) {
+            if (data[key] && Array.isArray(data[key])) {
+                return data[key];
+            }
+        }
+        
+        return [];
+    }
+    
+    /**
+     * Normalize time string for comparison
+     * @param {string} time - Time string
+     * @returns {string} Normalized time
+     */
+    normalizeTime(time) {
+        if (!time) return '';
+        return String(time).split(',')[0].trim(); // Remove gap info, just get main time
     }
 
     // -------- Internal helpers for index caching --------

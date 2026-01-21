@@ -288,7 +288,29 @@ function updateUrlParam(paramName, value) {
         // ignore URL update errors
     }
 }
-
+/**
+ * Formats a date string from ISO format to "DD MMM YYYY" format
+ * @param {string} dateTimeString - ISO date string (e.g., "2025-10-06T19:15:20")
+ * @returns {string} Formatted date (e.g., "6 Oct 2025")
+ */
+function formatDate(dateTimeString) {
+    if (!dateTimeString) return '';
+    try {
+        const date = new Date(dateTimeString);
+        if (isNaN(date.getTime())) return '';
+        
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        
+        const day = date.getDate();
+        const month = months[date.getMonth()];
+        const year = date.getFullYear();
+        
+        return `${day} ${month} ${year}`;
+    } catch (e) {
+        return '';
+    }
+}
 // ========================================
 // Export utilities for use in other modules
 // ========================================
@@ -306,5 +328,6 @@ window.R3EUtils = {
     renderRankStars,
     getPositionBadgeColor,
     getUrlParam,
-    updateUrlParam
+    updateUrlParam,
+    formatDate
 };

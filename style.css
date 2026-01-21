@@ -943,6 +943,13 @@ footer p {
     text-align: center;
 }
 
+/* Date cell */
+.date-cell {
+    white-space: nowrap;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
 /* Flag icons */
 .country-flag {
     display: inline-block;

@@ -474,7 +474,7 @@
     }
 
     // Order columns similar to leaderboards
-    const columnOrder = ['CarClass','Car Class','car_class','Class','Car','car','CarName','Track','track','TrackName','LapTime','Lap Time','lap_time','laptime','Time','Position','position','Pos'];
+    const columnOrder = ['CarClass','Car Class','car_class','Class','Car','car','CarName','Track','track','TrackName','LapTime','Lap Time','lap_time','laptime','Time','Position','position','Pos','date_time','Date'];
     keys.sort((a,b)=>{ let ia = columnOrder.indexOf(a); let ib = columnOrder.indexOf(b); if (ia===-1) ia=999; if (ib===-1) ib=999; return ia-ib; });
 
     let html = '<table class="results-table"><thead><tr>';
@@ -532,6 +532,10 @@
             trackStr = R3EUtils.escapeHtml(trackStr).replace(/&lt;wbr&gt;/g, '<wbr>');
             html += `<td class="track-cell">${trackStr}</td>`;
           }
+        } else if (key === 'date_time' || key === 'dateTime' || key === 'Date') {
+          // Date formatting
+          const formattedDate = value ? R3EUtils.formatDate(value) : '';
+          html += `<td class="date-cell">${R3EUtils.escapeHtml(formattedDate)}</td>`;
         } else {
           html += `<td>${formatValue(value)}</td>`;
         }

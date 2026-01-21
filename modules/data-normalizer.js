@@ -66,7 +66,8 @@ function normalizeLeaderboardEntry(entry, data = {}, index = 0, totalEntries = 0
         ClassID: classId || undefined,
         TrackID: trackIdFromEntry || undefined,
         class_id: classId || undefined,
-        track_id: trackIdFromEntry || undefined
+        track_id: trackIdFromEntry || undefined,
+        date_time: getField(entry, FIELD_NAMES.DATE_TIME)
     };
 }
 
@@ -143,6 +144,15 @@ function extractClassId(item) {
 }
 
 /**
+ * Extracts date/time from various field names
+ * @param {Object} item - Data item
+ * @returns {string} Date/time value
+ */
+function extractDateTime(item) {
+    return getField(item, FIELD_NAMES.DATE_TIME, '');
+}
+
+/**
  * Normalizes track names to fix known inconsistencies
  * Handles Brands Hatch naming variations without breaking if source data is corrected
  * @param {string} trackName - Raw track name
@@ -181,6 +191,7 @@ if (typeof window !== 'undefined') {
         extractCountry,
         extractTrackId,
         extractClassId,
+        extractDateTime,
         normalizeTrackName
     };
 }

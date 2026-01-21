@@ -696,8 +696,8 @@ async function displayResults(data) {
     
     // Create table
     const headers = DetailState.isCombinedView 
-        ? ['Position', 'Driver Name', 'Lap Time', 'Class', 'Car', 'Difficulty']
-        : ['Position', 'Driver Name', 'Lap Time', 'Car', 'Difficulty'];
+        ? ['Position', 'Driver Name', 'Lap Time', 'Class', 'Car', 'Difficulty', 'Date']
+        : ['Position', 'Driver Name', 'Lap Time', 'Car', 'Difficulty', 'Date'];
     let rowsHtml = '';
     paginatedResults.forEach(item => {
         rowsHtml += renderDetailRow(item, isCarFilterActive);
@@ -837,6 +837,16 @@ function renderDetailRow(item, showAbsolutePosition = false) {
     
     // Difficulty
     html += `<td class="difficulty-cell"><span class="difficulty-pill ${diffClass}">${R3EUtils.escapeHtml(String(difficulty))}</span></td>`;
+    
+    // Date
+    const dateTime = DataNormalizer.extractDateTime(item);
+    console.log('DEBUG: Detail page date rendering:', {
+        dateTime: dateTime,
+        itemKeys: Object.keys(item),
+        itemSample: JSON.stringify(item).substring(0, 300)
+    });
+    const formattedDate = dateTime ? R3EUtils.formatDate(dateTime) : '';
+    html += `<td class="date-cell">${R3EUtils.escapeHtml(formattedDate)}</td>`;
     
     html += '</tr>';
     return html;

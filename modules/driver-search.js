@@ -260,6 +260,8 @@ class DriverSearch {
             Array.isArray(paginatedDrivers[0].entries) && 
             paginatedDrivers[0].entries.length > 0) {
             keys = Object.keys(paginatedDrivers[0].entries[0]);
+            console.log('DEBUG: Driver search - first entry keys:', keys);
+            console.log('DEBUG: Driver search - first entry sample:', JSON.stringify(paginatedDrivers[0].entries[0]).substring(0, 400));
             keys = tableRenderer.filterAndSortKeys(keys);
         }
         

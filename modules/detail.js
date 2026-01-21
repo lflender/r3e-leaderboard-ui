@@ -696,8 +696,8 @@ async function displayResults(data) {
     
     // Create table
     const headers = DetailState.isCombinedView 
-        ? ['Position', 'Driver Name', 'Lap Time', 'Class', 'Car', 'Difficulty', 'Date']
-        : ['Position', 'Driver Name', 'Lap Time', 'Car', 'Difficulty', 'Date'];
+        ? ['Position', 'Driver Name', 'Lap Time', 'Lap %', 'Class', 'Car', 'Difficulty', 'Date']
+        : ['Position', 'Driver Name', 'Lap Time', 'Lap %', 'Car', 'Difficulty', 'Date'];
     let rowsHtml = '';
     paginatedResults.forEach(item => {
         rowsHtml += renderDetailRow(item, isCarFilterActive);
@@ -824,6 +824,28 @@ function renderDetailRow(item, showAbsolutePosition = false) {
         html += `<td class="no-wrap">${R3EUtils.escapeHtml(mainClassic)} <span class="time-delta-inline no-wrap">${R3EUtils.escapeHtml(deltaClassic)}</span></td>`;
     } else {
         html += `<td class="no-wrap">${R3EUtils.escapeHtml(mainClassic)}</td>`;
+    }
+    
+    // Lap % (Gap Percentage)
+    // Calculate percentage gap from leader (first position)
+    // For position 1, show -, otherwise calculate based on time difference
+    const posNumber = parseInt(posNum) || 1;
+    if (posNumber === 1) {
+        html += `<td class="gap-percent-cell">-</td>`;
+    } else {
+        // Find the leader's time from allResults
+        const leaderEntry = allResults.find(entry => {
+            const entryPos = parseInt(DataNormalizer.extractPosition(entry));
+            return entryPos === 1;
+        });
+        
+        if (leaderEntry) {
+            const leaderTime = DataNormalizer.extractLapTime(leaderEntry);
+            const gapPercent = R3EUtils.calculateGapPercentage(item, leaderTime);
+            html += `<td class="gap-percent-cell">${R3EUtils.escapeHtml(gapPercent)}</td>`;
+        } else {
+            html += `<td class="gap-percent-cell">—</td>`;
+        }
     }
     
     // Class (only in combined view)

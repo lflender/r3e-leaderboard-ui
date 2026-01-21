@@ -1,6 +1,10 @@
 /**
  * Field Mappings Module
  * Centralized field name variations for consistent data access
+ * 
+ * NOTE: For column configuration (display names, order, visibility),
+ * use ColumnConfig from column-config.js instead.
+ * This module is for field value extraction from data objects.
  */
 
 const FIELD_NAMES = {

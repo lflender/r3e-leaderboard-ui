@@ -25,15 +25,24 @@ function escapeHtml(text) {
  * @returns {string} Formatted header
  */
 function formatHeader(key) {
-    // Special case for class_name
+    // Use ColumnConfig if available (centralized source of truth)
+    if (typeof window !== 'undefined' && window.ColumnConfig) {
+        return window.ColumnConfig.getDisplayName(key);
+    }
+    
+    // Fallback: manual special cases
     if (key === 'class_name' || key === 'className' || key === 'ClassName') {
         return 'Car class';
     }
-    // Normalize known entry count fields to a concise label
+    if (key === 'date_time' || key === 'dateTime' || key === 'DateTime') {
+        return 'Date';
+    }
     const lower = String(key || '').toLowerCase();
     if (lower === 'entry_count' || lower === 'total_entries' || lower === 'totalracers' || lower === 'total_racers') {
         return 'Entries';
     }
+    
+    // Default: convert snake_case/camelCase to Title Case
     return key
         .replace(/([A-Z])/g, ' $1')
         .replace(/_/g, ' ')

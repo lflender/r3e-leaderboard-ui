@@ -259,10 +259,14 @@ class DriverSearch {
         if (paginatedDrivers.length > 0 && 
             Array.isArray(paginatedDrivers[0].entries) && 
             paginatedDrivers[0].entries.length > 0) {
-            keys = Object.keys(paginatedDrivers[0].entries[0]);
-            console.log('DEBUG: Driver search - first entry keys:', keys);
-            console.log('DEBUG: Driver search - first entry sample:', JSON.stringify(paginatedDrivers[0].entries[0]).substring(0, 400));
-            keys = tableRenderer.filterAndSortKeys(keys);
+            const dataKeys = Object.keys(paginatedDrivers[0].entries[0]);
+            // Use ColumnConfig if available for proper column ordering
+            if (window.ColumnConfig) {
+                keys = window.ColumnConfig.getOrderedColumns(dataKeys, { addSynthetic: true });
+            } else {
+                // Fallback to tableRenderer method
+                keys = tableRenderer.filterAndSortKeys(dataKeys);
+            }
         }
         
         // Render table
@@ -346,8 +350,8 @@ class DriverSearch {
     }
     
     /**
-     * Sort driver groups by gap time or gap percentage
-     * @param {string} sortBy - Sort key: 'gap' or 'gapPercent'
+     * Sort driver groups by gap time, gap percentage, position, or date
+     * @param {string} sortBy - Sort key: 'gap', 'gapPercent', 'position', or 'date_time'
      */
     sortDriverGroups(sortBy) {
         if (this.currentSortBy === sortBy) return; // Already sorted by this

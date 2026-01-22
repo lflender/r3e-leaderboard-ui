@@ -173,7 +173,7 @@ const COLUMNS = {
         id: 'total_entries',
         aliases: ['TotalEntries', 'total_entries', 'entry_count', 'EntryCount'],
         displayName: 'Entries',
-        order: 0,
+        order: 35,
         visible: false
     },
     

@@ -228,13 +228,22 @@ function calculateGapPercentage(item, referenceTime) {
 /**
  * Renders rank as stars: D -> 1, C -> 2, B -> 3, A -> 4
  * @param {string} rank - Rank letter
+ * @param {boolean} inline - If true, renders inline stars for detail page (no pipe separator)
  * @returns {string} HTML string with stars
  */
-function renderRankStars(rank) {
+function renderRankStars(rank, inline = false) {
     if (!rank) return '';
     const r = String(rank).trim().toUpperCase();
     const map = { 'D': 1, 'C': 2, 'B': 3, 'A': 4 };
     const count = map[r] || 0;
+    
+    // Inline variant for detail page - small stars after driver name
+    if (inline) {
+        if (count === 0) return '';
+        return '<span class="rank-stars-inline">' + '⭐'.repeat(count) + '</span>';
+    }
+    
+    // Original variant for other pages (with pipe separator and Rank text)
     if (count === 0) return ` | ⭐ Rank ${escapeHtml(rank)}`;
     return ' | ' + '⭐'.repeat(count) + ` Rank ${escapeHtml(r)}`;
 }

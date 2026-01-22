@@ -1383,6 +1383,22 @@ footer p {
    11. DETAIL PAGE SPECIFIC
    ======================================== */
 
+/* Rank stars displayed inline after driver name */
+.rank-stars-inline {
+    display: inline-block;
+    white-space: nowrap;
+    font-size: 0.7em;
+    line-height: 1;
+    vertical-align: middle;
+    /* Prevent the stars from wrapping separately */
+    word-break: keep-all;
+}
+
+/* Ensure the stars stay with the driver name */
+.rank-stars-inline::before {
+    content: '\00A0'; /* Non-breaking space before stars */
+}
+
 /* Detail header lines (Track, Layout, Class) */
 .detail-header-line, 
 #detail-track, 

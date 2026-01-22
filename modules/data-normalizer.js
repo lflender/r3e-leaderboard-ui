@@ -126,6 +126,22 @@ function extractCountry(item) {
 }
 
 /**
+ * Extracts rank from various field names
+ * @param {Object} item - Data item
+ * @returns {string} Rank value
+ */
+function extractRank(item) {
+    // Handle nested rank object or direct rank field
+    if (item.rank && typeof item.rank === 'object') {
+        return item.rank.Name || item.rank.name || '';
+    }
+    if (item.Rank && typeof item.Rank === 'object') {
+        return item.Rank.Name || item.Rank.name || '';
+    }
+    return getField(item, FIELD_NAMES.RANK, '');
+}
+
+/**
  * Extracts track ID from various field names
  * @param {Object} item - Data item
  * @returns {string} Track ID value
@@ -189,6 +205,7 @@ if (typeof window !== 'undefined') {
         extractLapTime,
         extractDifficulty,
         extractCountry,
+        extractRank,
         extractTrackId,
         extractClassId,
         extractDateTime,

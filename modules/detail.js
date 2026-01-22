@@ -819,12 +819,15 @@ function renderDetailRow(item, showAbsolutePosition = false) {
     
     html += '</td>';
     
-    // Driver name
+    // Driver name with rank stars
+    const rank = DataNormalizer.extractRank(item);
+    const rankStarsHtml = rank ? R3EUtils.renderRankStars(rank, true) : '';
+    
     if (!highlisted) {
         const encoded = encodeURIComponent(String(name));
-        html += `<td><a class="detail-driver-link" href="index.html?driver=${encoded}">${flagHtml}${R3EUtils.escapeHtml(String(name))}</a></td>`;
+        html += `<td><a class="detail-driver-link" href="index.html?driver=${encoded}">${flagHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}</a></td>`;
     } else {
-        html += `<td>${flagHtml}${R3EUtils.escapeHtml(String(name))}</td>`;
+        html += `<td>${flagHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}</td>`;
     }
     
     // Lap time

@@ -3188,6 +3188,22 @@
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/hillclimb-icons/carlsson/carlsson-slk-340-judd",
         "description": "The dramatic carbon fiber body sporting a huge rear wing covers a high tech chassis and an engine pumping out 600+ HP. This Carlsson is a purpose built tool made specifically with one aim in mind: Getting to the top of the hill. First!"
+      },
+      {
+        "car_class": "Hillclimb Icons",
+        "car": "E36 V8 JUDD",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "Palettes",
+        "transmission_cat": "paddles",
+        "year": "2009",
+        "power": "570 bhp",
+        "weight": "895 kg",
+        "engine": "3.4L V8",
+        "drive": "RWD",
+        "country": "Germany",
+        "link": "https://game.raceroom.com/store/cars/hillclimb-icons/georg-plasa/e36-v8-judd",
+        "description": "Georg Plasa’s automotive creations grew to become every bit as well-known as he was, partly thanks to their mad appearance, partly their power plants – Le Mans derived Judd KV675 V8s, complete with well over 550bhp and a manic, bone-chilling shriek as they raced to an impossibly high, 10,000RPM redline! Factor in the advanced KW suspension on both, and it becomes only too clear why Plasa’s BMW’s were so beloved."
       }
     ]
   },
@@ -3699,6 +3715,27 @@
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/procar/bmw/bmw-m1-procar",
         "description": "The futuristic center engine BMW M1 was hand-built between 1978 and 1981 as a homologation special for sports car racing. Only 456 M1s were built, making it one of BMW's rarest models, but the design also makes it one of the most famous BMW's ever."
+      }
+    ]
+  },
+  {
+    "class": "Safety Car",
+    "cars": [
+      {
+        "car_class": "Safety Car",
+        "car": "S.C. Cupra TCR",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "Palettes",
+        "transmission_cat": "paddles",
+        "year": "2020",
+        "power": "335 hp",
+        "weight": "1310 kg",
+        "engine": "L4",
+        "drive": "FWD",
+        "country": "Spain",
+        "link": "https://game.raceroom.com/store/cars/safety-cars/cupra/sc-cupra-tcr",
+        "description": ""
       }
     ]
   },

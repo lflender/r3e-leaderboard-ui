@@ -66,26 +66,49 @@ body {
    3. LAYOUT
    ======================================== */
 
-header {
+#site-header header {
     background-color: var(--surface);
-    padding: 2rem;
+    padding: 2rem 2rem 1rem 2rem;
     text-align: center;
     box-shadow: 0 2px 4px var(--shadow);
 }
 
-header h1 {
+#site-header header h1 {
     font-size: 2rem;
     color: var(--primary-color);
     font-weight: 700;
+    line-height: normal;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.header-logo {
+    height: 8rem;
+    width: auto;
+    max-width: 100%;
+    display: block;
 }
 
 .home-link {
     color: var(--primary-color);
     text-decoration: none;
+    display: inline-flex;
+    align-items: center;
 }
 
 .home-link:hover {
-    text-decoration: underline;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+/* Detail page subheader (the subtitle container) should not inherit site header spacing */
+#site-header + header {
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
+    text-align: left;
 }
 
 main {
@@ -1668,13 +1691,18 @@ footer {
 @media (max-width: 768px) {
     .info-icon { display: none !important; }
     
-    header {
-        padding: 1.25rem 1rem;
+    #site-header header {
+        /* Keep top padding, reduce bottom only */
+        padding: 1.25rem 1rem 0.75rem 1rem;
     }
 
     header h1 {
         font-size: 1.35rem;
         line-height: 1.3;
+    }
+
+    .header-logo {
+        height: 5rem;
     }
 
     main {
@@ -2038,8 +2066,16 @@ footer {
 
 /* Extra small screens (under 480px) */
 @media (max-width: 480px) {
+    /* Keep top padding, reduce bottom further on mobile */
+    #site-header header {
+        padding: 1.25rem 0.75rem 0.6rem 0.75rem;
+    }
     header h1 {
         font-size: 1.15rem;
+    }
+
+    .header-logo {
+        height: 4rem;
     }
 
     .results-table {

@@ -3002,6 +3002,22 @@
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/gtr-3/porsche/porsche-911-gt3-r-992",
         "description": "GT racing isn't GT racing without a Porsche in the mix, and the 992-shape GT3 R keeps Porsche at the forefront of the category. It's more powerful than ever, but also optimised for drivability with a wider track, massive aero and optimised traction."
+      },
+      {
+        "car_class": "GTR 3",
+        "car": "RUF RT12R GTR3",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "Seq",
+        "transmission_cat": "sequential",
+        "year": "2011",
+        "power": "565bhp",
+        "weight": "1305kg with driver",
+        "engine": "4.0L F6",
+        "drive": "RWD",
+        "country": "Germany",
+        "link": "https://game.raceroom.com/store/cars/gtr-3/ruf/ruf-rt12r-gtr3",
+        "description": "There is no mistaking the distinct sound of a flat-6 engine screaming at full power, the RUF brings that unique sound to RaceRoom. It is a rear engined model built with the purpose of dominating at the racetrack. Don't expect much in the way of comfort, but in return you get a very well handling car with good traction and predictability at the ragged edge."
       }
     ]
   },
@@ -4267,6 +4283,22 @@
       },
       {
         "car_class": "WTCC 2014",
+        "car": "Citroën C Elysee WTCC",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "Seq",
+        "transmission_cat": "sequential",
+        "year": "2014",
+        "power": "380",
+        "weight": "1100",
+        "engine": "Inline-4",
+        "drive": "FWD",
+        "country": "France",
+        "link": "https://game.raceroom.com/store/cars/wtcc-2014/citroen/citroen-c-elysee-wtcc",
+        "description": "The 2014 Citroën WTCC C-Elysee is a front wheel driven marvel of engineering. Its lightning fast, but with that raw potential also comes a car that can be a real handful to race on the limit. If you can handle it, the Elysee is the 2014 touring car to beat."
+      },
+      {
+        "car_class": "WTCC 2014",
         "car": "Honda Civic WTCC 2014",
         "wheel": "Round",
         "wheel_cat": "round",
@@ -4321,6 +4353,22 @@
       },
       {
         "car_class": "WTCC 2015",
+        "car": "Citroën C Elysee WTCC 2015",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "Seq",
+        "transmission_cat": "sequential",
+        "year": "2014",
+        "power": "380",
+        "weight": "1100",
+        "engine": "Inline-4",
+        "drive": "FWD",
+        "country": "France",
+        "link": "https://game.raceroom.com/store/cars/wtcc-2015/citroen/citroen-c-elysee-wtcc-2015",
+        "description": "The 2015 Citroën WTCC C-Elysee builds on the highly successful 2014 WTCC winning car, refining looks and handling even further. It is lightning fast, but with that raw potential also comes a car that can be a real handful to race on the limit. If you can handle it, the Elysee is still the 2015 touring car to beat."
+      },
+      {
+        "car_class": "WTCC 2015",
         "car": "Honda Civic WTCC 2015",
         "wheel": "Round",
         "wheel_cat": "round",
@@ -4372,6 +4420,22 @@
         "country": "USA",
         "link": "https://game.raceroom.com/en/store/cars/wtcc-2016/chevrolet/chevrolet-rml-cruze-tc1-2016",
         "description": "The RML Chevrolet Cruze remains a connoisseur choice. The Cruze from RML Group is a proven factor and it surely is a car capable of taking you all the way to the top."
+      },
+      {
+        "car_class": "WTCC 2016",
+        "car": "Citroën C Elysee WTCC 2016",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "Seq",
+        "transmission_cat": "sequential",
+        "year": "2014",
+        "power": "380",
+        "weight": "1100",
+        "engine": "Inline-4",
+        "drive": "FWD",
+        "country": "France",
+        "link": "https://game.raceroom.com/store/cars/wtcc-2016/citroen/citroen-c-elysee-wtcc-2016",
+        "description": "The 2016 version of the championship winning Citroën C Elysee model aims to be the pinnacle of what a touring car can be. Taking an already dominant car and making it faster in both a straight line and in the turns without sacrificing driveability is no easy job, but this is what Citroën wanted to achieve with their final year of factory involvement in the FIA WTCC. Slide behind the wheel of the Elysee 2016 to see if they made it happen. But beware, this one still bites if you push it too far!"
       },
       {
         "car_class": "WTCC 2016",
@@ -4442,6 +4506,22 @@
         "country": "USA",
         "link": "https://game.raceroom.com/en/store/cars/wtcc-2017/chevrolet/chevrolet-rml-cruze-tc1-2017",
         "description": "The RML Chevrolet Cruze remains a connoisseur choice. The Cruze from RML Group is a proven factor and it surely is a car capable of taking you all the way to the top."
+      },
+      {
+        "car_class": "WTCC 2017",
+        "car": "Citroën C Elysee WTCC 2017",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "Seq",
+        "transmission_cat": "sequential",
+        "year": "2014",
+        "power": "380",
+        "weight": "1100",
+        "engine": "Inline-4",
+        "drive": "FWD",
+        "country": "France",
+        "link": "https://game.raceroom.com/store/cars/wtcc-2017/citroen/citroen-c-elysee-wtcc-2017",
+        "description": "The Citroën WTCC C-Elysee is a front wheel driven marvel of engineering. Its lightning fast, but with that raw potential also comes a car that can be a real handful to race on the limit. "
       },
       {
         "car_class": "WTCC 2017",

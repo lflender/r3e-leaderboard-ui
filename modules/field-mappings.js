@@ -1,6 +1,10 @@
 /**
  * Field Mappings Module
  * Centralized field name variations for consistent data access
+ * 
+ * NOTE: For column configuration (display names, order, visibility),
+ * use ColumnConfig from column-config.js instead.
+ * This module is for field value extraction from data objects.
  */
 
 const FIELD_NAMES = {
@@ -39,7 +43,10 @@ const FIELD_NAMES = {
     CLASS_ID: ['class_id', 'ClassID', 'classId', 'Class ID'],
     
     // Entry count fields
-    TOTAL_ENTRIES: ['TotalEntries', 'total_entries', 'entry_count', 'EntryCount']
+    TOTAL_ENTRIES: ['TotalEntries', 'total_entries', 'entry_count', 'EntryCount'],
+    
+    // Date/Time fields
+    DATE_TIME: ['date_time', 'dateTime', 'Date', 'DateTime']
 };
 
 /**

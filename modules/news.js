@@ -83,7 +83,7 @@
     });
     container.innerHTML = html;
     // Append "More on Steam" link at the end
-    container.insertAdjacentHTML('beforeend', '<div class="news-actions" style="text-align: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.08);"><a class="news-link" href="https://store.steampowered.com/news/app/211500?l=en" target="_blank" rel="noopener">More on Steam →</a></div>');
+    container.insertAdjacentHTML('beforeend', '<div class="news-actions news-actions-footer"><a class="news-link" href="https://store.steampowered.com/news/app/211500?l=en" target="_blank" rel="noopener">More on Steam →</a></div>');
   }
 
   async function fetchJson(url){

@@ -3002,6 +3002,22 @@
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/gtr-3/porsche/porsche-911-gt3-r-992",
         "description": "GT racing isn't GT racing without a Porsche in the mix, and the 992-shape GT3 R keeps Porsche at the forefront of the category. It's more powerful than ever, but also optimised for drivability with a wider track, massive aero and optimised traction."
+      },
+      {
+        "car_class": "GTR 3",
+        "car": "RUF RT12R GTR3",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "Seq",
+        "transmission_cat": "sequential",
+        "year": "2011",
+        "power": "565bhp",
+        "weight": "1305kg with driver",
+        "engine": "4.0L F6",
+        "drive": "RWD",
+        "country": "Germany",
+        "link": "https://game.raceroom.com/store/cars/gtr-3/ruf/ruf-rt12r-gtr3",
+        "description": "There is no mistaking the distinct sound of a flat-6 engine screaming at full power, the RUF brings that unique sound to RaceRoom. It is a rear engined model built with the purpose of dominating at the racetrack. Don't expect much in the way of comfort, but in return you get a very well handling car with good traction and predictability at the ragged edge."
       }
     ]
   },
@@ -3188,6 +3204,22 @@
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/hillclimb-icons/carlsson/carlsson-slk-340-judd",
         "description": "The dramatic carbon fiber body sporting a huge rear wing covers a high tech chassis and an engine pumping out 600+ HP. This Carlsson is a purpose built tool made specifically with one aim in mind: Getting to the top of the hill. First!"
+      },
+      {
+        "car_class": "Hillclimb Icons",
+        "car": "E36 V8 JUDD",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "Palettes",
+        "transmission_cat": "paddles",
+        "year": "2009",
+        "power": "570 bhp",
+        "weight": "895 kg",
+        "engine": "3.4L V8",
+        "drive": "RWD",
+        "country": "Germany",
+        "link": "https://game.raceroom.com/store/cars/hillclimb-icons/georg-plasa/e36-v8-judd",
+        "description": "Georg Plasa’s automotive creations grew to become every bit as well-known as he was, partly thanks to their mad appearance, partly their power plants – Le Mans derived Judd KV675 V8s, complete with well over 550bhp and a manic, bone-chilling shriek as they raced to an impossibly high, 10,000RPM redline! Factor in the advanced KW suspension on both, and it becomes only too clear why Plasa’s BMW’s were so beloved."
       }
     ]
   },
@@ -3699,6 +3731,27 @@
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/procar/bmw/bmw-m1-procar",
         "description": "The futuristic center engine BMW M1 was hand-built between 1978 and 1981 as a homologation special for sports car racing. Only 456 M1s were built, making it one of BMW's rarest models, but the design also makes it one of the most famous BMW's ever."
+      }
+    ]
+  },
+  {
+    "class": "Safety Car",
+    "cars": [
+      {
+        "car_class": "Safety Car",
+        "car": "S.C. Cupra TCR",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "Palettes",
+        "transmission_cat": "paddles",
+        "year": "2020",
+        "power": "335 hp",
+        "weight": "1310 kg",
+        "engine": "L4",
+        "drive": "FWD",
+        "country": "Spain",
+        "link": "https://game.raceroom.com/store/cars/safety-cars/cupra/sc-cupra-tcr",
+        "description": ""
       }
     ]
   },
@@ -4230,6 +4283,22 @@
       },
       {
         "car_class": "WTCC 2014",
+        "car": "Citroën C Elysee WTCC",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "Seq",
+        "transmission_cat": "sequential",
+        "year": "2014",
+        "power": "380",
+        "weight": "1100",
+        "engine": "Inline-4",
+        "drive": "FWD",
+        "country": "France",
+        "link": "https://game.raceroom.com/store/cars/wtcc-2014/citroen/citroen-c-elysee-wtcc",
+        "description": "The 2014 Citroën WTCC C-Elysee is a front wheel driven marvel of engineering. Its lightning fast, but with that raw potential also comes a car that can be a real handful to race on the limit. If you can handle it, the Elysee is the 2014 touring car to beat."
+      },
+      {
+        "car_class": "WTCC 2014",
         "car": "Honda Civic WTCC 2014",
         "wheel": "Round",
         "wheel_cat": "round",
@@ -4284,6 +4353,22 @@
       },
       {
         "car_class": "WTCC 2015",
+        "car": "Citroën C Elysee WTCC 2015",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "Seq",
+        "transmission_cat": "sequential",
+        "year": "2014",
+        "power": "380",
+        "weight": "1100",
+        "engine": "Inline-4",
+        "drive": "FWD",
+        "country": "France",
+        "link": "https://game.raceroom.com/store/cars/wtcc-2015/citroen/citroen-c-elysee-wtcc-2015",
+        "description": "The 2015 Citroën WTCC C-Elysee builds on the highly successful 2014 WTCC winning car, refining looks and handling even further. It is lightning fast, but with that raw potential also comes a car that can be a real handful to race on the limit. If you can handle it, the Elysee is still the 2015 touring car to beat."
+      },
+      {
+        "car_class": "WTCC 2015",
         "car": "Honda Civic WTCC 2015",
         "wheel": "Round",
         "wheel_cat": "round",
@@ -4335,6 +4420,22 @@
         "country": "USA",
         "link": "https://game.raceroom.com/en/store/cars/wtcc-2016/chevrolet/chevrolet-rml-cruze-tc1-2016",
         "description": "The RML Chevrolet Cruze remains a connoisseur choice. The Cruze from RML Group is a proven factor and it surely is a car capable of taking you all the way to the top."
+      },
+      {
+        "car_class": "WTCC 2016",
+        "car": "Citroën C Elysee WTCC 2016",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "Seq",
+        "transmission_cat": "sequential",
+        "year": "2014",
+        "power": "380",
+        "weight": "1100",
+        "engine": "Inline-4",
+        "drive": "FWD",
+        "country": "France",
+        "link": "https://game.raceroom.com/store/cars/wtcc-2016/citroen/citroen-c-elysee-wtcc-2016",
+        "description": "The 2016 version of the championship winning Citroën C Elysee model aims to be the pinnacle of what a touring car can be. Taking an already dominant car and making it faster in both a straight line and in the turns without sacrificing driveability is no easy job, but this is what Citroën wanted to achieve with their final year of factory involvement in the FIA WTCC. Slide behind the wheel of the Elysee 2016 to see if they made it happen. But beware, this one still bites if you push it too far!"
       },
       {
         "car_class": "WTCC 2016",
@@ -4405,6 +4506,22 @@
         "country": "USA",
         "link": "https://game.raceroom.com/en/store/cars/wtcc-2017/chevrolet/chevrolet-rml-cruze-tc1-2017",
         "description": "The RML Chevrolet Cruze remains a connoisseur choice. The Cruze from RML Group is a proven factor and it surely is a car capable of taking you all the way to the top."
+      },
+      {
+        "car_class": "WTCC 2017",
+        "car": "Citroën C Elysee WTCC 2017",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "Seq",
+        "transmission_cat": "sequential",
+        "year": "2014",
+        "power": "380",
+        "weight": "1100",
+        "engine": "Inline-4",
+        "drive": "FWD",
+        "country": "France",
+        "link": "https://game.raceroom.com/store/cars/wtcc-2017/citroen/citroen-c-elysee-wtcc-2017",
+        "description": "The Citroën WTCC C-Elysee is a front wheel driven marvel of engineering. Its lightning fast, but with that raw potential also comes a car that can be a real handful to race on the limit. "
       },
       {
         "car_class": "WTCC 2017",

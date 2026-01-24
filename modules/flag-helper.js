@@ -46,7 +46,7 @@ function countryToFlag(country) {
     
     // Special case for "Various" - use custom RaceRoom icon
     if (s.toLowerCase() === 'various') {
-        return `<img src="https://s1.cdn.autoevolution.com/images/news/race-flags-indy-racing-league-8367_12.jpg" alt="Various" class="various-flag-icon" style="width: 1.3em; height: 1em; vertical-align: middle; display: inline-block;">`;
+        return `<img src="https://s1.cdn.autoevolution.com/images/news/race-flags-indy-racing-league-8367_12.jpg" alt="Various" class="various-flag-icon">`;
     }
     
     let code = null;

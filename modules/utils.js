@@ -25,15 +25,24 @@ function escapeHtml(text) {
  * @returns {string} Formatted header
  */
 function formatHeader(key) {
-    // Special case for class_name
+    // Use ColumnConfig if available (centralized source of truth)
+    if (typeof window !== 'undefined' && window.ColumnConfig) {
+        return window.ColumnConfig.getDisplayName(key);
+    }
+    
+    // Fallback: manual special cases
     if (key === 'class_name' || key === 'className' || key === 'ClassName') {
         return 'Car class';
     }
-    // Normalize known entry count fields to a concise label
+    if (key === 'date_time' || key === 'dateTime' || key === 'DateTime') {
+        return 'Date';
+    }
     const lower = String(key || '').toLowerCase();
     if (lower === 'entry_count' || lower === 'total_entries' || lower === 'totalracers' || lower === 'total_racers') {
         return 'Entries';
     }
+    
+    // Default: convert snake_case/camelCase to Title Case
     return key
         .replace(/([A-Z])/g, ' $1')
         .replace(/_/g, ' ')
@@ -219,13 +228,22 @@ function calculateGapPercentage(item, referenceTime) {
 /**
  * Renders rank as stars: D -> 1, C -> 2, B -> 3, A -> 4
  * @param {string} rank - Rank letter
+ * @param {boolean} inline - If true, renders inline stars for detail page (no pipe separator)
  * @returns {string} HTML string with stars
  */
-function renderRankStars(rank) {
+function renderRankStars(rank, inline = false) {
     if (!rank) return '';
     const r = String(rank).trim().toUpperCase();
     const map = { 'D': 1, 'C': 2, 'B': 3, 'A': 4 };
     const count = map[r] || 0;
+    
+    // Inline variant for detail page - small stars after driver name
+    if (inline) {
+        if (count === 0) return '';
+        return '<span class="rank-stars-inline">' + '⭐'.repeat(count) + '</span>';
+    }
+    
+    // Original variant for other pages (with pipe separator and Rank text)
     if (count === 0) return ` | ⭐ Rank ${escapeHtml(rank)}`;
     return ' | ' + '⭐'.repeat(count) + ` Rank ${escapeHtml(r)}`;
 }
@@ -288,7 +306,29 @@ function updateUrlParam(paramName, value) {
         // ignore URL update errors
     }
 }
-
+/**
+ * Formats a date string from ISO format to "DD MMM YYYY" format
+ * @param {string} dateTimeString - ISO date string (e.g., "2025-10-06T19:15:20")
+ * @returns {string} Formatted date (e.g., "6 Oct 2025")
+ */
+function formatDate(dateTimeString) {
+    if (!dateTimeString) return '';
+    try {
+        const date = new Date(dateTimeString);
+        if (isNaN(date.getTime())) return '';
+        
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        
+        const day = date.getDate();
+        const month = months[date.getMonth()];
+        const year = date.getFullYear();
+        
+        return `${day} ${month} ${year}`;
+    } catch (e) {
+        return '';
+    }
+}
 // ========================================
 // Export utilities for use in other modules
 // ========================================
@@ -306,5 +346,6 @@ window.R3EUtils = {
     renderRankStars,
     getPositionBadgeColor,
     getUrlParam,
-    updateUrlParam
+    updateUrlParam,
+    formatDate
 };

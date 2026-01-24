@@ -66,7 +66,8 @@ function normalizeLeaderboardEntry(entry, data = {}, index = 0, totalEntries = 0
         ClassID: classId || undefined,
         TrackID: trackIdFromEntry || undefined,
         class_id: classId || undefined,
-        track_id: trackIdFromEntry || undefined
+        track_id: trackIdFromEntry || undefined,
+        date_time: getField(entry, FIELD_NAMES.DATE_TIME)
     };
 }
 
@@ -125,6 +126,22 @@ function extractCountry(item) {
 }
 
 /**
+ * Extracts rank from various field names
+ * @param {Object} item - Data item
+ * @returns {string} Rank value
+ */
+function extractRank(item) {
+    // Handle nested rank object or direct rank field
+    if (item.rank && typeof item.rank === 'object') {
+        return item.rank.Name || item.rank.name || '';
+    }
+    if (item.Rank && typeof item.Rank === 'object') {
+        return item.Rank.Name || item.Rank.name || '';
+    }
+    return getField(item, FIELD_NAMES.RANK, '');
+}
+
+/**
  * Extracts track ID from various field names
  * @param {Object} item - Data item
  * @returns {string} Track ID value
@@ -140,6 +157,15 @@ function extractTrackId(item) {
  */
 function extractClassId(item) {
     return getField(item, FIELD_NAMES.CLASS_ID, '');
+}
+
+/**
+ * Extracts date/time from various field names
+ * @param {Object} item - Data item
+ * @returns {string} Date/time value
+ */
+function extractDateTime(item) {
+    return getField(item, FIELD_NAMES.DATE_TIME, '');
 }
 
 /**
@@ -179,8 +205,10 @@ if (typeof window !== 'undefined') {
         extractLapTime,
         extractDifficulty,
         extractCountry,
+        extractRank,
         extractTrackId,
         extractClassId,
+        extractDateTime,
         normalizeTrackName
     };
 }

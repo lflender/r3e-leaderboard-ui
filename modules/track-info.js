@@ -454,7 +454,7 @@
     // Determine keys from first item and ensure Car Class column exists
     let keys = pageItems.length > 0 ? Object.keys(pageItems[0]) : [];
     // Keep 'class_name' so we can display it when backend returns it.
-    let excludeColumns = ['ClassID','TrackID','TotalEntries','class_id','track_id','total_entries','Name','name','DriverName','driver_name','Country','country','Rank','rank','Team','team','time_diff','timeDiff','timeDifference'];
+    let excludeColumns = ['ClassID','TrackID','class_id','track_id','Name','name','DriverName','driver_name','Country','country','Rank','rank','Team','team','time_diff','timeDiff','timeDifference'];
     
     // In combine mode, also exclude class-related columns since we're showing combined data
     if (combineMode) {
@@ -473,12 +473,34 @@
       }
     }
 
-    // Order columns similar to leaderboards
-    const columnOrder = ['CarClass','Car Class','car_class','Class','Car','car','CarName','Track','track','TrackName','LapTime','Lap Time','lap_time','laptime','Time','Position','position','Pos'];
-    keys.sort((a,b)=>{ let ia = columnOrder.indexOf(a); let ib = columnOrder.indexOf(b); if (ia===-1) ia=999; if (ib===-1) ib=999; return ia-ib; });
+    // Order columns using ColumnConfig for consistency
+    // Note: Track Info needs the entry_count column, so we preserve it even though it's marked hidden in ColumnConfig
+    const entryCountKey = keys.find(k => window.ColumnConfig && window.ColumnConfig.isColumnType(k, 'TOTAL_ENTRIES'));
+    
+    if (window.ColumnConfig) {
+      // Get ordered columns (this will filter out entry_count since it's marked hidden)
+      let orderedKeys = window.ColumnConfig.getOrderedColumns(keys, { addSynthetic: false });
+      
+      // Manually add entry_count back if it was in the original data (use the actual key from data, not canonical ID)
+      if (entryCountKey && !orderedKeys.some(k => window.ColumnConfig.isColumnType(k, 'TOTAL_ENTRIES'))) {
+        // Find where to insert it based on the TOTAL_ENTRIES order setting (35, between Track and Position)
+        const trackIndex = orderedKeys.findIndex(k => window.ColumnConfig.isColumnType(k, 'TRACK'));
+        const insertIndex = trackIndex >= 0 ? trackIndex + 1 : orderedKeys.length;
+        orderedKeys.splice(insertIndex, 0, entryCountKey);
+      }
+      
+      keys = orderedKeys;
+    } else {
+      // Fallback: basic ordering
+      const columnOrder = ['CarClass','Car Class','car_class','Class','Car','car','CarName','Track','track','TrackName','LapTime','Lap Time','lap_time','laptime','Time','Position','position','Pos','date_time','Date'];
+      keys.sort((a,b)=>{ let ia = columnOrder.indexOf(a); let ib = columnOrder.indexOf(b); if (ia===-1) ia=999; if (ib===-1) ib=999; return ia-ib; });
+    }
 
     let html = '<table class="results-table"><thead><tr>';
-    keys.forEach(k=> html += `<th>${R3EUtils.formatHeader(k)}</th>`);
+    keys.forEach(k => {
+      const displayName = window.ColumnConfig ? window.ColumnConfig.getDisplayName(k) : R3EUtils.formatHeader(k);
+      html += `<th>${displayName}</th>`;
+    });
     html += '</tr></thead><tbody>';
 
     pageItems.forEach(item => {
@@ -532,6 +554,10 @@
             trackStr = R3EUtils.escapeHtml(trackStr).replace(/&lt;wbr&gt;/g, '<wbr>');
             html += `<td class="track-cell">${trackStr}</td>`;
           }
+        } else if (key === 'date_time' || key === 'dateTime' || key === 'Date') {
+          // Date formatting
+          const formattedDate = value ? R3EUtils.formatDate(value) : '';
+          html += `<td class="date-cell">${R3EUtils.escapeHtml(formattedDate)}</td>`;
         } else {
           html += `<td>${formatValue(value)}</td>`;
         }

@@ -1,12 +1,23 @@
 /**
  * Table Renderer Module
  * Handles table rendering with consistent formatting
- * Follows Single Responsibility Principle
+ * Uses ColumnConfig for centralized column definitions
  */
 
 class TableRenderer {
     constructor() {
-        this.excludeColumns = [
+        // Use ColumnConfig for excluded columns - no more duplicate lists!
+        this.excludeColumns = window.ColumnConfig ? 
+            window.ColumnConfig.getHiddenColumnAliases() : 
+            this._getFallbackExcludeColumns();
+    }
+    
+    /**
+     * Fallback exclude list if ColumnConfig not loaded
+     * @private
+     */
+    _getFallbackExcludeColumns() {
+        return [
             'ClassID', 'ClassName', 'TrackID', 'TotalEntries', 
             'Class ID', 'Class Name', 'Track ID', 'Total Entries',
             'class_id', 'class_name', 'track_id', 'total_entries',
@@ -15,14 +26,6 @@ class TableRenderer {
             'found', 'Found',
             'time_diff', 'timeDiff', 'timeDifference', 
             'time_diff_s', 'time_diff_seconds'
-        ];
-        
-        this.columnOrder = [
-            'CarClass', 'Car Class', 'car_class', 'Class',
-            'Car', 'car', 'CarName',
-            'Track', 'track', 'TrackName', 'track_name',
-            'LapTime', 'Lap Time', 'lap_time', 'Time',
-            'Position', 'position', 'Pos'
         ];
     }
     
@@ -34,41 +37,35 @@ class TableRenderer {
      * @returns {string} HTML string
      */
     renderDriverGroupedTable(driverGroups, keys = null, sortBy = 'gap') {
+        // Get keys from first entry if not provided
         if (!keys && driverGroups.length > 0 && driverGroups[0].entries && driverGroups[0].entries.length > 0) {
-            keys = Object.keys(driverGroups[0].entries[0]);
-            keys = this.filterAndSortKeys(keys);
+            const dataKeys = Object.keys(driverGroups[0].entries[0]);
+            
+            // Use ColumnConfig if available, otherwise fallback to manual filtering
+            if (window.ColumnConfig) {
+                keys = window.ColumnConfig.getOrderedColumns(dataKeys, { addSynthetic: true });
+            } else {
+                // Fallback: manual filtering and sorting
+                keys = this.filterAndSortKeys(dataKeys);
+                if (!keys.includes('Date') && !keys.includes('date_time')) {
+                    keys.push('Date');
+                }
+                const lapTimeIndex = keys.findIndex(k => ['LapTime', 'Lap Time', 'lap_time', 'laptime', 'Time'].includes(k));
+                if (lapTimeIndex !== -1 && !keys.includes('GapPercent')) {
+                    keys.splice(lapTimeIndex + 1, 0, 'GapPercent');
+                }
+            }
         }
         
         if (!keys || keys.length === 0) {
             return '<div class="no-results">No data to display</div>';
         }
         
-        // Add GapPercent column after LapTime if not already present
-        const lapTimeIndex = keys.findIndex(k => ['LapTime', 'Lap Time', 'lap_time', 'laptime', 'Time'].includes(k));
-        if (lapTimeIndex !== -1 && !keys.includes('GapPercent')) {
-            keys.splice(lapTimeIndex + 1, 0, 'GapPercent');
-        }
-        
         let html = '<table class="results-table"><thead><tr>';
         
-        // Create headers with sorting capability
+        // Create headers using ColumnConfig for display names and sort info
         keys.forEach(key => {
-            const isLapTimeKey = ['LapTime', 'Lap Time', 'lap_time', 'laptime', 'Time'].includes(key);
-            const isGapPercentKey = key === 'GapPercent';
-            const isPositionKey = ['Position', 'position', 'Pos'].includes(key);
-            
-            if (isPositionKey) {
-                const activeClass = sortBy === 'position' ? ' sort-active' : '';
-                html += `<th class="sortable${activeClass}" onclick="window.sortDriverGroups('position')" title="Click to sort by position">${R3EUtils.formatHeader(key)}</th>`;
-            } else if (isLapTimeKey) {
-                const activeClass = sortBy === 'gap' ? ' sort-active' : '';
-                html += `<th class="sortable${activeClass}" onclick="window.sortDriverGroups('gap')" title="Click to sort by gap time">${R3EUtils.formatHeader(key)}</th>`;
-            } else if (isGapPercentKey) {
-                const activeClass = sortBy === 'gapPercent' ? ' sort-active' : '';
-                html += `<th class="sortable${activeClass}" onclick="window.sortDriverGroups('gapPercent')" title="Click to sort by lap time percentage against reference time">Lap %</th>`;
-            } else {
-                html += `<th>${R3EUtils.formatHeader(key)}</th>`;
-            }
+            html += this.renderHeaderCell(key, sortBy);
         });
         
         html += '</tr></thead><tbody>';
@@ -144,7 +141,9 @@ class TableRenderer {
         
         const flagHtml = FlagHelper.countryToFlag(country) ? `<span class="country-flag">${FlagHelper.countryToFlag(country)}</span>` : '';
         const rankHtml = rank ? R3EUtils.renderRankStars(rank) : '';
-        const teamHtml = team ? ` | 🏁 Team ${team}` : '';
+        // Only add "Team" prefix if the team name doesn't already contain "team"
+        const teamPrefix = team && !String(team).toLowerCase().includes('team') ? 'Team ' : '';
+        const teamHtml = team ? ` | 🏁 ${teamPrefix}${team}` : '';
         
         return `
             <tr class="driver-group-header" data-group="${groupId}" onclick="toggleGroup(this)">
@@ -156,6 +155,34 @@ class TableRenderer {
             </tr>`;
     }
     
+    /**
+     * Renders a table header cell
+     * Uses ColumnConfig for display name and sortability
+     * @param {string} key - Column key
+     * @param {string} sortBy - Current sort key
+     * @returns {string} HTML string
+     */
+    renderHeaderCell(key, sortBy) {
+        // Get display name from ColumnConfig or fallback to formatHeader
+        const displayName = window.ColumnConfig ? 
+            window.ColumnConfig.getDisplayName(key) : 
+            R3EUtils.formatHeader(key);
+        
+        // Check if this is a sortable column using ColumnConfig
+        const sortConfig = window.ColumnConfig ? 
+            window.ColumnConfig.getSortConfig(key) : null;
+        
+        if (sortConfig) {
+            const sortKey = sortConfig.sortKey;
+            const activeClass = sortBy === sortKey ? ' sort-active' : '';
+            const title = `Click to sort by ${displayName.toLowerCase()}`;
+            
+            return `<th class="sortable${activeClass}" onclick="window.sortDriverGroups('${sortKey}')" title="${title}">${displayName}</th>`;
+        } else {
+            return `<th>${displayName}</th>`;
+        }
+    }
+
     /**
      * Renders a data row
      * @param {Object} item - Data item
@@ -222,19 +249,31 @@ class TableRenderer {
     
     /**
      * Renders a table cell based on key type
+     * Uses ColumnConfig for column type detection and formatting
      * @param {Object} item - Data item
      * @param {string} key - Column key
      * @returns {string} HTML string
      */
     renderCell(item, key) {
         const value = item[key];
-        const isPositionKey = ['Position', 'position', 'Pos'].includes(key);
-        const isCarClassKey = ['CarClass', 'Car Class', 'car_class', 'Class', 'class'].includes(key);
-        const isLapTimeKey = ['LapTime', 'Lap Time', 'lap_time', 'laptime', 'Time'].includes(key);
-        const isTrackKey = ['Track', 'track', 'TrackName', 'track_name'].includes(key);
-        const isDifficultyKey = ['Difficulty', 'difficulty', 'driving_model'].includes(key);
         
-        if (isPositionKey) {
+        // Use ColumnConfig for type checking if available
+        const CC = window.ColumnConfig;
+        const isPositionKey = CC ? CC.isColumnType(key, 'POSITION') : ['Position', 'position', 'Pos'].includes(key);
+        const isCarClassKey = CC ? CC.isColumnType(key, 'CAR_CLASS') : ['CarClass', 'Car Class', 'car_class', 'Class', 'class'].includes(key);
+        const isLapTimeKey = CC ? CC.isColumnType(key, 'LAP_TIME') : ['LapTime', 'Lap Time', 'lap_time', 'laptime', 'Time'].includes(key);
+        const isTrackKey = CC ? CC.isColumnType(key, 'TRACK') : ['Track', 'track', 'TrackName', 'track_name'].includes(key);
+        const isDifficultyKey = CC ? CC.isColumnType(key, 'DIFFICULTY') : ['Difficulty', 'difficulty', 'driving_model'].includes(key);
+        const isDateKey = CC ? CC.isColumnType(key, 'DATE') : ['Date', 'date_time', 'dateTime'].includes(key);
+        
+        if (isDateKey) {
+            // Try multiple field sources for date data
+            const dateValue = value || item.date_time || item.dateTime || item.Date;
+            // Use ColumnConfig formatter if available
+            const formattedDate = CC ? CC.formatCellValue(key, dateValue, item) : 
+                (dateValue ? R3EUtils.formatDate(dateValue) : '—');
+            return `<td class="date-cell">${R3EUtils.escapeHtml(formattedDate)}</td>`;
+        } else if (isPositionKey) {
             return this.renderPositionCell(item);
         } else if (isCarClassKey) {
             return `<td class="no-wrap"><strong>${R3EUtils.formatValue(value)}</strong></td>`;
@@ -251,6 +290,7 @@ class TableRenderer {
     
     /**
      * Renders position cell with badge
+     * Note: Uses inline style for dynamic background color based on position/total ratio
      * @param {Object} item - Data item
      * @returns {string} HTML string
      */
@@ -265,9 +305,9 @@ class TableRenderer {
         const podiumClass = (total >= 4 && (pos === 1 || pos === 2 || pos === 3)) ? ` pos-${pos}` : '';
         
         if (totalNum) {
-            return `<td class="pos-cell"><span class="pos-number${podiumClass}" style="background:${badgeColor}">${R3EUtils.escapeHtml(posNum)}</span><span class="pos-sep">/</span><span class="pos-total">${R3EUtils.escapeHtml(totalNum)}</span></td>`;
+            return `<td class="pos-cell"><span class="pos-number${podiumClass}" data-color="${badgeColor}" style="background:${badgeColor}">${R3EUtils.escapeHtml(posNum)}</span><span class="pos-sep">/</span><span class="pos-total">${R3EUtils.escapeHtml(totalNum)}</span></td>`;
         } else {
-            return `<td class="pos-cell"><span class="pos-number${podiumClass}" style="background:${badgeColor}">${R3EUtils.escapeHtml(posNum)}</span></td>`;
+            return `<td class="pos-cell"><span class="pos-number${podiumClass}" data-color="${badgeColor}" style="background:${badgeColor}">${R3EUtils.escapeHtml(posNum)}</span></td>`;
         }
     }
     
@@ -286,9 +326,9 @@ class TableRenderer {
         const escDelta = R3EUtils.escapeHtml(String(deltaClassic));
         
         if (escDelta) {
-            return `<td class="lap-time-cell">${escMain} <span class="time-delta-inline">${escDelta}</span></td>`;
+            return `<td class="lap-time-cell"><span class="lap-main">${escMain}</span><span class="time-delta">${escDelta}</span></td>`;
         } else {
-            return `<td class="lap-time-cell">${escMain}</td>`;
+            return `<td class="lap-time-cell"><span class="lap-main">${escMain}</span></td>`;
         }
     }
     
@@ -360,13 +400,29 @@ class TableRenderer {
      * @returns {Array} Filtered and sorted keys
      */
     filterAndSortKeys(keys) {
-        // Filter out unwanted columns
+        // Use ColumnConfig if available (preferred)
+        if (window.ColumnConfig) {
+            return window.ColumnConfig.getOrderedColumns(keys, { addSynthetic: false });
+        }
+        
+        // Fallback: manual filtering
         keys = keys.filter(key => !this.excludeColumns.includes(key));
         
-        // Sort by custom order
+        // Fallback column order (deprecated - use ColumnConfig instead)
+        const fallbackOrder = [
+            'CarClass', 'Car Class', 'car_class', 'Class',
+            'Car', 'car', 'CarName',
+            'Track', 'track', 'TrackName', 'track_name',
+            'Position', 'position', 'Pos',
+            'LapTime', 'Lap Time', 'lap_time', 'laptime', 'Time',
+            'GapPercent',
+            'Difficulty', 'difficulty',
+            'Date', 'date_time', 'dateTime'
+        ];
+        
         keys.sort((a, b) => {
-            let indexA = this.columnOrder.indexOf(a);
-            let indexB = this.columnOrder.indexOf(b);
+            let indexA = fallbackOrder.indexOf(a);
+            let indexB = fallbackOrder.indexOf(b);
             
             if (indexA === -1) indexA = 999;
             if (indexB === -1) indexB = 999;
@@ -378,9 +434,9 @@ class TableRenderer {
     }
     
     /**
-     * Sorts driver entries by gap time, gap percentage, or position
+     * Sorts driver entries by gap time, gap percentage, position, or date
      * @param {Array} entries - Driver entries
-     * @param {string} sortBy - Sort key: 'gap' (default), 'gapPercent', or 'position'
+     * @param {string} sortBy - Sort key: 'gap' (default), 'gapPercent', 'position', or 'date_time'
      */
     sortDriverEntries(entries, sortBy = 'gap') {
         try {
@@ -393,6 +449,22 @@ class TableRenderer {
                     const ta = R3EUtils.getTotalEntriesCount(a);
                     const tb = R3EUtils.getTotalEntriesCount(b);
                     return tb - ta; // descending
+                });
+            } else if (sortBy === 'date_time') {
+                // Sort by date (most recent first)
+                entries.sort((a, b) => {
+                    const dateA = a.date_time || a.dateTime || a.Date || a.DateTime || '';
+                    const dateB = b.date_time || b.dateTime || b.Date || b.DateTime || '';
+                    if (!dateA && !dateB) return 0;
+                    if (!dateA) return 1;
+                    if (!dateB) return -1;
+                    // Parse as Date objects and sort descending (newest first)
+                    const timeA = new Date(dateA).getTime();
+                    const timeB = new Date(dateB).getTime();
+                    if (isNaN(timeA) && isNaN(timeB)) return 0;
+                    if (isNaN(timeA)) return 1;
+                    if (isNaN(timeB)) return -1;
+                    return timeB - timeA;
                 });
             } else if (sortBy === 'gapPercent') {
                 // Sort by gap percentage

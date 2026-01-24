@@ -23,6 +23,7 @@ const DetailState = {
     allResults: [],
     unfilteredResults: [],
     carFilterSelect: null,
+    difficultyFilterSelect: null,
     availableCars: [],
     lastActionTime: 0,
     isCombinedView: false // True when showing combined superclass data
@@ -42,6 +43,7 @@ let itemsPerPage = DetailState.itemsPerPage;
 let allResults = DetailState.allResults;
 let unfilteredResults = DetailState.unfilteredResults;
 let carFilterSelect = DetailState.carFilterSelect;
+let difficultyFilterSelect = DetailState.difficultyFilterSelect;
 let availableCars = DetailState.availableCars;
 let lastActionTime = DetailState.lastActionTime;
 
@@ -692,10 +694,18 @@ async function displayResults(data) {
         });
     }
     
-    // Create table
-    const headers = DetailState.isCombinedView 
-        ? ['Position', 'Driver Name', 'Lap Time', 'Class', 'Car', 'Difficulty']
-        : ['Position', 'Driver Name', 'Lap Time', 'Car', 'Difficulty'];
+    // Create table headers using ColumnConfig for consistency
+    // For detail page, we want: Position, Driver Name, Lap Time, Lap %, [Class if combined], Car, Difficulty, Date
+    const baseColumns = ['Position', 'Name', 'LapTime', 'GapPercent', 'Car', 'Difficulty', 'date_time'];
+    const columnsWithClass = ['Position', 'Name', 'LapTime', 'GapPercent', 'CarClass', 'Car', 'Difficulty', 'date_time'];
+    const columnKeys = DetailState.isCombinedView ? columnsWithClass : baseColumns;
+    
+    // Get display names from ColumnConfig
+    const headers = columnKeys.map(key => {
+        if (key === 'Name') return 'Driver Name'; // Special case for detail page
+        return window.ColumnConfig ? window.ColumnConfig.getDisplayName(key) : key;
+    });
+    
     let rowsHtml = '';
     paginatedResults.forEach(item => {
         rowsHtml += renderDetailRow(item, isCarFilterActive);
@@ -789,18 +799,19 @@ function renderDetailRow(item, showAbsolutePosition = false) {
     }
     
     // Main position display - show absolute position when filter is active, otherwise normal position
+    // Note: Position badges use inline styles for dynamic background colors calculated per position
     if (showAbsolutePosition && absolutePos && absoluteTotal) {
         const absoluteBadgeColor = R3EUtils.getPositionBadgeColor(parseInt(absolutePos), parseInt(absoluteTotal));
         const absPos = parseInt(absolutePos);
         const absTotal = parseInt(absoluteTotal);
         const podiumClass = (absTotal >= 4 && (absPos === 1 || absPos === 2 || absPos === 3)) ? ` pos-${absPos}` : '';
-        html += `<span class="pos-number${podiumClass}" style="background:${absoluteBadgeColor}">${R3EUtils.escapeHtml(absolutePos)}</span>`;
+        html += `<span class="pos-number${podiumClass}" data-color="${absoluteBadgeColor}" style="background:${absoluteBadgeColor}">${R3EUtils.escapeHtml(absolutePos)}</span>`;
         html += `<span class="pos-sep">/</span><span class="pos-total">${R3EUtils.escapeHtml(absoluteTotal)}</span>`;
     } else {
         const pos = parseInt(posNum);
         const total = parseInt(totalNum);
         const podiumClass = (total >= 4 && (pos === 1 || pos === 2 || pos === 3)) ? ` pos-${pos}` : '';
-        html += `<span class="pos-number${podiumClass}" style="background:${badgeColor}">${R3EUtils.escapeHtml(posNum)}</span>`;
+        html += `<span class="pos-number${podiumClass}" data-color="${badgeColor}" style="background:${badgeColor}">${R3EUtils.escapeHtml(posNum)}</span>`;
         if (totalNum) {
             html += `<span class="pos-sep">/</span><span class="pos-total">${R3EUtils.escapeHtml(totalNum)}</span>`;
         }
@@ -808,12 +819,15 @@ function renderDetailRow(item, showAbsolutePosition = false) {
     
     html += '</td>';
     
-    // Driver name
+    // Driver name with rank stars
+    const rank = DataNormalizer.extractRank(item);
+    const rankStarsHtml = rank ? R3EUtils.renderRankStars(rank, true) : '';
+    
     if (!highlisted) {
         const encoded = encodeURIComponent(String(name));
-        html += `<td><a class="detail-driver-link" href="index.html?driver=${encoded}">${flagHtml}${R3EUtils.escapeHtml(String(name))}</a></td>`;
+        html += `<td><a class="detail-driver-link" href="index.html?driver=${encoded}">${flagHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}</a></td>`;
     } else {
-        html += `<td>${flagHtml}${R3EUtils.escapeHtml(String(name))}</td>`;
+        html += `<td>${flagHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}</td>`;
     }
     
     // Lap time
@@ -821,6 +835,28 @@ function renderDetailRow(item, showAbsolutePosition = false) {
         html += `<td class="no-wrap">${R3EUtils.escapeHtml(mainClassic)} <span class="time-delta-inline no-wrap">${R3EUtils.escapeHtml(deltaClassic)}</span></td>`;
     } else {
         html += `<td class="no-wrap">${R3EUtils.escapeHtml(mainClassic)}</td>`;
+    }
+    
+    // Lap % (Gap Percentage)
+    // Calculate percentage gap from leader (first position)
+    // For position 1, show -, otherwise calculate based on time difference
+    const posNumber = parseInt(posNum) || 1;
+    if (posNumber === 1) {
+        html += `<td class="gap-percent-cell">-</td>`;
+    } else {
+        // Find the leader's time from allResults
+        const leaderEntry = allResults.find(entry => {
+            const entryPos = parseInt(DataNormalizer.extractPosition(entry));
+            return entryPos === 1;
+        });
+        
+        if (leaderEntry) {
+            const leaderTime = DataNormalizer.extractLapTime(leaderEntry);
+            const gapPercent = R3EUtils.calculateGapPercentage(item, leaderTime);
+            html += `<td class="gap-percent-cell">${R3EUtils.escapeHtml(gapPercent)}</td>`;
+        } else {
+            html += `<td class="gap-percent-cell">—</td>`;
+        }
     }
     
     // Class (only in combined view)
@@ -834,6 +870,16 @@ function renderDetailRow(item, showAbsolutePosition = false) {
     
     // Difficulty
     html += `<td class="difficulty-cell"><span class="difficulty-pill ${diffClass}">${R3EUtils.escapeHtml(String(difficulty))}</span></td>`;
+    
+    // Date
+    const dateTime = DataNormalizer.extractDateTime(item);
+    console.log('DEBUG: Detail page date rendering:', {
+        dateTime: dateTime,
+        itemKeys: Object.keys(item),
+        itemSample: JSON.stringify(item).substring(0, 300)
+    });
+    const formattedDate = dateTime ? R3EUtils.formatDate(dateTime) : '';
+    html += `<td class="date-cell">${R3EUtils.escapeHtml(formattedDate)}</td>`;
     
     html += '</tr>';
     return html;
@@ -995,6 +1041,160 @@ function goToPage(page) {
 }
 
 /**
+ * Detects if a car name has a year suffix (e.g., "2015", "2021")
+ * @param {string} carName - Car model name
+ * @returns {{baseName: string, year: string}|null} Base name and year, or null if no year suffix
+ */
+function detectYearSuffix(carName) {
+    const yearMatch = carName.match(/^(.+?)\s+(\d{4})$/);
+    if (yearMatch) {
+        return {
+            baseName: yearMatch[1].trim(),
+            year: yearMatch[2]
+        };
+    }
+    return null;
+}
+
+/**
+ * Detects if a car name has a DTM suffix
+ * @param {string} carName - Car model name
+ * @returns {{baseName: string}|null} Base name, or null if no DTM suffix
+ */
+function detectDTMSuffix(carName) {
+    if (carName.endsWith(' DTM')) {
+        return {
+            baseName: carName.substring(0, carName.length - 4)
+        };
+    }
+    return null;
+}
+
+/**
+ * Finds DTM variant combinations (base model + DTM variant)
+ * @param {Array<string>} cars - Array of car model names
+ * @returns {Array<{value: string, label: string}>} Array of combined options
+ */
+function findDTMCombinations(cars) {
+    const combinations = [];
+    const processed = new Set();
+    
+    cars.forEach(car => {
+        const dtmInfo = detectDTMSuffix(car);
+        if (dtmInfo && cars.includes(dtmInfo.baseName) && !processed.has(dtmInfo.baseName)) {
+            combinations.push({
+                value: `COMBINED_DTM:${dtmInfo.baseName}`,
+                label: `Combined: ${dtmInfo.baseName} + DTM`
+            });
+            processed.add(dtmInfo.baseName);
+        }
+    });
+    
+    return combinations;
+}
+
+/**
+ * Finds year variant combinations (models that differ only by year)
+ * @param {Array<string>} cars - Array of car model names
+ * @returns {Array<{value: string, label: string}>} Array of combined options
+ */
+function findYearCombinations(cars) {
+    const combinations = [];
+    const processed = new Set();
+    const baseNameMap = new Map(); // baseName -> [car1, car2, ...]
+    
+    // Group cars by base name
+    cars.forEach(car => {
+        const yearInfo = detectYearSuffix(car);
+        if (yearInfo) {
+            if (!baseNameMap.has(yearInfo.baseName)) {
+                baseNameMap.set(yearInfo.baseName, []);
+            }
+            baseNameMap.get(yearInfo.baseName).push(car);
+        }
+    });
+    
+    // Create combinations for base names with multiple year variants
+    baseNameMap.forEach((variants, baseName) => {
+        // Only create combination if there are 2+ year variants OR if base model also exists
+        const hasBaseModel = cars.includes(baseName);
+        if ((variants.length >= 2 || (variants.length >= 1 && hasBaseModel)) && !processed.has(baseName)) {
+            combinations.push({
+                value: `COMBINED_YEAR:${baseName}`,
+                label: `Combined: ${baseName}`
+            });
+            processed.add(baseName);
+        }
+    });
+    
+    return combinations;
+}
+
+/**
+ * Find all car model combinations (DTM variants, year variants, etc.)
+ * @param {Array<string>} cars - Array of car model names
+ * @returns {Array<{value: string, label: string}>} Array of combined options
+ */
+function findCarCombinations(cars) {
+    const dtmCombinations = findDTMCombinations(cars);
+    const yearCombinations = findYearCombinations(cars);
+    return [...dtmCombinations, ...yearCombinations];
+}
+
+/**
+ * Finds the combination option associated with a specific car (if any)
+ * @param {string} car - Car model name
+ * @param {Array<{value: string, label: string}>} combinations - All available combinations
+ * @returns {{value: string, label: string}|null} Combination option or null
+ */
+function findCombinationForCar(car, combinations) {
+    // Check for DTM combination
+    const dtmInfo = detectDTMSuffix(car);
+    if (dtmInfo) {
+        const combo = combinations.find(c => c.value === `COMBINED_DTM:${dtmInfo.baseName}`);
+        if (combo) return combo;
+    }
+    
+    // Check for year combination
+    const yearInfo = detectYearSuffix(car);
+    if (yearInfo) {
+        const combo = combinations.find(c => c.value === `COMBINED_YEAR:${yearInfo.baseName}`);
+        if (combo) return combo;
+    }
+    
+    // Check if this car is a base model for a year combination
+    const yearCombo = combinations.find(c => c.value === `COMBINED_YEAR:${car}`);
+    if (yearCombo) return yearCombo;
+    
+    return null;
+}
+
+/**
+ * Checks if a car is the last variant in its group (for determining where to place combined option)
+ * @param {string} car - Current car model name
+ * @param {Array<string>} allCars - All car models (sorted)
+ * @param {number} currentIndex - Current car index in the array
+ * @returns {boolean} True if this is the last variant in its group
+ */
+function isLastInGroup(car, allCars, currentIndex) {
+    // Determine the base name for grouping: if this car has a year suffix,
+    // use its base name; otherwise the car itself is the base.
+    const yearInfo = detectYearSuffix(car);
+    const baseName = yearInfo ? yearInfo.baseName : car;
+
+    // Scan forward: if any subsequent car is a year variant of the same base,
+    // then this is NOT the last in the group.
+    for (let i = currentIndex + 1; i < allCars.length; i++) {
+        const nextYearInfo = detectYearSuffix(allCars[i]);
+        if (nextYearInfo && nextYearInfo.baseName === baseName) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/**
  * Build car filter from data
  */
 function buildCarFilter(data) {
@@ -1013,9 +1213,33 @@ function buildCarFilter(data) {
     if (availableCars.length > 1 && carFilterSelect) {
         // Update car filter options
         const carOptions = [
-            { value: '', label: 'All cars' },
-            ...availableCars.map(car => ({ value: car, label: car }))
+            { value: '', label: 'All cars' }
         ];
+        
+        // If in combined view, find all car combinations
+        let carCombinations = [];
+        if (DetailState.isCombinedView) {
+            carCombinations = findCarCombinations(availableCars);
+        }
+        
+        // Build the list with combined options inserted after their models
+        const addedCombinations = new Set(); // Track which combinations we've already added
+        
+        availableCars.forEach((car, index) => {
+            // Add the car itself
+            carOptions.push({ value: car, label: car });
+            
+            // Check if there's a combination for this car
+            const combo = findCombinationForCar(car, carCombinations);
+            if (combo && !addedCombinations.has(combo.value)) {
+                // Only add if this is the last car in the group
+                const last = isLastInGroup(car, availableCars, index);
+                if (last) {
+                    carOptions.push({ value: combo.value, label: combo.label });
+                    addedCombinations.add(combo.value);
+                }
+            }
+        });
         
         carFilterSelect.setOptions(carOptions);
         
@@ -1037,6 +1261,16 @@ function buildCarFilter(data) {
  * @returns {string} Selected filter value
  */
 function getSelectedFilter(selector, defaultValue) {
+    // Use the actual value from the CustomSelect component, not the label text
+    if (selector === '#car-filter-ui' && carFilterSelect) {
+        const value = carFilterSelect.getValue();
+        return value === '' ? 'All cars' : value;
+    }
+    if (selector === '#difficulty-filter-ui' && difficultyFilterSelect) {
+        const value = difficultyFilterSelect.getValue();
+        return value === '' ? 'All difficulties' : value;
+    }
+    // Fallback to reading button text (backward compatibility)
     const toggle = document.querySelector(`${selector} .custom-select__toggle`);
     return toggle ? toggle.textContent.replace(' ▾', '').trim() : defaultValue;
 }
@@ -1060,8 +1294,25 @@ function matchesDifficultyFilter(entry, selectedDifficulty) {
  * @returns {boolean} True if matches
  */
 function matchesCarFilter(entry, selectedCar) {
-    if (selectedCar === 'All cars') return true;
+    if (selectedCar === 'All cars' || selectedCar === '') return true;
+    
     const car = getField(entry, FIELD_NAMES.CAR);
+    
+    // Check if this is a combined DTM filter
+    if (selectedCar.startsWith('COMBINED_DTM:')) {
+        const baseName = selectedCar.substring(13);
+        return car === baseName || car === baseName + ' DTM';
+    }
+    
+    // Check if this is a combined year filter
+    if (selectedCar.startsWith('COMBINED_YEAR:')) {
+        const baseName = selectedCar.substring(14);
+        // Match base name or base name with any year suffix
+        if (car === baseName) return true;
+        const yearInfo = detectYearSuffix(car);
+        return yearInfo && yearInfo.baseName === baseName;
+    }
+    
     return car === selectedCar;
 }
 
@@ -1103,6 +1354,7 @@ document.addEventListener('DOMContentLoaded', () => {
     carFilterSelect = new CustomSelect('car-filter-ui', carOptions, () => {
         filterAndDisplayResults();
     });
+    DetailState.carFilterSelect = carFilterSelect;
     
     // Difficulty filter
     const difficultyOptions = [
@@ -1112,13 +1364,14 @@ document.addEventListener('DOMContentLoaded', () => {
         { value: 'Novice', label: 'Novice' }
     ];
     
-    const difficultySelect = new CustomSelect('difficulty-filter-ui', difficultyOptions, () => {
+    difficultyFilterSelect = new CustomSelect('difficulty-filter-ui', difficultyOptions, () => {
         filterAndDisplayResults();
     });
+    DetailState.difficultyFilterSelect = difficultyFilterSelect;
     
     // Set initial difficulty from URL param
     if (difficultyParam && difficultyParam !== 'All difficulties') {
-        difficultySelect.setValue(difficultyParam);
+        difficultyFilterSelect.setValue(difficultyParam);
     }
 });
 

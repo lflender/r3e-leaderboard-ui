@@ -350,6 +350,9 @@ class DataService {
             }
             
             if (filteredEntries.length > 0) {
+                // Note: date_time enhancement removed - it was causing major performance issues
+                // by fetching cache files for every entry. The date_time field should be added
+                // to the driver_index.json on the server side instead.
                 results.push({
                     driver: driverEntries[0].name || driverKey,
                     entries: filteredEntries
@@ -358,6 +361,37 @@ class DataService {
         }
         
         return results;
+    }
+    
+    /**
+     * Extract leaderboard array from cache data
+     * @param {Object} data - Cache file data
+     * @returns {Array} Leaderboard entries
+     */
+    extractLeaderboardArray(data) {
+        if (data.track_info && data.track_info.Data && Array.isArray(data.track_info.Data)) {
+            return data.track_info.Data;
+        }
+        
+        // Try other possible locations
+        const possibleKeys = ['Data', 'data', 'entries', 'leaderboard'];
+        for (const key of possibleKeys) {
+            if (data[key] && Array.isArray(data[key])) {
+                return data[key];
+            }
+        }
+        
+        return [];
+    }
+    
+    /**
+     * Normalize time string for comparison
+     * @param {string} time - Time string
+     * @returns {string} Normalized time
+     */
+    normalizeTime(time) {
+        if (!time) return '';
+        return String(time).split(',')[0].trim(); // Remove gap info, just get main time
     }
 
     // -------- Internal helpers for index caching --------

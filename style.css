@@ -1,57 +1,29 @@
-/* Car Info table: smaller, stylized font for Power, Weight, Engine, Drive */
-.carinfo-meta {
-    font-size: 0.87em !important;
-    font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
-    color: #b6c2d1;
-    font-weight: 500;
-    letter-spacing: 0.01em;
-    opacity: 0.93;
-}
-/* Car Info badges (same as .pos-number, but color-coded) */
-.car-badge {
-    padding: 0.18rem 0.6rem;
-    border-radius: 999px;
-    font-weight: 800;
-    font-size: 0.95rem;
-    text-decoration: none !important;
-    border: none;
-    line-height: 1.2;
-    display: inline-block;
-    vertical-align: baseline;
-    background: #b3e5fc;
-    color: #222;
-}
-.car-badge.gt { background: #b3e5fc; color: #222; }
-.car-badge.round { background: #ffe082; color: #222; }
-.car-badge[title*="flat"], .car-badge.round-flat { background: #c8e6c9; color: #222; white-space: nowrap; }
-.car-badge.trans { background: #1976d2; color: #fff; }
-.car-badge.trans.sequential { background: #7b1fa2; color: #fff; }
-.car-badge.trans.h { background: #c62828; color: #fff; }
-.car-badge.unknown { background: #eee; color: #888; }
+/**
+ * R3E Leaderboard UI - Main Stylesheet
+ * 
+ * Organization:
+ * 1. CSS Custom Properties (:root)
+ * 2. Global resets and base styles
+ * 3. Layout (header, main, footer)
+ * 4. Navigation (tabs)
+ * 5. Search and filters (custom selects)
+ * 6. Tables (results tables, cells, columns)
+ * 7. Badges and indicators (position, car, difficulty)
+ * 8. Status display
+ * 9. News section
+ * 10. Pagination
+ * 11. Detail page specific styles
+ * 12. Media queries (tablet and mobile)
+ * 
+ * Note: Some elements use inline styles in JS for dynamic coloring:
+ * - Position badges: gradient based on rank
+ * - Year badges in car info: gradient based on year
+ * These are marked with data-color attributes for reference.
+ */
 
-/* Detail header lines (Track, Layout, Class) - match other section title sizing */
-.detail-header-line, #detail-track, #detail-class, #detail-layout {
-    font-size: 1.35rem;
-    font-weight: 800;
-    color: var(--text-primary);
-    margin-bottom: 0.25rem;
-    letter-spacing: 0.015em;
-    padding-bottom: 0.35rem;
-    border-bottom: 1px solid rgba(255,255,255,0.03);
-}
-
-.detail-header-line .detail-label, #detail-track .detail-label, #detail-layout .detail-label, #detail-class .detail-label {
-    color: var(--primary-color);
-    font-weight: 700;
-    margin-right: 0.25em;
-}
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    /* Remove tap highlight on mobile for better UX */
-    -webkit-tap-highlight-color: transparent;
-}
+/* ========================================
+   1. CSS CUSTOM PROPERTIES
+   ======================================== */
 
 :root {
     --primary-color: #3b82f6;
@@ -62,6 +34,21 @@
     --border: #334155;
     --shadow: rgba(0, 0, 0, 0.3);
     --hover-bg: #334155;
+    --pos-badge-default: rgba(59,130,246,0.18);
+    --pos-badge-first: #22c55e;
+    --pos-badge-last: #ef4444;
+    --year-badge-text: #222;
+}
+
+/* ========================================
+   2. GLOBAL RESETS AND BASE STYLES
+   ======================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -71,31 +58,57 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    /* Better text rendering on mobile */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
-header {
+/* ========================================
+   3. LAYOUT
+   ======================================== */
+
+#site-header header {
     background-color: var(--surface);
-    padding: 2rem;
+    padding: 2rem 2rem 1rem 2rem;
     text-align: center;
     box-shadow: 0 2px 4px var(--shadow);
 }
 
-header h1 {
+#site-header header h1 {
     font-size: 2rem;
     color: var(--primary-color);
     font-weight: 700;
+    line-height: normal;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.header-logo {
+    height: 8rem;
+    width: auto;
+    max-width: 100%;
+    display: block;
 }
 
 .home-link {
     color: var(--primary-color);
     text-decoration: none;
+    display: inline-flex;
+    align-items: center;
 }
 
 .home-link:hover {
-    text-decoration: underline;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+/* Detail page subheader (the subtitle container) should not inherit site header spacing */
+#site-header + header {
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
+    text-align: left;
 }
 
 main {
@@ -105,6 +118,92 @@ main {
     margin: 2rem auto;
     padding: 0 1.5rem;
 }
+
+footer {
+    background-color: var(--surface);
+    padding: 1.5rem;
+    color: var(--text-secondary);
+    box-shadow: 0 -2px 4px var(--shadow);
+    margin-top: 2rem;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.footer-text {
+    text-align: center;
+    flex: 1;
+}
+
+footer p {
+    font-size: 0.875rem;
+}
+
+.footer-donate {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 180px;
+}
+
+.paypal-button {
+    background: #0070ba;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    white-space: nowrap;
+    width: 100%;
+}
+
+.paypal-button:hover {
+    background: #0f94ec;
+}
+
+.paypal-button span {
+    display: inline-block;
+}
+
+.raceroom-button {
+    background: #691313;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    white-space: nowrap;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.raceroom-button:hover {
+    background: #a32929;
+}
+
+.raceroom-button span {
+    display: inline-block;
+}
+
+/* ========================================
+   4. NAVIGATION (TABS)
+   ======================================== */
 
 .tabs {
     display: flex;
@@ -143,32 +242,20 @@ main {
     min-height: 400px;
 }
 
-/* Ensure tables are scrollable within their container and fit the same width as other tabs */
 .tab-panel {
+    display: none;
     max-width: 1100px;
     margin: 0 auto;
 }
+
+.tab-panel.active {
+    display: block;
+}
+
 .content-inner {
     max-width: 1100px;
     margin: 0 auto;
     width: 100%;
-}
-.results-table {
-    width: 100%;
-    table-layout: auto;
-}
-
-/* Slightly tighter table cells so long names don't push layout */
-.results-table th,
-.results-table td {
-    padding: 0.45rem 0.6rem; /* reduced from ~0.6-0.8 */
-    text-align: left;
-    vertical-align: middle;
-}
-
-/* Allow car names in Car Info to wrap (they were previously forced nowrap) */
-.results-table td.no-wrap {
-    white-space: normal;
 }
 
 /* Ensure search controls and table containers align identically */
@@ -180,13 +267,9 @@ main {
     margin: 0 auto 1rem auto;
 }
 
-.tab-panel {
-    display: none;
-}
-
-.tab-panel.active {
-    display: block;
-}
+/* ========================================
+   5. SEARCH AND FILTERS
+   ======================================== */
 
 .search-container {
     display: flex;
@@ -278,13 +361,6 @@ main {
 }
 
 /* Hide info icon on mobile devices (no hover tooltips) */
-@media (hover: none), (pointer: coarse) {
-    .info-icon { display: none !important; }
-}
-@media (max-width: 768px) {
-    .info-icon { display: none !important; }
-}
-
 /* Car Info table specific column widths */
 #cars-info-table .results-table th:nth-child(1),
 #cars-info-table .results-table td:nth-child(1) {
@@ -293,17 +369,11 @@ main {
 
 /* Reduce horizontal padding on Car Info page */
 #cars-info-table .results-table th {
-    padding: 0.7rem 0.65rem;
+    padding: 0.7rem 0.6rem;
 }
 #cars-info-table .results-table td {
-    padding: 0.65rem 0.65rem;
+    padding: 0.6rem 0.6rem;
 }
-
-/* Drive badges styling */
-.car-badge.drive { font-weight: 700; }
-.car-badge.drive.rwd { background: #35cbe6; color: #fff; }
-.car-badge.drive.fwd { background: #755377; color: #fff; }
-.car-badge.drive.awd { background: #f0b5e8; color: #fff; }
 
 .custom-select__toggle {
     width: 100%;
@@ -361,6 +431,10 @@ main {
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
+/* ========================================
+   6. TABLES
+   ======================================== */
+
 #results-container {
     margin-top: 1.5rem;
 }
@@ -382,6 +456,7 @@ main {
 
 .results-table {
     width: 100%;
+    table-layout: auto;
     border-collapse: collapse;
     margin-top: 1rem;
     border-radius: 10px;
@@ -389,48 +464,11 @@ main {
     box-shadow: 0 2px 12px 0 rgba(30, 41, 59, 0.10);
 }
 
-/* Allow horizontal scroll for wide tables on small screens */
-#cars-info-table,
-#track-info-table,
-#results-container,
-#detail-results-container {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    /* Add scrollbar styling for webkit browsers */
-    scrollbar-width: thin;
-    scrollbar-color: var(--primary-color) var(--surface);
-}
-
-#cars-info-table::-webkit-scrollbar,
-#track-info-table::-webkit-scrollbar,
-#results-container::-webkit-scrollbar,
-#detail-results-container::-webkit-scrollbar {
-    height: 8px;
-}
-
-#cars-info-table::-webkit-scrollbar-track,
-#track-info-table::-webkit-scrollbar-track,
-#results-container::-webkit-scrollbar-track,
-#detail-results-container::-webkit-scrollbar-track {
-    background: var(--surface);
-}
-
-#cars-info-table::-webkit-scrollbar-thumb,
-#track-info-table::-webkit-scrollbar-thumb,
-#results-container::-webkit-scrollbar-thumb,
-#detail-results-container::-webkit-scrollbar-thumb {
-    background: var(--primary-color);
-    border-radius: 4px;
-}
-
-.results-table thead tr {
-    background: #2563eb;
-}
-
 .results-table th,
 .results-table td {
-    padding: 0.65rem;
+    padding: 0.65rem 0.6rem;
     text-align: left;
+    vertical-align: middle;
     border-bottom: 1px solid var(--border);
 }
 
@@ -441,6 +479,10 @@ main {
     padding: 0.7rem 0.8rem;
     border: none;
     letter-spacing: 0.01em;
+}
+
+.results-table thead tr {
+    background: #2563eb;
 }
 
 .results-table th.sortable {
@@ -474,15 +516,26 @@ main {
 
 .results-table td {
     padding: 0.6rem;
-    border-bottom: 1px solid var(--border);
     background: var(--surface);
     color: var(--text-primary);
-    font-size: 1.05rem;
     transition: background 0.2s;
 }
 
 .results-table tr:hover td {
     background: var(--hover-bg);
+}
+
+.results-table tr:last-child td {
+    border-bottom: none;
+}
+
+.results-table a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.results-table td.no-wrap {
+    white-space: normal;
 }
 
 .highlight-row td {
@@ -495,9 +548,454 @@ main {
     transition: background-color 0.25s ease, box-shadow 0.25s ease;
 }
 
-.results-table tr:last-child td {
-    border-bottom: none;
+/* Table scrollbar styling */
+#cars-info-table,
+#track-info-table,
+#results-container,
+#detail-results-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) var(--surface);
 }
+
+#cars-info-table::-webkit-scrollbar,
+#track-info-table::-webkit-scrollbar,
+#results-container::-webkit-scrollbar,
+#detail-results-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+#cars-info-table::-webkit-scrollbar-track,
+#track-info-table::-webkit-scrollbar-track,
+#results-container::-webkit-scrollbar-track,
+#detail-results-container::-webkit-scrollbar-track {
+    background: var(--surface);
+}
+
+#cars-info-table::-webkit-scrollbar-thumb,
+#track-info-table::-webkit-scrollbar-thumb,
+#results-container::-webkit-scrollbar-thumb,
+#detail-results-container::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+/* Car Info table specific styles */
+.carinfo-meta {
+    font-size: 0.87em !important;
+    font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+    color: #b6c2d1;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    opacity: 0.93;
+}
+
+#cars-info-table .results-table th:nth-child(1),
+#cars-info-table .results-table td:nth-child(1) {
+    white-space: nowrap;
+}
+
+#cars-info-table .results-table th {
+    padding: 0.7rem 0.65rem;
+}
+
+#cars-info-table .results-table td {
+    padding: 0.65rem 0.65rem;
+}
+
+/* Row links and info icons */
+.row-link {
+    color: inherit;
+    text-decoration: none;
+    display: inline-block;
+    width: 100%;
+    white-space: normal;
+}
+
+.row-link:hover {
+    text-decoration: underline;
+}
+
+.info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1em;
+    height: 1em;
+    margin-left: 0.25em;
+    border-radius: 999px;
+    background: var(--primary-color);
+    color: #fff;
+    font-weight: 900;
+    font-size: 0.72em;
+    line-height: 1em;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+    cursor: help;
+    z-index: 2;
+}
+
+.no-wrap-tail {
+    white-space: nowrap;
+}
+
+/* Driver group headers */
+.driver-group-header {
+    background-color: #3b4a6b !important;
+    cursor: pointer;
+    user-select: none;
+    color: #f1f5fa;
+    font-weight: 600;
+    font-size: 1.08rem;
+    border-top: 1px solid #475569;
+    border-bottom: 1px solid #475569;
+    transition: background 0.2s;
+    box-shadow: none;
+}
+
+.driver-group-header:hover {
+    background-color: #4b5d85 !important;
+}
+
+.driver-group-header td {
+    padding: 1rem !important;
+    font-weight: 600;
+    border: none;
+    background: none;
+}
+
+.toggle-icon {
+    display: inline-block;
+    margin-right: 0.5rem;
+    font-size: 0.95rem;
+    transition: transform 0.2s;
+    color: #60a5fa;
+}
+
+.driver-meta {
+    margin-left: 1rem;
+    font-weight: 400;
+    opacity: 0.9;
+    font-size: 0.97rem;
+    color: #a5b4fc;
+}
+
+.driver-data-row {
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.driver-data-row:hover {
+    background-color: var(--hover-bg);
+}
+
+/* Lap time cells */
+.lap-time-cell {
+    vertical-align: top;
+    text-align: center;
+}
+
+.lap-time-cell .lap-main {
+    display: block;
+    white-space: nowrap;
+}
+
+.lap-time-cell .time-delta {
+    display: block;
+    white-space: nowrap;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.time-delta-inline {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin-left: 0.4rem;
+}
+
+.no-wrap {
+    white-space: nowrap;
+}
+
+/* Track layout styling */
+.track-layout {
+    font-size: 0.85em;
+    color: #999;
+    font-style: italic;
+    font-weight: 400;
+}
+
+#results-container .track-layout {
+    white-space: nowrap;
+    display: block;
+}
+
+/* ========================================
+   7. BADGES AND INDICATORS
+   ======================================== */
+
+/* Car badges - Base styling */
+.car-badge {
+    padding: 0.18rem 0.6rem;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    text-decoration: none !important;
+    border: none;
+    line-height: 1.2;
+    display: inline-block;
+    vertical-align: baseline;
+    background: #b3e5fc;
+    color: #222;
+}
+
+/* Wheel type badges */
+.car-badge.gt { 
+    background: #b3e5fc; 
+    color: #222; 
+}
+
+.car-badge.round { 
+    background: #ffe082; 
+    color: #222; 
+}
+
+.car-badge[title*="flat"], 
+.car-badge.round-flat { 
+    background: #c8e6c9; 
+    color: #222; 
+    white-space: nowrap; 
+}
+
+/* Transmission badges */
+.car-badge.trans { 
+    background: #1976d2; 
+    color: #fff; 
+}
+
+.car-badge.trans.sequential { 
+    background: #7b1fa2; 
+    color: #fff; 
+}
+
+.car-badge.trans.h { 
+    background: #c62828; 
+    color: #fff; 
+}
+
+.car-badge.unknown { 
+    background: #eee; 
+    color: #888; 
+}
+
+/* Drive type badges */
+.car-badge.drive { 
+    font-weight: 700; 
+}
+
+.car-badge.drive.rwd { 
+    background: #35cbe6; 
+    color: #fff; 
+}
+
+.car-badge.drive.fwd { 
+    background: #755377; 
+    color: #fff; 
+}
+
+.car-badge.drive.awd { 
+    background: #f0b5e8; 
+    color: #fff; 
+}
+
+/* Year badge (dynamic coloring via inline style) */
+.car-badge.year-badge {
+    color: var(--year-badge-text);
+}
+
+/* Position badges */
+.pos-cell {
+    white-space: nowrap;
+}
+
+.pos-number {
+    background: var(--pos-badge-default);
+    color: var(--text-primary);
+    padding: 0.18rem 0.6rem;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    text-decoration: none !important;
+    border: none;
+    line-height: 1.2;
+    display: inline-block;
+    vertical-align: baseline;
+}
+
+/* Podium positions - Gold, Silver, Bronze */
+.pos-number.pos-1 {
+    color: #ffd700;
+    text-shadow: 0 0 1px #000,
+                 0 0 2px #000,
+                 1px 1px 0 #000,
+                 -1px -1px 0 #000,
+                 1px -1px 0 #000,
+                 -1px 1px 0 #000,
+                 0 0 10px rgba(255, 215, 0, 0.8),
+                 0 0 20px rgba(255, 215, 0, 0.5);
+    font-weight: 900;
+}
+
+.pos-number.pos-2 {
+    color: #b8b8b8;
+    text-shadow: 0 0 1px #000,
+                 0 0 2px #000,
+                 1px 1px 0 #000,
+                 -1px -1px 0 #000,
+                 1px -1px 0 #000,
+                 -1px 1px 0 #000,
+                 0 0 8px rgba(184, 184, 184, 0.8),
+                 0 0 16px rgba(184, 184, 184, 0.5);
+    font-weight: 900;
+}
+
+.pos-number.pos-3 {
+    color: #cd7f32;
+    text-shadow: 0 0 1px #000,
+                 0 0 2px #000,
+                 1px 1px 0 #000,
+                 -1px -1px 0 #000,
+                 1px -1px 0 #000,
+                 -1px 1px 0 #000,
+                 0 0 8px rgba(205, 127, 50, 0.8),
+                 0 0 16px rgba(205, 127, 50, 0.5);
+    font-weight: 900;
+}
+
+.pos-total {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin-left: 0.35rem;
+    text-decoration: none !important;
+}
+
+.pos-sep {
+    color: var(--text-secondary);
+    opacity: 0.95;
+}
+
+.absolute-pos-label {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    font-weight: 500;
+    opacity: 0.85;
+    margin-right: 0.4rem;
+    display: inline-block;
+    vertical-align: baseline;
+}
+
+/* Difficulty badges */
+.difficulty-cell { 
+    white-space: nowrap;
+}
+
+.difficulty-pill {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    line-height: 1;
+}
+
+.difficulty-pill.difficulty-get-real {
+    background-color: rgba(255, 215, 0, 0.14);
+    border-color: rgba(255, 215, 0, 0.30);
+    border-style: solid;
+    border-width: 1px;
+}
+
+.difficulty-pill.difficulty-amateur {
+    background-color: rgba(192, 192, 192, 0.14);
+    border-color: rgba(192, 192, 192, 0.30);
+    border-style: solid;
+    border-width: 1px;
+}
+
+.difficulty-pill.difficulty-novice {
+    background-color: rgba(205, 127, 50, 0.14);
+    border-color: rgba(205, 127, 50, 0.30);
+    border-style: solid;
+    border-width: 1px;
+}
+
+.difficulty-get-real { 
+    background-color: rgba(255, 215, 0, 0.10); 
+}
+
+.difficulty-amateur { 
+    background-color: rgba(192, 192, 192, 0.10); 
+}
+
+.difficulty-novice { 
+    background-color: rgba(205, 127, 50, 0.10); 
+}
+
+.difficulty-legend {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+.difficulty-legend .legend-label {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.difficulty-legend .difficulty-pill {
+    font-weight: 700;
+    font-size: 0.8rem;
+    padding: 0.12rem 0.45rem;
+}
+
+.gap-percent-cell {
+    white-space: nowrap;
+    text-align: center;
+}
+
+/* Date cell */
+.date-cell {
+    white-space: nowrap;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+/* Flag icons */
+.country-flag {
+    display: inline-block;
+    margin-right: 0.6rem;
+    vertical-align: -1px;
+    line-height: 1;
+}
+
+.country-flag .fi {
+    font-size: 1em;
+    line-height: 1;
+}
+
+.various-flag-icon {
+    width: 1.3em;
+    height: 1em;
+    vertical-align: middle;
+    display: inline-block;
+}
+
+/* ========================================
+   8. STATUS DISPLAY
+   ======================================== */
 
 .status-section {
     margin-top: 3rem;
@@ -596,7 +1094,32 @@ main {
     color: var(--text-primary);
 }
 
-/* News list */
+.status-item-inline {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    align-items: baseline;
+}
+
+.status-section .status-grid .status-item.status-item-inline > div {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+}
+
+.status-label {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.status-value {
+    color: var(--text-primary);
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+/* ========================================
+   9. NEWS SECTION
+   ======================================== */
 .news-list {
     display: flex;
     flex-direction: column;
@@ -654,25 +1177,12 @@ main {
     background: var(--surface);
 }
 
-@media (max-width: 600px) {
-    .news-item { flex-direction: column; }
-    .news-thumb {
-        width: 100%;
-        height: auto;
-        max-height: 300px;
-        aspect-ratio: 16 / 9;
-    }
-}
-
 /* Prevent wrapping for compact fields like "pos / total" */
 .no-wrap {
     white-space: nowrap;
 }
 
 .lap-time-cell {
-    min-width: 80px;
-    max-width: 80px;
-    width: 80px;
     vertical-align: top;
     text-align: center;
 }
@@ -681,9 +1191,8 @@ main {
     display: block;
     white-space: nowrap;
 }
+
 .lap-time-cell .time-delta {
-    display: block;
-    white-space: nowrap;
     display: block;
     white-space: nowrap;
     color: var(--text-secondary);
@@ -699,11 +1208,9 @@ main {
 /* Position badge styling */
 .pos-cell {
     white-space: nowrap;
-    /* Use inline layout so badge baseline aligns with text baseline */
-    /* Remove flex and alignment */
 }
 .pos-number {
-    background: rgba(59,130,246,0.18);
+    background: var(--pos-badge-default);
     color: var(--text-primary);
     padding: 0.18rem 0.6rem;
     border-radius: 999px;
@@ -786,18 +1293,29 @@ main {
     text-decoration: none;
 }
 
-/* Ensure table cells vertically center contents */
-.results-table td {
+/* Year badge coloring (dynamic via data attributes handled by JS) */
+.car-badge.year-badge {
+    color: var(--year-badge-text);
+}
+
+/* Various flag icon styling */
+.various-flag-icon {
+    width: 1.3em;
+    height: 1em;
     vertical-align: middle;
-}
-
-.lap-time-cell {
-    min-width: 0;
-}
-
-.status-item .status-value {
     display: inline-block;
-    min-width: 0;
+}
+
+/* News section styling */
+.news-actions-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.news-error-details {
+    margin-top: 0.5rem;
 }
 
 .status-item-inline {
@@ -810,12 +1328,6 @@ main {
 .status-section .status-grid .status-item.status-item-inline > div {
     flex: 1 1 0 !important;
     min-width: 0 !important;
-}
-
-@media (max-width: 800px) {
-    .status-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
 }
 
 .status-label {
@@ -888,6 +1400,49 @@ main {
 
 .driver-data-row:hover {
     background-color: var(--hover-bg);
+}
+
+/* ========================================
+   11. DETAIL PAGE SPECIFIC
+   ======================================== */
+
+/* Rank stars displayed inline after driver name */
+.rank-stars-inline {
+    display: inline-block;
+    white-space: nowrap;
+    font-size: 0.7em;
+    line-height: 1;
+    vertical-align: middle;
+    /* Prevent the stars from wrapping separately */
+    word-break: keep-all;
+}
+
+/* Ensure the stars stay with the driver name */
+.rank-stars-inline::before {
+    content: '\00A0'; /* Non-breaking space before stars */
+}
+
+/* Detail header lines (Track, Layout, Class) */
+.detail-header-line, 
+#detail-track, 
+#detail-class, 
+#detail-layout {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    letter-spacing: 0.015em;
+    padding-bottom: 0.35rem;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+
+.detail-header-line .detail-label, 
+#detail-track .detail-label, 
+#detail-layout .detail-label, 
+#detail-class .detail-label {
+    color: var(--primary-color);
+    font-weight: 700;
+    margin-right: 0.25em;
 }
 
 .detail-subtitle {
@@ -1039,93 +1594,17 @@ footer {
     margin: 0 auto;
 }
 
-.footer-text {
-    text-align: center;
-    flex: 1;
-}
-
-footer p {
-    font-size: 0.875rem;
-}
-
-.footer-donate {
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    min-width: 180px;
-}
-
-.paypal-button {
-    background: #0070ba;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s ease;
-    white-space: nowrap;
-    width: 100%;
-}
-
-.paypal-button:hover {
-    background: #0f94ec;
-}
-
-.paypal-button span {
-    display: inline-block;
-}
-
-.raceroom-button {
-    background: #691313;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s ease;
-    white-space: nowrap;
-    text-decoration: none;
-    display: inline-block;
-    text-align: center;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.raceroom-button:hover {
-    background: #a32929;
-}
-
-.raceroom-button span {
-    display: inline-block;
-}
-
 /* Difficulty color scheme - subtle pill styling */
 .difficulty-cell { 
     white-space: nowrap;
-    max-width: 75px;
-    width: 75px;
 }
 
 /* Gap percentage column styling */
 .gap-percent-cell {
     white-space: nowrap;
     text-align: center;
-    max-width: 75px;
-    width: 75px;
 }
 
-/* Lap time column - slightly constrain width */
-.lap-time-cell {
-    width: 100px;
-    max-width: 100px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
 .difficulty-pill {
     display: inline-block;
     padding: 0.15rem 0.5rem;
@@ -1192,68 +1671,38 @@ footer p {
     display: block;
 }
 
-/* Track Info table mobile optimization - apply for all small screens */
-@media (max-width: 768px) {
-    #track-info-table {
-        overflow-x: visible !important;
-        width: 100% !important;
-    }
-    
-    #track-info-table .results-table {
-        table-layout: fixed !important;
-        width: 100% !important;
-        min-width: 0 !important;
-    }
-    
-    #track-info-table .results-table th,
-    #track-info-table .results-table td {
-        padding: 0.4rem 0.25rem !important;
-        min-width: 0 !important;
-        overflow: hidden !important;
-    }
-    
-    /* First column - Track name */
-    #track-info-table .results-table th:nth-child(1),
-    #track-info-table .results-table td:nth-child(1),
-    #track-info-table .track-cell { 
-        width: 50% !important;
-        max-width: 50% !important;
-        word-break: break-word !important;
-        overflow-wrap: break-word !important;
-    }
-    
-    /* Second column - Car Class */
-    #track-info-table .results-table th:nth-child(2),
-    #track-info-table .results-table td:nth-child(2),
-    #track-info-table .class-cell { 
-        width: 35% !important;
-        max-width: 35% !important;
-        white-space: normal !important;
-        word-break: break-word !important;
-        overflow-wrap: break-word !important;
-    }
-    
-    /* Third column - Entry count */
-    #track-info-table .results-table th:nth-child(3),
-    #track-info-table .results-table td:nth-child(3),
-    #track-info-table td.no-wrap,
-    #track-info-table th.no-wrap { 
-        width: 15% !important;
-        max-width: 15% !important;
-        text-align: right !important;
-        white-space: nowrap !important;
-        overflow: visible !important;
+/* ========================================
+   12. RESPONSIVE DESIGN (MEDIA QUERIES)
+   ======================================== */
+
+/* Touch devices: hide info icons */
+@media (hover: none), (pointer: coarse) {
+    .info-icon { display: none !important; }
+}
+
+/* Tablets and medium screens (max-width: 800px) */
+@media (max-width: 800px) {
+    .status-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
+/* Small screens and mobile devices (max-width: 768px) */
 @media (max-width: 768px) {
-    header {
-        padding: 1.25rem 1rem;
+    .info-icon { display: none !important; }
+    
+    #site-header header {
+        /* Keep top padding, reduce bottom only */
+        padding: 1.25rem 1rem 0.75rem 1rem;
     }
 
     header h1 {
         font-size: 1.35rem;
         line-height: 1.3;
+    }
+
+    .header-logo {
+        height: 5rem;
     }
 
     main {
@@ -1269,7 +1718,7 @@ footer p {
     }
 
     .tab-button {
-        padding: 0.65rem 1rem;
+        padding: 0.6rem 1rem;
         font-size: 0.9rem;
         white-space: nowrap;
         flex-shrink: 0;
@@ -1294,29 +1743,12 @@ footer p {
 
     .results-table th,
     .results-table td {
-        padding: 0.45rem 0.35rem;
+        padding: 0.6rem 0.35rem;
         font-size: 0.7rem;
     }
 
     .results-table th {
         font-size: 0.75rem;
-    }
-
-    .results-table th:nth-child(4),
-    .results-table td:nth-child(4) {
-        max-width: 7rem;
-    }
-
-    .results-table th:nth-child(5),
-    .results-table td:nth-child(5) {
-        width: 4.5rem;
-        max-width: 4.5rem;
-    }
-
-    .results-table th:nth-child(6),
-    .results-table td:nth-child(6) {
-        width: 3rem;
-        max-width: 3rem;
     }
 
     /* Position badges stay readable */
@@ -1343,8 +1775,6 @@ footer p {
 
     .difficulty-cell { 
         white-space: nowrap;
-        max-width: 70px;
-        width: 70px;
     }
 
     /* Driver names and metadata */
@@ -1539,13 +1969,64 @@ footer p {
     #cars-info-table .results-table td {
         padding: 0.6rem 0.3rem;
         font-size: 0.75rem;
-        line-height: 0.9;
     }
 
     #cars-info-table .results-table th:nth-child(1),
     #cars-info-table .results-table td:nth-child(1) {
         width: 15rem;
         max-width: 15rem;
+    }
+
+    /* Track Info table mobile optimization */
+    #track-info-table {
+        overflow-x: visible !important;
+        width: 100% !important;
+    }
+    
+    #track-info-table .results-table {
+        table-layout: fixed !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+    
+    #track-info-table .results-table th,
+    #track-info-table .results-table td {
+        padding: 0.6rem 0.25rem !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+    }
+    
+    /* First column - Track name */
+    #track-info-table .results-table th:nth-child(1),
+    #track-info-table .results-table td:nth-child(1),
+    #track-info-table .track-cell { 
+        width: 50% !important;
+        max-width: 50% !important;
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
+    }
+    
+    /* Second column - Car Class */
+    #track-info-table .results-table th:nth-child(2),
+    #track-info-table .results-table td:nth-child(2),
+    #track-info-table .class-cell { 
+        width: 35% !important;
+        max-width: 35% !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
+    }
+    
+    /* Third column - Entry count */
+    #track-info-table .results-table th:nth-child(3),
+    #track-info-table .results-table td:nth-child(3),
+    #track-info-table td.no-wrap,
+    #track-info-table th.no-wrap { 
+        width: 15% !important;
+        max-width: 15% !important;
+        text-align: right !important;
+        white-space: nowrap !important;
+        overflow: visible !important;
     }
 
     /* Footer adjustments */
@@ -1569,10 +2050,32 @@ footer p {
     }
 }
 
+/* News thumbnails (max-width: 600px) */
+@media (max-width: 600px) {
+    .news-item { 
+        flex-direction: column; 
+    }
+    
+    .news-thumb {
+        width: 100%;
+        height: auto;
+        max-height: 300px;
+        aspect-ratio: 16 / 9;
+    }
+}
+
 /* Extra small screens (under 480px) */
 @media (max-width: 480px) {
+    /* Keep top padding, reduce bottom further on mobile */
+    #site-header header {
+        padding: 1.25rem 0.75rem 0.6rem 0.75rem;
+    }
     header h1 {
         font-size: 1.15rem;
+    }
+
+    .header-logo {
+        height: 4rem;
     }
 
     .results-table {

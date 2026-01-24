@@ -23,6 +23,11 @@
     
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"/>
+    <!-- Site Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png?v=2">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png?v=2">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png?v=2">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico?v=2">
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -38,9 +43,7 @@
     </script>
 </head>
 <body>
-    <header>
-        <h1><a href="index.html" class="home-link">RaceRoom Leaderboards Explorer</a></h1>
-    </header>
+    <div id="site-header"></div>
 
     <main>
         <div class="tabs">
@@ -112,34 +115,15 @@
         </div>
     </main>
 
-    <footer>
-        <div class="footer-content">
-            <div class="footer-text">
-                <p>&copy;RaceRoom Leaderboards Explorer</p>
-                <p>Website not affiliated with RaceRoom™.<br/>The RaceRoom™ brand belongs to its rightful owner.</p><br/>
-                <p>hello@r3e-leaderboards.info</p>
-            </div>
-            <div class="footer-donate">
-                <form action="https://www.paypal.com/donate" method="post" target="_blank">
-                    <input type="hidden" name="business" value="ludovic@fastmail.com" />
-                    <input type="hidden" name="no_recurring" value="0" />
-                    <input type="hidden" name="currency_code" value="EUR" />
-                    <input type="hidden" name="item_name" value="Support RaceRoom Leaderboards Explorer" />
-                    <button type="submit" class="paypal-button" title="Buy me a coffee">
-                        <span>☕ Buy me a coffee</span>
-                    </button>
-                </form>
-                <a href="https://game.raceroom.com/store/" target="_blank" rel="noopener" class="raceroom-button" title="Support RaceRoom">
-                    <span>🏁 Support RaceRoom</span>
-                </a>
-            </div>
-        </div>
-    </footer>
+    <div id="site-footer"></div>
     <!-- Core modules - load first -->
     <script src="data/country-mappings.js"></script>
     <script src="modules/flag-helper.js"></script>
     <script src="modules/template-loader.js"></script>
+    <script src="modules/header-loader.js"></script>
+    <script src="modules/footer-loader.js"></script>
     <script src="modules/template-helper.js"></script>
+    <script src="modules/column-config.js"></script>
     <script src="modules/field-mappings.js"></script>
     <script src="modules/data-normalizer.js"></script>
     <script src="modules/utils.js"></script>

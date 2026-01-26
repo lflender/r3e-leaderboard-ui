@@ -153,7 +153,7 @@ footer p {
     min-width: 180px;
 }
 
-.paypal-button {
+.donate-button {
     background: #0070ba;
     color: white;
     border: none;
@@ -167,11 +167,11 @@ footer p {
     width: 100%;
 }
 
-.paypal-button:hover {
+.donate-button:hover {
     background: #0f94ec;
 }
 
-.paypal-button span {
+.donate-button span {
     display: inline-block;
 }
 

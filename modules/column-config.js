@@ -47,7 +47,7 @@ const COLUMNS = {
         id: 'track',
         aliases: ['Track', 'track', 'TrackName', 'track_name'],
         displayName: 'Track',
-        order: 30,
+        order: 40,
         visible: true
     },
     
@@ -55,7 +55,7 @@ const COLUMNS = {
         id: 'position',
         aliases: ['Position', 'position', 'Pos'],
         displayName: 'Position',
-        order: 40,
+        order: 30,
         visible: true,
         sortable: true,
         sortKey: 'position'

@@ -695,14 +695,14 @@ async function displayResults(data) {
     }
     
     // Create table headers using ColumnConfig for consistency
-    // For detail page, we want: Position, Driver Name, Lap Time, Lap %, [Class if combined], Car, Difficulty, Date
+    // For detail page, we want: Position, Driver, Lap Time, Lap %, [Class if combined], Car, Difficulty, Date
     const baseColumns = ['Position', 'Name', 'LapTime', 'GapPercent', 'Car', 'Difficulty', 'date_time'];
     const columnsWithClass = ['Position', 'Name', 'LapTime', 'GapPercent', 'CarClass', 'Car', 'Difficulty', 'date_time'];
     const columnKeys = DetailState.isCombinedView ? columnsWithClass : baseColumns;
     
     // Get display names from ColumnConfig
     const headers = columnKeys.map(key => {
-        if (key === 'Name') return 'Driver Name'; // Special case for detail page
+        if (key === 'Name') return 'Driver'; // Special case for detail page
         return window.ColumnConfig ? window.ColumnConfig.getDisplayName(key) : key;
     });
     
@@ -838,26 +838,10 @@ function renderDetailRow(item, showAbsolutePosition = false) {
     }
     
     // Lap % (Gap Percentage)
-    // Calculate percentage gap from leader (first position)
-    // For position 1, show -, otherwise calculate based on time difference
-    const posNumber = parseInt(posNum) || 1;
-    if (posNumber === 1) {
-        html += `<td class="gap-percent-cell">-</td>`;
-    } else {
-        // Find the leader's time from allResults
-        const leaderEntry = allResults.find(entry => {
-            const entryPos = parseInt(DataNormalizer.extractPosition(entry));
-            return entryPos === 1;
-        });
-        
-        if (leaderEntry) {
-            const leaderTime = DataNormalizer.extractLapTime(leaderEntry);
-            const gapPercent = R3EUtils.calculateGapPercentage(item, leaderTime);
-            html += `<td class="gap-percent-cell">${R3EUtils.escapeHtml(gapPercent)}</td>`;
-        } else {
-            html += `<td class="gap-percent-cell">—</td>`;
-        }
-    }
+    // Calculate percentage gap directly from the gap time embedded in the lap time data
+    // This works even when filtering because gap is stored in the lap time string
+    const gapPercent = R3EUtils.calculateGapPercentage(item, null);
+    html += `<td class="gap-percent-cell">${R3EUtils.escapeHtml(gapPercent)}</td>`;
     
     // Class (only in combined view)
     if (DetailState.isCombinedView) {

@@ -4283,7 +4283,7 @@
       },
       {
         "car_class": "WTCC 2014",
-        "car": "Citroën C Elysee WTCC",
+        "car": "Citroën C Elysée WTCC",
         "wheel": "Round",
         "wheel_cat": "round",
         "transmission": "Seq",
@@ -4295,7 +4295,7 @@
         "drive": "FWD",
         "country": "France",
         "link": "https://game.raceroom.com/store/cars/wtcc-2014/citroen/citroen-c-elysee-wtcc",
-        "description": "The 2014 Citroën WTCC C-Elysee is a front wheel driven marvel of engineering. Its lightning fast, but with that raw potential also comes a car that can be a real handful to race on the limit. If you can handle it, the Elysee is the 2014 touring car to beat."
+        "description": "The 2014 Citroën WTCC C-Elysée is a front wheel driven marvel of engineering. Its lightning fast, but with that raw potential also comes a car that can be a real handful to race on the limit. If you can handle it, the Elysée is the 2014 touring car to beat."
       },
       {
         "car_class": "WTCC 2014",
@@ -4353,7 +4353,7 @@
       },
       {
         "car_class": "WTCC 2015",
-        "car": "Citroën C Elysee WTCC 2015",
+        "car": "Citroën C Elysée WTCC 2015",
         "wheel": "Round",
         "wheel_cat": "round",
         "transmission": "Seq",
@@ -4365,7 +4365,7 @@
         "drive": "FWD",
         "country": "France",
         "link": "https://game.raceroom.com/store/cars/wtcc-2015/citroen/citroen-c-elysee-wtcc-2015",
-        "description": "The 2015 Citroën WTCC C-Elysee builds on the highly successful 2014 WTCC winning car, refining looks and handling even further. It is lightning fast, but with that raw potential also comes a car that can be a real handful to race on the limit. If you can handle it, the Elysee is still the 2015 touring car to beat."
+        "description": "The 2015 Citroën WTCC C-Elysée builds on the highly successful 2014 WTCC winning car, refining looks and handling even further. It is lightning fast, but with that raw potential also comes a car that can be a real handful to race on the limit. If you can handle it, the Elysée is still the 2015 touring car to beat."
       },
       {
         "car_class": "WTCC 2015",
@@ -4423,7 +4423,7 @@
       },
       {
         "car_class": "WTCC 2016",
-        "car": "Citroën C Elysee WTCC 2016",
+        "car": "Citroën C Elysée WTCC 2016",
         "wheel": "Round",
         "wheel_cat": "round",
         "transmission": "Seq",
@@ -4435,7 +4435,7 @@
         "drive": "FWD",
         "country": "France",
         "link": "https://game.raceroom.com/store/cars/wtcc-2016/citroen/citroen-c-elysee-wtcc-2016",
-        "description": "The 2016 version of the championship winning Citroën C Elysee model aims to be the pinnacle of what a touring car can be. Taking an already dominant car and making it faster in both a straight line and in the turns without sacrificing driveability is no easy job, but this is what Citroën wanted to achieve with their final year of factory involvement in the FIA WTCC. Slide behind the wheel of the Elysee 2016 to see if they made it happen. But beware, this one still bites if you push it too far!"
+        "description": "The 2016 version of the championship winning Citroën C Elysée model aims to be the pinnacle of what a touring car can be. Taking an already dominant car and making it faster in both a straight line and in the turns without sacrificing driveability is no easy job, but this is what Citroën wanted to achieve with their final year of factory involvement in the FIA WTCC. Slide behind the wheel of the Elysée 2016 to see if they made it happen. But beware, this one still bites if you push it too far!"
       },
       {
         "car_class": "WTCC 2016",
@@ -4509,7 +4509,7 @@
       },
       {
         "car_class": "WTCC 2017",
-        "car": "Citroën C Elysee WTCC 2017",
+        "car": "Citroën C Elysée WTCC 2017",
         "wheel": "Round",
         "wheel_cat": "round",
         "transmission": "Seq",
@@ -4521,7 +4521,7 @@
         "drive": "FWD",
         "country": "France",
         "link": "https://game.raceroom.com/store/cars/wtcc-2017/citroen/citroen-c-elysee-wtcc-2017",
-        "description": "The Citroën WTCC C-Elysee is a front wheel driven marvel of engineering. Its lightning fast, but with that raw potential also comes a car that can be a real handful to race on the limit. "
+        "description": "The Citroën WTCC C-Elysée is a front wheel driven marvel of engineering. Its lightning fast, but with that raw potential also comes a car that can be a real handful to race on the limit. "
       },
       {
         "car_class": "WTCC 2017",

@@ -499,7 +499,10 @@
     let html = '<table class="results-table"><thead><tr>';
     keys.forEach(k => {
       const displayName = window.ColumnConfig ? window.ColumnConfig.getDisplayName(k) : R3EUtils.formatHeader(k);
-      html += `<th>${displayName}</th>`;
+      const isEntriesColumn = window.ColumnConfig && window.ColumnConfig.isColumnType(k, 'TOTAL_ENTRIES');
+      let headerClass = '';
+      if (isEntriesColumn) headerClass = ' class="entries-cell"';
+      html += `<th${headerClass}>${displayName}</th>`;
     });
     html += '</tr></thead><tbody>';
 
@@ -558,6 +561,9 @@
           // Date formatting
           const formattedDate = value ? R3EUtils.formatDate(value) : '';
           html += `<td class="date-cell">${R3EUtils.escapeHtml(formattedDate)}</td>`;
+        } else if (window.ColumnConfig && window.ColumnConfig.isColumnType(key, 'TOTAL_ENTRIES')) {
+          // Entries column: use specific class for right-alignment
+          html += `<td class="entries-cell">${formatValue(value)}</td>`;
         } else {
           html += `<td>${formatValue(value)}</td>`;
         }

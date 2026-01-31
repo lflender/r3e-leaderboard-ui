@@ -330,6 +330,84 @@ function formatDate(dateTimeString) {
     }
 }
 // ========================================
+// Car Name Utilities
+// ========================================
+
+/**
+ * List of known car brand names for splitting car names into brand + model
+ * Ordered from longest to shortest to match multi-word brands first (e.g., "Lynk & Co" before "KTM")
+ */
+const CAR_BRANDS = [
+    // Multi-word brands (must come first)
+    'Mercedes-Benz', 'Mercedes-AMG', 'Alfa Romeo', 'Lynk & Co', 'RUF',
+    // German brands
+    'Mercedes', 'AMG-Mercedes', 'BMW', 'Audi', 'Porsche', 'Volkswagen', 'Opel', 'NSU',
+    // Italian brands
+    'Ferrari', 'Lamborghini', 'Pagani', 'Maserati',
+    // British brands
+    'McLaren', 'Bentley', 'Lotus', 'Radical', 'Aston Martin', 'Jaguar',
+    // American brands
+    'Chevrolet', 'Ford', 'Cadillac', 'Saleen', 'Callaway',
+    // Japanese brands
+    'Nissan', 'Honda', 'Mazda', 'Toyota', 'Lexus', 'Subaru',
+    // Korean brands
+    'Hyundai', 'Kia',
+    // Other European
+    'Renault', 'Peugeot', 'Citroën', 'Citroen', 'Volvo', 'SEAT', 'CUPRA', 'LADA', 'Lada',
+    // Austrian
+    'KTM', 'Gumpert',
+    // Others
+    'Koenigsegg', 'Praga', 'Tatuus', 'Aquila', 'Canhard', 'Cougar', 'Crosslé', 'Crossle',
+    'DMD', 'Fabcar', 'Mistral', 'RaceRoom', 'Formula', 'Carlsson', 'Zakspeed',
+    'Abt-Audi', 'S.C.', 'P4-5'
+];
+
+/**
+ * Special case mappings for cars where brand detection doesn't work with simple prefix matching
+ * Maps full car name to { brand, model }
+ */
+const CAR_SPECIAL_CASES = {
+    'E36 V8 JUDD': { brand: 'Judd', model: 'E36 V8' },
+    '134 Judd V8': { brand: 'Judd', model: '134 V8' }
+};
+
+/**
+ * Splits a car name into brand and model parts
+ * @param {string} carName - Full car name (e.g., "BMW M4 GT3")
+ * @returns {Object} Object with brand and model properties
+ */
+function splitCarName(carName) {
+    if (!carName) return { brand: '', model: '' };
+    
+    const name = String(carName).trim();
+    
+    // Check special cases first
+    if (CAR_SPECIAL_CASES[name]) {
+        return CAR_SPECIAL_CASES[name];
+    }
+    
+    // Try to match each brand (already sorted by length/priority)
+    for (const brand of CAR_BRANDS) {
+        if (name.startsWith(brand + ' ') || name === brand) {
+            const model = name.slice(brand.length).trim();
+            return { brand, model };
+        }
+    }
+    
+    // Fallback: first word is brand, rest is model
+    const spaceIndex = name.indexOf(' ');
+    if (spaceIndex > 0) {
+        return {
+            brand: name.slice(0, spaceIndex),
+            model: name.slice(spaceIndex + 1)
+        };
+    }
+    
+    // No space found, entire name is brand
+    return { brand: name, model: '' };
+}
+
+// ========================================
 // Export utilities for use in other modules
 // ========================================
 
@@ -347,5 +425,6 @@ window.R3EUtils = {
     getPositionBadgeColor,
     getUrlParam,
     updateUrlParam,
-    formatDate
+    formatDate,
+    splitCarName
 };

@@ -849,9 +849,14 @@ function renderDetailRow(item, showAbsolutePosition = false) {
         html += `<td class="class-cell">${R3EUtils.escapeHtml(String(className))}</td>`;
     }
     
-    // Car
-    html += `<td>${R3EUtils.escapeHtml(String(car))}</td>`;
-    
+    // Car (with styled brand/model split)
+    const { brand: carBrand, model: carModel } = R3EUtils.splitCarName(car);
+    if (carModel) {
+        html += `<td class="car-cell"><span class="car-brand">${R3EUtils.escapeHtml(carBrand)}</span> <span class="car-model">${R3EUtils.escapeHtml(carModel)}</span></td>`;
+    } else {
+        html += `<td class="car-cell"><span class="car-brand">${R3EUtils.escapeHtml(carBrand)}</span></td>`;
+    }
+
     // Difficulty
     html += `<td class="difficulty-cell"><span class="difficulty-pill ${diffClass}">${R3EUtils.escapeHtml(String(difficulty))}</span></td>`;
     

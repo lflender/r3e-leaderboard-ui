@@ -369,6 +369,17 @@ footer p {
     z-index: 2;
 }
 
+/* Warning icon for cars not eligible to leaderboards */
+.warning-icon {
+    display: inline-block;
+    margin-left: 0.25em;
+    font-size: 0.9em;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+    cursor: help;
+}
+
 /* Keep last word + info icon together */
 .no-wrap-tail {
     white-space: nowrap;

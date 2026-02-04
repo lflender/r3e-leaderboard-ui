@@ -211,7 +211,7 @@
   async function aggregatePerClassForTrack(selectedTrackId){
     const idx = await loadDriverIndexLocal();
     if (!idx) return [];
-    const perClass = new Map(); // name -> {id, count}
+    const perClass = new Map(); // classId -> {name, count}
     let totalEntries = 0;
     let matchedEntries = 0;
     for (const k of Object.keys(idx)){
@@ -223,27 +223,30 @@
         if (Number(tid) !== Number(selectedTrackId)) continue;
         matchedEntries++;
         const cid = e.class_id || e.ClassID || e.classId;
-        let cname = e.class_name || e.ClassName;
-        if (!cname && e.car_class) {
-          cname = typeof e.car_class === 'string' ? e.car_class : (e.car_class.class?.Name || e.car_class.class?.name);
+        if (!cid) continue;
+        
+        // Use static lookup for class name (fast) or fallback to entry fields
+        let cname = window.getCarClassName ? window.getCarClassName(cid) : null;
+        if (!cname || cname === String(cid)) {
+          cname = e.car_class || e.class_name || e.ClassName || e.class || e.Class || String(cid);
         }
-        cname = cname || e.class || e.Class || null;
-        if (!cname) continue;
-        const existing = perClass.get(cname);
+        
+        const key = String(cid);
+        const existing = perClass.get(key);
         if (existing) {
           existing.count++;
         } else {
-          perClass.set(cname, { id: cid, count: 1 });
+          perClass.set(key, { id: cid, name: cname, count: 1 });
         }
       }
     }
     const rows = [];
-    perClass.forEach((data, cname)=>{
+    perClass.forEach((data, key)=>{
       rows.push({
         track: TRACK_LABELS.get(String(selectedTrackId)) || String(selectedTrackId),
         track_id: Number(selectedTrackId),
         class_id: Number(data.id),
-        class_name: cname,
+        class_name: data.name,
         entry_count: data.count
       });
     });
@@ -251,11 +254,17 @@
     return rows;
   }
 
-  // Simple: resolve class ID from driver_index by name
+  // Simple: resolve class ID from static mapping (fast)
   async function resolveClassId(className) {
     if (!className) return null;
     
-    // Scan driver_index to find numeric ID for this class name
+    // Use the fast static lookup from car-classes.js
+    if (window.getCarClassId) {
+      const classId = window.getCarClassId(className);
+      return classId ? Number(classId) : null;
+    }
+    
+    // Fallback: scan driver_index to find numeric ID for this class name (slow)
     const idx = await loadDriverIndexLocal();
     if (!idx) return null;
     
@@ -292,11 +301,21 @@
     return bestId;
   }
 
-  // Resolve multiple class names to their IDs in one pass
+  // Resolve multiple class names to their IDs using static mapping (fast)
   async function resolveMultipleClassIds(classNames) {
     const result = new Map();
     if (!classNames || classNames.length === 0) return result;
     
+    // Use the fast static lookup from car-classes.js
+    if (window.getCarClassId) {
+      classNames.forEach(className => {
+        const classId = window.getCarClassId(className);
+        result.set(className, classId ? Number(classId) : null);
+      });
+      return result;
+    }
+    
+    // Fallback: scan driver index (slow path, should not be needed)
     const idx = await loadDriverIndexLocal();
     if (!idx) return result;
     

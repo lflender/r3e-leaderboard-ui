@@ -104,57 +104,18 @@ class DailyRaces {
     }
 
     /**
-     * Resolve car class ID to name by scanning driver_index
+     * Resolve car class ID to name using mapping table
      */
-    async resolveCarClassName(classId) {
+    resolveCarClassName(classId) {
         if (!classId) return '';
         
-        // Try to load driver index
-        let idx = null;
-        try {
-            if (window.dataService) {
-                idx = await window.dataService.loadDriverIndex();
-            }
-        } catch (error) {
-            console.error('Error loading driver index for class resolution:', error);
-            return classId; // Return ID as fallback
+        // Use the fast mapping from car-classes.js
+        if (window.getCarClassName) {
+            return window.getCarClassName(classId);
         }
         
-        if (!idx) return classId;
-        
-        const targetId = Number(classId);
-        const counts = new Map(); // Map<className, count>
-        
-        // Scan driver index to find the most common class_name for this class_id
-        for (const driverKey of Object.keys(idx)) {
-            const entries = idx[driverKey] || [];
-            for (const e of entries) {
-                const cid = e.class_id || e.ClassID || e.classId;
-                if (Number(cid) === targetId) {
-                    let cname = e.class_name || e.ClassName;
-                    if (!cname && e.car_class) {
-                        cname = typeof e.car_class === 'string' ? e.car_class : (e.car_class.class?.Name || e.car_class.class?.name);
-                    }
-                    cname = cname || e.Class || e.class || '';
-                    if (cname) {
-                        const key = String(cname).trim();
-                        counts.set(key, (counts.get(key) || 0) + 1);
-                    }
-                }
-            }
-        }
-        
-        // Return the most common class name for this ID
-        let bestName = null;
-        let bestCount = 0;
-        for (const [name, count] of counts) {
-            if (count > bestCount) {
-                bestCount = count;
-                bestName = name;
-            }
-        }
-        
-        return bestName || classId; // Return ID if name not found
+        // Fallback to ID if mapping not loaded
+        return String(classId);
     }
 
     /**
@@ -192,12 +153,13 @@ class DailyRaces {
                 relativeTime = `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
             }
             
-            const formatted = date.toLocaleString('en-US', {
+            const formatted = date.toLocaleString('en-GB', {
                 month: 'short',
                 day: 'numeric',
                 year: 'numeric',
                 hour: '2-digit',
-                minute: '2-digit'
+                minute: '2-digit',
+                hour12: false
             });
             
             return `${formatted} (${relativeTime})`;
@@ -252,15 +214,8 @@ class DailyRaces {
         // Races grid
         html += '<div class="daily-races-grid">';
         
-        // Resolve all car class names first
-        const classNamePromises = racesData.races.map(race => 
-            this.resolveCarClassName(race.car_class_id)
-        );
-        const resolvedClassNames = await Promise.all(classNamePromises);
-        
-        for (let i = 0; i < racesData.races.length; i++) {
-            const race = racesData.races[i];
-            const carClassName = resolvedClassNames[i];
+        for (const race of racesData.races) {
+            const carClassName = this.resolveCarClassName(race.car_class_id);
             const trackName = this.resolveTrackName(race.track_id);
             const isFree = race.is_free_to_play;
             const freeIcon = '🆓';

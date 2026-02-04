@@ -132,7 +132,7 @@ async function fetchLeaderboardDetails() {
 }
 
 /**
- * Resolve multiple class names to their numeric IDs using driver index
+ * Resolve multiple class names to their numeric IDs using static mapping
  * @param {string[]} classNames - Array of class names
  * @returns {Promise<Map<string, number|null>>} Map of className -> classId
  */
@@ -140,6 +140,16 @@ async function resolveClassNamesToIds(classNames) {
     const result = new Map();
     if (!classNames || classNames.length === 0) return result;
 
+    // Use the fast static lookup from car-classes.js
+    if (window.getCarClassId) {
+        classNames.forEach(name => {
+            const classId = window.getCarClassId(name);
+            result.set(name, classId ? Number(classId) : null);
+        });
+        return result;
+    }
+
+    // Fallback: scan driver index (slow path, should not be needed)
     const buildCountsFromIndex = (idx) => {
         const classNameMap = new Map(); // className -> Map<classId, count>
         classNames.forEach(name => {

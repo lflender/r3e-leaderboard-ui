@@ -22,10 +22,11 @@ class DataService {
     }
     
     /**
-     * Loads driver index with caching
+     * Loads driver index with caching and progressive streaming
+     * @param {Function} onProgress - Optional callback for progressive updates (driverName, entries)
      * @returns {Promise<Object>} Driver index object
      */
-    async loadDriverIndex() {
+    async loadDriverIndex(onProgress = null) {
         // Return immediately if already loaded
         if (this.driverIndex) {
             return this.driverIndex;
@@ -69,20 +70,26 @@ class DataService {
                     if (!response.ok) {
                         throw new Error(`Failed to load driver index: ${response.status} ${response.statusText}`);
                     }
-                    const text = await response.text();
-                    if (!text || text.trim().length === 0) {
-                        throw new Error('Driver index response is empty');
+                    
+                    // Use streaming if onProgress callback is provided
+                    if (onProgress && typeof onProgress === 'function') {
+                        this.driverIndex = await this._streamParseDriverIndex(response, onProgress);
+                    } else {
+                        const text = await response.text();
+                        if (!text || text.trim().length === 0) {
+                            throw new Error('Driver index response is empty');
+                        }
+                        this.driverIndex = await this._parseJsonWhenIdle(text);
                     }
-                    const parsed = await this._parseJsonWhenIdle(text);
-                    if (!parsed || typeof parsed !== 'object') {
+                    
+                    if (!this.driverIndex || typeof this.driverIndex !== 'object') {
                         throw new Error('Driver index is not an object');
                     }
-                    const keyCount = Object.keys(parsed).length;
+                    const keyCount = Object.keys(this.driverIndex).length;
                     if (keyCount === 0) {
                         throw new Error('Driver index is empty');
                     }
-                    this.driverIndex = parsed;
-                    this._saveDriverIndexToCache(parsed);
+                    this._saveDriverIndexToCache(this.driverIndex);
                     // Update baseline and start periodic revalidation
                     setTimeout(() => { this._updateLastIndexFromStatus(); }, 0);
                     this._startIndexStatusRevalidator();
@@ -101,6 +108,85 @@ class DataService {
         })();
 
         return this.driverIndexPromise;
+    }
+
+    /**
+     * Stream-parse driver index JSON and call onProgress for each driver entry
+     * @param {Response} response - Fetch response object
+     * @param {Function} onProgress - Callback(driverName, entries)
+     * @returns {Promise<Object>} Complete driver index
+     */
+    async _streamParseDriverIndex(response, onProgress) {
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        const index = {};
+        let inObject = false;
+        let currentKey = '';
+        let braceDepth = 0;
+        let valueStart = -1;
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            
+            buffer += decoder.decode(value, { stream: true });
+            
+            // Simple streaming JSON parser for {key:[...], key:[...]} structure
+            for (let i = 0; i < buffer.length; i++) {
+                const char = buffer[i];
+                
+                if (char === '{' && !inObject && braceDepth === 0) {
+                    braceDepth = 1;
+                    continue;
+                }
+                
+                if (braceDepth === 1) {
+                    // Looking for key
+                    if (char === '"' && !currentKey) {
+                        const closeQuote = buffer.indexOf('"', i + 1);
+                        if (closeQuote > i) {
+                            currentKey = buffer.substring(i + 1, closeQuote);
+                            i = closeQuote;
+                        }
+                    } else if (char === '[' && currentKey) {
+                        valueStart = i;
+                        braceDepth = 2;
+                    }
+                } else if (braceDepth === 2) {
+                    // Inside array, look for closing ]
+                    if (char === '[') braceDepth++;
+                    else if (char === ']') {
+                        braceDepth--;
+                        if (braceDepth === 1) {
+                            // Complete entry found
+                            const arrayJson = buffer.substring(valueStart, i + 1);
+                            try {
+                                const entries = JSON.parse(arrayJson);
+                                index[currentKey] = entries;
+                                // Call progress callback
+                                if (onProgress) {
+                                    onProgress(currentKey, entries);
+                                }
+                            } catch (e) {
+                                // Ignore malformed entries
+                            }
+                            currentKey = '';
+                            valueStart = -1;
+                            // Remove processed content from buffer
+                            buffer = buffer.substring(i + 1);
+                            i = -1;
+                        }
+                    } else if (char === '{' || char === '}') {
+                        // Track nested objects within arrays
+                        if (char === '{') braceDepth++;
+                        else braceDepth--;
+                    }
+                }
+            }
+        }
+
+        return index;
     }
     
     /**

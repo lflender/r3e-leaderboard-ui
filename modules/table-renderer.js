@@ -261,6 +261,7 @@ class TableRenderer {
         const CC = window.ColumnConfig;
         const isPositionKey = CC ? CC.isColumnType(key, 'POSITION') : ['Position', 'position', 'Pos'].includes(key);
         const isCarClassKey = CC ? CC.isColumnType(key, 'CAR_CLASS') : ['CarClass', 'Car Class', 'car_class', 'Class', 'class'].includes(key);
+        const isCarKey = CC ? CC.isColumnType(key, 'CAR') : ['Car', 'car', 'CarName', 'car_name'].includes(key);
         const isLapTimeKey = CC ? CC.isColumnType(key, 'LAP_TIME') : ['LapTime', 'Lap Time', 'lap_time', 'laptime', 'Time'].includes(key);
         const isTrackKey = CC ? CC.isColumnType(key, 'TRACK') : ['Track', 'track', 'TrackName', 'track_name'].includes(key);
         const isDifficultyKey = CC ? CC.isColumnType(key, 'DIFFICULTY') : ['Difficulty', 'difficulty', 'driving_model'].includes(key);
@@ -277,6 +278,8 @@ class TableRenderer {
             return this.renderPositionCell(item);
         } else if (isCarClassKey) {
             return `<td class="no-wrap"><strong>${R3EUtils.formatValue(value)}</strong></td>`;
+        } else if (isCarKey) {
+            return this.renderCarCell(value);
         } else if (isLapTimeKey) {
             return this.renderLapTimeCell(value);
         } else if (isTrackKey) {
@@ -339,6 +342,25 @@ class TableRenderer {
      */
     renderTrackCell(value) {
         return TableRenderer.renderTrackCellStatic(value);
+    }
+    
+    /**
+     * Renders car cell with brand in normal styling and model in secondary styling
+     * @param {string} value - Car name
+     * @returns {string} HTML string
+     */
+    renderCarCell(value) {
+        if (!value) return '<td>-</td>';
+        
+        const { brand, model } = R3EUtils.splitCarName(value);
+        const escBrand = R3EUtils.escapeHtml(brand);
+        const escModel = R3EUtils.escapeHtml(model);
+        
+        if (model) {
+            return `<td class="car-cell"><span class="car-brand">${escBrand}</span> <span class="car-model">${escModel}</span></td>`;
+        } else {
+            return `<td class="car-cell"><span class="car-brand">${escBrand}</span></td>`;
+        }
     }
     
     /**

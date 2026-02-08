@@ -612,7 +612,7 @@ class DataService {
     }
     
     /**
-     * Populates class filter from cars data
+     * Populates class filter from cars data, filtered to only classes with leaderboard data
      * @returns {Array<{value: string, label: string}>} Class options
      */
     getClassOptionsFromCarsData() {
@@ -626,6 +626,12 @@ class DataService {
         window.CARS_DATA.forEach(entry => {
             const cls = entry.class || entry.car_class || entry.CarClass || '';
             if (!cls || seen.has(cls)) return;
+            
+            // Only include classes that exist in CAR_CLASSES_DATA (have leaderboard entries)
+            if (window.getCarClassId && !window.getCarClassId(cls)) {
+                return; // Skip classes without leaderboard data (e.g., Safety Car)
+            }
+            
             seen.add(cls);
             options.push({ value: cls, label: cls });
         });

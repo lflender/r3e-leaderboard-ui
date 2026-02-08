@@ -68,8 +68,8 @@ class StatusDisplay {
                 const date = new Date(timestamp);
                 this.elements.timestamp.textContent = date.toLocaleString('en-GB', { 
                     year: 'numeric', 
-                    month: '2-digit', 
-                    day: '2-digit', 
+                    month: 'short', 
+                    day: 'numeric', 
                     hour: '2-digit', 
                     minute: '2-digit',
                     hour12: false 

@@ -1653,7 +1653,326 @@ footer p {
     gap: 0.35rem;
 }
 
+/* Car Distribution Summary */
+.car-dist-summary {
+    margin: 1.5rem 0;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background-color: var(--surface);
+    overflow: hidden;
+}
 
+.car-dist-toggle {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background-color: var(--surface);
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: background-color 0.2s;
+    border-bottom: 1px solid var(--border);
+}
+
+.car-dist-toggle:hover {
+    background-color: var(--hover-bg);
+}
+
+.car-dist-toggle-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s;
+    font-size: 0.85rem;
+    color: var(--primary-color);
+    min-width: 1rem;
+}
+
+.car-dist-toggle.expanded .car-dist-toggle-icon {
+    transform: rotate(0deg);
+}
+
+.car-dist-toggle:not(.expanded) .car-dist-toggle-icon {
+    transform: rotate(-90deg);
+}
+
+.car-dist-content {
+    padding: 0;
+    overflow-x: auto;
+}
+
+.car-dist-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    table-layout: auto;
+}
+
+/* Restore original header row styling */
+.car-dist-table thead {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.car-dist-table th,
+.car-dist-table td {
+    /* Remove forced ellipsis and nowrap for car column */
+    overflow: initial;
+    text-overflow: initial;
+    white-space: initial;
+}
+
+/* Make the 3 data columns equal width, car column flexible */
+.car-dist-table th.car-dist-car,
+.car-dist-table td.car-dist-car {
+    width: auto;
+    min-width: 120px;
+    max-width: 320px;
+}
+.car-dist-table th.car-dist-entries,
+.car-dist-table td.car-dist-entries,
+.car-dist-table th.car-dist-percentage,
+.car-dist-table td.car-dist-percentage,
+.car-dist-table th.car-dist-median,
+.car-dist-table td.car-dist-median {
+    width: 10.5em;
+    max-width: 10.5em;
+    text-align: right;
+}
+}
+
+.car-dist-table thead {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.car-dist-table th {
+    padding: 0.6rem 0.75rem;
+    text-align: left;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.car-dist-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    padding-right: 1.5rem;
+}
+
+.car-dist-table th.sortable:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.car-dist-table th.sortable.sort-active {
+    color: var(--primary-color);
+}
+
+.car-dist-table .sort-label {
+    display: inline;
+}
+
+.car-dist-table .sort-indicator {
+    margin-left: 0.4rem;
+    opacity: 0.5;
+    font-size: 0.9em;
+}
+
+.car-dist-table th.sortable.sort-active .sort-indicator {
+    opacity: 1;
+}
+
+.car-dist-table th.car-dist-entries,
+.car-dist-table th.car-dist-percentage,
+.car-dist-table th.car-dist-median {
+    text-align: right;
+}
+
+.car-dist-table td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+    color: var(--text-primary);
+}
+
+.car-dist-table tbody tr:hover {
+    background-color: rgba(59, 130, 246, 0.08);
+}
+
+.car-dist-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.car-dist-car {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.car-dist-entries {
+    text-align: right;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.car-dist-percentage {
+    text-align: right;
+    color: var(--primary-color);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+}
+
+.car-dist-median {
+    text-align: right;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Responsive styling for car distribution table */
+@media (max-width: 1000px) {
+    .car-dist-table {
+        font-size: 0.85rem;
+    }
+    
+    .car-dist-table th {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.6rem;
+    }
+    
+    .car-dist-toggle {
+        font-size: 0.9rem;
+        padding: 0.65rem 0.9rem;
+    }
+
+    .car-dist-table th.car-dist-entries,
+    .car-dist-table td.car-dist-entries,
+    .car-dist-table th.car-dist-percentage,
+    .car-dist-table td.car-dist-percentage,
+    .car-dist-table th.car-dist-median,
+    .car-dist-table td.car-dist-median {
+        width: 6.5em;
+        max-width: 6.5em;
+    }
+}
+
+@media (max-width: 768px) {
+    .car-dist-summary {
+        margin: 1rem 0;
+    }
+    
+    .car-dist-content {
+        overflow-x: visible;
+    }
+    
+    .car-dist-table {
+        font-size: 0.8rem;
+        table-layout: auto;
+        width: 100%;
+    }
+    
+    .car-dist-table th {
+        font-size: 0.75rem;
+        padding: 0.45rem 0.35rem;
+    }
+    
+    .car-dist-table td {
+        padding: 0.4rem 0.35rem;
+    }
+    
+    .car-dist-toggle {
+        font-size: 0.85rem;
+        padding: 0.6rem 0.8rem;
+    }
+
+    .car-dist-table th.car-dist-car,
+    .car-dist-table td.car-dist-car {
+        max-width: none;
+    }
+
+    .car-dist-table th.car-dist-entries,
+    .car-dist-table td.car-dist-entries,
+    .car-dist-table th.car-dist-percentage,
+    .car-dist-table td.car-dist-percentage {
+        width: 3.5em;
+        max-width: 3.5em;
+    }
+    
+    .car-dist-table th.car-dist-median,
+    .car-dist-table td.car-dist-median {
+        width: 4.5em;
+        max-width: 4.5em;
+    }
+    
+    /* Ensure sort indicators are visible */
+    .car-dist-table th.sortable {
+        padding-right: 1.2rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .car-dist-content {
+        overflow-x: visible;
+    }
+    .car-dist-table {
+        font-size: 0.68rem;
+        table-layout: auto;
+        min-width: 0;
+        width: 100%;
+    }
+    .car-dist-table th.car-dist-car,
+    .car-dist-table td.car-dist-car {
+        min-width: 0;
+        max-width: none;
+    }
+    .car-dist-table th {
+        font-size: 0.7rem;
+        padding: 0.4rem 0.25rem;
+    }
+    .car-dist-table td {
+        padding: 0.35rem 0.25rem;
+    }
+    .car-dist-table th.car-dist-entries,
+    .car-dist-table td.car-dist-entries,
+    .car-dist-table th.car-dist-percentage,
+    .car-dist-table td.car-dist-percentage {
+        width: 3.2em;
+        max-width: 3.2em;
+    }
+    .car-dist-table th.car-dist-median,
+    .car-dist-table td.car-dist-median {
+        width: 3.8em;
+        max-width: 3.8em;
+    }
+    
+    /* Ensure sort indicators are visible on mobile */
+    .car-dist-table th.sortable {
+        padding-right: 1rem;
+    }
+    
+    /* Use 'Med' label for median column header on mobile */
+    .car-dist-median-label {
+        font-size: 0;
+    }
+    .car-dist-median-label::after {
+        content: 'Med';
+        font-size: 0.7rem;
+        display: inline;
+    }
+    
+    .car-dist-table td {
+        padding: 0.35rem 0.5rem;
+    }
+    
+    .car-dist-toggle {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.7rem;
+    }
+}
 
 .no-results {
     text-align: center;

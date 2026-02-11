@@ -737,6 +737,80 @@ async function displayResults(data) {
     
     resultsContainer.innerHTML = paginationHTML + tableHTML + paginationHTML;
     
+    // Add car distribution summary if multiple cars present
+    if (availableCars.length > 1) {
+        // Default sort: entries (desc), median (asc)
+        let defaultSortBy = 'entries';
+        let defaultSortDir = 'desc';
+        if (defaultSortBy === 'median') {
+            defaultSortDir = 'asc';
+        }
+        const summaryHTML = generateCarDistributionSummary(allResults, defaultSortBy, defaultSortBy === 'median' ? 'asc' : 'desc');
+        // Insert summary above pagination and table
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = summaryHTML + paginationHTML + tableHTML + paginationHTML;
+        resultsContainer.innerHTML = tempDiv.innerHTML;
+
+        // Add event listener for expand/collapse
+        const toggleBtn = resultsContainer.querySelector('.car-dist-toggle');
+        const summaryTable = resultsContainer.querySelector('.car-dist-content');
+        if (toggleBtn && summaryTable) {
+            toggleBtn.addEventListener('click', () => {
+                const isCollapsed = summaryTable.style.display === 'none';
+                summaryTable.style.display = isCollapsed ? '' : 'none';
+                toggleBtn.classList.toggle('expanded', isCollapsed);
+                toggleBtn.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false');
+            });
+        }
+
+        // Create a function to handle sorting
+        const handleCarDistSort = () => {
+            const sortHeaders = resultsContainer.querySelectorAll('.car-dist-table th.sortable');
+            sortHeaders.forEach(header => {
+                header.addEventListener('click', () => {
+                    const summaryDiv = resultsContainer.querySelector('.car-dist-summary');
+                    const currentSort = summaryDiv.getAttribute('data-sort-by');
+                    const currentDir = summaryDiv.getAttribute('data-sort-dir');
+                    const clickedSort = header.getAttribute('data-sort');
+
+                    // Determine new sort direction
+                    let newDir;
+                    if (currentSort !== clickedSort) {
+                        // If switching to Median, default to asc; otherwise desc
+                        newDir = clickedSort === 'median' ? 'asc' : 'desc';
+                    } else {
+                        // Toggle direction
+                        newDir = currentDir === 'desc' ? 'asc' : 'desc';
+                    }
+
+                    // Re-render with new sort
+                    const newSummaryHTML = generateCarDistributionSummary(allResults, clickedSort, newDir);
+                    const newTempDiv = document.createElement('div');
+                    newTempDiv.innerHTML = newSummaryHTML + paginationHTML + tableHTML + paginationHTML;
+                    resultsContainer.innerHTML = newTempDiv.innerHTML;
+
+                    // Re-attach expand/collapse listener
+                    const newToggleBtn = resultsContainer.querySelector('.car-dist-toggle');
+                    const newSummaryTable = resultsContainer.querySelector('.car-dist-content');
+                    if (newToggleBtn && newSummaryTable) {
+                        newToggleBtn.addEventListener('click', () => {
+                            const isCollapsed = newSummaryTable.style.display === 'none';
+                            newSummaryTable.style.display = isCollapsed ? '' : 'none';
+                            newToggleBtn.classList.toggle('expanded', isCollapsed);
+                            newToggleBtn.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false');
+                        });
+                    }
+
+                    // Re-attach sort listeners
+                    handleCarDistSort();
+                });
+            });
+        };
+        
+        // Attach sorting listeners
+        handleCarDistSort();
+    }
+    
     // Highlight position row if needed
     if (posParam && !Number.isNaN(posParam)) {
         highlightPositionRow(posParam);
@@ -1373,6 +1447,143 @@ document.addEventListener('DOMContentLoaded', () => {
         difficultyFilterSelect.setValue(difficultyParam);
     }
 });
+
+/**
+ * Calculate car distribution statistics
+ * @param {Array} data - Full results dataset
+ * @returns {Array} Array of car stats sorted by entry count descending
+ */
+function getCarDistributionStats(data) {
+    const carStats = {};
+    
+    // Collect position data for each car
+    data.forEach(entry => {
+        const car = entry.Car || entry.car || 'Unknown';
+        const position = parseInt(entry.Position || entry.position || entry.Pos || 0);
+        
+        if (!carStats[car]) {
+            carStats[car] = {
+                car: car,
+                positions: [],
+                entries: 0
+            };
+        }
+        carStats[car].entries++;
+        if (position > 0) {
+            carStats[car].positions.push(position);
+        }
+    });
+    
+    const total = data.length;
+    
+    // Calculate statistics
+    const stats = Object.values(carStats).map(stat => {
+        // Sort positions to find median
+        const sortedPositions = stat.positions.sort((a, b) => a - b);
+        let median = 0;
+        if (sortedPositions.length > 0) {
+            const mid = Math.floor(sortedPositions.length / 2);
+            if (sortedPositions.length % 2 === 0) {
+                median = (sortedPositions[mid - 1] + sortedPositions[mid]) / 2;
+            } else {
+                median = sortedPositions[mid];
+            }
+        }
+        
+        return {
+            car: stat.car,
+            entries: stat.entries,
+            percentage: ((stat.entries / total) * 100).toFixed(1),
+            medianPosition: median
+        };
+    });
+    
+    // Sort by entries descending
+    stats.sort((a, b) => b.entries - a.entries);
+    
+    return stats;
+}
+
+/**
+ * Generate car distribution summary HTML
+ * @param {Array} data - Full results dataset
+ * @param {string} sortBy - Column to sort by ('entries' or 'median'), default 'entries'
+ * @param {string} sortDir - Sort direction ('asc' or 'desc'), default 'desc'
+ * @returns {string} HTML string for the car distribution summary
+ */
+function generateCarDistributionSummary(data, sortBy = 'entries', sortDir = 'desc') {
+    let stats = getCarDistributionStats(data);
+    
+    // Sort the stats array
+    if (sortBy === 'entries') {
+        stats.sort((a, b) => sortDir === 'desc' ? b.entries - a.entries : a.entries - b.entries);
+    } else if (sortBy === 'median') {
+        stats.sort((a, b) => {
+            const aVal = a.medianPosition > 0 ? a.medianPosition : Infinity;
+            const bVal = b.medianPosition > 0 ? b.medianPosition : Infinity;
+            return sortDir === 'desc' ? bVal - aVal : aVal - bVal;
+        });
+    }
+    
+    const summaryId = 'car-dist-summary-' + Date.now();
+    
+    let html = '<div class="car-dist-summary" data-sort-by="' + sortBy + '" data-sort-dir="' + sortDir + '">';
+    html += '<button type="button" class="car-dist-toggle" aria-expanded="false" aria-controls="' + summaryId + '">';
+    html += '<span class="car-dist-toggle-icon">▼</span>';
+    html += '<span class="car-dist-toggle-text">Car Distribution Summary</span>';
+    html += '</button>';
+    
+    html += '<div id="' + summaryId + '" class="car-dist-content" style="display: none;">';
+    html += '<table class="car-dist-table">';
+    html += '<thead>';
+    html += '<tr>';
+    html += '<th class="car-dist-car">Car</th>';
+    
+    // Entries header
+    let entriesClass = 'car-dist-entries sortable';
+    let entriesIndicator = '⇅';
+    if (sortBy === 'entries') {
+        entriesClass += ' sort-active';
+        entriesIndicator = sortDir === 'desc' ? '▼' : '▲';
+    }
+    html += '<th class="' + entriesClass + '" data-sort="entries"><span class="sort-label">Nb</span><span class="sort-indicator">' + entriesIndicator + '</span></th>';
+    
+    html += '<th class="car-dist-percentage">%</th>';
+    
+    // Median Position header
+    let medianClass = 'car-dist-median sortable';
+    let medianIndicator = '⇅';
+    if (sortBy === 'median') {
+        medianClass += ' sort-active';
+        medianIndicator = sortDir === 'desc' ? '▼' : '▲';
+    }
+    html += '<th class="' + medianClass + '" data-sort="median"><span class="sort-label car-dist-median-label">Median</span><span class="sort-indicator">' + medianIndicator + '</span></th>';
+    
+    html += '</tr>';
+    html += '</thead>';
+    html += '<tbody>';
+    
+    stats.forEach(stat => {
+        const { brand: carBrand, model: carModel } = R3EUtils.splitCarName(stat.car);
+        let carHtml = '<span class="car-brand">' + R3EUtils.escapeHtml(carBrand) + '</span>';
+        if (carModel) {
+            carHtml += ' <span class="car-model">' + R3EUtils.escapeHtml(carModel) + '</span>';
+        }
+        html += '<tr>';
+        html += '<td class="car-dist-car">' + carHtml + '</td>';
+        html += '<td class="car-dist-entries">' + stat.entries + '</td>';
+        html += '<td class="car-dist-percentage">' + stat.percentage + '%</td>';
+        html += '<td class="car-dist-median">' + (stat.medianPosition > 0 ? Math.round(stat.medianPosition) : '-') + '</td>';
+        html += '</tr>';
+    });
+    
+    html += '</tbody>';
+    html += '</table>';
+    html += '</div>';
+    html += '</div>';
+    
+    return html;
+}
 
 // Make functions globally accessible
 window.goToPage = goToPage;

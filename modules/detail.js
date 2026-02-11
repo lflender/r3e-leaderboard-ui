@@ -737,21 +737,9 @@ async function displayResults(data) {
     
     resultsContainer.innerHTML = paginationHTML + tableHTML + paginationHTML;
     
-    // Add car distribution summary if multiple cars present
-    if (availableCars.length > 1) {
-        // Default sort: entries (desc), median (asc)
-        let defaultSortBy = 'entries';
-        let defaultSortDir = 'desc';
-        if (defaultSortBy === 'median') {
-            defaultSortDir = 'asc';
-        }
-        const summaryHTML = generateCarDistributionSummary(allResults, defaultSortBy, defaultSortBy === 'median' ? 'asc' : 'desc');
-        // Insert summary above pagination and table
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = summaryHTML + paginationHTML + tableHTML + paginationHTML;
-        resultsContainer.innerHTML = tempDiv.innerHTML;
+    const entriesDistHTML = generateEntriesDistributionGraph(allResults, false);
 
-        // Add event listener for expand/collapse
+    const attachCarDistToggle = () => {
         const toggleBtn = resultsContainer.querySelector('.car-dist-toggle');
         const summaryTable = resultsContainer.querySelector('.car-dist-content');
         if (toggleBtn && summaryTable) {
@@ -762,6 +750,37 @@ async function displayResults(data) {
                 toggleBtn.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false');
             });
         }
+    };
+
+    const attachEntriesDistToggle = () => {
+        const toggleBtn = resultsContainer.querySelector('.entries-dist-toggle');
+        const content = resultsContainer.querySelector('.entries-dist-content');
+        if (toggleBtn && content) {
+            toggleBtn.addEventListener('click', () => {
+                const isCollapsed = content.style.display === 'none';
+                content.style.display = isCollapsed ? '' : 'none';
+                toggleBtn.classList.toggle('expanded', isCollapsed);
+                toggleBtn.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false');
+            });
+        }
+    };
+
+    // Add car distribution summary if multiple cars present
+    if (availableCars.length > 1) {
+        // Default sort: entries (desc), median (asc)
+        let defaultSortBy = 'entries';
+        let defaultSortDir = 'desc';
+        if (defaultSortBy === 'median') {
+            defaultSortDir = 'asc';
+        }
+        const summaryHTML = generateCarDistributionSummary(allResults, defaultSortBy, defaultSortBy === 'median' ? 'asc' : 'desc');
+        // Insert summaries above pagination and table
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = summaryHTML + entriesDistHTML + paginationHTML + tableHTML + paginationHTML;
+        resultsContainer.innerHTML = tempDiv.innerHTML;
+
+        attachCarDistToggle();
+        attachEntriesDistToggle();
 
         // Create a function to handle sorting
         const handleCarDistSort = () => {
@@ -772,6 +791,10 @@ async function displayResults(data) {
                     const currentSort = summaryDiv.getAttribute('data-sort-by');
                     const currentDir = summaryDiv.getAttribute('data-sort-dir');
                     const clickedSort = header.getAttribute('data-sort');
+                    const currentContent = resultsContainer.querySelector('.car-dist-content');
+                    const isExpanded = currentContent && currentContent.style.display !== 'none';
+                    const currentEntriesContent = resultsContainer.querySelector('.entries-dist-content');
+                    const entriesExpanded = currentEntriesContent && currentEntriesContent.style.display !== 'none';
 
                     // Determine new sort direction
                     let newDir;
@@ -784,22 +807,15 @@ async function displayResults(data) {
                     }
 
                     // Re-render with new sort
-                    const newSummaryHTML = generateCarDistributionSummary(allResults, clickedSort, newDir);
+                    const newSummaryHTML = generateCarDistributionSummary(allResults, clickedSort, newDir, isExpanded);
+                    const newEntriesHTML = generateEntriesDistributionGraph(allResults, entriesExpanded);
                     const newTempDiv = document.createElement('div');
-                    newTempDiv.innerHTML = newSummaryHTML + paginationHTML + tableHTML + paginationHTML;
+                    newTempDiv.innerHTML = newSummaryHTML + newEntriesHTML + paginationHTML + tableHTML + paginationHTML;
                     resultsContainer.innerHTML = newTempDiv.innerHTML;
 
-                    // Re-attach expand/collapse listener
-                    const newToggleBtn = resultsContainer.querySelector('.car-dist-toggle');
-                    const newSummaryTable = resultsContainer.querySelector('.car-dist-content');
-                    if (newToggleBtn && newSummaryTable) {
-                        newToggleBtn.addEventListener('click', () => {
-                            const isCollapsed = newSummaryTable.style.display === 'none';
-                            newSummaryTable.style.display = isCollapsed ? '' : 'none';
-                            newToggleBtn.classList.toggle('expanded', isCollapsed);
-                            newToggleBtn.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false');
-                        });
-                    }
+                    // Re-attach expand/collapse listeners
+                    attachCarDistToggle();
+                    attachEntriesDistToggle();
 
                     // Re-attach sort listeners
                     handleCarDistSort();
@@ -809,6 +825,11 @@ async function displayResults(data) {
         
         // Attach sorting listeners
         handleCarDistSort();
+    } else if (entriesDistHTML) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = entriesDistHTML + paginationHTML + tableHTML + paginationHTML;
+        resultsContainer.innerHTML = tempDiv.innerHTML;
+        attachEntriesDistToggle();
     }
     
     // Highlight position row if needed
@@ -1511,7 +1532,7 @@ function getCarDistributionStats(data) {
  * @param {string} sortDir - Sort direction ('asc' or 'desc'), default 'desc'
  * @returns {string} HTML string for the car distribution summary
  */
-function generateCarDistributionSummary(data, sortBy = 'entries', sortDir = 'desc') {
+function generateCarDistributionSummary(data, sortBy = 'entries', sortDir = 'desc', isExpanded = false) {
     let stats = getCarDistributionStats(data);
     
     // Sort the stats array
@@ -1528,12 +1549,12 @@ function generateCarDistributionSummary(data, sortBy = 'entries', sortDir = 'des
     const summaryId = 'car-dist-summary-' + Date.now();
     
     let html = '<div class="car-dist-summary" data-sort-by="' + sortBy + '" data-sort-dir="' + sortDir + '">';
-    html += '<button type="button" class="car-dist-toggle" aria-expanded="false" aria-controls="' + summaryId + '">';
+    html += '<button type="button" class="car-dist-toggle' + (isExpanded ? ' expanded' : '') + '" aria-expanded="' + (isExpanded ? 'true' : 'false') + '" aria-controls="' + summaryId + '">';
     html += '<span class="car-dist-toggle-icon">▼</span>';
     html += '<span class="car-dist-toggle-text">Car Distribution Summary</span>';
     html += '</button>';
     
-    html += '<div id="' + summaryId + '" class="car-dist-content" style="display: none;">';
+    html += '<div id="' + summaryId + '" class="car-dist-content" style="display: ' + (isExpanded ? '' : 'none') + ';">';
     html += '<table class="car-dist-table">';
     html += '<thead>';
     html += '<tr>';
@@ -1582,6 +1603,78 @@ function generateCarDistributionSummary(data, sortBy = 'entries', sortDir = 'des
     html += '</div>';
     html += '</div>';
     
+    return html;
+}
+
+/**
+ * Generate entries distribution graph HTML (entries per day)
+ * @param {Array} data - Full results dataset
+ * @param {boolean} isExpanded - Whether graph is expanded by default
+ * @returns {string} HTML string for the entries distribution graph
+ */
+function generateEntriesDistributionGraph(data, isExpanded = false) {
+    if (!Array.isArray(data) || data.length === 0) return '';
+
+    const dayCounts = new Map();
+    let minDate = null;
+    let maxDate = null;
+
+    data.forEach(entry => {
+        const raw = entry.date_time || entry.dateTime || entry.Date || entry.DateTime || '';
+        if (!raw) return;
+        const d = new Date(raw);
+        if (Number.isNaN(d.getTime())) return;
+        const dayKey = d.toISOString().slice(0, 10);
+        dayCounts.set(dayKey, (dayCounts.get(dayKey) || 0) + 1);
+        if (!minDate || d < minDate) minDate = d;
+        if (!maxDate || d > maxDate) maxDate = d;
+    });
+
+    if (!minDate || !maxDate) return '';
+
+    const start = new Date(Date.UTC(minDate.getUTCFullYear(), minDate.getUTCMonth(), minDate.getUTCDate()));
+    const end = new Date(Date.UTC(maxDate.getUTCFullYear(), maxDate.getUTCMonth(), maxDate.getUTCDate()));
+
+    const dayKeys = [];
+    for (let d = new Date(start); d <= end; d.setUTCDate(d.getUTCDate() + 1)) {
+        dayKeys.push(d.toISOString().slice(0, 10));
+    }
+
+    const counts = dayKeys.map(k => dayCounts.get(k) || 0);
+    const maxCount = Math.max(1, ...counts);
+
+    const chartHeight = 100;
+    const chartWidth = Math.max(dayKeys.length, 1);
+
+    const summaryId = 'entries-dist-summary-' + Date.now();
+    let html = '<div class="entries-dist-summary">';
+    html += '<button type="button" class="entries-dist-toggle' + (isExpanded ? ' expanded' : '') + '" aria-expanded="' + (isExpanded ? 'true' : 'false') + '" aria-controls="' + summaryId + '">';
+    html += '<span class="entries-dist-toggle-icon">▼</span>';
+    html += '<span class="entries-dist-toggle-text">Entries Distribution Graph</span>';
+    html += '</button>';
+
+    html += '<div id="' + summaryId + '" class="entries-dist-content" style="display: ' + (isExpanded ? '' : 'none') + ';">';
+    html += '<div class="entries-dist-chart" role="img" aria-label="Entries per day from ' + dayKeys[0] + ' to ' + dayKeys[dayKeys.length - 1] + '">';
+    html += '<svg viewBox="0 0 ' + chartWidth + ' ' + chartHeight + '" preserveAspectRatio="none" aria-hidden="true">';
+
+    dayKeys.forEach((key, idx) => {
+        const count = counts[idx];
+        const h = Math.max(1, Math.round((count / maxCount) * chartHeight));
+        const y = chartHeight - h;
+        html += '<rect class="entries-dist-bar" x="' + idx + '" y="' + y + '" width="0.9" height="' + h + '">';
+        html += '<title>' + key + ': ' + count + ' entries</title>';
+        html += '</rect>';
+    });
+
+    html += '</svg>';
+    html += '</div>';
+    html += '<div class="entries-dist-axis">';
+    html += '<span class="entries-dist-axis-left">' + dayKeys[0] + '</span>';
+    html += '<span class="entries-dist-axis-right">' + dayKeys[dayKeys.length - 1] + '</span>';
+    html += '</div>';
+    html += '</div>';
+    html += '</div>';
+
     return html;
 }
 

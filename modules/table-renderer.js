@@ -33,7 +33,7 @@ class TableRenderer {
      * Renders a complete results table with driver grouping
      * @param {Array} driverGroups - Array of driver group objects
      * @param {Array} keys - Column keys to display
-     * @param {string} sortBy - Optional sort key: 'gap' (default) or 'gapPercent'
+    * @param {string} sortBy - Optional sort key: 'gap' (default), 'lapTime', or 'gapPercent'
      * @returns {string} HTML string
      */
     renderDriverGroupedTable(driverGroups, keys = null, sortBy = 'gap') {
@@ -171,8 +171,21 @@ class TableRenderer {
         // Check if this is a sortable column using ColumnConfig
         const sortConfig = window.ColumnConfig ? 
             window.ColumnConfig.getSortConfig(key) : null;
+        const isLapTimeKey = window.ColumnConfig ? 
+            window.ColumnConfig.isColumnType(key, 'LAP_TIME') : 
+            ['LapTime', 'Lap Time', 'lap_time', 'laptime', 'Time', 'time'].includes(key);
         
         if (sortConfig) {
+            if (isLapTimeKey) {
+                const activeClass = (sortBy === 'gap' || sortBy === 'lapTime') ? ' sort-active' : '';
+                let title = 'Click to sort by gap time';
+                if (sortBy === 'gap') {
+                    title = 'Click to sort by lap time';
+                } else if (sortBy === 'lapTime') {
+                    title = 'Click to sort by gap time';
+                }
+                return `<th class="sortable${activeClass}" onclick="window.sortDriverGroups('lapTimeToggle')" title="${title}">${displayName}</th>`;
+            }
             const sortKey = sortConfig.sortKey;
             const activeClass = sortBy === sortKey ? ' sort-active' : '';
             const title = `Click to sort by ${displayName.toLowerCase()}`;
@@ -456,9 +469,9 @@ class TableRenderer {
     }
     
     /**
-     * Sorts driver entries by gap time, gap percentage, position, or date
+     * Sorts driver entries by gap time, lap time, gap percentage, car class, track, position, or date
      * @param {Array} entries - Driver entries
-     * @param {string} sortBy - Sort key: 'gap' (default), 'gapPercent', 'position', or 'date_time'
+     * @param {string} sortBy - Sort key: 'gap' (default), 'lapTime', 'gapPercent', 'car_class', 'track', 'position', or 'date_time'
      */
     sortDriverEntries(entries, sortBy = 'gap') {
         try {
@@ -487,6 +500,40 @@ class TableRenderer {
                     if (isNaN(timeA)) return 1;
                     if (isNaN(timeB)) return -1;
                     return timeB - timeA;
+                });
+            } else if (sortBy === 'lapTime') {
+                entries.sort((a, b) => {
+                    const rawA = a.LapTime || a['Lap Time'] || a.lap_time || a.laptime || a.Time || '';
+                    const rawB = b.LapTime || b['Lap Time'] || b.lap_time || b.laptime || b.Time || '';
+                    const lapA = String(rawA).split(/,\s*/)[0] || '';
+                    const lapB = String(rawB).split(/,\s*/)[0] || '';
+                    const msA = R3EUtils.parseLapTimeToMillis(lapA) || Number.MAX_VALUE;
+                    const msB = R3EUtils.parseLapTimeToMillis(lapB) || Number.MAX_VALUE;
+                    if (msA !== msB) return msA - msB;
+                    const ta = R3EUtils.getTotalEntriesCount(a);
+                    const tb = R3EUtils.getTotalEntriesCount(b);
+                    return tb - ta; // descending
+                });
+            } else if (sortBy === 'car_class' || sortBy === 'track') {
+                const isCarClass = sortBy === 'car_class';
+                entries.sort((a, b) => {
+                    const rawA = isCarClass
+                        ? (a.CarClass || a['Car Class'] || a.car_class || a.Class || a.class || '')
+                        : (a.Track || a.track || a.TrackName || a.track_name || '');
+                    const rawB = isCarClass
+                        ? (b.CarClass || b['Car Class'] || b.car_class || b.Class || b.class || '')
+                        : (b.Track || b.track || b.TrackName || b.track_name || '');
+                    const keyA = String(rawA).toLowerCase();
+                    const keyB = String(rawB).toLowerCase();
+                    if (keyA < keyB) return -1;
+                    if (keyA > keyB) return 1;
+
+                    const ga = R3EUtils.parseGapMillisFromItem(a);
+                    const gb = R3EUtils.parseGapMillisFromItem(b);
+                    if (ga !== gb) return ga - gb;
+                    const posA = parseInt(a.Position || a.position || a.Pos || 999999);
+                    const posB = parseInt(b.Position || b.position || b.Pos || 999999);
+                    return posA - posB;
                 });
             } else if (sortBy === 'gapPercent') {
                 // Sort by gap percentage

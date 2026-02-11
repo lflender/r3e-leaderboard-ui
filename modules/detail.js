@@ -737,6 +737,101 @@ async function displayResults(data) {
     
     resultsContainer.innerHTML = paginationHTML + tableHTML + paginationHTML;
     
+    const entriesDistHTML = generateEntriesDistributionGraph(allResults, false);
+
+    const attachCarDistToggle = () => {
+        const toggleBtn = resultsContainer.querySelector('.car-dist-toggle');
+        const summaryTable = resultsContainer.querySelector('.car-dist-content');
+        if (toggleBtn && summaryTable) {
+            toggleBtn.addEventListener('click', () => {
+                const isCollapsed = summaryTable.style.display === 'none';
+                summaryTable.style.display = isCollapsed ? '' : 'none';
+                toggleBtn.classList.toggle('expanded', isCollapsed);
+                toggleBtn.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false');
+            });
+        }
+    };
+
+    const attachEntriesDistToggle = () => {
+        const toggleBtn = resultsContainer.querySelector('.entries-dist-toggle');
+        const content = resultsContainer.querySelector('.entries-dist-content');
+        if (toggleBtn && content) {
+            toggleBtn.addEventListener('click', () => {
+                const isCollapsed = content.style.display === 'none';
+                content.style.display = isCollapsed ? '' : 'none';
+                toggleBtn.classList.toggle('expanded', isCollapsed);
+                toggleBtn.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false');
+            });
+        }
+    };
+
+    // Add car distribution summary if multiple cars present
+    if (availableCars.length > 1) {
+        // Default sort: entries (desc), median (asc)
+        let defaultSortBy = 'entries';
+        let defaultSortDir = 'desc';
+        if (defaultSortBy === 'median') {
+            defaultSortDir = 'asc';
+        }
+        const summaryHTML = generateCarDistributionSummary(allResults, defaultSortBy, defaultSortBy === 'median' ? 'asc' : 'desc');
+        // Insert summaries above pagination and table
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = summaryHTML + entriesDistHTML + paginationHTML + tableHTML + paginationHTML;
+        resultsContainer.innerHTML = tempDiv.innerHTML;
+
+        attachCarDistToggle();
+        attachEntriesDistToggle();
+
+        // Create a function to handle sorting
+        const handleCarDistSort = () => {
+            const sortHeaders = resultsContainer.querySelectorAll('.car-dist-table th.sortable');
+            sortHeaders.forEach(header => {
+                header.addEventListener('click', () => {
+                    const summaryDiv = resultsContainer.querySelector('.car-dist-summary');
+                    const currentSort = summaryDiv.getAttribute('data-sort-by');
+                    const currentDir = summaryDiv.getAttribute('data-sort-dir');
+                    const clickedSort = header.getAttribute('data-sort');
+                    const currentContent = resultsContainer.querySelector('.car-dist-content');
+                    const isExpanded = currentContent && currentContent.style.display !== 'none';
+                    const currentEntriesContent = resultsContainer.querySelector('.entries-dist-content');
+                    const entriesExpanded = currentEntriesContent && currentEntriesContent.style.display !== 'none';
+
+                    // Determine new sort direction
+                    let newDir;
+                    if (currentSort !== clickedSort) {
+                        // If switching to Median, default to asc; otherwise desc
+                        newDir = clickedSort === 'median' ? 'asc' : 'desc';
+                    } else {
+                        // Toggle direction
+                        newDir = currentDir === 'desc' ? 'asc' : 'desc';
+                    }
+
+                    // Re-render with new sort
+                    const newSummaryHTML = generateCarDistributionSummary(allResults, clickedSort, newDir, isExpanded);
+                    const newEntriesHTML = generateEntriesDistributionGraph(allResults, entriesExpanded);
+                    const newTempDiv = document.createElement('div');
+                    newTempDiv.innerHTML = newSummaryHTML + newEntriesHTML + paginationHTML + tableHTML + paginationHTML;
+                    resultsContainer.innerHTML = newTempDiv.innerHTML;
+
+                    // Re-attach expand/collapse listeners
+                    attachCarDistToggle();
+                    attachEntriesDistToggle();
+
+                    // Re-attach sort listeners
+                    handleCarDistSort();
+                });
+            });
+        };
+        
+        // Attach sorting listeners
+        handleCarDistSort();
+    } else if (entriesDistHTML) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = entriesDistHTML + paginationHTML + tableHTML + paginationHTML;
+        resultsContainer.innerHTML = tempDiv.innerHTML;
+        attachEntriesDistToggle();
+    }
+    
     // Highlight position row if needed
     if (posParam && !Number.isNaN(posParam)) {
         highlightPositionRow(posParam);
@@ -1373,6 +1468,215 @@ document.addEventListener('DOMContentLoaded', () => {
         difficultyFilterSelect.setValue(difficultyParam);
     }
 });
+
+/**
+ * Calculate car distribution statistics
+ * @param {Array} data - Full results dataset
+ * @returns {Array} Array of car stats sorted by entry count descending
+ */
+function getCarDistributionStats(data) {
+    const carStats = {};
+    
+    // Collect position data for each car
+    data.forEach(entry => {
+        const car = entry.Car || entry.car || 'Unknown';
+        const position = parseInt(entry.Position || entry.position || entry.Pos || 0);
+        
+        if (!carStats[car]) {
+            carStats[car] = {
+                car: car,
+                positions: [],
+                entries: 0
+            };
+        }
+        carStats[car].entries++;
+        if (position > 0) {
+            carStats[car].positions.push(position);
+        }
+    });
+    
+    const total = data.length;
+    
+    // Calculate statistics
+    const stats = Object.values(carStats).map(stat => {
+        // Sort positions to find median
+        const sortedPositions = stat.positions.sort((a, b) => a - b);
+        let median = 0;
+        if (sortedPositions.length > 0) {
+            const mid = Math.floor(sortedPositions.length / 2);
+            if (sortedPositions.length % 2 === 0) {
+                median = (sortedPositions[mid - 1] + sortedPositions[mid]) / 2;
+            } else {
+                median = sortedPositions[mid];
+            }
+        }
+        
+        return {
+            car: stat.car,
+            entries: stat.entries,
+            percentage: ((stat.entries / total) * 100).toFixed(1),
+            medianPosition: median
+        };
+    });
+    
+    // Sort by entries descending
+    stats.sort((a, b) => b.entries - a.entries);
+    
+    return stats;
+}
+
+/**
+ * Generate car distribution summary HTML
+ * @param {Array} data - Full results dataset
+ * @param {string} sortBy - Column to sort by ('entries' or 'median'), default 'entries'
+ * @param {string} sortDir - Sort direction ('asc' or 'desc'), default 'desc'
+ * @returns {string} HTML string for the car distribution summary
+ */
+function generateCarDistributionSummary(data, sortBy = 'entries', sortDir = 'desc', isExpanded = false) {
+    let stats = getCarDistributionStats(data);
+    
+    // Sort the stats array
+    if (sortBy === 'entries') {
+        stats.sort((a, b) => sortDir === 'desc' ? b.entries - a.entries : a.entries - b.entries);
+    } else if (sortBy === 'median') {
+        stats.sort((a, b) => {
+            const aVal = a.medianPosition > 0 ? a.medianPosition : Infinity;
+            const bVal = b.medianPosition > 0 ? b.medianPosition : Infinity;
+            return sortDir === 'desc' ? bVal - aVal : aVal - bVal;
+        });
+    }
+    
+    const summaryId = 'car-dist-summary-' + Date.now();
+    
+    let html = '<div class="car-dist-summary" data-sort-by="' + sortBy + '" data-sort-dir="' + sortDir + '">';
+    html += '<button type="button" class="car-dist-toggle' + (isExpanded ? ' expanded' : '') + '" aria-expanded="' + (isExpanded ? 'true' : 'false') + '" aria-controls="' + summaryId + '">';
+    html += '<span class="car-dist-toggle-icon">▼</span>';
+    html += '<span class="car-dist-toggle-text">Car Distribution Summary</span>';
+    html += '</button>';
+    
+    html += '<div id="' + summaryId + '" class="car-dist-content" style="display: ' + (isExpanded ? '' : 'none') + ';">';
+    html += '<table class="car-dist-table">';
+    html += '<thead>';
+    html += '<tr>';
+    html += '<th class="car-dist-car">Car</th>';
+    
+    // Entries header
+    let entriesClass = 'car-dist-entries sortable';
+    let entriesIndicator = '⇅';
+    if (sortBy === 'entries') {
+        entriesClass += ' sort-active';
+        entriesIndicator = sortDir === 'desc' ? '▼' : '▲';
+    }
+    html += '<th class="' + entriesClass + '" data-sort="entries"><span class="sort-label">Nb</span><span class="sort-indicator">' + entriesIndicator + '</span></th>';
+    
+    html += '<th class="car-dist-percentage">%</th>';
+    
+    // Median Position header
+    let medianClass = 'car-dist-median sortable';
+    let medianIndicator = '⇅';
+    if (sortBy === 'median') {
+        medianClass += ' sort-active';
+        medianIndicator = sortDir === 'desc' ? '▼' : '▲';
+    }
+    html += '<th class="' + medianClass + '" data-sort="median"><span class="sort-label car-dist-median-label">Median</span><span class="sort-indicator">' + medianIndicator + '</span></th>';
+    
+    html += '</tr>';
+    html += '</thead>';
+    html += '<tbody>';
+    
+    stats.forEach(stat => {
+        const { brand: carBrand, model: carModel } = R3EUtils.splitCarName(stat.car);
+        let carHtml = '<span class="car-brand">' + R3EUtils.escapeHtml(carBrand) + '</span>';
+        if (carModel) {
+            carHtml += ' <span class="car-model">' + R3EUtils.escapeHtml(carModel) + '</span>';
+        }
+        html += '<tr>';
+        html += '<td class="car-dist-car">' + carHtml + '</td>';
+        html += '<td class="car-dist-entries">' + stat.entries + '</td>';
+        html += '<td class="car-dist-percentage">' + stat.percentage + '%</td>';
+        html += '<td class="car-dist-median">' + (stat.medianPosition > 0 ? Math.round(stat.medianPosition) : '-') + '</td>';
+        html += '</tr>';
+    });
+    
+    html += '</tbody>';
+    html += '</table>';
+    html += '</div>';
+    html += '</div>';
+    
+    return html;
+}
+
+/**
+ * Generate entries distribution graph HTML (entries per day)
+ * @param {Array} data - Full results dataset
+ * @param {boolean} isExpanded - Whether graph is expanded by default
+ * @returns {string} HTML string for the entries distribution graph
+ */
+function generateEntriesDistributionGraph(data, isExpanded = false) {
+    if (!Array.isArray(data) || data.length === 0) return '';
+
+    const dayCounts = new Map();
+    let minDate = null;
+    let maxDate = null;
+
+    data.forEach(entry => {
+        const raw = entry.date_time || entry.dateTime || entry.Date || entry.DateTime || '';
+        if (!raw) return;
+        const d = new Date(raw);
+        if (Number.isNaN(d.getTime())) return;
+        const dayKey = d.toISOString().slice(0, 10);
+        dayCounts.set(dayKey, (dayCounts.get(dayKey) || 0) + 1);
+        if (!minDate || d < minDate) minDate = d;
+        if (!maxDate || d > maxDate) maxDate = d;
+    });
+
+    if (!minDate || !maxDate) return '';
+
+    const start = new Date(Date.UTC(minDate.getUTCFullYear(), minDate.getUTCMonth(), minDate.getUTCDate()));
+    const end = new Date(Date.UTC(maxDate.getUTCFullYear(), maxDate.getUTCMonth(), maxDate.getUTCDate()));
+
+    const dayKeys = [];
+    for (let d = new Date(start); d <= end; d.setUTCDate(d.getUTCDate() + 1)) {
+        dayKeys.push(d.toISOString().slice(0, 10));
+    }
+
+    const counts = dayKeys.map(k => dayCounts.get(k) || 0);
+    const maxCount = Math.max(1, ...counts);
+
+    const chartHeight = 100;
+    const chartWidth = Math.max(dayKeys.length, 1);
+
+    const summaryId = 'entries-dist-summary-' + Date.now();
+    let html = '<div class="entries-dist-summary">';
+    html += '<button type="button" class="entries-dist-toggle' + (isExpanded ? ' expanded' : '') + '" aria-expanded="' + (isExpanded ? 'true' : 'false') + '" aria-controls="' + summaryId + '">';
+    html += '<span class="entries-dist-toggle-icon">▼</span>';
+    html += '<span class="entries-dist-toggle-text">Entries Distribution Graph</span>';
+    html += '</button>';
+
+    html += '<div id="' + summaryId + '" class="entries-dist-content" style="display: ' + (isExpanded ? '' : 'none') + ';">';
+    html += '<div class="entries-dist-chart" role="img" aria-label="Entries per day from ' + dayKeys[0] + ' to ' + dayKeys[dayKeys.length - 1] + '">';
+    html += '<svg viewBox="0 0 ' + chartWidth + ' ' + chartHeight + '" preserveAspectRatio="none" aria-hidden="true">';
+
+    dayKeys.forEach((key, idx) => {
+        const count = counts[idx];
+        const h = Math.max(1, Math.round((count / maxCount) * chartHeight));
+        const y = chartHeight - h;
+        html += '<rect class="entries-dist-bar" x="' + idx + '" y="' + y + '" width="0.9" height="' + h + '">';
+        html += '<title>' + key + ': ' + count + ' entries</title>';
+        html += '</rect>';
+    });
+
+    html += '</svg>';
+    html += '</div>';
+    html += '<div class="entries-dist-axis">';
+    html += '<span class="entries-dist-axis-left">' + dayKeys[0] + '</span>';
+    html += '<span class="entries-dist-axis-right">' + dayKeys[dayKeys.length - 1] + '</span>';
+    html += '</div>';
+    html += '</div>';
+    html += '</div>';
+
+    return html;
+}
 
 // Make functions globally accessible
 window.goToPage = goToPage;

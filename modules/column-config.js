@@ -32,7 +32,9 @@ const COLUMNS = {
         aliases: ['CarClass', 'Car Class', 'car_class', 'Class', 'class', 'ClassName', 'className', 'class_name'],
         displayName: 'Car class',
         order: 10,
-        visible: true
+        visible: true,
+        sortable: true,
+        sortKey: 'car_class'
     },
     
     CAR: {
@@ -48,7 +50,9 @@ const COLUMNS = {
         aliases: ['Track', 'track', 'TrackName', 'track_name'],
         displayName: 'Track',
         order: 40,
-        visible: true
+        visible: true,
+        sortable: true,
+        sortKey: 'track'
     },
     
     POSITION: {

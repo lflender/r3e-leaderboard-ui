@@ -24,7 +24,7 @@ class DriverSearch {
         this.allResults = [];
         
         // Sort state
-        this.currentSortBy = 'gap'; // 'gap' or 'gapPercent'
+        this.currentSortBy = 'gap'; // 'gap', 'lapTime', or 'gapPercent'
         
         // Track last search time to prevent premature "no results" display
         this.lastSearchTime = 0;
@@ -350,10 +350,19 @@ class DriverSearch {
     }
     
     /**
-     * Sort driver groups by gap time, gap percentage, position, or date
-     * @param {string} sortBy - Sort key: 'gap', 'gapPercent', 'position', or 'date_time'
+     * Sort driver groups by gap time, lap time, gap percentage, position, or date
+     * @param {string} sortBy - Sort key: 'gap', 'lapTime', 'gapPercent', 'position', or 'date_time'
      */
     sortDriverGroups(sortBy) {
+        if (sortBy === 'lapTimeToggle') {
+            if (this.currentSortBy === 'gap') {
+                sortBy = 'lapTime';
+            } else if (this.currentSortBy === 'lapTime') {
+                sortBy = 'gap';
+            } else {
+                sortBy = 'gap';
+            }
+        }
         if (this.currentSortBy === sortBy) return; // Already sorted by this
         this.currentSortBy = sortBy;
         this.displayResults(this.allResults);

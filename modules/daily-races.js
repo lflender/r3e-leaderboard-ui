@@ -215,13 +215,23 @@ class DailyRaces {
         html += '<div class="daily-races-grid">';
         
         for (const race of racesData.races) {
-            const carClassName = this.resolveCarClassName(race.car_class_id);
+            // For categories (with multiple class IDs), display the car_class name directly
+            // For regular classes, resolve the class ID to name
+            const carClassName = (race.category_class_ids && Array.isArray(race.category_class_ids) && race.category_class_ids.length > 0) 
+                ? race.car_class 
+                : this.resolveCarClassName(race.car_class_id);
             const trackName = this.resolveTrackName(race.track_id);
             const isFree = race.is_free_to_play;
             const freeIcon = '🆓';
             
             // Create link to detail page
-            const detailLink = `detail.html?track=${race.track_id}&class=${race.car_class_id}`;
+            // If this is a category with multiple class IDs, use superclass parameter for combined view
+            let detailLink;
+            if (race.category_class_ids && Array.isArray(race.category_class_ids) && race.category_class_ids.length > 0) {
+                detailLink = `detail.html?track=${race.track_id}&superclass=${encodeURIComponent(race.car_class)}`;
+            } else {
+                detailLink = `detail.html?track=${race.track_id}&class=${race.car_class_id}`;
+            }
             
             html += `<a href="${detailLink}" target="_blank" class="daily-race-card-link">`;
             html += '<div class="daily-race-card">';

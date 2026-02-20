@@ -23,8 +23,8 @@ class DriverSearch {
         this.itemsPerPage = 100;
         this.allResults = [];
         
-        // Sort state
-        this.currentSortBy = 'gap'; // 'gap', 'lapTime', or 'gapPercent'
+        // Sort state - load from localStorage or default to 'gap'
+        this.currentSortBy = this.loadSortPreference() || 'gap'; // 'gap', 'lapTime', or 'gapPercent'
         
         // Track last search time to prevent premature "no results" display
         this.lastSearchTime = 0;
@@ -54,6 +54,37 @@ class DriverSearch {
         
         // Make sortDriverGroups available globally for sorting
         window.sortDriverGroups = (sortBy) => this.sortDriverGroups(sortBy);
+    }
+
+    /**
+     * Load sort preference from localStorage
+     * @returns {string|null} Sort preference or null if not found
+     */
+    loadSortPreference() {
+        try {
+            const saved = localStorage.getItem('driverInfoSortPreference');
+            // Validate that it's a known sort key
+            if (saved && ['gap', 'lapTime', 'gapPercent', 'position', 'date_time', 'car_class', 'track'].includes(saved)) {
+                return saved;
+            }
+        } catch (e) {
+            // localStorage might be disabled or unavailable
+            console.warn('localStorage not available:', e);
+        }
+        return null;
+    }
+
+    /**
+     * Save sort preference to localStorage
+     * @param {string} sortBy - Sort key to save
+     */
+    saveSortPreference(sortBy) {
+        try {
+            localStorage.setItem('driverInfoSortPreference', sortBy);
+        } catch (e) {
+            // localStorage might be full or disabled
+            console.warn('Could not save sort preference:', e);
+        }
     }
 
     /**
@@ -365,6 +396,7 @@ class DriverSearch {
         }
         if (this.currentSortBy === sortBy) return; // Already sorted by this
         this.currentSortBy = sortBy;
+        this.saveSortPreference(sortBy); // Save preference to localStorage
         this.displayResults(this.allResults);
     }
 }

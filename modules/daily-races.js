@@ -129,6 +129,53 @@ class DailyRaces {
     }
 
     /**
+     * Resolve category_class_ids to their superclass
+     * Given a list of class IDs, finds the common superclass from CARS_DATA
+     * @param {string[]} categoryClassIds - Array of class IDs (e.g., ["4680", "5726"])
+     * @returns {string|null} The superclass name if found, null otherwise
+     */
+    resolveCategoryToSuperclass(categoryClassIds) {
+        if (!categoryClassIds || !Array.isArray(categoryClassIds) || categoryClassIds.length === 0) {
+            return null;
+        }
+
+        if (!window.CAR_CLASSES_DATA || !window.CARS_DATA) {
+            return null;
+        }
+
+        // Resolve all class IDs to their class names
+        const classNames = categoryClassIds.map(id => {
+            const className = window.CAR_CLASSES_DATA[String(id)];
+            return className || null;
+        }).filter(name => name !== null);
+
+        if (classNames.length === 0) {
+            return null;
+        }
+
+        // Find superclass for each class name
+        const superclasses = new Set();
+        classNames.forEach(className => {
+            const carEntry = window.CARS_DATA.find(entry => {
+                const entryClass = entry.class || entry.car_class || entry.CarClass || '';
+                return String(entryClass).trim().toLowerCase() === String(className).trim().toLowerCase();
+            });
+            
+            if (carEntry && carEntry.superclass) {
+                superclasses.add(carEntry.superclass);
+            }
+        });
+
+        // If all class IDs resolve to the same superclass, return it
+        if (superclasses.size === 1) {
+            return Array.from(superclasses)[0];
+        }
+
+        // If multiple different superclasses found, return null (incompatible combination)
+        return null;
+    }
+
+    /**
      * Format timestamp to readable format
      */
     formatTimestamp(timestamp) {
@@ -225,10 +272,12 @@ class DailyRaces {
             const freeIcon = '🆓';
             
             // Create link to detail page
-            // If this is a category with multiple class IDs, use superclass parameter for combined view
+            // If this is a category with multiple class IDs, pass them as a comma-separated list
             let detailLink;
             if (race.category_class_ids && Array.isArray(race.category_class_ids) && race.category_class_ids.length > 0) {
-                detailLink = `detail.html?track=${race.track_id}&superclass=${encodeURIComponent(race.car_class)}`;
+                // Use specific class IDs for multi-class categories
+                const classIds = race.category_class_ids.join(',');
+                detailLink = `detail.html?track=${race.track_id}&classes=${classIds}`;
             } else {
                 detailLink = `detail.html?track=${race.track_id}&class=${race.car_class_id}`;
             }

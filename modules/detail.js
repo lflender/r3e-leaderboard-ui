@@ -11,6 +11,7 @@ const DetailState = {
     trackParam: R3EUtils.getUrlParam('track'),
     classParam: R3EUtils.getUrlParam('class'),
     superclassParam: R3EUtils.getUrlParam('superclass'), // For combined view
+    classesParam: R3EUtils.getUrlParam('classes'), // For specific multi-class categories (comma-separated IDs)
     posParam: parseInt(R3EUtils.getUrlParam('pos') || ''),
     difficultyParam: R3EUtils.getUrlParam('difficulty') || 'All difficulties',
     driverParam: R3EUtils.getUrlParam('driver') || '',
@@ -33,6 +34,7 @@ const DetailState = {
 const trackParam = DetailState.trackParam;
 const classParam = DetailState.classParam;
 const superclassParam = DetailState.superclassParam;
+const classesParam = DetailState.classesParam;
 const posParam = DetailState.posParam;
 const difficultyParam = DetailState.difficultyParam;
 const driverParam = DetailState.driverParam;
@@ -62,6 +64,13 @@ async function fetchLeaderboardDetails() {
     await TemplateHelper.showLoading(resultsContainer);
     
     try {
+        // Check if we're in specific multi-class mode (e.g., GT3 MP with specific class IDs)
+        if (classesParam && trackParam) {
+            DetailState.isCombinedView = true;
+            await fetchSpecificClassesDetails();
+            return;
+        }
+        
         // Check if we're in combined superclass mode
         if (superclassParam && trackParam) {
             DetailState.isCombinedView = true;
@@ -210,6 +219,149 @@ async function resolveClassNamesToIds(classNames) {
     }
 
     return result; // may contain nulls; callers should handle
+}
+
+/**
+ * Fetch combined leaderboard details for specific class IDs (multi-class categories)
+ */
+async function fetchSpecificClassesDetails() {
+    try {
+        // Keep showing loading state during the entire fetch
+        await TemplateHelper.showLoading(resultsContainer);
+        
+        // Update lastActionTime to prevent premature "no results" display
+        lastActionTime = Date.now();
+        
+        // Parse comma-separated class IDs
+        const specificClassIds = classesParam.split(',').map(id => id.trim()).filter(id => id);
+        
+        if (specificClassIds.length === 0) {
+            throw new Error('No valid class IDs provided');
+        }
+        
+        // Fetch data from all classes in parallel
+        const allEntries = [];
+        const fetchPromises = specificClassIds.map(async (classId) => {
+            try {
+                const data = await dataService.fetchLeaderboardDetails(trackParam, classId);
+                const leaderboardData = extractLeaderboardArray(data);
+                if (leaderboardData && Array.isArray(leaderboardData)) {
+                    const transformed = transformLeaderboardData(leaderboardData, data);
+                    // Add class ID to each entry for reference
+                    const className = window.getCarClassName ? window.getCarClassName(classId) : classId;
+                    transformed.forEach(entry => {
+                        entry.ClassName = className;
+                    });
+                    return transformed;
+                }
+                return [];
+            } catch (e) {
+                console.warn('Failed to fetch class:', classId, e);
+                return [];
+            }
+        });
+        
+        const results = await Promise.all(fetchPromises);
+        results.forEach(entries => {
+            allEntries.push(...entries);
+        });
+        
+        // Sort by lap time
+        allEntries.forEach((entry, idx) => {
+            const rawLap = (window.DataNormalizer && window.DataNormalizer.extractLapTime) ? window.DataNormalizer.extractLapTime(entry) : (entry.LapTime || entry['Lap Time'] || entry.lap_time || '');
+            entry.__debugRawLap = rawLap;
+            entry.__debugMs = lapToMs(rawLap);
+        });
+        allEntries.sort((a, b) => {
+            return a.__debugMs - b.__debugMs;
+        });
+        
+        // Re-assign positions after sorting
+        allEntries.forEach((entry, idx) => {
+            const newPos = idx + 1;
+            entry.Position = newPos;
+            entry.position = newPos;
+            entry.Pos = newPos;
+            delete entry.TotalEntries;
+            delete entry.total_entries;
+        });
+        
+        // Recalculate gap times
+        if (allEntries.length > 0) {
+            const fastestMs = allEntries[0].__debugMs;
+            
+            allEntries.forEach((entry, idx) => {
+                const entryMs = entry.__debugMs;
+                const rawLapTime = entry.__debugRawLap || '';
+                const lapTimePart = rawLapTime.split(',')[0].trim();
+                
+                if (idx === 0) {
+                    entry.LapTime = lapTimePart;
+                    entry['Lap Time'] = lapTimePart;
+                    entry.lap_time = lapTimePart;
+                } else {
+                    const gapMs = entryMs - fastestMs;
+                    const gapSeconds = (gapMs / 1000).toFixed(3);
+                    const gapFormatted = `+${gapSeconds}s`;
+                    const newLapTime = `${lapTimePart}, ${gapFormatted}`;
+                    
+                    entry.LapTime = newLapTime;
+                    entry['Lap Time'] = newLapTime;
+                    entry.lap_time = newLapTime;
+                }
+            });
+        }
+        
+        // Set page titles for specific classes view
+        setSpecificClassesDetailTitles(specificClassIds);
+        
+        // Store unfiltered results
+        unfilteredResults = allEntries;
+        
+        // Build car filter from data
+        buildCarFilter(allEntries);
+        
+        // Apply difficulty filter if specified
+        if (difficultyParam && difficultyParam !== 'All difficulties') {
+            allResults = allEntries.filter(entry => {
+                const diff = entry.Difficulty || entry.difficulty || entry.driving_model || '';
+                return diff.toLowerCase() === difficultyParam.toLowerCase();
+            });
+        } else {
+            allResults = allEntries;
+        }
+        
+        // Calculate page and display
+        currentPage = 1;
+        let targetIdx = -1;
+        if (driverParam) {
+            const dLower = String(driverParam).toLowerCase();
+            targetIdx = allResults.findIndex(entry => {
+                const n = String(entry.DriverName || entry['Driver Name'] || entry.driver_name || entry.Driver || entry.driver || '').toLowerCase();
+                return n.includes(dLower);
+            });
+        } else if (timeParam) {
+            targetIdx = allResults.findIndex(entry => {
+                const lt = String(entry.LapTime || entry['Lap Time'] || entry.lap_time || '');
+                return lt.includes(timeParam);
+            });
+        } else if (!isNaN(posParam) && posParam > 0) {
+            targetIdx = allResults.findIndex(entry => {
+                const p = parseInt(entry.Position || entry.position || entry.Pos || 0);
+                return p === posParam;
+            });
+        }
+        
+        if (targetIdx !== -1) {
+            currentPage = Math.floor(targetIdx / itemsPerPage) + 1;
+        }
+        
+        await displayResults(allResults);
+        
+    } catch (error) {
+        console.error('Error fetching specific classes details:', error);
+        await TemplateHelper.showError(resultsContainer, 'Failed to load leaderboard data. Please try again later.');
+    }
 }
 
 /**
@@ -420,6 +572,61 @@ function lapToMs(timeStr) {
 /**
  * Set page titles for combined superclass view
  */
+/**
+ * Set detail page titles for specific classes view
+ */
+function setSpecificClassesDetailTitles(classIds) {
+    const pageTitle = document.querySelector('title');
+    const detailTrackElem = document.getElementById('detail-track');
+    const detailClassElem = document.getElementById('detail-class');
+    
+    // Get track name from TRACKS_DATA
+    let trackName = trackParam;
+    let layoutName = '';
+    if (window.TRACKS_DATA && Array.isArray(window.TRACKS_DATA)) {
+        const track = window.TRACKS_DATA.find(t => String(t.id) === String(trackParam));
+        if (track && track.label) {
+            const fullTrack = track.label;
+            const match = fullTrack.match(/^(.*?)(?:\s*[-–—]\s*)(.+)$/);
+            if (match) {
+                trackName = match[1].trim();
+                layoutName = match[2].trim();
+            } else {
+                trackName = fullTrack;
+            }
+        }
+    }
+    
+    // Determine the category label - check if this is GT3 MP (class IDs: 1703, 12770, 13136)
+    const sortedIds = [...classIds].sort().join(',');
+    const isGT3MP = sortedIds === '1703,12770,13136' || sortedIds === '12770,13136,1703' || sortedIds === '1703,13136,12770';
+    const categoryLabel = isGT3MP ? 'GT3 MP' : 'Multi-Class';
+    
+    const title = `${trackName} - ${categoryLabel}`;
+    
+    if (pageTitle) pageTitle.textContent = title + ' — RaceRoom Leaderboards';
+    if (detailTrackElem) {
+        detailTrackElem.innerHTML = `<span class="detail-label">Track:</span> ${R3EUtils.escapeHtml(trackName)}`;
+    }
+    
+    // Add layout element if needed
+    if (layoutName) {
+        let layoutElem = document.getElementById('detail-layout');
+        if (!layoutElem && detailTrackElem) {
+            layoutElem = document.createElement('div');
+            layoutElem.id = 'detail-layout';
+            detailTrackElem.after(layoutElem);
+        }
+        if (layoutElem) {
+            layoutElem.innerHTML = `<span class="detail-label">Layout:</span> ${R3EUtils.escapeHtml(layoutName)}`;
+        }
+    }
+    
+    if (detailClassElem) {
+        detailClassElem.innerHTML = `<span class="detail-label">Category:</span> ${R3EUtils.escapeHtml(categoryLabel)}`;
+    }
+}
+
 function setCombinedDetailTitles(superclass) {
     const pageTitle = document.querySelector('title');
     const detailTrackElem = document.getElementById('detail-track');
@@ -1654,8 +1861,10 @@ function generateEntriesDistributionGraph(data, isExpanded = false) {
     html += '</button>';
 
     html += '<div id="' + summaryId + '" class="entries-dist-content" style="display: ' + (isExpanded ? '' : 'none') + ';">';
+    html += '<div class="entries-dist-max-label">' + maxCount + '</div>';
     html += '<div class="entries-dist-chart" role="img" aria-label="Entries per day from ' + dayKeys[0] + ' to ' + dayKeys[dayKeys.length - 1] + '">';
     html += '<svg viewBox="0 0 ' + chartWidth + ' ' + chartHeight + '" preserveAspectRatio="none" aria-hidden="true">';
+    html += '<line class="entries-dist-max-line" x1="0" y1="0.5" x2="' + chartWidth + '" y2="0.5" />';
 
     dayKeys.forEach((key, idx) => {
         const count = counts[idx];

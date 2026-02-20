@@ -1880,11 +1880,26 @@ footer p {
 
 .entries-dist-content {
     padding: 0.85rem 1rem 0.95rem;
+    position: relative;
+}
+
+.entries-dist-max-label {
+    position: absolute;
+    top: 0.85rem;
+    left: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    z-index: 1;
+    padding: 0.15rem 0.35rem;
+    background: rgba(15, 23, 42, 0.85);
+    border-radius: 3px;
 }
 
 .entries-dist-chart {
     width: 100%;
     height: 10rem;
+    position: relative;
 }
 
 .entries-dist-chart svg {
@@ -1897,6 +1912,13 @@ footer p {
     fill: rgba(59, 130, 246, 0.75);
 }
 
+.entries-dist-max-line {
+    stroke: var(--text-secondary);
+    stroke-width: 0.5;
+    opacity: 0.6;
+    stroke-dasharray: 2, 2;
+}
+
 .entries-dist-axis {
     display: flex;
     justify-content: space-between;
@@ -1906,7 +1928,7 @@ footer p {
     font-variant-numeric: tabular-nums;
 }
 
-/* Responsive styling for car distribution table */
+/* Responsive styling for distribution summaries */
 @media (max-width: 1000px) {
     .car-dist-table {
         font-size: 0.85rem;
@@ -1934,7 +1956,8 @@ footer p {
 }
 
 @media (max-width: 768px) {
-    .car-dist-summary {
+    .car-dist-summary,
+    .entries-dist-summary {
         margin: 1rem 0;
     }
     
@@ -1957,9 +1980,22 @@ footer p {
         padding: 0.4rem 0.35rem;
     }
     
-    .car-dist-toggle {
+    .car-dist-toggle,
+    .entries-dist-toggle {
         font-size: 0.85rem;
         padding: 0.6rem 0.8rem;
+    }
+    
+    .entries-dist-chart {
+        height: 7rem;
+    }
+    
+    .entries-dist-max-label {
+        font-size: 0.7rem;
+    }
+    
+    .entries-dist-axis {
+        font-size: 0.75rem;
     }
 
     .car-dist-table th.car-dist-car,
@@ -2041,9 +2077,29 @@ footer p {
         padding: 0.35rem 0.5rem;
     }
     
-    .car-dist-toggle {
+    .car-dist-toggle,
+    .entries-dist-toggle {
         font-size: 0.8rem;
         padding: 0.5rem 0.7rem;
+    }
+    
+    .entries-dist-summary {
+        margin: 0.75rem 0;
+    }
+    
+    .entries-dist-chart {
+        height: 5rem;
+    }
+    
+    .entries-dist-max-label {
+        font-size: 0.65rem;
+        top: 0.6rem;
+        left: 0.1rem;
+    }
+    
+    .entries-dist-axis {
+        font-size: 0.68rem;
+        margin-top: 0.3rem;
     }
 }
 

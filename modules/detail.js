@@ -597,10 +597,11 @@ function setSpecificClassesDetailTitles(classIds) {
         }
     }
     
-    // Determine the category label - check if this is GT3 MP (class IDs: 1703, 12770, 13136)
+    // Determine the category label
     const sortedIds = [...classIds].sort().join(',');
     const isGT3MP = sortedIds === '1703,12770,13136' || sortedIds === '12770,13136,1703' || sortedIds === '1703,13136,12770';
-    const categoryLabel = isGT3MP ? 'GT3 MP' : 'Multi-Class';
+    const isAudiTTCup = sortedIds === '4680,5726' || sortedIds === '5726,4680';
+    const categoryLabel = isGT3MP ? 'GT3 MP' : isAudiTTCup ? 'Audi TT Cup' : 'Multi-Class';
     
     const title = `${trackName} - ${categoryLabel}`;
     
@@ -1135,11 +1136,33 @@ function renderDetailRow(item, showAbsolutePosition = false) {
     const rank = DataNormalizer.extractRank(item);
     const rankStarsHtml = rank ? R3EUtils.renderRankStars(rank, true) : '';
     
+    // Get multiplayer position
+    const mpPos = getMpPos(name);
+    const mpPosHtml = mpPos ? ` <span class="mp-pos-badge">#${mpPos}</span>` : '';
+    
+    // Determine driver name class based on mp_pos
+    let driverLinkClass = 'detail-driver-link';
+    if (mpPos !== null) {
+        if (mpPos <= 25) {
+            driverLinkClass += ' driver-name-gold';
+        } else if (mpPos <= 100) {
+            driverLinkClass += ' driver-name-silver';
+        }
+    }
+    
     if (!highlisted) {
         const encoded = encodeURIComponent(String(name));
-        html += `<td><a class="detail-driver-link" href="index.html?driver=${encoded}">${flagHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}</a></td>`;
+        html += `<td><a class="${driverLinkClass}" href="index.html?driver=${encoded}">${flagHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}${mpPosHtml}</a></td>`;
     } else {
-        html += `<td>${flagHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}</td>`;
+        let spanClassAttr = '';
+        if (mpPos !== null) {
+            if (mpPos <= 10) {
+                spanClassAttr = ' class="driver-name-gold"';
+            } else if (mpPos <= 100) {
+                spanClassAttr = ' class="driver-name-silver"';
+            }
+        }
+        html += `<td><span${spanClassAttr}>${flagHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}${mpPosHtml}</span></td>`;
     }
     
     // Lap time

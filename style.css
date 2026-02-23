@@ -855,6 +855,12 @@ footer p {
     margin-left: 0.4rem;
 }
 
+.mp-pos-badge {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
 .no-wrap {
     white-space: nowrap;
 }
@@ -976,7 +982,7 @@ footer p {
 
 /* Podium positions - Gold, Silver, Bronze */
 .pos-number.pos-1 {
-    color: #ffd700;
+    color: #FFE10D;
     text-shadow: 0 0 1px #000,
                  0 0 2px #000,
                  1px 1px 0 #000,
@@ -989,7 +995,7 @@ footer p {
 }
 
 .pos-number.pos-2 {
-    color: #b8b8b8;
+    color: #AFA9A1;
     text-shadow: 0 0 1px #000,
                  0 0 2px #000,
                  1px 1px 0 #000,
@@ -1002,7 +1008,7 @@ footer p {
 }
 
 .pos-number.pos-3 {
-    color: #cd7f32;
+    color: #976A28;
     text-shadow: 0 0 1px #000,
                  0 0 2px #000,
                  1px 1px 0 #000,
@@ -1359,75 +1365,29 @@ footer p {
     margin-left: 0.4rem;
 }
 
-/* Position badge styling */
-.pos-cell {
-    white-space: nowrap;
-}
-.pos-number {
-    background: var(--pos-badge-default);
-    color: var(--text-primary);
-    padding: 0.18rem 0.6rem;
-    border-radius: 999px;
-    font-weight: 800;
-    font-size: 0.95rem;
-    text-decoration: none !important;
-    border: none;
-    line-height: 1.2;
-    display: inline-block;
-    vertical-align: baseline;
-}
-
-/* Position 1 - Shiny Gold Character */
-.pos-number.pos-1 {
-    color: #ffd700;
+/* Driver name styling based on multiplayer position */
+a.driver-name-gold,
+.driver-name-gold {
+    color: #FFE10D !important;
     text-shadow: 0 0 1px #000,
                  0 0 2px #000,
                  1px 1px 0 #000,
                  -1px -1px 0 #000,
                  1px -1px 0 #000,
-                 -1px 1px 0 #000,
-                 0 0 10px rgba(255, 215, 0, 0.8),
-                 0 0 20px rgba(255, 215, 0, 0.5);
-    font-weight: 900;
+                 -1px 1px 0 #000;
+    font-weight: 700;
 }
 
-/* Position 2 - Shiny Silver Character */
-.pos-number.pos-2 {
-    color: #b8b8b8;
+a.driver-name-silver,
+.driver-name-silver {
+    color: #AFA9A1 !important;
     text-shadow: 0 0 1px #000,
                  0 0 2px #000,
                  1px 1px 0 #000,
                  -1px -1px 0 #000,
                  1px -1px 0 #000,
-                 -1px 1px 0 #000,
-                 0 0 8px rgba(184, 184, 184, 0.8),
-                 0 0 16px rgba(184, 184, 184, 0.5);
-    font-weight: 900;
-}
-
-/* Position 3 - Shiny Bronze Character */
-.pos-number.pos-3 {
-    color: #cd7f32;
-    text-shadow: 0 0 1px #000,
-                 0 0 2px #000,
-                 1px 1px 0 #000,
-                 -1px -1px 0 #000,
-                 1px -1px 0 #000,
-                 -1px 1px 0 #000,
-                 0 0 8px rgba(205, 127, 50, 0.8),
-                 0 0 16px rgba(205, 127, 50, 0.5);
-    font-weight: 900;
-}
-
-.pos-total {
-    color: var(--text-secondary);
-    font-size: 0.95rem;
-    margin-left: 0.35rem;
-    text-decoration: none !important;
-}
-.pos-sep {
-    color: var(--text-secondary);
-    opacity: 0.95;
+                 -1px 1px 0 #000;
+    font-weight: 700;
 }
 
 /* Absolute position label (shown when car filter is active) */
@@ -1567,6 +1527,8 @@ footer p {
     font-size: 0.7em;
     line-height: 1;
     vertical-align: middle;
+    position: relative;
+    top: -2px;
     /* Prevent the stars from wrapping separately */
     word-break: keep-all;
 }
@@ -2021,6 +1983,10 @@ footer p {
     .car-dist-table th.sortable {
         padding-right: 1.2rem;
     }
+    
+    .mp-pos-badge {
+        font-size: 0.8rem;
+    }
 }
 
 @media (max-width: 600px) {
@@ -2100,6 +2066,10 @@ footer p {
     .entries-dist-axis {
         font-size: 0.68rem;
         margin-top: 0.3rem;
+    }
+    
+    .mp-pos-badge {
+        font-size: 0.7rem;
     }
 }
 
@@ -3168,6 +3138,10 @@ footer {
     #results-container .results-table th:nth-child(2),
     #results-container .results-table td:nth-child(2) {
         min-width: 140px !important;
+    }
+    
+    .mp-pos-badge {
+        font-size: 0.65rem;
     }
 }
 

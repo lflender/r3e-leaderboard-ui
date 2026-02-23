@@ -8,6 +8,7 @@
  * - status-display.js: Status information display
  * - driver-search.js: Driver search and filtering
  * - navigation.js: Global navigation functions
+ * - mp-pos-service.js: MP position data loading and caching
  */
 
 // ===========================================

@@ -141,6 +141,21 @@ class TableRenderer {
         
         const flagHtml = FlagHelper.countryToFlag(country) ? `<span class="country-flag">${FlagHelper.countryToFlag(country)}</span>` : '';
         const rankHtml = rank ? R3EUtils.renderRankStars(rank) : '';
+        
+        // Get multiplayer position if available
+        const mpPos = typeof getMpPos === 'function' ? getMpPos(displayName) : null;
+        const mpPosHtml = mpPos ? ` | Multiplayer #${mpPos}` : '';
+        
+        // Determine driver name class based on mp_pos
+        let driverNameClass = '';
+        if (mpPos !== null) {
+            if (mpPos <= 25) {
+                driverNameClass = ' class="driver-name-gold"';
+            } else if (mpPos <= 100) {
+                driverNameClass = ' class="driver-name-silver"';
+            }
+        }
+        
         // Only add "Team" prefix if the team name doesn't already contain "team"
         const teamPrefix = team && !String(team).toLowerCase().includes('team') ? 'Team ' : '';
         const teamHtml = team ? ` | 🏁 ${teamPrefix}${team}` : '';
@@ -149,8 +164,8 @@ class TableRenderer {
             <tr class="driver-group-header" data-group="${groupId}" onclick="toggleGroup(this)">
                 <td colspan="${colspan}">
                     <span class="toggle-icon">▼</span>
-                    <strong>${R3EUtils.escapeHtml(displayName)}</strong>
-                    <span class="driver-meta">${flagHtml}${R3EUtils.escapeHtml(country)}${rankHtml}${teamHtml}</span>
+                    <strong${driverNameClass}>${R3EUtils.escapeHtml(displayName)}</strong>
+                    <span class="driver-meta">${flagHtml}${R3EUtils.escapeHtml(country)}${rankHtml}${mpPosHtml}${teamHtml}</span>
                 </td>
             </tr>`;
     }

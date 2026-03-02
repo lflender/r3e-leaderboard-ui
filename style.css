@@ -2145,7 +2145,6 @@ a.driver-name-silver,
 
 .daily-races-header {
     text-align: center;
-    margin-bottom: 2rem;
 }
 
 .daily-races-header h2 {
@@ -2185,6 +2184,23 @@ a.driver-name-silver,
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 1.25rem;
     margin-bottom: 2rem;
+}
+
+.daily-races-section-header {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.daily-races-section-title {
+    font-size: 1.3rem;
+    color: var(--text-primary);
+    margin: 0;
+    font-weight: 600;
+}
+
+.daily-races-feature .daily-races-grid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 320px));
+    justify-content: center;
 }
 
 .daily-race-card-link {
@@ -2934,6 +2950,10 @@ footer {
     
     .daily-races-header h3 {
         font-size: 1.1rem;
+    }
+    
+    .daily-races-section-title {
+        font-size: 1.1rem !important;
     }
     
     .daily-races-grid {

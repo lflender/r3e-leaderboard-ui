@@ -577,8 +577,7 @@ footer p {
 /* Table scrollbar styling */
 #cars-info-table,
 #track-info-table,
-#results-container,
-#detail-results-container {
+#results-container {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
@@ -588,22 +587,49 @@ footer p {
 
 #cars-info-table::-webkit-scrollbar,
 #track-info-table::-webkit-scrollbar,
-#results-container::-webkit-scrollbar,
-#detail-results-container::-webkit-scrollbar {
+#results-container::-webkit-scrollbar {
     height: 8px;
 }
 
 #cars-info-table::-webkit-scrollbar-track,
 #track-info-table::-webkit-scrollbar-track,
-#results-container::-webkit-scrollbar-track,
-#detail-results-container::-webkit-scrollbar-track {
+#results-container::-webkit-scrollbar-track {
     background: var(--surface);
 }
 
 #cars-info-table::-webkit-scrollbar-thumb,
 #track-info-table::-webkit-scrollbar-thumb,
-#results-container::-webkit-scrollbar-thumb,
-#detail-results-container::-webkit-scrollbar-thumb {
+#results-container::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+/* Detail results container - no scroll */
+#detail-results-container {
+    overflow-x: visible;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* Scrollable table wrapper - only the table scrolls */
+.table-scroll-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) var(--surface);
+    padding: 2px; /* Prevent border/shadow clipping */
+}
+
+.table-scroll-wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-scroll-wrapper::-webkit-scrollbar-track {
+    background: var(--surface);
+}
+
+.table-scroll-wrapper::-webkit-scrollbar-thumb {
     background: var(--primary-color);
     border-radius: 4px;
 }
@@ -2879,7 +2905,7 @@ footer {
     /* Keep table usable with horizontal scroll */
     #cars-info-table,
     #track-info-table,
-    #detail-results-container {
+    .table-scroll-wrapper {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
     }

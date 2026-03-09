@@ -601,7 +601,8 @@ function setSpecificClassesDetailTitles(classIds) {
     const sortedIds = [...classIds].sort().join(',');
     const isGT3MP = sortedIds === '1703,12770,13136' || sortedIds === '12770,13136,1703' || sortedIds === '1703,13136,12770';
     const isAudiTTCup = sortedIds === '4680,5726' || sortedIds === '5726,4680';
-    const categoryLabel = isGT3MP ? 'GT3 MP' : isAudiTTCup ? 'Audi TT Cup' : 'Multi-Class';
+    const isPorscheCup = sortedIds === '12015,12969' || sortedIds === '12969,12015';
+    const categoryLabel = isGT3MP ? 'GT3 MP' : isAudiTTCup ? 'Audi TT Cup' : isPorscheCup ? 'Porsche Cup' : 'Multi-Class';
     
     const title = `${trackName} - ${categoryLabel}`;
     
@@ -943,7 +944,8 @@ async function displayResults(data) {
         });
     }
     
-    resultsContainer.innerHTML = paginationHTML + tableHTML + paginationHTML;
+    const tableWrapperHTML = `<div class="table-scroll-wrapper">${tableHTML}</div>`;
+    resultsContainer.innerHTML = paginationHTML + tableWrapperHTML + paginationHTML;
     
     const entriesDistHTML = generateEntriesDistributionGraph(allResults, false);
 
@@ -984,7 +986,8 @@ async function displayResults(data) {
         const summaryHTML = generateCarDistributionSummary(allResults, defaultSortBy, defaultSortBy === 'median' ? 'asc' : 'desc');
         // Insert summaries above pagination and table
         const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = summaryHTML + entriesDistHTML + paginationHTML + tableHTML + paginationHTML;
+        const tableWrapperHTML = `<div class="table-scroll-wrapper">${tableHTML}</div>`;
+        tempDiv.innerHTML = summaryHTML + entriesDistHTML + paginationHTML + tableWrapperHTML + paginationHTML;
         resultsContainer.innerHTML = tempDiv.innerHTML;
 
         attachCarDistToggle();
@@ -1018,7 +1021,8 @@ async function displayResults(data) {
                     const newSummaryHTML = generateCarDistributionSummary(allResults, clickedSort, newDir, isExpanded);
                     const newEntriesHTML = generateEntriesDistributionGraph(allResults, entriesExpanded);
                     const newTempDiv = document.createElement('div');
-                    newTempDiv.innerHTML = newSummaryHTML + newEntriesHTML + paginationHTML + tableHTML + paginationHTML;
+                    const newTableWrapperHTML = `<div class="table-scroll-wrapper">${tableHTML}</div>`;
+                    newTempDiv.innerHTML = newSummaryHTML + newEntriesHTML + paginationHTML + newTableWrapperHTML + paginationHTML;
                     resultsContainer.innerHTML = newTempDiv.innerHTML;
 
                     // Re-attach expand/collapse listeners
@@ -1035,7 +1039,8 @@ async function displayResults(data) {
         handleCarDistSort();
     } else if (entriesDistHTML) {
         const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = entriesDistHTML + paginationHTML + tableHTML + paginationHTML;
+        const tableWrapperHTML = `<div class="table-scroll-wrapper">${tableHTML}</div>`;
+        tempDiv.innerHTML = entriesDistHTML + paginationHTML + tableWrapperHTML + paginationHTML;
         resultsContainer.innerHTML = tempDiv.innerHTML;
         attachEntriesDistToggle();
     }

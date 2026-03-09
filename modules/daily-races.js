@@ -176,6 +176,26 @@ class DailyRaces {
     }
 
     /**
+     * Map combo class strings to their display names
+     * @param {string} comboString - The combo string from daily races (e.g., "PCCD + PCCNA")
+     * @returns {string} The mapped display name or original string if no mapping found
+     */
+    mapComboClassName(comboString) {
+        if (!comboString) return '';
+
+        const upperString = String(comboString).trim().toUpperCase();
+        
+        // Define mappings for combo strings to their display names
+        const comboMappings = {
+            'PCCD + PCCNA': 'Porsche Cup',
+            'PCCNA + PCCD': 'Porsche Cup',
+            // Add more mappings as needed
+        };
+
+        return comboMappings[upperString] || comboString;
+    }
+
+    /**
      * Format timestamp to readable format
      */
     formatTimestamp(timestamp) {
@@ -254,9 +274,13 @@ class DailyRaces {
             for (const race of races) {
                 // For categories (with multiple class IDs), display the car_class name directly
                 // For regular classes, resolve the class ID to name
-                const carClassName = (race.category_class_ids && Array.isArray(race.category_class_ids) && race.category_class_ids.length > 0)
+                let carClassName = (race.category_class_ids && Array.isArray(race.category_class_ids) && race.category_class_ids.length > 0)
                     ? race.car_class
                     : this.resolveCarClassName(race.car_class_id);
+                
+                // Apply combo mappings to display names like "Porsche Cup" instead of "PCCD + PCCNA"
+                carClassName = this.mapComboClassName(carClassName);
+                
                 const trackName = this.resolveTrackName(race.track_id);
                 const isFree = race.is_free_to_play;
                 const freeIcon = '🆓';

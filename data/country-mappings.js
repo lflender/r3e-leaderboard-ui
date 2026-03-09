@@ -58,7 +58,16 @@ const COUNTRY_NAME_MAP = {
     'korea, democratic people\'s republic of': 'KP',
     'democratic people\'s republic of korea': 'KP',
     'russia': 'RU',
-    'russian federation': 'RU'
+    'russian federation': 'RU',
+    'sao tome and principe': 'ST',
+    'sao tomé and príncipe': 'ST',
+    'são tomé and príncipe': 'ST',
+    'st. thomas and principe': 'ST',
+    'vatican': 'VA',
+    'vatican city': 'VA',
+    'holy see': 'VA',
+    'holy see (vatican city state)': 'VA',
+    'apostolic see': 'VA'
 };
 
 /**

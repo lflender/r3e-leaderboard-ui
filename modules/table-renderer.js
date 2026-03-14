@@ -136,25 +136,21 @@ class TableRenderer {
         const rank = firstEntry.rank || firstEntry.Rank || '';
         const team = firstEntry.team || firstEntry.Team || '';
         
+        // Create a unique group ID that includes country and team to handle drivers with same name from different countries/teams
         const slugSource = driverObj.driver || driverObj.name || firstEntry.name || firstEntry.Name || 'unknown';
-        const groupId = `group-${String(slugSource).replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-]/g, '').toLowerCase()}`;
+        const countrySlug = country && country !== '-' ? `-${String(country).replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-]/g, '').toLowerCase()}` : '';
+        const teamSlug = team && team !== '-' ? `-${String(team).replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-]/g, '').toLowerCase()}` : '';
+        const groupId = `group-${String(slugSource).replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-]/g, '').toLowerCase()}${countrySlug}${teamSlug}`;
         
         const flagHtml = FlagHelper.countryToFlag(country) ? `<span class="country-flag">${FlagHelper.countryToFlag(country)}</span>` : '';
         const rankHtml = rank ? R3EUtils.renderRankStars(rank) : '';
         
         // Get multiplayer position if available
-        const mpPos = typeof getMpPos === 'function' ? getMpPos(displayName) : null;
+        const mpPos = typeof resolveMpPos === 'function' ? resolveMpPos(displayName, country) : null;
         const mpPosHtml = mpPos ? ` | Multiplayer #${mpPos}` : '';
         
-        // Determine driver name class based on mp_pos
-        let driverNameClass = '';
-        if (mpPos !== null) {
-            if (mpPos <= 25) {
-                driverNameClass = ' class="driver-name-gold"';
-            } else if (mpPos <= 100) {
-                driverNameClass = ' class="driver-name-silver"';
-            }
-        }
+        const highlightClass = typeof getMpPosHighlightClass === 'function' ? getMpPosHighlightClass(mpPos) : '';
+        const driverNameClass = highlightClass ? ` class="${highlightClass}"` : '';
         
         // Only add "Team" prefix if the team name doesn't already contain "team"
         const teamPrefix = team && !String(team).toLowerCase().includes('team') ? 'Team ' : '';

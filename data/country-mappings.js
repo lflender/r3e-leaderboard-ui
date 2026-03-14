@@ -32,6 +32,8 @@ const COUNTRY_NAME_MAP = {
     'chinese taipei': 'TW',
     'hong kong': 'HK',
     'hongkong': 'HK',
+    'macao': 'MO',
+    'macau': 'MO',
     'venezuela': 'VE',
     'venezuela, bolivarian republic of': 'VE',
     'bolivarian republic of venezuela': 'VE',

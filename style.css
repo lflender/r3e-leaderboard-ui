@@ -2224,9 +2224,21 @@ a.driver-name-silver,
     font-weight: 600;
 }
 
+.daily-races-feature {
+    margin-bottom: 2rem;
+}
+
 .daily-races-feature .daily-races-grid {
-    grid-template-columns: repeat(auto-fit, minmax(320px, 320px));
-    justify-content: center;
+    grid-template-columns: repeat(2, minmax(280px, 1fr));
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+/* Extra large screens: constrain Feature Races width after Sprint Races transition to 2 columns */
+@media (min-width: 1160px) {
+    .daily-races-feature .daily-races-grid {
+        max-width: 750px;
+    }
 }
 
 .daily-race-card-link {
@@ -2985,6 +2997,11 @@ footer {
     .daily-races-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
+    }
+
+    .daily-races-feature .daily-races-grid {
+        grid-template-columns: 1fr;
+        max-width: none;
     }
     
     .daily-race-card {

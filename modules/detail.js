@@ -1142,16 +1142,14 @@ function renderDetailRow(item, showAbsolutePosition = false) {
     const rankStarsHtml = rank ? R3EUtils.renderRankStars(rank, true) : '';
     
     // Get multiplayer position
-    const mpPos = getMpPos(name);
+    const mpPos = typeof resolveMpPos === 'function' ? resolveMpPos(name, country) : null;
     const mpPosHtml = mpPos ? ` <span class="mp-pos-badge">#${mpPos}</span>` : '';
     
-    // Determine driver name class based on mp_pos
     let driverLinkClass = 'detail-driver-link';
-    if (mpPos !== null) {
-        if (mpPos <= 25) {
-            driverLinkClass += ' driver-name-gold';
-        } else if (mpPos <= 100) {
-            driverLinkClass += ' driver-name-silver';
+    if (typeof getMpPosHighlightClass === 'function') {
+        const highlightClass = getMpPosHighlightClass(mpPos);
+        if (highlightClass) {
+            driverLinkClass += ` ${highlightClass}`;
         }
     }
     
@@ -1159,14 +1157,10 @@ function renderDetailRow(item, showAbsolutePosition = false) {
         const encoded = encodeURIComponent(String(name));
         html += `<td><a class="${driverLinkClass}" href="index.html?driver=${encoded}">${flagHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}${mpPosHtml}</a></td>`;
     } else {
-        let spanClassAttr = '';
-        if (mpPos !== null) {
-            if (mpPos <= 10) {
-                spanClassAttr = ' class="driver-name-gold"';
-            } else if (mpPos <= 100) {
-                spanClassAttr = ' class="driver-name-silver"';
-            }
-        }
+        const highlightClass = typeof getMpPosHighlightClass === 'function'
+            ? getMpPosHighlightClass(mpPos, { gold: 10, silver: 100 })
+            : '';
+        const spanClassAttr = highlightClass ? ` class="${highlightClass}"` : '';
         html += `<td><span${spanClassAttr}>${flagHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}${mpPosHtml}</span></td>`;
     }
     

@@ -88,6 +88,45 @@ class DriverSearch {
     }
 
     /**
+     * Sort search results by driver name (alphabetically), then by MP position
+     * This handles multiple drivers with the same name from different countries/teams
+     * @param {Array} results - Search results to sort in-place
+     */
+    sortResultsByMpPosition(results) {
+        if (!Array.isArray(results) || results.length <= 1) return;
+        
+        results.sort((a, b) => {
+            // Primary sort: driver name (case-insensitive, alphabetically)
+            const nameA = String(a.driver || '').toLowerCase();
+            const nameB = String(b.driver || '').toLowerCase();
+            const nameCompare = nameA.localeCompare(nameB);
+            if (nameCompare !== 0) return nameCompare;
+            
+            // Secondary sort: country (alphabetically)
+            const countryA = String(a.country || '-').toLowerCase();
+            const countryB = String(b.country || '-').toLowerCase();
+            const countryCompare = countryA.localeCompare(countryB);
+            if (countryCompare !== 0) return countryCompare;
+            
+            // Tertiary sort: team (alphabetically)
+            const teamA = String(a.team || '-').toLowerCase();
+            const teamB = String(b.team || '-').toLowerCase();
+            const teamCompare = teamA.localeCompare(teamB);
+            if (teamCompare !== 0) return teamCompare;
+            
+            // Final tiebreaker: MP position (ascending - lower position is better)
+            const mpPosA = typeof resolveMpPos === 'function' ? resolveMpPos(a.driver, a.country) : null;
+            const mpPosB = typeof resolveMpPos === 'function' ? resolveMpPos(b.driver, b.country) : null;
+            
+            // null values (not in leaderboard) go to the end
+            if (mpPosA === null && mpPosB === null) return 0;
+            if (mpPosA === null) return 1;
+            if (mpPosB === null) return -1;
+            return mpPosA - mpPosB;
+        });
+    }
+
+    /**
      * Populate class filter from CARS_DATA
      */
     populateClassFilter() {
@@ -235,6 +274,9 @@ class DriverSearch {
                 className: selectedClass,
                 difficulty: selectedDifficulty
             });
+            
+            // Sort results by MP position (ascending) when multiple drivers have the same name
+            this.sortResultsByMpPosition(results);
             
             this.allResults = results;
             this.currentPage = 1;

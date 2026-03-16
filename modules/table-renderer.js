@@ -149,8 +149,8 @@ class TableRenderer {
         const mpPos = typeof resolveMpPos === 'function' ? resolveMpPos(displayName, country) : null;
         const mpPosHtml = mpPos ? ` | Multiplayer #${mpPos}` : '';
         
-        const highlightClass = typeof getMpPosHighlightClass === 'function' ? getMpPosHighlightClass(mpPos) : '';
-        const driverNameClass = highlightClass ? ` class="${highlightClass}"` : '';
+        const nameClasses = typeof getMpPosNameClasses === 'function' ? getMpPosNameClasses(mpPos) : '';
+        const driverNameClass = nameClasses ? ` class="${nameClasses}"` : '';
         
         // Only add "Team" prefix if the team name doesn't already contain "team"
         const teamPrefix = team && !String(team).toLowerCase().includes('team') ? 'Team ' : '';

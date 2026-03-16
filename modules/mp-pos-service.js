@@ -138,6 +138,35 @@ function getMpPosHighlightClass(mpPos, thresholds = { gold: 50, silver: 200 }) {
 }
 
 /**
+ * Build the full set of MP position CSS classes for a driver name.
+ * @param {number|null} mpPos - Multiplayer position
+ * @param {Object} options - Threshold configuration
+ * @param {number} options.gold - Max position for gold highlight
+ * @param {number} options.silver - Max position for silver highlight
+ * @param {number} options.glitter - Max position for glitter effect
+ * @returns {string} Space-separated CSS classes
+ */
+function getMpPosNameClasses(mpPos, options = { gold: 50, silver: 200, glitter: 10 }) {
+    if (mpPos === null || mpPos === undefined) return '';
+
+    const classes = [];
+    const highlightClass = getMpPosHighlightClass(mpPos, {
+        gold: options.gold,
+        silver: options.silver
+    });
+
+    if (highlightClass) {
+        classes.push(highlightClass);
+    }
+
+    if (mpPos <= options.glitter) {
+        classes.push('driver-name-top10-glitter');
+    }
+
+    return classes.join(' ');
+}
+
+/**
  * Get MP position with country code lookup only (no fallback)
  * @param {string} driverName - Driver name to look up
  * @param {string} countryCode - ISO country code (e.g., "DE", "CH")

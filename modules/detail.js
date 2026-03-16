@@ -1146,10 +1146,10 @@ function renderDetailRow(item, showAbsolutePosition = false) {
     const mpPosHtml = mpPos ? ` <span class="mp-pos-badge">#${mpPos}</span>` : '';
     
     let driverLinkClass = 'detail-driver-link';
-    if (typeof getMpPosHighlightClass === 'function') {
-        const highlightClass = getMpPosHighlightClass(mpPos);
-        if (highlightClass) {
-            driverLinkClass += ` ${highlightClass}`;
+    if (typeof getMpPosNameClasses === 'function') {
+        const nameClasses = getMpPosNameClasses(mpPos);
+        if (nameClasses) {
+            driverLinkClass += ` ${nameClasses}`;
         }
     }
     
@@ -1157,10 +1157,10 @@ function renderDetailRow(item, showAbsolutePosition = false) {
         const encoded = encodeURIComponent(String(name));
         html += `<td><a class="${driverLinkClass}" href="index.html?driver=${encoded}">${flagHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}${mpPosHtml}</a></td>`;
     } else {
-        const highlightClass = typeof getMpPosHighlightClass === 'function'
-            ? getMpPosHighlightClass(mpPos, { gold: 10, silver: 100 })
+        const nameClasses = typeof getMpPosNameClasses === 'function'
+            ? getMpPosNameClasses(mpPos, { gold: 10, silver: 100, glitter: 10 })
             : '';
-        const spanClassAttr = highlightClass ? ` class="${highlightClass}"` : '';
+        const spanClassAttr = nameClasses ? ` class="${nameClasses}"` : '';
         html += `<td><span${spanClassAttr}>${flagHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}${mpPosHtml}</span></td>`;
     }
     

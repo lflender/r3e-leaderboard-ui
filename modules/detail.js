@@ -27,7 +27,9 @@ const DetailState = {
     difficultyFilterSelect: null,
     availableCars: [],
     lastActionTime: 0,
-    isCombinedView: false // True when showing combined superclass data
+    isCombinedView: false, // True when showing combined superclass data
+    carDistributionExpanded: false,
+    entriesDistributionExpanded: false
 };
 
 // Backward compatibility - keep old variable names pointing to DetailState
@@ -836,6 +838,16 @@ function setDetailTitles(data, trackParam, classParam) {
  */
 async function displayResults(data) {
     let results = Array.isArray(data) ? data.slice() : [];
+
+    // Preserve expand/collapse state across full re-renders (pagination and filtering)
+    const existingCarDistContent = resultsContainer.querySelector('.car-dist-content');
+    if (existingCarDistContent) {
+        DetailState.carDistributionExpanded = existingCarDistContent.style.display !== 'none';
+    }
+    const existingEntriesDistContent = resultsContainer.querySelector('.entries-dist-content');
+    if (existingEntriesDistContent) {
+        DetailState.entriesDistributionExpanded = existingEntriesDistContent.style.display !== 'none';
+    }
     
     // Sort by position - in combined view, data is already sorted by lap time with proper positions
     // For normal view, sort by the position field
@@ -947,7 +959,7 @@ async function displayResults(data) {
     const tableWrapperHTML = `<div class="table-scroll-wrapper">${tableHTML}</div>`;
     resultsContainer.innerHTML = paginationHTML + tableWrapperHTML + paginationHTML;
     
-    const entriesDistHTML = generateEntriesDistributionGraph(allResults, false);
+    const entriesDistHTML = generateEntriesDistributionGraph(allResults, DetailState.entriesDistributionExpanded);
 
     const attachCarDistToggle = () => {
         const toggleBtn = resultsContainer.querySelector('.car-dist-toggle');
@@ -958,6 +970,7 @@ async function displayResults(data) {
                 summaryTable.style.display = isCollapsed ? '' : 'none';
                 toggleBtn.classList.toggle('expanded', isCollapsed);
                 toggleBtn.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false');
+                DetailState.carDistributionExpanded = isCollapsed;
             });
         }
     };
@@ -971,6 +984,7 @@ async function displayResults(data) {
                 content.style.display = isCollapsed ? '' : 'none';
                 toggleBtn.classList.toggle('expanded', isCollapsed);
                 toggleBtn.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false');
+                DetailState.entriesDistributionExpanded = isCollapsed;
             });
         }
     };
@@ -983,7 +997,12 @@ async function displayResults(data) {
         if (defaultSortBy === 'median') {
             defaultSortDir = 'asc';
         }
-        const summaryHTML = generateCarDistributionSummary(allResults, defaultSortBy, defaultSortBy === 'median' ? 'asc' : 'desc');
+        const summaryHTML = generateCarDistributionSummary(
+            allResults,
+            defaultSortBy,
+            defaultSortBy === 'median' ? 'asc' : 'desc',
+            DetailState.carDistributionExpanded
+        );
         // Insert summaries above pagination and table
         const tempDiv = document.createElement('div');
         const tableWrapperHTML = `<div class="table-scroll-wrapper">${tableHTML}</div>`;
@@ -1006,6 +1025,8 @@ async function displayResults(data) {
                     const isExpanded = currentContent && currentContent.style.display !== 'none';
                     const currentEntriesContent = resultsContainer.querySelector('.entries-dist-content');
                     const entriesExpanded = currentEntriesContent && currentEntriesContent.style.display !== 'none';
+                    DetailState.carDistributionExpanded = isExpanded;
+                    DetailState.entriesDistributionExpanded = entriesExpanded;
 
                     // Determine new sort direction
                     let newDir;

@@ -29,7 +29,9 @@ const DetailState = {
     lastActionTime: 0,
     isCombinedView: false, // True when showing combined superclass data
     carDistributionExpanded: false,
-    entriesDistributionExpanded: false
+    entriesDistributionExpanded: false,
+    timeframeStart: null,
+    timeframeEnd: null
 };
 
 // Backward compatibility - keep old variable names pointing to DetailState
@@ -837,7 +839,8 @@ function setDetailTitles(data, trackParam, classParam) {
  * @param {Array} data - Results data
  */
 async function displayResults(data) {
-    let results = Array.isArray(data) ? data.slice() : [];
+    const baseResults = Array.isArray(data) ? data.slice() : [];
+    let results = baseResults.slice();
 
     // Preserve expand/collapse state across full re-renders (pagination and filtering)
     const existingCarDistContent = resultsContainer.querySelector('.car-dist-content');
@@ -848,6 +851,21 @@ async function displayResults(data) {
     if (existingEntriesDistContent) {
         DetailState.entriesDistributionExpanded = existingEntriesDistContent.style.display !== 'none';
     }
+
+    const bounds = getDataTimeBounds(results);
+    if (bounds) {
+        if (!DetailState.timeframeStart) {
+            DetailState.timeframeStart = toLocalDateInputValue(bounds.min);
+        }
+        if (!DetailState.timeframeEnd) {
+            DetailState.timeframeEnd = toLocalDateInputValue(bounds.max);
+        }
+    } else {
+        DetailState.timeframeStart = null;
+        DetailState.timeframeEnd = null;
+    }
+
+    results = applyTimeframeFilter(results, DetailState.timeframeStart, DetailState.timeframeEnd);
     
     // Sort by position - in combined view, data is already sorted by lap time with proper positions
     // For normal view, sort by the position field
@@ -861,6 +879,66 @@ async function displayResults(data) {
     // In combined view, results are already in correct order (sorted by lap time with sequential positions)
     
     if (results.length === 0) {
+        if (baseResults.length > 0) {
+            const emptyEntriesDistHTML = generateEntriesDistributionGraph(
+                results,
+                DetailState.entriesDistributionExpanded,
+                DetailState.timeframeStart,
+                DetailState.timeframeEnd,
+                baseResults
+            );
+            resultsContainer.innerHTML = `${emptyEntriesDistHTML}<div class="no-results">No entries found for the selected timeframe.</div>`;
+
+            const toggleBtn = resultsContainer.querySelector('.entries-dist-toggle');
+            const content = resultsContainer.querySelector('.entries-dist-content');
+            if (toggleBtn && content) {
+                toggleBtn.addEventListener('click', () => {
+                    const isCollapsed = content.style.display === 'none';
+                    content.style.display = isCollapsed ? '' : 'none';
+                    toggleBtn.classList.toggle('expanded', isCollapsed);
+                    toggleBtn.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false');
+                    DetailState.entriesDistributionExpanded = isCollapsed;
+                });
+            }
+
+            const startInput = resultsContainer.querySelector('.entries-timeframe-start');
+            const endInput = resultsContainer.querySelector('.entries-timeframe-end');
+            const lastWeekBtn = resultsContainer.querySelector('.entries-timeframe-last-week');
+            if (startInput) {
+                startInput.addEventListener('input', () => {
+                    if (!startInput.value) return;
+                    DetailState.timeframeStart = startInput.value;
+                    if (DetailState.timeframeEnd && startInput.value > DetailState.timeframeEnd) {
+                        DetailState.timeframeEnd = startInput.value;
+                    }
+                    currentPage = 1;
+                    displayResults(allResults);
+                });
+            }
+            if (endInput) {
+                endInput.addEventListener('input', () => {
+                    if (!endInput.value) return;
+                    DetailState.timeframeEnd = endInput.value;
+                    if (DetailState.timeframeStart && endInput.value < DetailState.timeframeStart) {
+                        DetailState.timeframeStart = endInput.value;
+                    }
+                    currentPage = 1;
+                    displayResults(allResults);
+                });
+            }
+            if (lastWeekBtn) {
+                lastWeekBtn.addEventListener('click', () => {
+                    const now = new Date();
+                    const weekAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
+                    DetailState.timeframeStart = toLocalDateInputValue(weekAgo);
+                    DetailState.timeframeEnd = toLocalDateInputValue(now);
+                    currentPage = 1;
+                    displayResults(allResults);
+                });
+            }
+            return;
+        }
+
         // Only show "no results" if enough time has passed since last action
         const timeSinceAction = Date.now() - lastActionTime;
         if (timeSinceAction < 1500) {
@@ -880,6 +958,7 @@ async function displayResults(data) {
     // Pagination
     const totalResults = results.length;
     const totalPages = Math.ceil(totalResults / itemsPerPage);
+    currentPage = Math.min(Math.max(1, currentPage), Math.max(1, totalPages));
     
     // Apply position highlighting
     if (!posApplied && posParam && !Number.isNaN(posParam)) {
@@ -959,7 +1038,13 @@ async function displayResults(data) {
     const tableWrapperHTML = `<div class="table-scroll-wrapper">${tableHTML}</div>`;
     resultsContainer.innerHTML = paginationHTML + tableWrapperHTML + paginationHTML;
     
-    const entriesDistHTML = generateEntriesDistributionGraph(allResults, DetailState.entriesDistributionExpanded);
+    const entriesDistHTML = generateEntriesDistributionGraph(
+        results,
+        DetailState.entriesDistributionExpanded,
+        DetailState.timeframeStart,
+        DetailState.timeframeEnd,
+        baseResults
+    );
 
     const attachCarDistToggle = () => {
         const toggleBtn = resultsContainer.querySelector('.car-dist-toggle');
@@ -989,6 +1074,47 @@ async function displayResults(data) {
         }
     };
 
+    const attachEntriesTimeframeControls = () => {
+        const startInput = resultsContainer.querySelector('.entries-timeframe-start');
+        const endInput = resultsContainer.querySelector('.entries-timeframe-end');
+        const lastWeekBtn = resultsContainer.querySelector('.entries-timeframe-last-week');
+
+        if (startInput) {
+            startInput.addEventListener('input', () => {
+                if (!startInput.value) return;
+                DetailState.timeframeStart = startInput.value;
+                if (DetailState.timeframeEnd && startInput.value > DetailState.timeframeEnd) {
+                    DetailState.timeframeEnd = startInput.value;
+                }
+                currentPage = 1;
+                displayResults(allResults);
+            });
+        }
+
+        if (endInput) {
+            endInput.addEventListener('input', () => {
+                if (!endInput.value) return;
+                DetailState.timeframeEnd = endInput.value;
+                if (DetailState.timeframeStart && endInput.value < DetailState.timeframeStart) {
+                    DetailState.timeframeStart = endInput.value;
+                }
+                currentPage = 1;
+                displayResults(allResults);
+            });
+        }
+
+        if (lastWeekBtn) {
+            lastWeekBtn.addEventListener('click', () => {
+                const now = new Date();
+                const weekAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
+                DetailState.timeframeStart = toLocalDateInputValue(weekAgo);
+                DetailState.timeframeEnd = toLocalDateInputValue(now);
+                currentPage = 1;
+                displayResults(allResults);
+            });
+        }
+    };
+
     // Add car distribution summary if multiple cars present
     if (availableCars.length > 1) {
         // Default sort: entries (desc), median (asc)
@@ -1011,6 +1137,7 @@ async function displayResults(data) {
 
         attachCarDistToggle();
         attachEntriesDistToggle();
+        attachEntriesTimeframeControls();
 
         // Create a function to handle sorting
         const handleCarDistSort = () => {
@@ -1040,7 +1167,13 @@ async function displayResults(data) {
 
                     // Re-render with new sort
                     const newSummaryHTML = generateCarDistributionSummary(allResults, clickedSort, newDir, isExpanded);
-                    const newEntriesHTML = generateEntriesDistributionGraph(allResults, entriesExpanded);
+                    const newEntriesHTML = generateEntriesDistributionGraph(
+                        results,
+                        entriesExpanded,
+                        DetailState.timeframeStart,
+                        DetailState.timeframeEnd,
+                        baseResults
+                    );
                     const newTempDiv = document.createElement('div');
                     const newTableWrapperHTML = `<div class="table-scroll-wrapper">${tableHTML}</div>`;
                     newTempDiv.innerHTML = newSummaryHTML + newEntriesHTML + paginationHTML + newTableWrapperHTML + paginationHTML;
@@ -1049,6 +1182,7 @@ async function displayResults(data) {
                     // Re-attach expand/collapse listeners
                     attachCarDistToggle();
                     attachEntriesDistToggle();
+                    attachEntriesTimeframeControls();
 
                     // Re-attach sort listeners
                     handleCarDistSort();
@@ -1064,6 +1198,7 @@ async function displayResults(data) {
         tempDiv.innerHTML = entriesDistHTML + paginationHTML + tableWrapperHTML + paginationHTML;
         resultsContainer.innerHTML = tempDiv.innerHTML;
         attachEntriesDistToggle();
+        attachEntriesTimeframeControls();
     }
     
     // Highlight position row if needed
@@ -1860,43 +1995,66 @@ function generateCarDistributionSummary(data, sortBy = 'entries', sortDir = 'des
  * Generate entries distribution graph HTML (entries per day)
  * @param {Array} data - Full results dataset
  * @param {boolean} isExpanded - Whether graph is expanded by default
+ * @param {string|null} startValue - Selected start date value (yyyy-MM-dd)
+ * @param {string|null} endValue - Selected end date value (yyyy-MM-dd)
+ * @param {Array} boundsData - Data to use for control default bounds
  * @returns {string} HTML string for the entries distribution graph
  */
-function generateEntriesDistributionGraph(data, isExpanded = false) {
-    if (!Array.isArray(data) || data.length === 0) return '';
+function generateEntriesDistributionGraph(data, isExpanded = false, startValue = null, endValue = null, boundsData = []) {
+    const graphData = Array.isArray(data) ? data : [];
+    const rangeSourceData = (Array.isArray(boundsData) && boundsData.length > 0) ? boundsData : graphData;
+    if (!Array.isArray(rangeSourceData) || rangeSourceData.length === 0) return '';
 
     const dayCounts = new Map();
+    const fullRangeDayCounts = new Map();
     let minDate = null;
     let maxDate = null;
 
-    data.forEach(entry => {
-        const raw = entry.date_time || entry.dateTime || entry.Date || entry.DateTime || '';
-        if (!raw) return;
-        const d = new Date(raw);
-        if (Number.isNaN(d.getTime())) return;
-        const dayKey = d.toISOString().slice(0, 10);
+    graphData.forEach(entry => {
+        const d = parseEntryDate(entry);
+        if (!d) return;
+        const dayKey = getLocalDateKey(d);
         dayCounts.set(dayKey, (dayCounts.get(dayKey) || 0) + 1);
         if (!minDate || d < minDate) minDate = d;
         if (!maxDate || d > maxDate) maxDate = d;
     });
 
-    if (!minDate || !maxDate) return '';
+    // Keep the dotted reference line stable by using max entries/day from the full range data.
+    rangeSourceData.forEach(entry => {
+        const d = parseEntryDate(entry);
+        if (!d) return;
+        const dayKey = getLocalDateKey(d);
+        fullRangeDayCounts.set(dayKey, (fullRangeDayCounts.get(dayKey) || 0) + 1);
+    });
 
-    const start = new Date(Date.UTC(minDate.getUTCFullYear(), minDate.getUTCMonth(), minDate.getUTCDate()));
-    const end = new Date(Date.UTC(maxDate.getUTCFullYear(), maxDate.getUTCMonth(), maxDate.getUTCDate()));
+    // If selected range has no entries, keep controls visible using source-data bounds
+    if (!minDate || !maxDate) {
+        rangeSourceData.forEach(entry => {
+            const d = parseEntryDate(entry);
+            if (!d) return;
+            if (!minDate || d < minDate) minDate = d;
+            if (!maxDate || d > maxDate) maxDate = d;
+        });
+        if (!minDate || !maxDate) return '';
+    }
+
+    const start = new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate());
+    const end = new Date(maxDate.getFullYear(), maxDate.getMonth(), maxDate.getDate());
 
     const dayKeys = [];
-    for (let d = new Date(start); d <= end; d.setUTCDate(d.getUTCDate() + 1)) {
-        dayKeys.push(d.toISOString().slice(0, 10));
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        dayKeys.push(getLocalDateKey(d));
     }
 
     const counts = dayKeys.map(k => dayCounts.get(k) || 0);
-    const maxCount = Math.max(1, ...counts);
+    const maxCount = Math.max(1, ...Array.from(fullRangeDayCounts.values()));
 
     const chartHeight = 100;
     const chartWidth = Math.max(dayKeys.length, 1);
 
     const summaryId = 'entries-dist-summary-' + Date.now();
+    const startInputValue = startValue || DetailState.timeframeStart || toLocalDateInputValue(start);
+    const endInputValue = endValue || DetailState.timeframeEnd || toLocalDateInputValue(end);
     let html = '<div class="entries-dist-summary">';
     html += '<button type="button" class="entries-dist-toggle' + (isExpanded ? ' expanded' : '') + '" aria-expanded="' + (isExpanded ? 'true' : 'false') + '" aria-controls="' + summaryId + '">';
     html += '<span class="entries-dist-toggle-icon">▼</span>';
@@ -1907,7 +2065,6 @@ function generateEntriesDistributionGraph(data, isExpanded = false) {
     html += '<div class="entries-dist-max-label">' + maxCount + '</div>';
     html += '<div class="entries-dist-chart" role="img" aria-label="Entries per day from ' + dayKeys[0] + ' to ' + dayKeys[dayKeys.length - 1] + '">';
     html += '<svg viewBox="0 0 ' + chartWidth + ' ' + chartHeight + '" preserveAspectRatio="none" aria-hidden="true">';
-    html += '<line class="entries-dist-max-line" x1="0" y1="0.5" x2="' + chartWidth + '" y2="0.5" />';
 
     dayKeys.forEach((key, idx) => {
         const count = counts[idx];
@@ -1919,15 +2076,100 @@ function generateEntriesDistributionGraph(data, isExpanded = false) {
     });
 
     html += '</svg>';
+    html += '<div class="entries-dist-max-line-overlay" aria-hidden="true"></div>';
     html += '</div>';
     html += '<div class="entries-dist-axis">';
     html += '<span class="entries-dist-axis-left">' + dayKeys[0] + '</span>';
     html += '<span class="entries-dist-axis-right">' + dayKeys[dayKeys.length - 1] + '</span>';
     html += '</div>';
+    if (graphData.length === 0) {
+        html += '<div class="entries-dist-empty">No entries in the selected timeframe.</div>';
+    }
+    html += '<div class="entries-timeframe-controls">';
+    html += '<label class="entries-timeframe-field"><span>Start</span><input type="date" class="entries-timeframe-input entries-timeframe-start" value="' + R3EUtils.escapeHtml(startInputValue) + '"></label>';
+    html += '<button type="button" class="entries-timeframe-last-week">Last week</button>';
+    html += '<label class="entries-timeframe-field"><span>End</span><input type="date" class="entries-timeframe-input entries-timeframe-end" value="' + R3EUtils.escapeHtml(endInputValue) + '"></label>';
+    html += '</div>';
     html += '</div>';
     html += '</div>';
 
     return html;
+}
+
+/**
+ * Parse a detail entry date field into a Date instance
+ * @param {Object} entry - Leaderboard entry
+ * @returns {Date|null} Parsed date or null
+ */
+function parseEntryDate(entry) {
+    const raw = entry.date_time || entry.dateTime || entry.Date || entry.DateTime || '';
+    if (!raw) return null;
+    const date = new Date(raw);
+    return Number.isNaN(date.getTime()) ? null : date;
+}
+
+/**
+ * Convert Date to local day key (yyyy-MM-dd)
+ * @param {Date} date - Date object
+ * @returns {string} Local day key
+ */
+function getLocalDateKey(date) {
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return '';
+    const local = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+    return local.toISOString().slice(0, 10);
+}
+
+/**
+ * Get min/max date bounds from a dataset
+ * @param {Array} data - Leaderboard data
+ * @returns {{min: Date, max: Date}|null} Bounds object or null
+ */
+function getDataTimeBounds(data) {
+    if (!Array.isArray(data) || data.length === 0) return null;
+
+    let min = null;
+    let max = null;
+    data.forEach(entry => {
+        const dt = parseEntryDate(entry);
+        if (!dt) return;
+        if (!min || dt < min) min = dt;
+        if (!max || dt > max) max = dt;
+    });
+
+    if (!min || !max) return null;
+    return { min, max };
+}
+
+/**
+ * Convert Date to local date input format
+ * @param {Date} date - Date object
+ * @returns {string} yyyy-MM-dd string
+ */
+function toLocalDateInputValue(date) {
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return '';
+    return getLocalDateKey(date);
+}
+
+/**
+ * Apply selected timeframe filter to dataset
+ * @param {Array} data - Data to filter
+ * @param {string|null} startValue - date start (yyyy-MM-dd)
+ * @param {string|null} endValue - date end (yyyy-MM-dd)
+ * @returns {Array} Filtered data
+ */
+function applyTimeframeFilter(data, startValue, endValue) {
+    if (!Array.isArray(data) || data.length === 0) return [];
+    if (!startValue && !endValue) return data;
+
+    return data.filter(entry => {
+        const dt = parseEntryDate(entry);
+        if (!dt) return false;
+        const dayKey = getLocalDateKey(dt);
+        if (!dayKey) return false;
+        if (startValue && dayKey < startValue) return false;
+        if (endValue && dayKey > endValue) return false;
+        return true;
+    });
 }
 
 // Make functions globally accessible

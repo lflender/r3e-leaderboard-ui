@@ -2028,6 +2028,17 @@ span.driver-name-top10-glitter::after {
     display: block;
 }
 
+.entries-dist-max-line-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 0;
+    border-top: 1px dashed rgba(148, 163, 184, 0.7);
+    pointer-events: none;
+    z-index: 2;
+}
+
 .entries-dist-bar {
     fill: rgba(59, 130, 246, 0.75);
 }
@@ -2046,6 +2057,86 @@ span.driver-name-top10-glitter::after {
     color: var(--text-secondary);
     font-size: 0.85rem;
     font-variant-numeric: tabular-nums;
+}
+
+.entries-dist-empty {
+    margin-top: 0.55rem;
+    color: var(--text-secondary);
+    font-size: 0.84rem;
+}
+
+.entries-timeframe-controls {
+    margin-top: 0.8rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(51, 65, 85, 0.55);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 0.7rem;
+    align-items: end;
+}
+
+.entries-timeframe-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 0;
+}
+
+.entries-timeframe-field:last-child {
+    padding-right: 0.2rem;
+}
+
+.entries-timeframe-field span {
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.45px;
+}
+
+.entries-timeframe-input {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 2.1rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.96), rgba(15, 23, 42, 0.96));
+    color: var(--text-primary);
+    padding: 0.45rem 0.6rem;
+    font-size: 0.86rem;
+    font-variant-numeric: tabular-nums;
+    transition: border-color 0.18s, box-shadow 0.18s;
+}
+
+.entries-timeframe-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.entries-timeframe-last-week {
+    border: 1px solid rgba(59, 130, 246, 0.5);
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(59, 130, 246, 0.22), rgba(37, 99, 235, 0.28));
+    color: #dbeafe;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    padding: 0.5rem 0.95rem;
+    cursor: pointer;
+    min-height: 2.1rem;
+    white-space: nowrap;
+    transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+
+.entries-timeframe-last-week:hover {
+    border-color: rgba(96, 165, 250, 0.82);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+    transform: translateY(-1px);
+}
+
+.entries-timeframe-last-week:active {
+    transform: translateY(0);
 }
 
 /* Responsive styling for distribution summaries */
@@ -2116,6 +2207,16 @@ span.driver-name-top10-glitter::after {
     
     .entries-dist-axis {
         font-size: 0.75rem;
+    }
+
+    .entries-timeframe-controls {
+        grid-template-columns: 1fr;
+        gap: 0.55rem;
+        align-items: stretch;
+    }
+
+    .entries-timeframe-last-week {
+        justify-self: start;
     }
 
     .car-dist-table th.car-dist-car,

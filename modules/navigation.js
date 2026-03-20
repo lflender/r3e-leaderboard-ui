@@ -96,11 +96,11 @@ class Navigation {
     }
 }
 
-// Auto-initialize when DOM is ready
-if (document.readyState === 'loading') {
+// Auto-initialize when DOM is fully ready.
+if (document.readyState === 'complete') {
+    window.navigation = new Navigation();
+} else {
     document.addEventListener('DOMContentLoaded', () => {
         window.navigation = new Navigation();
-    });
-} else {
-    window.navigation = new Navigation();
+    }, { once: true });
 }

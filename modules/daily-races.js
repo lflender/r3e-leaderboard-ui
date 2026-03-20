@@ -370,11 +370,12 @@ class DailyRaces {
     }
 }
 
-// Auto-initialize when DOM is ready
-if (document.readyState === 'loading') {
+// Auto-initialize when DOM is fully ready.
+// With deferred scripts, readyState can be 'interactive' before dependent data scripts run.
+if (document.readyState === 'complete') {
+    window.dailyRaces = new DailyRaces();
+} else {
     document.addEventListener('DOMContentLoaded', () => {
         window.dailyRaces = new DailyRaces();
-    });
-} else {
-    window.dailyRaces = new DailyRaces();
+    }, { once: true });
 }

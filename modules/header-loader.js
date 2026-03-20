@@ -9,10 +9,10 @@
     }).catch(err => console.error('Failed to render header:', err));
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', injectHeader);
-  } else {
+  if (document.readyState === 'complete') {
     injectHeader();
+  } else {
+    document.addEventListener('DOMContentLoaded', injectHeader, { once: true });
   }
 
 })();

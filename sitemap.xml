@@ -2,37 +2,31 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://r3e-leaderboards.info/</loc>
-    <lastmod>2026-01-31</lastmod>
+    <lastmod>2026-03-19</lastmod>
     <priority>1.0</priority>
     <changefreq>daily</changefreq>
   </url>
   <url>
     <loc>https://r3e-leaderboards.info/tracks.html</loc>
-    <lastmod>2026-01-31</lastmod>
+    <lastmod>2026-03-19</lastmod>
     <priority>0.8</priority>
     <changefreq>weekly</changefreq>
   </url>
   <url>
     <loc>https://r3e-leaderboards.info/cars.html</loc>
-    <lastmod>2026-01-31</lastmod>
+    <lastmod>2026-03-19</lastmod>
     <priority>0.8</priority>
     <changefreq>weekly</changefreq>
   </url>
   <url>
-    <loc>https://r3e-leaderboards.info/detail.html</loc>
-    <lastmod>2026-01-31</lastmod>
-    <priority>0.6</priority>
-    <changefreq>weekly</changefreq>
-  </url>
-  <url>
     <loc>https://r3e-leaderboards.info/news.html</loc>
-    <lastmod>2026-01-31</lastmod>
+    <lastmod>2026-03-19</lastmod>
     <priority>0.7</priority>
     <changefreq>weekly</changefreq>
   </url>
   <url>
     <loc>https://r3e-leaderboards.info/faq.html</loc>
-    <lastmod>2026-01-31</lastmod>
+    <lastmod>2026-03-19</lastmod>
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
   </url>

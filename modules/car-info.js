@@ -63,7 +63,8 @@
     { value: '', label: 'All wheels' },
     { value: 'gt', label: 'GT' },
     { value: 'round', label: 'Round' },
-    { value: 'round (flat)', label: 'Round (flat)' }
+    { value: 'round (flat)', label: 'Round (flat)' },
+    { value: 'round_and_roundflat', label: 'Round & Round (flat)' }
   ];
   const transOptions = [
     { value: '', label: 'All transmissions' },
@@ -103,7 +104,17 @@
     const w = (car.wheel_cat || car.wheel || '').toLowerCase();
     const t = (car.transmission_cat || car.transmission || '').toLowerCase();
     const c = (car.car_class || car.class || '').toLowerCase();
-    const wheelOk = !wheelFilter || w === wheelFilter;
+    
+    // Handle wheel filter - check if it's the combined filter
+    let wheelOk = true;
+    if (wheelFilter) {
+      if (wheelFilter === 'round_and_roundflat') {
+        wheelOk = w === 'round' || w === 'round (flat)';
+      } else {
+        wheelOk = w === wheelFilter;
+      }
+    }
+    
     const transOk = !transFilter || t === transFilter;
     
     // Handle class filter - check if it's a superclass filter

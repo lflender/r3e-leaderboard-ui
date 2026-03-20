@@ -6,18 +6,30 @@
   <title>Car Info — RaceRoom Leaderboards Explorer</title>
   <meta name="description" content="Browse RaceRoom (R3E) car information: specs, wheels, transmissions, power and engines by class.">
   <link rel="canonical" href="https://r3e-leaderboards.info/cars.html">
-  <meta name="robots" content="index, follow">
+  <link rel="alternate" hreflang="en" href="https://r3e-leaderboards.info/cars.html">
+  <link rel="alternate" hreflang="x-default" href="https://r3e-leaderboards.info/cars.html">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
   <!-- Open Graph -->
   <meta property="og:site_name" content="RaceRoom Leaderboards Explorer">
   <meta property="og:title" content="Car Info — RaceRoom Leaderboards Explorer">
   <meta property="og:description" content="Explore detailed car specs and filters for RaceRoom classes.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://r3e-leaderboards.info/cars.html">
-  <meta property="og:image" content="https://r3e-leaderboards.info/og-image.png">
+  <meta property="og:image" content="https://r3e-leaderboards.info/images/rle-share.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="RaceRoom Leaderboards car information page">
+  <meta property="og:locale" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Car Info — RaceRoom Leaderboards Explorer">
+  <meta name="twitter:description" content="Explore detailed car specs and filters for RaceRoom classes.">
+  <meta name="twitter:image" content="https://r3e-leaderboards.info/images/rle-share.png">
   
   <!-- Analytics -->
   <script data-goatcounter="https://r3e-leaderboards.goatcounter.com/count"
-          async src="//gc.zgo.at/count.js"></script>
+      async src="https://gc.zgo.at/count.js"></script>
+    <link rel="preconnect" href="https://gc.zgo.at" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   
   <link rel="stylesheet" href="style.css?v=16">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"/>
@@ -39,6 +51,7 @@
   <div id="site-header"></div>
 
     <main>
+    <h1 class="sr-only">RaceRoom Car Specifications and Class Data</h1>
     <div class="tabs">
       <a class="tab-button" href="/">Driver Info</a>
       <a class="tab-button" href="tracks.html">Track Info</a>
@@ -73,27 +86,27 @@
   <div id="site-footer"></div>
 
   <!-- Core modules -->
-  <script src="data/country-mappings.js?v=2"></script>
-  <script src="modules/flag-helper.js?v=1"></script>
-  <script src="modules/template-loader.js?v=1"></script>
-  <script src="modules/header-loader.js?v=1"></script>
-  <script src="modules/template-helper.js?v=1"></script>
-  <script src="modules/column-config.js?v=3"></script>
-  <script src="modules/field-mappings.js?v=1"></script>
-  <script src="modules/utils.js?v=1"></script>
-  <script src="modules/data-service.js?v=4"></script>
-  <script src="modules/mp-pos-service.js?v=4"></script>
-  <script src="modules/custom-select.js?v=1"></script>
-  <script src="modules/footer-loader.js?v=1"></script>
+  <script src="data/country-mappings.js?v=2" defer></script>
+  <script src="modules/flag-helper.js?v=1" defer></script>
+  <script src="modules/template-loader.js?v=1" defer></script>
+  <script src="modules/header-loader.js?v=2" defer></script>
+  <script src="modules/template-helper.js?v=1" defer></script>
+  <script src="modules/column-config.js?v=3" defer></script>
+  <script src="modules/field-mappings.js?v=1" defer></script>
+  <script src="modules/utils.js?v=1" defer></script>
+  <script src="modules/data-service.js?v=4" defer></script>
+  <script src="modules/mp-pos-service.js?v=4" defer></script>
+  <script src="modules/custom-select.js?v=1" defer></script>
+  <script src="modules/footer-loader.js?v=2" defer></script>
   
   <!-- Feature modules -->
-  <script src="modules/tab-manager.js?v=1"></script>
-  <script src="modules/status-display.js?v=2"></script>
-  <script src="modules/navigation.js?v=1"></script>
+  <script src="modules/tab-manager.js?v=2" defer></script>
+  <script src="modules/status-display.js?v=3" defer></script>
+  <script src="modules/navigation.js?v=2" defer></script>
   
   <!-- Car Info specific -->
-  <script src="data/cars.js?v=1"></script>
-  <script src="script.js?v=2"></script>
-  <script src="modules/car-info.js?v=2"></script>
+  <script src="data/cars.js?v=1" defer></script>
+  <script src="script.js?v=2" defer></script>
+  <script src="modules/car-info.js?v=3" defer></script>
 </body>
 </html>

@@ -393,6 +393,17 @@ class DataService {
             }
             
             let filteredEntries = driverEntries;
+
+            // Apply track filter
+            if (filters.trackId) {
+                const selectedTrackId = Number(filters.trackId);
+                filteredEntries = filteredEntries.filter(entry => {
+                    const entryTrackId = entry.track_id || entry.TrackID || entry.trackId ||
+                        (entry.track && (entry.track.id || entry.track.Id || entry.track.track_id));
+                    if (entryTrackId === undefined || entryTrackId === null) return false;
+                    return Number(entryTrackId) === selectedTrackId;
+                });
+            }
             
             // Apply class filter
             if (filters.classId || filters.className) {

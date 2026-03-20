@@ -7,9 +7,10 @@ class DriverSearch {
     constructor() {
         this.elements = {
             driverSearch: document.getElementById('driver-search'),
+            trackFilter: document.getElementById('track-filter'),
+            trackFilterUI: document.getElementById('track-filter-ui'),
             classFilter: document.getElementById('class-filter'),
-            classFilterUI: document.getElementById('class-filter-ui'),
-            difficultyFilterUI: document.getElementById('difficulty-filter-ui'),
+            classFilterUI: document.getElementById('track-class-filter-ui') || document.getElementById('class-filter-ui'),
             resultsContainer: document.getElementById('results-container')
         };
 
@@ -31,6 +32,7 @@ class DriverSearch {
         this.lastSearchTerm = ''; // Store last search term for filter changes
         
         // Filter values
+        this.selectedTrack = ''; // Store selected track filter
         this.selectedClass = ''; // Store selected class/superclass filter
         
         // Debounce timer for live search
@@ -44,6 +46,7 @@ class DriverSearch {
      * Initialize driver search functionality
      */
     init() {
+        this.populateTrackFilter();
         this.populateClassFilter();
         this.setupCustomSelects();
         this.setupEventListeners();
@@ -144,9 +147,43 @@ class DriverSearch {
     }
 
     /**
+     * Populate track filter from TRACKS_DATA
+     */
+    populateTrackFilter() {
+        if (!this.elements.trackFilter) return;
+
+        const tracks = Array.isArray(window.TRACKS_DATA) ? window.TRACKS_DATA : [];
+        if (tracks.length === 0) return;
+
+        const allOption = '<option value="">All tracks</option>';
+        const optionsHtml = tracks.map(t =>
+            `<option value="${R3EUtils.escapeHtml(String(t.id))}">${R3EUtils.escapeHtml(t.label)}</option>`
+        ).join('');
+
+        this.elements.trackFilter.innerHTML = allOption + optionsHtml;
+    }
+
+    /**
      * Setup custom select components
      */
     setupCustomSelects() {
+        // Track filter custom select
+        if (this.elements.trackFilterUI) {
+            const tracks = Array.isArray(window.TRACKS_DATA) ? window.TRACKS_DATA : [];
+            const trackOptions = [{ value: '', label: 'All tracks' }]
+                .concat(tracks.map(t => ({ value: String(t.id), label: t.label })));
+
+            new CustomSelect('track-filter-ui', trackOptions, async (value) => {
+                this.selectedTrack = value;
+                if (this.elements.trackFilter) {
+                    this.elements.trackFilter.value = value;
+                }
+                if (this.lastSearchTerm) {
+                    await this.searchDriver(this.lastSearchTerm);
+                }
+            });
+        }
+
         // Class filter custom select
         if (this.elements.classFilter && this.elements.classFilterUI) {
             // Get superclass options first
@@ -160,25 +197,12 @@ class DriverSearch {
                 .concat(superclassOptions)
                 .concat(classOptions);
             
-            new CustomSelect('class-filter-ui', allOptions, async (value) => {
-                this.selectedClass = value; // Store directly in the class property
-                // Re-search with the last search term if we have one
-                if (this.lastSearchTerm) {
-                    await this.searchDriver(this.lastSearchTerm);
-                }
-            });
-        }
+            const classFilterElementId = document.getElementById('track-class-filter-ui')
+                ? 'track-class-filter-ui'
+                : 'class-filter-ui';
 
-        // Difficulty filter custom select
-        if (this.elements.difficultyFilterUI) {
-            const difficultyOptions = [
-                { value: '', label: 'All difficulties' },
-                { value: 'Get Real', label: 'Get Real' },
-                { value: 'Amateur', label: 'Amateur' },
-                { value: 'Novice', label: 'Novice' }
-            ];
-            
-            new CustomSelect('difficulty-filter-ui', difficultyOptions, async (value) => {
+            new CustomSelect(classFilterElementId, allOptions, async (value) => {
+                this.selectedClass = value; // Store directly in the class property
                 // Re-search with the last search term if we have one
                 if (this.lastSearchTerm) {
                     await this.searchDriver(this.lastSearchTerm);
@@ -240,6 +264,15 @@ class DriverSearch {
                 await this.searchDriver(searchTerm);
             });
         }
+
+        // Track filter change handler
+        if (this.elements.trackFilter) {
+            this.elements.trackFilter.addEventListener('change', async () => {
+                const searchTerm = this.elements.driverSearch.value.trim();
+                if (!searchTerm) return;
+                await this.searchDriver(searchTerm);
+            });
+        }
     }
 
     /**
@@ -264,15 +297,13 @@ class DriverSearch {
         
         try {
             // Get current filters
+            const selectedTrack = this.selectedTrack || '';
             const selectedClass = this.selectedClass || '';
-            const difficultyToggle = document.querySelector('#difficulty-filter-ui .custom-select__toggle');
-            const selectedDifficulty = difficultyToggle ? 
-                difficultyToggle.textContent.replace(' ▾', '').trim() : 'All difficulties';
             
             // Search using data service
             const results = await dataService.searchDriver(driverName, {
-                className: selectedClass,
-                difficulty: selectedDifficulty
+                trackId: selectedTrack,
+                className: selectedClass
             });
             
             // Sort results by MP position (ascending) when multiple drivers have the same name
@@ -443,11 +474,12 @@ class DriverSearch {
     }
 }
 
-// Auto-initialize when DOM is ready
-if (document.readyState === 'loading') {
+// Auto-initialize when DOM is fully ready.
+// With deferred scripts, readyState can be 'interactive' before dependent data scripts run.
+if (document.readyState === 'complete') {
+    window.driverSearch = new DriverSearch();
+} else {
     document.addEventListener('DOMContentLoaded', () => {
         window.driverSearch = new DriverSearch();
-    });
-} else {
-    window.driverSearch = new DriverSearch();
+    }, { once: true });
 }

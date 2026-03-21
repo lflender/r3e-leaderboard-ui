@@ -136,11 +136,9 @@ class TableRenderer {
         const rank = firstEntry.rank || firstEntry.Rank || '';
         const team = firstEntry.team || firstEntry.Team || '';
         
-        // Create a unique group ID that includes country and team to handle drivers with same name from different countries/teams
+        // Use a shared group ID builder so header and data rows always match.
         const slugSource = driverObj.driver || driverObj.name || firstEntry.name || firstEntry.Name || 'unknown';
-        const countrySlug = country && country !== '-' ? `-${String(country).replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-]/g, '').toLowerCase()}` : '';
-        const teamSlug = team && team !== '-' ? `-${String(team).replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-]/g, '').toLowerCase()}` : '';
-        const groupId = `group-${String(slugSource).replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-]/g, '').toLowerCase()}${countrySlug}${teamSlug}`;
+        const groupId = this.buildGroupId(slugSource, country, team);
         
         const flagHtml = FlagHelper.countryToFlag(country) ? `<span class="country-flag">${FlagHelper.countryToFlag(country)}</span>` : '';
         const rankHtml = rank ? R3EUtils.renderRankStars(rank) : '';
@@ -733,7 +731,31 @@ class TableRenderer {
      */
     getGroupIdForItem(item) {
         const slugSource = item.name || item.Name || item.driver || 'unknown';
-        return `group-${String(slugSource).replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-]/g, '').toLowerCase()}`;
+        const country = item.country || item.Country || '';
+        const team = item.team || item.Team || '';
+        return this.buildGroupId(slugSource, country, team);
+    }
+
+    /**
+     * Build a stable group ID for a driver row/header pair.
+     * Includes country/team to distinguish duplicate names.
+     * @param {string} name - Driver name
+     * @param {string} country - Driver country
+     * @param {string} team - Driver team
+     * @returns {string} Group ID
+     */
+    buildGroupId(name, country = '', team = '') {
+        const base = String(name || 'unknown')
+            .replace(/\s+/g, '-')
+            .replace(/[^a-zA-Z0-9\-]/g, '')
+            .toLowerCase();
+        const countrySlug = country && country !== '-'
+            ? `-${String(country).replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-]/g, '').toLowerCase()}`
+            : '';
+        const teamSlug = team && team !== '-'
+            ? `-${String(team).replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-]/g, '').toLowerCase()}`
+            : '';
+        return `group-${base}${countrySlug}${teamSlug}`;
     }
     
     /**

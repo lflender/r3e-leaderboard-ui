@@ -13,6 +13,7 @@ let mpPosCachePromise = null;
  * Creates a dual-index cache structure:
  * - byName: name -> position (for backward compatibility)
  * - byNameCountry: (name, country) -> position (for new country-aware lookup)
+ * - nameStats: name -> occurrence metadata (for safe fallback decisions)
  * @returns {Promise<Object>} Cache object with both index types
  */
 async function loadMpPosCache() {
@@ -30,13 +31,19 @@ async function loadMpPosCache() {
             // Create dual-index cache structure
             mpPosCache = {
                 byName: new Map(),      // name (lowercase) -> position (for backward compatibility)
-                byNameCountry: new Map() // (name|country) -> position (new format with country codes)
+                byNameCountry: new Map(), // (name|country) -> position (new format with country codes)
+                nameStats: new Map() // name (lowercase) -> { count: number }
             };
             
             if (data.results && Array.isArray(data.results)) {
                 data.results.forEach(entry => {
                     if (entry.name && entry.position) {
-                        const nameLower = entry.name.toLowerCase();
+                        const nameLower = String(entry.name).trim().toLowerCase();
+
+                        // Track how many times a name appears so we can avoid ambiguous fallbacks.
+                        const currentStats = mpPosCache.nameStats.get(nameLower) || { count: 0 };
+                        currentStats.count += 1;
+                        mpPosCache.nameStats.set(nameLower, currentStats);
                         
                         // Index by name (backward compatibility)
                         // Only set if not already set (first occurrence wins)
@@ -57,7 +64,8 @@ async function loadMpPosCache() {
             console.warn('Could not load mp_pos cache:', err);
             mpPosCache = { 
                 byName: new Map(), 
-                byNameCountry: new Map() 
+                byNameCountry: new Map(),
+                nameStats: new Map()
             }; // Empty maps to prevent retries
             return mpPosCache;
         }
@@ -67,8 +75,9 @@ async function loadMpPosCache() {
 }
 
 /**
- * Get MP position for a driver by name and optional country code
- * Tries country-aware lookup first (if country provided), then falls back to name-only lookup
+ * Get MP position for a driver by name and optional country code.
+ * If a country is provided, lookup is strict: it must match (name|country).
+ * This prevents incorrect rank assignment for same-name drivers from different countries.
  * @param {string} driverName - Driver name to look up
  * @param {string} countryCode - (Optional) ISO country code (e.g., "DE", "CH")
  * @returns {number|null} MP position or null if not found
@@ -76,7 +85,7 @@ async function loadMpPosCache() {
 function getMpPos(driverName, countryCode) {
     if (!mpPosCache || !driverName) return null;
     
-    const nameLower = String(driverName).toLowerCase();
+    const nameLower = String(driverName).trim().toLowerCase();
     
     // If country code is provided, try country-aware lookup first
     if (countryCode) {
@@ -86,6 +95,9 @@ function getMpPos(driverName, countryCode) {
         if (position !== undefined) {
             return position;
         }
+
+        // Strict mode when country is known: do not fallback to name-only.
+        return null;
     }
     
     // Fallback to name-only lookup (for backward compatibility)
@@ -175,7 +187,7 @@ function getMpPosNameClasses(mpPos, options = { gold: 50, silver: 200, glitter: 
 function getMpPosByCountry(driverName, countryCode) {
     if (!mpPosCache || !driverName || !countryCode) return null;
     
-    const nameLower = String(driverName).toLowerCase();
+    const nameLower = String(driverName).trim().toLowerCase();
     const countryLower = String(countryCode).toLowerCase();
     const key = `${nameLower}|${countryLower}`;
     

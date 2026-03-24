@@ -1,6 +1,8 @@
 // Tracks list extracted from modules/track-info.js for reuse
 // Similar style to data/cars.js
 window.TRACKS_DATA = [
+  { id: 13352, label: 'Adria International Raceway 2003 - Full Circuit' },
+  { id: 13425, label: 'Adria International Raceway 2021 - Full Circuit' },
   { id: 12500, label: 'AVUS - 1994' },
   { id: 12420, label: 'AVUS - 1998' },
   { id: 12938, label: 'Alemannenring - Full Circuit' },
@@ -19,6 +21,10 @@ window.TRACKS_DATA = [
   { id: 9796, label: 'Brno - Grand Prix (Short Pit Entry)' },
   { id: 4944, label: 'Chang International Circuit - D Circuit' },
   { id: 4253, label: 'Chang International Circuit - Full Circuit' },
+  { id: 13368, label: 'Circuit de Spa-Francorchamps - Classic' },
+  { id: 13369, label: 'Circuit de Spa-Francorchamps - Combined' },
+  { id: 13256, label: 'Circuit de Spa-Francorchamps - Grand Prix' },
+  { id: 13467, label: 'Circuit de Spa-Francorchamps - Moto' },
   { id: 10782, label: 'Circuit Zandvoort - Grand Prix' },
   { id: 11090, label: 'Circuit Zandvoort - Short' },
   { id: 1679, label: 'Circuit Zandvoort 2019 - Club' },
@@ -161,6 +167,10 @@ window.TRACKS_DATA = [
   { id: 6658, label: 'Twin Ring Motegi - Road Course' },
   { id: 7026, label: 'Twin Ring Motegi - West Course' },
   { id: 9465, label: 'Vålerbanen - Full Circuit' },
+  { id: 13339, label: 'Vallelunga - Chicane' },
+  { id: 13340, label: 'Vallelunga - Classic' },
+  { id: 13187, label: 'Vallelunga - International' },
+  { id: 13338, label: 'Vallelunga - Short' },
   { id: 9344, label: 'Watkins Glen International - Grand Prix' },
   { id: 9324, label: 'Watkins Glen International - Grand Prix with Inner Loop' },
   { id: 9343, label: 'Watkins Glen International - Short Circuit' },

@@ -613,6 +613,27 @@
     ]
   },
   {
+    "class": "Alpine A110 Cup",
+    "cars": [
+      {
+        "car_class": "Alpine A110 Cup",
+        "car": "Alpine A110 Cup",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "Palettes",
+        "transmission_cat": "paddles",
+        "year": "2025",
+        "power": "280hp",
+        "weight": "1135kg with driver",
+        "engine": "1.8L 4-cylinder",
+        "drive": "RWD",
+        "country": "France",
+        "link": "https://game.raceroom.com/store/cars/alpine-a110-cup/alpine/alpine-a110-cup",
+        "description": "The Alpine A110 Cup is a lightweight, mid-engine race car built for one-make competition. Based on the road-going A110, it combines low weight, balanced handling, and accessible performance. Focused on driver skill over raw power, it rewards precision, momentum, and consistency."
+      }
+    ]
+  },
+  {
     "class": "Aquila CR1 Cup",
     "cars": [
       {
@@ -833,8 +854,8 @@
         "car": "CUPRA Leon e-Racer",
         "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
-        "transmission_cat": "paddles",
+        "transmission": "",
+        "transmission_cat": "",
         "year": "2020",
         "power": "670hp",
         "weight": "1680kg with driver",
@@ -1781,8 +1802,8 @@
         "car": "Ford Mustang Mach-E 1400",
         "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
-        "transmission_cat": "paddles",
+        "transmission": "",
+        "transmission_cat": "",
         "year": "2021",
         "power": "1400 HP",
         "weight": "2600kg with driver",
@@ -3026,6 +3047,22 @@
     "cars": [
       {
         "car_class": "GTR 4",
+        "car": "Alpine A110 GT4+",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "Palettes",
+        "transmission_cat": "paddles",
+        "year": "2025",
+        "power": "341bhp",
+        "weight": "1255kg including driver",
+        "engine": "1.8L 4-cylinder",
+        "drive": "RWD",
+        "country": "France",
+        "link": "https://game.raceroom.com/store/cars/gtr-4/alpine/alpine-a110-gt4",
+        "description": "The Alpine A110 GT4+ is an evolution of the A110 GT4, developed for GT4 competition with improved performance, reliability, and drivability. Maintaining a lightweight design and strong balance, it delivers agility and consistency across a wide range of circuits, making it well suited for both sprint and endurance racing."
+      },
+      {
+        "car_class": "GTR 4",
         "car": "Audi R8 LMS GT4 2020",
         "wheel": "GT",
         "wheel_cat": "gt",
@@ -3378,6 +3415,27 @@
         "country": "Germany",
         "link": "https://game.raceroom.com/en/store/cars/nsu-tts-cup/nsu/nsu-tts",
         "description": "Advertised by NSU as “The car that leaps – yet hugs the ground”, this was a natural choice as a race or rally car in the late 60's and already by the early 70's the racing Prinz had earned a cult following.\n\nSporting a twin carburetor air cooled power plant, the racing spec TTS gives you 120 Hp at your right foot. With 60'es drum brakes fitted to stop you again, that is more than enough to keep life quite interesting on a full attack lap. This historic gem will reward smooth driving with focus on maintaining the momentum and nailing the perfect lines. But it has enough power to go sideways if that's your style."
+      }
+    ]
+  },
+  {
+    "class": "NXT Gen Cup",
+    "cars": [
+      {
+        "car_class": "NXT Gen Cup",
+        "car": "LRT NXT1",
+        "wheel": "Round",
+        "wheel_cat": "round",
+        "transmission": "",
+        "transmission_cat": "",
+        "year": "2023",
+        "power": "226hp",
+        "weight": "1233kg with driver",
+        "engine": "Electric",
+        "drive": "FWD",
+        "country": "Sweden",
+        "link": "https://game.raceroom.com/store/cars/nxt-gen-cup/lestrup-racing-team/lrt-nxt1",
+        "description": "The Lestrup Racing Team (LRT) NXT1 is a 100% electric touring car developed with junior racing and talent discovery in mind. A unique Push-to-Pass system adds strategy: drivers must load the boost for five seconds before activating a short boost window, making timing critical for overtaking."
       }
     ]
   },
@@ -4163,8 +4221,8 @@
         "car": "Volkswagen ID. R",
         "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
-        "transmission_cat": "paddles",
+        "transmission": "",
+        "transmission_cat": "",
         "year": "2019",
         "power": "500 kW (680 HP)",
         "weight": "< 1,100 kg (incl. driver)",

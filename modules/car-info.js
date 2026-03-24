@@ -74,6 +74,7 @@
   ];
 
   let wheelFilter = '', transFilter = '', classFilter = '';
+  let hasTrackedCarInfoDisplay = false;
   
   // Build class options from data
   const superclassOptions = dataService.getSuperclassOptions();
@@ -96,9 +97,35 @@
     .concat(regularClassOptions);
   
   // Use the new CustomSelect component
-  new CustomSelect('wheel-filter-ui', wheelOptions, v => { wheelFilter = v; renderTable(); });
-  new CustomSelect('trans-filter-ui', transOptions, v => { transFilter = v; renderTable(); });
-  new CustomSelect('class-filter-ui-cars', classOptions, v => { classFilter = v; renderTable(); });
+  function trackCarInfoFilter(filterName, filterValue, stats) {
+    if (typeof R3EAnalytics === 'undefined' || typeof R3EAnalytics.track !== 'function') return;
+    R3EAnalytics.track('car info filter changed', {
+      filter_name: filterName,
+      filter_value: filterValue || '',
+      wheel_filter: wheelFilter || '',
+      transmission_filter: transFilter || '',
+      class_filter: classFilter || '',
+      displayed_cars: (stats && stats.displayedCars) || 0,
+      displayed_classes: (stats && stats.displayedClasses) || 0,
+      is_superclass_filter: !!(classFilter && classFilter.startsWith('superclass:'))
+    });
+  }
+
+  new CustomSelect('wheel-filter-ui', wheelOptions, v => {
+    wheelFilter = v;
+    const stats = renderTable();
+    trackCarInfoFilter('wheel', v, stats);
+  });
+  new CustomSelect('trans-filter-ui', transOptions, v => {
+    transFilter = v;
+    const stats = renderTable();
+    trackCarInfoFilter('transmission', v, stats);
+  });
+  new CustomSelect('class-filter-ui-cars', classOptions, v => {
+    classFilter = v;
+    const stats = renderTable();
+    trackCarInfoFilter('class', v, stats);
+  });
 
   function carMatchesFilters(car) {
     const w = (car.wheel_cat || car.wheel || '').toLowerCase();
@@ -134,6 +161,9 @@
   function renderTable() {
     // Compute unique sorted years for ordinal coloring
     let allYears = [];
+    let displayedClasses = 0;
+    let displayedCars = 0;
+
     data.forEach(cls => {
       (cls.cars || []).forEach(car => {
         if (!carMatchesFilters(car)) return;
@@ -188,6 +218,7 @@
       // Only show group if at least one car matches
       const filteredCars = (cls.cars || []).filter(carMatchesFilters);
       if (filteredCars.length === 0) return;
+      displayedClasses++;
       
       // Build class header with optional superclass
       const superclass = cls.superclass;
@@ -198,6 +229,7 @@
       html += `\n<tr class="driver-group-header" data-group="${slug}" onclick="toggleGroup(this)">` +
               `<td colspan="9"><span class="toggle-icon">▼</span> <strong>${classHeaderText}</strong></td></tr>`;
       filteredCars.forEach(car => {
+        displayedCars++;
         if (car.link === undefined) car.link = '';
         const rowLink = R3EUtils.escapeHtml(car.link || '');
         const linkOpen = rowLink ? `<a class="row-link" href="${rowLink}" target="_blank" rel="noopener">` : '';
@@ -245,7 +277,20 @@
         }
       }
     });
+
+    return { displayedCars, displayedClasses };
   }
 
-  renderTable();
+  const initialStats = renderTable();
+  if (!hasTrackedCarInfoDisplay && typeof R3EAnalytics !== 'undefined' && typeof R3EAnalytics.track === 'function') {
+    const totalClasses = data.length;
+    const totalCars = data.reduce((sum, cls) => sum + ((cls.cars || []).length), 0);
+    R3EAnalytics.track('car info displayed', {
+      total_classes: totalClasses,
+      total_cars: totalCars,
+      displayed_classes: (initialStats && initialStats.displayedClasses) || 0,
+      displayed_cars: (initialStats && initialStats.displayedCars) || 0
+    });
+    hasTrackedCarInfoDisplay = true;
+  }
 })();

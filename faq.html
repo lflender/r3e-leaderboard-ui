@@ -25,10 +25,8 @@
   <meta name="twitter:description" content="Answers to common questions about RaceRoom Leaderboards Explorer.">
   <meta name="twitter:image" content="https://r3e-leaderboards.info/images/rle-share.png">
 
-  <!-- Analytics -->
-  <script data-goatcounter="https://r3e-leaderboards.goatcounter.com/count"
-      async src="https://gc.zgo.at/count.js"></script>
-    <link rel="preconnect" href="https://gc.zgo.at" crossorigin>
+  <!-- Analytics (PostHog via first-party proxy) -->
+  <script src="modules/analytics.js?v=1"></script>
 
   <link rel="stylesheet" href="style.css?v=15">
   <!-- Site Icons -->
@@ -162,5 +160,28 @@
   <script src="modules/template-loader.js?v=1" defer></script>
   <script src="modules/header-loader.js?v=2" defer></script>
   <script src="modules/footer-loader.js?v=2" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      if (typeof R3EAnalytics !== 'undefined' && typeof R3EAnalytics.track === 'function') {
+        const faqItems = document.querySelectorAll('.faq-item');
+        R3EAnalytics.track('faq displayed', {
+          question_count: faqItems.length
+        });
+
+        faqItems.forEach(function (item, index) {
+          item.addEventListener('toggle', function () {
+            const summary = item.querySelector('summary');
+            const questionText = summary ? (summary.textContent || '').trim() : '';
+            R3EAnalytics.track('faq question toggled', {
+              question_index: index + 1,
+              question: questionText,
+              is_open: !!item.open,
+              action: item.open ? 'unfold' : 'fold'
+            });
+          });
+        });
+      }
+    });
+  </script>
 </body>
 </html>

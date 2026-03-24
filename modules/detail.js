@@ -10,6 +10,7 @@ const DetailState = {
     // URL Parameters
     trackParam: R3EUtils.getUrlParam('track'),
     classParam: R3EUtils.getUrlParam('class'),
+    carParam: R3EUtils.getUrlParam('car'),
     superclassParam: R3EUtils.getUrlParam('superclass'), // For combined view
     classesParam: R3EUtils.getUrlParam('classes'), // For specific multi-class categories (comma-separated IDs)
     posParam: parseInt(R3EUtils.getUrlParam('pos') || ''),
@@ -37,6 +38,7 @@ const DetailState = {
 // Backward compatibility - keep old variable names pointing to DetailState
 const trackParam = DetailState.trackParam;
 const classParam = DetailState.classParam;
+const carParam = DetailState.carParam;
 const superclassParam = DetailState.superclassParam;
 const classesParam = DetailState.classesParam;
 const posParam = DetailState.posParam;
@@ -52,11 +54,50 @@ let carFilterSelect = DetailState.carFilterSelect;
 let difficultyFilterSelect = DetailState.difficultyFilterSelect;
 let availableCars = DetailState.availableCars;
 let lastActionTime = DetailState.lastActionTime;
+let hasTrackedDetailUrlView = false;
+
+function trackDetailUrlView() {
+    if (hasTrackedDetailUrlView) return;
+    if (typeof R3EAnalytics === 'undefined' || typeof R3EAnalytics.track !== 'function') return;
+
+    R3EAnalytics.track('detail page viewed', {
+        track_id: trackParam || '',
+        class_param: classParam || '',
+        classes_param: classesParam || '',
+        superclass_param: superclassParam || '',
+        car_param: carParam || '',
+        pos_param: Number.isNaN(posParam) ? '' : (posParam || ''),
+        driver_param: driverParam || '',
+        time_param: timeParam || '',
+        difficulty_param: difficultyParam || '',
+        is_combined_view: !!(classesParam || superclassParam)
+    });
+
+    hasTrackedDetailUrlView = true;
+}
+
+function trackDetailFilter(selectedDifficulty, selectedCar, resultCount) {
+    if (typeof R3EAnalytics === 'undefined' || typeof R3EAnalytics.track !== 'function') return;
+    R3EAnalytics.track('detail filter changed', {
+        track_id: trackParam || '',
+        class_param: classParam || '',
+        classes_param: classesParam || '',
+        superclass_param: superclassParam || '',
+        car_param: carParam || '',
+        selected_difficulty: selectedDifficulty || 'All difficulties',
+        selected_car: selectedCar || 'All cars',
+        result_count: resultCount || 0,
+        is_combined_view: !!DetailState.isCombinedView
+    });
+}
 
 // ===========================================
 // Initialize
 // ===========================================
 const resultsContainer = document.getElementById('detail-results-container');
+
+// Track detail page view from URL params as soon as script runs.
+trackDetailUrlView();
 
 // Fetch and display data
 fetchLeaderboardDetails();
@@ -112,7 +153,7 @@ async function fetchLeaderboardDetails() {
         } else {
             allResults = transformedData;
         }
-        
+
         // Calculate page containing the target entry (prefer driver/time match, fallback to position)
         currentPage = 1;
         let targetIdx = -1;
@@ -334,7 +375,7 @@ async function fetchSpecificClassesDetails() {
         } else {
             allResults = allEntries;
         }
-        
+
         // Calculate page and display
         currentPage = 1;
         let targetIdx = -1;
@@ -497,7 +538,7 @@ async function fetchCombinedSuperclassDetails() {
         } else {
             allResults = allEntries;
         }
-        
+
         // Calculate page containing the target entry
         currentPage = 1;
         let targetIdx = -1;
@@ -1798,7 +1839,7 @@ function matchesCarFilter(entry, selectedCar) {
 /**
  * Filter and display results by difficulty and car
  */
-function filterAndDisplayResults() {
+function filterAndDisplayResults(source = 'system') {
     lastActionTime = Date.now();
     
     const selectedDifficulty = getSelectedFilter('#difficulty-filter-ui', 'All difficulties');
@@ -1820,6 +1861,10 @@ function filterAndDisplayResults() {
     } else {
         currentPage = 1;
     }
+
+    if (source === 'user') {
+        trackDetailFilter(selectedDifficulty, selectedCar, allResults.length);
+    }
     
     displayResults(allResults);
 }
@@ -1831,7 +1876,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Car filter - will be populated dynamically when data loads
     const carOptions = [{ value: '', label: 'All cars' }];
     carFilterSelect = new CustomSelect('car-filter-ui', carOptions, () => {
-        filterAndDisplayResults();
+        filterAndDisplayResults('user');
     });
     DetailState.carFilterSelect = carFilterSelect;
     
@@ -1844,7 +1889,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
     
     difficultyFilterSelect = new CustomSelect('difficulty-filter-ui', difficultyOptions, () => {
-        filterAndDisplayResults();
+        filterAndDisplayResults('user');
     });
     DetailState.difficultyFilterSelect = difficultyFilterSelect;
     

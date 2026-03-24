@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RaceRoom Leaderboards Explorer - R3E Lap Times, Driver Rankings & Track Records</title>
+    <title>RaceRoom Leaderboards Explorer</title>
     <meta name="description" content="The #1 RaceRoom leaderboards database. Search driver lap times, track records, car performance data and rankings for RaceRoom Racing Experience (R3E). Updated daily with official leaderboard data.">
     <link rel="canonical" href="https://r3e-leaderboards.info/">
     <link rel="alternate" hreflang="en" href="https://r3e-leaderboards.info/">
@@ -29,11 +29,9 @@
     <meta name="twitter:description" content="The #1 RaceRoom leaderboards database. Search driver lap times, track records and rankings for R3E.">
     <meta name="twitter:image" content="https://r3e-leaderboards.info/images/rle-share.png">
     
-    <!-- Analytics -->
-    <script data-goatcounter="https://r3e-leaderboards.goatcounter.com/count"
-            async src="https://gc.zgo.at/count.js"></script>
-        <link rel="preconnect" href="https://gc.zgo.at" crossorigin>
-        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <!-- Analytics (PostHog via first-party proxy) -->
+    <script src="modules/analytics.js?v=1"></script>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     
     <link rel="stylesheet" href="style.css?v=23">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"/>
@@ -77,7 +75,7 @@
         "@type": "WebPage",
         "@id": "https://r3e-leaderboards.info/#webpage",
         "url": "https://r3e-leaderboards.info/",
-        "name": "RaceRoom Leaderboards Explorer - R3E Lap Times, Driver Rankings & Track Records",
+        "name": "RaceRoom Leaderboards Explorer",
         "description": "The #1 RaceRoom leaderboards database. Search driver lap times, track records, car performance data and rankings for RaceRoom Racing Experience.",
         "isPartOf": {"@id": "https://r3e-leaderboards.info/#website"},
         "inLanguage": "en",

@@ -39,6 +39,9 @@ class DriverSearch {
         this.searchDebounceTimer = null;
         this.minSearchLength = 3;
 
+        // Analytics: tracks how the search was triggered
+        this._searchSource = 'input';
+
         this.init();
     }
 
@@ -179,7 +182,9 @@ class DriverSearch {
                     this.elements.trackFilter.value = value;
                 }
                 if (this.lastSearchTerm) {
+                    this._searchSource = 'filter';
                     await this.searchDriver(this.lastSearchTerm);
+                    this.trackDriverFilterUsage('track', value || '', this.allResults.length);
                 }
             });
         }
@@ -205,7 +210,9 @@ class DriverSearch {
                 this.selectedClass = value; // Store directly in the class property
                 // Re-search with the last search term if we have one
                 if (this.lastSearchTerm) {
+                    this._searchSource = 'filter';
                     await this.searchDriver(this.lastSearchTerm);
+                    this.trackDriverFilterUsage('class', value || '', this.allResults.length);
                 }
             });
         }
@@ -232,6 +239,7 @@ class DriverSearch {
             
             // Debounce: wait 300ms after user stops typing
             this.searchDebounceTimer = setTimeout(async () => {
+                this._searchSource = 'input';
                 R3EUtils.updateUrlParam('driver', searchTerm);
                 await this.searchDriver(searchTerm);
             }, 300);
@@ -251,6 +259,7 @@ class DriverSearch {
                 // Close keyboard on mobile
                 e.target.blur();
                 
+                this._searchSource = 'enter';
                 R3EUtils.updateUrlParam('driver', searchTerm);
                 await this.searchDriver(searchTerm);
             }
@@ -261,7 +270,9 @@ class DriverSearch {
             this.elements.classFilter.addEventListener('change', async () => {
                 const searchTerm = this.elements.driverSearch.value.trim();
                 if (!searchTerm) return;
+                this._searchSource = 'filter';
                 await this.searchDriver(searchTerm);
+                this.trackDriverFilterUsage('class', this.selectedClass || this.elements.classFilter.value || '', this.allResults.length);
             });
         }
 
@@ -270,9 +281,31 @@ class DriverSearch {
             this.elements.trackFilter.addEventListener('change', async () => {
                 const searchTerm = this.elements.driverSearch.value.trim();
                 if (!searchTerm) return;
+                this._searchSource = 'filter';
                 await this.searchDriver(searchTerm);
+                this.trackDriverFilterUsage('track', this.selectedTrack || this.elements.trackFilter.value || '', this.allResults.length);
             });
         }
+    }
+
+    /**
+     * Track explicit filter usage on Driver Info page.
+     * @param {string} filterName - Changed filter name
+     * @param {string} filterValue - Selected filter value
+     * @param {number} resultCount - Result count after filter application
+     */
+    trackDriverFilterUsage(filterName, filterValue, resultCount) {
+        if (typeof R3EAnalytics === 'undefined' || typeof R3EAnalytics.track !== 'function') return;
+
+        R3EAnalytics.track('driver info filter changed', {
+            filter_name: filterName,
+            filter_value: filterValue || '',
+            track_filter: this.selectedTrack || '',
+            class_filter: this.selectedClass || '',
+            search_term: this.lastSearchTerm || '',
+            result_count: resultCount || 0,
+            has_search_term: !!this.lastSearchTerm
+        });
     }
 
     /**
@@ -282,6 +315,7 @@ class DriverSearch {
         const driver = R3EUtils.getUrlParam('driver') || R3EUtils.getUrlParam('query');
         if (driver && this.elements.driverSearch) {
             this.elements.driverSearch.value = driver;
+            this._searchSource = 'url';
             setTimeout(() => { this.searchDriver(driver); }, 50);
         }
     }
@@ -312,6 +346,18 @@ class DriverSearch {
             this.allResults = results;
             this.currentPage = 1;
             this.displayResults(results);
+
+            // Analytics: track the completed search
+            if (typeof R3EAnalytics !== 'undefined') {
+                const isExact = (driverName.startsWith('"') && driverName.endsWith('"')) ||
+                                (driverName.startsWith("'") && driverName.endsWith("'"));
+                R3EAnalytics.trackSearch(driverName, results.length, {
+                    trackFilter: selectedTrack,
+                    classFilter: selectedClass,
+                    source: this._searchSource || 'input',
+                    isExact: isExact
+                });
+            }
         } catch (error) {
             console.error('Search error:', error);
             this.displayError(error.message);

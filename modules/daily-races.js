@@ -129,13 +129,83 @@ class DailyRaces {
     }
 
     /**
+     * Resolve category_class_ids to their superclass
+     * Given a list of class IDs, finds the common superclass from CARS_DATA
+     * @param {string[]} categoryClassIds - Array of class IDs (e.g., ["4680", "5726"])
+     * @returns {string|null} The superclass name if found, null otherwise
+     */
+    resolveCategoryToSuperclass(categoryClassIds) {
+        if (!categoryClassIds || !Array.isArray(categoryClassIds) || categoryClassIds.length === 0) {
+            return null;
+        }
+
+        if (!window.CAR_CLASSES_DATA || !window.CARS_DATA) {
+            return null;
+        }
+
+        // Resolve all class IDs to their class names
+        const classNames = categoryClassIds.map(id => {
+            const className = window.CAR_CLASSES_DATA[String(id)];
+            return className || null;
+        }).filter(name => name !== null);
+
+        if (classNames.length === 0) {
+            return null;
+        }
+
+        // Find superclass for each class name
+        const superclasses = new Set();
+        classNames.forEach(className => {
+            const carEntry = window.CARS_DATA.find(entry => {
+                const entryClass = entry.class || entry.car_class || entry.CarClass || '';
+                return String(entryClass).trim().toLowerCase() === String(className).trim().toLowerCase();
+            });
+            
+            if (carEntry && carEntry.superclass) {
+                superclasses.add(carEntry.superclass);
+            }
+        });
+
+        // If all class IDs resolve to the same superclass, return it
+        if (superclasses.size === 1) {
+            return Array.from(superclasses)[0];
+        }
+
+        // If multiple different superclasses found, return null (incompatible combination)
+        return null;
+    }
+
+    /**
+     * Map combo class strings to their display names
+     * @param {string} comboString - The combo string from daily races (e.g., "PCCD + PCCNA")
+     * @returns {string} The mapped display name or original string if no mapping found
+     */
+    mapComboClassName(comboString) {
+        if (!comboString) return '';
+
+        const upperString = String(comboString).trim().toUpperCase();
+        
+        // Define mappings for combo strings to their display names
+        const comboMappings = {
+            'PCCD + PCCNA': 'Porsche Cup',
+            'PCCNA + PCCD': 'Porsche Cup',
+            // Add more mappings as needed
+        };
+
+        return comboMappings[upperString] || comboString;
+    }
+
+    /**
      * Format timestamp to readable format
      */
     formatTimestamp(timestamp) {
-        if (!timestamp) return 'Unknown';
+        if (!timestamp) return '-';
         
         try {
             const date = new Date(timestamp);
+            if (Number.isNaN(date.getTime()) || date.getFullYear() <= 1) {
+                return '-';
+            }
             const now = new Date();
             const diffMs = now - date;
             const diffMins = Math.floor(diffMs / 60000);
@@ -198,69 +268,96 @@ class DailyRaces {
             return;
         }
 
+        const buildRaceCards = (races) => {
+            let cardsHtml = '<div class="daily-races-grid">';
+
+            for (const race of races) {
+                // For categories (with multiple class IDs), display the car_class name directly
+                // For regular classes, resolve the class ID to name
+                let carClassName = (race.category_class_ids && Array.isArray(race.category_class_ids) && race.category_class_ids.length > 0)
+                    ? race.car_class
+                    : this.resolveCarClassName(race.car_class_id);
+                
+                // Apply combo mappings to display names like "Porsche Cup" instead of "PCCD + PCCNA"
+                carClassName = this.mapComboClassName(carClassName);
+                
+                const trackName = this.resolveTrackName(race.track_id);
+                const isFree = race.is_free_to_play;
+                const freeIcon = '🆓';
+
+                // Create link to detail page
+                // If this is a category with multiple class IDs, pass them as a comma-separated list
+                let detailLink;
+                if (race.category_class_ids && Array.isArray(race.category_class_ids) && race.category_class_ids.length > 0) {
+                    // Use specific class IDs for multi-class categories
+                    const classIds = race.category_class_ids.join(',');
+                    detailLink = `detail.html?track=${race.track_id}&classes=${classIds}`;
+                } else {
+                    detailLink = `detail.html?track=${race.track_id}&class=${race.car_class_id}`;
+                }
+
+                cardsHtml += `<a href="${detailLink}" target="_blank" class="daily-race-card-link">`;
+                cardsHtml += '<div class="daily-race-card">';
+                if (isFree) {
+                    cardsHtml += `<div class="daily-race-badge free">${freeIcon}</div>`;
+                }
+                cardsHtml += '<div class="daily-race-content">';
+                cardsHtml += `<div class="daily-race-class">${R3EUtils.escapeHtml(carClassName)}</div>`;
+
+                // Split track name on dash for better formatting
+                const trackParts = trackName.split(' - ');
+                const trackMain = trackParts[0];
+                const trackLayout = trackParts.length > 1 ? trackParts.slice(1).join(' - ') : '';
+
+                cardsHtml += '<div class="daily-race-track">';
+                cardsHtml += R3EUtils.escapeHtml(trackMain);
+                if (trackLayout) {
+                    cardsHtml += `<br><span class="daily-race-track-layout">${R3EUtils.escapeHtml(trackLayout)}</span>`;
+                }
+                cardsHtml += '</div>';
+                const cleanedSchedule = race.schedule
+                    ? String(race.schedule).replace(/`/g, '').trim()
+                    : '';
+                if (cleanedSchedule) {
+                    cardsHtml += `<div class="daily-race-schedule">⏱️ ${R3EUtils.escapeHtml(cleanedSchedule)}</div>`;
+                }
+                cardsHtml += '</div>';
+                cardsHtml += '</div>';
+                cardsHtml += '</a>';
+            }
+
+            cardsHtml += '</div>';
+            return cardsHtml;
+        };
+
         // Build HTML
         let html = '<div class="daily-races-container">';
         
         // Header
         html += '<div class="daily-races-header">';
         html += '<h2>📅 This Week in Ranked Multiplayer</h2>';
-        html += '<h3>Daily Sprint Races (15 min)</h3>';
         html += '<p class="daily-races-cta">Enter the leaderboards to secure your qualification!</p>';
         if (updateTime) {
-            html += `<p class="daily-races-update">Last cache update: ${this.formatTimestamp(updateTime)}</p>`;
+            html += `<p class="daily-races-update">Last cache update: ${this.formatTimestamp(updateTime)}</p><br/>`;
         }
         html += '</div>';
 
+        html += '<div class="daily-races-section-header">';
+        html += '<h3 class="daily-races-section-title">Daily Sprint Races (15 min)</h3>';
+        html += '</div>';
+
         // Races grid
-        html += '<div class="daily-races-grid">';
-        
-        for (const race of racesData.races) {
-            // For categories (with multiple class IDs), display the car_class name directly
-            // For regular classes, resolve the class ID to name
-            const carClassName = (race.category_class_ids && Array.isArray(race.category_class_ids) && race.category_class_ids.length > 0) 
-                ? race.car_class 
-                : this.resolveCarClassName(race.car_class_id);
-            const trackName = this.resolveTrackName(race.track_id);
-            const isFree = race.is_free_to_play;
-            const freeIcon = '🆓';
-            
-            // Create link to detail page
-            // If this is a category with multiple class IDs, use superclass parameter for combined view
-            let detailLink;
-            if (race.category_class_ids && Array.isArray(race.category_class_ids) && race.category_class_ids.length > 0) {
-                detailLink = `detail.html?track=${race.track_id}&superclass=${encodeURIComponent(race.car_class)}`;
-            } else {
-                detailLink = `detail.html?track=${race.track_id}&class=${race.car_class_id}`;
-            }
-            
-            html += `<a href="${detailLink}" target="_blank" class="daily-race-card-link">`;
-            html += '<div class="daily-race-card">';
-            if (isFree) {
-                html += `<div class="daily-race-badge free">${freeIcon}</div>`;
-            }
-            html += '<div class="daily-race-content">';
-            html += `<div class="daily-race-class">${R3EUtils.escapeHtml(carClassName)}</div>`;
-            
-            // Split track name on dash for better formatting
-            const trackParts = trackName.split(' - ');
-            const trackMain = trackParts[0];
-            const trackLayout = trackParts.length > 1 ? trackParts.slice(1).join(' - ') : '';
-            
-            html += '<div class="daily-race-track">';
-            html += R3EUtils.escapeHtml(trackMain);
-            if (trackLayout) {
-                html += `<br><span class="daily-race-track-layout">${R3EUtils.escapeHtml(trackLayout)}</span>`;
-            }
+        html += buildRaceCards(racesData.races);
+
+        const featureRaces = racesData['feature-races'];
+        if (Array.isArray(featureRaces) && featureRaces.length > 0) {
+            html += '<div class="daily-races-feature">';
+            html += '<div class="daily-races-section-header">';
+            html += '<h3 class="daily-races-section-title">Daily Feature Races (30 min)</h3>';
             html += '</div>';
-            if (race.schedule) {
-                html += `<div class="daily-race-schedule">⏱️ ${R3EUtils.escapeHtml(race.schedule)}</div>`;
-            }
+            html += buildRaceCards(featureRaces);
             html += '</div>';
-            html += '</div>';
-            html += '</a>';
         }
-        
-        html += '</div>'; // daily-races-grid
         
         // Footer note
         html += '<div class="daily-races-footer">';
@@ -273,11 +370,12 @@ class DailyRaces {
     }
 }
 
-// Auto-initialize when DOM is ready
-if (document.readyState === 'loading') {
+// Auto-initialize when DOM is fully ready.
+// With deferred scripts, readyState can be 'interactive' before dependent data scripts run.
+if (document.readyState === 'complete') {
+    window.dailyRaces = new DailyRaces();
+} else {
     document.addEventListener('DOMContentLoaded', () => {
         window.dailyRaces = new DailyRaces();
-    });
-} else {
-    window.dailyRaces = new DailyRaces();
+    }, { once: true });
 }

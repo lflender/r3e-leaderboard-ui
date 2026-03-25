@@ -9,10 +9,10 @@
     }).catch(err => console.error('Failed to render footer:', err));
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', injectFooter);
-  } else {
+  if (document.readyState === 'complete') {
     injectFooter();
+  } else {
+    document.addEventListener('DOMContentLoaded', injectFooter, { once: true });
   }
 
 })();

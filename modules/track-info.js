@@ -21,6 +21,7 @@
   let activeClassId = null; // null => All classes
   let activeClassLabel = null; // human-readable label for selected class
   let combineMode = false; // When true, combine all classes in superclass by track
+  let hasTrackedTrackInfoDisplay = false;
 
   // DOM refs for combine checkbox
   const combineContainer = document.getElementById('combine-checkbox-container');
@@ -28,6 +29,18 @@
 
   function closeMenu() { if (rootMenu) { rootMenu.hidden = true; rootToggle.setAttribute('aria-expanded','false'); } }
   function openMenu() { if (rootMenu) { rootMenu.hidden = false; rootToggle.setAttribute('aria-expanded','true'); } }
+
+  function trackTrackInfoFilter(filterName, filterValue) {
+    if (typeof R3EAnalytics === 'undefined' || typeof R3EAnalytics.track !== 'function') return;
+    R3EAnalytics.track('track info filter changed', {
+      filter_name: filterName,
+      filter_value: filterValue || '',
+      track_filter: activeTrackId ? String(activeTrackId) : '',
+      class_filter: activeClassId || '',
+      combine_mode: !!combineMode,
+      is_superclass_filter: !!(activeClassId && activeClassId.startsWith('superclass:'))
+    });
+  }
 
   // Build menu options from TRACKS + All tracks
   function buildMenu() {
@@ -49,6 +62,7 @@
     trackCurrentPage = 1;
     if (rootToggle) rootToggle.textContent = `${label} ▾`;
     closeMenu();
+    trackTrackInfoFilter('track', val ? String(val) : '');
     fetchAndRender();
   }
 
@@ -93,6 +107,8 @@
       combineCheckbox.checked = false;
       combineMode = false;
     }
+
+    trackTrackInfoFilter('class', value || '');
     
     fetchAndRender();
   });
@@ -102,6 +118,7 @@
     combineCheckbox.addEventListener('change', () => {
       combineMode = combineCheckbox.checked;
       trackCurrentPage = 1;
+      trackTrackInfoFilter('combine', combineMode ? 'on' : 'off');
       fetchAndRender();
     });
   }
@@ -457,6 +474,16 @@
   // Render table using the same style/formatting as leaderboards
   async function renderTable(data) {
     trackAllResults = Array.isArray(data) ? data : [];
+    if (!hasTrackedTrackInfoDisplay && typeof R3EAnalytics !== 'undefined' && typeof R3EAnalytics.track === 'function') {
+      R3EAnalytics.track('track info displayed', {
+        displayed_rows: trackAllResults.length,
+        track_filter: activeTrackId ? String(activeTrackId) : '',
+        class_filter: activeClassId || '',
+        combine_mode: !!combineMode,
+        is_superclass_filter: !!(activeClassId && activeClassId.startsWith('superclass:'))
+      });
+      hasTrackedTrackInfoDisplay = true;
+    }
     if (trackAllResults.length === 0) {
       await TemplateHelper.showNoResults(tableContainer);
       return;

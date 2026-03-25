@@ -41,11 +41,11 @@ class TabManager {
     }
 }
 
-// Auto-initialize when DOM is ready
-if (document.readyState === 'loading') {
+// Auto-initialize when DOM is fully ready.
+if (document.readyState === 'complete') {
+    window.tabManager = new TabManager();
+} else {
     document.addEventListener('DOMContentLoaded', () => {
         window.tabManager = new TabManager();
-    });
-} else {
-    window.tabManager = new TabManager();
+    }, { once: true });
 }

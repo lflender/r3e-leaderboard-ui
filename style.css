@@ -577,8 +577,7 @@ footer p {
 /* Table scrollbar styling */
 #cars-info-table,
 #track-info-table,
-#results-container,
-#detail-results-container {
+#results-container {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
@@ -588,22 +587,49 @@ footer p {
 
 #cars-info-table::-webkit-scrollbar,
 #track-info-table::-webkit-scrollbar,
-#results-container::-webkit-scrollbar,
-#detail-results-container::-webkit-scrollbar {
+#results-container::-webkit-scrollbar {
     height: 8px;
 }
 
 #cars-info-table::-webkit-scrollbar-track,
 #track-info-table::-webkit-scrollbar-track,
-#results-container::-webkit-scrollbar-track,
-#detail-results-container::-webkit-scrollbar-track {
+#results-container::-webkit-scrollbar-track {
     background: var(--surface);
 }
 
 #cars-info-table::-webkit-scrollbar-thumb,
 #track-info-table::-webkit-scrollbar-thumb,
-#results-container::-webkit-scrollbar-thumb,
-#detail-results-container::-webkit-scrollbar-thumb {
+#results-container::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+/* Detail results container - no scroll */
+#detail-results-container {
+    overflow-x: visible;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* Scrollable table wrapper - only the table scrolls */
+.table-scroll-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) var(--surface);
+    padding: 2px; /* Prevent border/shadow clipping */
+}
+
+.table-scroll-wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-scroll-wrapper::-webkit-scrollbar-track {
+    background: var(--surface);
+}
+
+.table-scroll-wrapper::-webkit-scrollbar-thumb {
     background: var(--primary-color);
     border-radius: 4px;
 }
@@ -855,6 +881,12 @@ footer p {
     margin-left: 0.4rem;
 }
 
+.mp-pos-badge {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
 .no-wrap {
     white-space: nowrap;
 }
@@ -976,7 +1008,7 @@ footer p {
 
 /* Podium positions - Gold, Silver, Bronze */
 .pos-number.pos-1 {
-    color: #ffd700;
+    color: #FFE10D;
     text-shadow: 0 0 1px #000,
                  0 0 2px #000,
                  1px 1px 0 #000,
@@ -989,7 +1021,7 @@ footer p {
 }
 
 .pos-number.pos-2 {
-    color: #b8b8b8;
+    color: #AFA9A1;
     text-shadow: 0 0 1px #000,
                  0 0 2px #000,
                  1px 1px 0 #000,
@@ -1002,7 +1034,7 @@ footer p {
 }
 
 .pos-number.pos-3 {
-    color: #cd7f32;
+    color: #976A28;
     text-shadow: 0 0 1px #000,
                  0 0 2px #000,
                  1px 1px 0 #000,
@@ -1359,75 +1391,161 @@ footer p {
     margin-left: 0.4rem;
 }
 
-/* Position badge styling */
-.pos-cell {
-    white-space: nowrap;
+/* Driver name styling based on multiplayer position */
+a.driver-name-gold,
+.driver-name-gold {
+    color: #FFE10D !important;
+    text-shadow: 0 0 1px #000,
+                 0 0 2px #000,
+                 1px 1px 0 #000,
+                 -1px -1px 0 #000,
+                 1px -1px 0 #000,
+                 -1px 1px 0 #000;
+    font-weight: 700;
 }
-.pos-number {
-    background: var(--pos-badge-default);
-    color: var(--text-primary);
-    padding: 0.18rem 0.6rem;
-    border-radius: 999px;
-    font-weight: 800;
-    font-size: 0.95rem;
-    text-decoration: none !important;
-    border: none;
-    line-height: 1.2;
+
+a.driver-name-silver,
+.driver-name-silver {
+    color: #AFA9A1 !important;
+    text-shadow: 0 0 1px #000,
+                 0 0 2px #000,
+                 1px 1px 0 #000,
+                 -1px -1px 0 #000,
+                 1px -1px 0 #000,
+                 -1px 1px 0 #000;
+    font-weight: 700;
+}
+
+a.driver-name-top10-glitter,
+strong.driver-name-top10-glitter,
+span.driver-name-top10-glitter {
+    position: relative;
     display: inline-block;
-    vertical-align: baseline;
+    animation: top10-glitter-pulse 3.4s ease-in-out infinite;
+    filter: drop-shadow(0 0 0.2rem rgba(255, 240, 130, 0.55));
 }
 
-/* Position 1 - Shiny Gold Character */
-.pos-number.pos-1 {
-    color: #ffd700;
-    text-shadow: 0 0 1px #000,
-                 0 0 2px #000,
-                 1px 1px 0 #000,
-                 -1px -1px 0 #000,
-                 1px -1px 0 #000,
-                 -1px 1px 0 #000,
-                 0 0 10px rgba(255, 215, 0, 0.8),
-                 0 0 20px rgba(255, 215, 0, 0.5);
-    font-weight: 900;
+a.driver-name-top10-glitter::before,
+strong.driver-name-top10-glitter::before,
+span.driver-name-top10-glitter::before,
+a.driver-name-top10-glitter::after,
+strong.driver-name-top10-glitter::after,
+span.driver-name-top10-glitter::after {
+    position: absolute;
+    pointer-events: none;
+    font-size: 0.7em;
+    line-height: 1;
+    opacity: 0;
+    text-shadow: 0 0 8px rgba(255, 242, 161, 0.95),
+                 0 0 14px rgba(255, 208, 82, 0.85);
+    will-change: transform, opacity;
 }
 
-/* Position 2 - Shiny Silver Character */
-.pos-number.pos-2 {
-    color: #b8b8b8;
-    text-shadow: 0 0 1px #000,
-                 0 0 2px #000,
-                 1px 1px 0 #000,
-                 -1px -1px 0 #000,
-                 1px -1px 0 #000,
-                 -1px 1px 0 #000,
-                 0 0 8px rgba(184, 184, 184, 0.8),
-                 0 0 16px rgba(184, 184, 184, 0.5);
-    font-weight: 900;
+a.driver-name-top10-glitter::before,
+strong.driver-name-top10-glitter::before,
+span.driver-name-top10-glitter::before {
+    content: '✦';
+    top: -0.38em;
+    right: -0.42em;
+    color: #fff3a1;
+    text-shadow: 0 0 8px rgba(255, 242, 161, 0.95),
+                 0 0 14px rgba(255, 208, 82, 0.85),
+                 -1.1em 0.5em 0 rgba(255, 243, 161, 0.9),
+                 -0.45em 1.15em 0 rgba(255, 210, 93, 0.85),
+                 0.65em 0.95em 0 rgba(255, 248, 200, 0.78);
+    animation: top10-glitter-sparkle-a 1.55s ease-in-out infinite;
 }
 
-/* Position 3 - Shiny Bronze Character */
-.pos-number.pos-3 {
-    color: #cd7f32;
-    text-shadow: 0 0 1px #000,
-                 0 0 2px #000,
-                 1px 1px 0 #000,
-                 -1px -1px 0 #000,
-                 1px -1px 0 #000,
-                 -1px 1px 0 #000,
-                 0 0 8px rgba(205, 127, 50, 0.8),
-                 0 0 16px rgba(205, 127, 50, 0.5);
-    font-weight: 900;
+a.driver-name-top10-glitter::after,
+strong.driver-name-top10-glitter::after,
+span.driver-name-top10-glitter::after {
+    content: '✧';
+    left: -0.55em;
+    bottom: -0.12em;
+    color: #ffd24d;
+    text-shadow: 0 0 8px rgba(255, 242, 161, 0.95),
+                 0 0 14px rgba(255, 208, 82, 0.85),
+                 1.15em -0.5em 0 rgba(255, 242, 161, 0.88),
+                 1.75em 0.35em 0 rgba(255, 226, 128, 0.82),
+                 0.4em -1em 0 rgba(255, 248, 200, 0.76);
+    animation: top10-glitter-sparkle-b 1.95s ease-in-out infinite 0.2s;
 }
 
-.pos-total {
-    color: var(--text-secondary);
-    font-size: 0.95rem;
-    margin-left: 0.35rem;
-    text-decoration: none !important;
+@keyframes top10-glitter-pulse {
+    0%,
+    100% {
+        text-shadow: 0 0 1px #000,
+                     0 0 2px #000,
+                     1px 1px 0 #000,
+                     -1px -1px 0 #000,
+                     1px -1px 0 #000,
+                     -1px 1px 0 #000,
+                     0 0 7px rgba(255, 225, 13, 0.28);
+    }
+    50% {
+        text-shadow: 0 0 1px #000,
+                     0 0 2px #000,
+                     1px 1px 0 #000,
+                     -1px -1px 0 #000,
+                     1px -1px 0 #000,
+                     -1px 1px 0 #000,
+                     0 0 10px rgba(255, 244, 154, 0.55),
+                     0 0 16px rgba(255, 208, 82, 0.4);
+    }
 }
-.pos-sep {
-    color: var(--text-secondary);
-    opacity: 0.95;
+
+@keyframes top10-glitter-sparkle-a {
+    0%,
+    100% {
+        opacity: 0;
+        transform: translate3d(0, 0, 0) scale(0.72) rotate(0deg);
+    }
+    20% {
+        opacity: 0.35;
+        transform: translate3d(0.03em, -0.05em, 0) scale(0.92) rotate(8deg);
+    }
+    42% {
+        opacity: 1;
+        transform: translate3d(0.08em, -0.12em, 0) scale(1.08) rotate(12deg);
+    }
+    72% {
+        opacity: 0.25;
+        transform: translate3d(0.16em, -0.18em, 0) scale(0.84) rotate(20deg);
+    }
+}
+
+@keyframes top10-glitter-sparkle-b {
+    0%,
+    100% {
+        opacity: 0;
+        transform: translate3d(0, 0, 0) scale(0.68) rotate(0deg);
+    }
+    18% {
+        opacity: 0.3;
+        transform: translate3d(-0.02em, -0.04em, 0) scale(0.84) rotate(-6deg);
+    }
+    38% {
+        opacity: 0.98;
+        transform: translate3d(-0.06em, -0.1em, 0) scale(1.04) rotate(-12deg);
+    }
+    70% {
+        opacity: 0.22;
+        transform: translate3d(-0.14em, -0.2em, 0) scale(0.78) rotate(-22deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    a.driver-name-top10-glitter,
+    strong.driver-name-top10-glitter,
+    span.driver-name-top10-glitter,
+    a.driver-name-top10-glitter::before,
+    strong.driver-name-top10-glitter::before,
+    span.driver-name-top10-glitter::before,
+    a.driver-name-top10-glitter::after,
+    strong.driver-name-top10-glitter::after,
+    span.driver-name-top10-glitter::after {
+        animation: none;
+    }
 }
 
 /* Absolute position label (shown when car filter is active) */
@@ -1567,6 +1685,8 @@ footer p {
     font-size: 0.7em;
     line-height: 1;
     vertical-align: middle;
+    position: relative;
+    top: -2px;
     /* Prevent the stars from wrapping separately */
     word-break: keep-all;
 }
@@ -1880,11 +2000,26 @@ footer p {
 
 .entries-dist-content {
     padding: 0.85rem 1rem 0.95rem;
+    position: relative;
+}
+
+.entries-dist-max-label {
+    position: absolute;
+    top: 0.85rem;
+    left: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    z-index: 1;
+    padding: 0.15rem 0.35rem;
+    background: rgba(15, 23, 42, 0.85);
+    border-radius: 3px;
 }
 
 .entries-dist-chart {
     width: 100%;
     height: 10rem;
+    position: relative;
 }
 
 .entries-dist-chart svg {
@@ -1893,8 +2028,26 @@ footer p {
     display: block;
 }
 
+.entries-dist-max-line-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 0;
+    border-top: 1px dashed rgba(148, 163, 184, 0.7);
+    pointer-events: none;
+    z-index: 2;
+}
+
 .entries-dist-bar {
     fill: rgba(59, 130, 246, 0.75);
+}
+
+.entries-dist-max-line {
+    stroke: var(--text-secondary);
+    stroke-width: 0.5;
+    opacity: 0.6;
+    stroke-dasharray: 2, 2;
 }
 
 .entries-dist-axis {
@@ -1906,7 +2059,87 @@ footer p {
     font-variant-numeric: tabular-nums;
 }
 
-/* Responsive styling for car distribution table */
+.entries-dist-empty {
+    margin-top: 0.55rem;
+    color: var(--text-secondary);
+    font-size: 0.84rem;
+}
+
+.entries-timeframe-controls {
+    margin-top: 0.8rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(51, 65, 85, 0.55);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 0.7rem;
+    align-items: end;
+}
+
+.entries-timeframe-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 0;
+}
+
+.entries-timeframe-field:last-child {
+    padding-right: 0.2rem;
+}
+
+.entries-timeframe-field span {
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.45px;
+}
+
+.entries-timeframe-input {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 2.1rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.96), rgba(15, 23, 42, 0.96));
+    color: var(--text-primary);
+    padding: 0.45rem 0.6rem;
+    font-size: 0.86rem;
+    font-variant-numeric: tabular-nums;
+    transition: border-color 0.18s, box-shadow 0.18s;
+}
+
+.entries-timeframe-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.entries-timeframe-last-week {
+    border: 1px solid rgba(59, 130, 246, 0.5);
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(59, 130, 246, 0.22), rgba(37, 99, 235, 0.28));
+    color: #dbeafe;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    padding: 0.5rem 0.95rem;
+    cursor: pointer;
+    min-height: 2.1rem;
+    white-space: nowrap;
+    transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+
+.entries-timeframe-last-week:hover {
+    border-color: rgba(96, 165, 250, 0.82);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+    transform: translateY(-1px);
+}
+
+.entries-timeframe-last-week:active {
+    transform: translateY(0);
+}
+
+/* Responsive styling for distribution summaries */
 @media (max-width: 1000px) {
     .car-dist-table {
         font-size: 0.85rem;
@@ -1934,7 +2167,8 @@ footer p {
 }
 
 @media (max-width: 768px) {
-    .car-dist-summary {
+    .car-dist-summary,
+    .entries-dist-summary {
         margin: 1rem 0;
     }
     
@@ -1957,9 +2191,32 @@ footer p {
         padding: 0.4rem 0.35rem;
     }
     
-    .car-dist-toggle {
+    .car-dist-toggle,
+    .entries-dist-toggle {
         font-size: 0.85rem;
         padding: 0.6rem 0.8rem;
+    }
+    
+    .entries-dist-chart {
+        height: 7rem;
+    }
+    
+    .entries-dist-max-label {
+        font-size: 0.7rem;
+    }
+    
+    .entries-dist-axis {
+        font-size: 0.75rem;
+    }
+
+    .entries-timeframe-controls {
+        grid-template-columns: 1fr;
+        gap: 0.55rem;
+        align-items: stretch;
+    }
+
+    .entries-timeframe-last-week {
+        justify-self: start;
     }
 
     .car-dist-table th.car-dist-car,
@@ -1984,6 +2241,10 @@ footer p {
     /* Ensure sort indicators are visible */
     .car-dist-table th.sortable {
         padding-right: 1.2rem;
+    }
+    
+    .mp-pos-badge {
+        font-size: 0.8rem;
     }
 }
 
@@ -2041,9 +2302,33 @@ footer p {
         padding: 0.35rem 0.5rem;
     }
     
-    .car-dist-toggle {
+    .car-dist-toggle,
+    .entries-dist-toggle {
         font-size: 0.8rem;
         padding: 0.5rem 0.7rem;
+    }
+    
+    .entries-dist-summary {
+        margin: 0.75rem 0;
+    }
+    
+    .entries-dist-chart {
+        height: 5rem;
+    }
+    
+    .entries-dist-max-label {
+        font-size: 0.65rem;
+        top: 0.6rem;
+        left: 0.1rem;
+    }
+    
+    .entries-dist-axis {
+        font-size: 0.68rem;
+        margin-top: 0.3rem;
+    }
+    
+    .mp-pos-badge {
+        font-size: 0.7rem;
     }
 }
 
@@ -2119,7 +2404,6 @@ footer p {
 
 .daily-races-header {
     text-align: center;
-    margin-bottom: 2rem;
 }
 
 .daily-races-header h2 {
@@ -2159,6 +2443,35 @@ footer p {
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 1.25rem;
     margin-bottom: 2rem;
+}
+
+.daily-races-section-header {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.daily-races-section-title {
+    font-size: 1.3rem;
+    color: var(--text-primary);
+    margin: 0;
+    font-weight: 600;
+}
+
+.daily-races-feature {
+    margin-bottom: 2rem;
+}
+
+.daily-races-feature .daily-races-grid {
+    grid-template-columns: repeat(2, minmax(280px, 1fr));
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+/* Extra large screens: constrain Feature Races width after Sprint Races transition to 2 columns */
+@media (min-width: 1160px) {
+    .daily-races-feature .daily-races-grid {
+        max-width: 750px;
+    }
 }
 
 .daily-race-card-link {
@@ -2837,7 +3150,7 @@ footer {
     /* Keep table usable with horizontal scroll */
     #cars-info-table,
     #track-info-table,
-    #detail-results-container {
+    .table-scroll-wrapper {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
     }
@@ -2910,9 +3223,18 @@ footer {
         font-size: 1.1rem;
     }
     
+    .daily-races-section-title {
+        font-size: 1.1rem !important;
+    }
+    
     .daily-races-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
+    }
+
+    .daily-races-feature .daily-races-grid {
+        grid-template-columns: 1fr;
+        max-width: none;
     }
     
     .daily-race-card {
@@ -3112,6 +3434,10 @@ footer {
     #results-container .results-table th:nth-child(2),
     #results-container .results-table td:nth-child(2) {
         min-width: 140px !important;
+    }
+    
+    .mp-pos-badge {
+        font-size: 0.65rem;
     }
 }
 

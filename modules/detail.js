@@ -10,7 +10,9 @@ const DetailState = {
     // URL Parameters
     trackParam: R3EUtils.getUrlParam('track'),
     classParam: R3EUtils.getUrlParam('class'),
+    carParam: R3EUtils.getUrlParam('car'),
     superclassParam: R3EUtils.getUrlParam('superclass'), // For combined view
+    classesParam: R3EUtils.getUrlParam('classes'), // For specific multi-class categories (comma-separated IDs)
     posParam: parseInt(R3EUtils.getUrlParam('pos') || ''),
     difficultyParam: R3EUtils.getUrlParam('difficulty') || 'All difficulties',
     driverParam: R3EUtils.getUrlParam('driver') || '',
@@ -26,13 +28,19 @@ const DetailState = {
     difficultyFilterSelect: null,
     availableCars: [],
     lastActionTime: 0,
-    isCombinedView: false // True when showing combined superclass data
+    isCombinedView: false, // True when showing combined superclass data
+    carDistributionExpanded: false,
+    entriesDistributionExpanded: false,
+    timeframeStart: null,
+    timeframeEnd: null
 };
 
 // Backward compatibility - keep old variable names pointing to DetailState
 const trackParam = DetailState.trackParam;
 const classParam = DetailState.classParam;
+const carParam = DetailState.carParam;
 const superclassParam = DetailState.superclassParam;
+const classesParam = DetailState.classesParam;
 const posParam = DetailState.posParam;
 const difficultyParam = DetailState.difficultyParam;
 const driverParam = DetailState.driverParam;
@@ -46,11 +54,50 @@ let carFilterSelect = DetailState.carFilterSelect;
 let difficultyFilterSelect = DetailState.difficultyFilterSelect;
 let availableCars = DetailState.availableCars;
 let lastActionTime = DetailState.lastActionTime;
+let hasTrackedDetailUrlView = false;
+
+function trackDetailUrlView() {
+    if (hasTrackedDetailUrlView) return;
+    if (typeof R3EAnalytics === 'undefined' || typeof R3EAnalytics.track !== 'function') return;
+
+    R3EAnalytics.track('detail page viewed', {
+        track_id: trackParam || '',
+        class_param: classParam || '',
+        classes_param: classesParam || '',
+        superclass_param: superclassParam || '',
+        car_param: carParam || '',
+        pos_param: Number.isNaN(posParam) ? '' : (posParam || ''),
+        driver_param: driverParam || '',
+        time_param: timeParam || '',
+        difficulty_param: difficultyParam || '',
+        is_combined_view: !!(classesParam || superclassParam)
+    });
+
+    hasTrackedDetailUrlView = true;
+}
+
+function trackDetailFilter(selectedDifficulty, selectedCar, resultCount) {
+    if (typeof R3EAnalytics === 'undefined' || typeof R3EAnalytics.track !== 'function') return;
+    R3EAnalytics.track('detail filter changed', {
+        track_id: trackParam || '',
+        class_param: classParam || '',
+        classes_param: classesParam || '',
+        superclass_param: superclassParam || '',
+        car_param: carParam || '',
+        selected_difficulty: selectedDifficulty || 'All difficulties',
+        selected_car: selectedCar || 'All cars',
+        result_count: resultCount || 0,
+        is_combined_view: !!DetailState.isCombinedView
+    });
+}
 
 // ===========================================
 // Initialize
 // ===========================================
 const resultsContainer = document.getElementById('detail-results-container');
+
+// Track detail page view from URL params as soon as script runs.
+trackDetailUrlView();
 
 // Fetch and display data
 fetchLeaderboardDetails();
@@ -62,6 +109,13 @@ async function fetchLeaderboardDetails() {
     await TemplateHelper.showLoading(resultsContainer);
     
     try {
+        // Check if we're in specific multi-class mode (e.g., GT3 MP with specific class IDs)
+        if (classesParam && trackParam) {
+            DetailState.isCombinedView = true;
+            await fetchSpecificClassesDetails();
+            return;
+        }
+        
         // Check if we're in combined superclass mode
         if (superclassParam && trackParam) {
             DetailState.isCombinedView = true;
@@ -99,7 +153,7 @@ async function fetchLeaderboardDetails() {
         } else {
             allResults = transformedData;
         }
-        
+
         // Calculate page containing the target entry (prefer driver/time match, fallback to position)
         currentPage = 1;
         let targetIdx = -1;
@@ -210,6 +264,149 @@ async function resolveClassNamesToIds(classNames) {
     }
 
     return result; // may contain nulls; callers should handle
+}
+
+/**
+ * Fetch combined leaderboard details for specific class IDs (multi-class categories)
+ */
+async function fetchSpecificClassesDetails() {
+    try {
+        // Keep showing loading state during the entire fetch
+        await TemplateHelper.showLoading(resultsContainer);
+        
+        // Update lastActionTime to prevent premature "no results" display
+        lastActionTime = Date.now();
+        
+        // Parse comma-separated class IDs
+        const specificClassIds = classesParam.split(',').map(id => id.trim()).filter(id => id);
+        
+        if (specificClassIds.length === 0) {
+            throw new Error('No valid class IDs provided');
+        }
+        
+        // Fetch data from all classes in parallel
+        const allEntries = [];
+        const fetchPromises = specificClassIds.map(async (classId) => {
+            try {
+                const data = await dataService.fetchLeaderboardDetails(trackParam, classId);
+                const leaderboardData = extractLeaderboardArray(data);
+                if (leaderboardData && Array.isArray(leaderboardData)) {
+                    const transformed = transformLeaderboardData(leaderboardData, data);
+                    // Add class ID to each entry for reference
+                    const className = window.getCarClassName ? window.getCarClassName(classId) : classId;
+                    transformed.forEach(entry => {
+                        entry.ClassName = className;
+                    });
+                    return transformed;
+                }
+                return [];
+            } catch (e) {
+                console.warn('Failed to fetch class:', classId, e);
+                return [];
+            }
+        });
+        
+        const results = await Promise.all(fetchPromises);
+        results.forEach(entries => {
+            allEntries.push(...entries);
+        });
+        
+        // Sort by lap time
+        allEntries.forEach((entry, idx) => {
+            const rawLap = (window.DataNormalizer && window.DataNormalizer.extractLapTime) ? window.DataNormalizer.extractLapTime(entry) : (entry.LapTime || entry['Lap Time'] || entry.lap_time || '');
+            entry.__debugRawLap = rawLap;
+            entry.__debugMs = lapToMs(rawLap);
+        });
+        allEntries.sort((a, b) => {
+            return a.__debugMs - b.__debugMs;
+        });
+        
+        // Re-assign positions after sorting
+        allEntries.forEach((entry, idx) => {
+            const newPos = idx + 1;
+            entry.Position = newPos;
+            entry.position = newPos;
+            entry.Pos = newPos;
+            delete entry.TotalEntries;
+            delete entry.total_entries;
+        });
+        
+        // Recalculate gap times
+        if (allEntries.length > 0) {
+            const fastestMs = allEntries[0].__debugMs;
+            
+            allEntries.forEach((entry, idx) => {
+                const entryMs = entry.__debugMs;
+                const rawLapTime = entry.__debugRawLap || '';
+                const lapTimePart = rawLapTime.split(',')[0].trim();
+                
+                if (idx === 0) {
+                    entry.LapTime = lapTimePart;
+                    entry['Lap Time'] = lapTimePart;
+                    entry.lap_time = lapTimePart;
+                } else {
+                    const gapMs = entryMs - fastestMs;
+                    const gapSeconds = (gapMs / 1000).toFixed(3);
+                    const gapFormatted = `+${gapSeconds}s`;
+                    const newLapTime = `${lapTimePart}, ${gapFormatted}`;
+                    
+                    entry.LapTime = newLapTime;
+                    entry['Lap Time'] = newLapTime;
+                    entry.lap_time = newLapTime;
+                }
+            });
+        }
+        
+        // Set page titles for specific classes view
+        setSpecificClassesDetailTitles(specificClassIds);
+        
+        // Store unfiltered results
+        unfilteredResults = allEntries;
+        
+        // Build car filter from data
+        buildCarFilter(allEntries);
+        
+        // Apply difficulty filter if specified
+        if (difficultyParam && difficultyParam !== 'All difficulties') {
+            allResults = allEntries.filter(entry => {
+                const diff = entry.Difficulty || entry.difficulty || entry.driving_model || '';
+                return diff.toLowerCase() === difficultyParam.toLowerCase();
+            });
+        } else {
+            allResults = allEntries;
+        }
+
+        // Calculate page and display
+        currentPage = 1;
+        let targetIdx = -1;
+        if (driverParam) {
+            const dLower = String(driverParam).toLowerCase();
+            targetIdx = allResults.findIndex(entry => {
+                const n = String(entry.DriverName || entry['Driver Name'] || entry.driver_name || entry.Driver || entry.driver || '').toLowerCase();
+                return n.includes(dLower);
+            });
+        } else if (timeParam) {
+            targetIdx = allResults.findIndex(entry => {
+                const lt = String(entry.LapTime || entry['Lap Time'] || entry.lap_time || '');
+                return lt.includes(timeParam);
+            });
+        } else if (!isNaN(posParam) && posParam > 0) {
+            targetIdx = allResults.findIndex(entry => {
+                const p = parseInt(entry.Position || entry.position || entry.Pos || 0);
+                return p === posParam;
+            });
+        }
+        
+        if (targetIdx !== -1) {
+            currentPage = Math.floor(targetIdx / itemsPerPage) + 1;
+        }
+        
+        await displayResults(allResults);
+        
+    } catch (error) {
+        console.error('Error fetching specific classes details:', error);
+        await TemplateHelper.showError(resultsContainer, 'Failed to load leaderboard data. Please try again later.');
+    }
 }
 
 /**
@@ -341,7 +538,7 @@ async function fetchCombinedSuperclassDetails() {
         } else {
             allResults = allEntries;
         }
-        
+
         // Calculate page containing the target entry
         currentPage = 1;
         let targetIdx = -1;
@@ -420,6 +617,63 @@ function lapToMs(timeStr) {
 /**
  * Set page titles for combined superclass view
  */
+/**
+ * Set detail page titles for specific classes view
+ */
+function setSpecificClassesDetailTitles(classIds) {
+    const pageTitle = document.querySelector('title');
+    const detailTrackElem = document.getElementById('detail-track');
+    const detailClassElem = document.getElementById('detail-class');
+    
+    // Get track name from TRACKS_DATA
+    let trackName = trackParam;
+    let layoutName = '';
+    if (window.TRACKS_DATA && Array.isArray(window.TRACKS_DATA)) {
+        const track = window.TRACKS_DATA.find(t => String(t.id) === String(trackParam));
+        if (track && track.label) {
+            const fullTrack = track.label;
+            const match = fullTrack.match(/^(.*?)(?:\s*[-–—]\s*)(.+)$/);
+            if (match) {
+                trackName = match[1].trim();
+                layoutName = match[2].trim();
+            } else {
+                trackName = fullTrack;
+            }
+        }
+    }
+    
+    // Determine the category label
+    const sortedIds = [...classIds].sort().join(',');
+    const isGT3MP = sortedIds === '1703,12770,13136' || sortedIds === '12770,13136,1703' || sortedIds === '1703,13136,12770';
+    const isAudiTTCup = sortedIds === '4680,5726' || sortedIds === '5726,4680';
+    const isPorscheCup = sortedIds === '12015,12969' || sortedIds === '12969,12015';
+    const categoryLabel = isGT3MP ? 'GT3 MP' : isAudiTTCup ? 'Audi TT Cup' : isPorscheCup ? 'Porsche Cup' : 'Multi-Class';
+    
+    const title = `${trackName} - ${categoryLabel}`;
+    
+    if (pageTitle) pageTitle.textContent = title + ' — RaceRoom Leaderboards';
+    if (detailTrackElem) {
+        detailTrackElem.innerHTML = `<span class="detail-label">Track:</span> ${R3EUtils.escapeHtml(trackName)}`;
+    }
+    
+    // Add layout element if needed
+    if (layoutName) {
+        let layoutElem = document.getElementById('detail-layout');
+        if (!layoutElem && detailTrackElem) {
+            layoutElem = document.createElement('div');
+            layoutElem.id = 'detail-layout';
+            detailTrackElem.after(layoutElem);
+        }
+        if (layoutElem) {
+            layoutElem.innerHTML = `<span class="detail-label">Layout:</span> ${R3EUtils.escapeHtml(layoutName)}`;
+        }
+    }
+    
+    if (detailClassElem) {
+        detailClassElem.innerHTML = `<span class="detail-label">Category:</span> ${R3EUtils.escapeHtml(categoryLabel)}`;
+    }
+}
+
 function setCombinedDetailTitles(superclass) {
     const pageTitle = document.querySelector('title');
     const detailTrackElem = document.getElementById('detail-track');
@@ -626,7 +880,33 @@ function setDetailTitles(data, trackParam, classParam) {
  * @param {Array} data - Results data
  */
 async function displayResults(data) {
-    let results = Array.isArray(data) ? data.slice() : [];
+    const baseResults = Array.isArray(data) ? data.slice() : [];
+    let results = baseResults.slice();
+
+    // Preserve expand/collapse state across full re-renders (pagination and filtering)
+    const existingCarDistContent = resultsContainer.querySelector('.car-dist-content');
+    if (existingCarDistContent) {
+        DetailState.carDistributionExpanded = existingCarDistContent.style.display !== 'none';
+    }
+    const existingEntriesDistContent = resultsContainer.querySelector('.entries-dist-content');
+    if (existingEntriesDistContent) {
+        DetailState.entriesDistributionExpanded = existingEntriesDistContent.style.display !== 'none';
+    }
+
+    const bounds = getDataTimeBounds(results);
+    if (bounds) {
+        if (!DetailState.timeframeStart) {
+            DetailState.timeframeStart = toLocalDateInputValue(bounds.min);
+        }
+        if (!DetailState.timeframeEnd) {
+            DetailState.timeframeEnd = toLocalDateInputValue(bounds.max);
+        }
+    } else {
+        DetailState.timeframeStart = null;
+        DetailState.timeframeEnd = null;
+    }
+
+    results = applyTimeframeFilter(results, DetailState.timeframeStart, DetailState.timeframeEnd);
     
     // Sort by position - in combined view, data is already sorted by lap time with proper positions
     // For normal view, sort by the position field
@@ -640,6 +920,66 @@ async function displayResults(data) {
     // In combined view, results are already in correct order (sorted by lap time with sequential positions)
     
     if (results.length === 0) {
+        if (baseResults.length > 0) {
+            const emptyEntriesDistHTML = generateEntriesDistributionGraph(
+                results,
+                DetailState.entriesDistributionExpanded,
+                DetailState.timeframeStart,
+                DetailState.timeframeEnd,
+                baseResults
+            );
+            resultsContainer.innerHTML = `${emptyEntriesDistHTML}<div class="no-results">No entries found for the selected timeframe.</div>`;
+
+            const toggleBtn = resultsContainer.querySelector('.entries-dist-toggle');
+            const content = resultsContainer.querySelector('.entries-dist-content');
+            if (toggleBtn && content) {
+                toggleBtn.addEventListener('click', () => {
+                    const isCollapsed = content.style.display === 'none';
+                    content.style.display = isCollapsed ? '' : 'none';
+                    toggleBtn.classList.toggle('expanded', isCollapsed);
+                    toggleBtn.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false');
+                    DetailState.entriesDistributionExpanded = isCollapsed;
+                });
+            }
+
+            const startInput = resultsContainer.querySelector('.entries-timeframe-start');
+            const endInput = resultsContainer.querySelector('.entries-timeframe-end');
+            const lastWeekBtn = resultsContainer.querySelector('.entries-timeframe-last-week');
+            if (startInput) {
+                startInput.addEventListener('input', () => {
+                    if (!startInput.value) return;
+                    DetailState.timeframeStart = startInput.value;
+                    if (DetailState.timeframeEnd && startInput.value > DetailState.timeframeEnd) {
+                        DetailState.timeframeEnd = startInput.value;
+                    }
+                    currentPage = 1;
+                    displayResults(allResults);
+                });
+            }
+            if (endInput) {
+                endInput.addEventListener('input', () => {
+                    if (!endInput.value) return;
+                    DetailState.timeframeEnd = endInput.value;
+                    if (DetailState.timeframeStart && endInput.value < DetailState.timeframeStart) {
+                        DetailState.timeframeStart = endInput.value;
+                    }
+                    currentPage = 1;
+                    displayResults(allResults);
+                });
+            }
+            if (lastWeekBtn) {
+                lastWeekBtn.addEventListener('click', () => {
+                    const now = new Date();
+                    const weekAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
+                    DetailState.timeframeStart = toLocalDateInputValue(weekAgo);
+                    DetailState.timeframeEnd = toLocalDateInputValue(now);
+                    currentPage = 1;
+                    displayResults(allResults);
+                });
+            }
+            return;
+        }
+
         // Only show "no results" if enough time has passed since last action
         const timeSinceAction = Date.now() - lastActionTime;
         if (timeSinceAction < 1500) {
@@ -659,6 +999,7 @@ async function displayResults(data) {
     // Pagination
     const totalResults = results.length;
     const totalPages = Math.ceil(totalResults / itemsPerPage);
+    currentPage = Math.min(Math.max(1, currentPage), Math.max(1, totalPages));
     
     // Apply position highlighting
     if (!posApplied && posParam && !Number.isNaN(posParam)) {
@@ -735,9 +1076,16 @@ async function displayResults(data) {
         });
     }
     
-    resultsContainer.innerHTML = paginationHTML + tableHTML + paginationHTML;
+    const tableWrapperHTML = `<div class="table-scroll-wrapper">${tableHTML}</div>`;
+    resultsContainer.innerHTML = paginationHTML + tableWrapperHTML + paginationHTML;
     
-    const entriesDistHTML = generateEntriesDistributionGraph(allResults, false);
+    const entriesDistHTML = generateEntriesDistributionGraph(
+        results,
+        DetailState.entriesDistributionExpanded,
+        DetailState.timeframeStart,
+        DetailState.timeframeEnd,
+        baseResults
+    );
 
     const attachCarDistToggle = () => {
         const toggleBtn = resultsContainer.querySelector('.car-dist-toggle');
@@ -748,6 +1096,7 @@ async function displayResults(data) {
                 summaryTable.style.display = isCollapsed ? '' : 'none';
                 toggleBtn.classList.toggle('expanded', isCollapsed);
                 toggleBtn.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false');
+                DetailState.carDistributionExpanded = isCollapsed;
             });
         }
     };
@@ -761,6 +1110,48 @@ async function displayResults(data) {
                 content.style.display = isCollapsed ? '' : 'none';
                 toggleBtn.classList.toggle('expanded', isCollapsed);
                 toggleBtn.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false');
+                DetailState.entriesDistributionExpanded = isCollapsed;
+            });
+        }
+    };
+
+    const attachEntriesTimeframeControls = () => {
+        const startInput = resultsContainer.querySelector('.entries-timeframe-start');
+        const endInput = resultsContainer.querySelector('.entries-timeframe-end');
+        const lastWeekBtn = resultsContainer.querySelector('.entries-timeframe-last-week');
+
+        if (startInput) {
+            startInput.addEventListener('input', () => {
+                if (!startInput.value) return;
+                DetailState.timeframeStart = startInput.value;
+                if (DetailState.timeframeEnd && startInput.value > DetailState.timeframeEnd) {
+                    DetailState.timeframeEnd = startInput.value;
+                }
+                currentPage = 1;
+                displayResults(allResults);
+            });
+        }
+
+        if (endInput) {
+            endInput.addEventListener('input', () => {
+                if (!endInput.value) return;
+                DetailState.timeframeEnd = endInput.value;
+                if (DetailState.timeframeStart && endInput.value < DetailState.timeframeStart) {
+                    DetailState.timeframeStart = endInput.value;
+                }
+                currentPage = 1;
+                displayResults(allResults);
+            });
+        }
+
+        if (lastWeekBtn) {
+            lastWeekBtn.addEventListener('click', () => {
+                const now = new Date();
+                const weekAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
+                DetailState.timeframeStart = toLocalDateInputValue(weekAgo);
+                DetailState.timeframeEnd = toLocalDateInputValue(now);
+                currentPage = 1;
+                displayResults(allResults);
             });
         }
     };
@@ -773,14 +1164,21 @@ async function displayResults(data) {
         if (defaultSortBy === 'median') {
             defaultSortDir = 'asc';
         }
-        const summaryHTML = generateCarDistributionSummary(allResults, defaultSortBy, defaultSortBy === 'median' ? 'asc' : 'desc');
+        const summaryHTML = generateCarDistributionSummary(
+            allResults,
+            defaultSortBy,
+            defaultSortBy === 'median' ? 'asc' : 'desc',
+            DetailState.carDistributionExpanded
+        );
         // Insert summaries above pagination and table
         const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = summaryHTML + entriesDistHTML + paginationHTML + tableHTML + paginationHTML;
+        const tableWrapperHTML = `<div class="table-scroll-wrapper">${tableHTML}</div>`;
+        tempDiv.innerHTML = summaryHTML + entriesDistHTML + paginationHTML + tableWrapperHTML + paginationHTML;
         resultsContainer.innerHTML = tempDiv.innerHTML;
 
         attachCarDistToggle();
         attachEntriesDistToggle();
+        attachEntriesTimeframeControls();
 
         // Create a function to handle sorting
         const handleCarDistSort = () => {
@@ -795,6 +1193,8 @@ async function displayResults(data) {
                     const isExpanded = currentContent && currentContent.style.display !== 'none';
                     const currentEntriesContent = resultsContainer.querySelector('.entries-dist-content');
                     const entriesExpanded = currentEntriesContent && currentEntriesContent.style.display !== 'none';
+                    DetailState.carDistributionExpanded = isExpanded;
+                    DetailState.entriesDistributionExpanded = entriesExpanded;
 
                     // Determine new sort direction
                     let newDir;
@@ -808,14 +1208,22 @@ async function displayResults(data) {
 
                     // Re-render with new sort
                     const newSummaryHTML = generateCarDistributionSummary(allResults, clickedSort, newDir, isExpanded);
-                    const newEntriesHTML = generateEntriesDistributionGraph(allResults, entriesExpanded);
+                    const newEntriesHTML = generateEntriesDistributionGraph(
+                        results,
+                        entriesExpanded,
+                        DetailState.timeframeStart,
+                        DetailState.timeframeEnd,
+                        baseResults
+                    );
                     const newTempDiv = document.createElement('div');
-                    newTempDiv.innerHTML = newSummaryHTML + newEntriesHTML + paginationHTML + tableHTML + paginationHTML;
+                    const newTableWrapperHTML = `<div class="table-scroll-wrapper">${tableHTML}</div>`;
+                    newTempDiv.innerHTML = newSummaryHTML + newEntriesHTML + paginationHTML + newTableWrapperHTML + paginationHTML;
                     resultsContainer.innerHTML = newTempDiv.innerHTML;
 
                     // Re-attach expand/collapse listeners
                     attachCarDistToggle();
                     attachEntriesDistToggle();
+                    attachEntriesTimeframeControls();
 
                     // Re-attach sort listeners
                     handleCarDistSort();
@@ -827,9 +1235,11 @@ async function displayResults(data) {
         handleCarDistSort();
     } else if (entriesDistHTML) {
         const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = entriesDistHTML + paginationHTML + tableHTML + paginationHTML;
+        const tableWrapperHTML = `<div class="table-scroll-wrapper">${tableHTML}</div>`;
+        tempDiv.innerHTML = entriesDistHTML + paginationHTML + tableWrapperHTML + paginationHTML;
         resultsContainer.innerHTML = tempDiv.innerHTML;
         attachEntriesDistToggle();
+        attachEntriesTimeframeControls();
     }
     
     // Highlight position row if needed
@@ -928,11 +1338,27 @@ function renderDetailRow(item, showAbsolutePosition = false) {
     const rank = DataNormalizer.extractRank(item);
     const rankStarsHtml = rank ? R3EUtils.renderRankStars(rank, true) : '';
     
+    // Get multiplayer position
+    const mpPos = typeof resolveMpPos === 'function' ? resolveMpPos(name, country) : null;
+    const mpPosHtml = mpPos ? ` <span class="mp-pos-badge">#${mpPos}</span>` : '';
+    
+    let driverLinkClass = 'detail-driver-link';
+    if (typeof getMpPosNameClasses === 'function') {
+        const nameClasses = getMpPosNameClasses(mpPos);
+        if (nameClasses) {
+            driverLinkClass += ` ${nameClasses}`;
+        }
+    }
+    
     if (!highlisted) {
         const encoded = encodeURIComponent(String(name));
-        html += `<td><a class="detail-driver-link" href="index.html?driver=${encoded}">${flagHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}</a></td>`;
+        html += `<td><a class="${driverLinkClass}" href="index.html?driver=${encoded}">${flagHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}${mpPosHtml}</a></td>`;
     } else {
-        html += `<td>${flagHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}</td>`;
+        const nameClasses = typeof getMpPosNameClasses === 'function'
+            ? getMpPosNameClasses(mpPos, { gold: 10, silver: 100, glitter: 10 })
+            : '';
+        const spanClassAttr = nameClasses ? ` class="${nameClasses}"` : '';
+        html += `<td><span${spanClassAttr}>${flagHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}${mpPosHtml}</span></td>`;
     }
     
     // Lap time
@@ -1413,7 +1839,7 @@ function matchesCarFilter(entry, selectedCar) {
 /**
  * Filter and display results by difficulty and car
  */
-function filterAndDisplayResults() {
+function filterAndDisplayResults(source = 'system') {
     lastActionTime = Date.now();
     
     const selectedDifficulty = getSelectedFilter('#difficulty-filter-ui', 'All difficulties');
@@ -1435,6 +1861,10 @@ function filterAndDisplayResults() {
     } else {
         currentPage = 1;
     }
+
+    if (source === 'user') {
+        trackDetailFilter(selectedDifficulty, selectedCar, allResults.length);
+    }
     
     displayResults(allResults);
 }
@@ -1446,7 +1876,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Car filter - will be populated dynamically when data loads
     const carOptions = [{ value: '', label: 'All cars' }];
     carFilterSelect = new CustomSelect('car-filter-ui', carOptions, () => {
-        filterAndDisplayResults();
+        filterAndDisplayResults('user');
     });
     DetailState.carFilterSelect = carFilterSelect;
     
@@ -1459,7 +1889,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
     
     difficultyFilterSelect = new CustomSelect('difficulty-filter-ui', difficultyOptions, () => {
-        filterAndDisplayResults();
+        filterAndDisplayResults('user');
     });
     DetailState.difficultyFilterSelect = difficultyFilterSelect;
     
@@ -1610,43 +2040,66 @@ function generateCarDistributionSummary(data, sortBy = 'entries', sortDir = 'des
  * Generate entries distribution graph HTML (entries per day)
  * @param {Array} data - Full results dataset
  * @param {boolean} isExpanded - Whether graph is expanded by default
+ * @param {string|null} startValue - Selected start date value (yyyy-MM-dd)
+ * @param {string|null} endValue - Selected end date value (yyyy-MM-dd)
+ * @param {Array} boundsData - Data to use for control default bounds
  * @returns {string} HTML string for the entries distribution graph
  */
-function generateEntriesDistributionGraph(data, isExpanded = false) {
-    if (!Array.isArray(data) || data.length === 0) return '';
+function generateEntriesDistributionGraph(data, isExpanded = false, startValue = null, endValue = null, boundsData = []) {
+    const graphData = Array.isArray(data) ? data : [];
+    const rangeSourceData = (Array.isArray(boundsData) && boundsData.length > 0) ? boundsData : graphData;
+    if (!Array.isArray(rangeSourceData) || rangeSourceData.length === 0) return '';
 
     const dayCounts = new Map();
+    const fullRangeDayCounts = new Map();
     let minDate = null;
     let maxDate = null;
 
-    data.forEach(entry => {
-        const raw = entry.date_time || entry.dateTime || entry.Date || entry.DateTime || '';
-        if (!raw) return;
-        const d = new Date(raw);
-        if (Number.isNaN(d.getTime())) return;
-        const dayKey = d.toISOString().slice(0, 10);
+    graphData.forEach(entry => {
+        const d = parseEntryDate(entry);
+        if (!d) return;
+        const dayKey = getLocalDateKey(d);
         dayCounts.set(dayKey, (dayCounts.get(dayKey) || 0) + 1);
         if (!minDate || d < minDate) minDate = d;
         if (!maxDate || d > maxDate) maxDate = d;
     });
 
-    if (!minDate || !maxDate) return '';
+    // Keep the dotted reference line stable by using max entries/day from the full range data.
+    rangeSourceData.forEach(entry => {
+        const d = parseEntryDate(entry);
+        if (!d) return;
+        const dayKey = getLocalDateKey(d);
+        fullRangeDayCounts.set(dayKey, (fullRangeDayCounts.get(dayKey) || 0) + 1);
+    });
 
-    const start = new Date(Date.UTC(minDate.getUTCFullYear(), minDate.getUTCMonth(), minDate.getUTCDate()));
-    const end = new Date(Date.UTC(maxDate.getUTCFullYear(), maxDate.getUTCMonth(), maxDate.getUTCDate()));
+    // If selected range has no entries, keep controls visible using source-data bounds
+    if (!minDate || !maxDate) {
+        rangeSourceData.forEach(entry => {
+            const d = parseEntryDate(entry);
+            if (!d) return;
+            if (!minDate || d < minDate) minDate = d;
+            if (!maxDate || d > maxDate) maxDate = d;
+        });
+        if (!minDate || !maxDate) return '';
+    }
+
+    const start = new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate());
+    const end = new Date(maxDate.getFullYear(), maxDate.getMonth(), maxDate.getDate());
 
     const dayKeys = [];
-    for (let d = new Date(start); d <= end; d.setUTCDate(d.getUTCDate() + 1)) {
-        dayKeys.push(d.toISOString().slice(0, 10));
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        dayKeys.push(getLocalDateKey(d));
     }
 
     const counts = dayKeys.map(k => dayCounts.get(k) || 0);
-    const maxCount = Math.max(1, ...counts);
+    const maxCount = Math.max(1, ...Array.from(fullRangeDayCounts.values()));
 
     const chartHeight = 100;
     const chartWidth = Math.max(dayKeys.length, 1);
 
     const summaryId = 'entries-dist-summary-' + Date.now();
+    const startInputValue = startValue || DetailState.timeframeStart || toLocalDateInputValue(start);
+    const endInputValue = endValue || DetailState.timeframeEnd || toLocalDateInputValue(end);
     let html = '<div class="entries-dist-summary">';
     html += '<button type="button" class="entries-dist-toggle' + (isExpanded ? ' expanded' : '') + '" aria-expanded="' + (isExpanded ? 'true' : 'false') + '" aria-controls="' + summaryId + '">';
     html += '<span class="entries-dist-toggle-icon">▼</span>';
@@ -1654,6 +2107,7 @@ function generateEntriesDistributionGraph(data, isExpanded = false) {
     html += '</button>';
 
     html += '<div id="' + summaryId + '" class="entries-dist-content" style="display: ' + (isExpanded ? '' : 'none') + ';">';
+    html += '<div class="entries-dist-max-label">' + maxCount + '</div>';
     html += '<div class="entries-dist-chart" role="img" aria-label="Entries per day from ' + dayKeys[0] + ' to ' + dayKeys[dayKeys.length - 1] + '">';
     html += '<svg viewBox="0 0 ' + chartWidth + ' ' + chartHeight + '" preserveAspectRatio="none" aria-hidden="true">';
 
@@ -1667,15 +2121,100 @@ function generateEntriesDistributionGraph(data, isExpanded = false) {
     });
 
     html += '</svg>';
+    html += '<div class="entries-dist-max-line-overlay" aria-hidden="true"></div>';
     html += '</div>';
     html += '<div class="entries-dist-axis">';
     html += '<span class="entries-dist-axis-left">' + dayKeys[0] + '</span>';
     html += '<span class="entries-dist-axis-right">' + dayKeys[dayKeys.length - 1] + '</span>';
     html += '</div>';
+    if (graphData.length === 0) {
+        html += '<div class="entries-dist-empty">No entries in the selected timeframe.</div>';
+    }
+    html += '<div class="entries-timeframe-controls">';
+    html += '<label class="entries-timeframe-field"><span>Start</span><input type="date" class="entries-timeframe-input entries-timeframe-start" value="' + R3EUtils.escapeHtml(startInputValue) + '"></label>';
+    html += '<button type="button" class="entries-timeframe-last-week">Last week</button>';
+    html += '<label class="entries-timeframe-field"><span>End</span><input type="date" class="entries-timeframe-input entries-timeframe-end" value="' + R3EUtils.escapeHtml(endInputValue) + '"></label>';
+    html += '</div>';
     html += '</div>';
     html += '</div>';
 
     return html;
+}
+
+/**
+ * Parse a detail entry date field into a Date instance
+ * @param {Object} entry - Leaderboard entry
+ * @returns {Date|null} Parsed date or null
+ */
+function parseEntryDate(entry) {
+    const raw = entry.date_time || entry.dateTime || entry.Date || entry.DateTime || '';
+    if (!raw) return null;
+    const date = new Date(raw);
+    return Number.isNaN(date.getTime()) ? null : date;
+}
+
+/**
+ * Convert Date to local day key (yyyy-MM-dd)
+ * @param {Date} date - Date object
+ * @returns {string} Local day key
+ */
+function getLocalDateKey(date) {
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return '';
+    const local = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+    return local.toISOString().slice(0, 10);
+}
+
+/**
+ * Get min/max date bounds from a dataset
+ * @param {Array} data - Leaderboard data
+ * @returns {{min: Date, max: Date}|null} Bounds object or null
+ */
+function getDataTimeBounds(data) {
+    if (!Array.isArray(data) || data.length === 0) return null;
+
+    let min = null;
+    let max = null;
+    data.forEach(entry => {
+        const dt = parseEntryDate(entry);
+        if (!dt) return;
+        if (!min || dt < min) min = dt;
+        if (!max || dt > max) max = dt;
+    });
+
+    if (!min || !max) return null;
+    return { min, max };
+}
+
+/**
+ * Convert Date to local date input format
+ * @param {Date} date - Date object
+ * @returns {string} yyyy-MM-dd string
+ */
+function toLocalDateInputValue(date) {
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return '';
+    return getLocalDateKey(date);
+}
+
+/**
+ * Apply selected timeframe filter to dataset
+ * @param {Array} data - Data to filter
+ * @param {string|null} startValue - date start (yyyy-MM-dd)
+ * @param {string|null} endValue - date end (yyyy-MM-dd)
+ * @returns {Array} Filtered data
+ */
+function applyTimeframeFilter(data, startValue, endValue) {
+    if (!Array.isArray(data) || data.length === 0) return [];
+    if (!startValue && !endValue) return data;
+
+    return data.filter(entry => {
+        const dt = parseEntryDate(entry);
+        if (!dt) return false;
+        const dayKey = getLocalDateKey(dt);
+        if (!dayKey) return false;
+        if (startValue && dayKey < startValue) return false;
+        if (endValue && dayKey > endValue) return false;
+        return true;
+    });
 }
 
 // Make functions globally accessible

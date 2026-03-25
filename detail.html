@@ -6,23 +6,45 @@
         <title>Leaderboard Details — RaceRoom Leaderboards</title>
         <meta name="description" content="Detailed RaceRoom leaderboard view: driver positions, lap times and class breakdowns for a selected track.">
         <link rel="canonical" href="https://r3e-leaderboards.info/detail.html">
+        <link rel="alternate" hreflang="en" href="https://r3e-leaderboards.info/detail.html">
+        <link rel="alternate" hreflang="x-default" href="https://r3e-leaderboards.info/detail.html">
+        <meta name="robots" content="noindex, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+        <meta property="og:site_name" content="RaceRoom Leaderboards">
         <meta property="og:title" content="Leaderboard Details — RaceRoom Leaderboards">
         <meta property="og:description" content="Detailed RaceRoom leaderboard view with driver positions and lap times.">
         <meta property="og:type" content="website">
         <meta property="og:url" content="https://r3e-leaderboards.info/detail.html">
-        <meta name="twitter:card" content="summary">
+        <meta property="og:image" content="https://r3e-leaderboards.info/images/rle-share.png">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta property="og:image:alt" content="RaceRoom Leaderboards detailed leaderboard view">
+        <meta property="og:locale" content="en_US">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="Leaderboard Details — RaceRoom Leaderboards">
+        <meta name="twitter:description" content="Detailed RaceRoom leaderboard view with driver positions and lap times.">
+        <meta name="twitter:image" content="https://r3e-leaderboards.info/images/rle-share.png">
         
-        <!-- Analytics -->
-        <script data-goatcounter="https://r3e-leaderboards.goatcounter.com/count"
-                async src="//gc.zgo.at/count.js"></script>
+        <!-- Analytics (PostHog via first-party proxy) -->
+        <script src="modules/analytics.js?v=1"></script>
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
         
-        <link rel="stylesheet" href="style.css?v=9">
+        <link rel="stylesheet" href="style.css?v=27">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"/>
         <!-- Site Icons -->
         <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png?v=3">
         <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png?v=3">
         <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png?v=3">
         <link rel="shortcut icon" type="image/x-icon" href="favicon.ico?v=3">
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": "Leaderboard Details",
+            "url": "https://r3e-leaderboards.info/detail.html",
+            "description": "Detailed RaceRoom leaderboard view with driver positions, lap times and class breakdowns.",
+            "inLanguage": "en"
+        }
+        </script>
         <script type="application/ld+json">
         {
             "@context": "https://schema.org",
@@ -42,6 +64,7 @@
     </header>
 
     <main>
+        <h1 class="sr-only">RaceRoom Leaderboard Details</h1>
         <div class="detail-content">
             <div class="detail-header">
                 <div class="detail-header-info">
@@ -71,28 +94,25 @@
     <div id="site-footer"></div>
 
     <!-- Core modules - load first -->
-    <script src="data/cars.js?v=1"></script>
-    <script src="data/tracks.js?v=1"></script>
-    <script src="data/cars.js?v=2"></script>
-    <script src="data/tracks.js?v=2"></script>
-    <script src="data/car-classes.js?v=2"></script>
-    <script src="data/country-mappings.js?v=2"></script>
-    <script src="modules/flag-helper.js?v=2"></script>
-    <script src="modules/template-loader.js?v=2"></script>
-    <script src="modules/header-loader.js?v=2"></script>
-    <script src="modules/template-helper.js?v=2"></script>
-    <script src="modules/column-config.js?v=3"></script>
-    <script src="modules/field-mappings.js?v=2"></script>
-    <script src="modules/data-normalizer.js?v=2"></script>
-    <script src="modules/utils.js?v=2"></script>
-    <script src="modules/data-service.js?v=3"></script>
-    <script src="modules/custom-select.js?v=2"></script>
-    <script src="modules/pagination.js?v=2"></script>
-    <script src="modules/table-renderer.js?v=3"></script>
-    <script src="modules/footer-loader.js?v=2"></script>
-    <!-- Feature modules -->
-    <script src="modules/status-display.js?v=3"></script>
-    <!-- Application script -->
-    <script src="modules/detail.js?v=9"></script>
+    <script src="data/cars.js?v=3" defer></script>
+    <script src="data/tracks.js?v=3" defer></script>
+    <script src="data/car-classes.js?v=3" defer></script>
+    <script src="data/country-mappings.js?v=5" defer></script>
+    <script src="modules/flag-helper.js?v=2" defer></script>
+    <script src="modules/template-loader.js?v=2" defer></script>
+    <script src="modules/header-loader.js?v=3" defer></script>
+    <script src="modules/template-helper.js?v=2" defer></script>
+    <script src="modules/column-config.js?v=3" defer></script>
+    <script src="modules/field-mappings.js?v=2" defer></script>
+    <script src="modules/data-normalizer.js?v=2" defer></script>
+    <script src="modules/utils.js?v=2" defer></script>
+    <script src="modules/data-service.js?v=4" defer></script>
+    <script src="modules/mp-pos-service.js?v=5" defer></script>
+    <script src="modules/custom-select.js?v=2" defer></script>
+    <script src="modules/pagination.js?v=2" defer></script>
+    <script src="modules/table-renderer.js?v=12" defer></script>
+    <script src="modules/footer-loader.js?v=3" defer></script>
+    <script src="modules/status-display.js?v=4" defer></script>
+    <script src="modules/detail.js?v=27" defer></script>
 </body>
 </html>

@@ -157,11 +157,11 @@ class StatusDisplay {
     }
 }
 
-// Auto-initialize when DOM is ready
-if (document.readyState === 'loading') {
+// Auto-initialize when DOM is fully ready.
+if (document.readyState === 'complete') {
+    window.statusDisplay = new StatusDisplay();
+} else {
     document.addEventListener('DOMContentLoaded', () => {
         window.statusDisplay = new StatusDisplay();
-    });
-} else {
-    window.statusDisplay = new StatusDisplay();
+    }, { once: true });
 }

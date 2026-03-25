@@ -136,11 +136,20 @@ class TableRenderer {
         const rank = firstEntry.rank || firstEntry.Rank || '';
         const team = firstEntry.team || firstEntry.Team || '';
         
+        // Use a shared group ID builder so header and data rows always match.
         const slugSource = driverObj.driver || driverObj.name || firstEntry.name || firstEntry.Name || 'unknown';
-        const groupId = `group-${String(slugSource).replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-]/g, '').toLowerCase()}`;
+        const groupId = this.buildGroupId(slugSource, country, team);
         
         const flagHtml = FlagHelper.countryToFlag(country) ? `<span class="country-flag">${FlagHelper.countryToFlag(country)}</span>` : '';
         const rankHtml = rank ? R3EUtils.renderRankStars(rank) : '';
+        
+        // Get multiplayer position if available
+        const mpPos = typeof resolveMpPos === 'function' ? resolveMpPos(displayName, country) : null;
+        const mpPosHtml = mpPos ? ` | Multiplayer #${mpPos}` : '';
+        
+        const nameClasses = typeof getMpPosNameClasses === 'function' ? getMpPosNameClasses(mpPos) : '';
+        const driverNameClass = nameClasses ? ` class="${nameClasses}"` : '';
+        
         // Only add "Team" prefix if the team name doesn't already contain "team"
         const teamPrefix = team && !String(team).toLowerCase().includes('team') ? 'Team ' : '';
         const teamHtml = team ? ` | 🏁 ${teamPrefix}${team}` : '';
@@ -149,8 +158,8 @@ class TableRenderer {
             <tr class="driver-group-header" data-group="${groupId}" onclick="toggleGroup(this)">
                 <td colspan="${colspan}">
                     <span class="toggle-icon">▼</span>
-                    <strong>${R3EUtils.escapeHtml(displayName)}</strong>
-                    <span class="driver-meta">${flagHtml}${R3EUtils.escapeHtml(country)}${rankHtml}${teamHtml}</span>
+                    <strong${driverNameClass}>${R3EUtils.escapeHtml(displayName)}</strong>
+                    <span class="driver-meta">${flagHtml}${R3EUtils.escapeHtml(country)}${rankHtml}${mpPosHtml}${teamHtml}</span>
                 </td>
             </tr>`;
     }
@@ -469,97 +478,178 @@ class TableRenderer {
     }
     
     /**
+     * Maps sort keys to their field names from FIELD_NAMES
+     * @param {string} sortBy - Sort key
+     * @returns {Array} Field names array or null if special handling needed
+     */
+    getSortFieldNames(sortBy) {
+        if (typeof window.FIELD_NAMES === 'undefined') return null;
+        
+        const fieldMap = {
+            'car_class': window.FIELD_NAMES.CAR_CLASS,
+            'track': window.FIELD_NAMES.TRACK,
+            'position': window.FIELD_NAMES.POSITION,
+            'date_time': window.FIELD_NAMES.DATE_TIME
+        };
+        
+        return fieldMap[sortBy] || null;
+    }
+    
+    /**
+     * Extracts field value using FIELD_NAMES for consistent field access
+     * @param {Object} item - Data item
+     * @param {string} sortBy - Sort key
+     * @returns {*} Field value
+     */
+    getFieldValueForSort(item, sortBy) {
+        const fieldNames = this.getSortFieldNames(sortBy);
+        if (!fieldNames) return null;
+        
+        // Use getField if available, otherwise manual extraction
+        if (typeof window.getField === 'function') {
+            return window.getField(item, fieldNames, '');
+        }
+        
+        // Fallback: manual extraction using same pattern as getField
+        for (const field of fieldNames) {
+            if (item[field] !== undefined && item[field] !== null) {
+                return item[field];
+            }
+        }
+        return '';
+    }
+    
+    /**
      * Sorts driver entries by gap time, lap time, gap percentage, car class, track, position, or date
      * @param {Array} entries - Driver entries
      * @param {string} sortBy - Sort key: 'gap' (default), 'lapTime', 'gapPercent', 'car_class', 'track', 'position', or 'date_time'
      */
     sortDriverEntries(entries, sortBy = 'gap') {
+        if (!entries || entries.length === 0) return;
+        
         try {
             if (sortBy === 'position') {
-                // Sort by position
-                entries.sort((a, b) => {
-                    const posA = parseInt(a.Position || a.position || a.Pos || 999999);
-                    const posB = parseInt(b.Position || b.position || b.Pos || 999999);
-                    if (posA !== posB) return posA - posB;
-                    const ta = R3EUtils.getTotalEntriesCount(a);
-                    const tb = R3EUtils.getTotalEntriesCount(b);
-                    return tb - ta; // descending
-                });
+                this._sortByPosition(entries);
             } else if (sortBy === 'date_time') {
-                // Sort by date (most recent first)
-                entries.sort((a, b) => {
-                    const dateA = a.date_time || a.dateTime || a.Date || a.DateTime || '';
-                    const dateB = b.date_time || b.dateTime || b.Date || b.DateTime || '';
-                    if (!dateA && !dateB) return 0;
-                    if (!dateA) return 1;
-                    if (!dateB) return -1;
-                    // Parse as Date objects and sort descending (newest first)
-                    const timeA = new Date(dateA).getTime();
-                    const timeB = new Date(dateB).getTime();
-                    if (isNaN(timeA) && isNaN(timeB)) return 0;
-                    if (isNaN(timeA)) return 1;
-                    if (isNaN(timeB)) return -1;
-                    return timeB - timeA;
-                });
+                this._sortByDateTime(entries);
             } else if (sortBy === 'lapTime') {
-                entries.sort((a, b) => {
-                    const rawA = a.LapTime || a['Lap Time'] || a.lap_time || a.laptime || a.Time || '';
-                    const rawB = b.LapTime || b['Lap Time'] || b.lap_time || b.laptime || b.Time || '';
-                    const lapA = String(rawA).split(/,\s*/)[0] || '';
-                    const lapB = String(rawB).split(/,\s*/)[0] || '';
-                    const msA = R3EUtils.parseLapTimeToMillis(lapA) || Number.MAX_VALUE;
-                    const msB = R3EUtils.parseLapTimeToMillis(lapB) || Number.MAX_VALUE;
-                    if (msA !== msB) return msA - msB;
-                    const ta = R3EUtils.getTotalEntriesCount(a);
-                    const tb = R3EUtils.getTotalEntriesCount(b);
-                    return tb - ta; // descending
-                });
+                this._sortByLapTime(entries);
             } else if (sortBy === 'car_class' || sortBy === 'track') {
-                const isCarClass = sortBy === 'car_class';
-                entries.sort((a, b) => {
-                    const rawA = isCarClass
-                        ? (a.CarClass || a['Car Class'] || a.car_class || a.Class || a.class || '')
-                        : (a.Track || a.track || a.TrackName || a.track_name || '');
-                    const rawB = isCarClass
-                        ? (b.CarClass || b['Car Class'] || b.car_class || b.Class || b.class || '')
-                        : (b.Track || b.track || b.TrackName || b.track_name || '');
-                    const keyA = String(rawA).toLowerCase();
-                    const keyB = String(rawB).toLowerCase();
-                    if (keyA < keyB) return -1;
-                    if (keyA > keyB) return 1;
-
-                    const ga = R3EUtils.parseGapMillisFromItem(a);
-                    const gb = R3EUtils.parseGapMillisFromItem(b);
-                    if (ga !== gb) return ga - gb;
-                    const posA = parseInt(a.Position || a.position || a.Pos || 999999);
-                    const posB = parseInt(b.Position || b.position || b.Pos || 999999);
-                    return posA - posB;
-                });
+                this._sortByTextField(entries, sortBy);
             } else if (sortBy === 'gapPercent') {
-                // Sort by gap percentage
-                const referenceTime = this.extractReferenceTime(entries);
-                entries.sort((a, b) => {
-                    const percentA = this.calculateGapPercentValue(a, referenceTime);
-                    const percentB = this.calculateGapPercentValue(b, referenceTime);
-                    if (percentA !== percentB) return percentA - percentB;
-                    const ta = R3EUtils.getTotalEntriesCount(a);
-                    const tb = R3EUtils.getTotalEntriesCount(b);
-                    return tb - ta; // descending
-                });
+                this._sortByGapPercent(entries);
             } else {
                 // Sort by gap time (default)
-                entries.sort((a, b) => {
-                    const ga = R3EUtils.parseGapMillisFromItem(a);
-                    const gb = R3EUtils.parseGapMillisFromItem(b);
-                    if (ga !== gb) return ga - gb;
-                    const ta = R3EUtils.getTotalEntriesCount(a);
-                    const tb = R3EUtils.getTotalEntriesCount(b);
-                    return tb - ta; // descending
-                });
+                this._sortByGap(entries);
             }
         } catch (e) {
             // If parsing fails, keep original order
+            console.warn('Sort error:', e);
         }
+    }
+    
+    /**
+     * Sort by position
+     * @private
+     */
+    _sortByPosition(entries) {
+        const fields = this.getSortFieldNames('position');
+        entries.sort((a, b) => {
+            const posA = parseInt(this.getFieldValueForSort(a, 'position') || 999999);
+            const posB = parseInt(this.getFieldValueForSort(b, 'position') || 999999);
+            if (posA !== posB) return posA - posB;
+            return R3EUtils.getTotalEntriesCount(b) - R3EUtils.getTotalEntriesCount(a);
+        });
+    }
+    
+    /**
+     * Sort by date/time (most recent first)
+     * @private
+     */
+    _sortByDateTime(entries) {
+        entries.sort((a, b) => {
+            const dateA = this.getFieldValueForSort(a, 'date_time');
+            const dateB = this.getFieldValueForSort(b, 'date_time');
+            if (!dateA && !dateB) return 0;
+            if (!dateA) return 1;
+            if (!dateB) return -1;
+            
+            const timeA = new Date(dateA).getTime();
+            const timeB = new Date(dateB).getTime();
+            if (isNaN(timeA) && isNaN(timeB)) return 0;
+            if (isNaN(timeA)) return 1;
+            if (isNaN(timeB)) return -1;
+            return timeB - timeA; // Newest first
+        });
+    }
+    
+    /**
+     * Sort by lap time
+     * @private
+     */
+    _sortByLapTime(entries) {
+        entries.sort((a, b) => {
+            const rawA = a.LapTime || a['Lap Time'] || a.lap_time || a.laptime || a.Time || '';
+            const rawB = b.LapTime || b['Lap Time'] || b.lap_time || b.laptime || b.Time || '';
+            const lapA = String(rawA).split(/,\s*/)[0] || '';
+            const lapB = String(rawB).split(/,\s*/)[0] || '';
+            const msA = R3EUtils.parseLapTimeToMillis(lapA) || Number.MAX_VALUE;
+            const msB = R3EUtils.parseLapTimeToMillis(lapB) || Number.MAX_VALUE;
+            if (msA !== msB) return msA - msB;
+            return R3EUtils.getTotalEntriesCount(b) - R3EUtils.getTotalEntriesCount(a);
+        });
+    }
+    
+    /**
+     * Sort by text field (car class or track)
+     * @private
+     */
+    _sortByTextField(entries, sortBy) {
+        entries.sort((a, b) => {
+            // Primary sort: by the text field (case-insensitive)
+            const fieldA = String(this.getFieldValueForSort(a, sortBy) || '').toLowerCase();
+            const fieldB = String(this.getFieldValueForSort(b, sortBy) || '').toLowerCase();
+            
+            if (fieldA < fieldB) return -1;
+            if (fieldA > fieldB) return 1;
+            
+            // Secondary sort: by gap time
+            const ga = R3EUtils.parseGapMillisFromItem(a);
+            const gb = R3EUtils.parseGapMillisFromItem(b);
+            if (ga !== gb) return ga - gb;
+            
+            // Tertiary sort: by position
+            const posA = parseInt(this.getFieldValueForSort(a, 'position') || 999999);
+            const posB = parseInt(this.getFieldValueForSort(b, 'position') || 999999);
+            return posA - posB;
+        });
+    }
+    
+    /**
+     * Sort by gap percentage
+     * @private
+     */
+    _sortByGapPercent(entries) {
+        const referenceTime = this.extractReferenceTime(entries);
+        entries.sort((a, b) => {
+            const percentA = this.calculateGapPercentValue(a, referenceTime);
+            const percentB = this.calculateGapPercentValue(b, referenceTime);
+            if (percentA !== percentB) return percentA - percentB;
+            return R3EUtils.getTotalEntriesCount(b) - R3EUtils.getTotalEntriesCount(a);
+        });
+    }
+    
+    /**
+     * Sort by gap time (default)
+     * @private
+     */
+    _sortByGap(entries) {
+        entries.sort((a, b) => {
+            const ga = R3EUtils.parseGapMillisFromItem(a);
+            const gb = R3EUtils.parseGapMillisFromItem(b);
+            if (ga !== gb) return ga - gb;
+            return R3EUtils.getTotalEntriesCount(b) - R3EUtils.getTotalEntriesCount(a);
+        });
     }
     
     /**
@@ -641,7 +731,31 @@ class TableRenderer {
      */
     getGroupIdForItem(item) {
         const slugSource = item.name || item.Name || item.driver || 'unknown';
-        return `group-${String(slugSource).replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-]/g, '').toLowerCase()}`;
+        const country = item.country || item.Country || '';
+        const team = item.team || item.Team || '';
+        return this.buildGroupId(slugSource, country, team);
+    }
+
+    /**
+     * Build a stable group ID for a driver row/header pair.
+     * Includes country/team to distinguish duplicate names.
+     * @param {string} name - Driver name
+     * @param {string} country - Driver country
+     * @param {string} team - Driver team
+     * @returns {string} Group ID
+     */
+    buildGroupId(name, country = '', team = '') {
+        const base = String(name || 'unknown')
+            .replace(/\s+/g, '-')
+            .replace(/[^a-zA-Z0-9\-]/g, '')
+            .toLowerCase();
+        const countrySlug = country && country !== '-'
+            ? `-${String(country).replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-]/g, '').toLowerCase()}`
+            : '';
+        const teamSlug = team && team !== '-'
+            ? `-${String(team).replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-]/g, '').toLowerCase()}`
+            : '';
+        return `group-${base}${countrySlug}${teamSlug}`;
     }
     
     /**

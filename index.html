@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RaceRoom Leaderboards Explorer - R3E Lap Times, Driver Rankings & Track Records</title>
+    <title>RaceRoom Leaderboards Explorer</title>
     <meta name="description" content="The #1 RaceRoom leaderboards database. Search driver lap times, track records, car performance data and rankings for RaceRoom Racing Experience (R3E). Updated daily with official leaderboard data.">
     <link rel="canonical" href="https://r3e-leaderboards.info/">
+    <link rel="alternate" hreflang="en" href="https://r3e-leaderboards.info/">
+    <link rel="alternate" hreflang="x-default" href="https://r3e-leaderboards.info/">
     <meta name="author" content="Ludo R3E Tools">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <meta name="keywords" content="raceroom leaderboards, r3e leaderboards, raceroom lap times, raceroom racing experience leaderboards, r3e lap times, raceroom driver rankings, raceroom track records, r3e rankings">
@@ -15,7 +17,7 @@
     <meta property="og:description" content="The #1 RaceRoom leaderboards database. Search driver lap times, track records and rankings for RaceRoom Racing Experience. Updated daily.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://r3e-leaderboards.info/">
-    <meta property="og:image" content="https://r3e-leaderboards.info/og-image.png">
+    <meta property="og:image" content="https://r3e-leaderboards.info/images/rle-share.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="RaceRoom Leaderboards - R3E Lap Times and Driver Rankings">
@@ -25,13 +27,13 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="RaceRoom Leaderboards Explorer - R3E Lap Times & Rankings">
     <meta name="twitter:description" content="The #1 RaceRoom leaderboards database. Search driver lap times, track records and rankings for R3E.">
-    <meta name="twitter:image" content="https://r3e-leaderboards.info/og-image.png">
+    <meta name="twitter:image" content="https://r3e-leaderboards.info/images/rle-share.png">
     
-    <!-- Analytics -->
-    <script data-goatcounter="https://r3e-leaderboards.goatcounter.com/count"
-            async src="//gc.zgo.at/count.js"></script>
+    <!-- Analytics (PostHog via first-party proxy) -->
+    <script src="modules/analytics.js?v=1"></script>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     
-    <link rel="stylesheet" href="style.css?v=9">
+    <link rel="stylesheet" href="style.css?v=23">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"/>
     <!-- Site Icons -->
     <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png?v=3">
@@ -42,6 +44,7 @@
     {
         "@context": "https://schema.org",
         "@type": "WebSite",
+        "@id": "https://r3e-leaderboards.info/#website",
         "name": "RaceRoom Leaderboards",
         "alternateName": ["R3E Leaderboards", "RaceRoom Racing Experience Leaderboards"],
         "url": "https://r3e-leaderboards.info/",
@@ -60,12 +63,22 @@
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "RaceRoom Leaderboards",
+        "url": "https://r3e-leaderboards.info/",
+        "logo": "https://r3e-leaderboards.info/images/rle-logo.png"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
         "@type": "WebPage",
         "@id": "https://r3e-leaderboards.info/#webpage",
         "url": "https://r3e-leaderboards.info/",
-        "name": "RaceRoom Leaderboards Explorer - R3E Lap Times, Driver Rankings & Track Records",
+        "name": "RaceRoom Leaderboards Explorer",
         "description": "The #1 RaceRoom leaderboards database. Search driver lap times, track records, car performance data and rankings for RaceRoom Racing Experience.",
         "isPartOf": {"@id": "https://r3e-leaderboards.info/#website"},
+        "inLanguage": "en",
         "about": {
             "@type": "VideoGame",
             "name": "RaceRoom Racing Experience",
@@ -74,7 +87,7 @@
         },
         "primaryImageOfPage": {
             "@type": "ImageObject",
-            "url": "https://r3e-leaderboards.info/og-image.png"
+            "url": "https://r3e-leaderboards.info/images/rle-share.png"
         }
     }
     </script>
@@ -119,18 +132,16 @@
                     <select id="class-filter" aria-label="Filter by car class" hidden>
                         <option value="">All classes</option>
                     </select>
-                    <div id="class-filter-ui" class="custom-select" role="listbox" aria-label="Filter by car class">
-                        <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All classes ▾</button>
+                    <select id="track-filter" aria-label="Filter by track" hidden>
+                        <option value="">All tracks</option>
+                    </select>
+                    <div id="track-filter-ui" class="custom-select" role="listbox" aria-label="Filter by track">
+                        <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All tracks ▾</button>
                         <div class="custom-select__menu" role="presentation" hidden></div>
                     </div>
-                    <div id="difficulty-filter-ui" class="custom-select" role="listbox" aria-label="Filter by difficulty">
-                        <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All difficulties ▾</button>
-                        <div class="custom-select__menu" role="presentation" hidden>
-                            <div class="custom-select__option" data-value="">All difficulties</div>
-                            <div class="custom-select__option" data-value="Get Real">Get Real</div>
-                            <div class="custom-select__option" data-value="Amateur">Amateur</div>
-                            <div class="custom-select__option" data-value="Novice">Novice</div>
-                        </div>
+                    <div id="track-class-filter-ui" class="custom-select" role="listbox" aria-label="Filter by car class">
+                        <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All classes ▾</button>
+                        <div class="custom-select__menu" role="presentation" hidden></div>
                     </div>
                 </div>
                 <div id="results-container"></div>
@@ -178,34 +189,35 @@
     
     <div id="site-footer"></div>
     <!-- Core modules - load first -->
-    <script src="data/country-mappings.js?v=1"></script>
-    <script src="modules/flag-helper.js?v=1"></script>
-    <script src="modules/template-loader.js?v=1"></script>
-    <script src="modules/header-loader.js?v=1"></script>
-    <script src="modules/footer-loader.js?v=1"></script>
-    <script src="modules/template-helper.js?v=1"></script>
-    <script src="modules/column-config.js?v=3"></script>
-    <script src="modules/field-mappings.js?v=1"></script>
-    <script src="modules/data-normalizer.js?v=1"></script>
-    <script src="modules/utils.js?v=1"></script>
-    <script src="modules/data-service.js?v=2"></script>
-    <script src="modules/custom-select.js?v=1"></script>
-    <script src="modules/pagination.js?v=1"></script>
-    <script src="modules/table-renderer.js?v=3"></script>
+    <script src="data/country-mappings.js?v=4" defer></script>
+    <script src="modules/flag-helper.js?v=1" defer></script>
+    <script src="modules/template-loader.js?v=1" defer></script>
+    <script src="modules/header-loader.js?v=2" defer></script>
+    <script src="modules/footer-loader.js?v=2" defer></script>
+    <script src="modules/template-helper.js?v=1" defer></script>
+    <script src="modules/column-config.js?v=3" defer></script>
+    <script src="modules/field-mappings.js?v=1" defer></script>
+    <script src="modules/data-normalizer.js?v=1" defer></script>
+    <script src="modules/utils.js?v=1" defer></script>
+    <script src="modules/data-service.js?v=4" defer></script>
+    <script src="modules/mp-pos-service.js?v=5" defer></script>
+    <script src="modules/custom-select.js?v=1" defer></script>
+    <script src="modules/pagination.js?v=1" defer></script>
+    <script src="modules/table-renderer.js?v=12" defer></script>
+    
+    <!-- Data files - must load before feature modules that depend on them -->
+    <script src="data/cars.js?v=3" defer></script>
+    <script src="data/tracks.js?v=3" defer></script>
+    <script src="data/car-classes.js?v=3" defer></script>
     
     <!-- Feature modules -->
-    <script src="modules/tab-manager.js?v=1"></script>
-    <script src="modules/status-display.js?v=2"></script>
-    <script src="modules/driver-search.js?v=2"></script>
-    <script src="modules/daily-races.js?v=4"></script>
-    <script src="modules/navigation.js?v=1"></script>
-    
-    <!-- Data files -->
-    <script src="data/cars.js?v=1"></script>
-    <script src="data/tracks.js?v=1"></script>
-    <script src="data/car-classes.js?v=1"></script>
+    <script src="modules/tab-manager.js?v=2" defer></script>
+    <script src="modules/status-display.js?v=3" defer></script>
+    <script src="modules/driver-search.js?v=10" defer></script>
+    <script src="modules/daily-races.js?v=12" defer></script>
+    <script src="modules/navigation.js?v=2" defer></script>
     
     <!-- Application script -->
-    <script src="script.js?v=1"></script>
+    <script src="script.js?v=2" defer></script>
 </body>
 </html>

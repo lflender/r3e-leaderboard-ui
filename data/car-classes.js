@@ -16,6 +16,9 @@ window.CAR_CLASSES_DATA = {
     "7767": "ADAC GT Masters 2020",
     "11566": "ADAC GT Masters 2021",
 
+    // Alpine Cup
+    "13397": "Alpine A110 Cup",
+
     // Audi Cup
     "4680": "Audi Sport TT Cup 2015",
     "5726": "Audi Sport TT Cup 2016",
@@ -66,10 +69,6 @@ window.CAR_CLASSES_DATA = {
     "5825": "GTR 4",
     
     // Touring cars
-    "1706": "German Nationals",
-    "10977": "Mazda MX-5 Cup",
-    "1717": "Silhouette Series",
-    "1710": "Super Touring",
     "8660": "Touring Cars Cup",
     "1922": "WTCC 2013",
     "3905": "WTCC 2014",
@@ -81,6 +80,12 @@ window.CAR_CLASSES_DATA = {
     "9233": "WTCR 2020",
     "10344": "WTCR 2021",
     "11317": "WTCR 2022",
+
+    // Various touring cars
+    "1706": "German Nationals",
+    "10977": "Mazda MX-5 Cup",
+    "1717": "Silhouette Series",
+    "1710": "Super Touring",
     
     // Prototypes
     "1714": "P1",
@@ -116,6 +121,7 @@ window.CAR_CLASSES_DATA = {
     "7765": "Volkswagen ID. R",
     "8682": "CUPRA Leon e-Racer",
     "10266": "Ford Mustang Mach E",
+    "13358": "NXT Gen Cup",
     
     // Historic
     "8483": "Group 2",

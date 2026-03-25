@@ -393,6 +393,17 @@ class DataService {
             }
             
             let filteredEntries = driverEntries;
+
+            // Apply track filter
+            if (filters.trackId) {
+                const selectedTrackId = Number(filters.trackId);
+                filteredEntries = filteredEntries.filter(entry => {
+                    const entryTrackId = entry.track_id || entry.TrackID || entry.trackId ||
+                        (entry.track && (entry.track.id || entry.track.Id || entry.track.track_id));
+                    if (entryTrackId === undefined || entryTrackId === null) return false;
+                    return Number(entryTrackId) === selectedTrackId;
+                });
+            }
             
             // Apply class filter
             if (filters.classId || filters.className) {
@@ -436,12 +447,34 @@ class DataService {
             }
             
             if (filteredEntries.length > 0) {
-                // Note: date_time enhancement removed - it was causing major performance issues
-                // by fetching cache files for every entry. The date_time field should be added
-                // to the driver_index.json on the server side instead.
-                results.push({
-                    driver: driverEntries[0].name || driverKey,
-                    entries: filteredEntries
+                // Group entries by country and team to handle drivers with same name from different countries/teams
+                const entriesByCountryAndTeam = new Map();
+                filteredEntries.forEach(entry => {
+                    const country = entry.country || entry.Country || '-';
+                    const team = entry.team || entry.Team || '-';
+                    const groupKey = `${country}|${team}`;
+                    if (!entriesByCountryAndTeam.has(groupKey)) {
+                        entriesByCountryAndTeam.set(groupKey, {
+                            country: country,
+                            team: team,
+                            entries: []
+                        });
+                    }
+                    entriesByCountryAndTeam.get(groupKey).entries.push(entry);
+                });
+                
+                // Create a result for each country/team combination
+                entriesByCountryAndTeam.forEach((groupData) => {
+                    // Note: date_time enhancement removed - it was causing major performance issues
+                    // by fetching cache files for every entry. The date_time field should be added
+                    // to the driver_index.json on the server side instead.
+                    const driverName = driverEntries[0].name || driverKey;
+                    results.push({
+                        driver: driverName,
+                        country: groupData.country,
+                        team: groupData.team,
+                        entries: groupData.entries
+                    });
                 });
             }
         }

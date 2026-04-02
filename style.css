@@ -2166,12 +2166,7 @@ span.driver-name-top10-glitter::after {
     }
 }
 
-@media (max-width: 768px) {
-    .car-dist-summary,
-    .entries-dist-summary {
-        margin: 1rem 0;
-    }
-    
+@media (max-width: 768px) {    
     .car-dist-content {
         overflow-x: visible;
     }
@@ -2443,6 +2438,12 @@ span.driver-name-top10-glitter::after {
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 1.25rem;
     margin-bottom: 2rem;
+}
+
+@media (min-width: 1024px) {
+    .daily-races-grid.daily-races-grid--center-fourth > .daily-race-card-link:nth-child(4):last-child {
+        grid-column: 2;
+    }
 }
 
 .daily-races-section-header {

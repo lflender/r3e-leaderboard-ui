@@ -268,8 +268,14 @@ class DailyRaces {
             return;
         }
 
-        const buildRaceCards = (races) => {
-            let cardsHtml = '<div class="daily-races-grid">';
+        const buildRaceCards = (races, options = {}) => {
+            const { centerFourthOnDesktop = false } = options;
+            const gridClasses = ['daily-races-grid'];
+            if (centerFourthOnDesktop && races.length === 4) {
+                gridClasses.push('daily-races-grid--center-fourth');
+            }
+
+            let cardsHtml = `<div class="${gridClasses.join(' ')}">`;
 
             for (const race of races) {
                 // For categories (with multiple class IDs), display the car_class name directly
@@ -347,7 +353,7 @@ class DailyRaces {
         html += '</div>';
 
         // Races grid
-        html += buildRaceCards(racesData.races);
+        html += buildRaceCards(racesData.races, { centerFourthOnDesktop: true });
 
         const featureRaces = racesData['feature-races'];
         if (Array.isArray(featureRaces) && featureRaces.length > 0) {

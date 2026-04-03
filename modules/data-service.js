@@ -397,7 +397,7 @@ class DataService {
      * @returns {Promise<Object>} Leaderboard data
      */
     async fetchLeaderboardDetails(trackId, classId) {
-        const filePath = `cache/track_${trackId}/class_${classId}.json.gz`;
+        const filePath = `cache/tracks/track_${trackId}/class_${classId}.json.gz`;
         
         const timestamp = new Date().getTime();
         const response = await fetch(`${filePath}?v=${timestamp}`, {

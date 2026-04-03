@@ -27,7 +27,8 @@ class DataService {
     }
     
     /**
-     * Loads driver name mirror index (name -> canonical name) with caching
+     * Loads driver mirror index with caching.
+     * Supports both legacy values (name -> canonical name) and new metadata objects.
      * @param {Function} onProgress - Optional callback for progressive updates (driverName, entries)
      * @returns {Promise<Object>} Driver index object
      */
@@ -106,6 +107,61 @@ class DataService {
             return firstChar;
         }
         return '_';
+    }
+
+    _normalizeDriverLookupName(name) {
+        return String(name || '').trim().replace(/\s+/g, ' ').toLowerCase();
+    }
+
+    _extractDriverMirrorMetadata(mirrorKey, mirrorEntry) {
+        if (mirrorEntry && typeof mirrorEntry === 'object' && !Array.isArray(mirrorEntry)) {
+            const lookupKey = this._normalizeDriverLookupName(
+                mirrorEntry.lookup_key ||
+                mirrorEntry.lookupKey ||
+                mirrorEntry.canonical_key ||
+                mirrorEntry.canonicalKey ||
+                mirrorEntry.canonical_name ||
+                mirrorEntry.canonicalName ||
+                mirrorKey
+            );
+
+            return {
+                lookupKey: lookupKey || this._normalizeDriverLookupName(mirrorKey),
+                displayName: String(mirrorEntry.name || mirrorKey),
+                country: String(mirrorEntry.country || ''),
+                team: String(mirrorEntry.team || ''),
+                rank: String(mirrorEntry.rank || ''),
+                hasMetadata: true
+            };
+        }
+
+        return {
+            lookupKey: this._normalizeDriverLookupName(String(mirrorEntry || mirrorKey)),
+            displayName: String(mirrorEntry || mirrorKey),
+            country: '',
+            team: '',
+            rank: '',
+            hasMetadata: false
+        };
+    }
+
+    getDriverMetadata(driverName, driverMirror = null) {
+        const mirror = driverMirror || this.driverIndex || this.driverNameMirror;
+        if (!mirror || typeof mirror !== 'object') {
+            return null;
+        }
+
+        const normalizedName = this._normalizeDriverLookupName(driverName);
+        if (!normalizedName) {
+            return null;
+        }
+
+        const mirrorEntry = mirror[normalizedName] || mirror[String(driverName)] || null;
+        if (!mirrorEntry) {
+            return null;
+        }
+
+        return this._extractDriverMirrorMetadata(normalizedName, mirrorEntry);
     }
 
     /**
@@ -482,8 +538,10 @@ class DataService {
         const searchLower = searchTerm.toLowerCase();
         const results = [];
 
-        for (const [mirrorKey, canonicalName] of Object.entries(driverMirror)) {
-            const driverLower = mirrorKey.toLowerCase();
+        for (const [mirrorKey, mirrorEntry] of Object.entries(driverMirror)) {
+            const mirrorMeta = this._extractDriverMirrorMetadata(mirrorKey, mirrorEntry);
+            const searchTarget = mirrorMeta.displayName || mirrorKey;
+            const driverLower = this._normalizeDriverLookupName(searchTarget);
             let matches = false;
             
             if (isExactSearch) {
@@ -492,13 +550,13 @@ class DataService {
                 if (words.length === 1) {
                     // Single word: match as whole word using word boundary
                     const wordRegex = new RegExp(`\\b${words[0].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
-                    matches = wordRegex.test(mirrorKey);
+                    matches = wordRegex.test(searchTarget);
                 } else {
                     // Multiple words: each word must be complete, in order, with any amount of space between
                     const escapedWords = words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
                     const pattern = escapedWords.map(w => `\\b${w}\\b`).join('\\s+');
                     const phraseRegex = new RegExp(pattern, 'i');
-                    matches = phraseRegex.test(mirrorKey);
+                    matches = phraseRegex.test(searchTarget);
                 }
             } else {
                 // Partial matching (current behavior)
@@ -511,8 +569,8 @@ class DataService {
             
             const shardKey = this._getShardKeyForName(mirrorKey);
             const shardData = await this._loadDriverShard(shardKey);
-            const normalizedLookupName = String(canonicalName || mirrorKey).toLowerCase();
-            const driverEntries = shardData[normalizedLookupName] || shardData[mirrorKey] || [];
+            const normalizedLookupName = mirrorMeta.lookupKey || this._normalizeDriverLookupName(mirrorKey);
+            const driverEntries = shardData[normalizedLookupName] || shardData[mirrorKey] || shardData[this._normalizeDriverLookupName(searchTarget)] || [];
             if (!Array.isArray(driverEntries) || driverEntries.length === 0) {
                 continue;
             }
@@ -572,7 +630,34 @@ class DataService {
             }
             
             if (filteredEntries.length > 0) {
-                // Group entries by country and team to handle drivers with same name from different countries/teams
+                if (mirrorMeta.hasMetadata) {
+                    const enrichedEntries = filteredEntries.map(entry => {
+                        const enrichedEntry = { ...entry };
+                        if (mirrorMeta.country) {
+                            enrichedEntry.country = mirrorMeta.country;
+                            enrichedEntry.Country = mirrorMeta.country;
+                        }
+                        enrichedEntry.team = mirrorMeta.team;
+                        enrichedEntry.Team = mirrorMeta.team;
+                        enrichedEntry.rank = mirrorMeta.rank;
+                        enrichedEntry.Rank = mirrorMeta.rank;
+                        if (mirrorMeta.displayName && !enrichedEntry.name && !enrichedEntry.Name) {
+                            enrichedEntry.name = mirrorMeta.displayName;
+                        }
+                        return enrichedEntry;
+                    });
+
+                    results.push({
+                        driver: mirrorMeta.displayName || driverEntries[0].name || mirrorKey,
+                        country: mirrorMeta.country || '-',
+                        team: mirrorMeta.team || '',
+                        rank: mirrorMeta.rank || '',
+                        entries: enrichedEntries
+                    });
+                    continue;
+                }
+
+                // Legacy fallback: group entries by country and team when metadata is not in the mirror.
                 const entriesByCountryAndTeam = new Map();
                 filteredEntries.forEach(entry => {
                     const country = entry.country || entry.Country || '-';
@@ -582,22 +667,20 @@ class DataService {
                         entriesByCountryAndTeam.set(groupKey, {
                             country: country,
                             team: team,
+                            rank: entry.rank || entry.Rank || '',
                             entries: []
                         });
                     }
                     entriesByCountryAndTeam.get(groupKey).entries.push(entry);
                 });
                 
-                // Create a result for each country/team combination
                 entriesByCountryAndTeam.forEach((groupData) => {
-                    // Note: date_time enhancement removed - it was causing major performance issues
-                    // by fetching cache files for every entry. The date_time field should be added
-                    // to the driver_index.json on the server side instead.
-                    const driverName = driverEntries[0].name || canonicalName || mirrorKey;
+                    const driverName = driverEntries[0].name || mirrorMeta.displayName || mirrorKey;
                     results.push({
                         driver: driverName,
                         country: groupData.country,
                         team: groupData.team,
+                        rank: groupData.rank,
                         entries: groupData.entries
                     });
                 });

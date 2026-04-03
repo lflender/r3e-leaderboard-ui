@@ -105,6 +105,44 @@ fetchLeaderboardDetails();
 // ===========================================
 // Main Fetch Function
 // ===========================================
+async function enrichEntriesWithDriverMetadata(entries) {
+    if (!Array.isArray(entries) || entries.length === 0) {
+        return entries;
+    }
+
+    if (typeof dataService === 'undefined' || typeof dataService.waitForDriverIndex !== 'function' || typeof dataService.getDriverMetadata !== 'function') {
+        return entries;
+    }
+
+    const driverMirror = await dataService.waitForDriverIndex();
+    if (!driverMirror || typeof driverMirror !== 'object' || Object.keys(driverMirror).length === 0) {
+        return entries;
+    }
+
+    entries.forEach(entry => {
+        const driverName = DataNormalizer.extractName(entry);
+        if (!driverName) {
+            return;
+        }
+
+        const metadata = dataService.getDriverMetadata(driverName, driverMirror);
+        if (!metadata) {
+            return;
+        }
+
+        if (metadata.country) {
+            entry.country = metadata.country;
+            entry.Country = metadata.country;
+        }
+        entry.team = metadata.team || '';
+        entry.Team = metadata.team || '';
+        entry.rank = metadata.rank || '';
+        entry.Rank = metadata.rank || '';
+    });
+
+    return entries;
+}
+
 async function fetchLeaderboardDetails() {
     await TemplateHelper.showLoading(resultsContainer);
     
@@ -138,6 +176,8 @@ async function fetchLeaderboardDetails() {
         // Set page titles
         setDetailTitles(data, trackParam, classParam);
         
+        await enrichEntriesWithDriverMetadata(transformedData);
+
         // Store unfiltered results
         unfilteredResults = transformedData;
         
@@ -360,6 +400,8 @@ async function fetchSpecificClassesDetails() {
         // Set page titles for specific classes view
         setSpecificClassesDetailTitles(specificClassIds);
         
+        await enrichEntriesWithDriverMetadata(allEntries);
+
         // Store unfiltered results
         unfilteredResults = allEntries;
         
@@ -523,6 +565,8 @@ async function fetchCombinedSuperclassDetails() {
         // Set page titles for combined view
         setCombinedDetailTitles(superclassParam);
         
+        await enrichEntriesWithDriverMetadata(allEntries);
+
         // Store unfiltered results
         unfilteredResults = allEntries;
         

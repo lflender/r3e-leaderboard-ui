@@ -132,9 +132,9 @@ class TableRenderer {
      */
     renderDriverHeader(driverObj, firstEntry, colspan) {
         const displayName = firstEntry.name || firstEntry.Name || driverObj.driver || driverObj.name || driverObj.DriverName || 'Unknown';
-        const country = firstEntry.country || firstEntry.Country || '-';
-        const rank = firstEntry.rank || firstEntry.Rank || '';
-        const team = firstEntry.team || firstEntry.Team || '';
+        const country = driverObj.country || firstEntry.country || firstEntry.Country || '-';
+        const rank = driverObj.rank || firstEntry.rank || firstEntry.Rank || '';
+        const team = driverObj.team || firstEntry.team || firstEntry.Team || '';
         
         // Use a shared group ID builder so header and data rows always match.
         const slugSource = driverObj.driver || driverObj.name || firstEntry.name || firstEntry.Name || 'unknown';

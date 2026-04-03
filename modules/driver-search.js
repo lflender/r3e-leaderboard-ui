@@ -38,6 +38,9 @@ class DriverSearch {
         // Debounce timer for live search
         this.searchDebounceTimer = null;
         this.minSearchLength = 3;
+        
+        // Track search requests to prevent race conditions
+        this.currentSearchId = 0;
 
         // Analytics: tracks how the search was triggered
         this._searchSource = 'input';
@@ -327,6 +330,10 @@ class DriverSearch {
     async searchDriver(driverName) {
         this.lastSearchTime = Date.now();
         this.lastSearchTerm = driverName; // Store the search term
+        
+        // Increment search ID to track this request and discard outdated results
+        const searchId = ++this.currentSearchId;
+        
         await TemplateHelper.showLoading(this.elements.resultsContainer, 'Searching...');
         
         try {
@@ -340,12 +347,17 @@ class DriverSearch {
                 className: selectedClass
             });
             
+            // Discard results if a newer search has started
+            if (searchId !== this.currentSearchId) {
+                return;
+            }
+            
             // Sort results by MP position (ascending) when multiple drivers have the same name
             this.sortResultsByMpPosition(results);
             
             this.allResults = results;
             this.currentPage = 1;
-            this.displayResults(results);
+            this.displayResults(results, searchId);
 
             // Analytics: track the completed search
             if (typeof R3EAnalytics !== 'undefined') {
@@ -367,8 +379,14 @@ class DriverSearch {
     /**
      * Display search results
      * @param {Array} data - Search results
+     * @param {number} searchId - Search request ID to verify this is the latest search
      */
-    async displayResults(data) {
+    async displayResults(data, searchId) {
+        // Discard results if a newer search has started
+        if (searchId !== this.currentSearchId) {
+            return;
+        }
+        
         if (!Array.isArray(data)) {
             this.displayError('Invalid response format');
             return;

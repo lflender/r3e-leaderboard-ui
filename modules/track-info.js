@@ -385,32 +385,78 @@
     return result;
   }
 
+  // Single-flight cache for all_combinations.json.gz to handle concurrent requests
+  let allCombinationsPromise = null;
+  let allCombinations = null;
+
+  // Fetch all combinations (full list, for use when filters are applied)
+  async function loadAllCombinations() {
+    if (allCombinations) return allCombinations;
+    if (allCombinationsPromise) return allCombinationsPromise;
+
+    allCombinationsPromise = (async () => {
+      const timestamp = new Date().getTime();
+      try {
+        const resp = await fetch(`cache/all_combinations.json.gz?v=${timestamp}`, {
+          cache: 'no-store'
+        });
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        const stream = resp.body.pipeThrough(new DecompressionStream('gzip'));
+        const text = await new Response(stream).text();
+        const data = JSON.parse(text);
+        let combinations = [];
+        if (Array.isArray(data)) {
+          combinations = data;
+        } else if (data && Array.isArray(data.results)) {
+          combinations = data.results;
+        } else if (data && Array.isArray(data.data)) {
+          combinations = data.data;
+        }
+        allCombinations = combinations;
+        return combinations;
+      } catch (e) {
+        console.error('Failed to load all_combinations.json.gz:', e);
+        return [];
+      } finally {
+        allCombinationsPromise = null;
+      }
+    })();
+
+    return allCombinationsPromise;
+  }
+
   // Fetch data from local cache
+  // Without filters: use top_combinations.json (1000 entries, fast)
+  // With filters: use all_combinations.json.gz (all entries, with single-flight caching for concurrent access)
   async function fetchTopCombinations() {
     try {
       await TemplateHelper.showLoading(tableContainer);
-      
-      // Load all combinations from cache
+
       const timestamp = new Date().getTime();
-      const resp = await fetch(`cache/top_combinations.json?v=${timestamp}`, {
-        cache: 'no-store'
-      });
-      
-      if (!resp.ok) throw new Error('HTTP ' + resp.status);
-      const data = await resp.json();
-      
       let combinations = [];
-      if (Array.isArray(data)) {
-        combinations = data;
-      } else if (data && Array.isArray(data.results)) {
-        combinations = data.results;
-      } else if (data && Array.isArray(data.data)) {
-        combinations = data.data;
+
+      // If filters are active, use the full uncapped data
+      if (activeTrackId || activeClassId) {
+        combinations = await loadAllCombinations();
+      } else {
+        // No filters: use legacy top_combinations.json for speed (1000 cap is intentional for default view)
+        const resp = await fetch(`cache/top_combinations.json?v=${timestamp}`, {
+          cache: 'no-store'
+        });
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        const data = await resp.json();
+        if (Array.isArray(data)) {
+          combinations = data;
+        } else if (data && Array.isArray(data.results)) {
+          combinations = data.results;
+        } else if (data && Array.isArray(data.data)) {
+          combinations = data.data;
+        }
       }
-      
+
       // Apply filters
       let filtered = combinations;
-      
+
       // Filter by track if selected
       if (activeTrackId) {
         filtered = filtered.filter(item => {
@@ -418,13 +464,13 @@
           return Number(tid) === Number(activeTrackId);
         });
       }
-      
+
       // Filter by class if selected (using class NAME like other pages)
       if (activeClassId) {
         // Check if this is a superclass filter
         if (activeClassId.startsWith('superclass:')) {
           const superclassName = activeClassId.replace('superclass:', '');
-          
+
           // Get all classes that belong to this superclass
           const superclassClasses = new Set();
           if (window.CARS_DATA && Array.isArray(window.CARS_DATA)) {
@@ -435,7 +481,7 @@
               }
             });
           }
-          
+
           // Filter by any class in this superclass
           filtered = filtered.filter(item => {
             const className = item.class_name || item.ClassName || item.car_class || item.CarClass || item.Class || item.class || '';
@@ -449,22 +495,20 @@
           });
         }
       }
-      
+
       // Sort filtered results
       filtered.sort((a, b) => {
         // Primary sort: entry count descending
         const countDiff = (b.entry_count || 0) - (a.entry_count || 0);
         if (countDiff !== 0) return countDiff;
-        
+
         // Secondary sort: track name alphabetically
         const trackA = String(a.track || a.Track || a.track_name || a.TrackName || '');
         const trackB = String(b.track || b.Track || b.track_name || b.TrackName || '');
         return trackA.localeCompare(trackB);
       });
-      
-      const limitedCombinations = filtered.slice(0, 1000);
-      
-      return limitedCombinations;
+
+      return filtered;
     } catch (e) {
       console.error('Failed to fetch data', e);
       return [];
@@ -648,117 +692,35 @@
     if (tableContainer && (activeTrackId || activeClassId)) {
       tableContainer.innerHTML = '<div class="loading">Loading...</div>';
     }
-    
-    // Check if activeClassId is a superclass filter
-    const isSuperclassFilter = activeClassId && activeClassId.startsWith('superclass:');
-    
-    // BOTH track and class selected
-    if (activeTrackId && activeClassId) {
-      if (isSuperclassFilter) {
-        const superclassName = activeClassId.replace('superclass:', '');
-        
-        if (combineMode) {
-          // Combine mode: show single row with combined entry count
-          const data = await aggregateByTrackForSuperclass(superclassName);
-          const filtered = data.filter(row => Number(row.track_id) === Number(activeTrackId));
-          renderTable(filtered);
+
+    // fetchTopCombinations already handles filtering by activeTrackId / activeClassId
+    // (including superclass expansion) via closures. Use it for all cases.
+    let data = await fetchTopCombinations();
+
+    // Combine mode: collapse per-class rows into per-track totals for a superclass filter
+    if (activeClassId && activeClassId.startsWith('superclass:') && combineMode) {
+      const superclassName = activeClassId.replace('superclass:', '');
+      const byTrack = new Map();
+      data.forEach(row => {
+        const tid = String(row.track_id || row.TrackID || row.trackId || '');
+        if (!tid) return;
+        const existing = byTrack.get(tid);
+        if (existing) {
+          existing.entry_count = (existing.entry_count || 0) + (row.entry_count || 0);
         } else {
-          // Non-combine mode: show each class separately for this track
-          const superclassClasses = new Set();
-          if (window.CARS_DATA && Array.isArray(window.CARS_DATA)) {
-            window.CARS_DATA.forEach(entry => {
-              if (entry.superclass === superclassName) {
-                const cls = entry.class || entry.car_class || entry.CarClass || '';
-                if (cls) superclassClasses.add(cls);
-              }
-            });
-          }
-          
-          // Get data for each class and combine
-          const allResults = [];
-          const classIdMap = await resolveMultipleClassIds(Array.from(superclassClasses));
-          for (const className of superclassClasses) {
-            const classId = classIdMap.get(className);
-            if (classId !== null) {
-              const classData = await aggregatePerTrackForClass(classId, className);
-              const filtered = classData.filter(row => Number(row.track_id) === Number(activeTrackId));
-              allResults.push(...filtered);
-            }
-          }
-          // Sort combined results by entry_count descending
-          allResults.sort((a, b) => (b.entry_count || 0) - (a.entry_count || 0));
-          renderTable(allResults);
+          byTrack.set(tid, {
+            track: row.track || row.Track || row.track_name || row.TrackName || tid,
+            track_id: row.track_id || row.TrackID || row.trackId,
+            superclass: superclassName,
+            entry_count: row.entry_count || 0
+          });
         }
-      } else {
-        // Single class
-        const numericClassId = await resolveClassId(activeClassId);
-        if (numericClassId === null) {
-          console.warn('Could not resolve class ID for:', activeClassId);
-          tableContainer.innerHTML = '<div class="no-results">No results found for this class</div>';
-          return;
-        }
-        const allTracksForClass = await aggregatePerTrackForClass(numericClassId, activeClassId);
-        const filtered = allTracksForClass.filter(row => Number(row.track_id) === Number(activeTrackId));
-        renderTable(filtered);
-      }
+      });
+      data = Array.from(byTrack.values());
+      data.sort((a, b) => (b.entry_count || 0) - (a.entry_count || 0));
     }
-    // Only class selected
-    else if (activeClassId) {
-      if (isSuperclassFilter) {
-        const superclassName = activeClassId.replace('superclass:', '');
-        
-        // If combine mode, aggregate by track (combining all classes)
-        if (combineMode) {
-          const data = await aggregateByTrackForSuperclass(superclassName);
-          renderTable(data);
-        } else {
-          // Non-combine mode: show each class separately
-          const superclassClasses = new Set();
-          if (window.CARS_DATA && Array.isArray(window.CARS_DATA)) {
-            window.CARS_DATA.forEach(entry => {
-              if (entry.superclass === superclassName) {
-                const cls = entry.class || entry.car_class || entry.CarClass || '';
-                if (cls) superclassClasses.add(cls);
-              }
-            });
-          }
-          
-          // Get data for each class and combine
-          const allResults = [];
-          const classIdMap = await resolveMultipleClassIds(Array.from(superclassClasses));
-          for (const className of superclassClasses) {
-            const classId = classIdMap.get(className);
-            if (classId !== null) {
-              const classData = await aggregatePerTrackForClass(classId, className);
-              allResults.push(...classData);
-            }
-          }
-          // Sort combined results by entry_count descending
-          allResults.sort((a, b) => (b.entry_count || 0) - (a.entry_count || 0));
-          renderTable(allResults);
-        }
-      } else {
-        // Single class
-        const numericClassId = await resolveClassId(activeClassId);
-        if (numericClassId === null) {
-          console.warn('Could not resolve class ID for:', activeClassId);
-          tableContainer.innerHTML = '<div class="no-results">No results found for this class</div>';
-          return;
-        }
-        const data = await aggregatePerTrackForClass(numericClassId, activeClassId);
-        renderTable(data);
-      }
-    }
-    // Only track selected - aggregate from driver_index for all classes at this track
-    else if (activeTrackId) {
-      const data = await aggregatePerClassForTrack(activeTrackId);
-      renderTable(data);
-    }
-    // No filters - show top combinations
-    else {
-      const data = await fetchTopCombinations();
-      renderTable(data);
-    }
+
+    renderTable(data);
   }
 
   // Initial load

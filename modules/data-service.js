@@ -8,6 +8,11 @@ class DataService {
     constructor() {
         this.driverIndex = null;
         this.driverIndexPromise = null; // single-flight promise for index loading
+        this.driverNameMirror = null;
+        this.driverShardPromises = new Map(); // single-flight promises for shard loading
+        this.driverShardCache = new Map();
+        this.driverMirrorPath = 'cache/index/driver_index.json.gz';
+        this.driverShardBasePath = 'cache/index/shards';
         // Disable status caching: status.json is precomputed and should be fetched fresh
         this.statusCache = null; // last good status (fallback only, not used to avoid fresh fetches)
         this.statusPromise = null; // single-flight promise for status fetch
@@ -22,7 +27,8 @@ class DataService {
     }
     
     /**
-     * Loads driver index with caching and progressive streaming
+     * Loads driver mirror index with caching.
+     * Supports both legacy values (name -> canonical name) and new metadata objects.
      * @param {Function} onProgress - Optional callback for progressive updates (driverName, entries)
      * @returns {Promise<Object>} Driver index object
      */
@@ -54,41 +60,17 @@ class DataService {
         this.driverIndexPromise = (async () => {
             for (let attempt = 1; attempt <= maxAttempts; attempt++) {
                 try {
-                    const controller = new AbortController();
-                    const timeout = setTimeout(() => controller.abort(), 8000);
-                    const timestamp = new Date().getTime();
-                    const response = await fetch(`cache/driver_index.json?v=${timestamp}`, {
-                        cache: 'no-store',
-                        headers: {
-                            'Cache-Control': 'no-cache, no-store, must-revalidate',
-                            'Pragma': 'no-cache',
-                            'Expires': '0'
-                        },
-                        signal: controller.signal
-                    });
-                    clearTimeout(timeout);
-                    if (!response.ok) {
-                        throw new Error(`Failed to load driver index: ${response.status} ${response.statusText}`);
-                    }
-                    
-                    // Use streaming if onProgress callback is provided
-                    if (onProgress && typeof onProgress === 'function') {
-                        this.driverIndex = await this._streamParseDriverIndex(response, onProgress);
-                    } else {
-                        const text = await response.text();
-                        if (!text || text.trim().length === 0) {
-                            throw new Error('Driver index response is empty');
-                        }
-                        this.driverIndex = await this._parseJsonWhenIdle(text);
-                    }
+                    const mirrorData = await this._fetchDriverMirrorData();
+                    this.driverIndex = mirrorData;
                     
                     if (!this.driverIndex || typeof this.driverIndex !== 'object') {
-                        throw new Error('Driver index is not an object');
+                        throw new Error('Driver name mirror index is not an object');
                     }
                     const keyCount = Object.keys(this.driverIndex).length;
                     if (keyCount === 0) {
-                        throw new Error('Driver index is empty');
+                        throw new Error('Driver name mirror index is empty');
                     }
+                    this.driverNameMirror = this.driverIndex;
                     this._saveDriverIndexToCache(this.driverIndex);
                     // Update baseline and start periodic revalidation
                     setTimeout(() => { this._updateLastIndexFromStatus(); }, 0);
@@ -108,6 +90,197 @@ class DataService {
         })();
 
         return this.driverIndexPromise;
+    }
+
+    /**
+     * Resolve shard file key from normalized driver key
+     * @param {string} normalizedName - Lowercased/normalized driver key
+     * @returns {string} Shard key: a-z or _
+     */
+    _getShardKeyForName(normalizedName) {
+        if (!normalizedName || typeof normalizedName !== 'string') {
+            return '_';
+        }
+
+        const firstChar = normalizedName.trim().charAt(0).toLowerCase();
+        if (firstChar >= 'a' && firstChar <= 'z') {
+            return firstChar;
+        }
+        return '_';
+    }
+
+    _normalizeDriverLookupName(name) {
+        return String(name || '').trim().replace(/\s+/g, ' ').toLowerCase();
+    }
+
+    _extractDriverMirrorMetadata(mirrorKey, mirrorEntry) {
+        if (mirrorEntry && typeof mirrorEntry === 'object' && !Array.isArray(mirrorEntry)) {
+            const lookupKey = this._normalizeDriverLookupName(
+                mirrorEntry.lookup_key ||
+                mirrorEntry.lookupKey ||
+                mirrorEntry.canonical_key ||
+                mirrorEntry.canonicalKey ||
+                mirrorEntry.canonical_name ||
+                mirrorEntry.canonicalName ||
+                mirrorKey
+            );
+
+            return {
+                lookupKey: lookupKey || this._normalizeDriverLookupName(mirrorKey),
+                displayName: String(mirrorEntry.name || mirrorKey),
+                country: String(mirrorEntry.country || ''),
+                team: String(mirrorEntry.team || ''),
+                rank: String(mirrorEntry.rank || ''),
+                hasMetadata: true
+            };
+        }
+
+        return {
+            lookupKey: this._normalizeDriverLookupName(String(mirrorEntry || mirrorKey)),
+            displayName: String(mirrorEntry || mirrorKey),
+            country: '',
+            team: '',
+            rank: '',
+            hasMetadata: false
+        };
+    }
+
+    getDriverMetadata(driverName, driverMirror = null) {
+        const mirror = driverMirror || this.driverIndex || this.driverNameMirror;
+        if (!mirror || typeof mirror !== 'object') {
+            return null;
+        }
+
+        const normalizedName = this._normalizeDriverLookupName(driverName);
+        if (!normalizedName) {
+            return null;
+        }
+
+        const mirrorEntry = mirror[normalizedName] || mirror[String(driverName)] || null;
+        if (!mirrorEntry) {
+            return null;
+        }
+
+        return this._extractDriverMirrorMetadata(normalizedName, mirrorEntry);
+    }
+
+    /**
+     * Loads a single shard file with single-flight dedupe and in-memory caching
+     * @param {string} shardKey - a-z or _
+     * @returns {Promise<Object>} Shard object mapping normalized name -> entries[]
+     */
+    async _loadDriverShard(shardKey) {
+        const safeShardKey = (typeof shardKey === 'string' && shardKey.length > 0) ? shardKey : '_';
+
+        if (this.driverShardCache.has(safeShardKey)) {
+            return this.driverShardCache.get(safeShardKey);
+        }
+
+        if (this.driverShardPromises.has(safeShardKey)) {
+            return this.driverShardPromises.get(safeShardKey);
+        }
+
+        const shardPromise = (async () => {
+            const parsed = await this._fetchSingleDriverShard(safeShardKey);
+            this.driverShardCache.set(safeShardKey, parsed);
+            return parsed;
+        })();
+
+        this.driverShardPromises.set(safeShardKey, shardPromise);
+        try {
+            return await shardPromise;
+        } finally {
+            this.driverShardPromises.delete(safeShardKey);
+        }
+    }
+
+    async _fetchSingleDriverShard(shardKey) {
+        const maxAttempts = 6;
+        const baseDelayMs = 200;
+
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 8000);
+                const timestamp = Date.now();
+                const response = await fetch(`${this.driverShardBasePath}/${shardKey}.json.gz?v=${timestamp}`, {
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    },
+                    signal: controller.signal
+                });
+                clearTimeout(timeout);
+
+                if (!response.ok) {
+                    throw new Error(`Failed to load shard ${shardKey}: ${response.status} ${response.statusText}`);
+                }
+
+                if (typeof DecompressionStream === 'undefined') {
+                    throw new Error('DecompressionStream is not supported in this browser. Please use a modern browser.');
+                }
+
+                const decompressedStream = response.body.pipeThrough(new DecompressionStream('gzip'));
+                const decompressedResponse = new Response(decompressedStream);
+                const text = await decompressedResponse.text();
+                if (!text || text.trim().length === 0) {
+                    throw new Error(`Shard ${shardKey} response is empty`);
+                }
+
+                const parsed = await this._parseJsonWhenIdle(text);
+                if (!parsed || typeof parsed !== 'object') {
+                    throw new Error(`Shard ${shardKey} is not an object`);
+                }
+
+                return parsed;
+            } catch (error) {
+                const delay = baseDelayMs * Math.min(20, attempt);
+                if (attempt === maxAttempts) {
+                    throw error;
+                }
+                await new Promise(r => setTimeout(r, delay));
+            }
+        }
+
+        throw new Error(`Failed to load shard ${shardKey}`);
+    }
+
+    async _fetchDriverMirrorData() {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
+        const response = await fetch(`${this.driverMirrorPath}?v=${Date.now()}`, {
+            cache: 'no-store',
+            headers: {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+            },
+            signal: controller.signal
+        });
+        clearTimeout(timeout);
+
+        if (!response.ok) {
+            throw new Error(`Failed to load driver index: ${response.status} ${response.statusText}`);
+        }
+
+        if (typeof DecompressionStream === 'undefined') {
+            throw new Error('DecompressionStream is not supported in this browser. Please use a modern browser.');
+        }
+
+        const decompressedStream = response.body.pipeThrough(new DecompressionStream('gzip'));
+        const text = await new Response(decompressedStream).text();
+        if (!text || text.trim().length === 0) {
+            throw new Error('Driver name mirror response is empty');
+        }
+
+        const parsed = await this._parseJsonWhenIdle(text);
+        if (!parsed || typeof parsed !== 'object' || Object.keys(parsed).length === 0) {
+            throw new Error('Driver name mirror index is invalid');
+        }
+
+        return parsed;
     }
 
     /**
@@ -224,7 +397,7 @@ class DataService {
      * @returns {Promise<Object>} Leaderboard data
      */
     async fetchLeaderboardDetails(trackId, classId) {
-        const filePath = `cache/track_${trackId}/class_${classId}.json.gz`;
+        const filePath = `cache/tracks/track_${trackId}/class_${classId}.json.gz`;
         
         const timestamp = new Date().getTime();
         const response = await fetch(`${filePath}?v=${timestamp}`, {
@@ -346,9 +519,9 @@ class DataService {
      * @returns {Promise<Array>} Search results
      */
     async searchDriver(driverName, filters = {}) {
-        const driverIndex = await this.waitForDriverIndex();
-        
-        if (!driverIndex || Object.keys(driverIndex).length === 0) {
+        const driverMirror = await this.waitForDriverIndex();
+
+        if (!driverMirror || Object.keys(driverMirror).length === 0) {
             throw new Error('Driver index is loading or unavailable. Please try again in a moment.');
         }
         
@@ -364,9 +537,11 @@ class DataService {
         
         const searchLower = searchTerm.toLowerCase();
         const results = [];
-        
-        for (const [driverKey, driverEntries] of Object.entries(driverIndex)) {
-            const driverLower = driverKey.toLowerCase();
+
+        for (const [mirrorKey, mirrorEntry] of Object.entries(driverMirror)) {
+            const mirrorMeta = this._extractDriverMirrorMetadata(mirrorKey, mirrorEntry);
+            const searchTarget = mirrorMeta.displayName || mirrorKey;
+            const driverLower = this._normalizeDriverLookupName(searchTarget);
             let matches = false;
             
             if (isExactSearch) {
@@ -375,13 +550,13 @@ class DataService {
                 if (words.length === 1) {
                     // Single word: match as whole word using word boundary
                     const wordRegex = new RegExp(`\\b${words[0].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
-                    matches = wordRegex.test(driverKey);
+                    matches = wordRegex.test(searchTarget);
                 } else {
                     // Multiple words: each word must be complete, in order, with any amount of space between
                     const escapedWords = words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
                     const pattern = escapedWords.map(w => `\\b${w}\\b`).join('\\s+');
                     const phraseRegex = new RegExp(pattern, 'i');
-                    matches = phraseRegex.test(driverKey);
+                    matches = phraseRegex.test(searchTarget);
                 }
             } else {
                 // Partial matching (current behavior)
@@ -392,6 +567,14 @@ class DataService {
                 continue;
             }
             
+            const shardKey = this._getShardKeyForName(mirrorKey);
+            const shardData = await this._loadDriverShard(shardKey);
+            const normalizedLookupName = mirrorMeta.lookupKey || this._normalizeDriverLookupName(mirrorKey);
+            const driverEntries = shardData[normalizedLookupName] || shardData[mirrorKey] || shardData[this._normalizeDriverLookupName(searchTarget)] || [];
+            if (!Array.isArray(driverEntries) || driverEntries.length === 0) {
+                continue;
+            }
+
             let filteredEntries = driverEntries;
 
             // Apply track filter
@@ -447,7 +630,34 @@ class DataService {
             }
             
             if (filteredEntries.length > 0) {
-                // Group entries by country and team to handle drivers with same name from different countries/teams
+                if (mirrorMeta.hasMetadata) {
+                    const enrichedEntries = filteredEntries.map(entry => {
+                        const enrichedEntry = { ...entry };
+                        if (mirrorMeta.country) {
+                            enrichedEntry.country = mirrorMeta.country;
+                            enrichedEntry.Country = mirrorMeta.country;
+                        }
+                        enrichedEntry.team = mirrorMeta.team;
+                        enrichedEntry.Team = mirrorMeta.team;
+                        enrichedEntry.rank = mirrorMeta.rank;
+                        enrichedEntry.Rank = mirrorMeta.rank;
+                        if (mirrorMeta.displayName && !enrichedEntry.name && !enrichedEntry.Name) {
+                            enrichedEntry.name = mirrorMeta.displayName;
+                        }
+                        return enrichedEntry;
+                    });
+
+                    results.push({
+                        driver: mirrorMeta.displayName || driverEntries[0].name || mirrorKey,
+                        country: mirrorMeta.country || '-',
+                        team: mirrorMeta.team || '',
+                        rank: mirrorMeta.rank || '',
+                        entries: enrichedEntries
+                    });
+                    continue;
+                }
+
+                // Legacy fallback: group entries by country and team when metadata is not in the mirror.
                 const entriesByCountryAndTeam = new Map();
                 filteredEntries.forEach(entry => {
                     const country = entry.country || entry.Country || '-';
@@ -457,22 +667,20 @@ class DataService {
                         entriesByCountryAndTeam.set(groupKey, {
                             country: country,
                             team: team,
+                            rank: entry.rank || entry.Rank || '',
                             entries: []
                         });
                     }
                     entriesByCountryAndTeam.get(groupKey).entries.push(entry);
                 });
                 
-                // Create a result for each country/team combination
                 entriesByCountryAndTeam.forEach((groupData) => {
-                    // Note: date_time enhancement removed - it was causing major performance issues
-                    // by fetching cache files for every entry. The date_time field should be added
-                    // to the driver_index.json on the server side instead.
-                    const driverName = driverEntries[0].name || driverKey;
+                    const driverName = driverEntries[0].name || mirrorMeta.displayName || mirrorKey;
                     results.push({
                         driver: driverName,
                         country: groupData.country,
                         team: groupData.team,
+                        rank: groupData.rank,
                         entries: groupData.entries
                     });
                 });
@@ -556,27 +764,14 @@ class DataService {
             const baseDelayMs = 250;
             for (let attempt = 1; attempt <= maxAttempts; attempt++) {
                 try {
-                    const controller = new AbortController();
-                    const timeout = setTimeout(() => controller.abort(), 8000);
-                    const timestamp = new Date().getTime();
-                    const response = await fetch(`cache/driver_index.json?v=${timestamp}`, {
-                        cache: 'no-store',
-                        headers: {
-                            'Cache-Control': 'no-cache, no-store, must-revalidate',
-                            'Pragma': 'no-cache',
-                            'Expires': '0'
-                        },
-                        signal: controller.signal
-                    });
-                    clearTimeout(timeout);
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    const text = await response.text();
-                    if (!text || text.trim().length === 0) throw new Error('Empty response');
-                    const parsed = await this._parseJsonWhenIdle(text);
+                    const parsed = await this._fetchDriverMirrorData();
                     if (!parsed || typeof parsed !== 'object' || Object.keys(parsed).length === 0) {
                         throw new Error('Invalid index');
                     }
                     this.driverIndex = parsed;
+                    this.driverNameMirror = parsed;
+                    this.driverShardCache.clear();
+                    this.driverShardPromises.clear();
                     this._saveDriverIndexToCache(parsed);
                     // After refresh, also update baseline status timestamp
                     setTimeout(() => { this._updateLastIndexFromStatus(); }, 0);

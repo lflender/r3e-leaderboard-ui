@@ -33,13 +33,14 @@
     <script src="modules/analytics.js?v=1"></script>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     
-    <link rel="stylesheet" href="style.css?v=25">
+    <link rel="stylesheet" href="style.css?v=32">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"/>
     <!-- Site Icons -->
     <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png?v=3">
     <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png?v=3">
     <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png?v=3">
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico?v=3">
+
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -116,6 +117,7 @@
             <button class="tab-button active" data-tab="leaderboards">Driver Info</button>
             <a class="tab-button" href="tracks.html">Track Info</a>
             <a class="tab-button" href="cars.html">Car Info</a>
+            <a class="tab-button" href="stats.html">Driver Stats</a>
             <a class="tab-button" href="faq.html">FAQ</a>
         </div>
 
@@ -144,6 +146,7 @@
                         <div class="custom-select__menu" role="presentation" hidden></div>
                     </div>
                 </div>
+                <div id="hall-of-fame-container"></div>
                 <div id="results-container"></div>
             </div>
         </div>
@@ -211,7 +214,9 @@
     <script src="data/tracks.js?v=3" defer></script>
     
     <!-- Feature modules -->
-    <script src="modules/daily-races.js?v=14" defer></script>
+    <script src="modules/stats-data.js?v=1" defer></script>
+    <script src="modules/hall-of-fame.js?v=1" defer></script>
+    <script src="modules/daily-races.js?v=16" defer></script>
     <script src="modules/driver-search.js?v=11" defer></script>
     <script src="modules/navigation.js?v=2" defer></script>
     <script src="modules/status-display.js?v=3" defer></script>

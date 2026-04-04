@@ -1,0 +1,16 @@
+{
+  "name": "r3e-leaderboard-ui",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Frontend for r3e-leaderboard-ui",
+  "scripts": {
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^3.2.4",
+    "jsdom": "^26.1.0",
+    "vitest": "^3.2.4"
+  }
+}

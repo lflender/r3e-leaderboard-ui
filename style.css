@@ -2388,6 +2388,205 @@ span.driver-name-top10-glitter::after {
 }
 
 /* ========================================
+   HALL OF FAME SECTION
+   ======================================== */
+
+.hall-of-fame-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    margin-top: 2rem;
+}
+
+.hall-of-fame-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: linear-gradient(145deg, rgba(59, 130, 246, 0.1), rgba(30, 41, 59, 0.95));
+    padding: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.hall-of-fame-link:hover .hall-of-fame-card {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
+    transform: translateY(-1px);
+}
+
+.hall-of-fame-header {
+    text-align: center;
+    margin-bottom: 0.85rem;
+}
+
+.hall-of-fame-header h3 {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    margin-bottom: 0.2rem;
+}
+
+.hall-of-fame-header p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.hall-of-fame-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.hall-of-fame-column h4 {
+    color: var(--primary-color);
+    font-size: 0.95rem;
+    margin-bottom: 0.55rem;
+    text-align: center;
+}
+
+.hall-of-fame-column ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.hall-of-fame-item,
+.hall-of-fame-empty {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.45rem 0.55rem;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 8px;
+    background: rgba(15, 23, 42, 0.55);
+    color: var(--text-primary);
+    margin-bottom: 0.4rem;
+    font-size: 0.88rem;
+}
+
+.hall-of-fame-empty {
+    display: block;
+    text-align: center;
+    color: var(--text-secondary);
+    margin-bottom: 0;
+}
+
+.hall-of-fame-rank {
+    color: var(--primary-color);
+    font-weight: 700;
+    min-width: 1.25rem;
+}
+
+.hall-of-fame-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hall-of-fame-value {
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    white-space: nowrap;
+}
+
+/* ========================================
+   STATS PAGE
+   ======================================== */
+
+#stats-panel {
+    max-width: 1250px;
+    margin: 0 auto;
+}
+
+#stats-search-container {
+    justify-content: center;
+}
+
+#stats-class-filter-ui {
+    width: 50%;
+    min-width: 260px;
+    max-width: 540px;
+    margin: 0 auto;
+}
+
+#stats-tables {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.stats-box {
+    min-width: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) var(--surface);
+    padding: 2px;
+}
+
+.stats-box::-webkit-scrollbar { height: 6px; }
+.stats-box::-webkit-scrollbar-track { background: var(--surface); }
+.stats-box::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 4px; }
+
+.stats-box h2 {
+    font-size: 1.05rem;
+    margin-bottom: 0.75rem;
+    color: var(--text-primary);
+    text-align: center;
+}
+
+.stats-table {
+    table-layout: auto;
+    width: 100%;
+    min-width: 220px;
+}
+
+.stats-table .stats-pos-th,
+.stats-table .pos-cell {
+    width: 2.8rem;
+    white-space: nowrap;
+    padding-right: 0.4rem;
+}
+
+.stats-table th:last-child {
+    width: 1%;
+    white-space: nowrap;
+    text-align: right;
+    padding-right: 0.35rem;
+    padding-left: 0.35rem;
+}
+
+.stats-table td.stats-value-cell {
+    width: 1%;
+    white-space: nowrap;
+    text-align: right;
+    padding-right: 0.35rem;
+    padding-left: 0.35rem;
+}
+
+.stats-driver-cell {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.stats-table a {
+    color: var(--text-primary);
+    text-decoration: none;
+}
+
+.stats-table a:hover {
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.stats-empty {
+    color: var(--text-secondary);
+    padding: 1rem;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    background: rgba(148, 163, 184, 0.06);
+}
+
+/* ========================================
    DAILY RACES SECTION
    ======================================== */
 
@@ -3237,6 +3436,10 @@ footer {
         grid-template-columns: 1fr;
         max-width: none;
     }
+
+    .hall-of-fame-grid {
+        grid-template-columns: 1fr;
+    }
     
     .daily-race-card {
         padding: 1rem;
@@ -3303,6 +3506,77 @@ footer {
     .faq-title {
         font-size: 1.4rem;
         margin-bottom: 0.6rem;
+    }
+}
+
+@media (max-width: 900px) {
+    #stats-tables {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-box h2 {
+        font-size: 0.95rem;
+    }
+
+    .stats-table {
+        min-width: 0;
+        table-layout: fixed;
+    }
+}
+
+@media (max-width: 640px) {
+    #stats-class-filter-ui {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .stats-box h2 {
+        font-size: 0.88rem;
+    }
+
+    .stats-table th,
+    .stats-table td {
+        padding: 0.5rem 0.3rem;
+        font-size: 0.68rem;
+    }
+
+    .stats-table th {
+        font-size: 0.72rem;
+    }
+
+    .stats-table .stats-pos-th,
+    .stats-table .pos-cell {
+        width: 2.35rem;
+        padding-right: 0.2rem;
+    }
+
+    .stats-table th:last-child,
+    .stats-table td.stats-value-cell {
+        width: 3.2rem;
+        padding-left: 0.2rem;
+        padding-right: 0.2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-table th,
+    .stats-table td {
+        padding: 0.45rem 0.22rem;
+        font-size: 0.64rem;
+    }
+
+    .stats-table th {
+        font-size: 0.68rem;
+    }
+
+    .stats-table .stats-pos-th,
+    .stats-table .pos-cell {
+        width: 2.1rem;
+    }
+
+    .stats-table th:last-child,
+    .stats-table td.stats-value-cell {
+        width: 2.9rem;
     }
 }
 

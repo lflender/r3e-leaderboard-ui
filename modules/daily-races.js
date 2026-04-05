@@ -65,15 +65,19 @@ class DailyRaces {
     async loadDailyRaces() {
         try {
             const timestamp = new Date().getTime();
-            const response = await fetch(`cache/daily_races.json?v=${timestamp}`, {
+            const response = await fetch(`cache/daily_races.json.gz?v=${timestamp}`, {
                 cache: 'no-store'
             });
             
             if (!response.ok) {
                 throw new Error(`Failed to load daily races: ${response.status}`);
             }
-            
-            this.dailyRacesData = await response.json();
+
+            if (!window.CompressedJsonHelper || typeof window.CompressedJsonHelper.readGzipJson !== 'function') {
+                throw new Error('CompressedJsonHelper is not loaded.');
+            }
+
+            this.dailyRacesData = await window.CompressedJsonHelper.readGzipJson(response);
             return this.dailyRacesData;
         } catch (error) {
             console.error('Error loading daily races:', error);

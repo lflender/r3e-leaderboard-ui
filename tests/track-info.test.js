@@ -51,17 +51,34 @@ beforeEach(() => {
     window.CustomSelect = class {
         constructor(_id, _options, _onChange) {}
     };
+
+    global.Response = class Response {
+        constructor(value) {
+            this.value = value;
+        }
+
+        async text() {
+            return this.value;
+        }
+    };
+
+    global.DecompressionStream = class DecompressionStream {
+        constructor() {}
+    };
 });
 
 describe('track-info integration', () => {
     it('renders rows from top combinations payload', async () => {
         global.fetch = vi.fn().mockResolvedValueOnce({
             ok: true,
-            json: async () => ([
-                { track_id: 10, class_name: 'GT3', entry_count: 321 }
-            ])
+            body: {
+                pipeThrough: vi.fn().mockReturnValue(JSON.stringify([
+                    { track_id: 10, class_name: 'GT3', entry_count: 321 }
+                ]))
+            }
         });
 
+        loadBrowserScript('modules/compressed-json-helper.js');
         loadBrowserScript('modules/track-info.js');
         await new Promise(resolve => setTimeout(resolve, 20));
 
@@ -75,9 +92,12 @@ describe('track-info integration', () => {
     it('shows no-results state when payload is empty', async () => {
         global.fetch = vi.fn().mockResolvedValueOnce({
             ok: true,
-            json: async () => ([])
+            body: {
+                pipeThrough: vi.fn().mockReturnValue(JSON.stringify([]))
+            }
         });
 
+        loadBrowserScript('modules/compressed-json-helper.js');
         loadBrowserScript('modules/track-info.js');
         await new Promise(resolve => setTimeout(resolve, 20));
 

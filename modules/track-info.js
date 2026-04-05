@@ -138,10 +138,10 @@
   }
 
   async function decompressGzipToJson(resp) {
-    const stream = resp.body.pipeThrough(new DecompressionStream('gzip'));
-    const dec = new Response(stream);
-    const text = await dec.text();
-    return JSON.parse(text);
+    if (!window.CompressedJsonHelper || typeof window.CompressedJsonHelper.readGzipJson !== 'function') {
+      throw new Error('CompressedJsonHelper is not loaded.');
+    }
+    return window.CompressedJsonHelper.readGzipJson(resp);
   }
   function resolveTrackLabel(trackId, fallback = '') {
     if (window.R3EUtils && typeof window.R3EUtils.resolveTrackLabel === 'function') {
@@ -409,9 +409,7 @@
           cache: 'no-store'
         });
         if (!resp.ok) throw new Error('HTTP ' + resp.status);
-        const stream = resp.body.pipeThrough(new DecompressionStream('gzip'));
-        const text = await new Response(stream).text();
-        const data = JSON.parse(text);
+        const data = await decompressGzipToJson(resp);
         let combinations = [];
         if (Array.isArray(data)) {
           combinations = data;
@@ -434,7 +432,7 @@
   }
 
   // Fetch data from local cache
-  // Without filters: use top_combinations.json (1000 entries, fast)
+  // Without filters: use top_combinations.json.gz (1000 entries, fast)
   // With filters: use all_combinations.json.gz (all entries, with single-flight caching for concurrent access)
   async function fetchTopCombinations() {
     try {
@@ -447,12 +445,12 @@
       if (activeTrackId || activeClassId) {
         combinations = await loadAllCombinations();
       } else {
-        // No filters: use legacy top_combinations.json for speed (1000 cap is intentional for default view)
-        const resp = await fetch(`cache/top_combinations.json?v=${timestamp}`, {
+        // No filters: use legacy top_combinations.json.gz for speed (1000 cap is intentional for default view)
+        const resp = await fetch(`cache/top_combinations.json.gz?v=${timestamp}`, {
           cache: 'no-store'
         });
         if (!resp.ok) throw new Error('HTTP ' + resp.status);
-        const data = await resp.json();
+        const data = await decompressGzipToJson(resp);
         if (Array.isArray(data)) {
           combinations = data;
         } else if (data && Array.isArray(data.results)) {

@@ -25,6 +25,13 @@ class DataService {
         this.lastIndexUpdate = null;
         this.indexRevalidatorStarted = false;
     }
+
+    _getCompressedJsonHelper() {
+        if (!window.CompressedJsonHelper) {
+            throw new Error('CompressedJsonHelper is not loaded.');
+        }
+        return window.CompressedJsonHelper;
+    }
     
     /**
      * Loads driver mirror index with caching.
@@ -218,13 +225,8 @@ class DataService {
                     throw new Error(`Failed to load shard ${shardKey}: ${response.status} ${response.statusText}`);
                 }
 
-                if (typeof DecompressionStream === 'undefined') {
-                    throw new Error('DecompressionStream is not supported in this browser. Please use a modern browser.');
-                }
-
-                const decompressedStream = response.body.pipeThrough(new DecompressionStream('gzip'));
-                const decompressedResponse = new Response(decompressedStream);
-                const text = await decompressedResponse.text();
+                const helper = this._getCompressedJsonHelper();
+                const text = await helper.readGzipText(response);
                 if (!text || text.trim().length === 0) {
                     throw new Error(`Shard ${shardKey} response is empty`);
                 }
@@ -265,12 +267,8 @@ class DataService {
             throw new Error(`Failed to load driver index: ${response.status} ${response.statusText}`);
         }
 
-        if (typeof DecompressionStream === 'undefined') {
-            throw new Error('DecompressionStream is not supported in this browser. Please use a modern browser.');
-        }
-
-        const decompressedStream = response.body.pipeThrough(new DecompressionStream('gzip'));
-        const text = await new Response(decompressedStream).text();
+        const helper = this._getCompressedJsonHelper();
+        const text = await helper.readGzipText(response);
         if (!text || text.trim().length === 0) {
             throw new Error('Driver name mirror response is empty');
         }
@@ -408,17 +406,8 @@ class DataService {
             throw new Error(`Failed to load data: ${response.status} ${response.statusText}`);
         }
         
-        // Check if DecompressionStream is available
-        if (typeof DecompressionStream === 'undefined') {
-            throw new Error('DecompressionStream is not supported in this browser. Please use a modern browser.');
-        }
-        
-        // Decompress the gzipped response
-        const decompressedStream = response.body.pipeThrough(new DecompressionStream('gzip'));
-        const decompressedResponse = new Response(decompressedStream);
-        const text = await decompressedResponse.text();
-        
-        return JSON.parse(text);
+        const helper = this._getCompressedJsonHelper();
+        return helper.readGzipJson(response);
     }
     
     /**
@@ -427,15 +416,16 @@ class DataService {
      */
     async fetchTopCombinations() {
         const timestamp = new Date().getTime();
-        const response = await fetch(`cache/top_combinations.json?v=${timestamp}`, {
+        const response = await fetch(`cache/top_combinations.json.gz?v=${timestamp}`, {
             cache: 'no-store'
         });
         
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }
-        
-        const data = await response.json();
+
+        const helper = this._getCompressedJsonHelper();
+        const data = await helper.readGzipJson(response);
         
         let combinations = [];
         if (Array.isArray(data)) {

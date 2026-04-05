@@ -382,8 +382,10 @@ class DriverSearch {
      * @param {number} searchId - Search request ID to verify this is the latest search
      */
     async displayResults(data, searchId) {
+        const activeSearchId = typeof searchId === 'number' ? searchId : this.currentSearchId;
+
         // Discard results if a newer search has started
-        if (searchId !== this.currentSearchId) {
+        if (activeSearchId !== this.currentSearchId) {
             return;
         }
         

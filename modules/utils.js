@@ -306,6 +306,41 @@ function updateUrlParam(paramName, value) {
         // ignore URL update errors
     }
 }
+
+let cachedTrackDataRef = null;
+let cachedTrackLabelMap = new Map();
+
+function getTrackLabelMap() {
+    const tracks = Array.isArray(window.TRACKS_DATA) ? window.TRACKS_DATA : [];
+    if (tracks !== cachedTrackDataRef) {
+        cachedTrackDataRef = tracks;
+        cachedTrackLabelMap = new Map();
+        tracks.forEach(track => {
+            if (!track || track.id === undefined || track.id === null) return;
+            cachedTrackLabelMap.set(String(track.id), String(track.label || track.name || track.id));
+        });
+    }
+    return cachedTrackLabelMap;
+}
+
+function resolveTrackLabel(trackId, fallback = '') {
+    if (trackId === undefined || trackId === null || trackId === '') {
+        return fallback ? String(fallback) : '';
+    }
+
+    const label = getTrackLabelMap().get(String(trackId));
+    if (label) {
+        return label;
+    }
+
+    return fallback ? String(fallback) : String(trackId);
+}
+
+function resolveTrackLabelForItem(item, fallback = '') {
+    const trackId = item?.track_id || item?.TrackID || item?.trackId || item?.['Track ID'] || '';
+    const fallbackLabel = fallback || item?.track_name || item?.TrackName || item?.track || item?.Track || '';
+    return resolveTrackLabel(trackId, fallbackLabel);
+}
 /**
  * Formats a date string from ISO format to "DD MMM YYYY" format
  * @param {string} dateTimeString - ISO date string (e.g., "2025-10-06T19:15:20")
@@ -425,6 +460,9 @@ window.R3EUtils = {
     getPositionBadgeColor,
     getUrlParam,
     updateUrlParam,
+    getTrackLabelMap,
+    resolveTrackLabel,
+    resolveTrackLabelForItem,
     formatDate,
     splitCarName
 };

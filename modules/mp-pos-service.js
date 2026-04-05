@@ -8,7 +8,7 @@ let mpPosCache = null;
 let mpPosCachePromise = null;
 
 /**
- * Load MP position cache from cache/mp_pos.json
+ * Load MP position cache from cache/mp_pos.json.gz
  * Uses single-flight pattern to prevent concurrent fetches
  * Creates a dual-index cache structure:
  * - byName: name -> position (for backward compatibility)
@@ -24,9 +24,12 @@ async function loadMpPosCache() {
     
     mpPosCachePromise = (async () => {
         try {
-            const response = await fetch('cache/mp_pos.json');
-            if (!response.ok) throw new Error('Failed to load mp_pos.json');
-            const data = await response.json();
+            const response = await fetch(`cache/mp_pos.json.gz?v=${Date.now()}`, { cache: 'no-store' });
+            if (!response.ok) throw new Error('Failed to load mp_pos.json.gz');
+            if (!window.CompressedJsonHelper || typeof window.CompressedJsonHelper.readGzipJson !== 'function') {
+                throw new Error('CompressedJsonHelper is not loaded.');
+            }
+            const data = await window.CompressedJsonHelper.readGzipJson(response);
             
             // Create dual-index cache structure
             mpPosCache = {

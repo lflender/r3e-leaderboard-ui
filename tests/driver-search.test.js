@@ -20,8 +20,8 @@ beforeAll(() => {
         constructor(_id, _options, _cb) {}
     };
     window.tableRenderer = {
-        filterAndSortKeys: keys => keys,
-        renderDriverGroupedTable: () => '<table><tbody><tr><td>ok</td></tr></tbody></table>'
+        filterAndSortKeys: vi.fn(keys => keys),
+        renderDriverGroupedTable: vi.fn(() => '<table><tbody><tr><td>ok</td></tr></tbody></table>')
     };
     window.TemplateHelper = {
         showLoading: vi.fn(async (container, message = 'Loading...') => {
@@ -48,9 +48,13 @@ beforeAll(() => {
 
 beforeEach(() => {
     document.body.innerHTML = buildDom();
+    window.localStorage.clear();
     window.R3EUtils.updateUrlParam.mockClear();
     window.dataService.searchDriver.mockReset();
     window.dataService.searchDriver.mockResolvedValue([]);
+    window.tableRenderer.filterAndSortKeys.mockClear();
+    window.tableRenderer.renderDriverGroupedTable.mockClear();
+    delete window.ColumnConfig;
 });
 
 describe('driver-search integration', () => {
@@ -90,5 +94,64 @@ describe('driver-search integration', () => {
             className: ''
         });
         expect(ds.lastSearchTerm).toBe('Alice');
+    });
+
+    it('re-renders current results when a sort header changes', async () => {
+        const ds = new window.driverSearch.constructor();
+        ds.currentSearchId = 1;
+        ds.allResults = [{
+            driver: 'Alice',
+            entries: [{ position: '1', lap_time: '1:30.000', track: 'Spa', car_class: 'GT3' }]
+        }];
+
+        await ds.sortDriverGroups('position');
+
+        expect(window.tableRenderer.renderDriverGroupedTable).toHaveBeenCalledTimes(1);
+        expect(window.tableRenderer.renderDriverGroupedTable).toHaveBeenLastCalledWith(
+            ds.allResults,
+            ['position', 'lap_time', 'track', 'car_class'],
+            'position'
+        );
+    });
+
+    it('re-renders current results when pagination changes', async () => {
+        const ds = new window.driverSearch.constructor();
+        ds.currentSearchId = 2;
+        ds.itemsPerPage = 1;
+        ds.allResults = [
+            { driver: 'Alice', entries: [{ position: '1', lap_time: '1:30.000', track: 'Spa', car_class: 'GT3' }] },
+            { driver: 'Bob', entries: [{ position: '2', lap_time: '1:31.000', track: 'Monza', car_class: 'GT3' }] }
+        ];
+        document.getElementById('results-container').scrollIntoView = vi.fn();
+
+        await ds.goToPage(2);
+
+        expect(window.tableRenderer.renderDriverGroupedTable).toHaveBeenCalledTimes(1);
+        expect(window.tableRenderer.renderDriverGroupedTable).toHaveBeenLastCalledWith(
+            [ds.allResults[1]],
+            ['position', 'lap_time', 'track', 'car_class'],
+            'gap'
+        );
+    });
+
+    it('adds a synthetic track column when results only contain track_id', async () => {
+        window.ColumnConfig = {
+            getOrderedColumns: vi.fn(keys => keys),
+            isColumnType: vi.fn((key, type) => type === 'TRACK' && ['Track', 'track', 'TrackName', 'track_name'].includes(key))
+        };
+
+        const ds = new window.driverSearch.constructor();
+        ds.currentSearchId = 3;
+        ds.allResults = [{
+            driver: 'Alice',
+            entries: [{ position: '1', lap_time: '1:30.000', track_id: '10', car_class: 'GT3' }]
+        }];
+
+        await ds.displayResults(ds.allResults);
+
+        expect(window.ColumnConfig.getOrderedColumns).toHaveBeenCalledWith(
+            ['position', 'lap_time', 'track_id', 'car_class', 'track'],
+            { addSynthetic: true }
+        );
     });
 });

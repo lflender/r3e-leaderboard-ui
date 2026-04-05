@@ -138,15 +138,26 @@
   }
 
   async function decompressGzipToJson(resp) {
-    const stream = resp.body.pipeThrough(new DecompressionStream('gzip'));
-    const dec = new Response(stream);
-    const text = await dec.text();
-    return JSON.parse(text);
+    if (!window.CompressedJsonHelper || typeof window.CompressedJsonHelper.readGzipJson !== 'function') {
+      throw new Error('CompressedJsonHelper is not loaded.');
+    }
+    return window.CompressedJsonHelper.readGzipJson(resp);
+  }
+  function resolveTrackLabel(trackId, fallback = '') {
+    if (window.R3EUtils && typeof window.R3EUtils.resolveTrackLabel === 'function') {
+      return window.R3EUtils.resolveTrackLabel(trackId, fallback);
+    }
+    return fallback ? String(fallback) : String(trackId || '');
   }
 
-  // Build static track label lookup
-  function buildTrackLabelMap(){ const m = new Map(); TRACKS.forEach(t=> m.set(String(t.id), t.label)); return m; }
-  const TRACK_LABELS = buildTrackLabelMap();
+  function resolveTrackLabelForItem(item, fallback = '') {
+    if (window.R3EUtils && typeof window.R3EUtils.resolveTrackLabelForItem === 'function') {
+      return window.R3EUtils.resolveTrackLabelForItem(item, fallback);
+    }
+
+    const tid = item?.track_id || item?.TrackID || item?.trackId || item?.['Track ID'] || '';
+    return resolveTrackLabel(tid, fallback || item?.track || item?.Track || item?.track_name || item?.TrackName || '');
+  }
 
   async function aggregatePerTrackForClass(selectedClassId, classNameFallback){
     const idx = await loadDriverIndexLocal();
@@ -168,7 +179,6 @@
     const rows = [];
     perTrack.forEach((count, key)=>{
       rows.push({
-        track: TRACK_LABELS.get(key) || key,
         track_id: Number(key),
         class_id: Number(selectedClassId),
         class_name: classNameFallback || String(selectedClassId),
@@ -215,7 +225,6 @@
     const rows = [];
     perTrack.forEach((count, key) => {
       rows.push({
-        track: TRACK_LABELS.get(key) || key,
         track_id: Number(key),
         superclass: superclassName,
         entry_count: count
@@ -260,7 +269,6 @@
     const rows = [];
     perClass.forEach((data, key)=>{
       rows.push({
-        track: TRACK_LABELS.get(String(selectedTrackId)) || String(selectedTrackId),
         track_id: Number(selectedTrackId),
         class_id: Number(data.id),
         class_name: data.name,
@@ -401,9 +409,7 @@
           cache: 'no-store'
         });
         if (!resp.ok) throw new Error('HTTP ' + resp.status);
-        const stream = resp.body.pipeThrough(new DecompressionStream('gzip'));
-        const text = await new Response(stream).text();
-        const data = JSON.parse(text);
+        const data = await decompressGzipToJson(resp);
         let combinations = [];
         if (Array.isArray(data)) {
           combinations = data;
@@ -426,7 +432,7 @@
   }
 
   // Fetch data from local cache
-  // Without filters: use top_combinations.json (1000 entries, fast)
+  // Without filters: use top_combinations.json.gz (1000 entries, fast)
   // With filters: use all_combinations.json.gz (all entries, with single-flight caching for concurrent access)
   async function fetchTopCombinations() {
     try {
@@ -439,12 +445,12 @@
       if (activeTrackId || activeClassId) {
         combinations = await loadAllCombinations();
       } else {
-        // No filters: use legacy top_combinations.json for speed (1000 cap is intentional for default view)
-        const resp = await fetch(`cache/top_combinations.json?v=${timestamp}`, {
+        // No filters: use legacy top_combinations.json.gz for speed (1000 cap is intentional for default view)
+        const resp = await fetch(`cache/top_combinations.json.gz?v=${timestamp}`, {
           cache: 'no-store'
         });
         if (!resp.ok) throw new Error('HTTP ' + resp.status);
-        const data = await resp.json();
+        const data = await decompressGzipToJson(resp);
         if (Array.isArray(data)) {
           combinations = data;
         } else if (data && Array.isArray(data.results)) {
@@ -503,8 +509,8 @@
         if (countDiff !== 0) return countDiff;
 
         // Secondary sort: track name alphabetically
-        const trackA = String(a.track || a.Track || a.track_name || a.TrackName || '');
-        const trackB = String(b.track || b.Track || b.track_name || b.TrackName || '');
+        const trackA = resolveTrackLabelForItem(a);
+        const trackB = resolveTrackLabelForItem(b);
         return trackA.localeCompare(trackB);
       });
 
@@ -543,6 +549,8 @@
 
     // Determine keys from first item and ensure Car Class column exists
     let keys = pageItems.length > 0 ? Object.keys(pageItems[0]) : [];
+    const hasTrackId = keys.some(k => ['track_id','TrackID','trackId','Track ID'].includes(k));
+    const hasTrackColumn = keys.some(k => ['Track','track','TrackName','track_name'].includes(k));
     // Keep 'class_name' so we can display it when backend returns it.
     let excludeColumns = ['ClassID','TrackID','class_id','track_id','Name','name','DriverName','driver_name','Country','country','Rank','rank','Team','team','time_diff','timeDiff','timeDifference'];
     
@@ -552,6 +560,10 @@
     }
     
     keys = keys.filter(k => !excludeColumns.includes(k));
+
+    if (hasTrackId && !hasTrackColumn) {
+      keys.unshift('track');
+    }
 
     // Ensure a `Car Class` column is present (normalize various field names) - but NOT in combine mode
     if (!combineMode) {
@@ -598,7 +610,7 @@
 
     pageItems.forEach(item => {
       // derive IDs and pos for data attributes
-      const trackIdVal = item.track_id || item.TrackID || item.trackId || item.track || item.Track || '';
+      const trackIdVal = item.track_id || item.TrackID || item.trackId || '';
       const classIdVal = item.class_id || item.ClassID || item.classId || item.class || item.class_name || item.className || item.ClassName || '';
       const superclassVal = item.superclass || ''; // For combined mode
       const posVal = item.position || item.Position || item.Pos || item.rank || '';
@@ -630,7 +642,7 @@
           if (delta) html += `<td class="no-wrap">${escMain} <span class="time-delta-inline">${escDelta}</span></td>`;
           else html += `<td class="no-wrap">${escMain}</td>`;
         } else if (key === 'Track' || key === 'track' || key === 'TrackName' || key === 'track_name') {
-          let trackStr = String(value || '');
+          let trackStr = resolveTrackLabelForItem(item, value || '');
           // Normalize track name to fix known inconsistencies
           if (window.DataNormalizer && window.DataNormalizer.normalizeTrackName) {
             trackStr = window.DataNormalizer.normalizeTrackName(trackStr);

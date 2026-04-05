@@ -40,6 +40,13 @@ describe('R3EUtils', () => {
         expect(new URL(window.location.href).searchParams.get('driver')).toBe('Sam');
     });
 
+    test('resolves track labels from TRACKS_DATA by track_id', () => {
+        window.TRACKS_DATA = [{ id: 10, label: 'Spa - Grand Prix' }];
+        expect(window.R3EUtils.resolveTrackLabel(10)).toBe('Spa - Grand Prix');
+        expect(window.R3EUtils.resolveTrackLabelForItem({ track_id: 10 })).toBe('Spa - Grand Prix');
+        expect(window.R3EUtils.resolveTrackLabel(999, 'Fallback Track')).toBe('Fallback Track');
+    });
+
     test('splits car names into brand and model', () => {
         expect(window.R3EUtils.splitCarName('Audi R8 LMS')).toEqual({ brand: 'Audi', model: 'R8 LMS' });
         expect(window.R3EUtils.splitCarName('Porsche')).toEqual({ brand: 'Porsche', model: '' });

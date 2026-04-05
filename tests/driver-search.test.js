@@ -54,6 +54,7 @@ beforeEach(() => {
     window.dataService.searchDriver.mockResolvedValue([]);
     window.tableRenderer.filterAndSortKeys.mockClear();
     window.tableRenderer.renderDriverGroupedTable.mockClear();
+    delete window.ColumnConfig;
 });
 
 describe('driver-search integration', () => {
@@ -130,6 +131,27 @@ describe('driver-search integration', () => {
             [ds.allResults[1]],
             ['position', 'lap_time', 'track', 'car_class'],
             'gap'
+        );
+    });
+
+    it('adds a synthetic track column when results only contain track_id', async () => {
+        window.ColumnConfig = {
+            getOrderedColumns: vi.fn(keys => keys),
+            isColumnType: vi.fn((key, type) => type === 'TRACK' && ['Track', 'track', 'TrackName', 'track_name'].includes(key))
+        };
+
+        const ds = new window.driverSearch.constructor();
+        ds.currentSearchId = 3;
+        ds.allResults = [{
+            driver: 'Alice',
+            entries: [{ position: '1', lap_time: '1:30.000', track_id: '10', car_class: 'GT3' }]
+        }];
+
+        await ds.displayResults(ds.allResults);
+
+        expect(window.ColumnConfig.getOrderedColumns).toHaveBeenCalledWith(
+            ['position', 'lap_time', 'track_id', 'car_class', 'track'],
+            { addSynthetic: true }
         );
     });
 });

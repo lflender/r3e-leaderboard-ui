@@ -430,12 +430,15 @@ class DriverSearch {
             Array.isArray(paginatedDrivers[0].entries) && 
             paginatedDrivers[0].entries.length > 0) {
             const dataKeys = Object.keys(paginatedDrivers[0].entries[0]);
+            const hasTrackId = dataKeys.some(key => ['track_id', 'TrackID', 'trackId', 'Track ID'].includes(key));
+            const hasTrackColumn = dataKeys.some(key => ['Track', 'track', 'TrackName', 'track_name'].includes(key));
+            const keysForDisplay = hasTrackId && !hasTrackColumn ? dataKeys.concat('track') : dataKeys;
             // Use ColumnConfig if available for proper column ordering
             if (window.ColumnConfig) {
-                keys = window.ColumnConfig.getOrderedColumns(dataKeys, { addSynthetic: true });
+                keys = window.ColumnConfig.getOrderedColumns(keysForDisplay, { addSynthetic: true });
             } else {
                 // Fallback to tableRenderer method
-                keys = tableRenderer.filterAndSortKeys(dataKeys);
+                keys = tableRenderer.filterAndSortKeys(keysForDisplay);
             }
         }
         

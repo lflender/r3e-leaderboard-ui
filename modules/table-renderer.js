@@ -223,12 +223,13 @@ class TableRenderer {
         
         const driverName = firstEntry.name || firstEntry.Name || '';
         const rawLapTime = item.LapTime || item['Lap Time'] || item.lap_time || item.laptime || item.Time || '';
+        const resolvedTrackName = this.resolveTrackLabel(item);
         
         let html = `<tr class="driver-data-row ${groupId}" onclick="openDetailView(event, this)" 
                 data-position="${numericPos}" 
                 data-trackid="${R3EUtils.escapeHtml(String(trackId))}" 
                 data-classid="${R3EUtils.escapeHtml(String(classId))}" 
-                data-track="${R3EUtils.escapeHtml(item.track || item.Track || '')}" 
+            data-track="${R3EUtils.escapeHtml(resolvedTrackName)}" 
                 data-class="${R3EUtils.escapeHtml(firstEntry.car_class || firstEntry.CarClass || firstEntry['Car Class'] || firstEntry.Class || '')}"
                 data-name="${R3EUtils.escapeHtml(String(driverName))}"
                 data-time="${R3EUtils.escapeHtml(String(rawLapTime))}">`;
@@ -305,7 +306,7 @@ class TableRenderer {
         } else if (isLapTimeKey) {
             return this.renderLapTimeCell(value);
         } else if (isTrackKey) {
-            return this.renderTrackCell(value);
+            return this.renderTrackCell(item, value);
         } else if (isDifficultyKey) {
             return this.renderDifficultyCell(value);
         } else {
@@ -362,8 +363,16 @@ class TableRenderer {
      * @param {string} value - Track name
      * @returns {string} HTML string
      */
-    renderTrackCell(value) {
-        return TableRenderer.renderTrackCellStatic(value);
+    renderTrackCell(item, value) {
+        return TableRenderer.renderTrackCellStatic(this.resolveTrackLabel(item, value));
+    }
+
+    resolveTrackLabel(item, fallback = '') {
+        if (window.R3EUtils && typeof window.R3EUtils.resolveTrackLabelForItem === 'function') {
+            return window.R3EUtils.resolveTrackLabelForItem(item, fallback);
+        }
+
+        return String(fallback || item?.track || item?.Track || item?.track_name || item?.TrackName || '');
     }
     
     /**
@@ -502,6 +511,10 @@ class TableRenderer {
      * @returns {*} Field value
      */
     getFieldValueForSort(item, sortBy) {
+        if (sortBy === 'track') {
+            return this.resolveTrackLabel(item);
+        }
+
         const fieldNames = this.getSortFieldNames(sortBy);
         if (!fieldNames) return null;
         

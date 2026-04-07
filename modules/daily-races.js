@@ -28,9 +28,11 @@ class DailyRaces {
         // Wait a bit for other modules to initialize
         await new Promise(resolve => setTimeout(resolve, 100));
         
-        // Show daily races on page load (when search is empty and no URL param)
+        // Show daily races on page load.
+        // If no search input exists, this page is dedicated to daily races.
         const urlDriver = this.getUrlParam('driver') || this.getUrlParam('query');
-        if (this.elements.driverSearch && !this.elements.driverSearch.value.trim() && !urlDriver) {
+        const isDedicatedDailyRacesPage = !this.elements.driverSearch;
+        if (isDedicatedDailyRacesPage || (!this.elements.driverSearch.value.trim() && !urlDriver)) {
             await this.showDailyRaces();
         }
 
@@ -407,11 +409,6 @@ class DailyRaces {
             html += buildRaceCards(featureRaces);
             html += '</div>';
         }
-        
-        // Footer note
-        html += '<div class="daily-races-footer">';
-        html += '<p>Start typing a driver name above to search leaderboards</p>';
-        html += '</div>';
         
         html += '</div>'; // daily-races-container
 

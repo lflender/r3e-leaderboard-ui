@@ -300,7 +300,11 @@ function getUrlParam(paramName) {
 function updateUrlParam(paramName, value) {
     try {
         const url = new URL(window.location.href);
-        url.searchParams.set(paramName, value);
+        if (value === null || value === undefined || String(value).trim() === '') {
+            url.searchParams.delete(paramName);
+        } else {
+            url.searchParams.set(paramName, value);
+        }
         window.history.replaceState({}, '', url);
     } catch (e) {
         // ignore URL update errors

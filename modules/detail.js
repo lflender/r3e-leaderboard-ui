@@ -1396,7 +1396,7 @@ function renderDetailRow(item, showAbsolutePosition = false) {
     
     if (!highlisted) {
         const encoded = encodeURIComponent(`"${String(name)}"`);
-        html += `<td><a class="${driverLinkClass}" href="index.html?driver=${encoded}">${flagHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}${mpPosHtml}</a></td>`;
+        html += `<td><a class="${driverLinkClass}" href="drivers.html?driver=${encoded}">${flagHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}${mpPosHtml}</a></td>`;
     } else {
         const nameClasses = typeof getMpPosNameClasses === 'function'
             ? getMpPosNameClasses(mpPos, { gold: 10, silver: 100, glitter: 10 })

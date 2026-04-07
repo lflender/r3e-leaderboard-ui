@@ -82,7 +82,7 @@
         const name = row.name;
         const country = row.country;
         const rank = row.rank;
-        const searchUrl = `/?driver=${encodeURIComponent(`"${name}"`)}`;
+        const searchUrl = `drivers.html?driver=${encodeURIComponent(`"${name}"`)}`;  
 
         // MP position and name colouring
         const mpPos = (typeof resolveMpPos === 'function') ? resolveMpPos(name, country) : null;

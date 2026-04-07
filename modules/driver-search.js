@@ -237,6 +237,13 @@ class DriverSearch {
             // Clear results if less than minimum length
             if (searchTerm.length < this.minSearchLength) {
                 this.elements.resultsContainer.innerHTML = '';
+                if (searchTerm.length === 0) {
+                    this.lastSearchTerm = '';
+                    R3EUtils.updateUrlParam('driver', '');
+                    R3EUtils.updateUrlParam('query', '');
+                    // Notify listeners (Hall of Fame) after URL cleanup.
+                    this.elements.driverSearch.dispatchEvent(new Event('change', { bubbles: true }));
+                }
                 return;
             }
             

@@ -115,7 +115,13 @@ const R3EAnalytics = (() => {
             // Respect Do-Not-Track
             respect_dnt: false,
             // Disable session recording to keep things lightweight
-            disable_session_recording: true
+            disable_session_recording: true,
+            // Prevent toolbar assets from routing through the /t proxy
+            // (they live on eu-assets.i.posthog.com, not eu.i.posthog.com)
+            advanced_disable_toolbar_metrics: true,
+            // Single-domain site — skip cross-subdomain cookie discovery probe
+            // (prevents the dmn_chk_* cookie rejection warning in the console)
+            cross_subdomain_cookie: false
         });
 
         _ready = true;

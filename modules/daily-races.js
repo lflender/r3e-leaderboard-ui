@@ -200,6 +200,46 @@ class DailyRaces {
     }
 
     /**
+     * Resolve the race car class as displayed on the tile
+     */
+    resolveRaceCarClassName(race) {
+        // For category races, use the provided class label directly.
+        // For regular races, resolve class ID to display name.
+        let carClassName = (race.category_class_ids && Array.isArray(race.category_class_ids) && race.category_class_ids.length > 0)
+            ? race.car_class
+            : this.resolveCarClassName(race.car_class_id);
+
+        return this.mapComboClassName(carClassName);
+    }
+
+    /**
+     * Detect if any race tile appears to have missing parser fields
+     */
+    hasScheduleParsingError(races) {
+        if (!Array.isArray(races) || races.length === 0) {
+            return false;
+        }
+
+        return races.some(race => {
+            const carClassName = this.resolveRaceCarClassName(race);
+            const trackName = this.resolveTrackName(race.track_id);
+
+            const isClassMissing = !carClassName || String(carClassName).trim() === '';
+            const isTrackMissing = !trackName || String(trackName).trim() === '';
+
+            return isClassMissing || isTrackMissing;
+        });
+    }
+
+    /**
+     * Build the schedule parser warning banner
+     */
+    getScheduleParsingErrorBannerHtml() {
+        const message = 'Automated schedule parsing error detected, please allow me a few hours to fix it, thank you';
+        return `<p style="margin: 0.5rem auto 0; max-width: 760px; padding: 0.65rem 0.9rem; border: 1px solid rgba(220, 38, 38, 0.35); border-left: 4px solid #dc2626; border-radius: 8px; background: rgba(220, 38, 38, 0.08); color: var(--text-primary); font-size: 0.95rem;">${R3EUtils.escapeHtml(message)}</p>`;
+    }
+
+    /**
      * Format timestamp to readable format
      */
     formatTimestamp(timestamp) {
@@ -282,14 +322,7 @@ class DailyRaces {
             let cardsHtml = `<div class="${gridClasses.join(' ')}">`;
 
             for (const race of races) {
-                // For categories (with multiple class IDs), display the car_class name directly
-                // For regular classes, resolve the class ID to name
-                let carClassName = (race.category_class_ids && Array.isArray(race.category_class_ids) && race.category_class_ids.length > 0)
-                    ? race.car_class
-                    : this.resolveCarClassName(race.car_class_id);
-                
-                // Apply combo mappings to display names like "Porsche Cup" instead of "PCCD + PCCNA"
-                carClassName = this.mapComboClassName(carClassName);
+                const carClassName = this.resolveRaceCarClassName(race);
                 
                 const trackName = this.resolveTrackName(race.track_id);
                 const isFree = race.is_free_to_play;
@@ -354,6 +387,9 @@ class DailyRaces {
 
         html += '<div class="daily-races-section-header">';
         html += '<h3 class="daily-races-section-title">Daily Sprint Races (15 min)</h3>';
+        if (this.hasScheduleParsingError(racesData.races)) {
+            html += this.getScheduleParsingErrorBannerHtml();
+        }
         html += '</div>';
 
         // Races grid
@@ -364,6 +400,9 @@ class DailyRaces {
             html += '<div class="daily-races-feature">';
             html += '<div class="daily-races-section-header">';
             html += '<h3 class="daily-races-section-title">Daily Feature Races (30 min)</h3>';
+            if (this.hasScheduleParsingError(featureRaces)) {
+                html += this.getScheduleParsingErrorBannerHtml();
+            }
             html += '</div>';
             html += buildRaceCards(featureRaces);
             html += '</div>';

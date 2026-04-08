@@ -7,9 +7,7 @@
       {
         "car_class": "ADAC GT Masters 2013",
         "car": "Audi R8 LMS Ultra",
-        "wheel": "Round (flat)",
         "wheel_cat": "round (flat)",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2012",
         "power": "585bhp",
@@ -23,9 +21,7 @@
       {
         "car_class": "ADAC GT Masters 2013",
         "car": "BMW Z4 GT3",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2012",
         "power": "575bhp",
@@ -39,9 +35,7 @@
       {
         "car_class": "ADAC GT Masters 2013",
         "car": "Chevrolet Camaro GT3",
-        "wheel": "Round (flat)",
         "wheel_cat": "round (flat)",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2012",
         "power": "620 bhp",
@@ -55,9 +49,7 @@
       {
         "car_class": "ADAC GT Masters 2013",
         "car": "Chevrolet Corvette Z06.R GT3",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2013",
         "power": "590bhp",
@@ -71,9 +63,7 @@
       {
         "car_class": "ADAC GT Masters 2013",
         "car": "Ford GT GT3",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2013",
         "power": "575bhp",
@@ -87,9 +77,7 @@
       {
         "car_class": "ADAC GT Masters 2013",
         "car": "Mercedes-Benz SLS AMG GT3",
-        "wheel": "Round (flat)",
         "wheel_cat": "round (flat)",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2013",
         "power": "600bhp",
@@ -103,9 +91,7 @@
       {
         "car_class": "ADAC GT Masters 2013",
         "car": "Nissan GT-R GT3",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2011",
         "power": "600bhp",
@@ -125,9 +111,7 @@
       {
         "car_class": "ADAC GT Masters 2014",
         "car": "Audi R8 LMS Ultra",
-        "wheel": "Round (flat)",
         "wheel_cat": "round (flat)",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2012",
         "power": "585bhp",
@@ -141,9 +125,7 @@
       {
         "car_class": "ADAC GT Masters 2014",
         "car": "BMW Z4 GT3",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2012",
         "power": "575bhp",
@@ -157,9 +139,7 @@
       {
         "car_class": "ADAC GT Masters 2014",
         "car": "Chevrolet Camaro GT3",
-        "wheel": "Round (flat)",
         "wheel_cat": "round (flat)",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2012",
         "power": "620 bhp",
@@ -173,9 +153,7 @@
       {
         "car_class": "ADAC GT Masters 2014",
         "car": "Chevrolet Corvette Z06.R GT3",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2013",
         "power": "590bhp",
@@ -189,9 +167,7 @@
       {
         "car_class": "ADAC GT Masters 2014",
         "car": "McLaren MP4-12C GT3",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2013",
         "power": "575bhp",
@@ -205,9 +181,7 @@
       {
         "car_class": "ADAC GT Masters 2014",
         "car": "Mercedes-Benz SLS AMG GT3",
-        "wheel": "Round (flat)",
         "wheel_cat": "round (flat)",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2014",
         "power": "600bhp",
@@ -227,9 +201,7 @@
       {
         "car_class": "ADAC GT Masters 2015",
         "car": "Audi R8 LMS Ultra",
-        "wheel": "Round (flat)",
         "wheel_cat": "round (flat)",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2012",
         "power": "585bhp",
@@ -243,9 +215,7 @@
       {
         "car_class": "ADAC GT Masters 2015",
         "car": "BMW Z4 GT3",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2012",
         "power": "575bhp",
@@ -259,9 +229,7 @@
       {
         "car_class": "ADAC GT Masters 2015",
         "car": "Bentley Continental GT3",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2014",
         "power": "575bhp",
@@ -275,9 +243,7 @@
       {
         "car_class": "ADAC GT Masters 2015",
         "car": "Chevrolet Camaro GT3",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2012",
         "power": "620 bhp",
@@ -291,9 +257,7 @@
       {
         "car_class": "ADAC GT Masters 2015",
         "car": "Chevrolet Corvette Z06.R GT3 GTM15",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2013",
         "power": "590bhp",
@@ -307,9 +271,7 @@
       {
         "car_class": "ADAC GT Masters 2015",
         "car": "Mercedes-Benz SLS AMG GT3",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2013",
         "power": "600bhp",
@@ -323,9 +285,7 @@
       {
         "car_class": "ADAC GT Masters 2015",
         "car": "Nissan GT-R GT3",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2011",
         "power": "550",
@@ -345,9 +305,7 @@
       {
         "car_class": "ADAC GT Masters 2018",
         "car": "Audi R8 LMS",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2015",
         "power": "570bhp",
@@ -361,9 +319,7 @@
       {
         "car_class": "ADAC GT Masters 2018",
         "car": "BMW M6 GT3",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2016",
         "power": "590bhp",
@@ -377,9 +333,7 @@
       {
         "car_class": "ADAC GT Masters 2018",
         "car": "Callaway Corvette C7 GT3-R",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2016",
         "power": "585bhp",
@@ -393,9 +347,7 @@
       {
         "car_class": "ADAC GT Masters 2018",
         "car": "Mercedes AMG GT3",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2016",
         "power": "590bhp",
@@ -415,9 +367,7 @@
       {
         "car_class": "ADAC GT Masters 2020",
         "car": "Audi R8 LMS GT3 EVO",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2019",
         "power": "570bhp",
@@ -431,9 +381,7 @@
       {
         "car_class": "ADAC GT Masters 2020",
         "car": "Bentley Continental GT3 EVO",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2019",
         "power": "577 bhp",
@@ -447,9 +395,7 @@
       {
         "car_class": "ADAC GT Masters 2020",
         "car": "BMW M6 GT3",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2016",
         "power": "590bhp",
@@ -463,9 +409,7 @@
       {
         "car_class": "ADAC GT Masters 2020",
         "car": "Callaway Corvette C7 GT3-R",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2016",
         "power": "585bhp",
@@ -479,9 +423,7 @@
       {
         "car_class": "ADAC GT Masters 2020",
         "car": "Mercedes AMG GT3",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2016",
         "power": "590bhp",
@@ -495,9 +437,7 @@
       {
         "car_class": "ADAC GT Masters 2020",
         "car": "Mercedes-AMG GT3 2020",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2019",
         "power": "585hp",
@@ -511,9 +451,7 @@
       {
         "car_class": "ADAC GT Masters 2020",
         "car": "Porsche 911 GT3 R (2019)",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2019",
         "power": "570bhp",
@@ -533,9 +471,7 @@
       {
         "car_class": "ADAC GT Masters 2021",
         "car": "Audi R8 LMS GT3 EVO",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2019",
         "power": "570bhp",
@@ -549,9 +485,7 @@
       {
         "car_class": "ADAC GT Masters 2021",
         "car": "BMW M6 GT3",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2016",
         "power": "590bhp",
@@ -565,9 +499,7 @@
       {
         "car_class": "ADAC GT Masters 2021",
         "car": "Callaway Corvette C7 GT3-R",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2016",
         "power": "585bhp",
@@ -581,9 +513,7 @@
       {
         "car_class": "ADAC GT Masters 2021",
         "car": "Mercedes-AMG GT3 2020",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2020",
         "power": "590bhp",
@@ -597,9 +527,7 @@
       {
         "car_class": "ADAC GT Masters 2021",
         "car": "Porsche 911 GT3 R (2019)",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2019",
         "power": "570bhp",
@@ -618,9 +546,7 @@
       {
         "car_class": "Alpine A110 Cup",
         "car": "Alpine A110 Cup",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2025",
         "power": "280hp",
@@ -639,9 +565,7 @@
       {
         "car_class": "Aquila CR1 Cup",
         "car": "Aquila CR1 Sports GT",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2009",
         "power": "315",
@@ -661,9 +585,7 @@
       {
         "car_class": "Audi Sport TT Cup 2015",
         "car": "Audi TT cup 2015",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2015",
         "power": "310hp (P2P +30)",
@@ -683,9 +605,7 @@
       {
         "car_class": "Audi Sport TT Cup 2016",
         "car": "Audi TT cup 2016",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2015",
         "power": "310hp (P2P +30)",
@@ -704,9 +624,7 @@
       {
         "car_class": "Audi TT RS cup",
         "car": "Audi TT RS VLN",
-        "wheel": "Round (flat)",
         "wheel_cat": "round (flat)",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2011",
         "power": "365",
@@ -725,9 +643,7 @@
       {
         "car_class": "BMW M2 Cup",
         "car": "BMW M2 CS Racing 2021",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2021",
         "power": "450bhp",
@@ -746,9 +662,7 @@
       {
         "car_class": "BMW M235i Racing Cup",
         "car": "BMW M235i Racing",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2014",
         "power": "333bhp @ 5800 rpm",
@@ -767,9 +681,7 @@
       {
         "car_class": "C-Klasse DTM 2005",
         "car": "AMG-Mercedes C-Klasse DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2005",
         "power": "480 ps @ 7000 rpm",
@@ -788,9 +700,7 @@
       {
         "car_class": "Cayman GT4 Trophy by Manthey-Racing",
         "car": "Porsche Cayman GT4 Clubsport",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2017",
         "power": "385 BHP @ 7500 RPM",
@@ -809,9 +719,7 @@
       {
         "car_class": "Crosslé 90F",
         "car": "Crosslé 90F",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "2017",
         "power": "110bhp",
@@ -830,9 +738,7 @@
       {
         "car_class": "Crosslé 9S",
         "car": "Crosslé 9S",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "1966",
         "power": "185bhp",
@@ -852,9 +758,7 @@
       {
         "car_class": "CUPRA Leon e-Racer",
         "car": "CUPRA Leon e-Racer",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "",
         "transmission_cat": "",
         "year": "2020",
         "power": "670hp",
@@ -873,9 +777,7 @@
       {
         "car_class": "Drift",
         "car": "BMW E30 M3 Drift",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2021",
         "power": "600",
@@ -889,9 +791,7 @@
       {
         "car_class": "Drift",
         "car": "BMW G82 M4 Drift",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2021",
         "power": "",
@@ -910,9 +810,7 @@
       {
         "car_class": "DTM 1992",
         "car": "Audi V8 DTM",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "1992",
         "power": "460+",
@@ -926,9 +824,7 @@
       {
         "car_class": "DTM 1992",
         "car": "BMW M3 Sport Evolution",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "1992",
         "power": "350+",
@@ -942,9 +838,7 @@
       {
         "car_class": "DTM 1992",
         "car": "Ford Mustang GT DTM",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "1992",
         "power": "520+",
@@ -958,9 +852,7 @@
       {
         "car_class": "DTM 1992",
         "car": "Mercedes 190E Evo II DTM",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "1992",
         "power": "350+",
@@ -974,9 +866,7 @@
       {
         "car_class": "DTM 1992",
         "car": "Opel Omega 3000 Evo500",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "1992",
         "power": "400+",
@@ -995,9 +885,7 @@
       {
         "car_class": "DTM 1995",
         "car": "Alfa Romeo 155 TI DTM 1995",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "1995",
         "power": "490 bhp",
@@ -1011,9 +899,7 @@
       {
         "car_class": "DTM 1995",
         "car": "AMG-Mercedes C-Klasse DTM",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "1995",
         "power": "505 bhp",
@@ -1027,9 +913,7 @@
       {
         "car_class": "DTM 1995",
         "car": "Opel Calibra V6 DTM",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "1995",
         "power": "494 bhp",
@@ -1048,9 +932,7 @@
       {
         "car_class": "DTM 2002",
         "car": "Abt-Audi TT-R",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2002",
         "power": "",
@@ -1064,9 +946,7 @@
       {
         "car_class": "DTM 2002",
         "car": "AMG-Mercedes CLK-DTM 2002",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2002",
         "power": "",
@@ -1080,9 +960,7 @@
       {
         "car_class": "DTM 2002",
         "car": "Opel Astra V8 Coupé",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2002",
         "power": "",
@@ -1101,9 +979,7 @@
       {
         "car_class": "DTM 2003",
         "car": "AMG-Mercedes CLK DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2003",
         "power": "460 ps @ 6750 rpm",
@@ -1123,9 +999,7 @@
       {
         "car_class": "DTM 2013",
         "car": "Audi RS 5 DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2013",
         "power": "500",
@@ -1139,9 +1013,7 @@
       {
         "car_class": "DTM 2013",
         "car": "BMW M3 DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2013",
         "power": "500",
@@ -1155,9 +1027,7 @@
       {
         "car_class": "DTM 2013",
         "car": "DTM Mercedes AMG C-Coupé",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2013",
         "power": "500",
@@ -1177,9 +1047,7 @@
       {
         "car_class": "DTM 2014",
         "car": "Audi RS 5 DTM 2014",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2014",
         "power": "500+",
@@ -1193,9 +1061,7 @@
       {
         "car_class": "DTM 2014",
         "car": "BMW M4 DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2014",
         "power": "500+",
@@ -1209,9 +1075,7 @@
       {
         "car_class": "DTM 2014",
         "car": "DTM Mercedes AMG C Coupe 14",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2014",
         "power": "500+",
@@ -1231,9 +1095,7 @@
       {
         "car_class": "DTM 2015",
         "car": "Audi RS 5 DTM 2015",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2015",
         "power": "500+",
@@ -1247,9 +1109,7 @@
       {
         "car_class": "DTM 2015",
         "car": "BMW M4 DTM 2015",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2015",
         "power": "500+",
@@ -1263,9 +1123,7 @@
       {
         "car_class": "DTM 2015",
         "car": "Mercedes-AMG C63 DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2015",
         "power": "500+",
@@ -1285,9 +1143,7 @@
       {
         "car_class": "DTM 2016",
         "car": "Audi RS 5 DTM 2016",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2016",
         "power": "500",
@@ -1301,9 +1157,7 @@
       {
         "car_class": "DTM 2016",
         "car": "BMW M4 DTM 2016",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2016",
         "power": "500",
@@ -1317,9 +1171,7 @@
       {
         "car_class": "DTM 2016",
         "car": "Mercedes-AMG C 63 DTM 2016",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2016",
         "power": "500",
@@ -1338,9 +1190,7 @@
       {
         "car_class": "DTM 2020",
         "car": "Audi RS 5 DTM 2020",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2020",
         "power": "580 bhp",
@@ -1354,9 +1204,7 @@
       {
         "car_class": "DTM 2020",
         "car": "BMW M4 DTM 2020",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2020",
         "power": "580 bhp",
@@ -1376,9 +1224,7 @@
       {
         "car_class": "DTM 2021",
         "car": "Audi R8 LMS GT3 EVO DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2019",
         "power": "570bhp",
@@ -1392,9 +1238,7 @@
       {
         "car_class": "DTM 2021",
         "car": "BMW M6 GT3 DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2016",
         "power": "590bhp",
@@ -1408,9 +1252,7 @@
       {
         "car_class": "DTM 2021",
         "car": "Ferrari 488 GT3 EVO 2020 DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2021",
         "power": "560bhp",
@@ -1424,9 +1266,7 @@
       {
         "car_class": "DTM 2021",
         "car": "McLaren 720S GT3 DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2021",
         "power": "575bhp",
@@ -1440,9 +1280,7 @@
       {
         "car_class": "DTM 2021",
         "car": "Mercedes-AMG GT3 2020 DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2019",
         "power": "585hp",
@@ -1456,9 +1294,7 @@
       {
         "car_class": "DTM 2021",
         "car": "Porsche 911 GT3 R (2019) DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2019",
         "power": "570bhp",
@@ -1478,9 +1314,7 @@
       {
         "car_class": "DTM 2023",
         "car": "Audi R8 LMS GT3 EVO II DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2022",
         "power": "570bhp",
@@ -1494,9 +1328,7 @@
       {
         "car_class": "DTM 2023",
         "car": "BMW M4 GT3 DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2021",
         "power": "545bhp",
@@ -1510,9 +1342,7 @@
       {
         "car_class": "DTM 2023",
         "car": "Ferrari 296 GT3 DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2022",
         "power": "545bhp",
@@ -1526,9 +1356,7 @@
       {
         "car_class": "DTM 2023",
         "car": "Mercedes-AMG GT3 2020 DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2019",
         "power": "585bhp",
@@ -1542,9 +1370,7 @@
       {
         "car_class": "DTM 2023",
         "car": "Porsche 911 GT3 R (992) DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2022",
         "power": "575hp",
@@ -1564,9 +1390,7 @@
       {
         "car_class": "DTM 2024",
         "car": "Audi R8 LMS GT3 EVO II DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2022",
         "power": "570bhp",
@@ -1580,9 +1404,7 @@
       {
         "car_class": "DTM 2024",
         "car": "BMW M4 GT3 DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2021",
         "power": "545bhp",
@@ -1596,9 +1418,7 @@
       {
         "car_class": "DTM 2024",
         "car": "Ferrari 296 GT3 DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2022",
         "power": "545bhp",
@@ -1612,9 +1432,7 @@
       {
         "car_class": "DTM 2024",
         "car": "Lamborghini Huracán GT3 EVO II DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2023",
         "power": "570bhp",
@@ -1628,9 +1446,7 @@
       {
         "car_class": "DTM 2024",
         "car": "McLaren 720S GT3 EVO DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2021",
         "power": "575bhp",
@@ -1644,9 +1460,7 @@
       {
         "car_class": "DTM 2024",
         "car": "Mercedes-AMG GT3 2020 DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2019",
         "power": "585bhp",
@@ -1660,9 +1474,7 @@
       {
         "car_class": "DTM 2024",
         "car": "Porsche 911 GT3 R (992) DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2022",
         "power": "575hp",
@@ -1682,9 +1494,7 @@
       {
         "car_class": "DTM 2025",
         "car": "Audi R8 LMS GT3 EVO II DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2022",
         "power": "570bhp",
@@ -1698,9 +1508,7 @@
       {
         "car_class": "DTM 2025",
         "car": "BMW M4 GT3 EVO DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2021",
         "power": "545bhp",
@@ -1714,9 +1522,7 @@
       {
         "car_class": "DTM 2025",
         "car": "Ferrari 296 GT3 DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2022",
         "power": "545bhp",
@@ -1730,9 +1536,7 @@
       {
         "car_class": "DTM 2025",
         "car": "Lamborghini Huracán GT3 EVO II DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2023",
         "power": "570bhp",
@@ -1746,9 +1550,7 @@
       {
         "car_class": "DTM 2025",
         "car": "McLaren 720S GT3 EVO DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2021",
         "power": "575bhp",
@@ -1762,9 +1564,7 @@
       {
         "car_class": "DTM 2025",
         "car": "Mercedes-AMG GT3 2020 DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2019",
         "power": "585bhp",
@@ -1778,9 +1578,7 @@
       {
         "car_class": "DTM 2025",
         "car": "Porsche 911 GT3 R (992) DTM",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2022",
         "power": "575hp",
@@ -1800,9 +1598,7 @@
       {
         "car_class": "Ford Mustang Mach E",
         "car": "Ford Mustang Mach-E 1400",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "",
         "transmission_cat": "",
         "year": "2021",
         "power": "1400 HP",
@@ -1821,9 +1617,7 @@
       {
         "car_class": "FR US Cup",
         "car": "Formula RaceRoom US",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2016",
         "power": "675",
@@ -1842,9 +1636,7 @@
       {
         "car_class": "FR X-17 Cup",
         "car": "Formula Raceroom X-17",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2017",
         "power": "950",
@@ -1863,9 +1655,7 @@
       {
         "car_class": "FR X-22 Cup",
         "car": "Formula Raceroom X-22",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2022",
         "power": "1050 bhp",
@@ -1884,9 +1674,7 @@
       {
         "car_class": "FR X-90 Cup",
         "car": "Formula RR 90 V8",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "1990",
         "power": "680 bhp@ 12500",
@@ -1900,9 +1688,7 @@
       {
         "car_class": "FR X-90 Cup",
         "car": "Formula RR 90 V10",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "1990",
         "power": "680 bhp@ 12750",
@@ -1916,9 +1702,7 @@
       {
         "car_class": "FR X-90 Cup",
         "car": "Formula RR 90 V12",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "1990",
         "power": "680 bhp @ 13000",
@@ -1937,9 +1721,7 @@
       {
         "car_class": "FR2 Cup",
         "car": "Formula RaceRoom 2",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2015",
         "power": "612",
@@ -1958,9 +1740,7 @@
       {
         "car_class": "FR3 Cup",
         "car": "Formula RaceRoom 3",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2016",
         "power": "240",
@@ -1979,9 +1759,7 @@
       {
         "car_class": "FRJ Cup",
         "car": "Formula RaceRoom Junior",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "2015",
         "power": "145",
@@ -2000,9 +1778,7 @@
       {
         "car_class": "German Nationals",
         "car": "Carlsson C25 GT",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2012",
         "power": "650+",
@@ -2016,9 +1792,7 @@
       {
         "car_class": "German Nationals",
         "car": "McLaren-Mercedes SLR 722 GT",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2007",
         "power": "600+",
@@ -2037,9 +1811,7 @@
       {
         "car_class": "Group 2",
         "car": "Volkswagen Scirocco Gr2",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "1976",
         "power": "176hp",
@@ -2058,9 +1830,7 @@
       {
         "car_class": "Group 4",
         "car": "BMW M1 Gr. 4",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "1979",
         "power": "465bhp",
@@ -2074,9 +1844,7 @@
       {
         "car_class": "Group 4",
         "car": "Porsche 934 Turbo RSR",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "1976",
         "power": "485hp",
@@ -2095,9 +1863,7 @@
       {
         "car_class": "Group 5",
         "car": "BMW 320 Turbo",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "1980",
         "power": "650",
@@ -2111,9 +1877,7 @@
       {
         "car_class": "Group 5",
         "car": "Chevrolet Corvette Greenwood 1977",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "1977",
         "power": "900",
@@ -2127,9 +1891,7 @@
       {
         "car_class": "Group 5",
         "car": "Chevrolet Dekon Monza",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "1975",
         "power": "650",
@@ -2143,9 +1905,7 @@
       {
         "car_class": "Group 5",
         "car": "Fabcar 935",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "1983",
         "power": "800",
@@ -2159,9 +1919,7 @@
       {
         "car_class": "Group 5",
         "car": "Nissan Silvia Turbo",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "1981",
         "power": "650",
@@ -2175,9 +1933,7 @@
       {
         "car_class": "Group 5",
         "car": "Nissan Skyline 2000RS",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "1981",
         "power": "650",
@@ -2191,9 +1947,7 @@
       {
         "car_class": "Group 5",
         "car": "Zakspeed Capri",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "1979",
         "power": "600",
@@ -2212,9 +1966,7 @@
       {
         "car_class": "Group C",
         "car": "Nissan R90CK",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "1990",
         "power": "773 hp",
@@ -2228,9 +1980,7 @@
       {
         "car_class": "Group C",
         "car": "Porsche 962 C Team Joest",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "1992",
         "power": "735 hp",
@@ -2249,9 +1999,7 @@
       {
         "car_class": "GT2",
         "car": "Audi R8 LMS GT2 2019",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2019",
         "power": "635bhp",
@@ -2265,9 +2013,7 @@
       {
         "car_class": "GT2",
         "car": "KTM X-BOW GT2",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2020",
         "power": "600 hp",
@@ -2281,9 +2027,7 @@
       {
         "car_class": "GT2",
         "car": "Porsche 911 GT2 RS Clubsport",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2019",
         "power": "700bhp",
@@ -2302,9 +2046,7 @@
       {
         "car_class": "GTE",
         "car": "BMW M8 GTE",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2018",
         "power": "592bhp",
@@ -2318,9 +2060,7 @@
       {
         "car_class": "GTE",
         "car": "Porsche 911 RSR 2019",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2019",
         "power": "610bhp",
@@ -2339,9 +2079,7 @@
       {
         "car_class": "GTO Classics",
         "car": "Audi 90 Quattro",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "1989",
         "power": "709",
@@ -2355,9 +2093,7 @@
       {
         "car_class": "GTO Classics",
         "car": "Ford Mustang IMSA GTO",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "1985",
         "power": "650",
@@ -2371,9 +2107,7 @@
       {
         "car_class": "GTO Classics",
         "car": "Nissan 300ZX Z32",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "1989",
         "power": "750",
@@ -2392,9 +2126,7 @@
       {
         "car_class": "GTR 1",
         "car": "Ford GT GT1",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2011",
         "power": "609 bhp",
@@ -2408,9 +2140,7 @@
       {
         "car_class": "GTR 1",
         "car": "Gumpert Apollo Sport",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2008",
         "power": "612 bhp",
@@ -2424,9 +2154,7 @@
       {
         "car_class": "GTR 1",
         "car": "Koenigsegg CCGT",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2007",
         "power": "598 bhp",
@@ -2440,9 +2168,7 @@
       {
         "car_class": "GTR 1",
         "car": "Nissan GT-R GT1",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2011",
         "power": "653 bhp",
@@ -2456,9 +2182,7 @@
       {
         "car_class": "GTR 1",
         "car": "RUF CTR3",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2007",
         "power": "615 bhp",
@@ -2472,9 +2196,7 @@
       {
         "car_class": "GTR 1",
         "car": "Saleen S7R",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2004",
         "power": "615 bhp",
@@ -2493,9 +2215,7 @@
       {
         "car_class": "GTR 2",
         "car": "BMW M3 E92 GT",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2009",
         "power": "540+",
@@ -2509,9 +2229,7 @@
       {
         "car_class": "GTR 2",
         "car": "Cadillac CTS-V.R",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2012",
         "power": "500+",
@@ -2525,9 +2243,7 @@
       {
         "car_class": "GTR 2",
         "car": "Chevrolet Corvette C6.R ZR1",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2009",
         "power": "525+",
@@ -2541,9 +2257,7 @@
       {
         "car_class": "GTR 2",
         "car": "P4-5 Competizione GT2",
-        "wheel": "Round (flat)",
         "wheel_cat": "round (flat)",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2011",
         "power": "500",
@@ -2557,9 +2271,7 @@
       {
         "car_class": "GTR 2",
         "car": "RUF RT12R",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2011",
         "power": "545+",
@@ -2579,9 +2291,7 @@
       {
         "car_class": "GTR 3",
         "car": "Audi R8 LMS",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2015",
         "power": "570bhp",
@@ -2595,9 +2305,7 @@
       {
         "car_class": "GTR 3",
         "car": "Audi R8 LMS GT3 EVO",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2019",
         "power": "570bhp",
@@ -2611,9 +2319,7 @@
       {
         "car_class": "GTR 3",
         "car": "Audi R8 LMS GT3 EVO II",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2022",
         "power": "570bhp",
@@ -2627,9 +2333,7 @@
       {
         "car_class": "GTR 3",
         "car": "Audi R8 LMS Ultra",
-        "wheel": "Round (flat)",
         "wheel_cat": "round (flat)",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2012",
         "power": "585bhp",
@@ -2643,9 +2347,7 @@
       {
         "car_class": "GTR 3",
         "car": "BMW Alpina B6 GT3",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2009",
         "power": "580 bhp",
@@ -2659,9 +2361,7 @@
       {
         "car_class": "GTR 3",
         "car": "BMW M4 GT3",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2021",
         "power": "545bhp",
@@ -2675,9 +2375,7 @@
       {
         "car_class": "GTR 3",
         "car": "BMW M6 GT3",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2016",
         "power": "590bhp",
@@ -2691,9 +2389,7 @@
       {
         "car_class": "GTR 3",
         "car": "BMW Z4 GT3",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2012",
         "power": "575bhp",
@@ -2707,9 +2403,7 @@
       {
         "car_class": "GTR 3",
         "car": "Bentley Continental GT3",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2014",
         "power": "575bhp",
@@ -2723,9 +2417,7 @@
       {
         "car_class": "GTR 3",
         "car": "Bentley Continental GT3 EVO",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2019",
         "power": "",
@@ -2739,9 +2431,7 @@
       {
         "car_class": "GTR 3",
         "car": "Callaway Corvette C7 GT3-R",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2016",
         "power": "585bhp",
@@ -2755,9 +2445,7 @@
       {
         "car_class": "GTR 3",
         "car": "Chevrolet Camaro GT3",
-        "wheel": "Round (flat)",
         "wheel_cat": "round (flat)",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2012",
         "power": "620 bhp",
@@ -2771,9 +2459,7 @@
       {
         "car_class": "GTR 3",
         "car": "Chevrolet Corvette Z06.R GT3",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2013",
         "power": "590bhp",
@@ -2787,9 +2473,7 @@
       {
         "car_class": "GTR 3",
         "car": "Ferrari 296 GT3",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2022",
         "power": "545bhp",
@@ -2803,9 +2487,7 @@
       {
         "car_class": "GTR 3",
         "car": "Ferrari 488 GT3 EVO 2020",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2021",
         "power": "560bhp",
@@ -2819,9 +2501,7 @@
       {
         "car_class": "GTR 3",
         "car": "Ford GT GT3",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2013",
         "power": "575bhp",
@@ -2835,9 +2515,7 @@
       {
         "car_class": "GTR 3",
         "car": "Ford Mustang GT3",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2007",
         "power": "630bhp",
@@ -2851,9 +2529,7 @@
       {
         "car_class": "GTR 3",
         "car": "Lamborghini Huracán GT3 EVO II",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2023",
         "power": "570bhp",
@@ -2867,9 +2543,7 @@
       {
         "car_class": "GTR 3",
         "car": "McLaren 650S GT3",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2015",
         "power": "570bhp",
@@ -2883,9 +2557,7 @@
       {
         "car_class": "GTR 3",
         "car": "McLaren 720S GT3",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2021",
         "power": "575bhp",
@@ -2899,9 +2571,7 @@
       {
         "car_class": "GTR 3",
         "car": "McLaren MP4-12C GT3",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2013",
         "power": "575bhp",
@@ -2915,9 +2585,7 @@
       {
         "car_class": "GTR 3",
         "car": "Mercedes AMG GT3",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2016",
         "power": "590bhp",
@@ -2931,9 +2599,7 @@
       {
         "car_class": "GTR 3",
         "car": "Mercedes-AMG GT3 2020",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2019",
         "power": "585hp",
@@ -2947,9 +2613,7 @@
       {
         "car_class": "GTR 3",
         "car": "Mercedes-Benz SLS AMG GT3",
-        "wheel": "Round (flat)",
         "wheel_cat": "round (flat)",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2013",
         "power": "600bhp",
@@ -2963,9 +2627,7 @@
       {
         "car_class": "GTR 3",
         "car": "Nissan GT-R GT3",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2011",
         "power": "600bhp",
@@ -2979,9 +2641,7 @@
       {
         "car_class": "GTR 3",
         "car": "P4-5 Competizione GT3",
-        "wheel": "Round (flat)",
         "wheel_cat": "round (flat)",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2011",
         "power": "560bhp",
@@ -2995,9 +2655,7 @@
       {
         "car_class": "GTR 3",
         "car": "Porsche 911 GT3 R (2019)",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2019",
         "power": "570bhp",
@@ -3011,9 +2669,7 @@
       {
         "car_class": "GTR 3",
         "car": "Porsche 911 GT3 R (992)",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2022",
         "power": "575hp",
@@ -3027,9 +2683,7 @@
       {
         "car_class": "GTR 3",
         "car": "RUF RT12R GTR3",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2011",
         "power": "565bhp",
@@ -3048,9 +2702,7 @@
       {
         "car_class": "GTR 4",
         "car": "Alpine A110 GT4+",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2025",
         "power": "341bhp",
@@ -3064,9 +2716,7 @@
       {
         "car_class": "GTR 4",
         "car": "Audi R8 LMS GT4 2020",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2020",
         "power": "450bhp",
@@ -3080,9 +2730,7 @@
       {
         "car_class": "GTR 4",
         "car": "BMW M4 GT4 (F82)",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2017",
         "power": "430bhp",
@@ -3096,9 +2744,7 @@
       {
         "car_class": "GTR 4",
         "car": "BMW M4 GT4 (G82)",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2023",
         "power": "550bhp",
@@ -3112,9 +2758,7 @@
       {
         "car_class": "GTR 4",
         "car": "KTM X-Bow GT4",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2015",
         "power": "353BHP",
@@ -3128,9 +2772,7 @@
       {
         "car_class": "GTR 4",
         "car": "Lotus Evora GT4",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2010",
         "power": "355bhp",
@@ -3144,9 +2786,7 @@
       {
         "car_class": "GTR 4",
         "car": "McLaren 570s GT4",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2017",
         "power": "425bhp",
@@ -3160,9 +2800,7 @@
       {
         "car_class": "GTR 4",
         "car": "Mercedes AMG GT4 2020",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2020",
         "power": "415bhp",
@@ -3176,9 +2814,7 @@
       {
         "car_class": "GTR 4",
         "car": "Porsche 718 Cayman GT4 Clubsport",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2019",
         "power": "420bhp",
@@ -3192,9 +2828,7 @@
       {
         "car_class": "GTR 4",
         "car": "Porsche Cayman GT4 CS MR",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2017",
         "power": "385 BHP @ 7500 RPM",
@@ -3213,9 +2847,7 @@
       {
         "car_class": "Hillclimb Icons",
         "car": "134 Judd V8",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2011",
         "power": "570 bhp",
@@ -3229,9 +2861,7 @@
       {
         "car_class": "Hillclimb Icons",
         "car": "Carlsson SLK 340 JUDD",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2013",
         "power": "570 bhp",
@@ -3245,9 +2875,7 @@
       {
         "car_class": "Hillclimb Icons",
         "car": "E36 V8 JUDD",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2009",
         "power": "570 bhp",
@@ -3266,9 +2894,7 @@
       {
         "car_class": "Hypercars",
         "car": "BMW M Hybrid V8",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "-",
         "power": "",
@@ -3282,9 +2908,7 @@
       {
         "car_class": "Hypercars",
         "car": "Lamborghini SC63",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "-",
         "power": "",
@@ -3298,9 +2922,7 @@
       {
         "car_class": "Hypercars",
         "car": "Porsche 963",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "-",
         "power": "",
@@ -3319,9 +2941,7 @@
       {
         "car_class": "KTM GTX",
         "car": "KTM X-BOW GTX",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2020",
         "power": "",
@@ -3340,9 +2960,7 @@
       {
         "car_class": "KTM X-Bow RR Cup",
         "car": "KTM X-Bow RR",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "2012",
         "power": "360",
@@ -3361,9 +2979,7 @@
       {
         "car_class": "Mazda Dpi",
         "car": "Mazda RT24 P DPi",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2021",
         "power": "620bhp",
@@ -3382,9 +2998,7 @@
       {
         "car_class": "Mazda MX-5 Cup",
         "car": "Mazda MX-5 CUP 2019 ND2",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2019",
         "power": "184",
@@ -3403,9 +3017,7 @@
       {
         "car_class": "NSU TTS Cup",
         "car": "NSU TTS",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "1969",
         "power": "122",
@@ -3424,9 +3036,7 @@
       {
         "car_class": "NXT Gen Cup",
         "car": "LRT NXT1",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "",
         "transmission_cat": "",
         "year": "2023",
         "power": "226hp",
@@ -3445,9 +3055,7 @@
       {
         "car_class": "P1",
         "car": "Audi R18",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2011",
         "power": "540",
@@ -3461,9 +3069,7 @@
       {
         "car_class": "P1",
         "car": "DMD P20",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2009",
         "power": "570",
@@ -3477,9 +3083,7 @@
       {
         "car_class": "P1",
         "car": "Mistral M530",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2009",
         "power": "535",
@@ -3498,9 +3102,7 @@
       {
         "car_class": "P2",
         "car": "Chevrolet Daytona Prototype",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2012",
         "power": "600",
@@ -3514,9 +3116,7 @@
       {
         "car_class": "P2",
         "car": "DMD P21",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2009",
         "power": "450",
@@ -3530,9 +3130,7 @@
       {
         "car_class": "P2",
         "car": "Radical SR9 AER",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2006",
         "power": "470",
@@ -3546,9 +3144,7 @@
       {
         "car_class": "P2",
         "car": "Radical SR9 Judd",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2006",
         "power": "475",
@@ -3562,9 +3158,7 @@
       {
         "car_class": "P2",
         "car": "Mistral M531",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2009",
         "power": "450",
@@ -3583,9 +3177,7 @@
       {
         "car_class": "Porsche 944 Turbo Cup",
         "car": "Porsche 944 Turbo Cup",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "1986",
         "power": "250hp",
@@ -3605,9 +3197,7 @@
       {
         "car_class": "Porsche 964 Cup",
         "car": "Porsche 911 Carrera Cup (964)",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "1990",
         "power": "265",
@@ -3626,9 +3216,7 @@
       {
         "car_class": "Porsche 991.2 GT3 Cup",
         "car": "Porsche 911 GT3 Cup (991.2) Endurance",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2017",
         "power": "485 BHP @ 7500rpm",
@@ -3647,9 +3235,7 @@
       {
         "car_class": "Porsche 992 GT3 Cup",
         "car": "Porsche 911 GT3 Cup (992) Endurance",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2021",
         "power": "503 bhp @ 8400rpm",
@@ -3669,9 +3255,7 @@
       {
         "car_class": "Porsche Carrera Cup Deutschland 2019",
         "car": "Porsche 911 GT3 Cup",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2017",
         "power": "485 BHP @ 7500rpm",
@@ -3691,9 +3275,7 @@
       {
         "car_class": "Porsche Carrera Cup Deutschland 2023",
         "car": "Porsche 911 GT3 Cup (992)",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2021",
         "power": "503 bhp @ 8400rpm",
@@ -3713,9 +3295,7 @@
       {
         "car_class": "Porsche Carrera Cup North America 2024",
         "car": "Porsche 911 GT3 Cup (992)",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2021",
         "power": "503 bhp @ 8400rpm",
@@ -3735,9 +3315,7 @@
       {
         "car_class": "Porsche Carrera Cup Scandinavia",
         "car": "Porsche 911 GT3 Cup (991.2)",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2017",
         "power": "485 BHP @ 7500rpm",
@@ -3756,9 +3334,7 @@
       {
         "car_class": "Praga R1",
         "car": "Praga R1",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2022",
         "power": "365bhp",
@@ -3777,9 +3353,7 @@
       {
         "car_class": "Procar",
         "car": "BMW M1 Procar",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "1979",
         "power": "470bhp",
@@ -3798,9 +3372,7 @@
       {
         "car_class": "Safety Car",
         "car": "S.C. Cupra TCR",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2020",
         "power": "335 hp",
@@ -3819,9 +3391,7 @@
       {
         "car_class": "Silhouette Series",
         "car": "Canhard R51",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2010",
         "power": "400",
@@ -3835,9 +3405,7 @@
       {
         "car_class": "Silhouette Series",
         "car": "Canhard R52",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2010",
         "power": "415",
@@ -3851,9 +3419,7 @@
       {
         "car_class": "Silhouette Series",
         "car": "Cougar C14-1",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2010",
         "power": "420",
@@ -3867,9 +3433,7 @@
       {
         "car_class": "Silhouette Series",
         "car": "Cougar C14-2",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2010",
         "power": "399",
@@ -3888,9 +3452,7 @@
       {
         "car_class": "Super Touring",
         "car": "Alfa Romeo 156 Super Touring",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "1998",
         "power": "300bhp",
@@ -3904,9 +3466,7 @@
       {
         "car_class": "Super Touring",
         "car": "Audi A4 Super Touring 1995",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "1995",
         "power": "305bhp",
@@ -3920,9 +3480,7 @@
       {
         "car_class": "Super Touring",
         "car": "BMW 320i E36 Super Touring",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "1996",
         "power": "300bhp",
@@ -3936,9 +3494,7 @@
       {
         "car_class": "Super Touring",
         "car": "Honda Accord Super Touring",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "1997",
         "power": "310bhp",
@@ -3952,9 +3508,7 @@
       {
         "car_class": "Super Touring",
         "car": "Opel Vectra Super Touring",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "1998",
         "power": "300bhp",
@@ -3968,9 +3522,7 @@
       {
         "car_class": "Super Touring",
         "car": "Renault Laguna Super Touring",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "1998",
         "power": "298bhp",
@@ -3984,9 +3536,7 @@
       {
         "car_class": "Super Touring",
         "car": "Volvo 850 Super Touring",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "1996",
         "power": "300bhp",
@@ -4000,9 +3550,7 @@
       {
         "car_class": "Super Touring",
         "car": "Volvo S40 Super Touring",
-        "wheel": "Round (flat)",
         "wheel_cat": "round (flat)",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "1999",
         "power": "302bhp",
@@ -4021,9 +3569,7 @@
       {
         "car_class": "Tatuus F4 Cup",
         "car": "Tatuus F4",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2014",
         "power": "160",
@@ -4043,9 +3589,7 @@
       {
         "car_class": "Touring Cars Cup",
         "car": "CUPRA Leon Competición",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2020",
         "power": "335 hp",
@@ -4059,9 +3603,7 @@
       {
         "car_class": "Touring Cars Cup",
         "car": "Honda Civic TCR",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2020",
         "power": "340bhp",
@@ -4075,9 +3617,7 @@
       {
         "car_class": "Touring Cars Cup",
         "car": "Hyundai i30 N TCR",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2019",
         "power": "340bhp",
@@ -4091,9 +3631,7 @@
       {
         "car_class": "Touring Cars Cup",
         "car": "Lada Vesta",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2020",
         "power": "345bhp",
@@ -4107,9 +3645,7 @@
       {
         "car_class": "Touring Cars Cup",
         "car": "Opel Astra",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2018",
         "power": "339bhp",
@@ -4129,9 +3665,7 @@
       {
         "car_class": "Touring Classics",
         "car": "BMW 635 CSI",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "1989",
         "power": "320+",
@@ -4145,9 +3679,7 @@
       {
         "car_class": "Touring Classics",
         "car": "BMW M3 E30 Gr.A",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "1991",
         "power": "330+",
@@ -4161,9 +3693,7 @@
       {
         "car_class": "Touring Classics",
         "car": "Nissan Skyline GTR R32 Group N",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "1990",
         "power": "400+",
@@ -4177,9 +3707,7 @@
       {
         "car_class": "Touring Classics",
         "car": "Volvo 240 Turbo",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "1980",
         "power": "345+",
@@ -4198,9 +3726,7 @@
       {
         "car_class": "Truck Racing",
         "car": "RaceRoom Truck",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "H",
         "transmission_cat": "h",
         "year": "2022",
         "power": "1100hp",
@@ -4219,9 +3745,7 @@
       {
         "car_class": "Volkswagen ID. R",
         "car": "Volkswagen ID. R",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "",
         "transmission_cat": "",
         "year": "2019",
         "power": "500 kW (680 HP)",
@@ -4240,9 +3764,7 @@
       {
         "car_class": "WTCC 2013",
         "car": "BMW E90 320 TC",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2013",
         "power": "320",
@@ -4256,9 +3778,7 @@
       {
         "car_class": "WTCC 2013",
         "car": "Chevrolet Cruze WTCC",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2013",
         "power": "310",
@@ -4272,9 +3792,7 @@
       {
         "car_class": "WTCC 2013",
         "car": "Honda Civic WTCC",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2013",
         "power": "290",
@@ -4288,9 +3806,7 @@
       {
         "car_class": "WTCC 2013",
         "car": "Lada Granta WTCC",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2013",
         "power": "300",
@@ -4304,9 +3820,7 @@
       {
         "car_class": "WTCC 2013",
         "car": "SEAT León WTCC",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2013",
         "power": "310",
@@ -4326,9 +3840,7 @@
       {
         "car_class": "WTCC 2014",
         "car": "Chevrolet RML Cruze TC1",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2014",
         "power": "380",
@@ -4342,9 +3854,7 @@
       {
         "car_class": "WTCC 2014",
         "car": "Citroën C Elysée WTCC",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2014",
         "power": "380",
@@ -4358,9 +3868,7 @@
       {
         "car_class": "WTCC 2014",
         "car": "Honda Civic WTCC 2014",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2014",
         "power": "380",
@@ -4374,9 +3882,7 @@
       {
         "car_class": "WTCC 2014",
         "car": "LADA Granta 1.6T",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2014",
         "power": "380",
@@ -4396,9 +3902,7 @@
       {
         "car_class": "WTCC 2015",
         "car": "Chevrolet RML Cruze TC1 2015",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2014",
         "power": "380",
@@ -4412,9 +3916,7 @@
       {
         "car_class": "WTCC 2015",
         "car": "Citroën C Elysée WTCC 2015",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2014",
         "power": "380",
@@ -4428,9 +3930,7 @@
       {
         "car_class": "WTCC 2015",
         "car": "Honda Civic WTCC 2015",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2014",
         "power": "380",
@@ -4444,9 +3944,7 @@
       {
         "car_class": "WTCC 2015",
         "car": "Lada Vesta WTCC 2015",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2015",
         "power": "380",
@@ -4466,9 +3964,7 @@
       {
         "car_class": "WTCC 2016",
         "car": "Chevrolet RML Cruze TC1 2016",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2014",
         "power": "380",
@@ -4482,9 +3978,7 @@
       {
         "car_class": "WTCC 2016",
         "car": "Citroën C Elysée WTCC 2016",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2014",
         "power": "380",
@@ -4498,9 +3992,7 @@
       {
         "car_class": "WTCC 2016",
         "car": "Honda Civic WTCC 2016",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2014",
         "power": "380",
@@ -4514,9 +4006,7 @@
       {
         "car_class": "WTCC 2016",
         "car": "Lada Vesta WTCC 2016",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2015",
         "power": "380",
@@ -4530,9 +4020,7 @@
       {
         "car_class": "WTCC 2016",
         "car": "Volvo S60 Polestar TC1",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2016",
         "power": "380",
@@ -4552,9 +4040,7 @@
       {
         "car_class": "WTCC 2017",
         "car": "Chevrolet RML Cruze TC1 2017",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2014",
         "power": "380",
@@ -4568,9 +4054,7 @@
       {
         "car_class": "WTCC 2017",
         "car": "Citroën C Elysée WTCC 2017",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2014",
         "power": "380",
@@ -4584,9 +4068,7 @@
       {
         "car_class": "WTCC 2017",
         "car": "Honda Civic WTCC 2017",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2014",
         "power": "380",
@@ -4600,9 +4082,7 @@
       {
         "car_class": "WTCC 2017",
         "car": "Lada Vesta WTCC 2017",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2015",
         "power": "380",
@@ -4616,9 +4096,7 @@
       {
         "car_class": "WTCC 2017",
         "car": "Volvo S60 Polestar TC1",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2017",
         "power": "380",
@@ -4638,9 +4116,7 @@
       {
         "car_class": "WTCR 2018",
         "car": "Alfa Romeo Giulietta TCR",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2018",
         "power": "330",
@@ -4654,9 +4130,7 @@
       {
         "car_class": "WTCR 2018",
         "car": "Audi RS 3 LMS",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2018",
         "power": "338 bhp",
@@ -4670,9 +4144,7 @@
       {
         "car_class": "WTCR 2018",
         "car": "CUPRA TCR",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2018",
         "power": "335 bhp",
@@ -4686,9 +4158,7 @@
       {
         "car_class": "WTCR 2018",
         "car": "Honda Civic TCR",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2018",
         "power": "335 bhp",
@@ -4702,9 +4172,7 @@
       {
         "car_class": "WTCR 2018",
         "car": "Hyundai i30 N TCR",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2018",
         "power": "340bhp",
@@ -4718,9 +4186,7 @@
       {
         "car_class": "WTCR 2018",
         "car": "Peugeot 308 TCR",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2018",
         "power": "330 bhp",
@@ -4734,9 +4200,7 @@
       {
         "car_class": "WTCR 2018",
         "car": "Volkswagen Golf GTI TCR",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2018",
         "power": "338 bhp",
@@ -4756,9 +4220,7 @@
       {
         "car_class": "WTCR 2019",
         "car": "Alfa Romeo Giulietta TCR",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2019",
         "power": "340bhp",
@@ -4772,9 +4234,7 @@
       {
         "car_class": "WTCR 2019",
         "car": "Audi RS 3 LMS",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2019",
         "power": "340bhp",
@@ -4788,9 +4248,7 @@
       {
         "car_class": "WTCR 2019",
         "car": "CUPRA TCR",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2019",
         "power": "340bhp",
@@ -4804,9 +4262,7 @@
       {
         "car_class": "WTCR 2019",
         "car": "Honda Civic TCR",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2019",
         "power": "340bhp",
@@ -4820,9 +4276,7 @@
       {
         "car_class": "WTCR 2019",
         "car": "Hyundai i30 N TCR",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2019",
         "power": "340bhp",
@@ -4836,9 +4290,7 @@
       {
         "car_class": "WTCC 2019",
         "car": "Lynk & Co 03 TCR",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2019",
         "power": "340bhp",
@@ -4852,9 +4304,7 @@
       {
         "car_class": "WTCR 2019",
         "car": "Volkswagen Golf GTI TCR",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2019",
         "power": "340bhp",
@@ -4874,9 +4324,7 @@
       {
         "car_class": "WTCR 2020",
         "car": "Alfa Romeo Giulietta TCR",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2020",
         "power": "340bhp",
@@ -4890,9 +4338,7 @@
       {
         "car_class": "WTCR 2020",
         "car": "Audi RS 3 LMS",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2020",
         "power": "338 bhp",
@@ -4906,9 +4352,7 @@
       {
         "car_class": "WTCR 2020",
         "car": "CUPRA Leon Competición",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2020",
         "power": "340bhp",
@@ -4922,9 +4366,7 @@
       {
         "car_class": "WTCR 2020",
         "car": "Honda Civic TCR",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2020",
         "power": "340bhp",
@@ -4938,9 +4380,7 @@
       {
         "car_class": "WTCR 2020",
         "car": "Hyundai i30 N TCR",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2020",
         "power": "340bhp",
@@ -4954,9 +4394,7 @@
       {
         "car_class": "WTCR 2020",
         "car": "Lynk & Co 03 TCR",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2020",
         "power": "340bhp",
@@ -4970,9 +4408,7 @@
       {
         "car_class": "WTCR 2020",
         "car": "Renault Mégane RS TCR",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2020",
         "power": "340hp",
@@ -4992,9 +4428,7 @@
       {
         "car_class": "WTCR 2021",
         "car": "Audi RS 3 LMS 2021",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2021",
         "power": "345bhp",
@@ -5008,9 +4442,7 @@
       {
         "car_class": "WTCR 2021",
         "car": "CUPRA Leon Competición",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2020",
         "power": "340bhp",
@@ -5024,9 +4456,7 @@
       {
         "car_class": "WTCR 2021",
         "car": "Honda Civic TCR",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2020",
         "power": "340bhp",
@@ -5040,9 +4470,7 @@
       {
         "car_class": "WTCR 2021",
         "car": "Hyundai Elantra TCR 2021",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2021",
         "power": "340bhp",
@@ -5056,9 +4484,7 @@
       {
         "car_class": "WTCR 2021",
         "car": "Lada Vesta TCR",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2020",
         "power": "345bhp",
@@ -5072,9 +4498,7 @@
       {
         "car_class": "WTCR 2021",
         "car": "Lynk & Co 03 TCR",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2020",
         "power": "340bhp",
@@ -5094,9 +4518,7 @@
       {
         "car_class": "WTCR 2022",
         "car": "Audi RS 3 LMS 2021",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2021",
         "power": "345bhp",
@@ -5110,9 +4532,7 @@
       {
         "car_class": "WTCR 2022",
         "car": "CUPRA Leon Competición",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2020",
         "power": "340bhp",
@@ -5126,9 +4546,7 @@
       {
         "car_class": "WTCR 2022",
         "car": "Honda Civic TCR",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2020",
         "power": "340bhp",
@@ -5142,9 +4560,7 @@
       {
         "car_class": "WTCR 2022",
         "car": "Hyundai Elantra TCR 2022",
-        "wheel": "GT",
         "wheel_cat": "gt",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2021",
         "power": "340bhp",
@@ -5158,9 +4574,7 @@
       {
         "car_class": "WTCR 2022",
         "car": "Lynk & Co 03 TCR",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Palettes",
         "transmission_cat": "paddles",
         "year": "2020",
         "power": "340bhp",
@@ -5179,9 +4593,7 @@
       {
         "car_class": "Zonda R Cup",
         "car": "Pagani Zonda R",
-        "wheel": "Round",
         "wheel_cat": "round",
-        "transmission": "Seq",
         "transmission_cat": "sequential",
         "year": "2009",
         "power": "670 bhp",

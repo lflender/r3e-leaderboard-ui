@@ -128,8 +128,8 @@
   });
 
   function carMatchesFilters(car) {
-    const w = (car.wheel_cat || car.wheel || '').toLowerCase();
-    const t = (car.transmission_cat || car.transmission || '').toLowerCase();
+    const w = (car.wheel_cat || '').toLowerCase();
+    const t = (car.transmission_cat || '').toLowerCase();
     const c = (car.car_class || car.class || '').toLowerCase();
     
     // Handle wheel filter - check if it's the combined filter
@@ -247,8 +247,8 @@
         // Note: Year badge uses inline style for dynamic background color gradient based on year
         html += `\n<tr class="driver-data-row ${slug}" data-link="${rowLink}">` +
           `<td>${linkOpen}${carNameHtml}${linkClose}</td>` +
-                `<td>${linkOpen}${wheelBadge(car.wheel_cat || car.wheel)}${linkClose}</td>` +
-                `<td>${linkOpen}${transBadge(car.transmission_cat || car.transmission)}${linkClose}</td>` +
+                `<td>${linkOpen}${wheelBadge(car.wheel_cat)}${linkClose}</td>` +
+                `<td>${linkOpen}${transBadge(car.transmission_cat)}${linkClose}</td>` +
                 `<td>${linkOpen}${driveBadge(car.drive)}${linkClose}</td>` +
                 `<td>${linkOpen}<span class="car-badge year-badge" data-year="${car.year}" style="background:${yearColor(car.year)}">${R3EUtils.escapeHtml(car.year || '')}</span>${linkClose}</td>` +
                 `<td class="carinfo-meta">${linkOpen}${R3EUtils.escapeHtml(car.power || '')}${linkClose}</td>` +

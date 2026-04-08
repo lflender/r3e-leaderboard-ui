@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Driver Search — RaceRoom Leaderboards Explorer</title>
+    <title>Driver Search â€” RaceRoom Leaderboards Explorer</title>
     <meta name="description" content="The #1 RaceRoom leaderboards database. Search driver lap times, track records, car performance data and rankings for RaceRoom Racing Experience (R3E). Updated daily with official leaderboard data.">
     <link rel="canonical" href="https://r3e-leaderboards.info/drivers.html">
     <link rel="alternate" hreflang="en" href="https://r3e-leaderboards.info/drivers.html">
@@ -13,7 +13,7 @@
     <meta name="keywords" content="raceroom leaderboards, r3e leaderboards, raceroom lap times, raceroom racing experience leaderboards, r3e lap times, raceroom driver rankings, raceroom track records, r3e rankings">
     <!-- Open Graph -->
     <meta property="og:site_name" content="RaceRoom Leaderboards">
-    <meta property="og:title" content="Driver Search — RaceRoom Leaderboards Explorer">
+    <meta property="og:title" content="Driver Search â€” RaceRoom Leaderboards Explorer">
     <meta property="og:description" content="The #1 RaceRoom leaderboards database. Search driver lap times, track records and rankings for RaceRoom Racing Experience. Updated daily.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://r3e-leaderboards.info/drivers.html">
@@ -25,7 +25,7 @@
     
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Driver Search — RaceRoom Leaderboards Explorer">
+    <meta name="twitter:title" content="Driver Search â€” RaceRoom Leaderboards Explorer">
     <meta name="twitter:description" content="The #1 RaceRoom leaderboards database. Search driver lap times, track records and rankings for R3E.">
     <meta name="twitter:image" content="https://r3e-leaderboards.info/images/rle-share.png">
     
@@ -33,7 +33,7 @@
     <script src="modules/analytics.js?v=3"></script>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     
-    <link rel="stylesheet" href="style.css?v=32">
+    <link rel="stylesheet" href="style.css?v=34">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"/>
     <!-- Site Icons -->
     <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png?v=3">
@@ -138,14 +138,15 @@
                         <option value="">All tracks</option>
                     </select>
                     <div id="track-filter-ui" class="custom-select" role="listbox" aria-label="Filter by track">
-                        <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All tracks ▾</button>
+                        <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All tracks â–¾</button>
                         <div class="custom-select__menu" role="presentation" hidden></div>
                     </div>
                     <div id="track-class-filter-ui" class="custom-select" role="listbox" aria-label="Filter by car class">
-                        <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All classes ▾</button>
+                        <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All classes â–¾</button>
                         <div class="custom-select__menu" role="presentation" hidden></div>
                     </div>
                 </div>
+                <div id="fun-fact-banner" hidden></div>
                 <div id="hall-of-fame-container"></div>
                 <div id="results-container"></div>
             </div>
@@ -210,11 +211,12 @@
     
     <!-- Data files - must load before feature modules that depend on them -->
     <script src="data/car-classes.js?v=3" defer></script>
-    <script src="data/cars.js?v=3" defer></script>
+    <script src="data/cars.js?v=4" defer></script>
     <script src="data/tracks.js?v=3" defer></script>
     
     <!-- Feature modules -->
     <script src="modules/stats-data.js?v=1" defer></script>
+    <script src="modules/fun-fact.js?v=1" defer></script>
     <script src="modules/hall-of-fame.js?v=2" defer></script>
     <script src="modules/driver-search.js?v=14" defer></script>
     <script src="modules/navigation.js?v=2" defer></script>

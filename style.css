@@ -2388,6 +2388,27 @@ span.driver-name-top10-glitter::after {
 }
 
 /* ========================================
+   FUN FACT BANNER
+   ======================================== */
+
+#fun-fact-banner {
+    max-width: var(--results-table-max-width);
+    margin: 0.75rem auto 0 auto;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    text-align: center;
+}
+
+#fun-fact-banner strong {
+    color: var(--text-primary, #e2e8f0);
+    margin-right: 0.3em;
+}
+
+/* ========================================
    HALL OF FAME SECTION
    ======================================== */
 
@@ -2395,7 +2416,7 @@ span.driver-name-top10-glitter::after {
     display: block;
     text-decoration: none;
     color: inherit;
-    margin-top: 2rem;
+    margin-top: 1.2rem;
 }
 
 .hall-of-fame-card {

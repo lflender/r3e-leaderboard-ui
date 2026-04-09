@@ -300,7 +300,17 @@ class TableRenderer {
         } else if (isPositionKey) {
             return this.renderPositionCell(item);
         } else if (isCarClassKey) {
-            return `<td class="no-wrap"><strong>${R3EUtils.formatValue(value)}</strong></td>`;
+            const classNameRaw = value || item.CarClass || item['Car Class'] || item.car_class || item.Class || item.class || '';
+            const className = String(classNameRaw || '').trim();
+            const classId = item.class_id || item.ClassID || item['Class ID'] || item.classId || '';
+            const classLogoUrl = (window.R3EUtils && typeof window.R3EUtils.resolveCarClassLogo === 'function')
+                ? window.R3EUtils.resolveCarClassLogo(className, classId)
+                : '';
+            const classLogoHtml = classLogoUrl
+                ? `<img class="table-car-class-logo" src="${R3EUtils.escapeHtml(classLogoUrl)}" alt="${R3EUtils.escapeHtml(className || 'Car class')} class logo" loading="lazy" decoding="async" />`
+                : '';
+            const classTextHtml = className ? R3EUtils.escapeHtml(className) : '—';
+            return `<td class="no-wrap car-class-cell"><strong>${classLogoHtml}${classTextHtml}</strong></td>`;
         } else if (isCarKey) {
             return this.renderCarCell(value);
         } else if (isLapTimeKey) {

@@ -13,3 +13,9 @@ After any code change, always bump cache-busting versions for all edited static 
 
 - Confirm that changed asset references now include the bumped version.
 - Keep version format consistent with existing project style (numeric or timestamp-based).
+
+## Architecture And Reuse
+
+- Never copy/paste logic between modules. Always reuse existing helpers or extract shared logic into a single reusable module.
+- Keep a single source of truth for shared behavior and data derivations.
+- Keep module responsibilities clearly separated (UI rendering, data access, formatting, and domain-specific transforms).

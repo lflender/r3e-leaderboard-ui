@@ -222,12 +222,18 @@
       
       // Build class header with optional superclass
       const superclass = cls.superclass;
+      const classLogoUrl = (window.R3EUtils && typeof window.R3EUtils.resolveCarClassLogoByName === 'function')
+        ? window.R3EUtils.resolveCarClassLogoByName(className)
+        : '';
+      const classLogoHtml = classLogoUrl
+        ? `<img class="table-car-class-logo" src="${R3EUtils.escapeHtml(classLogoUrl)}" alt="${R3EUtils.escapeHtml(className)} class logo" loading="lazy" decoding="async">`
+        : '';
       const classHeaderText = superclass 
         ? `${R3EUtils.escapeHtml(className)} (${R3EUtils.escapeHtml(superclass)})`
         : R3EUtils.escapeHtml(className);
       
       html += `\n<tr class="driver-group-header" data-group="${slug}" onclick="toggleGroup(this)">` +
-              `<td colspan="9"><span class="toggle-icon">▼</span> <strong>${classHeaderText}</strong></td></tr>`;
+              `<td colspan="9"><span class="toggle-icon">▼</span> <strong class="car-class-header-text">${classLogoHtml}${classHeaderText}</strong></td></tr>`;
       filteredCars.forEach(car => {
         displayedCars++;
         if (car.link === undefined) car.link = '';

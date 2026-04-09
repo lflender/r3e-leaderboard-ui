@@ -3,6 +3,7 @@
   {
     "superclass": "GT3",
     "class": "ADAC GT Masters 2013",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/adac-gt-masters-2013-2922-image-small.png",
     "cars": [
       {
         "car_class": "ADAC GT Masters 2013",
@@ -107,6 +108,7 @@
   {
     "superclass": "GT3",
     "class": "ADAC GT Masters 2014",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/adac-gt-masters-2014-3375-image-small.png",
     "cars": [
       {
         "car_class": "ADAC GT Masters 2014",
@@ -197,6 +199,7 @@
   {
     "superclass": "GT3",
     "class": "ADAC GT Masters 2015",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/adac-gt-masters-2015-4516-image-small.png",
     "cars": [
       {
         "car_class": "ADAC GT Masters 2015",
@@ -301,6 +304,7 @@
   {
     "superclass": "GT3",
     "class": "ADAC GT Masters 2018",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/adac-gt-masters-2018-7278-image-small.png",
     "cars": [
       {
         "car_class": "ADAC GT Masters 2018",
@@ -363,6 +367,7 @@
   {
     "superclass": "GT3",
     "class": "ADAC GT Masters 2020",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/adac-gt-masters-2020-7767-image-small.png",
     "cars": [
       {
         "car_class": "ADAC GT Masters 2020",
@@ -467,6 +472,7 @@
   {
     "superclass": "GT3",
     "class": "ADAC GT Masters 2021",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/adac-gt-masters-2021-11566-image-small.png",
     "cars": [
       {
         "car_class": "ADAC GT Masters 2021",
@@ -542,6 +548,7 @@
   },
   {
     "class": "Alpine A110 Cup",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/alpine-a110-cup-13397-image-small.png",
     "cars": [
       {
         "car_class": "Alpine A110 Cup",
@@ -561,6 +568,7 @@
   },
   {
     "class": "Aquila CR1 Cup",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/aquila-cr1-cup-255-image-small.png",
     "cars": [
       {
         "car_class": "Aquila CR1 Cup",
@@ -581,6 +589,7 @@
   {
     "superclass": "Audi Cup",
     "class": "Audi Sport TT Cup 2015",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/audi-sport-tt-cup-2015-4680-image-small.png",
     "cars": [
       {
         "car_class": "Audi Sport TT Cup 2015",
@@ -601,6 +610,7 @@
   {
     "superclass": "Audi Cup",
     "class": "Audi Sport TT Cup 2016",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/audi-sport-tt-cup-2016-5726-image-small.png",
     "cars": [
       {
         "car_class": "Audi Sport TT Cup 2016",
@@ -620,6 +630,7 @@
   },
   {
     "class": "Audi TT RS cup",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/audi-tt-rs-cup-5234-image-small.png",
     "cars": [
       {
         "car_class": "Audi TT RS cup",
@@ -639,6 +650,7 @@
   },
   {
     "class": "BMW M2 Cup",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/bmw-m2-cup-10909-image-small.png",
     "cars": [
       {
         "car_class": "BMW M2 Cup",
@@ -658,6 +670,7 @@
   },
   {
     "class": "BMW M235i Racing Cup",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/bmw-m235i-racing-cup-6344-image-small.png",
     "cars": [
       {
         "car_class": "BMW M235i Racing Cup",
@@ -677,6 +690,7 @@
   },
   {
     "class": "C-Klasse DTM 2005",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/c-klasse-dtm-2005-7168-image-small.png",
     "cars": [
       {
         "car_class": "C-Klasse DTM 2005",
@@ -696,6 +710,7 @@
   },
   {
     "class": "Cayman GT4 Trophy by Manthey-Racing",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/cayman-gt4-trophy-by-manthey-racing-6648-image-small.png",
     "cars": [
       {
         "car_class": "Cayman GT4 Trophy by Manthey-Racing",
@@ -715,6 +730,7 @@
   },
   {
     "class": "Crosslé 90F",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/crossle-90f-10899-image-small.png",
     "cars": [
       {
         "car_class": "Crosslé 90F",
@@ -734,6 +750,7 @@
   },
   {
     "class": "Crosslé 9S",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/crossle-9s-11844-image-small.png",
     "cars": [
       {
         "car_class": "Crosslé 9S",
@@ -754,6 +771,7 @@
   {
     "superclass": "e-Sedan",
     "class": "CUPRA Leon e-Racer",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/cupra-leon-e-racer-8682-image-small.png",
     "cars": [
       {
         "car_class": "CUPRA Leon e-Racer",
@@ -773,6 +791,7 @@
   },
   {
     "class": "Drift",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/drift-1711-image-small.png",
     "cars": [
       {
         "car_class": "Drift",
@@ -806,6 +825,7 @@
   },
   {
     "class": "DTM 1992",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/dtm-1992-3499-image-small.png",
     "cars": [
       {
         "car_class": "DTM 1992",
@@ -881,6 +901,7 @@
   },
   {
     "class": "DTM 1995",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/dtm-1995-7075-image-small.png",
     "cars": [
       {
         "car_class": "DTM 1995",
@@ -928,6 +949,7 @@
   },
   {
     "class": "DTM 2002",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/dtm-2002-13264-image-small.png",
     "cars": [
       {
         "car_class": "DTM 2002",
@@ -975,6 +997,7 @@
   },
   {
     "class": "DTM 2003",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/dtm-2003-7167-image-small.png",
     "cars": [
       {
         "car_class": "DTM 2003",
@@ -995,6 +1018,7 @@
   {
     "superclass": "DTM 2010s",
     "class": "DTM 2013",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/dtm-2013-1921-image-small.png",
     "cars": [
       {
         "car_class": "DTM 2013",
@@ -1043,6 +1067,7 @@
   {
     "superclass": "DTM 2010s",
     "class": "DTM 2014",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/dtm-2014-3086-image-small.png",
     "cars": [
       {
         "car_class": "DTM 2014",
@@ -1091,6 +1116,7 @@
   {
     "superclass": "DTM 2010s",
     "class": "DTM 2015",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/dtm-2015-4260-image-small.png",
     "cars": [
       {
         "car_class": "DTM 2015",
@@ -1139,6 +1165,7 @@
   {
     "superclass": "DTM 2010s",
     "class": "DTM 2016",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/dtm-2016-5262-image-small.png",
     "cars": [
       {
         "car_class": "DTM 2016",
@@ -1186,6 +1213,7 @@
   },
   {
     "class": "DTM 2020",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/dtm-2020-9205-image-small.png",
     "cars": [
       {
         "car_class": "DTM 2020",
@@ -1220,6 +1248,7 @@
   {
     "superclass": "GT3",
     "class": "DTM 2021",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/dtm-2021-10396-image-small.png",
     "cars": [
       {
         "car_class": "DTM 2021",
@@ -1310,6 +1339,7 @@
   {
     "superclass": "GT3",
     "class": "DTM 2023",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/dtm-2023-12196-image-small.png",
     "cars": [
       {
         "car_class": "DTM 2023",
@@ -1386,6 +1416,7 @@
   {
     "superclass": "GT3",
     "class": "DTM 2024",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/dtm-2024-12770-image-small.png",
     "cars": [
       {
         "car_class": "DTM 2024",
@@ -1490,6 +1521,7 @@
   {
     "superclass": "GT3",
     "class": "DTM 2025",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/dtm-2025-13136-image-small.png",
     "cars": [
       {
         "car_class": "DTM 2025",
@@ -1594,6 +1626,7 @@
   {
     "superclass": "e-Sedan",
     "class": "Ford Mustang Mach E",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/ford-mustang-mach-e-10266-image-small.png",
     "cars": [
       {
         "car_class": "Ford Mustang Mach E",
@@ -1613,6 +1646,7 @@
   },
   {
     "class": "FR US Cup",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/fr-us-cup-5383-image-small.png",
     "cars": [
       {
         "car_class": "FR US Cup",
@@ -1632,6 +1666,7 @@
   },
   {
     "class": "FR X-17 Cup",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/fr-x-17-cup-5824-image-small.png",
     "cars": [
       {
         "car_class": "FR X-17 Cup",
@@ -1651,6 +1686,7 @@
   },
   {
     "class": "FR X-22 Cup",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/fr-x-22-cup-10050-image-small.png",
     "cars": [
       {
         "car_class": "FR X-22 Cup",
@@ -1670,6 +1706,7 @@
   },
   {
     "class": "FR X-90 Cup",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/fr-x-90-cup-7214-image-small.png",
     "cars": [
       {
         "car_class": "FR X-90 Cup",
@@ -1717,6 +1754,7 @@
   },
   {
     "class": "FR2 Cup",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/fr2-cup-4597-image-small.png",
     "cars": [
       {
         "car_class": "FR2 Cup",
@@ -1736,6 +1774,7 @@
   },
   {
     "class": "FR3 Cup",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/fr3-cup-5652-image-small.png",
     "cars": [
       {
         "car_class": "FR3 Cup",
@@ -1755,6 +1794,7 @@
   },
   {
     "class": "FRJ Cup",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/frj-cup-253-image-small.png",
     "cars": [
       {
         "car_class": "FRJ Cup",
@@ -1774,6 +1814,7 @@
   },
   {
     "class": "German Nationals",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/german-nationals-1706-image-small.png",
     "cars": [
       {
         "car_class": "German Nationals",
@@ -1807,6 +1848,7 @@
   },
   {
     "class": "Group 2",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/group-2-8483-image-small.png",
     "cars": [
       {
         "car_class": "Group 2",
@@ -1826,6 +1868,7 @@
   },
   {
     "class": "Group 4",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/group-4-7304-image-small.png",
     "cars": [
       {
         "car_class": "Group 4",
@@ -1859,6 +1902,7 @@
   },
   {
     "class": "Group 5",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/group-5-1708-image-small.png",
     "cars": [
       {
         "car_class": "Group 5",
@@ -1962,6 +2006,7 @@
   },
   {
     "class": "Group C",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/group-c-4121-image-small.png",
     "cars": [
       {
         "car_class": "Group C",
@@ -1995,6 +2040,7 @@
   },
   {
     "class": "GT2",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/gt2-8248-image-small.png",
     "cars": [
       {
         "car_class": "GT2",
@@ -2042,6 +2088,7 @@
   },
   {
     "class": "GTE",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/gte-8600-image-small.png",
     "cars": [
       {
         "car_class": "GTE",
@@ -2075,6 +2122,7 @@
   },
   {
     "class": "GTO Classics",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/gto-classics-1713-image-small.png",
     "cars": [
       {
         "car_class": "GTO Classics",
@@ -2122,6 +2170,7 @@
   },
   {
     "class": "GTR 1",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/gtr-1-1687-image-small.png",
     "cars": [
       {
         "car_class": "GTR 1",
@@ -2211,6 +2260,7 @@
   },
   {
     "class": "GTR 2",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/gtr-2-1704-image-small.png",
     "cars": [
       {
         "car_class": "GTR 2",
@@ -2287,6 +2337,7 @@
   {
     "superclass": "GT3",
     "class": "GTR 3",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/gtr-3-1703-image-small.png",
     "cars": [
       {
         "car_class": "GTR 3",
@@ -2698,6 +2749,7 @@
   },
   {
     "class": "GTR 4",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/gtr-4-5825-image-small.png",
     "cars": [
       {
         "car_class": "GTR 4",
@@ -2843,6 +2895,7 @@
   },
   {
     "class": "Hillclimb Icons",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/hillclimb-icons-1685-image-small.png",
     "cars": [
       {
         "car_class": "Hillclimb Icons",
@@ -2890,6 +2943,7 @@
   },
   {
     "class": "Hypercars",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/hypercars-13129-image-small.png",
     "cars": [
       {
         "car_class": "Hypercars",
@@ -2937,6 +2991,7 @@
   },
   {
     "class": "KTM GTX",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/ktm-gtx-11990-image-small.png",
     "cars": [
       {
         "car_class": "KTM GTX",
@@ -2956,6 +3011,7 @@
   },
   {
     "class": "KTM X-Bow RR Cup",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/ktm-x-bow-rr-cup-5385-image-small.png",
     "cars": [
       {
         "car_class": "KTM X-Bow RR Cup",
@@ -2975,6 +3031,7 @@
   },
   {
     "class": "Mazda Dpi",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/mazda-dpi-12003-image-small.png",
     "cars": [
       {
         "car_class": "Mazda Dpi",
@@ -2994,6 +3051,7 @@
   },
   {
     "class": "Mazda MX-5 Cup",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/mazda-mx-5-cup-10977-image-small.png",
     "cars": [
       {
         "car_class": "Mazda MX-5 Cup",
@@ -3013,6 +3071,7 @@
   },
   {
     "class": "NSU TTS Cup",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/nsu-tts-cup-4813-image-small.png",
     "cars": [
       {
         "car_class": "NSU TTS Cup",
@@ -3032,6 +3091,7 @@
   },
   {
     "class": "NXT Gen Cup",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/nxt-gen-cup-13358-image-small.png",
     "cars": [
       {
         "car_class": "NXT Gen Cup",
@@ -3051,6 +3111,7 @@
   },
   {
     "class": "P1",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/p1-1714-image-small.png",
     "cars": [
       {
         "car_class": "P1",
@@ -3098,6 +3159,7 @@
   },
   {
     "class": "P2",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/p2-1923-image-small.png",
     "cars": [
       {
         "car_class": "P2",
@@ -3173,6 +3235,7 @@
   },
   {
     "class": "Porsche 944 Turbo Cup",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/porsche-944-turbo-cup-11564-image-small.png",
     "cars": [
       {
         "car_class": "Porsche 944 Turbo Cup",
@@ -3193,6 +3256,7 @@
   {
     "superclass": "Classics",
     "class": "Porsche 964 Cup",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/porsche-964-cup-7287-image-small.png",
     "cars": [
       {
         "car_class": "Porsche 964 Cup",
@@ -3212,6 +3276,7 @@
   },
   {
     "class": "Porsche 991.2 GT3 Cup",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/porsche-9912-gt3-cup-6345-image-small.png",
     "cars": [
       {
         "car_class": "Porsche 991.2 GT3 Cup",
@@ -3231,6 +3296,7 @@
   },
   {
     "class": "Porsche 992 GT3 Cup",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/porsche-992-gt3-cup-12302-image-small.png",
     "cars": [
       {
         "car_class": "Porsche 992 GT3 Cup",
@@ -3251,6 +3317,7 @@
   {
     "superclass": "Porsche Cup",
     "class": "Porsche Carrera Cup Deutschland 2019",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/porsche-carrera-cup-deutschland-2019-7982-image-small.png",
     "cars": [
       {
         "car_class": "Porsche Carrera Cup Deutschland 2019",
@@ -3271,6 +3338,7 @@
   {
     "superclass": "Porsche Cup",
     "class": "Porsche Carrera Cup Deutschland 2023",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/porsche-carrera-cup-deutschland-2023-12015-image-small.png",
     "cars": [
       {
         "car_class": "Porsche Carrera Cup Deutschland 2023",
@@ -3291,6 +3359,7 @@
   {
     "superclass": "Porsche Cup",
     "class": "Porsche Carrera Cup North America 2024",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/porsche-carrera-cup-north-america-2024-12969-image-small.png",
     "cars": [
       {
         "car_class": "Porsche Carrera Cup North America 2024",
@@ -3311,6 +3380,7 @@
   {
     "superclass": "Porsche Cup",
     "class": "Porsche Carrera Cup Scandinavia",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/porsche-carrera-cup-scandinavia-8165-image-small.png",
     "cars": [
       {
         "car_class": "Porsche Carrera Cup Scandinavia",
@@ -3330,6 +3400,7 @@
   },
   {
     "class": "Praga R1",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/praga-r1-11055-image-small.png",
     "cars": [
       {
         "car_class": "Praga R1",
@@ -3349,6 +3420,7 @@
   },
   {
     "class": "Procar",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/procar-2378-image-small.png",
     "cars": [
       {
         "car_class": "Procar",
@@ -3368,6 +3440,7 @@
   },
   {
     "class": "Safety Car",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/safety-cars-10743-image-small.png",
     "cars": [
       {
         "car_class": "Safety Car",
@@ -3386,7 +3459,28 @@
     ]
   },
   {
+    "class": "Shopping Cart",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/shopping-cart-8680-image-small.png",
+    "cars": [
+      {
+        "car_class": "Shopping Cart",
+        "car": "Shopping Cart",
+        "wheel_cat": "round",
+        "transmission_cat": "",
+        "year": "2022",
+        "power": "67hp",
+        "weight": "200kg with driver",
+        "engine": "400cc 4-cylinder",
+        "drive": "RWD",
+        "country": "Sweden",
+        "link": "https://game.raceroom.com/store/cars/shopping-cart/raceroom/shopping-cart",
+        "description": ""
+      }
+    ]
+  },
+  {
     "class": "Silhouette Series",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/silhouette-series-1717-image-small.png",
     "cars": [
       {
         "car_class": "Silhouette Series",
@@ -3448,6 +3542,7 @@
   },
   {
     "class": "Super Touring",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/super-touring-1710-image-small.png",
     "cars": [
       {
         "car_class": "Super Touring",
@@ -3565,6 +3660,7 @@
   },
   {
     "class": "Tatuus F4 Cup",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/tatuus-f4-cup-4867-image-small.png",
     "cars": [
       {
         "car_class": "Tatuus F4 Cup",
@@ -3585,6 +3681,7 @@
   {
     "superclass": "WTCR",
     "class": "Touring Cars Cup",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/touring-cars-cup-8660-image-small.png",
     "cars": [
       {
         "car_class": "Touring Cars Cup",
@@ -3661,6 +3758,7 @@
   {
     "superclass": "Classics",
     "class": "Touring Classics",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/touring-classics-1712-image-small.png",
     "cars": [
       {
         "car_class": "Touring Classics",
@@ -3722,6 +3820,7 @@
   },
   {
     "class": "Truck Racing",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/truck-racing-9989-image-small.png",
     "cars": [
       {
         "car_class": "Truck Racing",
@@ -3741,6 +3840,7 @@
   },
   {
     "class": "Volkswagen ID. R",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/volkswagen-id-r-7765-image-small.png",
     "cars": [
       {
         "car_class": "Volkswagen ID. R",
@@ -3760,6 +3860,7 @@
   },
   {
     "class": "WTCC 2013",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/wtcc-2013-1922-image-small.png",
     "cars": [
       {
         "car_class": "WTCC 2013",
@@ -3836,6 +3937,7 @@
   {
     "superclass": "WTCC",
     "class": "WTCC 2014",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/wtcc-2014-3905-image-small.png",
     "cars": [
       {
         "car_class": "WTCC 2014",
@@ -3898,6 +4000,7 @@
   {
     "superclass": "WTCC",
     "class": "WTCC 2015",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/wtcc-2015-4517-image-small.png",
     "cars": [
       {
         "car_class": "WTCC 2015",
@@ -3960,6 +4063,7 @@
   {
     "superclass": "WTCC",
     "class": "WTCC 2016",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/wtcc-2016-6036-image-small.png",
     "cars": [
       {
         "car_class": "WTCC 2016",
@@ -4036,6 +4140,7 @@
   {
     "superclass": "WTCC",
     "class": "WTCC 2017",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/wtcc-2017-6309-image-small.png",
     "cars": [
       {
         "car_class": "WTCC 2017",
@@ -4112,6 +4217,7 @@
   {
     "superclass": "WTCR",
     "class": "WTCR 2018",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/wtcr-2018-7009-image-small.png",
     "cars": [
       {
         "car_class": "WTCR 2018",
@@ -4216,6 +4322,7 @@
   {
     "superclass": "WTCR",
     "class": "WTCR 2019",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/wtcr-2019-7844-image-small.png",
     "cars": [
       {
         "car_class": "WTCR 2019",
@@ -4320,6 +4427,7 @@
   {
     "superclass": "WTCR",
     "class": "WTCR 2020",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/wtcr-2020-9233-image-small.png",
     "cars": [
       {
         "car_class": "WTCR 2020",
@@ -4424,6 +4532,7 @@
   {
     "superclass": "WTCR",
     "class": "WTCR 2021",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/wtcr-2021-10344-image-small.png",
     "cars": [
       {
         "car_class": "WTCR 2021",
@@ -4514,6 +4623,7 @@
   {
     "superclass": "WTCR",
     "class": "WTCR 2022",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/wtcr-2022-11317-image-small.png",
     "cars": [
       {
         "car_class": "WTCR 2022",
@@ -4589,6 +4699,7 @@
   },
   {
     "class": "Zonda R Cup",
+    "logo": "https://prod.r3eassets.com/assets/content/carclass/zonda-r-cup-7110-image-small.png",
     "cars": [
       {
         "car_class": "Zonda R Cup",

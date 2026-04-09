@@ -325,6 +325,13 @@ class DailyRaces {
 
             for (const race of races) {
                 const carClassName = this.resolveRaceCarClassName(race);
+                const classLogosHtml = (window.R3EUtils && typeof window.R3EUtils.getDailyRaceClassLogosHtml === 'function')
+                    ? window.R3EUtils.getDailyRaceClassLogosHtml(
+                        race,
+                        (classId) => this.resolveCarClassName(classId),
+                        carClassName
+                    )
+                    : '';
                 
                 const trackName = this.resolveTrackName(race.track_id);
                 const isFree = race.is_free_to_play;
@@ -343,11 +350,12 @@ class DailyRaces {
 
                 cardsHtml += `<a href="${detailLink}" target="_blank" class="daily-race-card-link">`;
                 cardsHtml += '<div class="daily-race-card">';
-                if (isFree) {
-                    cardsHtml += `<div class="daily-race-badge free">${freeIcon}</div>`;
-                }
                 cardsHtml += '<div class="daily-race-content">';
-                cardsHtml += `<div class="daily-race-class">${R3EUtils.escapeHtml(carClassName)}</div>`;
+                const freeIconHtml = isFree
+                    ? `<span class="daily-race-free-inline" title="Free to play" aria-label="Free to play">${freeIcon}</span>`
+                    : '';
+                cardsHtml += `<div class="daily-race-class">${R3EUtils.escapeHtml(carClassName)}${freeIconHtml}</div>`;
+                cardsHtml += classLogosHtml;
 
                 // Split track name on dash for better formatting
                 const trackParts = trackName.split(' - ');

@@ -4,6 +4,7 @@
     const bestedTitleEl = document.getElementById('stats-bested-title');
     const poleContainer = document.getElementById('stats-pole-table');
     const bestedContainer = document.getElementById('stats-bested-table');
+    const selectedClassLogoEl = document.getElementById('stats-selected-class-logo');
 
     let currentFilter = '';
     let currentRequestId = 0;
@@ -78,11 +79,39 @@
         return `<span class="pos-number${posClass}">${position}</span>`;
     }
 
+    function renderSelectedClassLogo(filterValue) {
+        if (!selectedClassLogoEl) return;
+
+        const hideLogo = () => {
+            selectedClassLogoEl.innerHTML = '';
+            selectedClassLogoEl.hidden = true;
+        };
+
+        if (!filterValue || filterValue.startsWith('superclass:')) {
+            hideLogo();
+            return;
+        }
+
+        const className = getSelectedLabel(filterValue);
+        const classId = typeof window.getCarClassId === 'function'
+            ? window.getCarClassId(className)
+            : '';
+
+        const logoUrl = window.R3EUtils?.resolveCarClassLogo?.(className, classId) || '';
+        if (!logoUrl) {
+            hideLogo();
+            return;
+        }
+
+        selectedClassLogoEl.innerHTML = `<img class="stats-selected-class-logo__img" src="${escapeHtml(logoUrl)}" alt="${escapeHtml(className)} class logo" loading="lazy" decoding="async">`;
+        selectedClassLogoEl.hidden = false;
+    }
+
     function buildDriverCell(row) {
         const name = row.name;
         const country = row.country;
         const rank = row.rank;
-        const searchUrl = `/?driver=${encodeURIComponent(`"${name}"`)}`;
+        const searchUrl = `drivers.html?driver=${encodeURIComponent(`"${name}"`)}`;  
 
         // MP position and name colouring
         const mpPos = (typeof resolveMpPos === 'function') ? resolveMpPos(name, country) : null;
@@ -149,6 +178,7 @@
     async function fetchAndRender() {
         const requestId = ++currentRequestId;
         renderLoading();
+        renderSelectedClassLogo(currentFilter);
 
         try {
             const statsData = getStatsData();
@@ -177,6 +207,7 @@
             if (bestedTitleEl) {
                 bestedTitleEl.textContent = `Top 100 Drivers by Bested Drivers (${selectedLabel})`;
             }
+            renderSelectedClassLogo(currentFilter);
 
             const poleRows = statsData.normalizeRows(poleRaw, 'pole_positions');
             const bestedRows = statsData.normalizeRows(bestedRaw, 'bested_drivers');

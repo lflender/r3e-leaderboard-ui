@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -26,7 +26,7 @@
 
     <script src="modules/analytics.js?v=3"></script>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-    <link rel="stylesheet" href="style.css?v=32">
+    <link rel="stylesheet" href="style.css?v=56">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"/>
     <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png?v=3">
     <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png?v=3">
@@ -39,9 +39,9 @@
     <main>
         <h1 class="sr-only">RaceRoom Driver Statistics</h1>
         <div class="tabs">
-            <a class="tab-button" href="/">Driver Info</a>
-            <a class="tab-button" href="tracks.html">Track Info</a>
-            <a class="tab-button" href="cars.html">Car Info</a>
+            <a class="tab-button" href="drivers.html">Driver Search</a>
+            <a class="tab-button" href="tracks.html">Tracks</a>
+            <a class="tab-button" href="cars.html">Cars</a>
             <button class="tab-button active">Driver Stats</button>
             <a class="tab-button" href="faq.html">FAQ</a>
         </div>
@@ -60,6 +60,7 @@
                         <h2 id="stats-pole-title">Top 100 Drivers by Pole Position (Overall)</h2>
                         <div id="stats-pole-table"></div>
                     </section>
+                    <div id="stats-selected-class-logo" class="stats-selected-class-logo" hidden aria-hidden="true"></div>
                     <section class="stats-box" aria-label="Top 100 by bested drivers">
                         <h2 id="stats-bested-title">Top 100 Drivers by Bested Drivers (Overall)</h2>
                         <div id="stats-bested-table"></div>
@@ -69,7 +70,7 @@
         </div>
 
         <section class="seo-content" aria-label="About stats">
-            <p class="page-intro">Browse top RaceRoom drivers by total pole positions and by total bested drivers, overall or per class category.</p>
+            <p class="page-intro">Browse top <strong>RaceRoom leaderboards</strong> drivers by total pole positions and by total bested drivers, overall or per class category.<br/>Or go back to this week's <a href="/" class="internal-link">ranked multiplayer races</a>.</p>
         </section>
 
         <div id="status-container" class="status-section">
@@ -117,13 +118,13 @@
     <script src="modules/flag-helper.js?v=1" defer></script>
     <script src="modules/mp-pos-service.js?v=7" defer></script>
     <script src="modules/status-display.js?v=3" defer></script>
-    <script src="modules/utils.js?v=3" defer></script>
+    <script src="modules/utils.js?v=5" defer></script>
 
     <script src="data/car-classes.js?v=3" defer></script>
-    <script src="data/cars.js?v=3" defer></script>
+    <script src="data/cars.js?v=4" defer></script>
 
     <script src="modules/stats-data.js?v=1" defer></script>
-    <script src="modules/stats.js?v=9" defer></script>
+    <script src="modules/stats.js?v=11" defer></script>
     <script src="script.js?v=2" defer></script>
 </body>
 </html>

@@ -36,10 +36,14 @@
         return rows.map((row, index) => {
             const rank = index + 1;
             const value = Number.isFinite(row.value) ? row.value.toLocaleString() : '0';
+            const flagRaw = (window.FlagHelper && typeof window.FlagHelper.countryToFlag === 'function')
+                ? window.FlagHelper.countryToFlag(row.country)
+                : '';
+            const flagHtml = flagRaw ? `<span class="country-flag">${flagRaw}</span>` : '';
             return [
                 '<li class="hall-of-fame-item">',
                 `<span class="hall-of-fame-rank">${rank}</span>`,
-                `<span class="hall-of-fame-name">${escapeHtml(row.name)}</span>`,
+                `<span class="hall-of-fame-name">${flagHtml}${escapeHtml(row.name)}</span>`,
                 `<span class="hall-of-fame-value">${value} ${metricLabel}</span>`,
                 '</li>'
             ].join('');
@@ -95,8 +99,8 @@
                 window.StatsData.fetchGzipJson(paths.bestedPath)
             ]);
 
-            const poles = window.StatsData.normalizeRows(polePayload, 'pole_positions', 3);
-            const bested = window.StatsData.normalizeRows(bestedPayload, 'bested_drivers', 3);
+            const poles = window.StatsData.normalizeRows(polePayload, 'pole_positions', 5);
+            const bested = window.StatsData.normalizeRows(bestedPayload, 'bested_drivers', 5);
 
             render({ poles, bested });
         } catch (error) {

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -28,7 +28,7 @@
     <!-- Analytics (PostHog via first-party proxy) -->
     <script src="modules/analytics.js?v=3"></script>
     
-    <link rel="stylesheet" href="style.css?v=32">
+    <link rel="stylesheet" href="style.css?v=56">
     <!-- Site Icons -->
     <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png?v=2">
     <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png?v=2">
@@ -49,9 +49,9 @@
     <main>
         <h1 class="sr-only">RaceRoom Track Info and Class Leaderboard Combinations</h1>
         <div class="tabs">
-            <a class="tab-button" href="/">Driver Info</a>
-            <button class="tab-button active">Track Info</button>
-            <a class="tab-button" href="cars.html">Car Info</a>
+            <a class="tab-button" href="drivers.html">Driver Search</a>
+            <button class="tab-button active">Tracks</button>
+            <a class="tab-button" href="cars.html">Cars</a>
             <a class="tab-button" href="stats.html">Driver Stats</a>
             <a class="tab-button" href="faq.html">FAQ</a>
         </div>
@@ -82,7 +82,7 @@
         </div>
   
         <section class="seo-content" aria-label="About RaceRoom Leaderboards">
-            <p class="page-intro">Browse all track and class combinations available in <a href="/" class="internal-link">RaceRoom leaderboards</a>.<br/>Filter by track or car class to find out the most popular combinations and explore various leaderboards.</p>
+            <p class="page-intro">Browse all track and class combinations available in <strong>RaceRoom leaderboards</strong>.<br/>Filter by track or car class to find out the most popular combinations and explore various leaderboards.<br/>Or go back to this week's <a href="/" class="internal-link">ranked multiplayer races</a>.</p>
         </section>
 
         <div id="status-container" class="status-section">
@@ -133,9 +133,9 @@
     <script src="modules/field-mappings.js?v=1" defer></script>
     <script src="modules/flag-helper.js?v=1" defer></script>
     <script src="modules/mp-pos-service.js?v=7" defer></script>
-    <script src="modules/table-renderer.js?v=14" defer></script>
+    <script src="modules/table-renderer.js?v=15" defer></script>
     <script src="modules/template-helper.js?v=1" defer></script>
-    <script src="modules/utils.js?v=3" defer></script>
+    <script src="modules/utils.js?v=5" defer></script>
     
     <!-- Feature modules -->
     <script src="modules/navigation.js?v=2" defer></script>
@@ -144,9 +144,9 @@
     
     <!-- Data -->
     <script src="data/car-classes.js?v=3" defer></script>
-    <script src="data/cars.js?v=3" defer></script>
+    <script src="data/cars.js?v=4" defer></script>
     <script src="data/tracks.js?v=3" defer></script>
-    <script src="modules/track-info.js?v=10" defer></script>
+    <script src="modules/track-info.js?v=12" defer></script>
 
     <!-- Application script -->
     <script src="script.js?v=2" defer></script>

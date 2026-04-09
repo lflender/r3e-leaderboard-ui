@@ -846,6 +846,7 @@ function setDetailTitles(data, trackParam, classParam) {
     let trackName = trackParam || '';
     let layoutName = '';
     let carClassName = '';
+    let carClassId = '';
     
     // Try to get info from track_info
     if (data.track_info && typeof data.track_info === 'object') {
@@ -864,6 +865,7 @@ function setDetailTitles(data, trackParam, classParam) {
             }
         }
         carClassName = data.track_info.ClassName || data.track_info.class_name || '';
+        carClassId = data.track_info.ClassId || data.track_info.class_id || data.track_info.classid || '';
     }
     
     // Fallback to results array
@@ -894,6 +896,11 @@ function setDetailTitles(data, trackParam, classParam) {
                 carClassName = first?.car_class?.class?.Name || first?.car_class?.class?.name || 
                               first.CarClass || first['Car Class'] || '';
             }
+            if (!carClassId) {
+                carClassId = first?.car_class?.class?.Id || first?.car_class?.class?.id ||
+                             first?.car_class?.Id || first?.car_class?.id ||
+                             first.ClassId || first.class_id || first.classId || '';
+            }
         }
     }
     
@@ -915,8 +922,15 @@ function setDetailTitles(data, trackParam, classParam) {
         if (layoutElem) layoutElem.remove();
     }
     
-    document.getElementById('detail-class').innerHTML = 
-        `<span class="detail-label">Class:</span> ${R3EUtils.escapeHtml(carClassName)}`;
+    const classLogoUrl = (window.R3EUtils && typeof window.R3EUtils.resolveCarClassLogo === 'function')
+        ? window.R3EUtils.resolveCarClassLogo(carClassName, carClassId)
+        : '';
+    const classLogoHtml = classLogoUrl
+        ? `<img class="detail-class-logo" src="${R3EUtils.escapeHtml(classLogoUrl)}" alt="${R3EUtils.escapeHtml(carClassName)} class logo" loading="lazy" decoding="async" />`
+        : '';
+
+    document.getElementById('detail-class').innerHTML =
+        `<span class="detail-label">Class:</span>${classLogoHtml}<span class="detail-class-name">${R3EUtils.escapeHtml(carClassName)}</span>`;
 }
 
 /**
@@ -1396,7 +1410,7 @@ function renderDetailRow(item, showAbsolutePosition = false) {
     
     if (!highlisted) {
         const encoded = encodeURIComponent(`"${String(name)}"`);
-        html += `<td><a class="${driverLinkClass}" href="index.html?driver=${encoded}">${flagHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}${mpPosHtml}</a></td>`;
+        html += `<td><a class="${driverLinkClass}" href="drivers.html?driver=${encoded}">${flagHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}${mpPosHtml}</a></td>`;
     } else {
         const nameClasses = typeof getMpPosNameClasses === 'function'
             ? getMpPosNameClasses(mpPos, { gold: 10, silver: 100, glitter: 10 })

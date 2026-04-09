@@ -629,9 +629,16 @@
         if (key === 'Position' || key === 'position' || key === 'Pos') {
           const posNum = String(value || '');
           html += `<td class="pos-cell"><span class="pos-number">${R3EUtils.escapeHtml(posNum)}</span></td>`;
-        } else if (key === 'Car Class' || key === 'car_class' || key === 'Class' || key === 'CarClass') {
-          // Car class cell: allow wrapping and target with class for mobile sizing
-          html += `<td class="class-cell">${formatValue(value)}</td>`;
+        } else if (key === 'Car Class' || key === 'car_class' || key === 'Class' || key === 'CarClass' || key === 'class_name' || key === 'className' || key === 'ClassName' || key === 'class') {
+          const className = String(value || '').trim();
+          const classLogoUrl = (window.R3EUtils && typeof window.R3EUtils.resolveCarClassLogo === 'function')
+            ? window.R3EUtils.resolveCarClassLogo(className, classIdVal)
+            : '';
+          const classLogoHtml = classLogoUrl
+            ? `<img class="table-car-class-logo" src="${R3EUtils.escapeHtml(classLogoUrl)}" alt="${R3EUtils.escapeHtml(className || 'Car class')} class logo" loading="lazy" decoding="async" />`
+            : '';
+          const classTextHtml = className ? R3EUtils.escapeHtml(className) : '—';
+          html += `<td class="class-cell car-class-cell"><strong>${classLogoHtml}${classTextHtml}</strong></td>`;
         } else if (key === 'LapTime' || key === 'Lap Time' || key === 'lap_time' || key === 'laptime' || key === 'Time') {
           const s = String(value || '');
           const parts = s.split(/,\s*/);

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -28,7 +28,7 @@
   <!-- Analytics (PostHog via first-party proxy) -->
   <script src="modules/analytics.js?v=3"></script>
 
-  <link rel="stylesheet" href="style.css?v=32">
+  <link rel="stylesheet" href="style.css?v=56">
   <!-- Site Icons -->
   <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png?v=2">
   <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png?v=2">
@@ -88,71 +88,79 @@
 
   <main>
     <div class="tabs">
-      <a class="tab-button" href="/">Driver Info</a>
-      <a class="tab-button" href="tracks.html">Track Info</a>
-      <a class="tab-button" href="cars.html">Car Info</a>
+      <a class="tab-button" href="drivers.html">Driver Search</a>
+      <a class="tab-button" href="tracks.html">Tracks</a>
+      <a class="tab-button" href="cars.html">Cars</a>
       <a class="tab-button" href="stats.html">Driver Stats</a>
       <button class="tab-button active">FAQ</button>
     </div>
 
-    <div class="faq-container">
-      <h1 class="faq-title">Frequently Asked Questions</h1>
-      <p class="faq-intro">Find answers to questions you may have about the <a href="/" class="internal-link">RaceRoom leaderboards</a> database and how to use this site.</p>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="faq-container">
+          <h1 class="faq-title">Frequently Asked Questions</h1>
 
-      <div class="faq-list">
+          <div class="faq-list">
 
-        <details class="faq-item">
-          <summary>I noticed the "Support r3e-leaderboards" button in the footer. Why would I want to pay for this site?</summary>
-          <div class="faq-content">
-            <p>Servers and domain have a cost each month.</p>
-            <p>Donations allow to cover the costs of the infrastructure.</p>
-            <br/>
-            <p>Also, developping this site takes time and effort, so you can donate as a reward for the hard work.<br/>Each donation means a lot to me.</p>
+          <details class="faq-item">
+            <summary>I noticed the "Support r3e-leaderboards" button in the footer. Why would I want to pay for this site?</summary>
+            <div class="faq-content">
+              <p>Servers and domain have a cost each month.</p>
+              <p>Donations allow to cover the costs of the infrastructure.</p>
+              <br/>
+              <p>Also, developping this site takes time and effort, so you can donate as a reward for the hard work.<br/>Each donation means a lot to me.</p>
+            </div>
+          </details>
+          
+          <details class="faq-item">
+            <summary>I just set a new record, why does it not appear right away?</summary>
+            <div class="faq-content">
+              <p>All data served by RaceRoom Leaderboards Explorer is pre-fetched and does not hit the official servers.</p>
+              <br/>
+              <p>By design, the information displayed is not live data.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary>So, when will my new record appear?</summary>
+            <div class="faq-content">
+              <p>All data is refreshed daily, except the daily races combinations which are refreshed hourly.</p>
+              <br/>
+              <p>Updates take a long time, but during that time, data is indexed every 60 minutes.<br/>You can see update details in the "Database Status" section at the bottom of each page.</p>
+              <br/>
+              <p>Worst case scenario is that you have to wait for 1 hour for a daily race or 24 hours for any other combo.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary>In the class filters, why are there some Categories at start?</summary>
+            <div class="faq-content">
+              <p>Categories are used to show similar classes together.</p>
+              <br/>
+              <p>The categories are based on the official <a href="https://forum.kw-studios.com/index.php?threads/performance-index.10084/page-9#post-259671" target="_blank">Performance Index</a>.</p>
+              <br/>
+              <p>On the <a href="https://r3e-leaderboards.info/tracks.html">Track Info</a> page, you can even hit the "Combine" checkbox to group multiple classes on the same leaderboards.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary>On the combined leaderboards, why are there some Combined car entries?</summary>
+            <div class="faq-content">
+              <p>The Combined entries allow to filter the leaderboards by grouping multiple cars together when those cars have the exact same specifications.</p>
+              <br/>
+              <p>For example, the Ferrari 296 GT3 and the Ferrari 296 GT3 DTM are the same cars, so you can filter leaderboards with both at the same time.</p>
+            </div>
+          </details>
+
           </div>
-        </details>
-        
-        <details class="faq-item">
-          <summary>I just set a new record, why does it not appear right away?</summary>
-          <div class="faq-content">
-            <p>All data served by RaceRoom Leaderboards Explorer is pre-fetched and does not hit the official servers.</p>
-            <br/>
-            <p>By design, the information displayed is not live data.</p>
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>So, when will my new record appear?</summary>
-          <div class="faq-content">
-            <p>All data is refreshed daily, except the daily races combinations which are refreshed hourly.</p>
-            <br/>
-            <p>Updates take a long time, but during that time, data is indexed every 60 minutes.<br/>You can see update details in the "Database Status" section at the bottom of each page.</p>
-            <br/>
-            <p>Worst case scenario is that you have to wait for 24 hours.</p>
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>In the class filters, why are there some Categories at start?</summary>
-          <div class="faq-content">
-            <p>Categories are used to show similar classes together.</p>
-            <br/>
-            <p>The categories are based on the official <a href="https://forum.kw-studios.com/index.php?threads/performance-index.10084/page-9#post-259671" target="_blank">Performance Index</a>.</p>
-            <br/>
-            <p>On the <a href="https://r3e-leaderboards.info/tracks.html">Track Info</a> page, you can even hit the "Combine" checkbox to group multiple classes on the same leaderboards.</p>
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>On the combined leaderboards, why are there some Combined car entries?</summary>
-          <div class="faq-content">
-            <p>The Combined entries allow to filter the leaderboards by grouping multiple cars together when those cars have the exact same specifications.</p>
-            <br/>
-            <p>For example, the Ferrari 296 GT3 and the Ferrari 296 GT3 DTM are the same cars, so you can filter leaderboards with both at the same time.</p>
-          </div>
-        </details>
-
+        </div>
       </div>
     </div>
+
+    <section class="seo-content" aria-label="About FAQ">
+      <p class="page-intro">Find answers to questions you may have about <strong>RaceRoom leaderboards</strong> and how this website works.<br/>Or go back to this week's <a href="/" class="internal-link">ranked multiplayer races</a>.</p>
+    </section>
+
   </main>
 
   <div id="site-footer"></div>

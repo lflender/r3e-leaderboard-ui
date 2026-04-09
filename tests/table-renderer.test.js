@@ -46,4 +46,23 @@ describe('table-renderer track resolution', () => {
 
         expect(entries.map(entry => entry.track_id)).toEqual(['10', '20']);
     });
+
+    test('renders car class logo in car class cells when logo mapping exists', () => {
+        window.CARS_DATA = [
+            { class: 'GT3', logo: 'https://example.com/gt3-logo.png' }
+        ];
+
+        const html = window.tableRenderer.renderDriverGroupedTable([
+            {
+                driver: 'Bob',
+                country: 'DE',
+                team: '',
+                entries: [{ position: '1', lap_time: '1:30.000', car_class: 'GT3', class_id: '1703' }]
+            }
+        ], ['car_class'], 'gap');
+
+        expect(html).toContain('table-car-class-logo');
+        expect(html).toContain('https://example.com/gt3-logo.png');
+        expect(html).toContain('GT3');
+    });
 });

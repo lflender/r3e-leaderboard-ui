@@ -171,6 +171,43 @@ class DataService {
         return this._extractDriverMirrorMetadata(normalizedName, mirrorEntry);
     }
 
+    async enrichEntriesWithDriverMetadata(entries) {
+        if (!Array.isArray(entries) || entries.length === 0) {
+            return entries;
+        }
+
+        const driverMirror = await this.waitForDriverIndex();
+        if (!driverMirror || typeof driverMirror !== 'object' || Object.keys(driverMirror).length === 0) {
+            return entries;
+        }
+
+        entries.forEach(entry => {
+            const driverName = window.DataNormalizer && typeof window.DataNormalizer.extractName === 'function'
+                ? window.DataNormalizer.extractName(entry)
+                : (entry.name || entry.Name || '');
+
+            if (!driverName) {
+                return;
+            }
+
+            const metadata = this.getDriverMetadata(driverName, driverMirror);
+            if (!metadata) {
+                return;
+            }
+
+            if (metadata.country) {
+                entry.country = metadata.country;
+                entry.Country = metadata.country;
+            }
+            entry.team = metadata.team || '';
+            entry.Team = metadata.team || '';
+            entry.rank = metadata.rank || '';
+            entry.Rank = metadata.rank || '';
+        });
+
+        return entries;
+    }
+
     /**
      * Loads a single shard file with single-flight dedupe and in-memory caching
      * @param {string} shardKey - a-z or _
@@ -686,15 +723,50 @@ class DataService {
      * @returns {Array} Leaderboard entries
      */
     extractLeaderboardArray(data) {
+        if (!data || typeof data !== 'object') {
+            return [];
+        }
+
         if (data.track_info && data.track_info.Data && Array.isArray(data.track_info.Data)) {
             return data.track_info.Data;
         }
-        
-        // Try other possible locations
-        const possibleKeys = ['Data', 'data', 'entries', 'leaderboard'];
+
+        const possibleKeys = ['leaderboard', 'entries', 'results', 'data', 'Data', 'Leaderboard', 'Entries', 'Results'];
+
         for (const key of possibleKeys) {
             if (data[key] && Array.isArray(data[key])) {
                 return data[key];
+            }
+        }
+
+        if (data.track_info && typeof data.track_info === 'object') {
+            for (const key of possibleKeys) {
+                if (data.track_info[key] && Array.isArray(data.track_info[key])) {
+                    return data.track_info[key];
+                }
+            }
+        }
+
+        for (const key of Object.keys(data)) {
+            if (Array.isArray(data[key]) && data[key].length > 0) {
+                return data[key];
+            }
+        }
+
+        for (const key of possibleKeys) {
+            if (data.track_info && data.track_info[key] && Array.isArray(data.track_info[key])) {
+                return data.track_info[key];
+            }
+        }
+
+        for (const key of Object.keys(data)) {
+            const value = data[key];
+            if (value && typeof value === 'object' && !Array.isArray(value)) {
+                for (const nestedKey of Object.keys(value)) {
+                    if (Array.isArray(value[nestedKey]) && value[nestedKey].length > 0) {
+                        return value[nestedKey];
+                    }
+                }
             }
         }
         

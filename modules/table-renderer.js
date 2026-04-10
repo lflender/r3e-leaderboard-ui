@@ -346,6 +346,86 @@ class TableRenderer {
             return `<td class="pos-cell"><span class="pos-number${podiumClass}" data-color="${badgeColor}" style="background:${badgeColor}">${R3EUtils.escapeHtml(posNum)}</span></td>`;
         }
     }
+
+    renderDetailPositionCell(item, options = {}) {
+        const showAbsolutePosition = !!options.showAbsolutePosition;
+        const totalEntries = R3EUtils.getTotalEntriesCount(item);
+        const posNum = String(item.Position || item.position || item.Pos || '').trim();
+        const totalNum = totalEntries ? String(totalEntries).trim() : '';
+        const badgeColor = R3EUtils.getPositionBadgeColor(parseInt(posNum), parseInt(totalNum));
+
+        const filteredPos = item.filteredPosition ? String(item.filteredPosition).trim() : '';
+        const filteredTotal = item.filteredTotal ? String(item.filteredTotal).trim() : '';
+        const absolutePos = item.absolutePosition ? String(item.absolutePosition).trim() : '';
+        const absoluteTotal = item.absoluteTotal ? String(item.absoluteTotal).trim() : '';
+
+        let html = '<td class="pos-cell">';
+
+        if (showAbsolutePosition && filteredPos && filteredTotal) {
+            html += `<span class="absolute-pos-label">${R3EUtils.escapeHtml(filteredPos)}/${R3EUtils.escapeHtml(filteredTotal)}</span> `;
+        }
+
+        if (showAbsolutePosition && absolutePos && absoluteTotal) {
+            const absoluteBadgeColor = R3EUtils.getPositionBadgeColor(parseInt(absolutePos), parseInt(absoluteTotal));
+            const absolutePosNum = parseInt(absolutePos);
+            const absoluteTotalNum = parseInt(absoluteTotal);
+            const podiumClass = (absoluteTotalNum >= 4 && (absolutePosNum === 1 || absolutePosNum === 2 || absolutePosNum === 3))
+                ? ` pos-${absolutePosNum}`
+                : '';
+            html += `<span class="pos-number${podiumClass}" data-color="${absoluteBadgeColor}" style="background:${absoluteBadgeColor}">${R3EUtils.escapeHtml(absolutePos)}</span>`;
+            html += `<span class="pos-sep">/</span><span class="pos-total">${R3EUtils.escapeHtml(absoluteTotal)}</span>`;
+        } else {
+            const pos = parseInt(posNum);
+            const total = parseInt(totalNum);
+            const podiumClass = (total >= 4 && (pos === 1 || pos === 2 || pos === 3)) ? ` pos-${pos}` : '';
+            html += `<span class="pos-number${podiumClass}" data-color="${badgeColor}" style="background:${badgeColor}">${R3EUtils.escapeHtml(posNum)}</span>`;
+            if (totalNum) {
+                html += `<span class="pos-sep">/</span><span class="pos-total">${R3EUtils.escapeHtml(totalNum)}</span>`;
+            }
+        }
+
+        html += '</td>';
+        return html;
+    }
+
+    renderDriverNameCell(item, options = {}) {
+        const name = window.DataNormalizer && typeof window.DataNormalizer.extractName === 'function'
+            ? window.DataNormalizer.extractName(item)
+            : (item.name || item.Name || '');
+        const country = window.DataNormalizer && typeof window.DataNormalizer.extractCountry === 'function'
+            ? window.DataNormalizer.extractCountry(item)
+            : (item.country || item.Country || '');
+        const rank = window.DataNormalizer && typeof window.DataNormalizer.extractRank === 'function'
+            ? window.DataNormalizer.extractRank(item)
+            : (item.rank || item.Rank || '');
+        const highlisted = item.highlisted || item.Highlisted || false;
+        const flag = FlagHelper.countryToFlag(country);
+        const flagHtml = flag ? `<span class="country-flag">${flag}</span>` : '';
+        const rankStarsHtml = rank ? R3EUtils.renderRankStars(rank, true) : '';
+        const mpPos = typeof resolveMpPos === 'function' ? resolveMpPos(name, country) : null;
+        const mpPosHtml = mpPos ? ` <span class="mp-pos-badge">#${mpPos}</span>` : '';
+        const driverLinkClass = options.driverLinkClass || 'detail-driver-link';
+        const encodedDriver = encodeURIComponent(`"${String(name)}"`);
+        const driverHref = `${options.driverLinkBase || 'drivers.html?driver='}${encodedDriver}`;
+
+        if (!highlisted) {
+            let linkClasses = driverLinkClass;
+            if (typeof getMpPosNameClasses === 'function') {
+                const nameClasses = getMpPosNameClasses(mpPos);
+                if (nameClasses) {
+                    linkClasses += ` ${nameClasses}`;
+                }
+            }
+            return `<td><a class="${linkClasses}" href="${driverHref}">${flagHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}${mpPosHtml}</a></td>`;
+        }
+
+        const highlightThresholds = options.highlightedMpPosThresholds || { gold: 10, silver: 100, glitter: 10 };
+        const highlightedClasses = typeof getMpPosNameClasses === 'function'
+            ? getMpPosNameClasses(mpPos, highlightThresholds)
+            : '';
+        const classAttr = highlightedClasses ? ` class="${highlightedClasses}"` : '';
+        return `<td><span${classAttr}>${flagHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}${mpPosHtml}</span></td>`;
+    }
     
     /**
      * Renders lap time cell with delta

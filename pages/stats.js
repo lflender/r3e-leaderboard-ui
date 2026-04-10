@@ -216,7 +216,9 @@
             renderTable(bestedContainer, bestedRows, 'Bested');
 
             trackStatsDisplayed(currentFilter, poleRows.length, bestedRows.length);
-            trackStatsFilterChanged(currentFilter, pendingTrackSource, poleRows.length, bestedRows.length);
+            if (pendingTrackSource !== 'initial') {
+                trackStatsFilterChanged(currentFilter, pendingTrackSource, poleRows.length, bestedRows.length);
+            }
             pendingTrackSource = 'filter';
         } catch (error) {
             if (requestId !== currentRequestId) return;
@@ -237,9 +239,11 @@
             .concat(superclassOptions)
             .concat(regularClassOptions);
 
-        new window.CustomSelect(filterRootId, classOptions, (value) => {
+        new window.CustomSelect(filterRootId, classOptions, (value, opts) => {
             currentFilter = value || '';
-            pendingTrackSource = 'filter';
+            if (opts?.source === 'user') {
+              pendingTrackSource = 'filter';
+            }
             fetchAndRender();
         });
     }

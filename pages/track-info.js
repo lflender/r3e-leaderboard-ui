@@ -89,7 +89,7 @@
     .concat(superclassOptions)
     .concat(regularClassOptions);
   
-  new CustomSelect('track-class-filter-ui', classOptions, async (value) => {
+  new CustomSelect('track-class-filter-ui', classOptions, async (value, opts) => {
     activeClassId = value || null;
     activeClassLabel = value || null;
     trackCurrentPage = 1;
@@ -108,7 +108,9 @@
       combineMode = false;
     }
 
-    trackTrackInfoFilter('class', value || '');
+    if (opts?.source === 'user') {
+      trackTrackInfoFilter('class', value || '');
+    }
     
     fetchAndRender();
   });

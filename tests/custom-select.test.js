@@ -18,7 +18,7 @@ describe('CustomSelect', () => {
         ].join('');
     });
 
-    test('builds menu and selects default option', () => {
+    test('builds menu and selects default option without calling onChange', () => {
         const onChange = vi.fn();
         const select = new window.CustomSelect('test-select', [
             { value: '', label: 'All classes' },
@@ -27,7 +27,22 @@ describe('CustomSelect', () => {
 
         expect(select.toggle.innerHTML).toContain('All classes');
         expect(select.menu.querySelectorAll('.custom-select__option')).toHaveLength(2);
-        expect(onChange).toHaveBeenCalledWith('');
+        expect(onChange).not.toHaveBeenCalled();
+    });
+
+    test('setValue notifies onChange unless explicitly silenced', () => {
+        const onChange = vi.fn();
+        const select = new window.CustomSelect('test-select', [
+            { value: '', label: 'All classes' },
+            { value: 'gt3', label: 'Category: GT3' }
+        ], onChange);
+
+        select.setValue('gt3');
+        expect(onChange).toHaveBeenCalledWith('gt3', { source: 'programmatic' });
+
+        onChange.mockClear();
+        select.setValue('', { notify: false, source: 'init' });
+        expect(onChange).not.toHaveBeenCalled();
     });
 
     test('opens, selects a value, and updates aria-selected state', () => {

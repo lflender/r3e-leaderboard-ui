@@ -164,7 +164,7 @@ async function fetchLeaderboardDetails() {
         const data = await dataService.fetchLeaderboardDetails(trackParam, classParam);
         
         // Extract leaderboard array from data structure
-        const leaderboardData = extractLeaderboardArray(data);
+        const leaderboardData = dataService.extractLeaderboardArray(data);
         
         if (!leaderboardData || !Array.isArray(leaderboardData)) {
             throw new Error('Leaderboard data not found in the expected format');
@@ -176,7 +176,7 @@ async function fetchLeaderboardDetails() {
         // Set page titles
         setDetailTitles(data, trackParam, classParam);
         
-        await enrichEntriesWithDriverMetadata(transformedData);
+        await dataService.enrichEntriesWithDriverMetadata(transformedData);
 
         // Store unfiltered results
         unfilteredResults = transformedData;
@@ -329,7 +329,7 @@ async function fetchSpecificClassesDetails() {
         const fetchPromises = specificClassIds.map(async (classId) => {
             try {
                 const data = await dataService.fetchLeaderboardDetails(trackParam, classId);
-                const leaderboardData = extractLeaderboardArray(data);
+                const leaderboardData = dataService.extractLeaderboardArray(data);
                 if (leaderboardData && Array.isArray(leaderboardData)) {
                     const transformed = transformLeaderboardData(leaderboardData, data);
                     // Add class ID to each entry for reference
@@ -355,7 +355,7 @@ async function fetchSpecificClassesDetails() {
         allEntries.forEach((entry, idx) => {
             const rawLap = (window.DataNormalizer && window.DataNormalizer.extractLapTime) ? window.DataNormalizer.extractLapTime(entry) : (entry.LapTime || entry['Lap Time'] || entry.lap_time || '');
             entry.__debugRawLap = rawLap;
-            entry.__debugMs = lapToMs(rawLap);
+            entry.__debugMs = R3EUtils.parseLapTimeToMillis(rawLap) || Number.POSITIVE_INFINITY;
         });
         allEntries.sort((a, b) => {
             return a.__debugMs - b.__debugMs;
@@ -400,7 +400,7 @@ async function fetchSpecificClassesDetails() {
         // Set page titles for specific classes view
         setSpecificClassesDetailTitles(specificClassIds);
         
-        await enrichEntriesWithDriverMetadata(allEntries);
+        await dataService.enrichEntriesWithDriverMetadata(allEntries);
 
         // Store unfiltered results
         unfilteredResults = allEntries;
@@ -490,7 +490,7 @@ async function fetchCombinedSuperclassDetails() {
                     return [];
                 }
                 const data = await dataService.fetchLeaderboardDetails(trackParam, classId);
-                const leaderboardData = extractLeaderboardArray(data);
+                const leaderboardData = dataService.extractLeaderboardArray(data);
                 if (leaderboardData && Array.isArray(leaderboardData)) {
                     const transformed = transformLeaderboardData(leaderboardData, data);
                     // Add class name to each entry
@@ -515,7 +515,7 @@ async function fetchCombinedSuperclassDetails() {
         allEntries.forEach((entry, idx) => {
             const rawLap = (window.DataNormalizer && window.DataNormalizer.extractLapTime) ? window.DataNormalizer.extractLapTime(entry) : (entry.LapTime || entry['Lap Time'] || entry.lap_time || '');
             entry.__debugRawLap = rawLap;
-            entry.__debugMs = lapToMs(rawLap);
+            entry.__debugMs = R3EUtils.parseLapTimeToMillis(rawLap) || Number.POSITIVE_INFINITY;
         });
         allEntries.sort((a, b) => {
             return a.__debugMs - b.__debugMs;
@@ -565,7 +565,7 @@ async function fetchCombinedSuperclassDetails() {
         // Set page titles for combined view
         setCombinedDetailTitles(superclassParam);
         
-        await enrichEntriesWithDriverMetadata(allEntries);
+        await dataService.enrichEntriesWithDriverMetadata(allEntries);
 
         // Store unfiltered results
         unfilteredResults = allEntries;
@@ -602,60 +602,6 @@ async function fetchCombinedSuperclassDetails() {
         console.error('Error loading combined leaderboard:', error);
         await displayError(error.message);
     }
-}
-
-/**
- * Parse lap time string to milliseconds for sorting
- */
-function lapToMs(timeStr) {
-    if (!timeStr) return Number.POSITIVE_INFINITY;
-    
-    const original = String(timeStr).trim();
-    const beforeComma = original.split(',')[0].trim();
-    
-    let primary = beforeComma;
-    let m;
-    
-    // Format: "3m 54.196s" or "3m 54s"
-    m = primary.match(/^(\d+)m\s+(\d+)\.(\d+)s?$/i);
-    if (m) {
-        const minutes = +m[1];
-        const seconds = +m[2];
-        const millis = +m[3];
-        return minutes * 60000 + seconds * 1000 + millis;
-    }
-    
-    m = primary.match(/^(\d+)m\s+(\d+)s?$/i);
-    if (m) {
-        const minutes = +m[1];
-        const seconds = +m[2];
-        return minutes * 60000 + seconds * 1000;
-    }
-    
-    // Remove trailing 's' for other formats
-    primary = primary.replace(/s$/i, '');
-    
-    // M:SS:mmm (e.g., 1:20:029)
-    m = primary.match(/^(\d+):(\d{2}):(\d{3})$/);
-    if (m) return (+m[1]) * 60000 + (+m[2]) * 1000 + (+m[3]);
-    
-    // M:SS.mmm (e.g., 1:20.029)
-    m = primary.match(/^(\d+):(\d{2})\.(\d{3})$/);
-    if (m) return (+m[1]) * 60000 + (+m[2]) * 1000 + (+m[3]);
-    
-    // SS:mmm (e.g., 59:026)
-    m = primary.match(/^(\d{2}):(\d{3})$/);
-    if (m) return (+m[1]) * 1000 + (+m[2]);
-    
-    // SS.mmm (e.g., 59.026)
-    m = primary.match(/^(\d{2})\.(\d{3})$/);
-    if (m) return (+m[1]) * 1000 + (+m[2]);
-    
-    // Plain seconds
-    m = primary.match(/^(\d+)$/);
-    if (m) return (+m[1]) * 1000;
-    
-    return Number.POSITIVE_INFINITY;
 }
 
 /**
@@ -767,51 +713,6 @@ function setCombinedDetailTitles(superclass) {
 }
 
 /**
- * Extract leaderboard array from various data structures
- * @param {Object} data - API response data
- * @returns {Array} Leaderboard array
- */
-function extractLeaderboardArray(data) {
-    const possibleKeys = ['leaderboard', 'entries', 'results', 'data', 'Leaderboard', 'Entries', 'Results'];
-    
-    // Check root level
-    for (const key of possibleKeys) {
-        if (data[key] && Array.isArray(data[key])) {
-            return data[key];
-        }
-    }
-    
-    // Check track_info
-    if (data.track_info) {
-        for (const key of possibleKeys) {
-            if (data.track_info[key] && Array.isArray(data.track_info[key])) {
-                return data.track_info[key];
-            }
-        }
-    }
-    
-    // Search all keys for arrays
-    for (const key of Object.keys(data)) {
-        if (Array.isArray(data[key]) && data[key].length > 0) {
-            return data[key];
-        }
-    }
-    
-    // Check nested objects
-    for (const key of Object.keys(data)) {
-        if (data[key] && typeof data[key] === 'object' && !Array.isArray(data[key])) {
-            for (const nestedKey of Object.keys(data[key])) {
-                if (Array.isArray(data[key][nestedKey]) && data[key][nestedKey].length > 0) {
-                    return data[key][nestedKey];
-                }
-            }
-        }
-    }
-    
-    return null;
-}
-
-/**
  * Transform leaderboard data to consistent format
  * @param {Array} leaderboardData - Raw leaderboard array
  * @param {Object} data - Full data object
@@ -870,7 +771,7 @@ function setDetailTitles(data, trackParam, classParam) {
     
     // Fallback to results array
     if (!trackName || trackName === trackParam || !carClassName) {
-        const results = extractLeaderboardArray(data);
+        const results = dataService.extractLeaderboardArray(data);
         if (results && results.length > 0) {
             const first = results[0];
             let fullTrackRaw = first.Track || first.track || trackName;
@@ -1313,8 +1214,6 @@ async function displayResults(data) {
  * @returns {string} HTML string
  */
 function renderDetailRow(item, showAbsolutePosition = false) {
-    // Extract fields using helper functions
-    // In combined view, use our re-assigned Position, otherwise extract from item
     const position = DetailState.isCombinedView 
         ? (item.Position || item.position || DataNormalizer.extractPosition(item))
         : DataNormalizer.extractPosition(item);
@@ -1324,140 +1223,56 @@ function renderDetailRow(item, showAbsolutePosition = false) {
     const difficulty = DataNormalizer.extractDifficulty(item);
     const lapTime = DataNormalizer.extractLapTime(item);
     
-    // In combined view, use total count from allResults, otherwise from item
     const totalEntries = DetailState.isCombinedView 
         ? allResults.length 
         : R3EUtils.getTotalEntriesCount(item);
-    const posNum = String(position).trim();
-    const totalNum = totalEntries ? String(totalEntries).trim() : '';
-    const badgeColor = R3EUtils.getPositionBadgeColor(parseInt(posNum), parseInt(totalNum));
-    
-    const flag = FlagHelper.countryToFlag(country);
-    const flagHtml = flag ? `<span class="country-flag">${flag}</span>` : '';
-    const highlisted = item.highlisted || item.Highlisted || false;
-    
-    // Position details for filtering
-    const filteredPos = item.filteredPosition ? String(item.filteredPosition).trim() : null;
-    const filteredTotal = item.filteredTotal ? String(item.filteredTotal).trim() : null;
-    const absolutePos = item.absolutePosition ? String(item.absolutePosition).trim() : null;
-    const absoluteTotal = item.absoluteTotal ? String(item.absoluteTotal).trim() : null;
-    
-    // Lap time parsing
-    const parts = String(lapTime).split(/,\s*/);
-    const mainClassic = R3EUtils.formatClassicLapTime(parts[0] || '');
-    const deltaRaw = parts.slice(1).join(' ');
-    const deltaClassic = deltaRaw ? R3EUtils.formatClassicLapTime(deltaRaw) : '';
-    
-    // Difficulty class
-    const diffStr = String(difficulty).trim().toLowerCase();
-    let diffClass = '';
-    if (diffStr === 'get real') diffClass = 'difficulty-get-real';
-    else if (diffStr === 'amateur') diffClass = 'difficulty-amateur';
-    else if (diffStr === 'novice') diffClass = 'difficulty-novice';
-    
-    // Data attributes
     const rowTrackId = DataNormalizer.extractTrackId(item) || trackParam || '';
     const rowClassId = DataNormalizer.extractClassId(item) || '';
-    const rowName = name;
-    const rowTime = lapTime;
-    
-    let html = `<tr data-trackid="${R3EUtils.escapeHtml(String(rowTrackId))}" data-classid="${R3EUtils.escapeHtml(String(rowClassId))}" data-name="${R3EUtils.escapeHtml(String(rowName))}" data-time="${R3EUtils.escapeHtml(String(rowTime))}">`;
-    
-    // Position
-    html += '<td class="pos-cell">';
-    
-    // When car filter is active, show filtered position in small label
-    if (showAbsolutePosition && filteredPos && filteredTotal) {
-        html += `<span class="absolute-pos-label">${R3EUtils.escapeHtml(filteredPos)}/${R3EUtils.escapeHtml(filteredTotal)}</span> `;
-    }
-    
-    // Main position display - show absolute position when filter is active, otherwise normal position
-    // Note: Position badges use inline styles for dynamic background colors calculated per position
-    if (showAbsolutePosition && absolutePos && absoluteTotal) {
-        const absoluteBadgeColor = R3EUtils.getPositionBadgeColor(parseInt(absolutePos), parseInt(absoluteTotal));
-        const absPos = parseInt(absolutePos);
-        const absTotal = parseInt(absoluteTotal);
-        const podiumClass = (absTotal >= 4 && (absPos === 1 || absPos === 2 || absPos === 3)) ? ` pos-${absPos}` : '';
-        html += `<span class="pos-number${podiumClass}" data-color="${absoluteBadgeColor}" style="background:${absoluteBadgeColor}">${R3EUtils.escapeHtml(absolutePos)}</span>`;
-        html += `<span class="pos-sep">/</span><span class="pos-total">${R3EUtils.escapeHtml(absoluteTotal)}</span>`;
-    } else {
-        const pos = parseInt(posNum);
-        const total = parseInt(totalNum);
-        const podiumClass = (total >= 4 && (pos === 1 || pos === 2 || pos === 3)) ? ` pos-${pos}` : '';
-        html += `<span class="pos-number${podiumClass}" data-color="${badgeColor}" style="background:${badgeColor}">${R3EUtils.escapeHtml(posNum)}</span>`;
-        if (totalNum) {
-            html += `<span class="pos-sep">/</span><span class="pos-total">${R3EUtils.escapeHtml(totalNum)}</span>`;
-        }
-    }
-    
-    html += '</td>';
-    
-    // Driver name with rank stars
-    const rank = DataNormalizer.extractRank(item);
-    const rankStarsHtml = rank ? R3EUtils.renderRankStars(rank, true) : '';
-    
-    // Get multiplayer position
-    const mpPos = typeof resolveMpPos === 'function' ? resolveMpPos(name, country) : null;
-    const mpPosHtml = mpPos ? ` <span class="mp-pos-badge">#${mpPos}</span>` : '';
-    
-    let driverLinkClass = 'detail-driver-link';
-    if (typeof getMpPosNameClasses === 'function') {
-        const nameClasses = getMpPosNameClasses(mpPos);
-        if (nameClasses) {
-            driverLinkClass += ` ${nameClasses}`;
-        }
-    }
-    
-    if (!highlisted) {
-        const encoded = encodeURIComponent(`"${String(name)}"`);
-        html += `<td><a class="${driverLinkClass}" href="drivers.html?driver=${encoded}">${flagHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}${mpPosHtml}</a></td>`;
-    } else {
-        const nameClasses = typeof getMpPosNameClasses === 'function'
-            ? getMpPosNameClasses(mpPos, { gold: 10, silver: 100, glitter: 10 })
-            : '';
-        const spanClassAttr = nameClasses ? ` class="${nameClasses}"` : '';
-        html += `<td><span${spanClassAttr}>${flagHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}${mpPosHtml}</span></td>`;
-    }
-    
-    // Lap time
-    if (deltaClassic) {
-        html += `<td class="no-wrap">${R3EUtils.escapeHtml(mainClassic)} <span class="time-delta-inline no-wrap">${R3EUtils.escapeHtml(deltaClassic)}</span></td>`;
-    } else {
-        html += `<td class="no-wrap">${R3EUtils.escapeHtml(mainClassic)}</td>`;
-    }
-    
-    // Lap % (Gap Percentage)
-    // Calculate percentage gap directly from the gap time embedded in the lap time data
-    // This works even when filtering because gap is stored in the lap time string
-    const gapPercent = R3EUtils.calculateGapPercentage(item, null);
-    html += `<td class="gap-percent-cell">${R3EUtils.escapeHtml(gapPercent)}</td>`;
-    
-    // Class (only in combined view)
+    const detailRowItem = {
+        ...item,
+        Position: position,
+        position: position,
+        Pos: position,
+        TotalEntries: totalEntries,
+        total_entries: totalEntries,
+        Name: name,
+        name: name,
+        Country: country,
+        country: country,
+        Car: car,
+        car: car,
+        Difficulty: difficulty,
+        difficulty: difficulty,
+        LapTime: lapTime,
+        'Lap Time': lapTime,
+        lap_time: lapTime,
+        filteredPosition: item.filteredPosition,
+        filteredTotal: item.filteredTotal,
+        absolutePosition: item.absolutePosition,
+        absoluteTotal: item.absoluteTotal
+    };
+
     if (DetailState.isCombinedView) {
-        const className = item.ClassName || item.class_name || item.CarClass || item.car_class || '';
-        html += `<td class="class-cell">${R3EUtils.escapeHtml(String(className))}</td>`;
+        detailRowItem.CarClass = item.ClassName || item.class_name || item.CarClass || item.car_class || '';
     }
     
-    // Car (with styled brand/model split)
-    const { brand: carBrand, model: carModel } = R3EUtils.splitCarName(car);
-    if (carModel) {
-        html += `<td class="car-cell"><span class="car-brand">${R3EUtils.escapeHtml(carBrand)}</span> <span class="car-model">${R3EUtils.escapeHtml(carModel)}</span></td>`;
-    } else {
-        html += `<td class="car-cell"><span class="car-brand">${R3EUtils.escapeHtml(carBrand)}</span></td>`;
+    let html = `<tr data-trackid="${R3EUtils.escapeHtml(String(rowTrackId))}" data-classid="${R3EUtils.escapeHtml(String(rowClassId))}" data-name="${R3EUtils.escapeHtml(String(name))}" data-time="${R3EUtils.escapeHtml(String(lapTime))}">`;
+
+    html += tableRenderer.renderDetailPositionCell(detailRowItem, { showAbsolutePosition });
+    html += tableRenderer.renderDriverNameCell(detailRowItem, {
+        driverLinkClass: 'detail-driver-link',
+        driverLinkBase: 'drivers.html?driver='
+    });
+    html += tableRenderer.renderCell(detailRowItem, 'LapTime');
+    html += tableRenderer.renderGapPercentCell(detailRowItem, null);
+
+    if (DetailState.isCombinedView) {
+        html += tableRenderer.renderCell(detailRowItem, 'CarClass');
     }
 
-    // Difficulty
-    html += `<td class="difficulty-cell"><span class="difficulty-pill ${diffClass}">${R3EUtils.escapeHtml(String(difficulty))}</span></td>`;
-    
-    // Date
-    const dateTime = DataNormalizer.extractDateTime(item);
-    console.log('DEBUG: Detail page date rendering:', {
-        dateTime: dateTime,
-        itemKeys: Object.keys(item),
-        itemSample: JSON.stringify(item).substring(0, 300)
-    });
-    const formattedDate = dateTime ? R3EUtils.formatDate(dateTime) : '';
-    html += `<td class="date-cell">${R3EUtils.escapeHtml(formattedDate)}</td>`;
+    html += tableRenderer.renderCell(detailRowItem, 'Car');
+    html += tableRenderer.renderCell(detailRowItem, 'Difficulty');
+    html += tableRenderer.renderCell(detailRowItem, 'date_time');
     
     html += '</tr>';
     return html;
@@ -1953,7 +1768,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Set initial difficulty from URL param
     if (difficultyParam && difficultyParam !== 'All difficulties') {
-        difficultyFilterSelect.setValue(difficultyParam);
+        difficultyFilterSelect.setValue(difficultyParam, { notify: false, source: 'init' });
     }
 });
 

@@ -17,6 +17,7 @@ class DailyRaces {
 
         this.dailyRacesData = null;
         this.lastUpdateTime = null;
+        this.handleDetailTileClick = this.handleDetailTileClick.bind(this);
         
         this.init();
     }
@@ -25,6 +26,10 @@ class DailyRaces {
      * Initialize daily races functionality
      */
     async init() {
+        if (this.elements.resultsContainer) {
+            this.elements.resultsContainer.addEventListener('click', this.handleDetailTileClick);
+        }
+
         // Wait a bit for other modules to initialize
         await new Promise(resolve => setTimeout(resolve, 100));
         
@@ -50,6 +55,50 @@ class DailyRaces {
                     }, 50);
                 }
             });
+        }
+    }
+
+    /**
+     * Track clicks on home page race tiles that open detail pages.
+     * @param {MouseEvent} event
+     */
+    handleDetailTileClick(event) {
+        const link = event.target && event.target.closest
+            ? event.target.closest('.daily-race-card-link')
+            : null;
+        if (!link) return;
+
+        if (typeof R3EAnalytics === 'undefined' || typeof R3EAnalytics.track !== 'function') {
+            return;
+        }
+
+        try {
+            const url = new URL(link.href, window.location.origin);
+            const trackId = url.searchParams.get('track') || '';
+            const classId = url.searchParams.get('class') || '';
+            const classIds = url.searchParams.get('classes') || '';
+            const classLabelElement = link.querySelector('.daily-race-class');
+            const trackLabelElement = link.querySelector('.daily-race-track');
+            const raceClassLabel = classLabelElement
+                ? String(classLabelElement.textContent || '').trim()
+                : '';
+            const trackLabel = trackLabelElement
+                ? String(trackLabelElement.textContent || '').trim()
+                : '';
+            const isFeatureRace = !!link.closest('.daily-races-feature');
+            const eventName = isFeatureRace ? 'daily feature race viewed' : 'daily sprint race viewed';
+
+            R3EAnalytics.track(eventName, {
+                destination_url: `${url.pathname}${url.search}`,
+                track_id: trackId,
+                class_id: classId,
+                classes: classIds,
+                class_label: raceClassLabel,
+                track_label: trackLabel,
+                target_blank: link.target === '_blank'
+            });
+        } catch (_) {
+            // Never block navigation for tracking failures.
         }
     }
 

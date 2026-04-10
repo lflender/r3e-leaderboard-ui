@@ -164,11 +164,11 @@ Work in layers.
 
 ### Layer 3: controller/integration-heavy modules
 
-- `modules/driver-search.js`
-- `modules/detail.js`
-- `modules/track-info.js`
-- `modules/car-info.js`
-- `modules/news.js`
+- `pages/driver-search.js`
+- `pages/detail.js`
+- `pages/track-info.js`
+- `pages/car-info.js`
+- `pages/news.js`
 
 For those, prefer integration-style tests with mocked globals and DOM fixtures instead of pretending they are small isolated units.
 

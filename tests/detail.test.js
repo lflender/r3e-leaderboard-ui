@@ -37,7 +37,9 @@ beforeAll(async () => {
 
     // Return invalid shape to verify error-path wiring (extractLeaderboardArray => null).
     window.dataService = {
-        fetchLeaderboardDetails: vi.fn().mockResolvedValue({ bad_payload: true })
+        fetchLeaderboardDetails: vi.fn().mockResolvedValue({ bad_payload: true }),
+        extractLeaderboardArray: vi.fn().mockReturnValue(null),
+        enrichEntriesWithDriverMetadata: vi.fn(async entries => entries)
     };
 
     window.DataNormalizer = {
@@ -58,7 +60,7 @@ beforeAll(async () => {
         setValue() {}
     };
 
-    loadBrowserScript('modules/detail.js');
+    loadBrowserScript('pages/detail.js');
     await new Promise(resolve => setTimeout(resolve, 0));
 });
 

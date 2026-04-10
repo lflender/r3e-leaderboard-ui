@@ -111,20 +111,26 @@
     });
   }
 
-  new CustomSelect('wheel-filter-ui', wheelOptions, v => {
+  new CustomSelect('wheel-filter-ui', wheelOptions, (v, opts) => {
     wheelFilter = v;
     const stats = renderTable();
-    trackCarInfoFilter('wheel', v, stats);
+    if (opts?.source === 'user') {
+      trackCarInfoFilter('wheel', v, stats);
+    }
   });
-  new CustomSelect('trans-filter-ui', transOptions, v => {
+  new CustomSelect('trans-filter-ui', transOptions, (v, opts) => {
     transFilter = v;
     const stats = renderTable();
-    trackCarInfoFilter('transmission', v, stats);
+    if (opts?.source === 'user') {
+      trackCarInfoFilter('transmission', v, stats);
+    }
   });
-  new CustomSelect('class-filter-ui-cars', classOptions, v => {
+  new CustomSelect('class-filter-ui-cars', classOptions, (v, opts) => {
     classFilter = v;
     const stats = renderTable();
-    trackCarInfoFilter('class', v, stats);
+    if (opts?.source === 'user') {
+      trackCarInfoFilter('class', v, stats);
+    }
   });
 
   function carMatchesFilters(car) {

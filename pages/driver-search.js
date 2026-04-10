@@ -179,7 +179,7 @@ class DriverSearch {
             const trackOptions = [{ value: '', label: 'All tracks' }]
                 .concat(tracks.map(t => ({ value: String(t.id), label: t.label })));
 
-            new CustomSelect('track-filter-ui', trackOptions, async (value) => {
+            new CustomSelect('track-filter-ui', trackOptions, async (value, opts) => {
                 this.selectedTrack = value;
                 if (this.elements.trackFilter) {
                     this.elements.trackFilter.value = value;
@@ -187,7 +187,9 @@ class DriverSearch {
                 if (this.lastSearchTerm) {
                     this._searchSource = 'filter';
                     await this.searchDriver(this.lastSearchTerm);
-                    this.trackDriverFilterUsage('track', value || '', this.allResults.length);
+                    if (opts?.source === 'user') {
+                      this.trackDriverFilterUsage('track', value || '', this.allResults.length);
+                    }
                 }
             });
         }
@@ -209,13 +211,15 @@ class DriverSearch {
                 ? 'track-class-filter-ui'
                 : 'class-filter-ui';
 
-            new CustomSelect(classFilterElementId, allOptions, async (value) => {
+            new CustomSelect(classFilterElementId, allOptions, async (value, opts) => {
                 this.selectedClass = value; // Store directly in the class property
                 // Re-search with the last search term if we have one
                 if (this.lastSearchTerm) {
                     this._searchSource = 'filter';
                     await this.searchDriver(this.lastSearchTerm);
-                    this.trackDriverFilterUsage('class', value || '', this.allResults.length);
+                    if (opts?.source === 'user') {
+                      this.trackDriverFilterUsage('class', value || '', this.allResults.length);
+                    }
                 }
             });
         }
@@ -319,6 +323,21 @@ class DriverSearch {
     }
 
     /**
+     * Track when a driver search is performed.
+     * @param {string} searchTerm - Raw term searched by the user
+     */
+    trackSearchPerformed(searchTerm) {
+        if (typeof R3EAnalytics === 'undefined' || typeof R3EAnalytics.track !== 'function') return;
+
+        R3EAnalytics.track('driver search performed', {
+            search_term: searchTerm || '',
+            track_filter: this.selectedTrack || '',
+            class_filter: this.selectedClass || '',
+            source: this._searchSource || 'input'
+        });
+    }
+
+    /**
      * Handle URL driver parameter on page load
      */
     handleUrlDriverParam() {
@@ -337,6 +356,7 @@ class DriverSearch {
     async searchDriver(driverName) {
         this.lastSearchTime = Date.now();
         this.lastSearchTerm = driverName; // Store the search term
+        this.trackSearchPerformed(driverName);
         
         // Increment search ID to track this request and discard outdated results
         const searchId = ++this.currentSearchId;
@@ -366,15 +386,15 @@ class DriverSearch {
             this.currentPage = 1;
             this.displayResults(results, searchId);
 
-            // Analytics: track the completed search
-            if (typeof R3EAnalytics !== 'undefined') {
-                const isExact = (driverName.startsWith('"') && driverName.endsWith('"')) ||
-                                (driverName.startsWith("'") && driverName.endsWith("'"));
-                R3EAnalytics.trackSearch(driverName, results.length, {
+            // Analytics: keep the generic search event and additionally log
+            // when a single driver result is actually displayed.
+            if (typeof R3EAnalytics !== 'undefined' && results.length === 1) {
+                const driverResult = results[0];
+                const driverDisplayName = driverResult.driver || driverName;
+                R3EAnalytics.trackSearchResultViewed(driverName, results.length, driverDisplayName, {
                     trackFilter: selectedTrack,
                     classFilter: selectedClass,
-                    source: this._searchSource || 'input',
-                    isExact: isExact
+                    source: this._searchSource || 'input'
                 });
             }
         } catch (error) {

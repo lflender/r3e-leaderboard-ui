@@ -1,4 +1,4 @@
-// Tracks list extracted from modules/track-info.js for reuse
+// Tracks list extracted from pages/track-info.js for reuse
 // Similar style to data/cars.js
 window.TRACKS_DATA = [
   { id: 13352, label: 'Adria International Raceway 2003 - Full Circuit' },

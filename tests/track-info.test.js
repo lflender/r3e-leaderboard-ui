@@ -79,7 +79,7 @@ describe('track-info integration', () => {
         });
 
         loadBrowserScript('modules/compressed-json-helper.js');
-        loadBrowserScript('modules/track-info.js');
+        loadBrowserScript('pages/track-info.js');
         await new Promise(resolve => setTimeout(resolve, 20));
 
         const html = document.getElementById('track-info-table').innerHTML;
@@ -98,7 +98,7 @@ describe('track-info integration', () => {
         });
 
         loadBrowserScript('modules/compressed-json-helper.js');
-        loadBrowserScript('modules/track-info.js');
+        loadBrowserScript('pages/track-info.js');
         await new Promise(resolve => setTimeout(resolve, 20));
 
         expect(window.TemplateHelper.showNoResults).toHaveBeenCalled();

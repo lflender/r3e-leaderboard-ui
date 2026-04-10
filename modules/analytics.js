@@ -12,7 +12,7 @@
  *    Copy your Project API Key and paste it below in PH_TOKEN.
  *
  * 2. Download the PostHog JS SDK and host it locally:
- *      curl -o modules/ph-lib.js "https://eu-assets.i.posthog.com/static/array.js"
+ *      curl -o lib/ph-lib.js "https://eu-assets.i.posthog.com/static/array.js"
  *    This avoids ad-blockers that block requests to posthog.com / i.posthog.com.
  *
  * 3. Set up a reverse-proxy on your server so that /ingest/* forwards
@@ -36,7 +36,7 @@ const R3EAnalytics = (() => {
 
     // Path to the locally-hosted PostHog SDK file (see step 2 above).
     // Falls back to PostHog CDN if the local file is missing.
-    const PH_LOCAL_SDK = 'modules/ph-lib.js';
+    const PH_LOCAL_SDK = 'lib/ph-lib.js?v=1';
     // ─────────────────────────────────────────────────────────────────
 
     let _ready = false;
@@ -139,33 +139,36 @@ const R3EAnalytics = (() => {
     }
 
     /**
-     * Track a driver search on the Driver Info page.
-     * Call this after results are returned from dataService.searchDriver().
+    * Track when a single driver result is displayed on the Driver Info page.
+    * Call this after results are returned from dataService.searchDriver().
      *
      * @param {string}  searchTerm   - The raw search string
      * @param {number}  resultCount  - Number of driver groups returned
+     * @param {string}  driverName   - Name of the single driver (only if resultCount === 1)
      * @param {Object}  opts         - Extra context
      * @param {string}  opts.trackFilter  - Active track filter value ('' = none)
      * @param {string}  opts.classFilter  - Active class filter value ('' = none)
      * @param {string}  opts.source       - 'input' | 'enter' | 'url' | 'filter'
-     * @param {boolean} opts.isExact      - True when wrapped in quotes
      */
-    function trackSearch(searchTerm, resultCount, opts) {
+    function trackSearchResultViewed(searchTerm, resultCount, driverName, opts) {
         if (!_ready) return;
+        if (resultCount !== 1) return;
         opts = opts || {};
-        track('driver search', {
+        track('driver search result viewed', {
+            driver_name:   driverName || '',
             search_term:   searchTerm,
-            result_count:  resultCount,
-            has_results:   resultCount > 0,
             track_filter:  opts.trackFilter || '',
             class_filter:  opts.classFilter || '',
-            source:        opts.source || 'input',
-            is_exact:      !!opts.isExact
+            source:        opts.source || 'input'
         });
     }
 
+    function trackSearch(searchTerm, resultCount, driverName, opts) {
+        trackSearchResultViewed(searchTerm, resultCount, driverName, opts);
+    }
+
     // Public API
-    return { init, track, trackSearch };
+    return { init, track, trackSearch, trackSearchResultViewed };
 })();
 
 // Auto-initialise as soon as this script runs

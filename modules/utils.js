@@ -1,17 +1,8 @@
 /**
- * Shared utility functions used across the application
- * Following SRP (Single Responsibility Principle) from SOLID
+ * Shared utility facade used across the application.
+ * Domain-specific utilities are split into dedicated modules and re-exported here.
  */
 
-// ========================================
-// HTML & String Utilities
-// ========================================
-
-/**
- * Escapes HTML special characters to prevent XSS
- * @param {string} text - Text to escape
- * @returns {string} HTML-safe string
- */
 function escapeHtml(text) {
     if (text === null || text === undefined) return '';
     const div = document.createElement('div');
@@ -19,30 +10,23 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-/**
- * Formats a camelCase or snake_case key into Title Case
- * @param {string} key - Key to format
- * @returns {string} Formatted header
- */
 function formatHeader(key) {
-    // Use ColumnConfig if available (centralized source of truth)
     if (typeof window !== 'undefined' && window.ColumnConfig) {
         return window.ColumnConfig.getDisplayName(key);
     }
-    
-    // Fallback: manual special cases
+
     if (key === 'class_name' || key === 'className' || key === 'ClassName') {
         return 'Car class';
     }
     if (key === 'date_time' || key === 'dateTime' || key === 'DateTime') {
         return 'Date';
     }
+
     const lower = String(key || '').toLowerCase();
     if (lower === 'entry_count' || lower === 'total_entries' || lower === 'totalracers' || lower === 'total_racers') {
         return 'Entries';
     }
-    
-    // Default: convert snake_case/camelCase to Title Case
+
     return key
         .replace(/([A-Z])/g, ' $1')
         .replace(/_/g, ' ')
@@ -50,11 +34,6 @@ function formatHeader(key) {
         .trim();
 }
 
-/**
- * Formats a value for display, handling null/undefined
- * @param {*} value - Value to format
- * @returns {string} Formatted value
- */
 function formatValue(value) {
     if (value === null || value === undefined) {
         return '-';
@@ -62,539 +41,55 @@ function formatValue(value) {
     return escapeHtml(String(value));
 }
 
-// ========================================
-// Time & Lap Time Utilities
-// ========================================
-
-/**
- * Converts raw lap times like "2m 12.524s" or "45.281s" to classic format "2:12:524s"
- * @param {string} raw - Raw lap time string
- * @returns {string} Formatted lap time
- */
-function formatClassicLapTime(raw) {
-    if (raw === null || raw === undefined) return '';
-    const s = String(raw).trim();
-    if (!s) return '';
-    // Handle optional +/- prefix for gap times
-    const m = s.match(/^([+-])?(?:(\d+)m\s*)?(\d+)(?:\.(\d{1,3}))?s$/);
-    if (!m) return String(raw); // fallback if pattern doesn't match
-    const sign = m[1] || '';
-    const minutes = parseInt(m[2] || '0', 10);
-    const seconds = parseInt(m[3] || '0', 10);
-    const millis = (m[4] || '').padEnd(3, '0');
-    // Omit minutes if 0
-    if (minutes === 0) {
-        return `${sign}${seconds}:${millis}s`;
-    }
-    return `${sign}${minutes}:${String(seconds).padStart(2, '0')}:${millis}s`;
-}
-
-/**
- * Parses gap time in milliseconds from an item's lap time field
- * @param {Object} item - Data item containing lap time
- * @returns {number} Gap time in milliseconds
- */
-function parseGapMillisFromItem(item) {
-    if (!item) return 0;
-    const raw = item.LapTime || item['Lap Time'] || item.lap_time || item.laptime || item.Time || '';
-    const s = String(raw || '');
-    if (!s) return 0;
-    const parts = s.split(/,\s*/);
-    if (parts.length < 2) return 0; // leader row or missing gap
-    const gapStr = String(parts.slice(1).join(' ') || '');
-    if (!gapStr) return 0;
-    // Patterns supported: "+1.234s", "+0m 1.234s", "-0.500s" (optional sign), with optional minutes
-    const m = gapStr.match(/^([+-])?(?:(\d+)m\s*)?(\d+)(?:\.(\d{1,3}))?s$/);
-    if (!m) return Number.MAX_VALUE; // push unknown gaps to the end
-    const sign = m[1] === '-' ? -1 : 1;
-    const minutes = parseInt(m[2] || '0', 10);
-    const seconds = parseInt(m[3] || '0', 10);
-    const millis = parseInt((m[4] || '0').padEnd(3, '0'), 10);
-    const total = ((minutes * 60) + seconds) * 1000 + millis;
-    return sign * total;
-}
-
-/**
- * Extracts total entries count from various possible fields
- * @param {Object} item - Data item
- * @returns {number} Total entries count
- */
 function getTotalEntriesCount(item) {
     const totalEntries = item.total_entries || item.TotalEntries || item['Total Entries'] || item.TotalRacers || item.total_racers;
     const n = parseInt(String(totalEntries || '').replace(/[^0-9]/g, ''));
     return isNaN(n) ? 0 : n;
 }
 
-/**
- * Parses a lap time string and returns milliseconds
- * Supports formats: "1:59:530s", "55.395s", "1:23.456s", "1m 26.693s"
- * @param {string} timeStr - Lap time string
- * @returns {number} Time in milliseconds
- */
-function parseLapTimeToMillis(timeStr) {
-    if (!timeStr) return 0;
-    const s = String(timeStr).trim().replace(/s$/i, '');
-    
-    // Format 1: minutes:seconds:milliseconds (e.g., "1:59:530" or "2:00:705")
-    let m = s.match(/^(\d+):(\d+):(\d+)$/);
-    if (m) {
-        const minutes = parseInt(m[1], 10);
-        const seconds = parseInt(m[2], 10);
-        const millis = parseInt(m[3], 10);
-        return ((minutes * 60) + seconds) * 1000 + millis;
-    }
-    
-    // Format 2: minutes:seconds.milliseconds (e.g., "1:23.456")
-    m = s.match(/^(\d+):(\d+)\.(\d+)$/);
-    if (m) {
-        const minutes = parseInt(m[1], 10);
-        const seconds = parseInt(m[2], 10);
-        const millis = parseInt((m[3] + '000').substring(0, 3), 10);
-        return ((minutes * 60) + seconds) * 1000 + millis;
-    }
-    
-    // Format 3: Xm Y.Zs (e.g., "1m 26.693" or "2m 03.404")
-    m = s.match(/^(\d+)m\s+(\d+)\.(\d+)$/);
-    if (m) {
-        const minutes = parseInt(m[1], 10);
-        const seconds = parseInt(m[2], 10);
-        const millis = parseInt((m[3] + '000').substring(0, 3), 10);
-        return ((minutes * 60) + seconds) * 1000 + millis;
-    }
-    
-    // Format 4: seconds.milliseconds (e.g., "55.395")
-    m = s.match(/^(\d+)\.(\d+)$/);
-    if (m) {
-        const seconds = parseInt(m[1], 10);
-        const millis = parseInt((m[2] + '000').substring(0, 3), 10);
-        return seconds * 1000 + millis;
-    }
-    
-    return 0;
-}
-
-/**
- * Calculates the gap percentage between a lap time and reference time
- * @param {Object} item - Data item containing lap time with gap
- * @param {string} referenceTime - Not used, kept for API compatibility
- * @returns {string} Percentage string (e.g., "101.0%" or "-" for reference)
- */
-function calculateGapPercentage(item, referenceTime) {
-    if (!item) return '-';
-    
-    const raw = item.LapTime || item['Lap Time'] || item.lap_time || item.laptime || item.Time || '';
-    const s = String(raw || '');
-    if (!s) return '-';
-    
-    // Parse the lap time (first part before comma) and gap (after comma)
-    const parts = s.split(/,\s*/);
-    const lapTime = parts[0] || '';
-    
-    // If this is the reference (no gap), return "-"
-    if (parts.length < 2) return '-';
-    
-    const lapMillis = parseLapTimeToMillis(lapTime);
-    if (lapMillis === 0) {
-        console.log('Failed to parse lap time:', lapTime);
-        return '-';
-    }
-    
-    // Parse the gap time (e.g., "+1.175s" or "+0m 1.175s")
-    const gapMillis = parseGapMillisFromItem(item);
-    
-    if (gapMillis === 0 || gapMillis === Number.MAX_VALUE) {
-        console.log('Invalid gap:', gapMillis, 'for item:', s);
-        return '-';
-    }
-    
-    // Calculate reference time: reference = lapTime - gap
-    const refMillis = lapMillis - gapMillis;
-    if (refMillis <= 0) {
-        console.log('Invalid refMillis:', refMillis);
-        return '-';
-    }
-    
-    // Calculate percentage: (lapTime / refTime) * 100
-    const percentage = (lapMillis / refMillis) * 100;
-    
-    // Round to 1 decimal place
-    return percentage.toFixed(1) + '%';
-}
-
-// ========================================
-// UI & Display Utilities
-// ========================================
-
-/**
- * Renders rank as stars: D -> 1, C -> 2, B -> 3, A -> 4
- * @param {string} rank - Rank letter
- * @param {boolean} inline - If true, renders inline stars for detail page (no pipe separator)
- * @returns {string} HTML string with stars
- */
 function renderRankStars(rank, inline = false) {
     if (!rank) return '';
-    const r = String(rank).trim().toUpperCase();
-    const map = { 'D': 1, 'C': 2, 'B': 3, 'A': 4 };
-    const count = map[r] || 0;
-    
-    // Inline variant for detail page - small stars after driver name
+    const normalizedRank = String(rank).trim().toUpperCase();
+    const map = { D: 1, C: 2, B: 3, A: 4 };
+    const count = map[normalizedRank] || 0;
+
     if (inline) {
         if (count === 0) return '';
         return '<span class="rank-stars-inline">' + '⭐'.repeat(count) + '</span>';
     }
-    
-    // Original variant for other pages (with pipe separator and Rank text)
+
     if (count === 0) return ` | ⭐ Rank ${escapeHtml(rank)}`;
-    return ' | ' + '⭐'.repeat(count) + ` Rank ${escapeHtml(r)}`;
+    return ' | ' + '⭐'.repeat(count) + ` Rank ${escapeHtml(normalizedRank)}`;
 }
 
-/**
- * Calculates position badge color based on rank
- * @param {number} position - Position number
- * @param {number} total - Total entries
- * @returns {string} CSS color value
- */
 function getPositionBadgeColor(position, total) {
     if (isNaN(position) || isNaN(total) || total <= 1) {
-        return 'rgba(59,130,246,0.18)'; // fallback blue
+        return 'rgba(59,130,246,0.18)';
     }
-    
+
     if (position === 1) {
-        return '#22c55e'; // bright green
-    } else if (position === total) {
-        return '#ef4444'; // bright red
-    } else {
-        // Interpolate between green and red
-        const t = (position - 1) / (total - 1);
-        // Green: 34,197,94  Red: 239,68,68
-        const r = Math.round(34 + (239-34)*t);
-        const g = Math.round(197 + (68-197)*t);
-        const b = Math.round(94 + (68-94)*t);
-        return `rgb(${r},${g},${b})`;
+        return '#22c55e';
     }
+    if (position === total) {
+        return '#ef4444';
+    }
+
+    const t = (position - 1) / (total - 1);
+    const r = Math.round(34 + (239 - 34) * t);
+    const g = Math.round(197 + (68 - 197) * t);
+    const b = Math.round(94 + (68 - 94) * t);
+    return `rgb(${r},${g},${b})`;
 }
 
-// ========================================
-// Data Utilities
-// ========================================
-
-/**
- * Safely parses a URL parameter
- * @param {string} paramName - Parameter name
- * @returns {string|null} Parameter value or null
- */
-function getUrlParam(paramName) {
-    try {
-        const params = new URLSearchParams(window.location.search);
-        return params.get(paramName);
-    } catch (e) {
-        return null;
-    }
-}
-
-/**
- * Updates URL parameter without reloading the page
- * @param {string} paramName - Parameter name
- * @param {string} value - Parameter value
- */
-function updateUrlParam(paramName, value) {
-    try {
-        const url = new URL(window.location.href);
-        if (value === null || value === undefined || String(value).trim() === '') {
-            url.searchParams.delete(paramName);
-        } else {
-            url.searchParams.set(paramName, value);
-        }
-        window.history.replaceState({}, '', url);
-    } catch (e) {
-        // ignore URL update errors
-    }
-}
-
-let cachedTrackDataRef = null;
-let cachedTrackLabelMap = new Map();
-
-function getTrackLabelMap() {
-    const tracks = Array.isArray(window.TRACKS_DATA) ? window.TRACKS_DATA : [];
-    if (tracks !== cachedTrackDataRef) {
-        cachedTrackDataRef = tracks;
-        cachedTrackLabelMap = new Map();
-        tracks.forEach(track => {
-            if (!track || track.id === undefined || track.id === null) return;
-            cachedTrackLabelMap.set(String(track.id), String(track.label || track.name || track.id));
-        });
-    }
-    return cachedTrackLabelMap;
-}
-
-function resolveTrackLabel(trackId, fallback = '') {
-    if (trackId === undefined || trackId === null || trackId === '') {
-        return fallback ? String(fallback) : '';
-    }
-
-    const label = getTrackLabelMap().get(String(trackId));
-    if (label) {
-        return label;
-    }
-
-    return fallback ? String(fallback) : String(trackId);
-}
-
-function resolveTrackLabelForItem(item, fallback = '') {
-    const trackId = item?.track_id || item?.TrackID || item?.trackId || item?.['Track ID'] || '';
-    const fallbackLabel = fallback || item?.track_name || item?.TrackName || item?.track || item?.Track || '';
-    return resolveTrackLabel(trackId, fallbackLabel);
-}
-
-let cachedCarsDataRef = null;
-let cachedClassLogoByName = new Map();
-let cachedClassLogoById = new Map();
-
-function rebuildCarClassLogoMaps() {
-    const carsData = Array.isArray(window.CARS_DATA) ? window.CARS_DATA : [];
-    cachedClassLogoByName = new Map();
-    cachedClassLogoById = new Map();
-
-    for (const classEntry of carsData) {
-        const className = String(classEntry.class || classEntry.car_class || '').trim().toLowerCase();
-        const logoUrl = String(classEntry.logo || '').trim();
-        if (!className || !logoUrl || cachedClassLogoByName.has(className)) {
-            continue;
-        }
-        cachedClassLogoByName.set(className, logoUrl);
-    }
-
-    if (window.CAR_CLASSES_DATA && typeof window.CAR_CLASSES_DATA === 'object') {
-        for (const [classId, className] of Object.entries(window.CAR_CLASSES_DATA)) {
-            const normalizedClassName = String(className || '').trim().toLowerCase();
-            const logoUrl = cachedClassLogoByName.get(normalizedClassName);
-            if (logoUrl) {
-                cachedClassLogoById.set(String(classId), logoUrl);
-            }
-        }
-    }
-
-    cachedCarsDataRef = carsData;
-}
-
-function ensureCarClassLogoMaps() {
-    const carsData = Array.isArray(window.CARS_DATA) ? window.CARS_DATA : [];
-    if (carsData !== cachedCarsDataRef) {
-        rebuildCarClassLogoMaps();
-    }
-}
-
-function resolveCarClassLogoByName(className) {
-    if (!className) return '';
-    ensureCarClassLogoMaps();
-    return cachedClassLogoByName.get(String(className).trim().toLowerCase()) || '';
-}
-
-function resolveCarClassLogoById(classId) {
-    if (!classId) return '';
-    ensureCarClassLogoMaps();
-    return cachedClassLogoById.get(String(classId)) || '';
-}
-
-function resolveCarClassLogo(className, classId) {
-    const logoFromName = resolveCarClassLogoByName(className);
-    if (logoFromName) {
-        return logoFromName;
-    }
-    return resolveCarClassLogoById(classId);
-}
-
-function resolveDailyRaceClassLogos(race, resolveClassNameById, raceClassName) {
-    if (!race) return [];
-
-    const resolveName = typeof resolveClassNameById === 'function'
-        ? resolveClassNameById
-        : (classId) => String(classId || '');
-
-    const categoryClassIds = Array.isArray(race.category_class_ids) ? race.category_class_ids : [];
-    if (categoryClassIds.length > 0) {
-        const logoItems = [];
-        const seenIds = new Set();
-
-        for (const rawId of categoryClassIds) {
-            const classId = String(rawId || '').trim();
-            if (!classId || seenIds.has(classId)) {
-                continue;
-            }
-            seenIds.add(classId);
-
-            const logoUrl = resolveCarClassLogoById(classId);
-            if (!logoUrl) {
-                continue;
-            }
-
-            logoItems.push({
-                classId,
-                className: resolveName(classId),
-                logoUrl
-            });
-        }
-
-        if (logoItems.length > 0) {
-            return logoItems;
-        }
-    }
-
-    const classId = String(race.car_class_id || '').trim();
-    const className = String(raceClassName || race.car_class || '').trim();
-    const logoUrl = resolveCarClassLogo(className, classId);
-
-    if (!logoUrl) {
-        return [];
-    }
-
-    return [{ classId, className, logoUrl }];
-}
-
-function getDailyRaceClassLogosHtml(race, resolveClassNameById, raceClassName) {
-    const logos = resolveDailyRaceClassLogos(race, resolveClassNameById, raceClassName);
-    if (logos.length === 0) {
-        return '';
-    }
-
-    let logosHtml = `<div class="daily-race-class-logos daily-race-class-logos--count-${Math.min(logos.length, 6)}">`;
-    for (const logo of logos) {
-        const altText = logo.className
-            ? `${logo.className} class logo`
-            : 'Car class logo';
-        logosHtml += `<img class="daily-race-class-logo" src="${escapeHtml(logo.logoUrl)}" alt="${escapeHtml(altText)}" loading="lazy" decoding="async">`;
-    }
-    logosHtml += '</div>';
-
-    return logosHtml;
-}
-/**
- * Formats a date string from ISO format to "DD MMM YYYY" format
- * @param {string} dateTimeString - ISO date string (e.g., "2025-10-06T19:15:20")
- * @returns {string} Formatted date (e.g., "6 Oct 2025")
- */
-function formatDate(dateTimeString) {
-    if (!dateTimeString) return '';
-    try {
-        const date = new Date(dateTimeString);
-        if (isNaN(date.getTime())) return '';
-        
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        
-        const day = date.getDate();
-        const month = months[date.getMonth()];
-        const year = date.getFullYear();
-        
-        return `${day} ${month} ${year}`;
-    } catch (e) {
-        return '';
-    }
-}
-// ========================================
-// Car Name Utilities
-// ========================================
-
-/**
- * List of known car brand names for splitting car names into brand + model
- * Ordered from longest to shortest to match multi-word brands first (e.g., "Lynk & Co" before "KTM")
- */
-const CAR_BRANDS = [
-    // Multi-word brands (must come first)
-    'Mercedes-Benz', 'Mercedes-AMG', 'Alfa Romeo', 'Lynk & Co', 'RUF',
-    // German brands
-    'Mercedes', 'AMG-Mercedes', 'BMW', 'Audi', 'Porsche', 'Volkswagen', 'Opel', 'NSU',
-    // Italian brands
-    'Ferrari', 'Lamborghini', 'Pagani', 'Maserati',
-    // British brands
-    'McLaren', 'Bentley', 'Lotus', 'Radical', 'Aston Martin', 'Jaguar',
-    // American brands
-    'Chevrolet', 'Ford', 'Cadillac', 'Saleen', 'Callaway',
-    // Japanese brands
-    'Nissan', 'Honda', 'Mazda', 'Toyota', 'Lexus', 'Subaru',
-    // Korean brands
-    'Hyundai', 'Kia',
-    // Other European
-    'Renault', 'Peugeot', 'Citroën', 'Citroen', 'Volvo', 'SEAT', 'CUPRA', 'LADA', 'Lada',
-    // Austrian
-    'KTM', 'Gumpert',
-    // Others
-    'Koenigsegg', 'Praga', 'Tatuus', 'Aquila', 'Canhard', 'Cougar', 'Crosslé', 'Crossle',
-    'DMD', 'Fabcar', 'Mistral', 'RaceRoom', 'Formula', 'Carlsson', 'Zakspeed',
-    'Abt-Audi', 'S.C.', 'P4-5'
-];
-
-/**
- * Special case mappings for cars where brand detection doesn't work with simple prefix matching
- * Maps full car name to { brand, model }
- */
-const CAR_SPECIAL_CASES = {
-    'E36 V8 JUDD': { brand: 'Judd', model: 'E36 V8' },
-    '134 Judd V8': { brand: 'Judd', model: '134 V8' }
-};
-
-/**
- * Splits a car name into brand and model parts
- * @param {string} carName - Full car name (e.g., "BMW M4 GT3")
- * @returns {Object} Object with brand and model properties
- */
-function splitCarName(carName) {
-    if (!carName) return { brand: '', model: '' };
-    
-    const name = String(carName).trim();
-    
-    // Check special cases first
-    if (CAR_SPECIAL_CASES[name]) {
-        return CAR_SPECIAL_CASES[name];
-    }
-    
-    // Try to match each brand (already sorted by length/priority)
-    for (const brand of CAR_BRANDS) {
-        if (name.startsWith(brand + ' ') || name === brand) {
-            const model = name.slice(brand.length).trim();
-            return { brand, model };
-        }
-    }
-    
-    // Fallback: first word is brand, rest is model
-    const spaceIndex = name.indexOf(' ');
-    if (spaceIndex > 0) {
-        return {
-            brand: name.slice(0, spaceIndex),
-            model: name.slice(spaceIndex + 1)
-        };
-    }
-    
-    // No space found, entire name is brand
-    return { brand: name, model: '' };
-}
-
-// ========================================
-// Export utilities for use in other modules
-// ========================================
-
-// Make utilities available globally
 window.R3EUtils = {
     escapeHtml,
     formatHeader,
     formatValue,
-    formatClassicLapTime,
-    parseGapMillisFromItem,
     getTotalEntriesCount,
-    parseLapTimeToMillis,
-    calculateGapPercentage,
     renderRankStars,
     getPositionBadgeColor,
-    getUrlParam,
-    updateUrlParam,
-    getTrackLabelMap,
-    resolveTrackLabel,
-    resolveTrackLabelForItem,
-    resolveCarClassLogoByName,
-    resolveCarClassLogoById,
-    resolveCarClassLogo,
-    resolveDailyRaceClassLogos,
-    getDailyRaceClassLogosHtml,
-    formatDate,
-    splitCarName
+    ...(window.R3ETimeUtils || {}),
+    ...(window.R3ETrackUtils || {}),
+    ...(window.R3EUrlUtils || {}),
+    ...(window.R3ECarUtils || {})
 };

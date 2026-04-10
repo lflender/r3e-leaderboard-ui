@@ -105,43 +105,6 @@ fetchLeaderboardDetails();
 // ===========================================
 // Main Fetch Function
 // ===========================================
-async function enrichEntriesWithDriverMetadata(entries) {
-    if (!Array.isArray(entries) || entries.length === 0) {
-        return entries;
-    }
-
-    if (typeof dataService === 'undefined' || typeof dataService.waitForDriverIndex !== 'function' || typeof dataService.getDriverMetadata !== 'function') {
-        return entries;
-    }
-
-    const driverMirror = await dataService.waitForDriverIndex();
-    if (!driverMirror || typeof driverMirror !== 'object' || Object.keys(driverMirror).length === 0) {
-        return entries;
-    }
-
-    entries.forEach(entry => {
-        const driverName = DataNormalizer.extractName(entry);
-        if (!driverName) {
-            return;
-        }
-
-        const metadata = dataService.getDriverMetadata(driverName, driverMirror);
-        if (!metadata) {
-            return;
-        }
-
-        if (metadata.country) {
-            entry.country = metadata.country;
-            entry.Country = metadata.country;
-        }
-        entry.team = metadata.team || '';
-        entry.Team = metadata.team || '';
-        entry.rank = metadata.rank || '';
-        entry.Rank = metadata.rank || '';
-    });
-
-    return entries;
-}
 
 async function fetchLeaderboardDetails() {
     await TemplateHelper.showLoading(resultsContainer);
@@ -323,79 +286,13 @@ async function fetchSpecificClassesDetails() {
         if (specificClassIds.length === 0) {
             throw new Error('No valid class IDs provided');
         }
-        
-        // Fetch data from all classes in parallel
-        const allEntries = [];
-        const fetchPromises = specificClassIds.map(async (classId) => {
-            try {
-                const data = await dataService.fetchLeaderboardDetails(trackParam, classId);
-                const leaderboardData = dataService.extractLeaderboardArray(data);
-                if (leaderboardData && Array.isArray(leaderboardData)) {
-                    const transformed = transformLeaderboardData(leaderboardData, data);
-                    // Add class ID to each entry for reference
-                    const className = window.getCarClassName ? window.getCarClassName(classId) : classId;
-                    transformed.forEach(entry => {
-                        entry.ClassName = className;
-                    });
-                    return transformed;
-                }
-                return [];
-            } catch (e) {
-                console.warn('Failed to fetch class:', classId, e);
-                return [];
-            }
-        });
-        
-        const results = await Promise.all(fetchPromises);
-        results.forEach(entries => {
-            allEntries.push(...entries);
-        });
-        
-        // Sort by lap time
-        allEntries.forEach((entry, idx) => {
-            const rawLap = (window.DataNormalizer && window.DataNormalizer.extractLapTime) ? window.DataNormalizer.extractLapTime(entry) : (entry.LapTime || entry['Lap Time'] || entry.lap_time || '');
-            entry.__debugRawLap = rawLap;
-            entry.__debugMs = R3EUtils.parseLapTimeToMillis(rawLap) || Number.POSITIVE_INFINITY;
-        });
-        allEntries.sort((a, b) => {
-            return a.__debugMs - b.__debugMs;
-        });
-        
-        // Re-assign positions after sorting
-        allEntries.forEach((entry, idx) => {
-            const newPos = idx + 1;
-            entry.Position = newPos;
-            entry.position = newPos;
-            entry.Pos = newPos;
-            delete entry.TotalEntries;
-            delete entry.total_entries;
-        });
-        
-        // Recalculate gap times
-        if (allEntries.length > 0) {
-            const fastestMs = allEntries[0].__debugMs;
-            
-            allEntries.forEach((entry, idx) => {
-                const entryMs = entry.__debugMs;
-                const rawLapTime = entry.__debugRawLap || '';
-                const lapTimePart = rawLapTime.split(',')[0].trim();
-                
-                if (idx === 0) {
-                    entry.LapTime = lapTimePart;
-                    entry['Lap Time'] = lapTimePart;
-                    entry.lap_time = lapTimePart;
-                } else {
-                    const gapMs = entryMs - fastestMs;
-                    const gapSeconds = (gapMs / 1000).toFixed(3);
-                    const gapFormatted = `+${gapSeconds}s`;
-                    const newLapTime = `${lapTimePart}, ${gapFormatted}`;
-                    
-                    entry.LapTime = newLapTime;
-                    entry['Lap Time'] = newLapTime;
-                    entry.lap_time = newLapTime;
-                }
-            });
-        }
+
+        const classSpecs = specificClassIds.map(classId => ({
+            classId,
+            className: window.getCarClassName ? window.getCarClassName(classId) : classId
+        }));
+
+        const allEntries = await dataService.buildCombinedLeaderboard(trackParam, classSpecs);
         
         // Set page titles for specific classes view
         setSpecificClassesDetailTitles(specificClassIds);
@@ -479,88 +376,19 @@ async function fetchCombinedSuperclassDetails() {
         
         // Resolve class names to class IDs
         const classIdMap = await resolveClassNamesToIds(superclassClasses);
-        
-        // Fetch data from all classes in parallel (using class ID, not name)
-        const allEntries = [];
-        const fetchPromises = superclassClasses.map(async (className) => {
-            try {
-                const classId = classIdMap.get(className);
-                if (classId === null || classId === undefined) {
-                    console.warn('No class ID found for:', className);
-                    return [];
-                }
-                const data = await dataService.fetchLeaderboardDetails(trackParam, classId);
-                const leaderboardData = dataService.extractLeaderboardArray(data);
-                if (leaderboardData && Array.isArray(leaderboardData)) {
-                    const transformed = transformLeaderboardData(leaderboardData, data);
-                    // Add class name to each entry
-                    transformed.forEach(entry => {
-                        entry.ClassName = className;
-                    });
-                    return transformed;
-                }
-                return [];
-            } catch (e) {
-                console.warn('Failed to fetch class:', className, e);
-                return [];
-            }
-        });
-        
-        const results = await Promise.all(fetchPromises);
-        results.forEach(entries => {
-            allEntries.push(...entries);
-        });
-        
-        // Sort by lap time using minimal, explicit parser
-        allEntries.forEach((entry, idx) => {
-            const rawLap = (window.DataNormalizer && window.DataNormalizer.extractLapTime) ? window.DataNormalizer.extractLapTime(entry) : (entry.LapTime || entry['Lap Time'] || entry.lap_time || '');
-            entry.__debugRawLap = rawLap;
-            entry.__debugMs = R3EUtils.parseLapTimeToMillis(rawLap) || Number.POSITIVE_INFINITY;
-        });
-        allEntries.sort((a, b) => {
-            return a.__debugMs - b.__debugMs;
-        });
-        
-        // Re-assign positions after sorting - overwrite ALL position properties to ensure correct order
-        allEntries.forEach((entry, idx) => {
-            const newPos = idx + 1;
-            entry.Position = newPos;
-            entry.position = newPos;
-            entry.Pos = newPos;
-            // Clear the original TotalEntries so it doesn't conflict
-            delete entry.TotalEntries;
-            delete entry.total_entries;
-        });
-        
-        // Recalculate gap times relative to position 1 (fastest time in combined dataset)
-        if (allEntries.length > 0) {
-            const fastestMs = allEntries[0].__debugMs;
-            
-            allEntries.forEach((entry, idx) => {
-                const entryMs = entry.__debugMs;
-                const rawLapTime = entry.__debugRawLap || '';
-                
-                // Extract just the lap time part (before any comma/gap)
-                const lapTimePart = rawLapTime.split(',')[0].trim();
-                
-                if (idx === 0) {
-                    // Position 1 - no gap
-                    entry.LapTime = lapTimePart;
-                    entry['Lap Time'] = lapTimePart;
-                    entry.lap_time = lapTimePart;
-                } else {
-                    // Calculate gap in milliseconds
-                    const gapMs = entryMs - fastestMs;
-                    const gapSeconds = (gapMs / 1000).toFixed(3);
-                    const gapFormatted = `+${gapSeconds}s`;
-                    const newLapTime = `${lapTimePart}, ${gapFormatted}`;
-                    
-                    entry.LapTime = newLapTime;
-                    entry['Lap Time'] = newLapTime;
-                    entry.lap_time = newLapTime;
-                }
-            });
+
+        const classSpecs = superclassClasses
+            .map(className => ({
+                classId: classIdMap.get(className),
+                className
+            }))
+            .filter(spec => spec.classId !== null && spec.classId !== undefined);
+
+        if (classSpecs.length === 0) {
+            throw new Error('No class IDs resolved for superclass: ' + superclassParam);
         }
+
+        const allEntries = await dataService.buildCombinedLeaderboard(trackParam, classSpecs);
         
         // Set page titles for combined view
         setCombinedDetailTitles(superclassParam);
@@ -607,30 +435,79 @@ async function fetchCombinedSuperclassDetails() {
 /**
  * Set page titles for combined superclass view
  */
+function splitTrackAndLayout(fullTrack) {
+    const safeTrack = String(fullTrack || '').trim();
+    if (!safeTrack) {
+        return { trackName: '', layoutName: '' };
+    }
+
+    const match = safeTrack.match(/^(.*?)(?:\s*[-–—]\s*)(.+)$/);
+    if (match) {
+        return {
+            trackName: match[1].trim(),
+            layoutName: match[2].trim()
+        };
+    }
+
+    return { trackName: safeTrack, layoutName: '' };
+}
+
+function resolveTrackAndLayoutFromTracksData(trackId, fallbackTrackName = '') {
+    let resolvedName = fallbackTrackName || trackId || '';
+    let resolvedLayout = '';
+
+    if (window.TRACKS_DATA && Array.isArray(window.TRACKS_DATA)) {
+        const track = window.TRACKS_DATA.find(t => String(t.id) === String(trackId));
+        if (track && track.label) {
+            const parts = splitTrackAndLayout(track.label);
+            resolvedName = parts.trackName || resolvedName;
+            resolvedLayout = parts.layoutName || '';
+        }
+    }
+
+    return {
+        trackName: resolvedName,
+        layoutName: resolvedLayout
+    };
+}
+
+function renderDetailHeader({ pageTitleText, trackName, layoutName, detailClassHtml }) {
+    const pageTitleElem = document.querySelector('title');
+    const detailTrackElem = document.getElementById('detail-track');
+    const detailClassElem = document.getElementById('detail-class');
+
+    if (pageTitleElem) {
+        pageTitleElem.textContent = `${pageTitleText} — RaceRoom Leaderboards`;
+    }
+
+    if (detailTrackElem) {
+        detailTrackElem.innerHTML = `<span class="detail-label">Track:</span> ${R3EUtils.escapeHtml(trackName)}`;
+    }
+
+    let layoutElem = document.getElementById('detail-layout');
+    if (layoutName) {
+        if (!layoutElem && detailTrackElem) {
+            layoutElem = document.createElement('div');
+            layoutElem.id = 'detail-layout';
+            detailTrackElem.after(layoutElem);
+        }
+        if (layoutElem) {
+            layoutElem.innerHTML = `<span class="detail-label">Layout:</span> ${R3EUtils.escapeHtml(layoutName)}`;
+        }
+    } else if (layoutElem) {
+        layoutElem.remove();
+    }
+
+    if (detailClassElem) {
+        detailClassElem.innerHTML = detailClassHtml;
+    }
+}
+
 /**
  * Set detail page titles for specific classes view
  */
 function setSpecificClassesDetailTitles(classIds) {
-    const pageTitle = document.querySelector('title');
-    const detailTrackElem = document.getElementById('detail-track');
-    const detailClassElem = document.getElementById('detail-class');
-    
-    // Get track name from TRACKS_DATA
-    let trackName = trackParam;
-    let layoutName = '';
-    if (window.TRACKS_DATA && Array.isArray(window.TRACKS_DATA)) {
-        const track = window.TRACKS_DATA.find(t => String(t.id) === String(trackParam));
-        if (track && track.label) {
-            const fullTrack = track.label;
-            const match = fullTrack.match(/^(.*?)(?:\s*[-–—]\s*)(.+)$/);
-            if (match) {
-                trackName = match[1].trim();
-                layoutName = match[2].trim();
-            } else {
-                trackName = fullTrack;
-            }
-        }
-    }
+    const { trackName, layoutName } = resolveTrackAndLayoutFromTracksData(trackParam, trackParam);
     
     // Determine the category label
     const sortedIds = [...classIds].sort().join(',');
@@ -640,76 +517,26 @@ function setSpecificClassesDetailTitles(classIds) {
     const categoryLabel = isGT3MP ? 'GT3 MP' : isAudiTTCup ? 'Audi TT Cup' : isPorscheCup ? 'Porsche Cup' : 'Multi-Class';
     
     const title = `${trackName} - ${categoryLabel}`;
-    
-    if (pageTitle) pageTitle.textContent = title + ' — RaceRoom Leaderboards';
-    if (detailTrackElem) {
-        detailTrackElem.innerHTML = `<span class="detail-label">Track:</span> ${R3EUtils.escapeHtml(trackName)}`;
-    }
-    
-    // Add layout element if needed
-    if (layoutName) {
-        let layoutElem = document.getElementById('detail-layout');
-        if (!layoutElem && detailTrackElem) {
-            layoutElem = document.createElement('div');
-            layoutElem.id = 'detail-layout';
-            detailTrackElem.after(layoutElem);
-        }
-        if (layoutElem) {
-            layoutElem.innerHTML = `<span class="detail-label">Layout:</span> ${R3EUtils.escapeHtml(layoutName)}`;
-        }
-    }
-    
-    if (detailClassElem) {
-        detailClassElem.innerHTML = `<span class="detail-label">Category:</span> ${R3EUtils.escapeHtml(categoryLabel)}`;
-    }
+
+    renderDetailHeader({
+        pageTitleText: title,
+        trackName,
+        layoutName,
+        detailClassHtml: `<span class="detail-label">Category:</span> ${R3EUtils.escapeHtml(categoryLabel)}`
+    });
 }
 
 function setCombinedDetailTitles(superclass) {
-    const pageTitle = document.querySelector('title');
-    const detailTrackElem = document.getElementById('detail-track');
-    const detailClassElem = document.getElementById('detail-class');
-    const subtitleElem = document.getElementById('detail-subtitle');
-    
-    // Get track name from TRACKS_DATA
-    let trackName = trackParam;
-    let layoutName = '';
-    if (window.TRACKS_DATA && Array.isArray(window.TRACKS_DATA)) {
-        const track = window.TRACKS_DATA.find(t => String(t.id) === String(trackParam));
-        if (track && track.label) {
-            const fullTrack = track.label;
-            const match = fullTrack.match(/^(.*?)(?:\s*[-–—]\s*)(.+)$/);
-            if (match) {
-                trackName = match[1].trim();
-                layoutName = match[2].trim();
-            } else {
-                trackName = fullTrack;
-            }
-        }
-    }
+    const { trackName, layoutName } = resolveTrackAndLayoutFromTracksData(trackParam, trackParam);
     
     const title = `${trackName} - ${superclass} (Combined)`;
-    
-    if (pageTitle) pageTitle.textContent = title + ' — RaceRoom Leaderboards';
-    if (detailTrackElem) {
-        detailTrackElem.innerHTML = `<span class="detail-label">Track:</span> ${R3EUtils.escapeHtml(trackName)}`;
-    }
-    
-    // Add layout element if needed
-    if (layoutName) {
-        let layoutElem = document.getElementById('detail-layout');
-        if (!layoutElem && detailTrackElem) {
-            layoutElem = document.createElement('div');
-            layoutElem.id = 'detail-layout';
-            detailTrackElem.after(layoutElem);
-        }
-        if (layoutElem) {
-            layoutElem.innerHTML = `<span class="detail-label">Layout:</span> ${R3EUtils.escapeHtml(layoutName)}`;
-        }
-    }
-    
-    if (detailClassElem) {
-        detailClassElem.innerHTML = `<span class="detail-label">Category:</span> ${R3EUtils.escapeHtml(superclass)} (Combined)`;
-    }
+
+    renderDetailHeader({
+        pageTitleText: title,
+        trackName,
+        layoutName,
+        detailClassHtml: `<span class="detail-label">Category:</span> ${R3EUtils.escapeHtml(superclass)} (Combined)`
+    });
 }
 
 /**
@@ -757,13 +584,9 @@ function setDetailTitles(data, trackParam, classParam) {
             fullTrack = window.DataNormalizer.normalizeTrackName(fullTrack);
         }
         if (fullTrack && fullTrack !== '') {
-            const match = fullTrack.match(/^(.*?)(?:\s*[-–—]\s*)(.+)$/);
-            if (match) {
-                trackName = match[1].trim();
-                layoutName = match[2].trim();
-            } else {
-                trackName = fullTrack;
-            }
+            const parts = splitTrackAndLayout(fullTrack);
+            trackName = parts.trackName || trackName;
+            layoutName = parts.layoutName || '';
         }
         carClassName = data.track_info.ClassName || data.track_info.class_name || '';
         carClassId = data.track_info.ClassId || data.track_info.class_id || data.track_info.classid || '';
@@ -785,13 +608,9 @@ function setDetailTitles(data, trackParam, classParam) {
                 fullTrack = window.DataNormalizer.normalizeTrackName(fullTrack);
             }
             if (fullTrack && fullTrack !== '' && fullTrack !== 'undefined' && fullTrack !== '[object Object]') {
-                const match = fullTrack.match(/^(.*?)(?:\s*[-–—]\s*)(.+)$/);
-                if (match) {
-                    trackName = match[1].trim();
-                    layoutName = match[2].trim();
-                } else {
-                    trackName = fullTrack;
-                }
+                const parts = splitTrackAndLayout(fullTrack);
+                trackName = parts.trackName || trackName;
+                layoutName = parts.layoutName || '';
             }
             if (!carClassName) {
                 carClassName = first?.car_class?.class?.Name || first?.car_class?.class?.name || 
@@ -830,8 +649,12 @@ function setDetailTitles(data, trackParam, classParam) {
         ? `<img class="detail-class-logo" src="${R3EUtils.escapeHtml(classLogoUrl)}" alt="${R3EUtils.escapeHtml(carClassName)} class logo" loading="lazy" decoding="async" />`
         : '';
 
-    document.getElementById('detail-class').innerHTML =
-        `<span class="detail-label">Class:</span>${classLogoHtml}<span class="detail-class-name">${R3EUtils.escapeHtml(carClassName)}</span>`;
+    renderDetailHeader({
+        pageTitleText: `${trackName} - ${carClassName}`,
+        trackName,
+        layoutName,
+        detailClassHtml: `<span class="detail-label">Class:</span>${classLogoHtml}<span class="detail-class-name">${R3EUtils.escapeHtml(carClassName)}</span>`
+    });
 }
 
 /**
@@ -842,28 +665,8 @@ async function displayResults(data) {
     const baseResults = Array.isArray(data) ? data.slice() : [];
     let results = baseResults.slice();
 
-    // Preserve expand/collapse state across full re-renders (pagination and filtering)
-    const existingCarDistContent = resultsContainer.querySelector('.car-dist-content');
-    if (existingCarDistContent) {
-        DetailState.carDistributionExpanded = existingCarDistContent.style.display !== 'none';
-    }
-    const existingEntriesDistContent = resultsContainer.querySelector('.entries-dist-content');
-    if (existingEntriesDistContent) {
-        DetailState.entriesDistributionExpanded = existingEntriesDistContent.style.display !== 'none';
-    }
-
-    const bounds = getDataTimeBounds(results);
-    if (bounds) {
-        if (!DetailState.timeframeStart) {
-            DetailState.timeframeStart = toLocalDateInputValue(bounds.min);
-        }
-        if (!DetailState.timeframeEnd) {
-            DetailState.timeframeEnd = toLocalDateInputValue(bounds.max);
-        }
-    } else {
-        DetailState.timeframeStart = null;
-        DetailState.timeframeEnd = null;
-    }
+    preserveDistributionExpandedState();
+    updateTimeframeBoundsFromResults(results);
 
     results = applyTimeframeFilter(results, DetailState.timeframeStart, DetailState.timeframeEnd);
     
@@ -880,78 +683,12 @@ async function displayResults(data) {
     
     if (results.length === 0) {
         if (baseResults.length > 0) {
-            const emptyEntriesDistHTML = generateEntriesDistributionGraph(
-                results,
-                DetailState.entriesDistributionExpanded,
-                DetailState.timeframeStart,
-                DetailState.timeframeEnd,
-                baseResults
-            );
-            resultsContainer.innerHTML = `${emptyEntriesDistHTML}<div class="no-results">No entries found for the selected timeframe.</div>`;
-
-            const toggleBtn = resultsContainer.querySelector('.entries-dist-toggle');
-            const content = resultsContainer.querySelector('.entries-dist-content');
-            if (toggleBtn && content) {
-                toggleBtn.addEventListener('click', () => {
-                    const isCollapsed = content.style.display === 'none';
-                    content.style.display = isCollapsed ? '' : 'none';
-                    toggleBtn.classList.toggle('expanded', isCollapsed);
-                    toggleBtn.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false');
-                    DetailState.entriesDistributionExpanded = isCollapsed;
-                });
-            }
-
-            const startInput = resultsContainer.querySelector('.entries-timeframe-start');
-            const endInput = resultsContainer.querySelector('.entries-timeframe-end');
-            const lastWeekBtn = resultsContainer.querySelector('.entries-timeframe-last-week');
-            if (startInput) {
-                startInput.addEventListener('input', () => {
-                    if (!startInput.value) return;
-                    DetailState.timeframeStart = startInput.value;
-                    if (DetailState.timeframeEnd && startInput.value > DetailState.timeframeEnd) {
-                        DetailState.timeframeEnd = startInput.value;
-                    }
-                    currentPage = 1;
-                    displayResults(allResults);
-                });
-            }
-            if (endInput) {
-                endInput.addEventListener('input', () => {
-                    if (!endInput.value) return;
-                    DetailState.timeframeEnd = endInput.value;
-                    if (DetailState.timeframeStart && endInput.value < DetailState.timeframeStart) {
-                        DetailState.timeframeStart = endInput.value;
-                    }
-                    currentPage = 1;
-                    displayResults(allResults);
-                });
-            }
-            if (lastWeekBtn) {
-                lastWeekBtn.addEventListener('click', () => {
-                    const now = new Date();
-                    const weekAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
-                    DetailState.timeframeStart = toLocalDateInputValue(weekAgo);
-                    DetailState.timeframeEnd = toLocalDateInputValue(now);
-                    currentPage = 1;
-                    displayResults(allResults);
-                });
-            }
+            renderEmptyTimeframeState(baseResults, results);
+            bindEntriesDistributionInteractions();
             return;
         }
 
-        // Only show "no results" if enough time has passed since last action
-        const timeSinceAction = Date.now() - lastActionTime;
-        if (timeSinceAction < 1500) {
-            await TemplateHelper.showLoading(resultsContainer);
-            // Schedule showing "no results" after the delay
-            setTimeout(async () => {
-                if (resultsContainer.innerHTML.includes('Loading')) {
-                    await TemplateHelper.showNoResults(resultsContainer);
-                }
-            }, 1500 - timeSinceAction);
-            return;
-        }
-        await TemplateHelper.showNoResults(resultsContainer);
+        await showNoResultsWithActionDelay();
         return;
     }
     
@@ -976,43 +713,23 @@ async function displayResults(data) {
     const endIndex = Math.min(startIndex + itemsPerPage, totalResults);
     const paginatedResults = results.slice(startIndex, endIndex);
     
-    // Check if car filter is active
-    const carToggle = document.querySelector('#car-filter-ui .custom-select__toggle');
-    const selectedCar = carToggle ? carToggle.textContent.replace(' ▾', '').trim() : 'All cars';
-    const isCarFilterActive = selectedCar !== 'All cars';
+    const isCarFilterActive = isCarFilterCurrentlyActive();
     
     // Add filtered and absolute position data when car filter is active
     if (isCarFilterActive) {
-        paginatedResults.forEach((item, filteredIndex) => {
-            // Calculate filtered position (position within the current filtered results)
-            const actualFilteredIndex = startIndex + filteredIndex;
-            item.filteredPosition = actualFilteredIndex + 1;
-            item.filteredTotal = totalResults;
-            
-            // Find absolute position in unfiltered results
-            const originalPos = item.Position || item.position || item.Pos;
-            const itemName = item.Name || item.name;
-            const absoluteEntry = unfilteredResults.find(entry => {
-                const entryPos = entry.Position || entry.position || entry.Pos;
-                const entryName = entry.Name || entry.name;
-                return entryPos === originalPos && entryName === itemName;
-            });
-            if (absoluteEntry) {
-                item.absolutePosition = absoluteEntry.Position || absoluteEntry.position || absoluteEntry.Pos;
-                item.absoluteTotal = absoluteEntry.TotalEntries || unfilteredResults.length;
-            }
-        });
+        annotateFilteredAndAbsolutePositions(paginatedResults, startIndex, totalResults);
     }
     
-    // Create table headers using ColumnConfig for consistency
-    // For detail page, we want: Position, Driver, Lap Time, Lap %, [Class if combined], Car, Difficulty, Date
-    const baseColumns = ['Position', 'Name', 'LapTime', 'GapPercent', 'Car', 'Difficulty', 'date_time'];
-    const columnsWithClass = ['Position', 'Name', 'LapTime', 'GapPercent', 'CarClass', 'Car', 'Difficulty', 'date_time'];
+    // Create table headers using ColumnConfig for consistency.
+    // GapTime is a detail-page pseudo column rendered from LapTime delta.
+    const baseColumns = ['Position', 'Name', 'LapTime', 'GapTime', 'GapPercent', 'Car', 'Difficulty', 'date_time'];
+    const columnsWithClass = ['Position', 'Name', 'LapTime', 'GapTime', 'GapPercent', 'CarClass', 'Car', 'Difficulty', 'date_time'];
     const columnKeys = DetailState.isCombinedView ? columnsWithClass : baseColumns;
     
     // Get display names from ColumnConfig
     const headers = columnKeys.map(key => {
         if (key === 'Name') return 'Driver'; // Special case for detail page
+        if (key === 'GapTime') return 'Gap';
         return window.ColumnConfig ? window.ColumnConfig.getDisplayName(key) : key;
     });
     
@@ -1036,7 +753,6 @@ async function displayResults(data) {
     }
     
     const tableWrapperHTML = `<div class="table-scroll-wrapper">${tableHTML}</div>`;
-    resultsContainer.innerHTML = paginationHTML + tableWrapperHTML + paginationHTML;
     
     const entriesDistHTML = generateEntriesDistributionGraph(
         results,
@@ -1045,75 +761,6 @@ async function displayResults(data) {
         DetailState.timeframeEnd,
         baseResults
     );
-
-    const attachCarDistToggle = () => {
-        const toggleBtn = resultsContainer.querySelector('.car-dist-toggle');
-        const summaryTable = resultsContainer.querySelector('.car-dist-content');
-        if (toggleBtn && summaryTable) {
-            toggleBtn.addEventListener('click', () => {
-                const isCollapsed = summaryTable.style.display === 'none';
-                summaryTable.style.display = isCollapsed ? '' : 'none';
-                toggleBtn.classList.toggle('expanded', isCollapsed);
-                toggleBtn.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false');
-                DetailState.carDistributionExpanded = isCollapsed;
-            });
-        }
-    };
-
-    const attachEntriesDistToggle = () => {
-        const toggleBtn = resultsContainer.querySelector('.entries-dist-toggle');
-        const content = resultsContainer.querySelector('.entries-dist-content');
-        if (toggleBtn && content) {
-            toggleBtn.addEventListener('click', () => {
-                const isCollapsed = content.style.display === 'none';
-                content.style.display = isCollapsed ? '' : 'none';
-                toggleBtn.classList.toggle('expanded', isCollapsed);
-                toggleBtn.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false');
-                DetailState.entriesDistributionExpanded = isCollapsed;
-            });
-        }
-    };
-
-    const attachEntriesTimeframeControls = () => {
-        const startInput = resultsContainer.querySelector('.entries-timeframe-start');
-        const endInput = resultsContainer.querySelector('.entries-timeframe-end');
-        const lastWeekBtn = resultsContainer.querySelector('.entries-timeframe-last-week');
-
-        if (startInput) {
-            startInput.addEventListener('input', () => {
-                if (!startInput.value) return;
-                DetailState.timeframeStart = startInput.value;
-                if (DetailState.timeframeEnd && startInput.value > DetailState.timeframeEnd) {
-                    DetailState.timeframeEnd = startInput.value;
-                }
-                currentPage = 1;
-                displayResults(allResults);
-            });
-        }
-
-        if (endInput) {
-            endInput.addEventListener('input', () => {
-                if (!endInput.value) return;
-                DetailState.timeframeEnd = endInput.value;
-                if (DetailState.timeframeStart && endInput.value < DetailState.timeframeStart) {
-                    DetailState.timeframeStart = endInput.value;
-                }
-                currentPage = 1;
-                displayResults(allResults);
-            });
-        }
-
-        if (lastWeekBtn) {
-            lastWeekBtn.addEventListener('click', () => {
-                const now = new Date();
-                const weekAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
-                DetailState.timeframeStart = toLocalDateInputValue(weekAgo);
-                DetailState.timeframeEnd = toLocalDateInputValue(now);
-                currentPage = 1;
-                displayResults(allResults);
-            });
-        }
-    };
 
     // Add car distribution summary if multiple cars present
     if (availableCars.length > 1) {
@@ -1129,82 +776,224 @@ async function displayResults(data) {
             defaultSortBy === 'median' ? 'asc' : 'desc',
             DetailState.carDistributionExpanded
         );
-        // Insert summaries above pagination and table
-        const tempDiv = document.createElement('div');
-        const tableWrapperHTML = `<div class="table-scroll-wrapper">${tableHTML}</div>`;
-        tempDiv.innerHTML = summaryHTML + entriesDistHTML + paginationHTML + tableWrapperHTML + paginationHTML;
-        resultsContainer.innerHTML = tempDiv.innerHTML;
-
-        attachCarDistToggle();
-        attachEntriesDistToggle();
-        attachEntriesTimeframeControls();
-
-        // Create a function to handle sorting
-        const handleCarDistSort = () => {
-            const sortHeaders = resultsContainer.querySelectorAll('.car-dist-table th.sortable');
-            sortHeaders.forEach(header => {
-                header.addEventListener('click', () => {
-                    const summaryDiv = resultsContainer.querySelector('.car-dist-summary');
-                    const currentSort = summaryDiv.getAttribute('data-sort-by');
-                    const currentDir = summaryDiv.getAttribute('data-sort-dir');
-                    const clickedSort = header.getAttribute('data-sort');
-                    const currentContent = resultsContainer.querySelector('.car-dist-content');
-                    const isExpanded = currentContent && currentContent.style.display !== 'none';
-                    const currentEntriesContent = resultsContainer.querySelector('.entries-dist-content');
-                    const entriesExpanded = currentEntriesContent && currentEntriesContent.style.display !== 'none';
-                    DetailState.carDistributionExpanded = isExpanded;
-                    DetailState.entriesDistributionExpanded = entriesExpanded;
-
-                    // Determine new sort direction
-                    let newDir;
-                    if (currentSort !== clickedSort) {
-                        // If switching to Median, default to asc; otherwise desc
-                        newDir = clickedSort === 'median' ? 'asc' : 'desc';
-                    } else {
-                        // Toggle direction
-                        newDir = currentDir === 'desc' ? 'asc' : 'desc';
-                    }
-
-                    // Re-render with new sort
-                    const newSummaryHTML = generateCarDistributionSummary(allResults, clickedSort, newDir, isExpanded);
-                    const newEntriesHTML = generateEntriesDistributionGraph(
-                        results,
-                        entriesExpanded,
-                        DetailState.timeframeStart,
-                        DetailState.timeframeEnd,
-                        baseResults
-                    );
-                    const newTempDiv = document.createElement('div');
-                    const newTableWrapperHTML = `<div class="table-scroll-wrapper">${tableHTML}</div>`;
-                    newTempDiv.innerHTML = newSummaryHTML + newEntriesHTML + paginationHTML + newTableWrapperHTML + paginationHTML;
-                    resultsContainer.innerHTML = newTempDiv.innerHTML;
-
-                    // Re-attach expand/collapse listeners
-                    attachCarDistToggle();
-                    attachEntriesDistToggle();
-                    attachEntriesTimeframeControls();
-
-                    // Re-attach sort listeners
-                    handleCarDistSort();
-                });
-            });
-        };
-        
-        // Attach sorting listeners
-        handleCarDistSort();
+        renderDetailSections(summaryHTML, entriesDistHTML, paginationHTML, tableWrapperHTML);
+        bindCarDistributionToggle();
+        bindEntriesDistributionInteractions();
+        bindCarDistributionSortHandlers({
+            allResults,
+            filteredResults: results,
+            baseResults,
+            paginationHTML,
+            tableWrapperHTML
+        });
     } else if (entriesDistHTML) {
-        const tempDiv = document.createElement('div');
-        const tableWrapperHTML = `<div class="table-scroll-wrapper">${tableHTML}</div>`;
-        tempDiv.innerHTML = entriesDistHTML + paginationHTML + tableWrapperHTML + paginationHTML;
-        resultsContainer.innerHTML = tempDiv.innerHTML;
-        attachEntriesDistToggle();
-        attachEntriesTimeframeControls();
+        renderDetailSections('', entriesDistHTML, paginationHTML, tableWrapperHTML);
+        bindEntriesDistributionInteractions();
+    } else {
+        renderDetailSections('', '', paginationHTML, tableWrapperHTML);
     }
     
     // Highlight position row if needed
     if (posParam && !Number.isNaN(posParam)) {
         highlightPositionRow(posParam);
     }
+}
+
+function preserveDistributionExpandedState() {
+    const existingCarDistContent = resultsContainer.querySelector('.car-dist-content');
+    if (existingCarDistContent) {
+        DetailState.carDistributionExpanded = existingCarDistContent.style.display !== 'none';
+    }
+
+    const existingEntriesDistContent = resultsContainer.querySelector('.entries-dist-content');
+    if (existingEntriesDistContent) {
+        DetailState.entriesDistributionExpanded = existingEntriesDistContent.style.display !== 'none';
+    }
+}
+
+function updateTimeframeBoundsFromResults(results) {
+    const bounds = getDataTimeBounds(results);
+    if (bounds) {
+        if (!DetailState.timeframeStart) {
+            DetailState.timeframeStart = toLocalDateInputValue(bounds.min);
+        }
+        if (!DetailState.timeframeEnd) {
+            DetailState.timeframeEnd = toLocalDateInputValue(bounds.max);
+        }
+    } else {
+        DetailState.timeframeStart = null;
+        DetailState.timeframeEnd = null;
+    }
+}
+
+function renderEmptyTimeframeState(baseResults, filteredResults) {
+    const emptyEntriesDistHTML = generateEntriesDistributionGraph(
+        filteredResults,
+        DetailState.entriesDistributionExpanded,
+        DetailState.timeframeStart,
+        DetailState.timeframeEnd,
+        baseResults
+    );
+    resultsContainer.innerHTML = `${emptyEntriesDistHTML}<div class="no-results">No entries found for the selected timeframe.</div>`;
+}
+
+async function showNoResultsWithActionDelay() {
+    const timeSinceAction = Date.now() - lastActionTime;
+    if (timeSinceAction < 1500) {
+        await TemplateHelper.showLoading(resultsContainer);
+        setTimeout(async () => {
+            if (resultsContainer.innerHTML.includes('Loading')) {
+                await TemplateHelper.showNoResults(resultsContainer);
+            }
+        }, 1500 - timeSinceAction);
+        return;
+    }
+    await TemplateHelper.showNoResults(resultsContainer);
+}
+
+function isCarFilterCurrentlyActive() {
+    const carToggle = document.querySelector('#car-filter-ui .custom-select__toggle');
+    const selectedCar = carToggle ? carToggle.textContent.replace(' ▾', '').trim() : 'All cars';
+    return selectedCar !== 'All cars';
+}
+
+function annotateFilteredAndAbsolutePositions(paginatedResults, startIndex, totalResults) {
+    paginatedResults.forEach((item, filteredIndex) => {
+        const actualFilteredIndex = startIndex + filteredIndex;
+        item.filteredPosition = actualFilteredIndex + 1;
+        item.filteredTotal = totalResults;
+
+        const originalPos = item.Position || item.position || item.Pos;
+        const itemName = item.Name || item.name;
+        const absoluteEntry = unfilteredResults.find(entry => {
+            const entryPos = entry.Position || entry.position || entry.Pos;
+            const entryName = entry.Name || entry.name;
+            return entryPos === originalPos && entryName === itemName;
+        });
+        if (absoluteEntry) {
+            item.absolutePosition = absoluteEntry.Position || absoluteEntry.position || absoluteEntry.Pos;
+            item.absoluteTotal = absoluteEntry.TotalEntries || unfilteredResults.length;
+        }
+    });
+}
+
+function renderDetailSections(summaryHTML, entriesDistHTML, paginationHTML, tableWrapperHTML) {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = `${summaryHTML || ''}${entriesDistHTML || ''}${paginationHTML || ''}${tableWrapperHTML || ''}${paginationHTML || ''}`;
+    resultsContainer.innerHTML = tempDiv.innerHTML;
+}
+
+function bindCarDistributionToggle() {
+    const toggleBtn = resultsContainer.querySelector('.car-dist-toggle');
+    const summaryTable = resultsContainer.querySelector('.car-dist-content');
+    if (toggleBtn && summaryTable) {
+        toggleBtn.addEventListener('click', () => {
+            const isCollapsed = summaryTable.style.display === 'none';
+            summaryTable.style.display = isCollapsed ? '' : 'none';
+            toggleBtn.classList.toggle('expanded', isCollapsed);
+            toggleBtn.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false');
+            DetailState.carDistributionExpanded = isCollapsed;
+        });
+    }
+}
+
+function bindEntriesDistributionInteractions() {
+    const toggleBtn = resultsContainer.querySelector('.entries-dist-toggle');
+    const content = resultsContainer.querySelector('.entries-dist-content');
+    if (toggleBtn && content) {
+        toggleBtn.addEventListener('click', () => {
+            const isCollapsed = content.style.display === 'none';
+            content.style.display = isCollapsed ? '' : 'none';
+            toggleBtn.classList.toggle('expanded', isCollapsed);
+            toggleBtn.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false');
+            DetailState.entriesDistributionExpanded = isCollapsed;
+        });
+    }
+
+    const startInput = resultsContainer.querySelector('.entries-timeframe-start');
+    const endInput = resultsContainer.querySelector('.entries-timeframe-end');
+    const lastWeekBtn = resultsContainer.querySelector('.entries-timeframe-last-week');
+
+    if (startInput) {
+        startInput.addEventListener('input', () => {
+            if (!startInput.value) return;
+            DetailState.timeframeStart = startInput.value;
+            if (DetailState.timeframeEnd && startInput.value > DetailState.timeframeEnd) {
+                DetailState.timeframeEnd = startInput.value;
+            }
+            currentPage = 1;
+            displayResults(allResults);
+        });
+    }
+
+    if (endInput) {
+        endInput.addEventListener('input', () => {
+            if (!endInput.value) return;
+            DetailState.timeframeEnd = endInput.value;
+            if (DetailState.timeframeStart && endInput.value < DetailState.timeframeStart) {
+                DetailState.timeframeStart = endInput.value;
+            }
+            currentPage = 1;
+            displayResults(allResults);
+        });
+    }
+
+    if (lastWeekBtn) {
+        lastWeekBtn.addEventListener('click', () => {
+            const now = new Date();
+            const weekAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
+            DetailState.timeframeStart = toLocalDateInputValue(weekAgo);
+            DetailState.timeframeEnd = toLocalDateInputValue(now);
+            currentPage = 1;
+            displayResults(allResults);
+        });
+    }
+}
+
+function bindCarDistributionSortHandlers({ allResults, filteredResults, baseResults, paginationHTML, tableWrapperHTML }) {
+    const sortHeaders = resultsContainer.querySelectorAll('.car-dist-table th.sortable');
+    sortHeaders.forEach(header => {
+        header.addEventListener('click', () => {
+            const summaryDiv = resultsContainer.querySelector('.car-dist-summary');
+            const currentSort = summaryDiv.getAttribute('data-sort-by');
+            const currentDir = summaryDiv.getAttribute('data-sort-dir');
+            const clickedSort = header.getAttribute('data-sort');
+
+            const currentContent = resultsContainer.querySelector('.car-dist-content');
+            const isExpanded = currentContent && currentContent.style.display !== 'none';
+            const currentEntriesContent = resultsContainer.querySelector('.entries-dist-content');
+            const entriesExpanded = currentEntriesContent && currentEntriesContent.style.display !== 'none';
+            DetailState.carDistributionExpanded = isExpanded;
+            DetailState.entriesDistributionExpanded = entriesExpanded;
+
+            let newDir;
+            if (currentSort !== clickedSort) {
+                newDir = clickedSort === 'median' ? 'asc' : 'desc';
+            } else {
+                newDir = currentDir === 'desc' ? 'asc' : 'desc';
+            }
+
+            const newSummaryHTML = generateCarDistributionSummary(allResults, clickedSort, newDir, isExpanded);
+            const newEntriesHTML = generateEntriesDistributionGraph(
+                filteredResults,
+                entriesExpanded,
+                DetailState.timeframeStart,
+                DetailState.timeframeEnd,
+                baseResults
+            );
+
+            renderDetailSections(newSummaryHTML, newEntriesHTML, paginationHTML, tableWrapperHTML);
+            bindCarDistributionToggle();
+            bindEntriesDistributionInteractions();
+            bindCarDistributionSortHandlers({
+                allResults,
+                filteredResults,
+                baseResults,
+                paginationHTML,
+                tableWrapperHTML
+            });
+        });
+    });
 }
 
 /**
@@ -1263,7 +1052,8 @@ function renderDetailRow(item, showAbsolutePosition = false) {
         driverLinkClass: 'detail-driver-link',
         driverLinkBase: 'drivers.html?driver='
     });
-    html += tableRenderer.renderCell(detailRowItem, 'LapTime');
+    html += tableRenderer.renderLapTimeCell(detailRowItem.LapTime, { includeDelta: false });
+    html += tableRenderer.renderGapTimeCell(detailRowItem.LapTime);
     html += tableRenderer.renderGapPercentCell(detailRowItem, null);
 
     if (DetailState.isCombinedView) {
@@ -1276,6 +1066,41 @@ function renderDetailRow(item, showAbsolutePosition = false) {
     
     html += '</tr>';
     return html;
+}
+
+function attachHighlightedRowExternalLink(row) {
+    const trackId = row.dataset.trackid || trackParam || '';
+    const classId = row.dataset.classid || classParam || '';
+    if (!trackId) {
+        return;
+    }
+
+    const isNumericId = /^\d+$/.test(String(classId));
+    const carClass = isNumericId ? `class-${classId}` : '';
+    const openExternal = () => {
+        let url = `https://game.raceroom.com/leaderboard/?track=${encodeURIComponent(trackId)}`;
+        if (carClass) {
+            url += `&car_class=${encodeURIComponent(carClass)}`;
+        }
+        window.open(url, '_blank');
+    };
+
+    row.style.cursor = 'pointer';
+    if (!row.dataset.externalClickAdded) {
+        row.addEventListener('click', openExternal);
+        row.dataset.externalClickAdded = '1';
+    }
+
+    const nameLink = row.querySelector('a.detail-driver-link');
+    if (nameLink && !nameLink.dataset.preventDefault) {
+        nameLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            openExternal();
+        });
+        nameLink.style.cursor = 'pointer';
+        nameLink.dataset.preventDefault = '1';
+    }
 }
 
 /**
@@ -1295,35 +1120,7 @@ function highlightPositionRow(targetPos) {
                 const rTime = String(r.dataset.time || '').trim();
                 if (rName === dLower && (!timeParam || rTime === String(timeParam).trim())) {
                     r.classList.add('highlight-row');
-                    
-                    // Add external link handler for highlighted row
-                    const trackId = r.dataset.trackid || trackParam || '';
-                    const classId = r.dataset.classid || classParam || '';
-                    if (trackId) {
-                        const isNumericId = /^\d+$/.test(String(classId));
-                        const carClass = isNumericId ? `class-${classId}` : '';
-                        const openExternal = (e) => {
-                            let url = `https://game.raceroom.com/leaderboard/?track=${encodeURIComponent(trackId)}`;
-                            if (carClass) url += `&car_class=${encodeURIComponent(carClass)}`;
-                            window.open(url, '_blank');
-                        };
-                        r.style.cursor = 'pointer';
-                        if (!r.dataset.externalClickAdded) {
-                            r.addEventListener('click', openExternal);
-                            r.dataset.externalClickAdded = '1';
-                        }
-                        // Prevent driver name links from navigating in highlighted rows
-                        const nameLink = r.querySelector('a.detail-driver-link');
-                        if (nameLink && !nameLink.dataset.preventDefault) {
-                            nameLink.addEventListener('click', (e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                openExternal(e);
-                            });
-                            nameLink.style.cursor = 'pointer';
-                            nameLink.dataset.preventDefault = '1';
-                        }
-                    }
+                    attachHighlightedRowExternalLink(r);
                     
                     // If a position was provided, enforce it visually on the highlighted row
                     if (posParam && !Number.isNaN(posParam)) {
@@ -1360,34 +1157,7 @@ function highlightPositionRow(targetPos) {
             const num = parseInt(posBadge.textContent.trim());
             if (num === targetPos) {
                 r.classList.add('highlight-row');
-                
-                const trackId = r.dataset.trackid || trackParam || '';
-                const classId = r.dataset.classid || classParam || '';
-                if (trackId) {
-                    const isNumericId = /^\d+$/.test(String(classId));
-                    const carClass = isNumericId ? `class-${classId}` : '';
-                    const openExternal = (e) => {
-                        let url = `https://game.raceroom.com/leaderboard/?track=${encodeURIComponent(trackId)}`;
-                        if (carClass) url += `&car_class=${encodeURIComponent(carClass)}`;
-                        window.open(url, '_blank');
-                    };
-                    r.style.cursor = 'pointer';
-                    if (!r.dataset.externalClickAdded) {
-                        r.addEventListener('click', openExternal);
-                        r.dataset.externalClickAdded = '1';
-                    }
-                    // Prevent driver name links from navigating in highlighted rows
-                    const nameLink = r.querySelector('a.detail-driver-link');
-                    if (nameLink && !nameLink.dataset.preventDefault) {
-                        nameLink.addEventListener('click', (e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            openExternal(e);
-                        });
-                        nameLink.style.cursor = 'pointer';
-                        nameLink.dataset.preventDefault = '1';
-                    }
-                }
+                attachHighlightedRowExternalLink(r);
                 // Ensure displayed position matches the requested one when provided
                 if (posParam && !Number.isNaN(posParam)) {
                     const posBadge = r.querySelector('td.pos-cell .pos-number');
@@ -1434,160 +1204,6 @@ function goToPage(page) {
 }
 
 /**
- * Detects if a car name has a year suffix (e.g., "2015", "2021")
- * @param {string} carName - Car model name
- * @returns {{baseName: string, year: string}|null} Base name and year, or null if no year suffix
- */
-function detectYearSuffix(carName) {
-    const yearMatch = carName.match(/^(.+?)\s+(\d{4})$/);
-    if (yearMatch) {
-        return {
-            baseName: yearMatch[1].trim(),
-            year: yearMatch[2]
-        };
-    }
-    return null;
-}
-
-/**
- * Detects if a car name has a DTM suffix
- * @param {string} carName - Car model name
- * @returns {{baseName: string}|null} Base name, or null if no DTM suffix
- */
-function detectDTMSuffix(carName) {
-    if (carName.endsWith(' DTM')) {
-        return {
-            baseName: carName.substring(0, carName.length - 4)
-        };
-    }
-    return null;
-}
-
-/**
- * Finds DTM variant combinations (base model + DTM variant)
- * @param {Array<string>} cars - Array of car model names
- * @returns {Array<{value: string, label: string}>} Array of combined options
- */
-function findDTMCombinations(cars) {
-    const combinations = [];
-    const processed = new Set();
-    
-    cars.forEach(car => {
-        const dtmInfo = detectDTMSuffix(car);
-        if (dtmInfo && cars.includes(dtmInfo.baseName) && !processed.has(dtmInfo.baseName)) {
-            combinations.push({
-                value: `COMBINED_DTM:${dtmInfo.baseName}`,
-                label: `Combined: ${dtmInfo.baseName} + DTM`
-            });
-            processed.add(dtmInfo.baseName);
-        }
-    });
-    
-    return combinations;
-}
-
-/**
- * Finds year variant combinations (models that differ only by year)
- * @param {Array<string>} cars - Array of car model names
- * @returns {Array<{value: string, label: string}>} Array of combined options
- */
-function findYearCombinations(cars) {
-    const combinations = [];
-    const processed = new Set();
-    const baseNameMap = new Map(); // baseName -> [car1, car2, ...]
-    
-    // Group cars by base name
-    cars.forEach(car => {
-        const yearInfo = detectYearSuffix(car);
-        if (yearInfo) {
-            if (!baseNameMap.has(yearInfo.baseName)) {
-                baseNameMap.set(yearInfo.baseName, []);
-            }
-            baseNameMap.get(yearInfo.baseName).push(car);
-        }
-    });
-    
-    // Create combinations for base names with multiple year variants
-    baseNameMap.forEach((variants, baseName) => {
-        // Only create combination if there are 2+ year variants OR if base model also exists
-        const hasBaseModel = cars.includes(baseName);
-        if ((variants.length >= 2 || (variants.length >= 1 && hasBaseModel)) && !processed.has(baseName)) {
-            combinations.push({
-                value: `COMBINED_YEAR:${baseName}`,
-                label: `Combined: ${baseName}`
-            });
-            processed.add(baseName);
-        }
-    });
-    
-    return combinations;
-}
-
-/**
- * Find all car model combinations (DTM variants, year variants, etc.)
- * @param {Array<string>} cars - Array of car model names
- * @returns {Array<{value: string, label: string}>} Array of combined options
- */
-function findCarCombinations(cars) {
-    const dtmCombinations = findDTMCombinations(cars);
-    const yearCombinations = findYearCombinations(cars);
-    return [...dtmCombinations, ...yearCombinations];
-}
-
-/**
- * Finds the combination option associated with a specific car (if any)
- * @param {string} car - Car model name
- * @param {Array<{value: string, label: string}>} combinations - All available combinations
- * @returns {{value: string, label: string}|null} Combination option or null
- */
-function findCombinationForCar(car, combinations) {
-    // Check for DTM combination
-    const dtmInfo = detectDTMSuffix(car);
-    if (dtmInfo) {
-        const combo = combinations.find(c => c.value === `COMBINED_DTM:${dtmInfo.baseName}`);
-        if (combo) return combo;
-    }
-    
-    // Check for year combination
-    const yearInfo = detectYearSuffix(car);
-    if (yearInfo) {
-        const combo = combinations.find(c => c.value === `COMBINED_YEAR:${yearInfo.baseName}`);
-        if (combo) return combo;
-    }
-    
-    // Check if this car is a base model for a year combination
-    const yearCombo = combinations.find(c => c.value === `COMBINED_YEAR:${car}`);
-    if (yearCombo) return yearCombo;
-    
-    return null;
-}
-
-/**
- * Checks if a car is the last variant in its group (for determining where to place combined option)
- * @param {string} car - Current car model name
- * @param {Array<string>} allCars - All car models (sorted)
- * @param {number} currentIndex - Current car index in the array
- * @returns {boolean} True if this is the last variant in its group
- */
-function isLastInGroup(car, allCars, currentIndex) {
-    // Determine the base name for grouping: if this car has a year suffix,
-    // use its base name; otherwise the car itself is the base.
-    const yearInfo = detectYearSuffix(car);
-    const baseName = yearInfo ? yearInfo.baseName : car;
-
-    // Scan forward: if any subsequent car is a year variant of the same base,
-    // then this is NOT the last in the group.
-    for (let i = currentIndex + 1; i < allCars.length; i++) {
-        const nextYearInfo = detectYearSuffix(allCars[i]);
-        if (nextYearInfo && nextYearInfo.baseName === baseName) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-/**
  * Build car filter from data
  */
 function buildCarFilter(data) {
@@ -1612,7 +1228,7 @@ function buildCarFilter(data) {
         // If in combined view, find all car combinations
         let carCombinations = [];
         if (DetailState.isCombinedView) {
-            carCombinations = findCarCombinations(availableCars);
+            carCombinations = R3EUtils.findCarCombinations(availableCars);
         }
         
         // Build the list with combined options inserted after their models
@@ -1623,10 +1239,10 @@ function buildCarFilter(data) {
             carOptions.push({ value: car, label: car });
             
             // Check if there's a combination for this car
-            const combo = findCombinationForCar(car, carCombinations);
+            const combo = R3EUtils.findCombinationForCar(car, carCombinations);
             if (combo && !addedCombinations.has(combo.value)) {
                 // Only add if this is the last car in the group
-                const last = isLastInGroup(car, availableCars, index);
+                const last = R3EUtils.isLastInCarGroup(car, availableCars, index);
                 if (last) {
                     carOptions.push({ value: combo.value, label: combo.label });
                     addedCombinations.add(combo.value);
@@ -1687,26 +1303,8 @@ function matchesDifficultyFilter(entry, selectedDifficulty) {
  * @returns {boolean} True if matches
  */
 function matchesCarFilter(entry, selectedCar) {
-    if (selectedCar === 'All cars' || selectedCar === '') return true;
-    
     const car = getField(entry, FIELD_NAMES.CAR);
-    
-    // Check if this is a combined DTM filter
-    if (selectedCar.startsWith('COMBINED_DTM:')) {
-        const baseName = selectedCar.substring(13);
-        return car === baseName || car === baseName + ' DTM';
-    }
-    
-    // Check if this is a combined year filter
-    if (selectedCar.startsWith('COMBINED_YEAR:')) {
-        const baseName = selectedCar.substring(14);
-        // Match base name or base name with any year suffix
-        if (car === baseName) return true;
-        const yearInfo = detectYearSuffix(car);
-        return yearInfo && yearInfo.baseName === baseName;
-    }
-    
-    return car === selectedCar;
+    return R3EUtils.matchesCarFilterValue(car, selectedCar);
 }
 
 /**

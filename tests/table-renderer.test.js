@@ -3,6 +3,10 @@ import { loadBrowserScript } from './helpers/script-loader.js';
 
 describe('table-renderer track resolution', () => {
     beforeAll(() => {
+        loadBrowserScript('modules/utils-car.js');
+        loadBrowserScript('modules/utils-time.js');
+        loadBrowserScript('modules/utils-track.js');
+        loadBrowserScript('modules/utils-url.js');
         loadBrowserScript('modules/utils.js');
         loadBrowserScript('modules/field-mappings.js');
         loadBrowserScript('modules/column-config.js');

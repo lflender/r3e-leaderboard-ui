@@ -887,11 +887,18 @@ footer p {
     white-space: nowrap;
 }
 
-.lap-time-cell .time-delta {
+.lap-time-cell .time-delta,
+.gap-time-cell .time-delta {
     display: block;
     white-space: nowrap;
     color: var(--text-secondary);
     font-size: 0.95rem;
+}
+
+.gap-time-cell {
+    white-space: nowrap;
+    color: var(--text-secondary);
+    text-align: left;
 }
 
 .time-delta-inline {
@@ -1413,11 +1420,18 @@ footer p {
     white-space: nowrap;
 }
 
-.lap-time-cell .time-delta {
+.lap-time-cell .time-delta,
+.gap-time-cell .time-delta {
     display: block;
     white-space: nowrap;
     color: var(--text-secondary);
     font-size: 0.95rem;
+}
+
+.gap-time-cell {
+    white-space: nowrap;
+    color: var(--text-secondary);
+    text-align: left;
 }
 
 .time-delta-inline {

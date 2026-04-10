@@ -783,6 +783,122 @@ class DataService {
         return String(time).split(',')[0].trim(); // Remove gap info, just get main time
     }
 
+    _normalizeLeaderboardEntriesForDetail(leaderboardData, data) {
+        if (!Array.isArray(leaderboardData)) {
+            return [];
+        }
+
+        const totalEntries = leaderboardData.length;
+        const defaultClassName = data?.track_info?.ClassName || data?.track_info?.class_name || null;
+        const firstClassName = leaderboardData[0]?.car_class?.class?.Name ||
+            leaderboardData[0]?.car_class?.class?.name || null;
+
+        return leaderboardData.map((entry, index) => {
+            let normalized;
+            if (window.DataNormalizer && typeof window.DataNormalizer.normalizeLeaderboardEntry === 'function') {
+                normalized = window.DataNormalizer.normalizeLeaderboardEntry(entry, data, index, totalEntries);
+            } else {
+                normalized = { ...entry };
+            }
+
+            if (!normalized.CarClass) {
+                normalized.CarClass = firstClassName || defaultClassName || '';
+            }
+
+            return normalized;
+        });
+    }
+
+    _extractRawLapTime(entry) {
+        if (window.DataNormalizer && typeof window.DataNormalizer.extractLapTime === 'function') {
+            return window.DataNormalizer.extractLapTime(entry);
+        }
+        return entry.LapTime || entry['Lap Time'] || entry.lap_time || entry.laptime || entry.Time || '';
+    }
+
+    _rebuildCombinedLapTimes(entries) {
+        if (!Array.isArray(entries) || entries.length === 0) {
+            return entries;
+        }
+
+        entries.forEach(entry => {
+            const rawLap = this._extractRawLapTime(entry);
+            entry.__rawLapForSort = rawLap;
+            entry.__lapSortMs = R3EUtils.parseLapTimeToMillis(rawLap) || Number.POSITIVE_INFINITY;
+        });
+
+        entries.sort((a, b) => a.__lapSortMs - b.__lapSortMs);
+
+        entries.forEach((entry, index) => {
+            const newPos = index + 1;
+            entry.Position = newPos;
+            entry.position = newPos;
+            entry.Pos = newPos;
+            delete entry.TotalEntries;
+            delete entry.total_entries;
+        });
+
+        const fastestMs = entries[0].__lapSortMs;
+        entries.forEach((entry, index) => {
+            const entryMs = entry.__lapSortMs;
+            const lapTimePart = String(entry.__rawLapForSort || '').split(',')[0].trim();
+
+            if (index === 0) {
+                entry.LapTime = lapTimePart;
+                entry['Lap Time'] = lapTimePart;
+                entry.lap_time = lapTimePart;
+            } else {
+                const gapMs = entryMs - fastestMs;
+                const gapSeconds = (gapMs / 1000).toFixed(3);
+                const gapFormatted = `+${gapSeconds}s`;
+                const newLapTime = `${lapTimePart}, ${gapFormatted}`;
+                entry.LapTime = newLapTime;
+                entry['Lap Time'] = newLapTime;
+                entry.lap_time = newLapTime;
+            }
+
+            delete entry.__rawLapForSort;
+            delete entry.__lapSortMs;
+        });
+
+        return entries;
+    }
+
+    async buildCombinedLeaderboard(trackId, classSpecs = []) {
+        const validSpecs = (Array.isArray(classSpecs) ? classSpecs : []).filter(spec => {
+            return spec && spec.classId !== null && spec.classId !== undefined && String(spec.classId).trim() !== '';
+        });
+
+        if (validSpecs.length === 0) {
+            return [];
+        }
+
+        const fetchPromises = validSpecs.map(async (spec) => {
+            try {
+                const data = await this.fetchLeaderboardDetails(trackId, spec.classId);
+                const leaderboardData = this.extractLeaderboardArray(data);
+                if (!Array.isArray(leaderboardData) || leaderboardData.length === 0) {
+                    return [];
+                }
+
+                const normalizedEntries = this._normalizeLeaderboardEntriesForDetail(leaderboardData, data);
+                if (spec.className) {
+                    normalizedEntries.forEach(entry => {
+                        entry.ClassName = spec.className;
+                    });
+                }
+                return normalizedEntries;
+            } catch (error) {
+                console.warn('Failed to fetch class for combined leaderboard:', spec.classId, error);
+                return [];
+            }
+        });
+
+        const batches = await Promise.all(fetchPromises);
+        const allEntries = batches.flat();
+        return this._rebuildCombinedLapTimes(allEntries);
+    }
+
     // -------- Internal helpers for index caching --------
     async _parseJsonWhenIdle(text) {
         if (typeof requestIdleCallback === 'function') {

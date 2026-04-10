@@ -30,7 +30,7 @@ class TableRenderer {
     }
     
     /**
-     * Renders a complete results table with driver grouping
+     * Renders a complete results table* grouping
      * @param {Array} driverGroups - Array of driver group objects
      * @param {Array} keys - Column keys to display
     * @param {string} sortBy - Optional sort key: 'gap' (default), 'lapTime', or 'gapPercent'
@@ -70,7 +70,7 @@ class TableRenderer {
         
         html += '</tr></thead><tbody>';
         
-        // Create grouped rows with driver headers
+        // Create grouped rows* headers
         driverGroups.forEach(driverObj => {
             const driverResults = Array.isArray(driverObj.entries) ? driverObj.entries : [];
             if (driverResults.length === 0) return;
@@ -432,20 +432,41 @@ class TableRenderer {
      * @param {string} value - Lap time value
      * @returns {string} HTML string
      */
-    renderLapTimeCell(value) {
-        const s = String(value || '');
-        const parts = s.split(/,\s*/);
-        const mainClassic = R3EUtils.formatClassicLapTime(parts[0] || '');
-        const deltaRaw = parts.slice(1).join(' ');
-        const deltaClassic = deltaRaw ? R3EUtils.formatClassicLapTime(deltaRaw) : '';
+    renderLapTimeCell(value, options = {}) {
+        const includeDelta = options.includeDelta !== false;
+        const parts = this.extractLapAndGapParts(value);
+        const mainClassic = parts.main;
+        const deltaClassic = parts.gap;
         const escMain = R3EUtils.escapeHtml(String(mainClassic));
         const escDelta = R3EUtils.escapeHtml(String(deltaClassic));
-        
-        if (escDelta) {
+
+        if (includeDelta && escDelta) {
             return `<td class="lap-time-cell"><span class="lap-main">${escMain}</span><span class="time-delta">${escDelta}</span></td>`;
         } else {
             return `<td class="lap-time-cell"><span class="lap-main">${escMain}</span></td>`;
         }
+    }
+
+    renderGapTimeCell(value) {
+        const parts = this.extractLapAndGapParts(value);
+        const deltaClassic = parts.gap;
+        const escDelta = R3EUtils.escapeHtml(String(deltaClassic));
+        if (!escDelta) {
+            return '<td class="gap-time-cell"></td>';
+        }
+        return `<td class="gap-time-cell"><span class="time-delta">${escDelta}</span></td>`;
+    }
+
+    extractLapAndGapParts(value) {
+        const s = String(value || '');
+        const parts = s.split(/,\s*/);
+        const mainRaw = parts[0] || '';
+        const gapRaw = parts.slice(1).join(' ');
+
+        return {
+            main: R3EUtils.formatClassicLapTime(mainRaw),
+            gap: gapRaw ? R3EUtils.formatClassicLapTime(gapRaw) : ''
+        };
     }
     
     /**

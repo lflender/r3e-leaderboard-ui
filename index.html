@@ -33,7 +33,7 @@
     <script src="modules/analytics.js?v=5"></script>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     
-    <link rel="stylesheet" href="style.css?v=56">
+    <link rel="stylesheet" href="style.css?v=58">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"/>
     <!-- Site Icons -->
     <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png?v=3">
@@ -49,7 +49,7 @@
         "name": "RaceRoom Leaderboards",
         "alternateName": ["R3E Leaderboards", "RaceRoom Racing Experience Leaderboards"],
         "url": "https://r3e-leaderboards.info/",
-        "description": "The #1 RaceRoom leaderboards database with driver lap times, track records, and rankings for RaceRoom Racing Experience.",
+        "description": "The #1 RaceRoom leaderboards database* lap times, track records, and rankings for RaceRoom Racing Experience.",
         "potentialAction": {
             "@type": "SearchAction",
             "target": {
@@ -145,7 +145,11 @@
     <!-- Core modules -->
     <script src="data/country-mappings.js?v=4" defer></script>
     <script src="modules/compressed-json-helper.js?v=1" defer></script>
-    <script src="modules/utils.js?v=5" defer></script>
+    <script src="modules/utils-time.js?v=1" defer></script>
+    <script src="modules/utils-track.js?v=1" defer></script>
+    <script src="modules/utils-url.js?v=1" defer></script>
+    <script src="modules/utils-car.js?v=1" defer></script>
+    <script src="modules/utils.js?v=11" defer></script>
     
     <!-- Data files - must load before feature modules that depend on them -->
     <script src="data/car-classes.js?v=3" defer></script>

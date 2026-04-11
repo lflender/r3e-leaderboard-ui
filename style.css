@@ -348,10 +348,85 @@ footer p {
     text-decoration: none;
     display: inline-block;
     width: 100%;
+    position: relative;
+    overflow: visible;
     white-space: normal; /* allow wrapping of long car names */
 }
 .row-link:hover {
     text-decoration: underline;
+}
+
+.car-inline-thumbnail {
+    position: absolute;
+    right: -1.5rem;
+    top: 40%;
+    transform: translateY(-50%);
+    width: auto;
+    height: 2.8rem;
+    max-width: 5.2rem;
+    border-radius: 0;
+    object-fit: contain;
+    background: transparent;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+    z-index: 3;
+    pointer-events: none;
+}
+
+.car-inline-meta {
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+    margin-left: 0.08rem;
+    padding-right: 4rem;
+}
+
+@media (max-width: 900px) {
+    .car-inline-thumbnail {
+        position: absolute;
+        right: -0.25rem;
+        top: -0.25rem;
+        transform: translateY(-50%);
+        display: block;
+        height: 1.9rem;
+        max-width: 3.2rem;
+        margin-left: 0;
+    }
+
+    .car-inline-meta {
+        padding-right: 2.75rem;
+    }
+}
+
+.car-link-thumbnail {
+    position: absolute;
+    left: calc(100% + 0.65rem);
+    top: 50%;
+    transform: translateY(-50%) scale(0.98);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 30;
+    width: 250px;
+    padding: 0.25rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: #111827;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.45);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.car-link-thumbnail img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 6px;
+}
+
+.row-link:hover .car-link-thumbnail,
+.row-link:focus-visible .car-link-thumbnail {
+    opacity: 1;
+    transform: translateY(-50%) scale(2);
 }
 
 /* Inline info icon with tooltip for car descriptions */
@@ -496,6 +571,13 @@ footer p {
     box-shadow: 0 2px 12px 0 rgba(30, 41, 59, 0.10);
 }
 
+#cars-info-table .results-table,
+#cars-info-table .results-table tbody,
+#cars-info-table .results-table tr,
+#cars-info-table .results-table td {
+    overflow: visible;
+}
+
 .results-table th,
 .results-table td {
     padding: 0.65rem 0.6rem;
@@ -581,7 +663,6 @@ footer p {
 }
 
 /* Table scrollbar styling */
-#cars-info-table,
 #track-info-table,
 #results-container {
     overflow-x: auto;
@@ -589,6 +670,13 @@ footer p {
     scrollbar-width: thin;
     scrollbar-color: var(--primary-color) var(--surface);
     padding: 2px; /* Prevent border/shadow clipping */
+}
+
+#cars-info-table {
+    position: relative;
+    overflow: visible;
+    z-index: 100;
+    padding: 2px;
 }
 
 #cars-info-table::-webkit-scrollbar,
@@ -782,6 +870,8 @@ footer p {
     text-decoration: none;
     display: inline-block;
     width: 100%;
+    position: relative;
+    overflow: visible;
     white-space: normal;
 }
 
@@ -811,6 +901,12 @@ footer p {
 
 .no-wrap-tail {
     white-space: nowrap;
+}
+
+@media (hover: none), (pointer: coarse) {
+    .car-link-thumbnail {
+        display: none !important;
+    }
 }
 
 /* Driver group headers */
@@ -3578,9 +3674,9 @@ footer {
 
     #cars-info-table .results-table th:nth-child(1),
     #cars-info-table .results-table td:nth-child(1) {
-        width: auto;
+        width: 32%;
         max-width: none;
-        min-width: 150px;
+        min-width: 195px;
         white-space: normal !important;
         word-break: break-word;
     }

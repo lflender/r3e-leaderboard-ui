@@ -242,23 +242,44 @@
               `<td colspan="9"><span class="toggle-icon">▼</span> <strong class="car-class-header-text">${classLogoHtml}${classHeaderText}</strong></td></tr>`;
       filteredCars.forEach(car => {
         displayedCars++;
-        if (car.link === undefined) car.link = '';
-        const rowLink = R3EUtils.escapeHtml(car.link || '');
+        const rawLink = String(car.link || '').trim();
+        const rowLink = R3EUtils.escapeHtml(rawLink);
         const linkOpen = rowLink ? `<a class="row-link" href="${rowLink}" target="_blank" rel="noopener">` : '';
+        const thumbUrl = R3EUtils.escapeHtml(car.thumbnail || '');
+        const imageMap = (window.CAR_IMAGES_BY_LINK && typeof window.CAR_IMAGES_BY_LINK === 'object')
+          ? window.CAR_IMAGES_BY_LINK
+          : null;
+        const mappedList = (imageMap && rawLink && Array.isArray(imageMap[rawLink]))
+          ? imageMap[rawLink]
+          : null;
+        const imageList = mappedList || (Array.isArray(car.image)
+          ? car.image
+          : (car.image ? [car.image] : []));
+        const encodedImageList = encodeURIComponent(JSON.stringify(imageList));
+        const imageUrl = R3EUtils.escapeHtml(imageList[0] || '');
+        const thumbInline = thumbUrl
+          ? `<img class="car-inline-thumbnail" src="${thumbUrl}" alt="" loading="lazy" decoding="async" aria-hidden="true">`
+          : '';
+        const thumbPreview = imageUrl
+          ? `<span class="car-link-thumbnail" data-image-list="${encodedImageList}" aria-hidden="true"><img src="${imageUrl}" alt="" loading="lazy" decoding="async"></span>`
+          : '';
         const linkClose = rowLink ? `</a>` : '';
         const infoIcon = car.description ? `<span class="info-icon" title="${R3EUtils.escapeHtml(car.description)}" aria-label="More info" role="img">i</span>` : '';
         const isSafetyCar = (car.car_class || car.class || '').toLowerCase() === 'safety car';
         const warningIcon = isSafetyCar ? `<span class="warning-icon" title="Not eligible to Leaderboards" aria-label="Warning" role="img">⚠️</span>` : '';
+        const metaIcons = (infoIcon || thumbInline || warningIcon)
+          ? `<span class="car-inline-meta">${infoIcon}${thumbInline}${warningIcon}</span>`
+          : '';
         const flag = countryFlag(car.country || '');
         const flagHtml = flag ? `<span class="country-flag">${flag}</span>` : '';
         const carName = String(car.car || '');
         const lastSpace = carName.lastIndexOf(' ');
         const carNameHtml = (lastSpace >= 0)
-          ? `${flagHtml}<b>${R3EUtils.escapeHtml(carName.slice(0, lastSpace))}</b><span class="no-wrap-tail"> <b>${R3EUtils.escapeHtml(carName.slice(lastSpace + 1))}</b> ${infoIcon}${warningIcon}</span>`
-          : `<span class="no-wrap-tail">${flagHtml}<b>${R3EUtils.escapeHtml(carName)}</b> ${infoIcon}${warningIcon}</span>`;
+          ? `${flagHtml}<b>${R3EUtils.escapeHtml(carName.slice(0, lastSpace))}</b><span class="no-wrap-tail"> <b>${R3EUtils.escapeHtml(carName.slice(lastSpace + 1))}</b> ${metaIcons}</span>`
+          : `<span class="no-wrap-tail">${flagHtml}<b>${R3EUtils.escapeHtml(carName)}</b> ${metaIcons}</span>`;
         // Note: Year badge uses inline style for dynamic background color gradient based on year
         html += `\n<tr class="driver-data-row ${slug}" data-link="${rowLink}">` +
-          `<td>${linkOpen}${carNameHtml}${linkClose}</td>` +
+          `<td>${linkOpen}${carNameHtml}${thumbPreview}${linkClose}</td>` +
                 `<td>${linkOpen}${wheelBadge(car.wheel_cat)}${linkClose}</td>` +
                 `<td>${linkOpen}${transBadge(car.transmission_cat)}${linkClose}</td>` +
                 `<td>${linkOpen}${driveBadge(car.drive)}${linkClose}</td>` +
@@ -272,6 +293,98 @@
 
     html += '\n</tbody></table>';
     tableContainer.innerHTML = html;
+
+    Array.from(tableContainer.querySelectorAll('span.car-link-thumbnail[data-image-list]')).forEach(preview => {
+      const host = preview.closest('a.row-link');
+      const img = preview.querySelector('img');
+      if (!host || !img) return;
+
+      let images = [];
+      try {
+        const raw = decodeURIComponent(preview.getAttribute('data-image-list') || '[]');
+        const parsed = JSON.parse(raw);
+        images = Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+      } catch (err) {
+        images = [];
+      }
+
+      if (images.length < 2) return;
+
+      let currentIndex = 0;
+      let cycleTimeoutId = null;
+      let isCycling = false;
+      let cycleToken = 0;
+      const preloadMap = new Map();
+
+      const ensurePreloaded = (url) => {
+        if (!url) return Promise.resolve();
+        if (preloadMap.has(url)) return preloadMap.get(url);
+
+        const p = new Promise(resolve => {
+          const preImg = new Image();
+          preImg.onload = () => resolve();
+          preImg.onerror = () => resolve();
+          preImg.src = url;
+        });
+
+        preloadMap.set(url, p);
+        return p;
+      };
+
+      const waitNextTick = () => new Promise(resolve => {
+        cycleTimeoutId = window.setTimeout(() => {
+          cycleTimeoutId = null;
+          resolve();
+        }, 1000);
+      });
+
+      const showImageWhenReady = async (url, token) => {
+        if (!url || token !== cycleToken) return false;
+        await ensurePreloaded(url);
+        if (token !== cycleToken) return false;
+        if (img.src !== url) img.src = url;
+        return true;
+      };
+
+      const runCycle = async (token) => {
+        while (isCycling && token === cycleToken) {
+          await waitNextTick();
+          if (!isCycling || token !== cycleToken) break;
+
+          const nextIndex = (currentIndex + 1) % images.length;
+          const shown = await showImageWhenReady(images[nextIndex], token);
+          if (!shown) break;
+          currentIndex = nextIndex;
+        }
+      };
+
+      const startCycle = () => {
+        if (isCycling) return;
+        isCycling = true;
+        cycleToken += 1;
+        const token = cycleToken;
+        img.src = images[0];
+        // Limit network pressure: preload only this hovered row's images.
+        images.slice(1).forEach(ensurePreloaded);
+        runCycle(token);
+      };
+
+      const stopCycle = () => {
+        isCycling = false;
+        cycleToken += 1;
+        if (cycleTimeoutId !== null) {
+          window.clearTimeout(cycleTimeoutId);
+          cycleTimeoutId = null;
+        }
+        currentIndex = 0;
+        img.src = images[0];
+      };
+
+      host.addEventListener('mouseenter', startCycle);
+      host.addEventListener('mouseleave', stopCycle);
+      host.addEventListener('focus', startCycle);
+      host.addEventListener('blur', stopCycle);
+    });
 
     // Make rows with a data-link attribute open that link in a new tab
     Array.from(tableContainer.querySelectorAll('tr.driver-data-row')).forEach(row => {

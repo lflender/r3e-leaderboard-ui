@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, vi } from 'vitest';
-import { loadBrowserScript } from './helpers/script-loader.js';
+import { loadBrowserScript } from '../helpers/script-loader.js';
 
 beforeAll(() => {
     loadBrowserScript('modules/pagination.js');
@@ -169,3 +169,4 @@ describe('generatePaginationHTML (static helper)', () => {
         expect(html).not.toContain('>1</button></button>');
     });
 });
+

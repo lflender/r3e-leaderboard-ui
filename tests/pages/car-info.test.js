@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { loadBrowserScript } from './helpers/script-loader.js';
+import { loadBrowserScript } from '../helpers/script-loader.js';
 
 function buildDom() {
     return [
@@ -74,3 +74,4 @@ describe('car-info integration', () => {
         expect(document.getElementById('cars-info-table').innerHTML).toContain('No car data available');
     });
 });
+

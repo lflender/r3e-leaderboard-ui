@@ -735,7 +735,15 @@ async function displayResults(data) {
     
     let rowsHtml = '';
     paginatedResults.forEach(item => {
-        rowsHtml += renderDetailRow(item, isCarFilterActive);
+        rowsHtml += tableRenderer.renderDetailRow(item, {
+            showAbsolutePosition: isCarFilterActive,
+            isCombinedView: DetailState.isCombinedView,
+            allResultsLength: allResults.length,
+            trackParam,
+            DataNormalizer,
+            R3EUtils,
+            tableRenderer
+        });
     });
     const tableHTML = TemplateHelper.generateTable(headers, rowsHtml);
     
@@ -776,7 +784,7 @@ async function displayResults(data) {
             defaultSortBy === 'median' ? 'asc' : 'desc',
             DetailState.carDistributionExpanded
         );
-        renderDetailSections(summaryHTML, entriesDistHTML, paginationHTML, tableWrapperHTML);
+        tableRenderer.renderDetailSections(resultsContainer, summaryHTML, entriesDistHTML, paginationHTML, tableWrapperHTML);
         bindCarDistributionToggle();
         bindEntriesDistributionInteractions();
         bindCarDistributionSortHandlers({
@@ -787,10 +795,10 @@ async function displayResults(data) {
             tableWrapperHTML
         });
     } else if (entriesDistHTML) {
-        renderDetailSections('', entriesDistHTML, paginationHTML, tableWrapperHTML);
+        tableRenderer.renderDetailSections(resultsContainer, '', entriesDistHTML, paginationHTML, tableWrapperHTML);
         bindEntriesDistributionInteractions();
     } else {
-        renderDetailSections('', '', paginationHTML, tableWrapperHTML);
+        tableRenderer.renderDetailSections(resultsContainer, '', '', paginationHTML, tableWrapperHTML);
     }
     
     // Highlight position row if needed
@@ -875,12 +883,6 @@ function annotateFilteredAndAbsolutePositions(paginatedResults, startIndex, tota
             item.absoluteTotal = absoluteEntry.TotalEntries || unfilteredResults.length;
         }
     });
-}
-
-function renderDetailSections(summaryHTML, entriesDistHTML, paginationHTML, tableWrapperHTML) {
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = `${summaryHTML || ''}${entriesDistHTML || ''}${paginationHTML || ''}${tableWrapperHTML || ''}${paginationHTML || ''}`;
-    resultsContainer.innerHTML = tempDiv.innerHTML;
 }
 
 function bindCarDistributionToggle() {
@@ -982,7 +984,7 @@ function bindCarDistributionSortHandlers({ allResults, filteredResults, baseResu
                 baseResults
             );
 
-            renderDetailSections(newSummaryHTML, newEntriesHTML, paginationHTML, tableWrapperHTML);
+            tableRenderer.renderDetailSections(resultsContainer, newSummaryHTML, newEntriesHTML, paginationHTML, tableWrapperHTML);
             bindCarDistributionToggle();
             bindEntriesDistributionInteractions();
             bindCarDistributionSortHandlers({
@@ -994,78 +996,6 @@ function bindCarDistributionSortHandlers({ allResults, filteredResults, baseResu
             });
         });
     });
-}
-
-/**
- * Render detail row
- * @param {Object} item - Data item
- * @param {boolean} showAbsolutePosition - Whether to show absolute position
- * @returns {string} HTML string
- */
-function renderDetailRow(item, showAbsolutePosition = false) {
-    const position = DetailState.isCombinedView 
-        ? (item.Position || item.position || DataNormalizer.extractPosition(item))
-        : DataNormalizer.extractPosition(item);
-    const name = DataNormalizer.extractName(item);
-    const country = DataNormalizer.extractCountry(item);
-    const car = DataNormalizer.extractCar(item);
-    const difficulty = DataNormalizer.extractDifficulty(item);
-    const lapTime = DataNormalizer.extractLapTime(item);
-    
-    const totalEntries = DetailState.isCombinedView 
-        ? allResults.length 
-        : R3EUtils.getTotalEntriesCount(item);
-    const rowTrackId = DataNormalizer.extractTrackId(item) || trackParam || '';
-    const rowClassId = DataNormalizer.extractClassId(item) || '';
-    const detailRowItem = {
-        ...item,
-        Position: position,
-        position: position,
-        Pos: position,
-        TotalEntries: totalEntries,
-        total_entries: totalEntries,
-        Name: name,
-        name: name,
-        Country: country,
-        country: country,
-        Car: car,
-        car: car,
-        Difficulty: difficulty,
-        difficulty: difficulty,
-        LapTime: lapTime,
-        'Lap Time': lapTime,
-        lap_time: lapTime,
-        filteredPosition: item.filteredPosition,
-        filteredTotal: item.filteredTotal,
-        absolutePosition: item.absolutePosition,
-        absoluteTotal: item.absoluteTotal
-    };
-
-    if (DetailState.isCombinedView) {
-        detailRowItem.CarClass = item.ClassName || item.class_name || item.CarClass || item.car_class || '';
-    }
-    
-    let html = `<tr data-trackid="${R3EUtils.escapeHtml(String(rowTrackId))}" data-classid="${R3EUtils.escapeHtml(String(rowClassId))}" data-name="${R3EUtils.escapeHtml(String(name))}" data-time="${R3EUtils.escapeHtml(String(lapTime))}">`;
-
-    html += tableRenderer.renderDetailPositionCell(detailRowItem, { showAbsolutePosition });
-    html += tableRenderer.renderDriverNameCell(detailRowItem, {
-        driverLinkClass: 'detail-driver-link',
-        driverLinkBase: 'drivers.html?driver='
-    });
-    html += tableRenderer.renderLapTimeCell(detailRowItem.LapTime, { includeDelta: false });
-    html += tableRenderer.renderGapTimeCell(detailRowItem.LapTime);
-    html += tableRenderer.renderGapPercentCell(detailRowItem, null);
-
-    if (DetailState.isCombinedView) {
-        html += tableRenderer.renderCell(detailRowItem, 'CarClass');
-    }
-
-    html += tableRenderer.renderCell(detailRowItem, 'Car');
-    html += tableRenderer.renderCell(detailRowItem, 'Difficulty');
-    html += tableRenderer.renderCell(detailRowItem, 'date_time');
-    
-    html += '</tr>';
-    return html;
 }
 
 function attachHighlightedRowExternalLink(row) {

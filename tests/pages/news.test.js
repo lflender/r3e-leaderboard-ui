@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { loadBrowserScript } from './helpers/script-loader.js';
+import { loadBrowserScript } from '../helpers/script-loader.js';
 
 beforeEach(() => {
     document.body.innerHTML = '<div id="news-content"></div>';
@@ -54,3 +54,4 @@ describe('news integration', () => {
         expect(global.fetch).not.toHaveBeenCalled();
     });
 });
+

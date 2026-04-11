@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, beforeEach, vi } from 'vitest';
-import { loadBrowserScript } from './helpers/script-loader.js';
+import { loadBrowserScript } from '../helpers/script-loader.js';
 
 // StatusDisplay auto-inits on load and does NOT export the class to window.
 // Load once with DOM in place; subsequent tests get the constructor from the
@@ -201,3 +201,4 @@ describe('StatusDisplay.updateStatusLed – LED colour logic', () => {
         window.TRACKS_DATA = null;
     });
 });
+

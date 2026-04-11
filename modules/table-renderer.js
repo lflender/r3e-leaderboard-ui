@@ -10,6 +10,9 @@ class TableRenderer {
         this.excludeColumns = window.ColumnConfig ? 
             window.ColumnConfig.getHiddenColumnAliases() : 
             this._getFallbackExcludeColumns();
+        this.sortService = window.TableSortService
+            ? new window.TableSortService({ resolveTrackLabel: this.resolveTrackLabel.bind(this) })
+            : null;
     }
     
     /**
@@ -81,7 +84,9 @@ class TableRenderer {
             this.sortDriverEntries(driverResults, sortBy);
             
             // Get reference time from the first (leader) entry for percentage calculation
-            const referenceTime = this.extractReferenceTime(driverResults);
+            const referenceTime = this.sortService
+                ? this.sortService.extractReferenceTime(driverResults)
+                : '';
             
             // Render driver header
             html += this.renderDriverHeader(driverObj, firstEntry, keys.length);
@@ -266,6 +271,86 @@ class TableRenderer {
             html += this.renderCell(item, key);
         });
         
+        html += '</tr>';
+        return html;
+    }
+
+    renderDetailSections(resultsContainer, summaryHTML, entriesDistHTML, paginationHTML, tableWrapperHTML) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = `${summaryHTML || ''}${entriesDistHTML || ''}${paginationHTML || ''}${tableWrapperHTML || ''}${paginationHTML || ''}`;
+        resultsContainer.innerHTML = tempDiv.innerHTML;
+    }
+
+    renderDetailRow(item, options = {}) {
+        const isCombinedView = !!options.isCombinedView;
+        const allResultsLength = Number(options.allResultsLength || 0);
+        const trackParam = options.trackParam || '';
+        const DataNormalizerRef = options.DataNormalizer || window.DataNormalizer;
+        const utils = options.R3EUtils || window.R3EUtils;
+        const renderer = options.tableRenderer || this;
+        const showAbsolutePosition = !!options.showAbsolutePosition;
+
+        const position = isCombinedView
+            ? (item.Position || item.position || DataNormalizerRef.extractPosition(item))
+            : DataNormalizerRef.extractPosition(item);
+        const name = DataNormalizerRef.extractName(item);
+        const country = DataNormalizerRef.extractCountry(item);
+        const car = DataNormalizerRef.extractCar(item);
+        const difficulty = DataNormalizerRef.extractDifficulty(item);
+        const lapTime = DataNormalizerRef.extractLapTime(item);
+
+        const totalEntries = isCombinedView
+            ? allResultsLength
+            : utils.getTotalEntriesCount(item);
+        const rowTrackId = DataNormalizerRef.extractTrackId(item) || trackParam || '';
+        const rowClassId = DataNormalizerRef.extractClassId(item) || '';
+        const detailRowItem = {
+            ...item,
+            Position: position,
+            position: position,
+            Pos: position,
+            TotalEntries: totalEntries,
+            total_entries: totalEntries,
+            Name: name,
+            name: name,
+            Country: country,
+            country: country,
+            Car: car,
+            car: car,
+            Difficulty: difficulty,
+            difficulty: difficulty,
+            LapTime: lapTime,
+            'Lap Time': lapTime,
+            lap_time: lapTime,
+            filteredPosition: item.filteredPosition,
+            filteredTotal: item.filteredTotal,
+            absolutePosition: item.absolutePosition,
+            absoluteTotal: item.absoluteTotal
+        };
+
+        if (isCombinedView) {
+            detailRowItem.CarClass = item.ClassName || item.class_name || item.CarClass || item.car_class || '';
+        }
+
+        let html = `<tr data-trackid="${utils.escapeHtml(String(rowTrackId))}" data-classid="${utils.escapeHtml(String(rowClassId))}" data-name="${utils.escapeHtml(String(name))}" data-time="${utils.escapeHtml(String(lapTime))}">`;
+
+        html += renderer.renderDetailPositionCell(detailRowItem, { showAbsolutePosition });
+        html += renderer.renderDriverNameCell(detailRowItem, {
+            driverLinkClass: 'detail-driver-link',
+            driverLinkBase: 'drivers.html?driver='
+        });
+        html += renderer.renderLapTimeCell(detailRowItem.LapTime, { includeDelta: false });
+        html += renderer.renderGapTimeCell(detailRowItem.LapTime);
+        html += renderer.renderGapPercentCell(detailRowItem, null);
+
+        if (isCombinedView) {
+            html += renderer.renderCell(detailRowItem, 'CarClass');
+        }
+
+        html += renderer.renderCell(detailRowItem, 'Car');
+        html += renderer.renderCell(detailRowItem, 'Difficulty');
+        html += renderer.renderCell(detailRowItem, 'date_time');
+
         html += '</tr>';
         return html;
     }
@@ -598,243 +683,13 @@ class TableRenderer {
     }
     
     /**
-     * Maps sort keys to their field names from FIELD_NAMES
-     * @param {string} sortBy - Sort key
-     * @returns {Array} Field names array or null if special handling needed
-     */
-    getSortFieldNames(sortBy) {
-        if (typeof window.FIELD_NAMES === 'undefined') return null;
-        
-        const fieldMap = {
-            'car_class': window.FIELD_NAMES.CAR_CLASS,
-            'track': window.FIELD_NAMES.TRACK,
-            'position': window.FIELD_NAMES.POSITION,
-            'date_time': window.FIELD_NAMES.DATE_TIME
-        };
-        
-        return fieldMap[sortBy] || null;
-    }
-    
-    /**
-     * Extracts field value using FIELD_NAMES for consistent field access
-     * @param {Object} item - Data item
-     * @param {string} sortBy - Sort key
-     * @returns {*} Field value
-     */
-    getFieldValueForSort(item, sortBy) {
-        if (sortBy === 'track') {
-            return this.resolveTrackLabel(item);
-        }
-
-        const fieldNames = this.getSortFieldNames(sortBy);
-        if (!fieldNames) return null;
-        
-        // Use getField if available, otherwise manual extraction
-        if (typeof window.getField === 'function') {
-            return window.getField(item, fieldNames, '');
-        }
-        
-        // Fallback: manual extraction using same pattern as getField
-        for (const field of fieldNames) {
-            if (item[field] !== undefined && item[field] !== null) {
-                return item[field];
-            }
-        }
-        return '';
-    }
-    
-    /**
      * Sorts driver entries by gap time, lap time, gap percentage, car class, track, position, or date
      * @param {Array} entries - Driver entries
      * @param {string} sortBy - Sort key: 'gap' (default), 'lapTime', 'gapPercent', 'car_class', 'track', 'position', or 'date_time'
      */
     sortDriverEntries(entries, sortBy = 'gap') {
-        if (!entries || entries.length === 0) return;
-        
-        try {
-            if (sortBy === 'position') {
-                this._sortByPosition(entries);
-            } else if (sortBy === 'date_time') {
-                this._sortByDateTime(entries);
-            } else if (sortBy === 'lapTime') {
-                this._sortByLapTime(entries);
-            } else if (sortBy === 'car_class' || sortBy === 'track') {
-                this._sortByTextField(entries, sortBy);
-            } else if (sortBy === 'gapPercent') {
-                this._sortByGapPercent(entries);
-            } else {
-                // Sort by gap time (default)
-                this._sortByGap(entries);
-            }
-        } catch (e) {
-            // If parsing fails, keep original order
-            console.warn('Sort error:', e);
-        }
-    }
-    
-    /**
-     * Sort by position
-     * @private
-     */
-    _sortByPosition(entries) {
-        const fields = this.getSortFieldNames('position');
-        entries.sort((a, b) => {
-            const posA = parseInt(this.getFieldValueForSort(a, 'position') || 999999);
-            const posB = parseInt(this.getFieldValueForSort(b, 'position') || 999999);
-            if (posA !== posB) return posA - posB;
-            return R3EUtils.getTotalEntriesCount(b) - R3EUtils.getTotalEntriesCount(a);
-        });
-    }
-    
-    /**
-     * Sort by date/time (most recent first)
-     * @private
-     */
-    _sortByDateTime(entries) {
-        entries.sort((a, b) => {
-            const dateA = this.getFieldValueForSort(a, 'date_time');
-            const dateB = this.getFieldValueForSort(b, 'date_time');
-            if (!dateA && !dateB) return 0;
-            if (!dateA) return 1;
-            if (!dateB) return -1;
-            
-            const timeA = new Date(dateA).getTime();
-            const timeB = new Date(dateB).getTime();
-            if (isNaN(timeA) && isNaN(timeB)) return 0;
-            if (isNaN(timeA)) return 1;
-            if (isNaN(timeB)) return -1;
-            return timeB - timeA; // Newest first
-        });
-    }
-    
-    /**
-     * Sort by lap time
-     * @private
-     */
-    _sortByLapTime(entries) {
-        entries.sort((a, b) => {
-            const rawA = a.LapTime || a['Lap Time'] || a.lap_time || a.laptime || a.Time || '';
-            const rawB = b.LapTime || b['Lap Time'] || b.lap_time || b.laptime || b.Time || '';
-            const lapA = String(rawA).split(/,\s*/)[0] || '';
-            const lapB = String(rawB).split(/,\s*/)[0] || '';
-            const msA = R3EUtils.parseLapTimeToMillis(lapA) || Number.MAX_VALUE;
-            const msB = R3EUtils.parseLapTimeToMillis(lapB) || Number.MAX_VALUE;
-            if (msA !== msB) return msA - msB;
-            return R3EUtils.getTotalEntriesCount(b) - R3EUtils.getTotalEntriesCount(a);
-        });
-    }
-    
-    /**
-     * Sort by text field (car class or track)
-     * @private
-     */
-    _sortByTextField(entries, sortBy) {
-        entries.sort((a, b) => {
-            // Primary sort: by the text field (case-insensitive)
-            const fieldA = String(this.getFieldValueForSort(a, sortBy) || '').toLowerCase();
-            const fieldB = String(this.getFieldValueForSort(b, sortBy) || '').toLowerCase();
-            
-            if (fieldA < fieldB) return -1;
-            if (fieldA > fieldB) return 1;
-            
-            // Secondary sort: by gap time
-            const ga = R3EUtils.parseGapMillisFromItem(a);
-            const gb = R3EUtils.parseGapMillisFromItem(b);
-            if (ga !== gb) return ga - gb;
-            
-            // Tertiary sort: by position
-            const posA = parseInt(this.getFieldValueForSort(a, 'position') || 999999);
-            const posB = parseInt(this.getFieldValueForSort(b, 'position') || 999999);
-            return posA - posB;
-        });
-    }
-    
-    /**
-     * Sort by gap percentage
-     * @private
-     */
-    _sortByGapPercent(entries) {
-        const referenceTime = this.extractReferenceTime(entries);
-        entries.sort((a, b) => {
-            const percentA = this.calculateGapPercentValue(a, referenceTime);
-            const percentB = this.calculateGapPercentValue(b, referenceTime);
-            if (percentA !== percentB) return percentA - percentB;
-            return R3EUtils.getTotalEntriesCount(b) - R3EUtils.getTotalEntriesCount(a);
-        });
-    }
-    
-    /**
-     * Sort by gap time (default)
-     * @private
-     */
-    _sortByGap(entries) {
-        entries.sort((a, b) => {
-            const ga = R3EUtils.parseGapMillisFromItem(a);
-            const gb = R3EUtils.parseGapMillisFromItem(b);
-            if (ga !== gb) return ga - gb;
-            return R3EUtils.getTotalEntriesCount(b) - R3EUtils.getTotalEntriesCount(a);
-        });
-    }
-    
-    /**
-     * Extracts the reference time (fastest lap) from driver entries
-     * @param {Array} entries - Driver entries
-     * @returns {string} Reference lap time
-     */
-    extractReferenceTime(entries) {
-        if (!entries || entries.length === 0) return '';
-        
-        // Find the entry with the smallest gap (should be first, but let's be safe)
-        let minGap = Number.MAX_VALUE;
-        let referenceEntry = entries[0];
-        
-        entries.forEach(entry => {
-            const gap = R3EUtils.parseGapMillisFromItem(entry);
-            if (gap < minGap) {
-                minGap = gap;
-                referenceEntry = entry;
-            }
-        });
-        
-        // Extract the lap time (first part before comma)
-        const raw = referenceEntry.LapTime || referenceEntry['Lap Time'] || 
-                   referenceEntry.lap_time || referenceEntry.laptime || 
-                   referenceEntry.Time || '';
-        const s = String(raw || '');
-        const parts = s.split(/,\s*/);
-        return parts[0] || '';
-    }
-    
-    /**
-     * Calculates gap percentage as a numeric value for sorting
-     * @param {Object} item - Data item
-     * @param {string} referenceTime - Not used, kept for API compatibility
-     * @returns {number} Percentage value (e.g., 100.5)
-     */
-    calculateGapPercentValue(item, referenceTime) {
-        if (!item) return 100;
-        
-        const raw = item.LapTime || item['Lap Time'] || item.lap_time || item.laptime || item.Time || '';
-        const s = String(raw || '');
-        if (!s) return 100;
-        
-        const parts = s.split(/,\s*/);
-        const lapTime = parts[0] || '';
-        
-        // If this is the reference (no gap), return 100
-        if (parts.length < 2) return 100;
-        
-        const lapMillis = R3EUtils.parseLapTimeToMillis(lapTime);
-        if (lapMillis === 0) return 100;
-        
-        const gapMillis = R3EUtils.parseGapMillisFromItem(item);
-        if (gapMillis === 0 || gapMillis === Number.MAX_VALUE) return 100;
-        
-        // Calculate reference time: reference = lapTime - gap
-        const refMillis = lapMillis - gapMillis;
-        if (refMillis <= 0) return 100;
-        
-        return (lapMillis / refMillis) * 100;
+        if (!this.sortService) return;
+        this.sortService.sortDriverEntries(entries, sortBy);
     }
     
     /**

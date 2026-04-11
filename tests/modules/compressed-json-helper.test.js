@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import { loadBrowserScript } from './helpers/script-loader.js';
+import { loadBrowserScript } from '../helpers/script-loader.js';
 
 describe('CompressedJsonHelper', () => {
     beforeEach(() => {

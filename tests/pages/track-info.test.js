@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { loadBrowserScript } from './helpers/script-loader.js';
+import { loadBrowserScript } from '../helpers/script-loader.js';
 
 function buildDom() {
     return [
@@ -105,3 +105,4 @@ describe('track-info integration', () => {
         expect(document.getElementById('track-info-table').innerHTML).toContain('No results found');
     });
 });
+

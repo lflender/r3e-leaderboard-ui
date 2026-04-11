@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { loadBrowserScript } from './helpers/script-loader.js';
+import { loadBrowserScript } from '../helpers/script-loader.js';
 
 // hall-of-fame.js is an IIFE – safe to reload per test group.
 // It closes over DOM refs captured at load time, so we set up DOM before each load.
@@ -236,3 +236,4 @@ describe('hall-of-fame – StatsData returns null paths', () => {
         expect(container.innerHTML.trim()).toBe('');
     });
 });
+

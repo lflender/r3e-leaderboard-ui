@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { loadBrowserScript } from './helpers/script-loader.js';
+import { loadBrowserScript } from '../helpers/script-loader.js';
 
 beforeAll(() => {
     // field-mappings.js provides FIELD_NAMES and getField as globals
@@ -164,3 +164,4 @@ describe('DataNormalizer extract helpers', () => {
         expect(window.DataNormalizer.extractDateTime({})).toBe('');
     });
 });
+

@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it, vi } from 'vitest';
-import { loadBrowserScript } from './helpers/script-loader.js';
+import { loadBrowserScript } from '../helpers/script-loader.js';
 
 beforeAll(async () => {
     window.history.replaceState({}, '', '/detail.html?track=10&class=5');
@@ -79,3 +79,4 @@ describe('detail page integration', () => {
         expect(typeof window.goToPage).toBe('function');
     });
 });
+

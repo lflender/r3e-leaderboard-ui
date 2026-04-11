@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, beforeEach, vi } from 'vitest';
-import { loadBrowserScript } from './helpers/script-loader.js';
+import { loadBrowserScript } from '../helpers/script-loader.js';
 
 beforeAll(() => {
     // TemplateLoader is accessed at call-time, not load-time; a stub is enough at load
@@ -107,3 +107,4 @@ describe('TemplateHelper.generatePagination', () => {
         expect(result).toBe('');
     });
 });
+

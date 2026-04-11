@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
-import { loadBrowserScript } from './helpers/script-loader.js';
+import { loadBrowserScript } from '../helpers/script-loader.js';
 
 function buildTabDOM() {
     return `
@@ -141,3 +141,4 @@ describe('TabManager – edge cases', () => {
         expect(() => tm.switchTab('x')).not.toThrow();
     });
 });
+

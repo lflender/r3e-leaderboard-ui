@@ -1,5 +1,5 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import { loadBrowserScript } from './helpers/script-loader.js';
+import { loadBrowserScript } from '../helpers/script-loader.js';
 
 function buildDom() {
     return [
@@ -155,3 +155,4 @@ describe('driver-search integration', () => {
         );
     });
 });
+

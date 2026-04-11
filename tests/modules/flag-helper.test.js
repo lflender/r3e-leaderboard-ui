@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
-import { loadBrowserScript } from './helpers/script-loader.js';
+import { loadBrowserScript } from '../helpers/script-loader.js';
 
 beforeAll(() => {
     // Provide minimal globals before load; the functions read them at call-time
@@ -75,3 +75,4 @@ describe('FlagHelper.findCountryCodeByName', () => {
         expect(window.FlagHelper.findCountryCodeByName('Neverland')).toBeNull();
     });
 });
+

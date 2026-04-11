@@ -221,6 +221,7 @@ beforeAll(async () => {
     document.body.innerHTML = buildDom();
     setupGlobals();
 
+    loadBrowserScript('modules/detail-difficulty-filter.js');
     loadBrowserScript('pages/detail.js');
     document.dispatchEvent(new Event('DOMContentLoaded'));
 
@@ -253,31 +254,72 @@ describe('detail page rich integration', () => {
         );
     });
 
-    it('applies difficulty and car filters via CustomSelect callbacks and tracks user filter analytics', async () => {
+    it('applies difficulty badge toggles and car filter and tracks user filter analytics', async () => {
         const carSelect = window.__customSelects['car-filter-ui'];
-        const diffSelect = window.__customSelects['difficulty-filter-ui'];
+        const getRealBadge = document.querySelector('#difficulty-filter-ui button[data-difficulty="Get Real"]');
 
-        diffSelect.setValue('Get Real', { source: 'user' });
-        carSelect.setValue('Audi R8', { source: 'user' });
+        getRealBadge.dispatchEvent(new MouseEvent('click', { bubbles: true }));
 
         await new Promise(resolve => setTimeout(resolve, 0));
 
-        const rows = document.querySelectorAll('#detail-results-container table.results-table tbody tr');
-        expect(rows.length).toBe(2);
-        expect(document.getElementById('detail-results-container').innerHTML).toContain('alice');
-        expect(document.getElementById('detail-results-container').innerHTML).toContain('bob');
+        let rows = document.querySelectorAll('#detail-results-container table.results-table tbody tr');
+        expect(rows.length).toBe(1);
+        expect(document.getElementById('detail-results-container').innerHTML).toContain('charlie');
+
+        carSelect.setValue('BMW M4', { source: 'user' });
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        rows = document.querySelectorAll('#detail-results-container table.results-table tbody tr');
+        expect(rows.length).toBe(1);
 
         expect(window.R3EAnalytics.track).toHaveBeenCalledWith(
             'detail filter changed',
             expect.objectContaining({
-                selected_difficulty: 'Get Real',
-                selected_car: 'Audi R8',
-                result_count: 2
+                selected_difficulty: 'Amateur, Novice',
+                selected_car: 'BMW M4',
+                result_count: 1
             })
         );
+
+        const refreshedGetRealBadge = document.querySelector('#difficulty-filter-ui button[data-difficulty="Get Real"]');
+        refreshedGetRealBadge.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        carSelect.setValue('', { source: 'user' });
+    });
+
+    it('does not allow disabling the last active difficulty badge', async () => {
+        const initiallyInactive = document.querySelectorAll('#difficulty-filter-ui button[aria-pressed="false"]');
+        initiallyInactive.forEach(badge => badge.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        const getRealBadge = document.querySelector('#difficulty-filter-ui button[data-difficulty="Get Real"]');
+        const amateurBadge = document.querySelector('#difficulty-filter-ui button[data-difficulty="Amateur"]');
+
+        amateurBadge.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        const noviceBadge = document.querySelector('#difficulty-filter-ui button[data-difficulty="Novice"]');
+        noviceBadge.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        const lockedGetRealBadge = document.querySelector('#difficulty-filter-ui button[data-difficulty="Get Real"]');
+        expect(lockedGetRealBadge.hasAttribute('disabled')).toBe(true);
+
+        lockedGetRealBadge.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        const refreshedGetRealBadge = document.querySelector('#difficulty-filter-ui button[data-difficulty="Get Real"]');
+        expect(refreshedGetRealBadge.getAttribute('aria-pressed')).toBe('true');
+
+        const inactiveBadges = document.querySelectorAll('#difficulty-filter-ui button[aria-pressed="false"]');
+        inactiveBadges.forEach(badge => badge.dispatchEvent(new MouseEvent('click', { bubbles: true })));
     });
 
     it('highlights the target row and opens RaceRoom leaderboard when the row is clicked', async () => {
+        const carSelect = window.__customSelects['car-filter-ui'];
+        carSelect.setValue('', { source: 'user' });
+
+        const inactiveBadges = document.querySelectorAll('#difficulty-filter-ui button[aria-pressed="false"]');
+        inactiveBadges.forEach(badge => badge.dispatchEvent(new MouseEvent('click', { bubbles: true })));
         await new Promise(resolve => setTimeout(resolve, 80));
 
         const highlighted = document.querySelector('#detail-results-container tr.highlight-row');

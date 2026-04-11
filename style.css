@@ -1808,7 +1808,7 @@ span.driver-name-top10-glitter::after {
 
 .detail-header {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 1.5rem;
     background: #1e293b;
     border-radius: 10px;
@@ -1823,12 +1823,7 @@ span.driver-name-top10-glitter::after {
 }
 
 #car-filter-ui {
-    margin-left: auto;
-}
-
-/* When car filter is hidden, difficulty filter takes its place */
-#car-filter-ui[style*="display: none"] + #difficulty-filter-ui {
-    margin-left: auto;
+    margin-left: 0;
 }
 
 .detail-header h2 {
@@ -1840,6 +1835,49 @@ span.driver-name-top10-glitter::after {
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
+    margin-right: auto;
+}
+
+#difficulty-filter-ui {
+    margin-left: 0;
+}
+
+#car-filter-ui + #difficulty-filter-ui {
+    margin-left: 0.5rem;
+}
+
+.detail-difficulty-badges {
+    display: flex;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.detail-difficulty-pill {
+    appearance: none;
+    -webkit-appearance: none;
+    margin: 0;
+    padding: 0.2rem 0.55rem;
+    color: var(--text-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.1;
+    cursor: pointer;
+    transition: opacity 0.15s ease, filter 0.15s ease, transform 0.15s ease;
+}
+
+.detail-difficulty-pill[aria-pressed="false"] {
+    opacity: 0.35;
+    filter: grayscale(100%);
+}
+
+.detail-difficulty-pill:disabled {
+    cursor: not-allowed;
+}
+
+.detail-difficulty-pill:not(:disabled):hover {
+    transform: translateY(-1px);
 }
 
 /* Car Distribution Summary */
@@ -3205,6 +3243,11 @@ footer {
     #difficulty-filter-ui {
         margin-left: 0 !important;
         min-width: 100%;
+    }
+
+    .detail-difficulty-badges {
+        width: 100%;
+        justify-content: flex-start;
     }
 
     /* Stack search filters vertically */

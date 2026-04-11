@@ -28,7 +28,7 @@
         <script src="modules/analytics.js?v=5"></script>
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
         
-        <link rel="stylesheet" href="style.css?v=58">
+        <link rel="stylesheet" href="style.css?v=60">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"/>
         <!-- Site Icons -->
         <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png?v=3">
@@ -77,15 +77,7 @@
                         <div class="custom-select__option" role="option" aria-selected="true">All cars</div>
                     </div>
                 </div>
-                <div id="difficulty-filter-ui" class="custom-select" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-label="Filter by difficulty">
-                    <button class="custom-select__toggle" type="button">All difficulties ▾</button>
-                    <div class="custom-select__menu" role="listbox" hidden>
-                        <div class="custom-select__option" role="option" aria-selected="true">All difficulties</div>
-                        <div class="custom-select__option" role="option">Get Real</div>
-                        <div class="custom-select__option" role="option">Amateur</div>
-                        <div class="custom-select__option" role="option">Novice</div>
-                    </div>
-                </div>
+                <div id="difficulty-filter-ui" aria-label="Filter by difficulty"></div>
             </div>
             <div id="detail-results-container"></div>
         </div>
@@ -117,12 +109,13 @@
     <script src="modules/status-display.js?v=4" defer></script>
     <script src="modules/table-sort-service.js?v=1" defer></script>
     <script src="modules/table-renderer.js?v=19" defer></script>
+    <script src="modules/detail-difficulty-filter.js?v=1" defer></script>
     <script src="modules/template-helper.js?v=2" defer></script>
     <script src="modules/utils-time.js?v=1" defer></script>
     <script src="modules/utils-track.js?v=1" defer></script>
     <script src="modules/utils-url.js?v=1" defer></script>
     <script src="modules/utils-car.js?v=1" defer></script>
     <script src="modules/utils.js?v=11" defer></script>
-    <script src="pages/detail.js?v=43" defer></script>
+    <script src="pages/detail.js?v=46" defer></script>
 </body>
 </html>

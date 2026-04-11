@@ -25,7 +25,7 @@ const DetailState = {
     allResults: [],
     unfilteredResults: [],
     carFilterSelect: null,
-    difficultyFilterSelect: null,
+    activeDifficulties: new Set(['Get Real', 'Amateur', 'Novice']),
     availableCars: [],
     lastActionTime: 0,
     isCombinedView: false, // True when showing combined superclass data
@@ -51,10 +51,13 @@ let itemsPerPage = DetailState.itemsPerPage;
 let allResults = DetailState.allResults;
 let unfilteredResults = DetailState.unfilteredResults;
 let carFilterSelect = DetailState.carFilterSelect;
-let difficultyFilterSelect = DetailState.difficultyFilterSelect;
+let activeDifficulties = DetailState.activeDifficulties;
 let availableCars = DetailState.availableCars;
 let lastActionTime = DetailState.lastActionTime;
 let hasTrackedDetailUrlView = false;
+const difficultyFilter = window.R3EDetailDifficultyFilter.create({
+    escapeHtml: R3EUtils.escapeHtml
+});
 
 function trackDetailUrlView() {
     if (hasTrackedDetailUrlView) return;
@@ -1205,10 +1208,6 @@ function getSelectedFilter(selector, defaultValue) {
         const value = carFilterSelect.getValue();
         return value === '' ? 'All cars' : value;
     }
-    if (selector === '#difficulty-filter-ui' && difficultyFilterSelect) {
-        const value = difficultyFilterSelect.getValue();
-        return value === '' ? 'All difficulties' : value;
-    }
     // Fallback to reading button text (backward compatibility)
     const toggle = document.querySelector(`${selector} .custom-select__toggle`);
     return toggle ? toggle.textContent.replace(' ▾', '').trim() : defaultValue;
@@ -1220,10 +1219,10 @@ function getSelectedFilter(selector, defaultValue) {
  * @param {string} selectedDifficulty - Selected difficulty
  * @returns {boolean} True if matches
  */
-function matchesDifficultyFilter(entry, selectedDifficulty) {
-    if (selectedDifficulty === 'All difficulties') return true;
+function matchesDifficultyFilter(entry, selectedDifficulties) {
+    if (!selectedDifficulties || difficultyFilter.isAllActive()) return true;
     const diff = getField(entry, FIELD_NAMES.DIFFICULTY);
-    return diff.toLowerCase() === selectedDifficulty.toLowerCase();
+    return difficultyFilter.isDifficultyActive(diff);
 }
 
 /**
@@ -1243,12 +1242,12 @@ function matchesCarFilter(entry, selectedCar) {
 function filterAndDisplayResults(source = 'system') {
     lastActionTime = Date.now();
     
-    const selectedDifficulty = getSelectedFilter('#difficulty-filter-ui', 'All difficulties');
+    const selectedDifficulty = difficultyFilter.getActiveDifficultyLabel();
     const selectedCar = getSelectedFilter('#car-filter-ui', 'All cars');
     
     // Apply both filters using helper functions
     allResults = unfilteredResults.filter(entry => {
-        return matchesDifficultyFilter(entry, selectedDifficulty) && 
+        return matchesDifficultyFilter(entry, activeDifficulties) && 
                matchesCarFilter(entry, selectedCar);
     });
     
@@ -1280,24 +1279,17 @@ document.addEventListener('DOMContentLoaded', () => {
         filterAndDisplayResults('user');
     });
     DetailState.carFilterSelect = carFilterSelect;
-    
-    // Difficulty filter
-    const difficultyOptions = [
-        { value: '', label: 'All difficulties' },
-        { value: 'Get Real', label: 'Get Real' },
-        { value: 'Amateur', label: 'Amateur' },
-        { value: 'Novice', label: 'Novice' }
-    ];
-    
-    difficultyFilterSelect = new CustomSelect('difficulty-filter-ui', difficultyOptions, () => {
+
+    const difficultyContainer = document.getElementById('difficulty-filter-ui');
+    difficultyFilter.initializeFromParam(difficultyParam);
+    activeDifficulties = difficultyFilter.getActiveDifficulties();
+    DetailState.activeDifficulties = activeDifficulties;
+    difficultyFilter.render(difficultyContainer);
+    difficultyFilter.bind(difficultyContainer, (nextSet) => {
+        activeDifficulties = new Set(nextSet);
+        DetailState.activeDifficulties = activeDifficulties;
         filterAndDisplayResults('user');
     });
-    DetailState.difficultyFilterSelect = difficultyFilterSelect;
-    
-    // Set initial difficulty from URL param
-    if (difficultyParam && difficultyParam !== 'All difficulties') {
-        difficultyFilterSelect.setValue(difficultyParam, { notify: false, source: 'init' });
-    }
 });
 
 /**

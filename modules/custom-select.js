@@ -89,8 +89,18 @@ class CustomSelect {
      * Opens the dropdown
      */
     open() {
+        document.querySelectorAll('.custom-select').forEach((el) => {
+            if (el !== this.root) {
+                el.classList.remove('is-open');
+                const menu = el.querySelector('.custom-select__menu');
+                const toggle = el.querySelector('.custom-select__toggle');
+                if (menu) menu.hidden = true;
+                if (toggle) toggle.setAttribute('aria-expanded', 'false');
+            }
+        });
         this.menu.hidden = false;
         this.toggle.setAttribute('aria-expanded', 'true');
+        this.root.classList.add('is-open');
     }
     
     /**
@@ -99,6 +109,7 @@ class CustomSelect {
     close() {
         this.menu.hidden = true;
         this.toggle.setAttribute('aria-expanded', 'false');
+        this.root.classList.remove('is-open');
     }
     
     /**

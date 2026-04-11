@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -30,7 +30,7 @@
     <meta name="twitter:image" content="https://r3e-leaderboards.info/images/rle-share.png">
     
     <!-- Analytics (PostHog via first-party proxy) -->
-    <script src="modules/analytics.js?v=5"></script>
+    <script src="modules/analytics.js?v=6"></script>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     
     <link rel="stylesheet" href="style.css?v=62">
@@ -138,12 +138,12 @@
     
     <div id="site-footer"></div>
     <!-- Loaders -->
-    <script src="loaders/template-loader.js?v=2" defer></script>
-    <script src="loaders/footer-loader.js?v=2" defer></script>
-    <script src="loaders/header-loader.js?v=2" defer></script>
+    <script src="modules/loaders/template-loader.js?v=2" defer></script>
+    <script src="modules/loaders/footer-loader.js?v=2" defer></script>
+    <script src="modules/loaders/header-loader.js?v=2" defer></script>
     
     <!-- Core modules -->
-    <script src="data/country-mappings.js?v=4" defer></script>
+    <script src="modules/data/country-mappings.js?v=4" defer></script>
     <script src="modules/compressed-json-helper.js?v=1" defer></script>
     <script src="modules/utils-time.js?v=1" defer></script>
     <script src="modules/utils-track.js?v=1" defer></script>
@@ -152,11 +152,11 @@
     <script src="modules/utils.js?v=11" defer></script>
     
     <!-- Data files - must load before feature modules that depend on them -->
-    <script src="data/car-classes.js?v=3" defer></script>
-    <script src="data/cars.js?v=4" defer></script>
-    <script src="data/tracks.js?v=3" defer></script>
+    <script src="modules/data/car-classes.js?v=3" defer></script>
+    <script src="modules/data/cars.js?v=4" defer></script>
+    <script src="modules/data/tracks.js?v=4" defer></script>
     
     <!-- Feature modules -->
-    <script src="pages/daily-races.js?v=30" defer></script>
+    <script src="modules/pages/daily-races.js?v=30" defer></script>
 </body>
 </html>

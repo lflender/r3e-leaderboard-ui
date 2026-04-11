@@ -2,7 +2,7 @@
   // Helper function for formatting values
   const formatValue = R3EUtils.formatValue;
   
-  // Track list moved to data/tracks.js
+  // Track list moved to modules/data/tracks.js
   const TRACKS = Array.isArray(window.TRACKS_DATA) ? window.TRACKS_DATA : [];
 
   // DOM refs

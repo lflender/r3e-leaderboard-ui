@@ -43,7 +43,7 @@ beforeAll(() => {
     };
     window.R3EAnalytics = { trackSearch: vi.fn(), track: vi.fn() };
 
-    loadBrowserScript('pages/driver-search.js');
+    loadBrowserScript('modules/pages/driver-search.js');
 });
 
 beforeEach(() => {

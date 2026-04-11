@@ -61,7 +61,7 @@ beforeAll(async () => {
     };
 
     loadBrowserScript('modules/detail-difficulty-filter.js');
-    loadBrowserScript('pages/detail.js');
+    loadBrowserScript('modules/pages/detail.js');
     await new Promise(resolve => setTimeout(resolve, 0));
 });
 

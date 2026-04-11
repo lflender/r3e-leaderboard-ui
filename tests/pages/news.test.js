@@ -26,7 +26,7 @@ describe('news integration', () => {
             })
         });
 
-        loadBrowserScript('pages/news.js');
+        loadBrowserScript('modules/pages/news.js');
         await new Promise(resolve => setTimeout(resolve, 0));
 
         const html = document.getElementById('news-content').innerHTML;
@@ -38,7 +38,7 @@ describe('news integration', () => {
     it('shows fallback error UI when fetch fails', async () => {
         global.fetch = vi.fn().mockRejectedValue(new Error('network down'));
 
-        loadBrowserScript('pages/news.js');
+        loadBrowserScript('modules/pages/news.js');
         await new Promise(resolve => setTimeout(resolve, 0));
 
         const html = document.getElementById('news-content').innerHTML;
@@ -50,7 +50,7 @@ describe('news integration', () => {
         document.body.innerHTML = '<div id="other"></div>';
         global.fetch = vi.fn();
 
-        expect(() => loadBrowserScript('pages/news.js')).not.toThrow();
+        expect(() => loadBrowserScript('modules/pages/news.js')).not.toThrow();
         expect(global.fetch).not.toHaveBeenCalled();
     });
 });

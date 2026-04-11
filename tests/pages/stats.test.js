@@ -87,7 +87,7 @@ beforeEach(() => {
 
 describe('stats page integration', () => {
     it('renders both stats tables and updates section titles', async () => {
-        loadBrowserScript('pages/stats.js');
+        loadBrowserScript('modules/pages/stats.js');
         await new Promise(resolve => setTimeout(resolve, 0));
 
         const poleTitle = document.getElementById('stats-pole-title').textContent;
@@ -106,7 +106,7 @@ describe('stats page integration', () => {
     it('renders an error state when no stats files are available for the filter', async () => {
         window.StatsData.getPathsForFilter = vi.fn(() => null);
 
-        loadBrowserScript('pages/stats.js');
+        loadBrowserScript('modules/pages/stats.js');
         await new Promise(resolve => setTimeout(resolve, 0));
 
         const poleHtml = document.getElementById('stats-pole-table').innerHTML;
@@ -116,7 +116,7 @@ describe('stats page integration', () => {
     });
 
     it('applies user-selected filters, tracks analytics, and renders class logo', async () => {
-        loadBrowserScript('pages/stats.js');
+        loadBrowserScript('modules/pages/stats.js');
         await new Promise(resolve => setTimeout(resolve, 0));
 
         window.__statsFilterOnChange('GT3', { source: 'user' });

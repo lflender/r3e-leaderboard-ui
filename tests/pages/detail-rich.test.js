@@ -222,7 +222,7 @@ beforeAll(async () => {
     setupGlobals();
 
     loadBrowserScript('modules/detail-difficulty-filter.js');
-    loadBrowserScript('pages/detail.js');
+    loadBrowserScript('modules/pages/detail.js');
     document.dispatchEvent(new Event('DOMContentLoaded'));
 
     await new Promise(resolve => setTimeout(resolve, 80));

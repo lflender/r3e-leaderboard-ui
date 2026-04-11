@@ -54,7 +54,7 @@ describe('car-info integration', () => {
     it('renders grouped table from CARS_DATA without fetch', async () => {
         const fetchSpy = vi.spyOn(global, 'fetch');
 
-        loadBrowserScript('pages/car-info.js');
+        loadBrowserScript('modules/pages/car-info.js');
         await new Promise(resolve => setTimeout(resolve, 0));
 
         const html = document.getElementById('cars-info-table').innerHTML;
@@ -68,7 +68,7 @@ describe('car-info integration', () => {
     it('shows placeholder when dataset is empty', async () => {
         window.CARS_DATA = [];
 
-        loadBrowserScript('pages/car-info.js');
+        loadBrowserScript('modules/pages/car-info.js');
         await new Promise(resolve => setTimeout(resolve, 0));
 
         expect(document.getElementById('cars-info-table').innerHTML).toContain('No car data available');

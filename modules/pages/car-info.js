@@ -1,11 +1,11 @@
-// Loads data/cars.json and renders a grouped table in #cars-info, styled like leaderboards
+// Loads modules/data/cars.json and renders a grouped table in #cars-info, styled like leaderboards
 (async function(){
   async function loadData(){
     if (window.CARS_DATA && Array.isArray(window.CARS_DATA)) {
       return window.CARS_DATA;
     }
     try{
-      const resp = await fetch('data/cars.json');
+      const resp = await fetch('modules/data/cars.json');
       if(!resp.ok) throw new Error('HTTP ' + resp.status);
       return await resp.json();
     }catch(e){

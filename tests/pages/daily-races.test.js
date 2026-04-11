@@ -73,7 +73,7 @@ function setupGlobalsAndFetch(data = mockDailyData()) {
 beforeAll(async () => {
     document.body.innerHTML = buildDom();
     setupGlobalsAndFetch();
-    loadBrowserScript('pages/daily-races.js');
+    loadBrowserScript('modules/pages/daily-races.js');
     document.dispatchEvent(new Event('DOMContentLoaded'));
     await new Promise(resolve => setTimeout(resolve, 180));
 });

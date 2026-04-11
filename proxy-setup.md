@@ -3,7 +3,7 @@
 Ad-blockers work by blocking requests to known analytics domains.
 Two things need to be first-party to bypass them:
 
-1. **The SDK script** — already handled: `lib/ph-lib.js` is served from your domain.
+1. **The SDK script** — already handled: `modules/lib/ph-lib.js` is served from your domain.
 2. **The ingestion endpoint** — needs a reverse-proxy so requests to `/t/*` on your domain forward to PostHog.
 
 > **Why `/t` and not `/ingest`?** Filter lists like EasyPrivacy specifically block `/ingest/` because it's PostHog's well-known proxy path. Using a short, generic path avoids detection.
@@ -122,7 +122,7 @@ Add to your `_redirects` file (create it in the project root if missing):
 1. In `modules/analytics.js`, make sure  `PH_API_HOST` is set to `'/t'`  (this is the default).
 2. Download the PostHog SDK to serve it locally:
    ```bash
-  curl -o lib/ph-lib.js "https://eu-assets.i.posthog.com/static/array.js"
+  curl -o modules/lib/ph-lib.js "https://eu-assets.i.posthog.com/static/array.js"
    ```
 3. Deploy and verify:
    - Open your site in a browser with an ad-blocker enabled.
@@ -136,7 +136,7 @@ Add to your `_redirects` file (create it in the project root if missing):
 
 - [ ] Created PostHog account and copied project API key
 - [ ] Pasted API key into `modules/analytics.js` (`PH_TOKEN`)
-- [ ] Downloaded SDK: `curl -o lib/ph-lib.js "https://us-assets.i.posthog.com/static/array.js"`
+- [ ] Downloaded SDK: `curl -o modules/lib/ph-lib.js "https://us-assets.i.posthog.com/static/array.js"`
 - [ ] Set up reverse-proxy (Option A/B/C/D/E above)
 - [ ] Set `PH_API_HOST = '/t'` in `modules/analytics.js`
 - [ ] Deployed and verified events arrive in PostHog dashboard

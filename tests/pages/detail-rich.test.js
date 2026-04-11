@@ -265,6 +265,7 @@ describe('detail page rich integration', () => {
         let rows = document.querySelectorAll('#detail-results-container table.results-table tbody tr');
         expect(rows.length).toBe(1);
         expect(document.getElementById('detail-results-container').innerHTML).toContain('charlie');
+        expect(window.localStorage.getItem('detailDifficultyPreference')).toBe('Amateur, Novice');
 
         carSelect.setValue('BMW M4', { source: 'user' });
         await new Promise(resolve => setTimeout(resolve, 0));

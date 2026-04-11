@@ -6,6 +6,37 @@
 // ===========================================
 // State Management
 // ===========================================
+const DETAIL_DIFFICULTY_PREFERENCE_KEY = 'detailDifficultyPreference';
+
+function loadDifficultyPreferenceFromLocalStorage() {
+    try {
+        const saved = localStorage.getItem(DETAIL_DIFFICULTY_PREFERENCE_KEY);
+        return typeof saved === 'string' ? saved.trim() : '';
+    } catch (e) {
+        console.warn('localStorage not available:', e);
+        return '';
+    }
+}
+
+function saveDifficultyPreferenceToLocalStorage(difficultyLabel) {
+    try {
+        const value = String(difficultyLabel || 'All difficulties').trim() || 'All difficulties';
+        localStorage.setItem(DETAIL_DIFFICULTY_PREFERENCE_KEY, value);
+    } catch (e) {
+        console.warn('Could not save detail difficulty preference:', e);
+    }
+}
+
+function getInitialDifficultyParam() {
+    const urlDifficulty = String(R3EUtils.getUrlParam('difficulty') || '').trim();
+    if (urlDifficulty && urlDifficulty.toLowerCase() !== 'all difficulties') {
+        return urlDifficulty;
+    }
+
+    const savedDifficulty = loadDifficultyPreferenceFromLocalStorage();
+    return savedDifficulty || 'All difficulties';
+}
+
 const DetailState = {
     // URL Parameters
     trackParam: R3EUtils.getUrlParam('track'),
@@ -14,7 +45,7 @@ const DetailState = {
     superclassParam: R3EUtils.getUrlParam('superclass'), // For combined view
     classesParam: R3EUtils.getUrlParam('classes'), // For specific multi-class categories (comma-separated IDs)
     posParam: parseInt(R3EUtils.getUrlParam('pos') || ''),
-    difficultyParam: R3EUtils.getUrlParam('difficulty') || 'All difficulties',
+    difficultyParam: getInitialDifficultyParam(),
     driverParam: R3EUtils.getUrlParam('driver') || '',
     timeParam: R3EUtils.getUrlParam('time') || '',
     
@@ -150,15 +181,8 @@ async function fetchLeaderboardDetails() {
         // Build car filter from data
         buildCarFilter(transformedData);
         
-        // Apply difficulty filter if specified
-        if (difficultyParam && difficultyParam !== 'All difficulties') {
-            allResults = transformedData.filter(entry => {
-                const diff = entry.Difficulty || entry.difficulty || entry.driving_model || '';
-                return diff.toLowerCase() === difficultyParam.toLowerCase();
-            });
-        } else {
-            allResults = transformedData;
-        }
+        // Apply initial difficulty state from URL param or persisted preference.
+        allResults = applyInitialDifficultyFilter(transformedData);
 
         // Calculate page containing the target entry (prefer driver/time match, fallback to position)
         currentPage = 1;
@@ -308,15 +332,8 @@ async function fetchSpecificClassesDetails() {
         // Build car filter from data
         buildCarFilter(allEntries);
         
-        // Apply difficulty filter if specified
-        if (difficultyParam && difficultyParam !== 'All difficulties') {
-            allResults = allEntries.filter(entry => {
-                const diff = entry.Difficulty || entry.difficulty || entry.driving_model || '';
-                return diff.toLowerCase() === difficultyParam.toLowerCase();
-            });
-        } else {
-            allResults = allEntries;
-        }
+        // Apply initial difficulty state from URL param or persisted preference.
+        allResults = applyInitialDifficultyFilter(allEntries);
 
         // Calculate page and display
         currentPage = 1;
@@ -404,15 +421,8 @@ async function fetchCombinedSuperclassDetails() {
         // Build car filter from data
         buildCarFilter(allEntries);
         
-        // Apply difficulty filter if specified
-        if (difficultyParam && difficultyParam !== 'All difficulties') {
-            allResults = allEntries.filter(entry => {
-                const diff = entry.Difficulty || entry.difficulty || entry.driving_model || '';
-                return diff.toLowerCase() === difficultyParam.toLowerCase();
-            });
-        } else {
-            allResults = allEntries;
-        }
+        // Apply initial difficulty state from URL param or persisted preference.
+        allResults = applyInitialDifficultyFilter(allEntries);
 
         // Calculate page containing the target entry
         currentPage = 1;
@@ -1213,6 +1223,35 @@ function getSelectedFilter(selector, defaultValue) {
     return toggle ? toggle.textContent.replace(' ▾', '').trim() : defaultValue;
 }
 
+function normalizeDifficultyForPreference(value) {
+    if (window.R3EDetailDifficultyFilter && typeof window.R3EDetailDifficultyFilter.normalizeDifficultyName === 'function') {
+        return window.R3EDetailDifficultyFilter.normalizeDifficultyName(value);
+    }
+    return String(value || '').trim();
+}
+
+function matchesDifficultyPreference(entry, selectedDifficultyLabel) {
+    const label = String(selectedDifficultyLabel || '').trim();
+    if (!label || label === 'All difficulties') return true;
+
+    const selectedDifficulties = label
+        .split(',')
+        .map(part => normalizeDifficultyForPreference(part))
+        .filter(Boolean);
+
+    if (selectedDifficulties.length === 0) return true;
+
+    const selectedSet = new Set(selectedDifficulties);
+    const diff = getField(entry, FIELD_NAMES.DIFFICULTY);
+    const normalizedDiff = normalizeDifficultyForPreference(diff);
+    return normalizedDiff ? selectedSet.has(normalizedDiff) : false;
+}
+
+function applyInitialDifficultyFilter(entries) {
+    const list = Array.isArray(entries) ? entries : [];
+    return list.filter(entry => matchesDifficultyPreference(entry, difficultyParam));
+}
+
 /**
  * Checks if entry matches difficulty filter
  * @param {Object} entry - Data entry
@@ -1284,10 +1323,12 @@ document.addEventListener('DOMContentLoaded', () => {
     difficultyFilter.initializeFromParam(difficultyParam);
     activeDifficulties = difficultyFilter.getActiveDifficulties();
     DetailState.activeDifficulties = activeDifficulties;
+    saveDifficultyPreferenceToLocalStorage(difficultyFilter.getActiveDifficultyLabel());
     difficultyFilter.render(difficultyContainer);
     difficultyFilter.bind(difficultyContainer, (nextSet) => {
         activeDifficulties = new Set(nextSet);
         DetailState.activeDifficulties = activeDifficulties;
+        saveDifficultyPreferenceToLocalStorage(difficultyFilter.getActiveDifficultyLabel());
         filterAndDisplayResults('user');
     });
 });

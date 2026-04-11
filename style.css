@@ -3362,7 +3362,8 @@ footer {
 
     /* Gap time deltas */
     .time-delta-inline,
-    .lap-time-cell .time-delta {
+    .lap-time-cell .time-delta,
+    .gap-time-cell .time-delta {
         font-size: 0.7rem;
     }
 
@@ -3433,6 +3434,7 @@ footer {
         gap: 0.75rem;
         padding: 0.75rem;
         align-items: stretch;
+        position: relative;
     }
 
     main {
@@ -3450,6 +3452,7 @@ footer {
 
     .detail-header-info {
         order: 1;
+        padding-right: 5.25rem;
     }
 
     .detail-header .custom-select {
@@ -3464,9 +3467,21 @@ footer {
     }
     
     #difficulty-filter-ui {
-        order: 3;
+        order: 1;
         margin-left: 0;
-        min-width: 100%;
+        min-width: auto;
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+    }
+
+    .detail-difficulty-badges {
+        width: auto;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        gap: 0.35rem;
     }
 
     .detail-header-line,
@@ -3887,8 +3902,18 @@ footer {
     }
 
     .time-delta-inline,
-    .lap-time-cell .time-delta {
+    .lap-time-cell .time-delta,
+    .gap-time-cell .time-delta {
         font-size: 0.65rem;
+    }
+
+    #difficulty-filter-ui {
+        top: 0.6rem;
+        right: 0.6rem;
+    }
+
+    .detail-header-info {
+        padding-right: 4.6rem;
     }
 
     .difficulty-pill {

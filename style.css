@@ -297,6 +297,8 @@ footer p {
     align-items: center;
     flex-wrap: wrap;
     margin-bottom: 2rem;
+    position: relative;
+    z-index: 220;
 }
 
 #class-filter {
@@ -340,6 +342,7 @@ footer p {
     display: inline-block;
     flex: 1 1 0;
     min-width: 170px;
+    z-index: 230;
 }
 
 /* Row link anchors: allow browser link preview on hover and style inline content */
@@ -505,7 +508,7 @@ footer p {
     max-height: 240px;
     overflow: auto;
     box-shadow: 0 6px 18px rgba(2,6,23,0.6);
-    z-index: 50;
+    z-index: 1400;
 }
 .custom-select__option {
     padding: 0.6rem 0.9rem;

@@ -22,12 +22,12 @@ function makeEntry({
 describe('table-sort-service', () => {
     beforeAll(() => {
         loadBrowserScript('modules/utils-car.js');
-        loadBrowserScript('modules/utils-time.js');
+        loadBrowserScript('modules/time-helper.js');
         loadBrowserScript('modules/utils-track.js');
-        loadBrowserScript('modules/utils-url.js');
+        loadBrowserScript('modules/url-helper.js');
         loadBrowserScript('modules/utils.js');
         loadBrowserScript('modules/field-mappings.js');
-        loadBrowserScript('modules/table-sort-service.js');
+        loadBrowserScript('modules/sort-service.js');
     });
 
     beforeEach(() => {

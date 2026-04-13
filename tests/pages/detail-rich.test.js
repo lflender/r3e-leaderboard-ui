@@ -221,7 +221,7 @@ beforeAll(async () => {
     document.body.innerHTML = buildDom();
     setupGlobals();
 
-    loadBrowserScript('modules/detail-difficulty-filter.js');
+    loadBrowserScript('modules/difficulty-filter.js');
     loadBrowserScript('modules/pages/detail.js');
     document.dispatchEvent(new Event('DOMContentLoaded'));
 

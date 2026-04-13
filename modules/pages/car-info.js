@@ -113,6 +113,20 @@
     });
   }
 
+  function trackCarInfoViewMode(nextMode, previousMode, stats) {
+    if (typeof R3EAnalytics === 'undefined' || typeof R3EAnalytics.track !== 'function') return;
+    R3EAnalytics.track('car info view mode changed', {
+      view_mode: nextMode,
+      previous_view_mode: previousMode,
+      wheel_filter: wheelFilter || '',
+      transmission_filter: transFilter || '',
+      class_filter: classFilter || '',
+      displayed_cars: (stats && stats.displayedCars) || 0,
+      displayed_classes: (stats && stats.displayedClasses) || 0,
+      is_superclass_filter: !!(classFilter && classFilter.startsWith('superclass:'))
+    });
+  }
+
   function updateViewToggleUI() {
     const wrap = document.getElementById('cars-view-toggle');
     if (!wrap) return;
@@ -125,7 +139,8 @@
 
   function setViewMode(nextMode, options = {}) {
     if (nextMode !== 'table' && nextMode !== 'tiles') return;
-    const changed = viewMode !== nextMode;
+    const previousMode = viewMode;
+    const changed = previousMode !== nextMode;
     viewMode = nextMode;
     updateViewToggleUI();
 
@@ -134,7 +149,10 @@
     }
 
     if (changed) {
-      renderResults();
+      const stats = renderResults();
+      if (options.track === true) {
+        trackCarInfoViewMode(nextMode, previousMode, stats);
+      }
     }
   }
 
@@ -152,7 +170,7 @@
         const btn = event.target.closest && event.target.closest('button[data-view]');
         if (!btn) return;
         const nextMode = btn.getAttribute('data-view');
-        setViewMode(nextMode, { persist: true });
+        setViewMode(nextMode, { persist: true, track: true });
       });
     }
 

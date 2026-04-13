@@ -3,7 +3,7 @@ import { loadBrowserScript } from '../helpers/script-loader.js';
 
 describe('R3ETimeUtils', () => {
     beforeAll(() => {
-        loadBrowserScript('modules/utils-time.js');
+        loadBrowserScript('modules/time-helper.js');
     });
 
     beforeEach(() => {

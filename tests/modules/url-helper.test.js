@@ -3,7 +3,7 @@ import { loadBrowserScript } from '../helpers/script-loader.js';
 
 describe('R3EUrlUtils', () => {
     beforeAll(() => {
-        loadBrowserScript('modules/utils-url.js');
+        loadBrowserScript('modules/url-helper.js');
     });
 
     beforeEach(() => {

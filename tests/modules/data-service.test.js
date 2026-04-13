@@ -24,16 +24,16 @@ describe('DataService core behavior', () => {
             extractLapTime: vi.fn(entry => entry.LapTime || entry['Lap Time'] || entry.lap_time || '')
         };
         window.R3EUtils = {
+            // Mirror the real parseLapTimeToMillis WITHOUT pre-stripping comma-separated gaps.
+            // Entries with embedded gaps like "2m 00.392s, +01.533s" must return 0 here so that
+            // _rebuildCombinedLapTimes is required to strip the suffix before calling this function.
             parseLapTimeToMillis: vi.fn((time) => {
-                const lap = String(time || '').split(',')[0].trim();
-                const match = lap.match(/^(?:(\d+):)?(\d{1,2})\.(\d{3})$/);
-                if (!match) {
-                    return Number.POSITIVE_INFINITY;
-                }
-                const minutes = Number(match[1] || 0);
-                const seconds = Number(match[2] || 0);
-                const millis = Number(match[3] || 0);
-                return (minutes * 60 * 1000) + (seconds * 1000) + millis;
+                const s = String(time || '').trim().replace(/s$/i, '');
+                let m = s.match(/^(\d+):(\d+)\.(\d+)$/);
+                if (m) return (parseInt(m[1]) * 60 + parseInt(m[2])) * 1000 + parseInt((m[3] + '000').slice(0, 3));
+                m = s.match(/^(\d+)m\s*(\d+)\.(\d+)$/);
+                if (m) return (parseInt(m[1]) * 60 + parseInt(m[2])) * 1000 + parseInt((m[3] + '000').slice(0, 3));
+                return 0;
             })
         };
         window.CARS_DATA = [];
@@ -148,6 +148,31 @@ describe('DataService core behavior', () => {
 
         expect(rebuilt[0]).toMatchObject({ name: 'A', Position: 1, LapTime: '1:22.000' });
         expect(rebuilt[1]).toMatchObject({ name: 'B', Position: 2, LapTime: '1:23.000, +1.000s' });
+    });
+
+    it('rebuilds combined lap times correctly when cache entries already contain embedded gap suffixes', () => {
+        // Real cache format: non-P1 entries store laptime as "2m 00.392s, +01.533s".
+        // parseLapTimeToMillis returns 0 for strings with commas, so _rebuildCombinedLapTimes
+        // must strip the suffix before parsing — otherwise all non-P1 entries sort incorrectly
+        // and gaps render as "+Infinitys".
+        const entries = [
+            { name: 'C', LapTime: '2m 01.533s, +02.674s' }, // P2 in class 2 (embedded gap)
+            { name: 'A', LapTime: '1m 58.859s' },           // P1 in class 1 (clean)
+            { name: 'B', LapTime: '2m 00.392s, +01.533s' }  // P2 in class 1 (embedded gap)
+        ];
+        const rebuilt = service._rebuildCombinedLapTimes(entries);
+
+        // Correct ordering by lap time
+        expect(rebuilt[0]).toMatchObject({ name: 'A', Position: 1 });
+        expect(rebuilt[1]).toMatchObject({ name: 'B', Position: 2 });
+        expect(rebuilt[2]).toMatchObject({ name: 'C', Position: 3 });
+
+        // Gaps must be finite numbers, never "+Infinitys"
+        expect(rebuilt[1].LapTime).not.toContain('Infinity');
+        expect(rebuilt[2].LapTime).not.toContain('Infinity');
+
+        // Leader has no gap suffix
+        expect(rebuilt[0].LapTime).toBe('1m 58.859s');
     });
 
     it('builds a combined leaderboard from valid class specs only', async () => {

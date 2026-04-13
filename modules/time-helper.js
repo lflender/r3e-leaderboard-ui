@@ -57,7 +57,7 @@ function parseLapTimeToMillis(timeStr) {
         return ((minutes * 60) + seconds) * 1000 + millis;
     }
 
-    m = s.match(/^(\d+)m\s+(\d+)\.(\d+)$/);
+    m = s.match(/^(\d+)m\s*(\d+)\.(\d+)$/);
     if (m) {
         const minutes = parseInt(m[1], 10);
         const seconds = parseInt(m[2], 10);

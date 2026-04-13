@@ -371,7 +371,9 @@ class DataService {
         entries.forEach(entry => {
             const rawLap = this._extractRawLapTime(entry);
             entry.__rawLapForSort = rawLap;
-            entry.__lapSortMs = R3EUtils.parseLapTimeToMillis(rawLap) || Number.POSITIVE_INFINITY;
+            // Strip any pre-existing gap suffix (e.g. "2m 00.392s, +01.533s") before parsing
+            const lapOnly = String(rawLap || '').split(',')[0].trim();
+            entry.__lapSortMs = R3EUtils.parseLapTimeToMillis(lapOnly) || Number.POSITIVE_INFINITY;
         });
 
         entries.sort((a, b) => a.__lapSortMs - b.__lapSortMs);

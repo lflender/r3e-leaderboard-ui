@@ -18,6 +18,7 @@ describe('R3ETimeUtils', () => {
     test('parses lap and gap times', () => {
         expect(window.R3ETimeUtils.parseLapTimeToMillis('1:23.456s')).toBe(83456);
         expect(window.R3ETimeUtils.parseLapTimeToMillis('2m 03.404s')).toBe(123404);
+        expect(window.R3ETimeUtils.parseLapTimeToMillis('2m03.404s')).toBe(123404); // no space between m and seconds
         expect(window.R3ETimeUtils.parseGapMillisFromItem({ LapTime: '1:24.631s, +1.175s' })).toBe(1175);
     });
 

@@ -402,23 +402,6 @@ footer p {
     padding-right: 4rem;
 }
 
-@media (max-width: 900px) {
-    .car-inline-thumbnail {
-        position: absolute;
-        right: -0.25rem;
-        top: -0.25rem;
-        transform: translateY(-50%);
-        display: block;
-        height: 1.9rem;
-        max-width: 3.2rem;
-        margin-left: 0;
-    }
-
-    .car-inline-meta {
-        padding-right: 2.75rem;
-    }
-}
-
 .car-link-thumbnail {
     position: absolute;
     left: calc(100% + 0.65rem);
@@ -487,20 +470,6 @@ footer p {
 }
 
 /* Hide info icon on mobile devices (no hover tooltips) */
-/* Car Info table specific column widths */
-#cars-info-table .results-table th:nth-child(1),
-#cars-info-table .results-table td:nth-child(1) {
-    white-space: nowrap;
-    min-width: 250px;
-}
-
-/* Reduce horizontal padding on Car Info page */
-#cars-info-table .results-table th {
-    padding: 0.7rem 0.6rem;
-}
-#cars-info-table .results-table td {
-    padding: 0.6rem 0.6rem;
-}
 
 .custom-select__toggle {
     width: 100%;
@@ -669,7 +638,7 @@ footer p {
 }
 
 .results-table td.no-wrap {
-    white-space: normal;
+    white-space: nowrap;
 }
 
 .highlight-row td {
@@ -761,6 +730,7 @@ footer p {
 #cars-info-table .results-table th:nth-child(1),
 #cars-info-table .results-table td:nth-child(1) {
     white-space: nowrap;
+    min-width: 250px;
 }
 
 #cars-info-table .results-table th {
@@ -883,12 +853,6 @@ footer p {
 }
 
 /* Car class and Car columns (1 and 2) have no width set, so they share remaining space naturally */
-
-@media (hover: none), (pointer: coarse) {
-    .car-link-thumbnail {
-        display: none !important;
-    }
-}
 
 /* Driver group headers */
 .driver-group-header {
@@ -1825,20 +1789,6 @@ span.driver-name-top10-glitter::after {
     }
 }
 
-@media (prefers-reduced-motion: reduce) {
-    a.driver-name-top10-glitter,
-    strong.driver-name-top10-glitter,
-    span.driver-name-top10-glitter,
-    a.driver-name-top10-glitter::before,
-    strong.driver-name-top10-glitter::before,
-    span.driver-name-top10-glitter::before,
-    a.driver-name-top10-glitter::after,
-    strong.driver-name-top10-glitter::after,
-    span.driver-name-top10-glitter::after {
-        animation: none;
-    }
-}
-
 /* News section styling */
 .news-actions-footer {
     text-align: center;
@@ -2373,198 +2323,6 @@ span.driver-name-top10-glitter::after {
     transform: translateY(0);
 }
 
-/* Responsive styling for distribution summaries */
-@media (max-width: 1000px) {
-    .car-dist-table {
-        font-size: 0.85rem;
-    }
-    
-    .car-dist-table th {
-        font-size: 0.8rem;
-        padding: 0.5rem 0.6rem;
-    }
-    
-    .car-dist-toggle {
-        font-size: 0.9rem;
-        padding: 0.65rem 0.9rem;
-    }
-
-    .car-dist-table th.car-dist-entries,
-    .car-dist-table td.car-dist-entries,
-    .car-dist-table th.car-dist-percentage,
-    .car-dist-table td.car-dist-percentage,
-    .car-dist-table th.car-dist-median,
-    .car-dist-table td.car-dist-median {
-        width: 6.5em;
-        max-width: 6.5em;
-    }
-
-    .search-container {
-        margin-bottom: 0;
-    }
-}
-
-@media (max-width: 768px) {    
-    .car-dist-content {
-        overflow-x: visible;
-    }
-    
-    .car-dist-table {
-        font-size: 0.8rem;
-        table-layout: auto;
-        width: 100%;
-    }
-    
-    .car-dist-table th {
-        font-size: 0.75rem;
-        padding: 0.45rem 0.35rem;
-    }
-    
-    .car-dist-table td {
-        padding: 0.4rem 0.35rem;
-    }
-    
-    .car-dist-toggle,
-    .entries-dist-toggle {
-        font-size: 0.85rem;
-        padding: 0.6rem 0.8rem;
-    }
-    
-    .entries-dist-chart {
-        height: 7rem;
-    }
-    
-    .entries-dist-max-label {
-        font-size: 0.7rem;
-    }
-    
-    .entries-dist-axis {
-        font-size: 0.75rem;
-    }
-
-    .entries-timeframe-controls {
-        grid-template-columns: 1fr;
-        gap: 0.55rem;
-        align-items: stretch;
-    }
-
-    .entries-timeframe-last-week {
-        justify-self: start;
-    }
-
-    .car-dist-table th.car-dist-car,
-    .car-dist-table td.car-dist-car {
-        max-width: none;
-    }
-
-    .car-dist-table th.car-dist-entries,
-    .car-dist-table td.car-dist-entries,
-    .car-dist-table th.car-dist-percentage,
-    .car-dist-table td.car-dist-percentage {
-        width: 3.5em;
-        max-width: 3.5em;
-    }
-    
-    .car-dist-table th.car-dist-median,
-    .car-dist-table td.car-dist-median {
-        width: 4.5em;
-        max-width: 4.5em;
-    }
-    
-    /* Ensure sort indicators are visible */
-    .car-dist-table th.sortable {
-        padding-right: 1.2rem;
-    }
-    
-    .mp-pos-badge {
-        font-size: 0.8rem;
-    }
-}
-
-@media (max-width: 600px) {
-    .car-dist-content {
-        overflow-x: visible;
-    }
-    .car-dist-table {
-        font-size: 0.68rem;
-        table-layout: auto;
-        min-width: 0;
-        width: 100%;
-    }
-    .car-dist-table th.car-dist-car,
-    .car-dist-table td.car-dist-car {
-        min-width: 0;
-        max-width: none;
-    }
-    .car-dist-table th {
-        font-size: 0.7rem;
-        padding: 0.4rem 0.25rem;
-    }
-    .car-dist-table td {
-        padding: 0.35rem 0.25rem;
-    }
-    .car-dist-table th.car-dist-entries,
-    .car-dist-table td.car-dist-entries,
-    .car-dist-table th.car-dist-percentage,
-    .car-dist-table td.car-dist-percentage {
-        width: 3.2em;
-        max-width: 3.2em;
-    }
-    .car-dist-table th.car-dist-median,
-    .car-dist-table td.car-dist-median {
-        width: 3.8em;
-        max-width: 3.8em;
-    }
-    
-    /* Ensure sort indicators are visible on mobile */
-    .car-dist-table th.sortable {
-        padding-right: 1rem;
-    }
-    
-    /* Use 'Med' label for median column header on mobile */
-    .car-dist-median-label {
-        font-size: 0;
-    }
-    .car-dist-median-label::after {
-        content: 'Med';
-        font-size: 0.7rem;
-        display: inline;
-    }
-    
-    .car-dist-table td {
-        padding: 0.35rem 0.5rem;
-    }
-    
-    .car-dist-toggle,
-    .entries-dist-toggle {
-        font-size: 0.8rem;
-        padding: 0.5rem 0.7rem;
-    }
-    
-    .entries-dist-summary {
-        margin: 0.75rem 0;
-    }
-    
-    .entries-dist-chart {
-        height: 5rem;
-    }
-    
-    .entries-dist-max-label {
-        font-size: 0.65rem;
-        top: 0.6rem;
-        left: 0.1rem;
-    }
-    
-    .entries-dist-axis {
-        font-size: 0.68rem;
-        margin-top: 0.3rem;
-    }
-    
-    .mp-pos-badge {
-        font-size: 0.7rem;
-    }
-}
-
 .no-results {
     text-align: center;
     color: #f87171;
@@ -2924,12 +2682,6 @@ span.driver-name-top10-glitter::after {
     margin-bottom: 2rem;
 }
 
-@media (min-width: 1024px) {
-    .daily-races-grid.daily-races-grid--center-fourth > .daily-race-card-link:nth-child(4):last-child {
-        grid-column: 2;
-    }
-}
-
 .daily-races-section-header {
     text-align: center;
     margin-bottom: 1rem;
@@ -2946,13 +2698,6 @@ span.driver-name-top10-glitter::after {
     grid-template-columns: repeat(2, minmax(280px, 1fr));
     max-width: 100%;
     margin: 0 auto;
-}
-
-/* Extra large screens: constrain Feature Races width after Sprint Races transition to 2 columns */
-@media (min-width: 1160px) {
-    .daily-races-feature .daily-races-grid {
-        max-width: 750px;
-    }
 }
 
 .daily-race-card-link {
@@ -3219,12 +2964,45 @@ span.driver-name-top10-glitter::after {
    12. RESPONSIVE DESIGN (MEDIA QUERIES)
    ======================================== */
 
-/* Touch devices: hide info icons */
+/* Touch devices and pointer-specific behavior */
 @media (hover: none), (pointer: coarse) {
-    .info-icon { display: none !important; }
+    .car-link-thumbnail {
+        display: none !important;
+    }
+
+    .info-icon {
+        display: none !important;
+    }
 }
 
-/* Medium screens - remove container padding to prevent table border clipping (max-width: 1450px) */
+@media (prefers-reduced-motion: reduce) {
+    a.driver-name-top10-glitter,
+    strong.driver-name-top10-glitter,
+    span.driver-name-top10-glitter,
+    a.driver-name-top10-glitter::before,
+    strong.driver-name-top10-glitter::before,
+    span.driver-name-top10-glitter::before,
+    a.driver-name-top10-glitter::after,
+    strong.driver-name-top10-glitter::after,
+    span.driver-name-top10-glitter::after {
+        animation: none;
+    }
+}
+
+/* Large-screen layout refinements */
+@media (min-width: 1024px) {
+    .daily-races-grid.daily-races-grid--center-fourth > .daily-race-card-link:nth-child(4):last-child {
+        grid-column: 2;
+    }
+}
+
+@media (min-width: 1160px) {
+    .daily-races-feature .daily-races-grid {
+        max-width: 750px;
+    }
+}
+
+/* Medium screens - remove container padding to prevent table border clipping */
 @media (max-width: 1300px) {
     .tab-content {
         padding: 2rem 0;
@@ -3254,9 +3032,37 @@ span.driver-name-top10-glitter::after {
     }
 }
 
-/* Large tablets - stack detail header earlier (max-width: 1000px) */
 @media (max-width: 1000px) {
-    /* Reduce main padding to give more space for tables on smaller desktops */
+    .car-dist-table {
+        font-size: 0.85rem;
+    }
+
+    .car-dist-table th {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.6rem;
+    }
+
+    .car-dist-toggle {
+        font-size: 0.9rem;
+        padding: 0.65rem 0.9rem;
+    }
+
+    .car-dist-table th.car-dist-entries,
+    .car-dist-table td.car-dist-entries,
+    .car-dist-table th.car-dist-percentage,
+    .car-dist-table td.car-dist-percentage,
+    .car-dist-table th.car-dist-median,
+    .car-dist-table td.car-dist-median {
+        width: 6.5em;
+        max-width: 6.5em;
+    }
+
+    .search-container {
+        margin-bottom: 0;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
     main {
         padding: 0 0.75rem;
     }
@@ -3271,12 +3077,12 @@ span.driver-name-top10-glitter::after {
         margin-left: 0 !important;
         min-width: 100%;
     }
-    
+
     #car-filter-ui {
         margin-left: 0 !important;
         min-width: 100%;
     }
-    
+
     #difficulty-filter-ui {
         margin-left: 0 !important;
         min-width: 100%;
@@ -3285,12 +3091,6 @@ span.driver-name-top10-glitter::after {
     .detail-difficulty-badges {
         width: 100%;
         justify-content: flex-start;
-    }
-
-    /* Stack search filters vertically */
-    .search-container {
-        flex-direction: column;
-        align-items: stretch;
     }
 
     #driver-search,
@@ -3333,12 +3133,116 @@ span.driver-name-top10-glitter::after {
     }
 }
 
-/* Small screens and mobile devices (max-width: 768px) */
+@media (max-width: 900px) {
+    .car-inline-thumbnail {
+        position: absolute;
+        right: -0.25rem;
+        top: -0.25rem;
+        transform: translateY(-50%);
+        display: block;
+        height: 1.9rem;
+        max-width: 3.2rem;
+        margin-left: 0;
+    }
+
+    .car-inline-meta {
+        padding-right: 2.75rem;
+    }
+
+    #stats-tables {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-selected-class-logo {
+        display: none;
+    }
+
+    .stats-box h2 {
+        font-size: 0.95rem;
+    }
+
+    .stats-table {
+        min-width: 0;
+        table-layout: fixed;
+    }
+}
+
 @media (max-width: 768px) {
-    .info-icon { display: none !important; }
-    
+    .car-dist-content {
+        overflow-x: visible;
+    }
+
+    .car-dist-table {
+        font-size: 0.8rem;
+        table-layout: auto;
+        width: 100%;
+    }
+
+    .car-dist-table th {
+        font-size: 0.75rem;
+        padding: 0.45rem 0.35rem;
+    }
+
+    .car-dist-table td {
+        padding: 0.4rem 0.35rem;
+    }
+
+    .car-dist-toggle,
+    .entries-dist-toggle {
+        font-size: 0.85rem;
+        padding: 0.6rem 0.8rem;
+    }
+
+    .entries-dist-chart {
+        height: 7rem;
+    }
+
+    .entries-dist-max-label {
+        font-size: 0.7rem;
+    }
+
+    .entries-dist-axis {
+        font-size: 0.75rem;
+    }
+
+    .entries-timeframe-controls {
+        grid-template-columns: 1fr;
+        gap: 0.55rem;
+        align-items: stretch;
+    }
+
+    .entries-timeframe-last-week {
+        justify-self: start;
+    }
+
+    .car-dist-table th.car-dist-car,
+    .car-dist-table td.car-dist-car {
+        max-width: none;
+    }
+
+    .car-dist-table th.car-dist-entries,
+    .car-dist-table td.car-dist-entries,
+    .car-dist-table th.car-dist-percentage,
+    .car-dist-table td.car-dist-percentage {
+        width: 3.5em;
+        max-width: 3.5em;
+    }
+
+    .car-dist-table th.car-dist-median,
+    .car-dist-table td.car-dist-median {
+        width: 4.5em;
+        max-width: 4.5em;
+    }
+
+    .car-dist-table th.sortable {
+        padding-right: 1.2rem;
+    }
+
+    .mp-pos-badge {
+        font-size: 0.8rem;
+    }
+
     #site-header header {
-        /* Keep top padding, reduce bottom only */
         padding: 1.25rem 1rem 0.75rem 1rem;
     }
 
@@ -3353,6 +3257,7 @@ span.driver-name-top10-glitter::after {
 
     main {
         padding: 0 0.75rem;
+        margin: 0.5rem auto;
     }
 
     .tabs {
@@ -3378,10 +3283,10 @@ span.driver-name-top10-glitter::after {
 
     .results-table {
         font-size: 0.7rem;
-        min-width: 600px; /* Prevent table from being too cramped */
+        min-width: 600px;
+        margin-top: 0.25rem;
     }
 
-    /* Detail page: reduce min-width on mobile to allow proper column fitting */
     #detail-results-container .results-table {
         min-width: 0;
     }
@@ -3396,13 +3301,11 @@ span.driver-name-top10-glitter::after {
         font-size: 0.75rem;
     }
 
-    /* Position badges stay readable */
     .pos-number {
         font-size: 0.7rem;
         padding: 0.12rem 0.4rem;
     }
 
-    /* Reduce Driver Info page column min-widths for tablets and mobile */
     #results-container .results-table th:nth-child(1),
     #results-container .results-table td:nth-child(1) {
         min-width: 100px !important;
@@ -3417,28 +3320,25 @@ span.driver-name-top10-glitter::after {
         font-size: 0.7rem;
     }
 
-    /* Gap time deltas */
     .time-delta-inline,
     .lap-time-cell .time-delta,
     .gap-time-cell .time-delta {
         font-size: 0.7rem;
     }
 
-    /* Difficulty pills */
     .difficulty-pill {
         font-size: 0.6rem !important;
         padding: 0.1rem 0.35rem !important;
     }
 
-    .difficulty-cell { 
+    .difficulty-cell {
         white-space: nowrap;
     }
 
-    /* Driver names and metadata */
     .driver-group-header strong {
         font-size: 0.85rem;
     }
-    
+
     .driver-group-header td {
         padding: 0.65rem !important;
     }
@@ -3451,13 +3351,13 @@ span.driver-name-top10-glitter::after {
         vertical-align: 0;
         margin-right: 0.4rem;
     }
-    
+
     .country-flag .fi {
         font-size: 0.9em;
     }
 
-    /* Car Info page: all 3 dropdowns stack vertically, each on its own line */
-    #cars-search-container .custom-select {
+    #cars-search-container .custom-select,
+    #track-search-container .custom-select {
         flex: 1 1 100%;
         min-width: 100%;
         max-width: 100%;
@@ -3466,17 +3366,9 @@ span.driver-name-top10-glitter::after {
     #cars-search-container .custom-select:nth-of-type(1) { z-index: 233; }
     #cars-search-container .custom-select:nth-of-type(2) { z-index: 232; }
     #cars-search-container .custom-select:nth-of-type(3) { z-index: 231; }
-    
-    /* Track Info page: dropdowns stack vertically for consistency */
-    #track-search-container .custom-select {
-        flex: 1 1 100%;
-        min-width: 100%;
-        max-width: 100%;
-    }
-
     #track-search-container .custom-select:nth-of-type(1) { z-index: 232; }
     #track-search-container .custom-select:nth-of-type(2) { z-index: 231; }
-    
+
     .custom-select__toggle {
         white-space: normal;
         padding: 0.55rem 0.7rem;
@@ -3535,7 +3427,6 @@ span.driver-name-top10-glitter::after {
         width: 0.9rem;
     }
 
-    /* Detail page improvements */
     .detail-content {
         padding: 1rem 0.75rem;
         margin-top: 0;
@@ -3547,15 +3438,6 @@ span.driver-name-top10-glitter::after {
         padding: 0.75rem;
         align-items: stretch;
         position: relative;
-    }
-
-    main {
-        margin: 0.5rem auto;
-        padding: 0 0.75rem;
-    }
-
-    .results-table {
-        margin-top: 0.25rem;
     }
 
     .pagination {
@@ -3571,13 +3453,13 @@ span.driver-name-top10-glitter::after {
         margin-left: 0;
         min-width: 100%;
     }
-    
+
     #car-filter-ui {
         order: 2;
         margin-left: 0;
         min-width: 100%;
     }
-    
+
     #difficulty-filter-ui {
         order: 1;
         margin-left: 0;
@@ -3606,7 +3488,6 @@ span.driver-name-top10-glitter::after {
         margin-bottom: 0.1rem;
     }
 
-    /* Pagination improvements */
     .pagination-buttons {
         gap: 0.35rem;
     }
@@ -3617,7 +3498,6 @@ span.driver-name-top10-glitter::after {
         min-width: 36px;
     }
 
-    /* Status section on mobile: more compact */
     .status-section {
         padding: 0.75rem;
     }
@@ -3638,7 +3518,6 @@ span.driver-name-top10-glitter::after {
         align-items: flex-start;
     }
 
-    /* Use higher specificity so mobile sizes override desktop */
     .status-item .status-label {
         font-size: 0.7rem !important;
     }
@@ -3650,20 +3529,17 @@ span.driver-name-top10-glitter::after {
         word-break: break-word;
     }
 
-    /* Timestamp: allow wrapping and shrink font on mobile */
     #status-timestamp {
         white-space: normal;
         font-size: 0.9rem;
     }
 
-    /* Inline status items should stack on mobile to avoid overflow */
     .status-item-inline {
         flex-direction: column;
         gap: 0.25rem;
         align-items: flex-start;
     }
 
-    /* Keep table usable with horizontal scroll */
     #cars-info-table,
     #track-info-table,
     .table-scroll-wrapper {
@@ -3671,18 +3547,17 @@ span.driver-name-top10-glitter::after {
         -webkit-overflow-scrolling: touch;
     }
 
-    /* Car/track info tables */
     .car-badge {
         font-size: 0.7rem;
         padding: 0.12rem 0.4rem;
         line-height: 1;
     }
 
-    /* Reduce horizontal padding for Car Info table on mobile */
     #cars-info-table .results-table th {
         padding: 0.7rem 0.3rem;
         font-size: 0.9rem;
     }
+
     #cars-info-table .results-table td {
         padding: 0.6rem 0.3rem;
         font-size: 0.75rem;
@@ -3697,53 +3572,51 @@ span.driver-name-top10-glitter::after {
         word-break: break-word;
     }
 
-    /* Track Info table mobile optimization */
     #track-info-table {
         overflow-x: visible !important;
         width: 100% !important;
     }
-    
+
     #track-info-table .results-table {
         table-layout: fixed !important;
         width: 100% !important;
         min-width: 0 !important;
     }
-    
+
     #track-info-table .results-table th,
     #track-info-table .results-table td {
         padding: 0.6rem 0.25rem !important;
         min-width: 0 !important;
         overflow: hidden !important;
     }
-    
-    /* First column - Track name */
+
     #track-info-table .results-table th:nth-child(1),
     #track-info-table .results-table td:nth-child(1),
-    #track-info-table .track-cell { 
+    #track-info-table .track-cell {
         width: 40% !important;
         max-width: 40% !important;
         word-break: break-word !important;
         overflow-wrap: break-word !important;
     }
-    
-    /* Daily Races mobile optimization */
+
     .daily-races-container {
         padding: 1rem 0.5rem;
     }
-    
+
     .daily-races-header h2 {
         font-size: 1.4rem;
     }
-    
+
     .daily-races-header h3 {
         font-size: 1.1rem;
     }
-    
+
     .daily-races-section-title {
         font-size: 1.1rem !important;
     }
-    
-    .daily-races-grid {
+
+    .daily-races-grid,
+    .hall-of-fame-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
     }
@@ -3753,14 +3626,10 @@ span.driver-name-top10-glitter::after {
         max-width: none;
     }
 
-    .hall-of-fame-grid {
-        grid-template-columns: 1fr;
-    }
-    
     .daily-race-card {
         padding: 1rem;
     }
-    
+
     .daily-race-class {
         font-size: 1rem;
         padding-right: clamp(72px, 22%, 96px);
@@ -3783,35 +3652,29 @@ span.driver-name-top10-glitter::after {
 
     .daily-race-track {
         padding-right: clamp(72px, 22%, 96px);
-    }
-    
-    .daily-race-track {
         font-size: 0.9rem;
     }
-    
+
     .daily-race-schedule {
         font-size: 0.85rem;
     }
-    
+
     .daily-race-tag {
         font-size: 0.7rem;
         padding: 0.2rem 0.5rem;
     }
 
-    
-    /* Second column - Car Class */
     #track-info-table .results-table th:nth-child(2),
     #track-info-table .results-table td:nth-child(2),
-    #track-info-table .class-cell { 
+    #track-info-table .class-cell {
         width: 40% !important;
         max-width: 40% !important;
         white-space: normal !important;
         word-break: break-word !important;
         overflow-wrap: break-word !important;
     }
-    
-    /* Third column - Entry count */
-    #track-info-table .entries-cell { 
+
+    #track-info-table .entries-cell {
         width: 20% !important;
         max-width: 20% !important;
         text-align: right !important;
@@ -3819,7 +3682,6 @@ span.driver-name-top10-glitter::after {
         overflow: visible !important;
     }
 
-    /* Footer adjustments */
     footer {
         padding: 1.25rem 0.75rem;
         margin-top: 1.5rem;
@@ -3843,24 +3705,29 @@ span.driver-name-top10-glitter::after {
         font-size: 1.4rem;
         margin-bottom: 0.6rem;
     }
-}
 
-@media (max-width: 900px) {
-    #stats-tables {
-        grid-template-columns: 1fr;
+    .hero-tagline {
+        font-size: 0.9rem;
+        padding: 0 0.5rem;
     }
 
-    .stats-selected-class-logo {
-        display: none;
+    .seo-content {
+        margin: 1.5rem 0 0.5rem 0;
+        padding: 0.75rem;
     }
 
-    .stats-box h2 {
+    .status-section h2,
+    .seo-content h2 {
+        font-size: 1.1rem;
+    }
+
+    .seo-content h3 {
         font-size: 0.95rem;
     }
 
-    .stats-table {
-        min-width: 0;
-        table-layout: fixed;
+    .seo-content p,
+    .seo-content ul li {
+        font-size: 0.9rem;
     }
 }
 
@@ -3898,6 +3765,102 @@ span.driver-name-top10-glitter::after {
     }
 }
 
+@media (max-width: 600px) {
+    .car-dist-content {
+        overflow-x: visible;
+    }
+
+    .car-dist-table {
+        font-size: 0.68rem;
+        table-layout: auto;
+        min-width: 0;
+        width: 100%;
+    }
+
+    .car-dist-table th.car-dist-car,
+    .car-dist-table td.car-dist-car {
+        min-width: 0;
+        max-width: none;
+    }
+
+    .car-dist-table th {
+        font-size: 0.7rem;
+        padding: 0.4rem 0.25rem;
+    }
+
+    .car-dist-table td {
+        padding: 0.35rem 0.5rem;
+    }
+
+    .car-dist-table th.car-dist-entries,
+    .car-dist-table td.car-dist-entries,
+    .car-dist-table th.car-dist-percentage,
+    .car-dist-table td.car-dist-percentage {
+        width: 3.2em;
+        max-width: 3.2em;
+    }
+
+    .car-dist-table th.car-dist-median,
+    .car-dist-table td.car-dist-median {
+        width: 3.8em;
+        max-width: 3.8em;
+    }
+
+    .car-dist-table th.sortable {
+        padding-right: 1rem;
+    }
+
+    .car-dist-median-label {
+        font-size: 0;
+    }
+
+    .car-dist-median-label::after {
+        content: 'Med';
+        font-size: 0.7rem;
+        display: inline;
+    }
+
+    .car-dist-toggle,
+    .entries-dist-toggle {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.7rem;
+    }
+
+    .entries-dist-summary {
+        margin: 0.75rem 0;
+    }
+
+    .entries-dist-chart {
+        height: 5rem;
+    }
+
+    .entries-dist-max-label {
+        font-size: 0.65rem;
+        top: 0.6rem;
+        left: 0.1rem;
+    }
+
+    .entries-dist-axis {
+        font-size: 0.68rem;
+        margin-top: 0.3rem;
+    }
+
+    .mp-pos-badge {
+        font-size: 0.7rem;
+    }
+
+    .news-item {
+        flex-direction: column;
+    }
+
+    .news-thumb {
+        width: 100%;
+        height: auto;
+        max-height: 300px;
+        aspect-ratio: 16 / 9;
+    }
+}
+
 @media (max-width: 480px) {
     .stats-table th,
     .stats-table td {
@@ -3918,34 +3881,18 @@ span.driver-name-top10-glitter::after {
     .stats-table td.stats-value-cell {
         width: 2.9rem;
     }
-}
 
-/* News thumbnails (max-width: 600px) */
-@media (max-width: 600px) {
-    .news-item { 
-        flex-direction: column; 
-    }
-    
-    .news-thumb {
-        width: 100%;
-        height: auto;
-        max-height: 300px;
-        aspect-ratio: 16 / 9;
-    }
-}
-
-/* Extra small screens (under 480px) */
-@media (max-width: 480px) {
-    /* Keep top padding, reduce bottom further on mobile */
     #site-header header {
         padding: 1.25rem 0.75rem 0.6rem 0.75rem;
     }
+
     header h1 {
         font-size: 1.15rem;
     }
 
     .results-table {
         font-size: 0.65rem;
+        margin-top: 0.15rem;
     }
 
     .results-table th,
@@ -3963,10 +3910,6 @@ span.driver-name-top10-glitter::after {
         padding: 0 0.5rem;
     }
 
-    .results-table {
-        margin-top: 0.15rem;
-    }
-
     .pagination {
         margin-top: 0.4rem;
     }
@@ -3982,6 +3925,7 @@ span.driver-name-top10-glitter::after {
 
     .detail-header-info {
         gap: 0.2rem;
+        padding-right: 4.6rem;
     }
 
     .detail-header-line,
@@ -4003,7 +3947,6 @@ span.driver-name-top10-glitter::after {
         font-size: 0.85rem;
     }
 
-    /* Further reduce special elements */
     .pos-number {
         font-size: 0.65rem;
         padding: 0.1rem 0.35rem;
@@ -4024,16 +3967,11 @@ span.driver-name-top10-glitter::after {
         right: 0.6rem;
     }
 
-    .detail-header-info {
-        padding-right: 4.6rem;
-    }
-
     .difficulty-pill {
         font-size: 0.55rem !important;
         padding: 0.08rem 0.3rem !important;
     }
 
-    /* Driver names and metadata even smaller */
     .driver-group-header strong {
         font-size: 0.8rem;
     }
@@ -4050,7 +3988,6 @@ span.driver-name-top10-glitter::after {
         font-size: 0.85em;
     }
 
-    /* Reduce Driver Info page column min-widths for mobile */
     #results-container .results-table th:nth-child(1),
     #results-container .results-table td:nth-child(1) {
         min-width: 100px !important;
@@ -4060,7 +3997,7 @@ span.driver-name-top10-glitter::after {
     #results-container .results-table td:nth-child(2) {
         min-width: 140px !important;
     }
-    
+
     .mp-pos-badge {
         font-size: 0.65rem;
     }
@@ -4188,29 +4125,3 @@ span.driver-name-top10-glitter::after {
     gap: 0.5rem;
 }
 
-/* Mobile responsiveness for SEO content */
-@media (max-width: 768px) {
-    .hero-tagline {
-        font-size: 0.9rem;
-        padding: 0 0.5rem;
-    }
-    
-    .seo-content {
-        margin: 1.5rem 0 0.5rem 0;
-        padding: 0.75rem;
-    }
-    
-    .status-section h2,
-    .seo-content h2 {
-        font-size: 1.1rem;
-    }
-    
-    .seo-content h3 {
-        font-size: 0.95rem;
-    }
-    
-    .seo-content p,
-    .seo-content ul li {
-        font-size: 0.9rem;
-    }
-}

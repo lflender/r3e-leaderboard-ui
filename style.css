@@ -767,7 +767,12 @@ footer p {
     min-width: 80px;
 }
 
-/* Detail page table layout */
+/* Detail page table layout - all columns auto-sized to content */
+#detail-results-container .results-table {
+    width: auto;
+    min-width: 100%;
+}
+
 /* Position column - fixed small width */
 #detail-results-container .results-table th:nth-child(1),
 #detail-results-container .results-table td:nth-child(1) {
@@ -775,9 +780,10 @@ footer p {
     white-space: nowrap;
 }
 
-/* Driver column - no width set, takes remaining space, no wrapping */
+/* Driver column - content-sized like other columns */
 #detail-results-container .results-table th:nth-child(2),
 #detail-results-container .results-table td:nth-child(2) {
+    width: 1px;
     white-space: nowrap;
 }
 
@@ -799,10 +805,12 @@ footer p {
 }
 
 /* Driver Info page table layout (columns: Car class, Car, Position, Track, Laptime, Lap%, Difficulty, Date) */
-/* Car class and Car columns - share remaining space but have minimum widths */
+/* Car class and Car columns - keep readable minimums */
 #results-container .results-table th:nth-child(1),
 #results-container .results-table td:nth-child(1) {
+    width: 22%;
     min-width: 150px;
+    white-space: normal;
 }
 
 #results-container .results-table th:nth-child(2),
@@ -817,11 +825,12 @@ footer p {
     white-space: nowrap;
 }
 
-/* Track column - auto-fit content */
+/* Track column - share flexible width with Car class and wrap when needed */
 #results-container .results-table th:nth-child(4),
 #results-container .results-table td:nth-child(4) {
-    width: 1px;
-    white-space: nowrap;
+    width: 22%;
+    min-width: 150px;
+    white-space: normal;
 }
 
 /* Laptime column - auto-fit content */

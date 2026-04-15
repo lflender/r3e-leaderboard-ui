@@ -35,7 +35,8 @@ class CustomSelect {
         
         this.buildMenu();
         this.attachEventListeners();
-        this.setValue(''); // Set to first option
+        // Initialize UI without firing change callbacks.
+        this.setValue('', { notify: false, source: 'init' }); // Set to first option
     }
     
     /**
@@ -73,7 +74,7 @@ class CustomSelect {
             const opt = e.target.closest('.custom-select__option');
             if (!opt) return;
             const value = opt.dataset.value;
-            this.setValue(value);
+            this.setValue(value, { source: 'user' });
         });
         
         // Close when clicking outside
@@ -88,8 +89,18 @@ class CustomSelect {
      * Opens the dropdown
      */
     open() {
+        document.querySelectorAll('.custom-select').forEach((el) => {
+            if (el !== this.root) {
+                el.classList.remove('is-open');
+                const menu = el.querySelector('.custom-select__menu');
+                const toggle = el.querySelector('.custom-select__toggle');
+                if (menu) menu.hidden = true;
+                if (toggle) toggle.setAttribute('aria-expanded', 'false');
+            }
+        });
         this.menu.hidden = false;
         this.toggle.setAttribute('aria-expanded', 'true');
+        this.root.classList.add('is-open');
     }
     
     /**
@@ -98,6 +109,7 @@ class CustomSelect {
     close() {
         this.menu.hidden = true;
         this.toggle.setAttribute('aria-expanded', 'false');
+        this.root.classList.remove('is-open');
     }
     
     /**
@@ -112,7 +124,10 @@ class CustomSelect {
      * Sets the selected value
      * @param {string} value - Value to select
      */
-    setValue(value) {
+    setValue(value, options = {}) {
+        const notify = options.notify !== false;
+        const source = options.source || 'programmatic';
+
         this.currentValue = value;
         const opt = this.options.find(o => o.value === value) || this.options[0];
         
@@ -131,8 +146,8 @@ class CustomSelect {
         this.updateSelectedState();
         this.close();
         
-        if (this.onChange && typeof this.onChange === 'function') {
-            this.onChange(value);
+        if (notify && this.onChange && typeof this.onChange === 'function') {
+            this.onChange(value, { source });
         }
     }
     

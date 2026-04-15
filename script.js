@@ -6,7 +6,7 @@
  * with functionality delegated to specialized modules:
  * - tab-manager.js: Tab switching
  * - status-display.js: Status information display
- * - driver-search.js: Driver search and filtering
+ * - modules/pages/driver-search.js: Driver search and filtering
  * - navigation.js: Global navigation functions
  * - mp-pos-service.js: MP position data loading and caching
  */

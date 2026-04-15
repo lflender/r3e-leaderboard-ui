@@ -10,6 +10,9 @@ class TableRenderer {
         this.excludeColumns = window.ColumnConfig ? 
             window.ColumnConfig.getHiddenColumnAliases() : 
             this._getFallbackExcludeColumns();
+        this.sortService = window.TableSortService
+            ? new window.TableSortService({ resolveTrackLabel: this.resolveTrackLabel.bind(this) })
+            : null;
     }
     
     /**
@@ -30,7 +33,7 @@ class TableRenderer {
     }
     
     /**
-     * Renders a complete results table with driver grouping
+     * Renders a complete results table* grouping
      * @param {Array} driverGroups - Array of driver group objects
      * @param {Array} keys - Column keys to display
     * @param {string} sortBy - Optional sort key: 'gap' (default), 'lapTime', or 'gapPercent'
@@ -70,7 +73,7 @@ class TableRenderer {
         
         html += '</tr></thead><tbody>';
         
-        // Create grouped rows with driver headers
+        // Create grouped rows* headers
         driverGroups.forEach(driverObj => {
             const driverResults = Array.isArray(driverObj.entries) ? driverObj.entries : [];
             if (driverResults.length === 0) return;
@@ -81,7 +84,9 @@ class TableRenderer {
             this.sortDriverEntries(driverResults, sortBy);
             
             // Get reference time from the first (leader) entry for percentage calculation
-            const referenceTime = this.extractReferenceTime(driverResults);
+            const referenceTime = this.sortService
+                ? this.sortService.extractReferenceTime(driverResults)
+                : '';
             
             // Render driver header
             html += this.renderDriverHeader(driverObj, firstEntry, keys.length);
@@ -269,6 +274,86 @@ class TableRenderer {
         html += '</tr>';
         return html;
     }
+
+    renderDetailSections(resultsContainer, summaryHTML, entriesDistHTML, paginationHTML, tableWrapperHTML) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = `${summaryHTML || ''}${entriesDistHTML || ''}${paginationHTML || ''}${tableWrapperHTML || ''}${paginationHTML || ''}`;
+        resultsContainer.innerHTML = tempDiv.innerHTML;
+    }
+
+    renderDetailRow(item, options = {}) {
+        const isCombinedView = !!options.isCombinedView;
+        const allResultsLength = Number(options.allResultsLength || 0);
+        const trackParam = options.trackParam || '';
+        const DataNormalizerRef = options.DataNormalizer || window.DataNormalizer;
+        const utils = options.R3EUtils || window.R3EUtils;
+        const renderer = options.tableRenderer || this;
+        const showAbsolutePosition = !!options.showAbsolutePosition;
+
+        const position = isCombinedView
+            ? (item.Position || item.position || DataNormalizerRef.extractPosition(item))
+            : DataNormalizerRef.extractPosition(item);
+        const name = DataNormalizerRef.extractName(item);
+        const country = DataNormalizerRef.extractCountry(item);
+        const car = DataNormalizerRef.extractCar(item);
+        const difficulty = DataNormalizerRef.extractDifficulty(item);
+        const lapTime = DataNormalizerRef.extractLapTime(item);
+
+        const totalEntries = isCombinedView
+            ? allResultsLength
+            : utils.getTotalEntriesCount(item);
+        const rowTrackId = DataNormalizerRef.extractTrackId(item) || trackParam || '';
+        const rowClassId = DataNormalizerRef.extractClassId(item) || '';
+        const detailRowItem = {
+            ...item,
+            Position: position,
+            position: position,
+            Pos: position,
+            TotalEntries: totalEntries,
+            total_entries: totalEntries,
+            Name: name,
+            name: name,
+            Country: country,
+            country: country,
+            Car: car,
+            car: car,
+            Difficulty: difficulty,
+            difficulty: difficulty,
+            LapTime: lapTime,
+            'Lap Time': lapTime,
+            lap_time: lapTime,
+            filteredPosition: item.filteredPosition,
+            filteredTotal: item.filteredTotal,
+            absolutePosition: item.absolutePosition,
+            absoluteTotal: item.absoluteTotal
+        };
+
+        if (isCombinedView) {
+            detailRowItem.CarClass = item.ClassName || item.class_name || item.CarClass || item.car_class || '';
+        }
+
+        let html = `<tr data-trackid="${utils.escapeHtml(String(rowTrackId))}" data-classid="${utils.escapeHtml(String(rowClassId))}" data-name="${utils.escapeHtml(String(name))}" data-time="${utils.escapeHtml(String(lapTime))}">`;
+
+        html += renderer.renderDetailPositionCell(detailRowItem, { showAbsolutePosition });
+        html += renderer.renderDriverNameCell(detailRowItem, {
+            driverLinkClass: 'detail-driver-link',
+            driverLinkBase: 'drivers.html?driver='
+        });
+        html += renderer.renderLapTimeCell(detailRowItem.LapTime, { includeDelta: false });
+        html += renderer.renderGapTimeCell(detailRowItem.LapTime);
+        html += renderer.renderGapPercentCell(detailRowItem, null);
+
+        if (isCombinedView) {
+            html += renderer.renderCell(detailRowItem, 'CarClass');
+        }
+
+        html += renderer.renderCell(detailRowItem, 'Car');
+        html += renderer.renderCell(detailRowItem, 'Difficulty');
+        html += renderer.renderCell(detailRowItem, 'date_time');
+
+        html += '</tr>';
+        return html;
+    }
     
     /**
      * Renders a table cell based on key type
@@ -346,26 +431,127 @@ class TableRenderer {
             return `<td class="pos-cell"><span class="pos-number${podiumClass}" data-color="${badgeColor}" style="background:${badgeColor}">${R3EUtils.escapeHtml(posNum)}</span></td>`;
         }
     }
+
+    renderDetailPositionCell(item, options = {}) {
+        const showAbsolutePosition = !!options.showAbsolutePosition;
+        const totalEntries = R3EUtils.getTotalEntriesCount(item);
+        const posNum = String(item.Position || item.position || item.Pos || '').trim();
+        const totalNum = totalEntries ? String(totalEntries).trim() : '';
+        const badgeColor = R3EUtils.getPositionBadgeColor(parseInt(posNum), parseInt(totalNum));
+
+        const filteredPos = item.filteredPosition ? String(item.filteredPosition).trim() : '';
+        const filteredTotal = item.filteredTotal ? String(item.filteredTotal).trim() : '';
+        const absolutePos = item.absolutePosition ? String(item.absolutePosition).trim() : '';
+        const absoluteTotal = item.absoluteTotal ? String(item.absoluteTotal).trim() : '';
+
+        let html = '<td class="pos-cell">';
+
+        if (showAbsolutePosition && filteredPos && filteredTotal) {
+            html += `<span class="absolute-pos-label">${R3EUtils.escapeHtml(filteredPos)}/${R3EUtils.escapeHtml(filteredTotal)}</span> `;
+        }
+
+        if (showAbsolutePosition && absolutePos && absoluteTotal) {
+            const absoluteBadgeColor = R3EUtils.getPositionBadgeColor(parseInt(absolutePos), parseInt(absoluteTotal));
+            const absolutePosNum = parseInt(absolutePos);
+            const absoluteTotalNum = parseInt(absoluteTotal);
+            const podiumClass = (absoluteTotalNum >= 4 && (absolutePosNum === 1 || absolutePosNum === 2 || absolutePosNum === 3))
+                ? ` pos-${absolutePosNum}`
+                : '';
+            html += `<span class="pos-number${podiumClass}" data-color="${absoluteBadgeColor}" style="background:${absoluteBadgeColor}">${R3EUtils.escapeHtml(absolutePos)}</span>`;
+            html += `<span class="pos-sep">/</span><span class="pos-total">${R3EUtils.escapeHtml(absoluteTotal)}</span>`;
+        } else {
+            const pos = parseInt(posNum);
+            const total = parseInt(totalNum);
+            const podiumClass = (total >= 4 && (pos === 1 || pos === 2 || pos === 3)) ? ` pos-${pos}` : '';
+            html += `<span class="pos-number${podiumClass}" data-color="${badgeColor}" style="background:${badgeColor}">${R3EUtils.escapeHtml(posNum)}</span>`;
+            if (totalNum) {
+                html += `<span class="pos-sep">/</span><span class="pos-total">${R3EUtils.escapeHtml(totalNum)}</span>`;
+            }
+        }
+
+        html += '</td>';
+        return html;
+    }
+
+    renderDriverNameCell(item, options = {}) {
+        const name = window.DataNormalizer && typeof window.DataNormalizer.extractName === 'function'
+            ? window.DataNormalizer.extractName(item)
+            : (item.name || item.Name || '');
+        const country = window.DataNormalizer && typeof window.DataNormalizer.extractCountry === 'function'
+            ? window.DataNormalizer.extractCountry(item)
+            : (item.country || item.Country || '');
+        const rank = window.DataNormalizer && typeof window.DataNormalizer.extractRank === 'function'
+            ? window.DataNormalizer.extractRank(item)
+            : (item.rank || item.Rank || '');
+        const highlisted = item.highlisted || item.Highlisted || false;
+        const flag = FlagHelper.countryToFlag(country);
+        const flagHtml = flag ? `<span class="country-flag">${flag}</span>` : '';
+        const rankStarsHtml = rank ? R3EUtils.renderRankStars(rank, true) : '';
+        const mpPos = typeof resolveMpPos === 'function' ? resolveMpPos(name, country) : null;
+        const mpPosHtml = mpPos ? ` <span class="mp-pos-badge">#${mpPos}</span>` : '';
+        const driverLinkClass = options.driverLinkClass || 'detail-driver-link';
+        const encodedDriver = encodeURIComponent(`"${String(name)}"`);
+        const driverHref = `${options.driverLinkBase || 'drivers.html?driver='}${encodedDriver}`;
+
+        if (!highlisted) {
+            let linkClasses = driverLinkClass;
+            if (typeof getMpPosNameClasses === 'function') {
+                const nameClasses = getMpPosNameClasses(mpPos);
+                if (nameClasses) {
+                    linkClasses += ` ${nameClasses}`;
+                }
+            }
+            return `<td><a class="${linkClasses}" href="${driverHref}">${flagHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}${mpPosHtml}</a></td>`;
+        }
+
+        const highlightThresholds = options.highlightedMpPosThresholds || { gold: 10, silver: 100, glitter: 10 };
+        const highlightedClasses = typeof getMpPosNameClasses === 'function'
+            ? getMpPosNameClasses(mpPos, highlightThresholds)
+            : '';
+        const classAttr = highlightedClasses ? ` class="${highlightedClasses}"` : '';
+        return `<td><span${classAttr}>${flagHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}${mpPosHtml}</span></td>`;
+    }
     
     /**
      * Renders lap time cell with delta
      * @param {string} value - Lap time value
      * @returns {string} HTML string
      */
-    renderLapTimeCell(value) {
-        const s = String(value || '');
-        const parts = s.split(/,\s*/);
-        const mainClassic = R3EUtils.formatClassicLapTime(parts[0] || '');
-        const deltaRaw = parts.slice(1).join(' ');
-        const deltaClassic = deltaRaw ? R3EUtils.formatClassicLapTime(deltaRaw) : '';
+    renderLapTimeCell(value, options = {}) {
+        const includeDelta = options.includeDelta !== false;
+        const parts = this.extractLapAndGapParts(value);
+        const mainClassic = parts.main;
+        const deltaClassic = parts.gap;
         const escMain = R3EUtils.escapeHtml(String(mainClassic));
         const escDelta = R3EUtils.escapeHtml(String(deltaClassic));
-        
-        if (escDelta) {
+
+        if (includeDelta && escDelta) {
             return `<td class="lap-time-cell"><span class="lap-main">${escMain}</span><span class="time-delta">${escDelta}</span></td>`;
         } else {
             return `<td class="lap-time-cell"><span class="lap-main">${escMain}</span></td>`;
         }
+    }
+
+    renderGapTimeCell(value) {
+        const parts = this.extractLapAndGapParts(value);
+        const deltaClassic = parts.gap;
+        const escDelta = R3EUtils.escapeHtml(String(deltaClassic));
+        if (!escDelta) {
+            return '<td class="gap-time-cell"></td>';
+        }
+        return `<td class="gap-time-cell"><span class="time-delta">${escDelta}</span></td>`;
+    }
+
+    extractLapAndGapParts(value) {
+        const s = String(value || '');
+        const parts = s.split(/,\s*/);
+        const mainRaw = parts[0] || '';
+        const gapRaw = parts.slice(1).join(' ');
+
+        return {
+            main: R3EUtils.formatClassicLapTime(mainRaw),
+            gap: gapRaw ? R3EUtils.formatClassicLapTime(gapRaw) : ''
+        };
     }
     
     /**
@@ -497,243 +683,13 @@ class TableRenderer {
     }
     
     /**
-     * Maps sort keys to their field names from FIELD_NAMES
-     * @param {string} sortBy - Sort key
-     * @returns {Array} Field names array or null if special handling needed
-     */
-    getSortFieldNames(sortBy) {
-        if (typeof window.FIELD_NAMES === 'undefined') return null;
-        
-        const fieldMap = {
-            'car_class': window.FIELD_NAMES.CAR_CLASS,
-            'track': window.FIELD_NAMES.TRACK,
-            'position': window.FIELD_NAMES.POSITION,
-            'date_time': window.FIELD_NAMES.DATE_TIME
-        };
-        
-        return fieldMap[sortBy] || null;
-    }
-    
-    /**
-     * Extracts field value using FIELD_NAMES for consistent field access
-     * @param {Object} item - Data item
-     * @param {string} sortBy - Sort key
-     * @returns {*} Field value
-     */
-    getFieldValueForSort(item, sortBy) {
-        if (sortBy === 'track') {
-            return this.resolveTrackLabel(item);
-        }
-
-        const fieldNames = this.getSortFieldNames(sortBy);
-        if (!fieldNames) return null;
-        
-        // Use getField if available, otherwise manual extraction
-        if (typeof window.getField === 'function') {
-            return window.getField(item, fieldNames, '');
-        }
-        
-        // Fallback: manual extraction using same pattern as getField
-        for (const field of fieldNames) {
-            if (item[field] !== undefined && item[field] !== null) {
-                return item[field];
-            }
-        }
-        return '';
-    }
-    
-    /**
      * Sorts driver entries by gap time, lap time, gap percentage, car class, track, position, or date
      * @param {Array} entries - Driver entries
      * @param {string} sortBy - Sort key: 'gap' (default), 'lapTime', 'gapPercent', 'car_class', 'track', 'position', or 'date_time'
      */
     sortDriverEntries(entries, sortBy = 'gap') {
-        if (!entries || entries.length === 0) return;
-        
-        try {
-            if (sortBy === 'position') {
-                this._sortByPosition(entries);
-            } else if (sortBy === 'date_time') {
-                this._sortByDateTime(entries);
-            } else if (sortBy === 'lapTime') {
-                this._sortByLapTime(entries);
-            } else if (sortBy === 'car_class' || sortBy === 'track') {
-                this._sortByTextField(entries, sortBy);
-            } else if (sortBy === 'gapPercent') {
-                this._sortByGapPercent(entries);
-            } else {
-                // Sort by gap time (default)
-                this._sortByGap(entries);
-            }
-        } catch (e) {
-            // If parsing fails, keep original order
-            console.warn('Sort error:', e);
-        }
-    }
-    
-    /**
-     * Sort by position
-     * @private
-     */
-    _sortByPosition(entries) {
-        const fields = this.getSortFieldNames('position');
-        entries.sort((a, b) => {
-            const posA = parseInt(this.getFieldValueForSort(a, 'position') || 999999);
-            const posB = parseInt(this.getFieldValueForSort(b, 'position') || 999999);
-            if (posA !== posB) return posA - posB;
-            return R3EUtils.getTotalEntriesCount(b) - R3EUtils.getTotalEntriesCount(a);
-        });
-    }
-    
-    /**
-     * Sort by date/time (most recent first)
-     * @private
-     */
-    _sortByDateTime(entries) {
-        entries.sort((a, b) => {
-            const dateA = this.getFieldValueForSort(a, 'date_time');
-            const dateB = this.getFieldValueForSort(b, 'date_time');
-            if (!dateA && !dateB) return 0;
-            if (!dateA) return 1;
-            if (!dateB) return -1;
-            
-            const timeA = new Date(dateA).getTime();
-            const timeB = new Date(dateB).getTime();
-            if (isNaN(timeA) && isNaN(timeB)) return 0;
-            if (isNaN(timeA)) return 1;
-            if (isNaN(timeB)) return -1;
-            return timeB - timeA; // Newest first
-        });
-    }
-    
-    /**
-     * Sort by lap time
-     * @private
-     */
-    _sortByLapTime(entries) {
-        entries.sort((a, b) => {
-            const rawA = a.LapTime || a['Lap Time'] || a.lap_time || a.laptime || a.Time || '';
-            const rawB = b.LapTime || b['Lap Time'] || b.lap_time || b.laptime || b.Time || '';
-            const lapA = String(rawA).split(/,\s*/)[0] || '';
-            const lapB = String(rawB).split(/,\s*/)[0] || '';
-            const msA = R3EUtils.parseLapTimeToMillis(lapA) || Number.MAX_VALUE;
-            const msB = R3EUtils.parseLapTimeToMillis(lapB) || Number.MAX_VALUE;
-            if (msA !== msB) return msA - msB;
-            return R3EUtils.getTotalEntriesCount(b) - R3EUtils.getTotalEntriesCount(a);
-        });
-    }
-    
-    /**
-     * Sort by text field (car class or track)
-     * @private
-     */
-    _sortByTextField(entries, sortBy) {
-        entries.sort((a, b) => {
-            // Primary sort: by the text field (case-insensitive)
-            const fieldA = String(this.getFieldValueForSort(a, sortBy) || '').toLowerCase();
-            const fieldB = String(this.getFieldValueForSort(b, sortBy) || '').toLowerCase();
-            
-            if (fieldA < fieldB) return -1;
-            if (fieldA > fieldB) return 1;
-            
-            // Secondary sort: by gap time
-            const ga = R3EUtils.parseGapMillisFromItem(a);
-            const gb = R3EUtils.parseGapMillisFromItem(b);
-            if (ga !== gb) return ga - gb;
-            
-            // Tertiary sort: by position
-            const posA = parseInt(this.getFieldValueForSort(a, 'position') || 999999);
-            const posB = parseInt(this.getFieldValueForSort(b, 'position') || 999999);
-            return posA - posB;
-        });
-    }
-    
-    /**
-     * Sort by gap percentage
-     * @private
-     */
-    _sortByGapPercent(entries) {
-        const referenceTime = this.extractReferenceTime(entries);
-        entries.sort((a, b) => {
-            const percentA = this.calculateGapPercentValue(a, referenceTime);
-            const percentB = this.calculateGapPercentValue(b, referenceTime);
-            if (percentA !== percentB) return percentA - percentB;
-            return R3EUtils.getTotalEntriesCount(b) - R3EUtils.getTotalEntriesCount(a);
-        });
-    }
-    
-    /**
-     * Sort by gap time (default)
-     * @private
-     */
-    _sortByGap(entries) {
-        entries.sort((a, b) => {
-            const ga = R3EUtils.parseGapMillisFromItem(a);
-            const gb = R3EUtils.parseGapMillisFromItem(b);
-            if (ga !== gb) return ga - gb;
-            return R3EUtils.getTotalEntriesCount(b) - R3EUtils.getTotalEntriesCount(a);
-        });
-    }
-    
-    /**
-     * Extracts the reference time (fastest lap) from driver entries
-     * @param {Array} entries - Driver entries
-     * @returns {string} Reference lap time
-     */
-    extractReferenceTime(entries) {
-        if (!entries || entries.length === 0) return '';
-        
-        // Find the entry with the smallest gap (should be first, but let's be safe)
-        let minGap = Number.MAX_VALUE;
-        let referenceEntry = entries[0];
-        
-        entries.forEach(entry => {
-            const gap = R3EUtils.parseGapMillisFromItem(entry);
-            if (gap < minGap) {
-                minGap = gap;
-                referenceEntry = entry;
-            }
-        });
-        
-        // Extract the lap time (first part before comma)
-        const raw = referenceEntry.LapTime || referenceEntry['Lap Time'] || 
-                   referenceEntry.lap_time || referenceEntry.laptime || 
-                   referenceEntry.Time || '';
-        const s = String(raw || '');
-        const parts = s.split(/,\s*/);
-        return parts[0] || '';
-    }
-    
-    /**
-     * Calculates gap percentage as a numeric value for sorting
-     * @param {Object} item - Data item
-     * @param {string} referenceTime - Not used, kept for API compatibility
-     * @returns {number} Percentage value (e.g., 100.5)
-     */
-    calculateGapPercentValue(item, referenceTime) {
-        if (!item) return 100;
-        
-        const raw = item.LapTime || item['Lap Time'] || item.lap_time || item.laptime || item.Time || '';
-        const s = String(raw || '');
-        if (!s) return 100;
-        
-        const parts = s.split(/,\s*/);
-        const lapTime = parts[0] || '';
-        
-        // If this is the reference (no gap), return 100
-        if (parts.length < 2) return 100;
-        
-        const lapMillis = R3EUtils.parseLapTimeToMillis(lapTime);
-        if (lapMillis === 0) return 100;
-        
-        const gapMillis = R3EUtils.parseGapMillisFromItem(item);
-        if (gapMillis === 0 || gapMillis === Number.MAX_VALUE) return 100;
-        
-        // Calculate reference time: reference = lapTime - gap
-        const refMillis = lapMillis - gapMillis;
-        if (refMillis <= 0) return 100;
-        
-        return (lapMillis / refMillis) * 100;
+        if (!this.sortService) return;
+        this.sortService.sortDriverEntries(entries, sortBy);
     }
     
     /**

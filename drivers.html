@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Driver Search — RaceRoom Leaderboards Explorer</title>
+    <title>Driver Search - RaceRoom Leaderboards Explorer</title>
     <meta name="description" content="The #1 RaceRoom leaderboards database. Search driver lap times, track records, car performance data and rankings for RaceRoom Racing Experience (R3E). Updated daily with official leaderboard data.">
     <link rel="canonical" href="https://r3e-leaderboards.info/drivers.html">
     <link rel="alternate" hreflang="en" href="https://r3e-leaderboards.info/drivers.html">
@@ -13,7 +13,7 @@
     <meta name="keywords" content="raceroom leaderboards, r3e leaderboards, raceroom lap times, raceroom racing experience leaderboards, r3e lap times, raceroom driver rankings, raceroom track records, r3e rankings">
     <!-- Open Graph -->
     <meta property="og:site_name" content="RaceRoom Leaderboards">
-    <meta property="og:title" content="Driver Search — RaceRoom Leaderboards Explorer">
+    <meta property="og:title" content="Driver Search - RaceRoom Leaderboards Explorer">
     <meta property="og:description" content="The #1 RaceRoom leaderboards database. Search driver lap times, track records and rankings for RaceRoom Racing Experience. Updated daily.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://r3e-leaderboards.info/drivers.html">
@@ -25,15 +25,15 @@
     
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Driver Search — RaceRoom Leaderboards Explorer">
+    <meta name="twitter:title" content="Driver Search - RaceRoom Leaderboards Explorer">
     <meta name="twitter:description" content="The #1 RaceRoom leaderboards database. Search driver lap times, track records and rankings for R3E.">
     <meta name="twitter:image" content="https://r3e-leaderboards.info/images/rle-share.png">
     
     <!-- Analytics (PostHog via first-party proxy) -->
-    <script src="modules/analytics.js?v=3"></script>
+    <script src="modules/analytics.js?v=6"></script>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     
-    <link rel="stylesheet" href="style.css?v=56">
+    <link rel="stylesheet" href="style.css?v=98">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"/>
     <!-- Site Icons -->
     <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png?v=3">
@@ -49,7 +49,7 @@
         "name": "RaceRoom Leaderboards",
         "alternateName": ["R3E Leaderboards", "RaceRoom Racing Experience Leaderboards"],
         "url": "https://r3e-leaderboards.info/drivers.html",
-        "description": "The #1 RaceRoom leaderboards database with driver lap times, track records, and rankings for RaceRoom Racing Experience.",
+        "description": "The #1 RaceRoom leaderboards database* lap times, track records, and rankings for RaceRoom Racing Experience.",
         "potentialAction": {
             "@type": "SearchAction",
             "target": {
@@ -190,35 +190,42 @@
     
     <div id="site-footer"></div>
     <!-- Loaders -->
-    <script src="loaders/template-loader.js?v=2" defer></script>
-    <script src="loaders/footer-loader.js?v=2" defer></script>
-    <script src="loaders/header-loader.js?v=2" defer></script>
+    <script src="modules/loaders/template-loader.js?v=2" defer></script>
+    <script src="modules/loaders/footer-loader.js?v=2" defer></script>
+    <script src="modules/loaders/header-loader.js?v=2" defer></script>
     
     <!-- Core modules -->
-    <script src="data/country-mappings.js?v=4" defer></script>
+    <script src="modules/data/country-mappings.js?v=4" defer></script>
     <script src="modules/column-config.js?v=3" defer></script>
     <script src="modules/compressed-json-helper.js?v=1" defer></script>
-    <script src="modules/custom-select.js?v=1" defer></script>
+    <script src="modules/custom-select.js?v=3" defer></script>
     <script src="modules/data-normalizer.js?v=1" defer></script>
-    <script src="modules/data-service.js?v=11" defer></script>
+    <script src="modules/driver-index-service.js?v=1" defer></script>
+    <script src="modules/driver-search-service.js?v=1" defer></script>
+    <script src="modules/data-service.js?v=17" defer></script>
     <script src="modules/field-mappings.js?v=1" defer></script>
     <script src="modules/flag-helper.js?v=1" defer></script>
     <script src="modules/mp-pos-service.js?v=7" defer></script>
     <script src="modules/pagination.js?v=1" defer></script>
-    <script src="modules/table-renderer.js?v=15" defer></script>
+    <script src="modules/sort-service.js?v=2" defer></script>
+    <script src="modules/table-renderer.js?v=19" defer></script>
     <script src="modules/template-helper.js?v=1" defer></script>
-    <script src="modules/utils.js?v=6" defer></script>
+    <script src="modules/time-helper.js?v=3" defer></script>
+    <script src="modules/utils-track.js?v=1" defer></script>
+    <script src="modules/url-helper.js?v=2" defer></script>
+    <script src="modules/utils-car.js?v=1" defer></script>
+    <script src="modules/utils.js?v=11" defer></script>
     
     <!-- Data files - must load before feature modules that depend on them -->
-    <script src="data/car-classes.js?v=3" defer></script>
-    <script src="data/cars.js?v=4" defer></script>
-    <script src="data/tracks.js?v=3" defer></script>
+    <script src="modules/data/car-classes.js?v=3" defer></script>
+    <script src="modules/data/cars.js?v=9" defer></script>
+    <script src="modules/data/tracks.js?v=4" defer></script>
     
     <!-- Feature modules -->
     <script src="modules/stats-data.js?v=1" defer></script>
-    <script src="modules/fun-fact.js?v=2" defer></script>
+    <script src="modules/fun-fact.js?v=3" defer></script>
     <script src="modules/hall-of-fame.js?v=2" defer></script>
-    <script src="modules/driver-search.js?v=14" defer></script>
+    <script src="modules/pages/driver-search.js?v=18" defer></script>
     <script src="modules/navigation.js?v=2" defer></script>
     <script src="modules/status-display.js?v=3" defer></script>
     <script src="modules/tab-manager.js?v=2" defer></script>

@@ -32,6 +32,14 @@ class DataService {
         }
         return window.CompressedJsonHelper;
     }
+
+    _getDriverIndexModule() {
+        const module = window.R3EDriverIndexService;
+        if (!module) {
+            throw new Error('R3EDriverIndexService is not loaded.');
+        }
+        return module;
+    }
     
     /**
      * Loads driver mirror index with caching.
@@ -40,63 +48,7 @@ class DataService {
      * @returns {Promise<Object>} Driver index object
      */
     async loadDriverIndex(onProgress = null) {
-        // Return immediately if already loaded
-        if (this.driverIndex) {
-            return this.driverIndex;
-        }
-
-        // Serve cached index (stale-while-revalidate) to avoid empty UI on refresh
-        const cached = this._getCachedDriverIndex();
-        if (cached) {
-            this.driverIndex = cached;
-            // Kick off a background refresh without blocking the UI
-            setTimeout(() => { this._refreshDriverIndexInBackground(); }, 0);
-            // Initialize baseline lastIndexUpdate and start periodic revalidation
-            setTimeout(() => { this._updateLastIndexFromStatus(); }, 0);
-            this._startIndexStatusRevalidator();
-            return this.driverIndex;
-        }
-
-        // Ensure single-flight: reuse ongoing promise if present
-        if (this.driverIndexPromise) {
-            return this.driverIndexPromise;
-        }
-
-        const maxAttempts = 10;
-        const baseDelayMs = 250;
-        this.driverIndexPromise = (async () => {
-            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-                try {
-                    const mirrorData = await this._fetchDriverMirrorData();
-                    this.driverIndex = mirrorData;
-                    
-                    if (!this.driverIndex || typeof this.driverIndex !== 'object') {
-                        throw new Error('Driver name mirror index is not an object');
-                    }
-                    const keyCount = Object.keys(this.driverIndex).length;
-                    if (keyCount === 0) {
-                        throw new Error('Driver name mirror index is empty');
-                    }
-                    this.driverNameMirror = this.driverIndex;
-                    this._saveDriverIndexToCache(this.driverIndex);
-                    // Update baseline and start periodic revalidation
-                    setTimeout(() => { this._updateLastIndexFromStatus(); }, 0);
-                    this._startIndexStatusRevalidator();
-                    return this.driverIndex;
-                } catch (error) {
-                    const delay = baseDelayMs * Math.min(20, attempt);
-                    console.warn(`Driver index load attempt ${attempt}/${maxAttempts} failed:`, error?.message || error);
-                    if (attempt === maxAttempts) {
-                        console.error('Giving up loading driver index after retries');
-                        // Do not overwrite with empty object; preserve null so callers can decide
-                        throw error;
-                    }
-                    await new Promise(r => setTimeout(r, delay));
-                }
-            }
-        })();
-
-        return this.driverIndexPromise;
+        return this._getDriverIndexModule().loadDriverIndex.call(this, onProgress);
     }
 
     /**
@@ -105,70 +57,51 @@ class DataService {
      * @returns {string} Shard key: a-z or _
      */
     _getShardKeyForName(normalizedName) {
-        if (!normalizedName || typeof normalizedName !== 'string') {
-            return '_';
-        }
-
-        const firstChar = normalizedName.trim().charAt(0).toLowerCase();
-        if (firstChar >= 'a' && firstChar <= 'z') {
-            return firstChar;
-        }
-        return '_';
+        return this._getDriverIndexModule()._getShardKeyForName.call(this, normalizedName);
     }
 
     _normalizeDriverLookupName(name) {
-        return String(name || '').trim().replace(/\s+/g, ' ').toLowerCase();
+        return this._getDriverIndexModule()._normalizeDriverLookupName.call(this, name);
     }
 
     _extractDriverMirrorMetadata(mirrorKey, mirrorEntry) {
-        if (mirrorEntry && typeof mirrorEntry === 'object' && !Array.isArray(mirrorEntry)) {
-            const lookupKey = this._normalizeDriverLookupName(
-                mirrorEntry.lookup_key ||
-                mirrorEntry.lookupKey ||
-                mirrorEntry.canonical_key ||
-                mirrorEntry.canonicalKey ||
-                mirrorEntry.canonical_name ||
-                mirrorEntry.canonicalName ||
-                mirrorKey
-            );
-
-            return {
-                lookupKey: lookupKey || this._normalizeDriverLookupName(mirrorKey),
-                displayName: String(mirrorEntry.name || mirrorKey),
-                country: String(mirrorEntry.country || ''),
-                team: String(mirrorEntry.team || ''),
-                rank: String(mirrorEntry.rank || ''),
-                hasMetadata: true
-            };
-        }
-
-        return {
-            lookupKey: this._normalizeDriverLookupName(String(mirrorEntry || mirrorKey)),
-            displayName: String(mirrorEntry || mirrorKey),
-            country: '',
-            team: '',
-            rank: '',
-            hasMetadata: false
-        };
+        return this._getDriverIndexModule()._extractDriverMirrorMetadata.call(this, mirrorKey, mirrorEntry);
     }
 
     getDriverMetadata(driverName, driverMirror = null) {
-        const mirror = driverMirror || this.driverIndex || this.driverNameMirror;
-        if (!mirror || typeof mirror !== 'object') {
-            return null;
-        }
+        return this._getDriverIndexModule().getDriverMetadata.call(this, driverName, driverMirror);
+    }
 
-        const normalizedName = this._normalizeDriverLookupName(driverName);
-        if (!normalizedName) {
-            return null;
+    _getDriverSearchModule() {
+        const module = window.R3EDriverSearchService;
+        if (!module) {
+            throw new Error('R3EDriverSearchService is not loaded.');
         }
+        return module;
+    }
 
-        const mirrorEntry = mirror[normalizedName] || mirror[String(driverName)] || null;
-        if (!mirrorEntry) {
-            return null;
-        }
+    _matchesDriverSearchTerm(searchTarget, searchLower, isExactSearch) {
+        return this._getDriverSearchModule()._matchesDriverSearchTerm.call(this, searchTarget, searchLower, isExactSearch);
+    }
 
-        return this._extractDriverMirrorMetadata(normalizedName, mirrorEntry);
+    _getSuperclassClasses(superclassName) {
+        return this._getDriverSearchModule()._getSuperclassClasses.call(this, superclassName);
+    }
+
+    _filterDriverEntries(entries, filters = {}) {
+        return this._getDriverSearchModule()._filterDriverEntries.call(this, entries, filters);
+    }
+
+    _buildMetadataSearchResult(filteredEntries, mirrorMeta, mirrorKey, driverEntries) {
+        return this._getDriverSearchModule()._buildMetadataSearchResult.call(this, filteredEntries, mirrorMeta, mirrorKey, driverEntries);
+    }
+
+    _buildLegacySearchResults(filteredEntries, mirrorMeta, mirrorKey, driverEntries) {
+        return this._getDriverSearchModule()._buildLegacySearchResults.call(this, filteredEntries, mirrorMeta, mirrorKey, driverEntries);
+    }
+
+    async enrichEntriesWithDriverMetadata(entries) {
+        return this._getDriverIndexModule().enrichEntriesWithDriverMetadata.call(this, entries);
     }
 
     /**
@@ -177,187 +110,25 @@ class DataService {
      * @returns {Promise<Object>} Shard object mapping normalized name -> entries[]
      */
     async _loadDriverShard(shardKey) {
-        const safeShardKey = (typeof shardKey === 'string' && shardKey.length > 0) ? shardKey : '_';
-
-        if (this.driverShardCache.has(safeShardKey)) {
-            return this.driverShardCache.get(safeShardKey);
-        }
-
-        if (this.driverShardPromises.has(safeShardKey)) {
-            return this.driverShardPromises.get(safeShardKey);
-        }
-
-        const shardPromise = (async () => {
-            const parsed = await this._fetchSingleDriverShard(safeShardKey);
-            this.driverShardCache.set(safeShardKey, parsed);
-            return parsed;
-        })();
-
-        this.driverShardPromises.set(safeShardKey, shardPromise);
-        try {
-            return await shardPromise;
-        } finally {
-            this.driverShardPromises.delete(safeShardKey);
-        }
+        return this._getDriverIndexModule()._loadDriverShard.call(this, shardKey);
     }
 
     async _fetchSingleDriverShard(shardKey) {
-        const maxAttempts = 6;
-        const baseDelayMs = 200;
-
-        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-            try {
-                const controller = new AbortController();
-                const timeout = setTimeout(() => controller.abort(), 8000);
-                const timestamp = Date.now();
-                const response = await fetch(`${this.driverShardBasePath}/${shardKey}.json.gz?v=${timestamp}`, {
-                    cache: 'no-store',
-                    headers: {
-                        'Cache-Control': 'no-cache, no-store, must-revalidate',
-                        'Pragma': 'no-cache',
-                        'Expires': '0'
-                    },
-                    signal: controller.signal
-                });
-                clearTimeout(timeout);
-
-                if (!response.ok) {
-                    throw new Error(`Failed to load shard ${shardKey}: ${response.status} ${response.statusText}`);
-                }
-
-                const helper = this._getCompressedJsonHelper();
-                const text = await helper.readGzipText(response);
-                if (!text || text.trim().length === 0) {
-                    throw new Error(`Shard ${shardKey} response is empty`);
-                }
-
-                const parsed = await this._parseJsonWhenIdle(text);
-                if (!parsed || typeof parsed !== 'object') {
-                    throw new Error(`Shard ${shardKey} is not an object`);
-                }
-
-                return parsed;
-            } catch (error) {
-                const delay = baseDelayMs * Math.min(20, attempt);
-                if (attempt === maxAttempts) {
-                    throw error;
-                }
-                await new Promise(r => setTimeout(r, delay));
-            }
-        }
-
-        throw new Error(`Failed to load shard ${shardKey}`);
+        return this._getDriverIndexModule()._fetchSingleDriverShard.call(this, shardKey);
     }
 
     async _fetchDriverMirrorData() {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 8000);
-        const response = await fetch(`${this.driverMirrorPath}?v=${Date.now()}`, {
-            cache: 'no-store',
-            headers: {
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
-                'Pragma': 'no-cache',
-                'Expires': '0'
-            },
-            signal: controller.signal
-        });
-        clearTimeout(timeout);
-
-        if (!response.ok) {
-            throw new Error(`Failed to load driver index: ${response.status} ${response.statusText}`);
-        }
-
-        const helper = this._getCompressedJsonHelper();
-        const text = await helper.readGzipText(response);
-        if (!text || text.trim().length === 0) {
-            throw new Error('Driver name mirror response is empty');
-        }
-
-        const parsed = await this._parseJsonWhenIdle(text);
-        if (!parsed || typeof parsed !== 'object' || Object.keys(parsed).length === 0) {
-            throw new Error('Driver name mirror index is invalid');
-        }
-
-        return parsed;
+        return this._getDriverIndexModule()._fetchDriverMirrorData.call(this);
     }
 
     /**
-     * Stream-parse driver index JSON and call onProgress for each driver entry
+     * Parse driver index JSON and call onProgress for each driver entry
      * @param {Response} response - Fetch response object
      * @param {Function} onProgress - Callback(driverName, entries)
      * @returns {Promise<Object>} Complete driver index
      */
     async _streamParseDriverIndex(response, onProgress) {
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
-        const index = {};
-        let inObject = false;
-        let currentKey = '';
-        let braceDepth = 0;
-        let valueStart = -1;
-
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            
-            buffer += decoder.decode(value, { stream: true });
-            
-            // Simple streaming JSON parser for {key:[...], key:[...]} structure
-            for (let i = 0; i < buffer.length; i++) {
-                const char = buffer[i];
-                
-                if (char === '{' && !inObject && braceDepth === 0) {
-                    braceDepth = 1;
-                    continue;
-                }
-                
-                if (braceDepth === 1) {
-                    // Looking for key
-                    if (char === '"' && !currentKey) {
-                        const closeQuote = buffer.indexOf('"', i + 1);
-                        if (closeQuote > i) {
-                            currentKey = buffer.substring(i + 1, closeQuote);
-                            i = closeQuote;
-                        }
-                    } else if (char === '[' && currentKey) {
-                        valueStart = i;
-                        braceDepth = 2;
-                    }
-                } else if (braceDepth === 2) {
-                    // Inside array, look for closing ]
-                    if (char === '[') braceDepth++;
-                    else if (char === ']') {
-                        braceDepth--;
-                        if (braceDepth === 1) {
-                            // Complete entry found
-                            const arrayJson = buffer.substring(valueStart, i + 1);
-                            try {
-                                const entries = JSON.parse(arrayJson);
-                                index[currentKey] = entries;
-                                // Call progress callback
-                                if (onProgress) {
-                                    onProgress(currentKey, entries);
-                                }
-                            } catch (e) {
-                                // Ignore malformed entries
-                            }
-                            currentKey = '';
-                            valueStart = -1;
-                            // Remove processed content from buffer
-                            buffer = buffer.substring(i + 1);
-                            i = -1;
-                        }
-                    } else if (char === '{' || char === '}') {
-                        // Track nested objects within arrays
-                        if (char === '{') braceDepth++;
-                        else braceDepth--;
-                    }
-                }
-            }
-        }
-
-        return index;
+        return this._getDriverIndexModule()._streamParseDriverIndex.call(this, response, onProgress);
     }
     
     /**
@@ -366,26 +137,7 @@ class DataService {
      * @returns {Promise<Object>} Driver index
      */
     async waitForDriverIndex(maxAttempts = 50) {
-        // If already loaded, return immediately
-        if (this.driverIndex !== null) {
-            return this.driverIndex;
-        }
-
-        // Ensure loading is started and await the single-flight promise with timeout aligned to retries
-        const promise = this.loadDriverIndex();
-        if (promise && typeof promise.then === 'function') {
-            try {
-                // Align timeout with retry window (~12s)
-                const timeoutMs = Math.max(5000, maxAttempts * 250);
-                return await this._withTimeout(promise, timeoutMs);
-            } catch (e) {
-                console.error('waitForDriverIndex timed out or failed:', e?.message || e);
-                return this.driverIndex || {};
-            }
-        }
-
-        // Fallback if loadDriverIndex returned synchronously (cached)
-        return this.driverIndex || {};
+        return this._getDriverIndexModule().waitForDriverIndex.call(this, maxAttempts);
     }
     
     /**
@@ -509,175 +261,7 @@ class DataService {
      * @returns {Promise<Array>} Search results
      */
     async searchDriver(driverName, filters = {}) {
-        const driverMirror = await this.waitForDriverIndex();
-
-        if (!driverMirror || Object.keys(driverMirror).length === 0) {
-            throw new Error('Driver index is loading or unavailable. Please try again in a moment.');
-        }
-        
-        let searchTerm = driverName.trim();
-        let isExactSearch = false;
-        
-        // Check if search term is wrapped in quotes for exact matching
-        if ((searchTerm.startsWith('"') && searchTerm.endsWith('"')) ||
-            (searchTerm.startsWith("'") && searchTerm.endsWith("'"))) {
-            isExactSearch = true;
-            searchTerm = searchTerm.slice(1, -1).trim(); // Remove quotes
-        }
-        
-        const searchLower = searchTerm.toLowerCase();
-        const results = [];
-
-        for (const [mirrorKey, mirrorEntry] of Object.entries(driverMirror)) {
-            const mirrorMeta = this._extractDriverMirrorMetadata(mirrorKey, mirrorEntry);
-            const searchTarget = mirrorMeta.displayName || mirrorKey;
-            const driverLower = this._normalizeDriverLookupName(searchTarget);
-            let matches = false;
-            
-            if (isExactSearch) {
-                // Exact word/phrase matching with word boundaries
-                const words = searchLower.split(/\s+/);
-                if (words.length === 1) {
-                    // Single word: match as whole word using word boundary
-                    const wordRegex = new RegExp(`\\b${words[0].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
-                    matches = wordRegex.test(searchTarget);
-                } else {
-                    // Multiple words: each word must be complete, in order, with any amount of space between
-                    const escapedWords = words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-                    const pattern = escapedWords.map(w => `\\b${w}\\b`).join('\\s+');
-                    const phraseRegex = new RegExp(pattern, 'i');
-                    matches = phraseRegex.test(searchTarget);
-                }
-            } else {
-                // Partial matching (current behavior)
-                matches = driverLower.includes(searchLower);
-            }
-            
-            if (!matches) {
-                continue;
-            }
-            
-            const shardKey = this._getShardKeyForName(mirrorKey);
-            const shardData = await this._loadDriverShard(shardKey);
-            const normalizedLookupName = mirrorMeta.lookupKey || this._normalizeDriverLookupName(mirrorKey);
-            const driverEntries = shardData[normalizedLookupName] || shardData[mirrorKey] || shardData[this._normalizeDriverLookupName(searchTarget)] || [];
-            if (!Array.isArray(driverEntries) || driverEntries.length === 0) {
-                continue;
-            }
-
-            let filteredEntries = driverEntries;
-
-            // Apply track filter
-            if (filters.trackId) {
-                const selectedTrackId = Number(filters.trackId);
-                filteredEntries = filteredEntries.filter(entry => {
-                    const entryTrackId = entry.track_id || entry.TrackID || entry.trackId ||
-                        (entry.track && (entry.track.id || entry.track.Id || entry.track.track_id));
-                    if (entryTrackId === undefined || entryTrackId === null) return false;
-                    return Number(entryTrackId) === selectedTrackId;
-                });
-            }
-            
-            // Apply class filter
-            if (filters.classId || filters.className) {
-                const filterValue = filters.classId || filters.className;
-                
-                // Check if this is a superclass filter
-                if (filterValue.startsWith('superclass:')) {
-                    const superclassName = filterValue.replace('superclass:', '');
-                    
-                    // Get all classes that belong to this superclass
-                    const superclassClasses = new Set();
-                    if (window.CARS_DATA && Array.isArray(window.CARS_DATA)) {
-                        window.CARS_DATA.forEach(entry => {
-                            if (entry.superclass === superclassName) {
-                                const cls = entry.class || entry.car_class || entry.CarClass || '';
-                                if (cls) superclassClasses.add(cls);
-                            }
-                        });
-                    }
-                    
-                    // Filter entries by any of the classes in this superclass
-                    filteredEntries = filteredEntries.filter(entry => {
-                        const entryClass = entry.car_class || entry.CarClass || entry['Car Class'] || entry.Class || entry.class || '';
-                        return superclassClasses.has(entryClass);
-                    });
-                } else {
-                    // Regular class filter
-                    filteredEntries = filteredEntries.filter(entry => {
-                        const entryClass = entry.car_class || entry.CarClass || entry['Car Class'] || entry.Class || entry.class || '';
-                        return entryClass === filterValue;
-                    });
-                }
-            }
-            
-            // Apply difficulty filter
-            if (filters.difficulty && filters.difficulty !== 'All difficulties') {
-                filteredEntries = filteredEntries.filter(entry => {
-                    const entryDifficulty = entry.difficulty || entry.Difficulty || entry.driving_model || '';
-                    return entryDifficulty === filters.difficulty;
-                });
-            }
-            
-            if (filteredEntries.length > 0) {
-                if (mirrorMeta.hasMetadata) {
-                    const enrichedEntries = filteredEntries.map(entry => {
-                        const enrichedEntry = { ...entry };
-                        if (mirrorMeta.country) {
-                            enrichedEntry.country = mirrorMeta.country;
-                            enrichedEntry.Country = mirrorMeta.country;
-                        }
-                        enrichedEntry.team = mirrorMeta.team;
-                        enrichedEntry.Team = mirrorMeta.team;
-                        enrichedEntry.rank = mirrorMeta.rank;
-                        enrichedEntry.Rank = mirrorMeta.rank;
-                        if (mirrorMeta.displayName && !enrichedEntry.name && !enrichedEntry.Name) {
-                            enrichedEntry.name = mirrorMeta.displayName;
-                        }
-                        return enrichedEntry;
-                    });
-
-                    results.push({
-                        driver: mirrorMeta.displayName || driverEntries[0].name || mirrorKey,
-                        country: mirrorMeta.country || '-',
-                        team: mirrorMeta.team || '',
-                        rank: mirrorMeta.rank || '',
-                        entries: enrichedEntries
-                    });
-                    continue;
-                }
-
-                // Legacy fallback: group entries by country and team when metadata is not in the mirror.
-                const entriesByCountryAndTeam = new Map();
-                filteredEntries.forEach(entry => {
-                    const country = entry.country || entry.Country || '-';
-                    const team = entry.team || entry.Team || '-';
-                    const groupKey = `${country}|${team}`;
-                    if (!entriesByCountryAndTeam.has(groupKey)) {
-                        entriesByCountryAndTeam.set(groupKey, {
-                            country: country,
-                            team: team,
-                            rank: entry.rank || entry.Rank || '',
-                            entries: []
-                        });
-                    }
-                    entriesByCountryAndTeam.get(groupKey).entries.push(entry);
-                });
-                
-                entriesByCountryAndTeam.forEach((groupData) => {
-                    const driverName = driverEntries[0].name || mirrorMeta.displayName || mirrorKey;
-                    results.push({
-                        driver: driverName,
-                        country: groupData.country,
-                        team: groupData.team,
-                        rank: groupData.rank,
-                        entries: groupData.entries
-                    });
-                });
-            }
-        }
-        
-        return results;
+        return this._getDriverSearchModule().searchDriver.call(this, driverName, filters);
     }
     
     /**
@@ -686,15 +270,50 @@ class DataService {
      * @returns {Array} Leaderboard entries
      */
     extractLeaderboardArray(data) {
+        if (!data || typeof data !== 'object') {
+            return [];
+        }
+
         if (data.track_info && data.track_info.Data && Array.isArray(data.track_info.Data)) {
             return data.track_info.Data;
         }
-        
-        // Try other possible locations
-        const possibleKeys = ['Data', 'data', 'entries', 'leaderboard'];
+
+        const possibleKeys = ['leaderboard', 'entries', 'results', 'data', 'Data', 'Leaderboard', 'Entries', 'Results'];
+
         for (const key of possibleKeys) {
             if (data[key] && Array.isArray(data[key])) {
                 return data[key];
+            }
+        }
+
+        if (data.track_info && typeof data.track_info === 'object') {
+            for (const key of possibleKeys) {
+                if (data.track_info[key] && Array.isArray(data.track_info[key])) {
+                    return data.track_info[key];
+                }
+            }
+        }
+
+        for (const key of Object.keys(data)) {
+            if (Array.isArray(data[key]) && data[key].length > 0) {
+                return data[key];
+            }
+        }
+
+        for (const key of possibleKeys) {
+            if (data.track_info && data.track_info[key] && Array.isArray(data.track_info[key])) {
+                return data.track_info[key];
+            }
+        }
+
+        for (const key of Object.keys(data)) {
+            const value = data[key];
+            if (value && typeof value === 'object' && !Array.isArray(value)) {
+                for (const nestedKey of Object.keys(value)) {
+                    if (Array.isArray(value[nestedKey]) && value[nestedKey].length > 0) {
+                        return value[nestedKey];
+                    }
+                }
             }
         }
         
@@ -711,122 +330,152 @@ class DataService {
         return String(time).split(',')[0].trim(); // Remove gap info, just get main time
     }
 
+    _normalizeLeaderboardEntriesForDetail(leaderboardData, data) {
+        if (!Array.isArray(leaderboardData)) {
+            return [];
+        }
+
+        const totalEntries = leaderboardData.length;
+        const defaultClassName = data?.track_info?.ClassName || data?.track_info?.class_name || null;
+        const firstClassName = leaderboardData[0]?.car_class?.class?.Name ||
+            leaderboardData[0]?.car_class?.class?.name || null;
+
+        return leaderboardData.map((entry, index) => {
+            let normalized;
+            if (window.DataNormalizer && typeof window.DataNormalizer.normalizeLeaderboardEntry === 'function') {
+                normalized = window.DataNormalizer.normalizeLeaderboardEntry(entry, data, index, totalEntries);
+            } else {
+                normalized = { ...entry };
+            }
+
+            if (!normalized.CarClass) {
+                normalized.CarClass = firstClassName || defaultClassName || '';
+            }
+
+            return normalized;
+        });
+    }
+
+    _extractRawLapTime(entry) {
+        if (window.DataNormalizer && typeof window.DataNormalizer.extractLapTime === 'function') {
+            return window.DataNormalizer.extractLapTime(entry);
+        }
+        return entry.LapTime || entry['Lap Time'] || entry.lap_time || entry.laptime || entry.Time || '';
+    }
+
+    _rebuildCombinedLapTimes(entries) {
+        if (!Array.isArray(entries) || entries.length === 0) {
+            return entries;
+        }
+
+        entries.forEach(entry => {
+            const rawLap = this._extractRawLapTime(entry);
+            entry.__rawLapForSort = rawLap;
+            // Strip any pre-existing gap suffix (e.g. "2m 00.392s, +01.533s") before parsing
+            const lapOnly = String(rawLap || '').split(',')[0].trim();
+            entry.__lapSortMs = R3EUtils.parseLapTimeToMillis(lapOnly) || Number.POSITIVE_INFINITY;
+        });
+
+        entries.sort((a, b) => a.__lapSortMs - b.__lapSortMs);
+
+        entries.forEach((entry, index) => {
+            const newPos = index + 1;
+            entry.Position = newPos;
+            entry.position = newPos;
+            entry.Pos = newPos;
+            delete entry.TotalEntries;
+            delete entry.total_entries;
+        });
+
+        const fastestMs = entries[0].__lapSortMs;
+        entries.forEach((entry, index) => {
+            const entryMs = entry.__lapSortMs;
+            const lapTimePart = String(entry.__rawLapForSort || '').split(',')[0].trim();
+
+            if (index === 0) {
+                entry.LapTime = lapTimePart;
+                entry['Lap Time'] = lapTimePart;
+                entry.lap_time = lapTimePart;
+            } else {
+                const gapMs = entryMs - fastestMs;
+                const gapSeconds = (gapMs / 1000).toFixed(3);
+                const gapFormatted = `+${gapSeconds}s`;
+                const newLapTime = `${lapTimePart}, ${gapFormatted}`;
+                entry.LapTime = newLapTime;
+                entry['Lap Time'] = newLapTime;
+                entry.lap_time = newLapTime;
+            }
+
+            delete entry.__rawLapForSort;
+            delete entry.__lapSortMs;
+        });
+
+        return entries;
+    }
+
+    async buildCombinedLeaderboard(trackId, classSpecs = []) {
+        const validSpecs = (Array.isArray(classSpecs) ? classSpecs : []).filter(spec => {
+            return spec && spec.classId !== null && spec.classId !== undefined && String(spec.classId).trim() !== '';
+        });
+
+        if (validSpecs.length === 0) {
+            return [];
+        }
+
+        const fetchPromises = validSpecs.map(async (spec) => {
+            try {
+                const data = await this.fetchLeaderboardDetails(trackId, spec.classId);
+                const leaderboardData = this.extractLeaderboardArray(data);
+                if (!Array.isArray(leaderboardData) || leaderboardData.length === 0) {
+                    return [];
+                }
+
+                const normalizedEntries = this._normalizeLeaderboardEntriesForDetail(leaderboardData, data);
+                if (spec.className) {
+                    normalizedEntries.forEach(entry => {
+                        entry.ClassName = spec.className;
+                    });
+                }
+                return normalizedEntries;
+            } catch (error) {
+                console.warn('Failed to fetch class for combined leaderboard:', spec.classId, error);
+                return [];
+            }
+        });
+
+        const batches = await Promise.all(fetchPromises);
+        const allEntries = batches.flat();
+        return this._rebuildCombinedLapTimes(allEntries);
+    }
+
     // -------- Internal helpers for index caching --------
     async _parseJsonWhenIdle(text) {
-        if (typeof requestIdleCallback === 'function') {
-            return await new Promise((resolve, reject) => {
-                requestIdleCallback(() => {
-                    try { resolve(JSON.parse(text)); }
-                    catch (e) { reject(e); }
-                }, { timeout: 2000 });
-            });
-        }
-        // Fallback: parse immediately
-        return JSON.parse(text);
+        return this._getDriverIndexModule()._parseJsonWhenIdle.call(this, text);
     }
 
     _getCachedDriverIndex() {
-        if (!this.ENABLE_INDEX_LOCAL_CACHE) return null;
-        try {
-            const raw = localStorage.getItem(this.DRIVER_INDEX_CACHE_KEY);
-            if (!raw) return null;
-            const parsed = JSON.parse(raw);
-            if (!parsed || typeof parsed !== 'object') return null;
-            if (Object.keys(parsed).length === 0) return null;
-            return parsed;
-        } catch (_) {
-            return null;
-        }
+        return this._getDriverIndexModule()._getCachedDriverIndex.call(this);
     }
 
     _saveDriverIndexToCache(idx) {
-        if (!this.ENABLE_INDEX_LOCAL_CACHE) return;
-        try {
-            localStorage.setItem(this.DRIVER_INDEX_CACHE_KEY, JSON.stringify(idx));
-        } catch (_) {
-            // Ignore storage errors (quota, privacy mode)
-        }
+        return this._getDriverIndexModule()._saveDriverIndexToCache.call(this, idx);
     }
 
     async _refreshDriverIndexInBackground() {
-        try {
-            const maxAttempts = 5;
-            const baseDelayMs = 250;
-            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-                try {
-                    const parsed = await this._fetchDriverMirrorData();
-                    if (!parsed || typeof parsed !== 'object' || Object.keys(parsed).length === 0) {
-                        throw new Error('Invalid index');
-                    }
-                    this.driverIndex = parsed;
-                    this.driverNameMirror = parsed;
-                    this.driverShardCache.clear();
-                    this.driverShardPromises.clear();
-                    this._saveDriverIndexToCache(parsed);
-                    // After refresh, also update baseline status timestamp
-                    setTimeout(() => { this._updateLastIndexFromStatus(); }, 0);
-                    return;
-                } catch (e) {
-                    if (attempt === maxAttempts) return;
-                    await new Promise(r => setTimeout(r, baseDelayMs * Math.min(20, attempt)));
-                }
-            }
-        } catch (_) {
-            // Swallow background refresh failures
-        }
+        return this._getDriverIndexModule()._refreshDriverIndexInBackground.call(this);
     }
 
     _withTimeout(promise, ms) {
-        return new Promise((resolve, reject) => {
-            const t = setTimeout(() => reject(new Error('Timeout')), ms);
-            promise.then(v => { clearTimeout(t); resolve(v); })
-                   .catch(e => { clearTimeout(t); reject(e); });
-        });
+        return this._getDriverIndexModule()._withTimeout.call(this, promise, ms);
     }
 
     // -------- Minimal index change detection via status.json --------
     async _updateLastIndexFromStatus() {
-        try {
-            const status = await this.calculateStatus();
-            const latest = status && (status.last_index_update || status.last_scrape_end) || null;
-            if (latest) this.lastIndexUpdate = String(latest);
-        } catch (_) { /* ignore */ }
+        return this._getDriverIndexModule()._updateLastIndexFromStatus.call(this);
     }
 
     _startIndexStatusRevalidator() {
-        if (this.indexRevalidatorStarted) return;
-        this.indexRevalidatorStarted = true;
-
-        const baseIntervalMs = 10 * 60 * 1000; // 10 minutes
-        const jitterMs = Math.floor(Math.random() * 60 * 1000); // up to 60s jitter
-
-        const runCheck = async () => {
-            try {
-                if (typeof document !== 'undefined' && document.hidden) return; // skip when hidden
-                const status = await this.calculateStatus();
-                const latest = status && (status.last_index_update || status.last_scrape_end) || null;
-                if (!latest) return;
-                const latestStr = String(latest);
-                if (!this.lastIndexUpdate) {
-                    this.lastIndexUpdate = latestStr;
-                    return;
-                }
-                if (latestStr !== this.lastIndexUpdate) {
-                    this.lastIndexUpdate = latestStr;
-                    await this._refreshDriverIndexInBackground();
-                }
-            } catch (_) { /* ignore */ }
-        };
-
-        // Re-check when tab becomes visible
-        if (typeof document !== 'undefined') {
-            document.addEventListener('visibilitychange', () => {
-                if (!document.hidden) setTimeout(runCheck, 500);
-            });
-        }
-
-        setTimeout(runCheck, 2000 + jitterMs); // initial check shortly after load
-        setInterval(runCheck, baseIntervalMs + jitterMs);
+        return this._getDriverIndexModule()._startIndexStatusRevalidator.call(this);
     }
     
     /**
@@ -874,9 +523,9 @@ class DataService {
             
             if (superclass && cls) {
                 if (!superclassMap.has(superclass)) {
-                    superclassMap.set(superclass, []);
+                    superclassMap.set(superclass, new Set());
                 }
-                superclassMap.get(superclass).push(cls);
+                superclassMap.get(superclass).add(cls);
             }
         });
         
@@ -885,7 +534,7 @@ class DataService {
             options.push({
                 value: `superclass:${superclass}`,
                 label: `Category: ${superclass}`,
-                classes: classes
+                classes: Array.from(classes)
             });
         });
         

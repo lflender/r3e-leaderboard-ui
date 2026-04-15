@@ -3055,19 +3055,19 @@ span.driver-name-top10-glitter::after {
     }
 
     .detail-header .custom-select {
-        margin-left: 0 !important;
+        margin-left: 0;
         min-width: 100%;
     }
 
     #car-filter-ui {
         order: 2;
-        margin-left: 0 !important;
+        margin-left: 0;
         min-width: 100%;
     }
 
     #difficulty-filter-ui {
         order: 1;
-        margin-left: 0 !important;
+        margin-left: 0;
         min-width: auto;
         position: absolute;
         top: 0.75rem;
@@ -3474,11 +3474,11 @@ span.driver-name-top10-glitter::after {
     }
 
     .status-item .status-label {
-        font-size: 0.7rem !important;
+        font-size: 0.7rem;
     }
 
     .status-item .status-value {
-        font-size: 0.9rem !important;
+        font-size: 0.9rem;
         font-weight: 600;
         line-height: 1.2;
         word-break: break-word;
@@ -3896,8 +3896,8 @@ span.driver-name-top10-glitter::after {
     }
 
     .difficulty-pill {
-        font-size: 0.55rem !important;
-        padding: 0.08rem 0.3rem !important;
+        font-size: 0.55rem;
+        padding: 0.08rem 0.3rem;
     }
 
     .driver-group-header strong {

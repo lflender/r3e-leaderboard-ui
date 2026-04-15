@@ -1,0 +1,283 @@
+﻿/**
+ * R3E Leaderboard UI - Main Stylesheet
+ * 
+ * Organization:
+ * 1. CSS Custom Properties (:root)
+ * 2. Global resets and base styles
+ * 3. Layout (header, main, footer)
+ * 4. Navigation (tabs)
+ * 5. Search and filters (custom selects)
+ * 6. Tables (results tables, cells, columns)
+ * 7. Badges and indicators (position, car, difficulty)
+ * 8. Status display
+ * 9. News section
+ * 10. Pagination
+ * 11. Detail page specific styles
+ * 12. Media queries (tablet and mobile)
+ * 
+ * Note: Some elements use inline styles in JS for dynamic coloring:
+ * - Position badges: gradient based on rank
+ * - Year badges in car info: gradient based on year
+ * These are marked with data-color attributes for reference.
+ */
+
+/* ========================================
+   1. CSS CUSTOM PROPERTIES
+   ======================================== */
+
+:root {
+    --primary-color: #3b82f6;
+    --background: #0f172a;
+    --surface: #1e293b;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --border: #334155;
+    --shadow: rgba(0, 0, 0, 0.3);
+    --hover-bg: #334155;
+    --pos-badge-default: rgba(59,130,246,0.18);
+    --pos-badge-first: #22c55e;
+    --pos-badge-last: #ef4444;
+    --year-badge-text: #222;
+
+    /* Results table max-width - single source of truth for Driver Info, Car Info, Details pages */
+    --results-table-max-width: 1500px;
+}
+
+/* ========================================
+   2. GLOBAL RESETS AND BASE STYLES
+   ======================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: var(--background);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ========================================
+   3. LAYOUT
+   ======================================== */
+
+#site-header header {
+    background-color: var(--surface);
+    padding: 2rem 2rem 1rem 2rem;
+    text-align: center;
+    box-shadow: 0 2px 4px var(--shadow);
+}
+
+#site-header header h1 {
+    font-size: 2rem;
+    color: var(--primary-color);
+    font-weight: 700;
+    line-height: normal;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.header-logo {
+    height: 8rem;
+    width: auto;
+    max-width: 100%;
+    display: block;
+}
+
+.home-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+.home-link:hover {
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+/* Detail page subheader (the subtitle container) should not inherit site header spacing */
+#site-header + header {
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
+    text-align: left;
+}
+
+main {
+    flex: 1;
+    max-width: 1400px;
+    width: 100%;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+}
+
+footer {
+    background-color: var(--surface);
+    padding: 1.5rem;
+    color: var(--text-secondary);
+    box-shadow: 0 -2px 4px var(--shadow);
+    margin-top: 2rem;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.footer-text {
+    text-align: center;
+    flex: 1;
+}
+
+footer p {
+    font-size: 0.875rem;
+}
+
+.footer-donate {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 180px;
+}
+
+.donate-button {
+    background: #0070ba;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    white-space: nowrap;
+    width: 100%;
+}
+
+.donate-button:hover {
+    background: #0f94ec;
+}
+
+.donate-button span {
+    display: inline-block;
+}
+
+.raceroom-button {
+    background: #691313;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    white-space: nowrap;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.raceroom-button:hover {
+    background: #a32929;
+}
+
+.raceroom-button span {
+    display: inline-block;
+}
+
+/* ========================================
+   4. NAVIGATION (TABS)
+   ======================================== */
+
+.tabs {
+    display: flex;
+    gap: 0.35rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.tab-button {
+    background: none;
+    border: 1px solid transparent;
+     padding: 0.5rem 1.1rem;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+     border-radius: 10px;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    font-weight: 500;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    line-height: 1.5;
+}
+
+.tab-button:hover {
+    color: #e2e8f0;
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--border);
+}
+
+.tab-button.active {
+    color: var(--primary-color);
+    background: rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.45);
+}
+
+.tab-content {
+    background-color: var(--surface);
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px var(--shadow);
+    min-height: 400px;
+}
+
+.tab-panel {
+    display: none;
+    max-width: var(--results-table-max-width);
+    margin: 0 auto;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+.content-inner {
+    max-width: var(--results-table-max-width);
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Ensure search controls and table containers align identically */
+.tab-panel > .search-container,
+.tab-panel > #cars-info-table,
+.tab-panel > #results-container {
+    max-width: var(--results-table-max-width);
+    margin: 0 auto 1rem auto;
+}
+
+/* Track Info page keeps its own narrower width for better readability */
+.tab-panel > #track-info-table {
+    max-width: 1100px;
+    margin: 0 auto 1rem auto;
+}
+

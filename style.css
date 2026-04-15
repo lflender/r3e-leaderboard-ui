@@ -2696,8 +2696,12 @@ span.driver-name-top10-glitter::after {
 
 .daily-races-feature .daily-races-grid {
     grid-template-columns: repeat(2, minmax(280px, 1fr));
-    max-width: 100%;
+    max-width: 750px;
     margin: 0 auto;
+}
+
+.daily-races-grid.daily-races-grid--center-fourth > .daily-race-card-link:nth-child(4):last-child {
+    grid-column: 2;
 }
 
 .daily-race-card-link {
@@ -2989,19 +2993,6 @@ span.driver-name-top10-glitter::after {
     }
 }
 
-/* Large-screen layout refinements */
-@media (min-width: 1024px) {
-    .daily-races-grid.daily-races-grid--center-fourth > .daily-race-card-link:nth-child(4):last-child {
-        grid-column: 2;
-    }
-}
-
-@media (min-width: 1160px) {
-    .daily-races-feature .daily-races-grid {
-        max-width: 750px;
-    }
-}
-
 /* Medium screens - remove container padding to prevent table border clipping */
 @media (max-width: 1300px) {
     .tab-content {
@@ -3029,6 +3020,10 @@ span.driver-name-top10-glitter::after {
 
     .pagination {
         padding: 0 2rem;
+    }
+
+    .daily-races-feature .daily-races-grid {
+        max-width: 100%;
     }
 }
 
@@ -3071,6 +3066,8 @@ span.driver-name-top10-glitter::after {
         flex-direction: column;
         gap: 0.75rem;
         padding: 0.85rem 1rem;
+        align-items: stretch;
+        position: relative;
     }
 
     .detail-header .custom-select {
@@ -3079,18 +3076,32 @@ span.driver-name-top10-glitter::after {
     }
 
     #car-filter-ui {
+        order: 2;
         margin-left: 0 !important;
         min-width: 100%;
     }
 
     #difficulty-filter-ui {
+        order: 1;
         margin-left: 0 !important;
-        min-width: 100%;
+        min-width: auto;
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
     }
 
     .detail-difficulty-badges {
-        width: 100%;
-        justify-content: flex-start;
+        width: auto;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        gap: 0.35rem;
+    }
+
+    .detail-header-info {
+        order: 1;
+        padding-right: 5.25rem;
     }
 
     #driver-search,
@@ -3131,9 +3142,7 @@ span.driver-name-top10-glitter::after {
     .status-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-}
 
-@media (max-width: 900px) {
     .car-inline-thumbnail {
         position: absolute;
         right: -0.25rem;
@@ -3164,6 +3173,10 @@ span.driver-name-top10-glitter::after {
     .stats-table {
         min-width: 0;
         table-layout: fixed;
+    }
+
+    .daily-races-grid.daily-races-grid--center-fourth > .daily-race-card-link:nth-child(4):last-child {
+        grid-column: auto;
     }
 }
 
@@ -3729,43 +3742,14 @@ span.driver-name-top10-glitter::after {
     .seo-content ul li {
         font-size: 0.9rem;
     }
-}
 
-@media (max-width: 640px) {
     #stats-class-filter-ui {
         width: 100%;
         min-width: 0;
     }
-
-    .stats-box h2 {
-        font-size: 0.88rem;
-    }
-
-    .stats-table th,
-    .stats-table td {
-        padding: 0.5rem 0.3rem;
-        font-size: 0.68rem;
-    }
-
-    .stats-table th {
-        font-size: 0.72rem;
-    }
-
-    .stats-table .stats-pos-th,
-    .stats-table .pos-cell {
-        width: 2.35rem;
-        padding-right: 0.2rem;
-    }
-
-    .stats-table th:last-child,
-    .stats-table td.stats-value-cell {
-        width: 3.2rem;
-        padding-left: 0.2rem;
-        padding-right: 0.2rem;
-    }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 480px) {
     .car-dist-content {
         overflow-x: visible;
     }
@@ -3859,9 +3843,11 @@ span.driver-name-top10-glitter::after {
         max-height: 300px;
         aspect-ratio: 16 / 9;
     }
-}
 
-@media (max-width: 480px) {
+    .stats-box h2 {
+        font-size: 0.88rem;
+    }
+
     .stats-table th,
     .stats-table td {
         padding: 0.45rem 0.22rem;

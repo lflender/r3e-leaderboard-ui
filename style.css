@@ -562,8 +562,7 @@ footer p {
 
 #cars-info-table .results-table,
 #cars-info-table .results-table tbody,
-#cars-info-table .results-table tr,
-#cars-info-table .results-table td {
+#cars-info-table .results-table tr {
     overflow: visible;
 }
 
@@ -738,6 +737,7 @@ footer p {
 }
 
 #cars-info-table .results-table td {
+    overflow: visible;
     padding: 0.65rem 0.65rem;
 }
 
@@ -1584,17 +1584,6 @@ footer p {
     min-width: 0 !important;
 }
 
-.status-label {
-    color: var(--text-secondary);
-    font-size: 0.875rem;
-}
-
-.status-value {
-    color: var(--text-primary);
-    font-size: 1.25rem;
-    font-weight: 600;
-}
-
 /* ========================================
    9. NEWS SECTION
    ======================================== */
@@ -2045,11 +2034,6 @@ span.driver-name-top10-glitter::after {
     width: 10.5em;
     max-width: 10.5em;
     text-align: right;
-}
-
-.car-dist-table thead {
-    background-color: rgba(0, 0, 0, 0.2);
-    border-bottom: 2px solid var(--primary-color);
 }
 
 .car-dist-table th {

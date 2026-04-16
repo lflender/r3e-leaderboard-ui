@@ -1,0 +1,76 @@
+/* ========================================
+   NAVIGATION (TABS)
+   ======================================== */
+
+.tabs {
+    display: flex;
+    gap: 0.35rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.tab-button {
+    background: none;
+    border: 1px solid transparent;
+    padding: 0.5rem 1.1rem;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 10px;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    font-weight: 500;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    line-height: 1.5;
+}
+
+.tab-button:hover {
+    color: #e2e8f0;
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--border);
+}
+
+.tab-button.active {
+    color: var(--primary-color);
+    background: rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.45);
+}
+
+.tab-content {
+    background-color: var(--surface);
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px var(--shadow);
+    min-height: 400px;
+}
+
+.tab-panel {
+    display: none;
+    max-width: var(--results-table-max-width);
+    margin: 0 auto;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+.content-inner {
+    max-width: var(--results-table-max-width);
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Ensure search controls and table containers align identically */
+.tab-panel > .search-container,
+.tab-panel > #cars-info-table,
+.tab-panel > #results-container {
+    max-width: var(--results-table-max-width);
+    margin: 0 auto 1rem auto;
+}
+
+/* Track Info page keeps its own narrower width for better readability */
+.tab-panel > #track-info-table {
+    max-width: 1100px;
+    margin: 0 auto 1rem auto;
+}

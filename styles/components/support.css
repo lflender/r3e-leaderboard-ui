@@ -1,0 +1,51 @@
+/* ========================================
+   SUPPORT BUTTONS
+   ======================================== */
+
+.donate-button {
+    background: #0070ba;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    white-space: nowrap;
+    width: 100%;
+}
+
+.donate-button:hover {
+    background: #0f94ec;
+}
+
+.donate-button span {
+    display: inline-block;
+}
+
+.raceroom-button {
+    background: #691313;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    white-space: nowrap;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.raceroom-button:hover {
+    background: #a32929;
+}
+
+.raceroom-button span {
+    display: inline-block;
+}

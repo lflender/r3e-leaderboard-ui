@@ -1,10 +1,18 @@
 ﻿/* R3E Leaderboard UI - CSS Entry Point */
-@import url("./styles/base/base.css");
+@import url("./styles/base.css");
+@import url("./styles/components/tabs.css");
+@import url("./styles/components/support.css");
 @import url("./styles/components/search-filters.css");
 @import url("./styles/components/tables.css");
 @import url("./styles/components/badges.css");
-@import url("./styles/components/status.css");
+@import url("./styles/components/db-status.css");
+@import url("./styles/components/car-dist.css");
+@import url("./styles/components/entries-dist.css");
+@import url("./styles/components/fun-fact.css");
+@import url("./styles/components/hall-of-fame.css");
+@import url("./styles/components/seo.css");
+@import url("./styles/pages/cars.css");
+@import url("./styles/pages/faq.css");
 @import url("./styles/pages/news.css");
 @import url("./styles/pages/detail.css");
 @import url("./styles/responsive/breakpoints.css");
-@import url("./styles/pages/seo.css");

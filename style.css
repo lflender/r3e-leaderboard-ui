@@ -14,5 +14,7 @@
 @import url("./styles/pages/cars.css");
 @import url("./styles/pages/faq.css");
 @import url("./styles/pages/news.css");
+@import url("./styles/pages/stats.css");
+@import url("./styles/pages/daily-races.css");
 @import url("./styles/pages/detail.css");
 @import url("./styles/responsive/breakpoints.css");

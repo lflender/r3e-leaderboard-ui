@@ -22,6 +22,56 @@ const CAR_SPECIAL_CASES = {
     '134 Judd V8': { brand: 'Judd', model: '134 V8' }
 };
 
+const BRAND_LOGO_OVERRIDES = {
+    'alfa romeo': 'alfaromeo',
+    'abt-audi': 'audi',
+    'callaway': 'chevrolet',
+    'citroen': 'citroen',
+    'crossle': 'crossle',
+    'lynk & co': 'lynk-co',
+    'mclaren-mercedes': 'mclaren',
+    'amg-mercedes': 'mercedes',
+    'mercedes-amg': 'mercedes',
+    'mercedes-benz': 'mercedes',
+    'p4-5': 'p45'
+};
+
+const AVAILABLE_BRAND_LOGO_KEYS = new Set([
+    'alfaromeo', 'alpina', 'alpine', 'aquila', 'audi', 'bentley', 'bmw', 'cadillac',
+    'carlsson', 'chevrolet', 'citroen', 'crossle', 'cupra', 'fabcar', 'ferrari', 'ford',
+    'gumpert', 'honda', 'hyundai', 'judd', 'koenigsegg', 'ktm', 'lada', 'lamborghini', 'lotus',
+    'lrt', 'lynk-co', 'mazda', 'mclaren', 'mercedes', 'nissan', 'nsu', 'opel', 'p45', 'pagani',
+    'peugeot', 'porsche', 'praga', 'raceroom', 'radical', 'renault', 'ruf', 'saleen',
+    'seat', 'tatuus', 'volkswagen', 'volvo', 'zakspeed'
+]);
+
+function normalizeBrandForLogoLookup(brand) {
+    return String(brand || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim()
+        .toLowerCase();
+}
+
+function resolveBrandLogoPath(carNameOrBrand) {
+    const source = String(carNameOrBrand || '').trim();
+    if (!source) return 'images/brands/logo-raceroom.png';
+
+    const split = splitCarName(source);
+    const baseBrand = split.brand || source;
+    const normalizedBrand = normalizeBrandForLogoLookup(baseBrand);
+    if (!normalizedBrand) return 'images/brands/logo-raceroom.png';
+
+    const requestedFileKey = BRAND_LOGO_OVERRIDES[normalizedBrand]
+        || normalizedBrand.replace(/[^a-z0-9&]+/g, '');
+
+    const fileKey = AVAILABLE_BRAND_LOGO_KEYS.has(requestedFileKey)
+        ? requestedFileKey
+        : 'raceroom';
+
+    return `images/brands/logo-${fileKey}.png`;
+}
+
 function splitCarName(carName) {
     if (!carName) return { brand: '', model: '' };
 
@@ -175,6 +225,7 @@ function matchesCarFilterValue(carName, selectedCarFilter) {
 
 window.R3ECarUtils = {
     splitCarName,
+    resolveBrandLogoPath,
     detectYearSuffix,
     detectDTMSuffix,
     findCarCombinations,

@@ -70,4 +70,19 @@ describe('table-renderer track resolution', () => {
         expect(html).toContain('https://example.com/gt3-logo.png');
         expect(html).toContain('GT3');
     });
+
+    test('renders brand logo before car name in car cells', () => {
+        const html = window.tableRenderer.renderDriverGroupedTable([
+            {
+                driver: 'Chris',
+                country: 'SE',
+                team: '',
+                entries: [{ position: '1', lap_time: '1:30.000', car: 'Audi R8 LMS' }]
+            }
+        ], ['car'], 'gap');
+
+        expect(html).toContain('table-brand-logo');
+        expect(html).toContain('images/brands/logo-audi.png');
+        expect(html).toContain('Audi');
+    });
 });

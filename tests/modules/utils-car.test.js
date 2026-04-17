@@ -15,6 +15,15 @@ describe('R3ECarUtils', () => {
         expect(window.R3ECarUtils.splitCarName('E36 V8 JUDD')).toEqual({ brand: 'Judd', model: 'E36 V8' });
     });
 
+    test('resolves local brand logo paths from car names', () => {
+        expect(window.R3ECarUtils.resolveBrandLogoPath('Audi R8 LMS')).toBe('images/brands/logo-audi.png');
+        expect(window.R3ECarUtils.resolveBrandLogoPath('Alfa Romeo 155 V6 TI')).toBe('images/brands/logo-alfaromeo.png');
+        expect(window.R3ECarUtils.resolveBrandLogoPath('McLaren 720S GT3')).toBe('images/brands/logo-mclaren.png');
+        expect(window.R3ECarUtils.resolveBrandLogoPath('Lynk & Co 03 TCR')).toBe('images/brands/logo-lynk-co.png');
+        expect(window.R3ECarUtils.resolveBrandLogoPath('')).toBe('images/brands/logo-raceroom.png');
+        expect(window.R3ECarUtils.resolveBrandLogoPath('Some Unknown Brand Prototype')).toBe('images/brands/logo-raceroom.png');
+    });
+
     test('detects year and DTM suffixes', () => {
         expect(window.R3ECarUtils.detectYearSuffix('BMW M4 GT3 2023')).toEqual({
             baseName: 'BMW M4 GT3',

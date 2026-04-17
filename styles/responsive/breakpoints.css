@@ -253,6 +253,24 @@
         overflow-x: visible;
     }
 
+    .table-car-class-logo {
+        width: 18px;
+        height: 18px;
+        max-width: 18px;
+    }
+
+    .table-brand-logo {
+        height: 18px;
+        max-width: 31px;
+    }
+
+    .table-brand-logo-slot {
+        width: 18px;
+        height: 18px;
+        flex: 0 0 18px;
+        margin-right: 3px;
+    }
+
     .car-dist-table {
         font-size: 0.8rem;
         table-layout: auto;
@@ -389,7 +407,7 @@
 
     #results-container .results-table th:nth-child(1),
     #results-container .results-table td:nth-child(1) {
-        min-width: 100px !important;
+        min-width: 125px !important;
     }
 
     #results-container .results-table th:nth-child(2),
@@ -780,6 +798,24 @@
         overflow-x: visible;
     }
 
+    .table-car-class-logo {
+        width: 16px;
+        height: 16px;
+        max-width: 16px;
+    }
+
+    .table-brand-logo {
+        height: 16px;
+        max-width: 27px;
+    }
+
+    .table-brand-logo-slot {
+        width: 16px;
+        height: 16px;
+        flex: 0 0 16px;
+        margin-right: 2px;
+    }
+
     .car-dist-table {
         font-size: 0.68rem;
         table-layout: auto;
@@ -1002,7 +1038,7 @@
 
     #results-container .results-table th:nth-child(1),
     #results-container .results-table td:nth-child(1) {
-        min-width: 100px !important;
+        min-width: 118px !important;
     }
 
     #results-container .results-table th:nth-child(2),

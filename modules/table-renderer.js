@@ -582,11 +582,20 @@ class TableRenderer {
         const { brand, model } = R3EUtils.splitCarName(value);
         const escBrand = R3EUtils.escapeHtml(brand);
         const escModel = R3EUtils.escapeHtml(model);
+        const brandLogoUrl = (window.R3EUtils && typeof window.R3EUtils.resolveBrandLogoPath === 'function')
+            ? window.R3EUtils.resolveBrandLogoPath(value)
+            : '';
+        const brandLogoClass = brandLogoUrl.includes('logo-raceroom.png')
+            ? 'table-brand-logo table-brand-logo-raceroom'
+            : 'table-brand-logo';
+        const brandLogoHtml = brandLogoUrl
+            ? `<span class="table-brand-logo-slot"><img class="${brandLogoClass}" src="${R3EUtils.escapeHtml(brandLogoUrl)}" alt="${escBrand || 'Car brand'} logo" loading="lazy" decoding="async" onload='const renderedWidth = this.getBoundingClientRect().width || this.width || 22; const slotWidth = (this.parentElement && this.parentElement.getBoundingClientRect().width) || 22; const offsetX = (slotWidth - renderedWidth) / 2; this.style.marginLeft = offsetX + "px";' onerror='if (this.parentElement) { this.parentElement.remove(); } else { this.remove(); }' /></span>`
+            : '';
         
         if (model) {
-            return `<td class="car-cell"><span class="car-brand">${escBrand}</span> <span class="car-model">${escModel}</span></td>`;
+            return `<td class="car-cell"><span class="car-cell-inline">${brandLogoHtml}<span class="car-brand">${escBrand}</span> <span class="car-model">${escModel}</span></span></td>`;
         } else {
-            return `<td class="car-cell"><span class="car-brand">${escBrand}</span></td>`;
+            return `<td class="car-cell"><span class="car-cell-inline">${brandLogoHtml}<span class="car-brand">${escBrand}</span></span></td>`;
         }
     }
     

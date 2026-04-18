@@ -85,16 +85,13 @@ describe('DataService driver-search module', () => {
 
     it('searchDriver returns metadata-enriched results', async () => {
         vi.spyOn(service, 'waitForDriverIndex').mockResolvedValue({
-            'alice smith': {
-                name: 'Alice Smith',
-                lookup_key: 'alice smith',
-                country: 'SE',
-                team: 'Blue',
-                rank: 'Pro'
-            }
+            'alice smith': 'alice smith'
         });
         vi.spyOn(service, '_loadDriverShard').mockResolvedValue({
             'alice smith': [{ name: 'Alice Smith', Class: 5, track_id: 10, difficulty: 'Get Real' }]
+        });
+        vi.spyOn(service, '_loadDriverMetadataShard').mockResolvedValue({
+            'alice smith': { name: 'Alice Smith', country: 'SE', team: 'Blue', rank: 'Pro' }
         });
 
         const result = await service.searchDriver('Alice', { classId: 5, trackId: 10, difficulty: 'Get Real' });
@@ -106,7 +103,7 @@ describe('DataService driver-search module', () => {
 
     it('searchDriver supports exact quoted search with legacy grouping', async () => {
         vi.spyOn(service, 'waitForDriverIndex').mockResolvedValue({
-            'alice smith': 'Alice Smith'
+            'alice smith': 'alice smith'
         });
         vi.spyOn(service, '_loadDriverShard').mockResolvedValue({
             'alice smith': [
@@ -114,6 +111,7 @@ describe('DataService driver-search module', () => {
                 { name: 'Alice Smith', car_class: 'GT3', difficulty: 'Get Real', country: 'SE', team: 'Beta' }
             ]
         });
+        vi.spyOn(service, '_loadDriverMetadataShard').mockResolvedValue({});
 
         const result = await service.searchDriver('"Alice Smith"', { difficulty: 'Get Real' });
 

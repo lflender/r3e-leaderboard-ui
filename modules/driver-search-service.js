@@ -162,17 +162,19 @@
             const searchLower = searchTerm.toLowerCase();
             const results = [];
 
-            for (const [mirrorKey, mirrorEntry] of Object.entries(driverMirror)) {
-                const mirrorMeta = this._extractDriverMirrorMetadata(mirrorKey, mirrorEntry);
-                const searchTarget = mirrorMeta.displayName || mirrorKey;
-                if (!this._matchesDriverSearchTerm(searchTarget, searchLower, isExactSearch)) {
+            for (const mirrorKey of Object.keys(driverMirror)) {
+                if (!this._matchesDriverSearchTerm(mirrorKey, searchLower, isExactSearch)) {
                     continue;
                 }
 
                 const shardKey = this._getShardKeyForName(mirrorKey);
-                const shardData = await this._loadDriverShard(shardKey);
-                const normalizedLookupName = mirrorMeta.lookupKey || this._normalizeDriverLookupName(mirrorKey);
-                const driverEntries = shardData[normalizedLookupName] || shardData[mirrorKey] || shardData[this._normalizeDriverLookupName(searchTarget)] || [];
+                const [shardData, metadataShard] = await Promise.all([
+                    this._loadDriverShard(shardKey),
+                    this._loadDriverMetadataShard(shardKey).catch(() => null)
+                ]);
+
+                const normalizedLookupName = this._normalizeDriverLookupName(mirrorKey);
+                const driverEntries = shardData[normalizedLookupName] || shardData[mirrorKey] || [];
                 if (!Array.isArray(driverEntries) || driverEntries.length === 0) {
                     continue;
                 }
@@ -182,12 +184,28 @@
                     continue;
                 }
 
-                if (mirrorMeta.hasMetadata) {
+                const metaEntry = metadataShard && (metadataShard[normalizedLookupName] || metadataShard[mirrorKey]);
+                if (metaEntry && typeof metaEntry === 'object') {
+                    const mirrorMeta = {
+                        lookupKey: normalizedLookupName,
+                        displayName: String(metaEntry.name || mirrorKey),
+                        country: String(metaEntry.country || ''),
+                        team: String(metaEntry.team || ''),
+                        rank: String(metaEntry.rank || ''),
+                        hasMetadata: true
+                    };
                     results.push(this._buildMetadataSearchResult(filteredEntries, mirrorMeta, mirrorKey, driverEntries));
-                    continue;
+                } else {
+                    const mirrorMeta = {
+                        lookupKey: normalizedLookupName,
+                        displayName: mirrorKey,
+                        country: '',
+                        team: '',
+                        rank: '',
+                        hasMetadata: false
+                    };
+                    results.push(...this._buildLegacySearchResults(filteredEntries, mirrorMeta, mirrorKey, driverEntries));
                 }
-
-                results.push(...this._buildLegacySearchResults(filteredEntries, mirrorMeta, mirrorKey, driverEntries));
             }
 
             return results;

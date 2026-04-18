@@ -11,8 +11,11 @@ class DataService {
         this.driverNameMirror = null;
         this.driverShardPromises = new Map(); // single-flight promises for shard loading
         this.driverShardCache = new Map();
-        this.driverMirrorPath = 'cache/index/driver_index.json.gz';
+        this.driverMirrorPath = 'cache/index/mirror.json.gz';
         this.driverShardBasePath = 'cache/index/shards';
+        this.driverMetadataBasePath = 'cache/index';
+        this.driverMetadataShardCache = new Map();
+        this.driverMetadataShardPromises = new Map();
         // Disable status caching: status.json is precomputed and should be fetched fresh
         this.statusCache = null; // last good status (fallback only, not used to avoid fresh fetches)
         this.statusPromise = null; // single-flight promise for status fetch
@@ -60,6 +63,10 @@ class DataService {
         return this._getDriverIndexModule()._getShardKeyForName.call(this, normalizedName);
     }
 
+    _transformMirrorToNameIndex(mirrorData) {
+        return this._getDriverIndexModule()._transformMirrorToNameIndex.call(this, mirrorData);
+    }
+
     _normalizeDriverLookupName(name) {
         return this._getDriverIndexModule()._normalizeDriverLookupName.call(this, name);
     }
@@ -68,7 +75,7 @@ class DataService {
         return this._getDriverIndexModule()._extractDriverMirrorMetadata.call(this, mirrorKey, mirrorEntry);
     }
 
-    getDriverMetadata(driverName, driverMirror = null) {
+    async getDriverMetadata(driverName, driverMirror = null) {
         return this._getDriverIndexModule().getDriverMetadata.call(this, driverName, driverMirror);
     }
 
@@ -115,6 +122,14 @@ class DataService {
 
     async _fetchSingleDriverShard(shardKey) {
         return this._getDriverIndexModule()._fetchSingleDriverShard.call(this, shardKey);
+    }
+
+    async _loadDriverMetadataShard(shardKey) {
+        return this._getDriverIndexModule()._loadDriverMetadataShard.call(this, shardKey);
+    }
+
+    async _fetchSingleDriverMetadataShard(shardKey) {
+        return this._getDriverIndexModule()._fetchSingleDriverMetadataShard.call(this, shardKey);
     }
 
     async _fetchDriverMirrorData() {

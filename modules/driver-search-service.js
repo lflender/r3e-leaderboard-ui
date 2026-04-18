@@ -1,29 +1,65 @@
 (function () {
     const DriverSearchService = {
+        _hasAccents(str) {
+            if (!str) return false;
+            const normalized = String(str).normalize('NFD');
+            return normalized !== String(str).normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        },
+
+        _normalizeExactDisplayName(value) {
+            return String(value || '').trim().replace(/\s+/g, ' ').toLowerCase();
+        },
+
+        _accentExactWordMatch(candidateName, searchTerm) {
+            if (!candidateName || !searchTerm) return false;
+            const words = searchTerm.split(/\s+/).filter(Boolean);
+            if (words.length === 0) return false;
+            if (words.length === 1) {
+                // Single word: must appear as a whole word (bounded by space or string edges)
+                const escaped = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                return new RegExp(`(^|\\s)${escaped}(\\s|$)`, 'i').test(candidateName);
+            }
+            // Multi-word: require full phrase equality
+            return candidateName === searchTerm;
+        },
+
         _matchesDriverSearchTerm(searchTarget, searchLower, isExactSearch) {
             const normalizedTarget = this._normalizeDriverLookupName(searchTarget);
+            const normalizedSearch = this._normalizeDriverLookupName(searchLower);
             if (!normalizedTarget) {
                 return false;
             }
 
             if (!isExactSearch) {
-                return normalizedTarget.includes(searchLower);
+                return normalizedTarget.includes(normalizedSearch);
             }
 
-            const words = searchLower.split(/\s+/).filter(Boolean);
+            // For exact search: if accents are present, allow normalized pre-filtering here.
+            // Strict accent-aware equality is applied after shard/metadata lookup.
+            if (this._hasAccents(searchLower)) {
+                return normalizedTarget.includes(normalizedSearch);
+            }
+
+            // For exact search, use direct string comparison to avoid word boundary issues with punctuation
+            if (normalizedTarget === normalizedSearch) {
+                return true;
+            }
+
+            // Fallback to word-boundary regex for multi-word exact searches without punctuation
+            const words = normalizedSearch.split(/\s+/).filter(Boolean);
             if (words.length === 0) {
                 return false;
             }
 
             if (words.length === 1) {
                 const wordRegex = new RegExp(`\\b${words[0].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
-                return wordRegex.test(searchTarget);
+                return wordRegex.test(normalizedTarget);
             }
 
             const escapedWords = words.map(word => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
             const pattern = escapedWords.map(word => `\\b${word}\\b`).join('\\s+');
             const phraseRegex = new RegExp(pattern, 'i');
-            return phraseRegex.test(searchTarget);
+            return phraseRegex.test(normalizedTarget);
         },
 
         _getSuperclassClasses(superclassName) {
@@ -241,18 +277,48 @@
             }
 
             const searchLower = searchTerm.toLowerCase();
+            const accentSearch = this._hasAccents(searchTerm);
+            const exactAccentSearch = isExactSearch && accentSearch;
+            const partialAccentSearch = !isExactSearch && accentSearch;
+            const accentSearchTerm = accentSearch ? this._normalizeExactDisplayName(searchTerm) : '';
             const results = [];
 
-            for (const mirrorKey of Object.keys(driverMirror)) {
-                if (!this._matchesDriverSearchTerm(mirrorKey, searchLower, isExactSearch)) {
-                    continue;
-                }
+            const mirrorKeys = Object.keys(driverMirror);
+            const matchedMirrorKeys = mirrorKeys.filter(mirrorKey => this._matchesDriverSearchTerm(mirrorKey, searchLower, isExactSearch));
+            if (matchedMirrorKeys.length === 0) {
+                return results;
+            }
 
-                const shardKey = this._getShardKeyForName(mirrorKey);
+            const shardKeysToLoad = new Set(matchedMirrorKeys.map(mirrorKey => this._getShardKeyForName(mirrorKey)));
+            const shardDataByKey = new Map();
+            const metadataByKey = new Map();
+            await Promise.all(Array.from(shardKeysToLoad).map(async shardKey => {
                 const [shardData, metadataShard] = await Promise.all([
                     this._loadDriverShard(shardKey),
                     this._loadDriverMetadataShard(shardKey).catch(() => null)
                 ]);
+                shardDataByKey.set(shardKey, shardData || {});
+                metadataByKey.set(shardKey, metadataShard || null);
+            }));
+
+            let fallbackLoaded = false;
+            let fallbackShard = null;
+            let fallbackMetadata = null;
+            const ensureFallbackData = async () => {
+                if (fallbackLoaded) {
+                    return;
+                }
+                fallbackLoaded = true;
+                [fallbackShard, fallbackMetadata] = await Promise.all([
+                    this._loadDriverShard('_'),
+                    this._loadDriverMetadataShard('_').catch(() => null)
+                ]);
+            };
+
+            for (const mirrorKey of matchedMirrorKeys) {
+                const shardKey = this._getShardKeyForName(mirrorKey);
+                const shardData = shardDataByKey.get(shardKey) || {};
+                const metadataShard = metadataByKey.get(shardKey) || null;
 
                 const normalizedLookupName = this._normalizeDriverLookupName(mirrorKey);
                 let metaEntry = metadataShard && (metadataShard[normalizedLookupName] || metadataShard[mirrorKey]);
@@ -260,10 +326,7 @@
 
                 // Fallback: diacritical names live in _ shards with search_name alias
                 if ((!metaEntry || !Array.isArray(driverEntries) || driverEntries.length === 0) && shardKey !== '_') {
-                    const [fallbackShard, fallbackMetadata] = await Promise.all([
-                        this._loadDriverShard('_'),
-                        this._loadDriverMetadataShard('_').catch(() => null)
-                    ]);
+                    await ensureFallbackData();
 
                     if (!metaEntry && fallbackMetadata) {
                         metaEntry = fallbackMetadata[normalizedLookupName] || fallbackMetadata[mirrorKey];
@@ -295,8 +358,101 @@
 
                 const metadataCandidates = this._normalizeMetadataCandidates(metaEntry);
                 if (metadataCandidates.length > 0) {
-                    results.push(...this._buildMetadataSearchResultsForPathIds(filteredEntries, metadataCandidates, mirrorKey, driverEntries));
+                    let matchedMetadataCandidates = metadataCandidates;
+                    let matchedEntries = filteredEntries;
+
+                    if (isExactSearch) {
+                        const exactMatchTerm = exactAccentSearch ? accentSearchTerm : searchLower;
+                        matchedMetadataCandidates = metadataCandidates.filter(candidate => {
+                            const candidateName = this._normalizeExactDisplayName(candidate && candidate.name);
+                            return this._accentExactWordMatch(candidateName, exactMatchTerm);
+                        });
+
+                        if (matchedMetadataCandidates.length === 0) {
+                            continue;
+                        }
+
+                        const allowedPathIds = new Set(
+                            matchedMetadataCandidates
+                                .map(candidate => this._extractPathId(candidate))
+                                .filter(Boolean)
+                        );
+
+                        if (allowedPathIds.size > 0) {
+                            matchedEntries = filteredEntries.filter(entry => allowedPathIds.has(this._extractPathId(entry)));
+                            if (matchedEntries.length === 0) {
+                                continue;
+                            }
+                        }
+                    } else if (partialAccentSearch) {
+                        matchedMetadataCandidates = metadataCandidates.filter(candidate => {
+                            const candidateName = this._normalizeExactDisplayName(candidate && candidate.name);
+                            return candidateName.includes(accentSearchTerm);
+                        });
+
+                        if (matchedMetadataCandidates.length === 0) {
+                            continue;
+                        }
+
+                        const allowedPathIds = new Set(
+                            matchedMetadataCandidates
+                                .map(candidate => this._extractPathId(candidate))
+                                .filter(Boolean)
+                        );
+
+                        if (allowedPathIds.size > 0) {
+                            matchedEntries = filteredEntries.filter(entry => allowedPathIds.has(this._extractPathId(entry)));
+                            if (matchedEntries.length === 0) {
+                                continue;
+                            }
+                        }
+                    }
+
+                    results.push(...this._buildMetadataSearchResultsForPathIds(matchedEntries, matchedMetadataCandidates, mirrorKey, driverEntries));
                 } else {
+                    if (isExactSearch) {
+                        const exactMatchTerm = exactAccentSearch ? accentSearchTerm : searchLower;
+                        const matchedLegacyEntries = filteredEntries.filter(entry => {
+                            const entryName = this._normalizeExactDisplayName(entry && (entry.name || entry.Name));
+                            return this._accentExactWordMatch(entryName, exactMatchTerm);
+                        });
+
+                        if (matchedLegacyEntries.length === 0) {
+                            continue;
+                        }
+
+                        const mirrorMeta = {
+                            lookupKey: normalizedLookupName,
+                            displayName: mirrorKey,
+                            country: '',
+                            team: '',
+                            rank: '',
+                            hasMetadata: false
+                        };
+                        results.push(...this._buildLegacySearchResults(matchedLegacyEntries, mirrorMeta, mirrorKey, driverEntries));
+                        continue;
+                    } else if (partialAccentSearch) {
+                        const matchedLegacyEntries = filteredEntries.filter(entry => {
+                            const entryName = this._normalizeExactDisplayName(entry && (entry.name || entry.Name));
+                            return entryName.includes(accentSearchTerm);
+                        });
+
+                        if (matchedLegacyEntries.length === 0) {
+                            continue;
+                        }
+
+                        const mirrorMeta = {
+                            lookupKey: normalizedLookupName,
+                            displayName: mirrorKey,
+                            country: '',
+                            team: '',
+                            rank: '',
+                            hasMetadata: false
+                        };
+                        results.push(...this._buildLegacySearchResults(matchedLegacyEntries, mirrorMeta, mirrorKey, driverEntries));
+                        continue;
+                    }
+
                     const mirrorMeta = {
                         lookupKey: normalizedLookupName,
                         displayName: mirrorKey,

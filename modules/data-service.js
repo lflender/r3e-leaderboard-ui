@@ -95,6 +95,18 @@ class DataService {
         return this._getDriverSearchModule()._matchesDriverSearchTerm.call(this, searchTarget, searchLower, isExactSearch);
     }
 
+    _hasAccents(str) {
+        return this._getDriverSearchModule()._hasAccents.call(this, str);
+    }
+
+    _normalizeExactDisplayName(value) {
+        return this._getDriverSearchModule()._normalizeExactDisplayName.call(this, value);
+    }
+
+    _accentExactWordMatch(candidateName, searchTerm) {
+        return this._getDriverSearchModule()._accentExactWordMatch.call(this, candidateName, searchTerm);
+    }
+
     _getSuperclassClasses(superclassName) {
         return this._getDriverSearchModule()._getSuperclassClasses.call(this, superclassName);
     }

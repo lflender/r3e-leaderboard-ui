@@ -83,7 +83,12 @@
         },
 
         _normalizeDriverLookupName(name) {
-            return String(name || '').trim().replace(/\s+/g, ' ').toLowerCase();
+            return String(name || '')
+                .trim()
+                .replace(/\s+/g, ' ')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase();
         },
 
         _extractDriverMirrorMetadata(mirrorKey, mirrorEntry) {

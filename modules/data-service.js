@@ -67,6 +67,10 @@ class DataService {
         return this._getDriverIndexModule()._transformMirrorToNameIndex.call(this, mirrorData);
     }
 
+    _buildSearchNameAliases(parsed) {
+        return this._getDriverIndexModule()._buildSearchNameAliases.call(this, parsed);
+    }
+
     _normalizeDriverLookupName(name) {
         return this._getDriverIndexModule()._normalizeDriverLookupName.call(this, name);
     }

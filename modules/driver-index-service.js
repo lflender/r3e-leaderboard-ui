@@ -143,7 +143,14 @@
             const shardKey = this._getShardKeyForName(normalizedName);
             try {
                 const metadataShard = await this._loadDriverMetadataShard(shardKey);
-                const metaEntry = metadataShard && metadataShard[normalizedName];
+                let metaEntry = metadataShard && metadataShard[normalizedName];
+
+                // Fallback: diacritical names live in _ shard with search_name alias
+                if (!metaEntry && shardKey !== '_') {
+                    const fallbackShard = await this._loadDriverMetadataShard('_');
+                    metaEntry = fallbackShard && fallbackShard[normalizedName];
+                }
+
                 if (metaEntry && typeof metaEntry === 'object') {
                     return {
                         lookupKey: normalizedName,
@@ -151,6 +158,7 @@
                         country: String(metaEntry.country || ''),
                         team: String(metaEntry.team || ''),
                         rank: String(metaEntry.rank || ''),
+                        originalKey: metaEntry._originalKey || null,
                         hasMetadata: true
                     };
                 }
@@ -164,6 +172,7 @@
                 country: '',
                 team: '',
                 rank: '',
+                originalKey: null,
                 hasMetadata: false
             };
         },
@@ -190,6 +199,9 @@
                 shardKeysNeeded.add(this._getShardKeyForName(normalizedName));
             });
 
+            // Always include _ shard for diacritical name fallback
+            shardKeysNeeded.add('_');
+
             // Pre-load all needed metadata shards in parallel
             await Promise.all([...shardKeysNeeded].map(key =>
                 this._loadDriverMetadataShard(key).catch(() => null)
@@ -206,10 +218,15 @@
                 if (!(normalizedName in driverMirror)) return;
 
                 const shardKey = this._getShardKeyForName(normalizedName);
-                const metadataShard = this.driverMetadataShardCache.get(shardKey);
-                if (!metadataShard) return;
+                let metadataShard = this.driverMetadataShardCache.get(shardKey);
+                let metaEntry = metadataShard && metadataShard[normalizedName];
 
-                const metaEntry = metadataShard[normalizedName];
+                // Fallback: diacritical names live in _ shard with search_name alias
+                if (!metaEntry && shardKey !== '_') {
+                    metadataShard = this.driverMetadataShardCache.get('_');
+                    metaEntry = metadataShard && metadataShard[normalizedName];
+                }
+
                 if (!metaEntry || typeof metaEntry !== 'object') return;
 
                 if (metaEntry.country) {
@@ -311,6 +328,7 @@
 
             const shardPromise = (async () => {
                 const parsed = await this._fetchSingleDriverMetadataShard(safeShardKey);
+                this._buildSearchNameAliases(parsed);
                 this.driverMetadataShardCache.set(safeShardKey, parsed);
                 return parsed;
             })();
@@ -369,6 +387,21 @@
             }
 
             throw new Error(`Failed to load metadata shard ${shardKey}`);
+        },
+
+        _buildSearchNameAliases(parsed) {
+            const aliasesToAdd = [];
+            for (const [key, entry] of Object.entries(parsed)) {
+                if (entry && typeof entry === 'object' && entry.search_name && entry.search_name !== key) {
+                    if (!(entry.search_name in parsed)) {
+                        entry._originalKey = key;
+                        aliasesToAdd.push([entry.search_name, entry]);
+                    }
+                }
+            }
+            for (const [alias, entry] of aliasesToAdd) {
+                parsed[alias] = entry;
+            }
         },
 
         async _fetchDriverMirrorData() {

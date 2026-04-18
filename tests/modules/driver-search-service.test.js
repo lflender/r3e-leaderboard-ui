@@ -124,5 +124,32 @@ describe('DataService driver-search module', () => {
 
         await expect(service.searchDriver('Alice')).rejects.toThrow('Driver index is loading or unavailable');
     });
+
+    it('searchDriver falls back to _ shards for diacritical names', async () => {
+        vi.spyOn(service, 'waitForDriverIndex').mockResolvedValue({
+            'oscar domingo': 'oscar domingo'
+        });
+
+        // _ metadata shard has original key with search_name alias already built
+        const underscoreMetadata = {
+            'óscar domingo': { name: 'Óscar Domingo', country: 'Spain', team: 'RRSL1', rank: '', search_name: 'oscar domingo', _originalKey: 'óscar domingo' },
+            'oscar domingo': null // alias will be set below
+        };
+        underscoreMetadata['oscar domingo'] = underscoreMetadata['óscar domingo'];
+
+        vi.spyOn(service, '_loadDriverShard').mockImplementation(async (key) => {
+            if (key === '_') return { 'óscar domingo': [{ name: 'Óscar Domingo', track_id: 10, Class: 5, difficulty: 'Get Real' }] };
+            return {};
+        });
+        vi.spyOn(service, '_loadDriverMetadataShard').mockImplementation(async (key) => {
+            if (key === '_') return underscoreMetadata;
+            return {};
+        });
+
+        const result = await service.searchDriver('oscar', { trackId: 10 });
+
+        expect(result).toHaveLength(1);
+        expect(result[0]).toMatchObject({ driver: 'Óscar Domingo', country: 'Spain', team: 'RRSL1' });
+    });
 });
 

@@ -174,7 +174,29 @@
                 ]);
 
                 const normalizedLookupName = this._normalizeDriverLookupName(mirrorKey);
-                const driverEntries = shardData[normalizedLookupName] || shardData[mirrorKey] || [];
+                let metaEntry = metadataShard && (metadataShard[normalizedLookupName] || metadataShard[mirrorKey]);
+                let driverEntries = shardData[normalizedLookupName] || shardData[mirrorKey] || [];
+
+                // Fallback: diacritical names live in _ shards with search_name alias
+                if ((!metaEntry || !Array.isArray(driverEntries) || driverEntries.length === 0) && shardKey !== '_') {
+                    const [fallbackShard, fallbackMetadata] = await Promise.all([
+                        this._loadDriverShard('_'),
+                        this._loadDriverMetadataShard('_').catch(() => null)
+                    ]);
+
+                    if (!metaEntry && fallbackMetadata) {
+                        metaEntry = fallbackMetadata[normalizedLookupName] || fallbackMetadata[mirrorKey];
+                    }
+
+                    if (!Array.isArray(driverEntries) || driverEntries.length === 0) {
+                        // Use original key from metadata to find entries in _ leaderboard shard
+                        const originalKey = metaEntry && metaEntry._originalKey;
+                        if (originalKey && fallbackShard) {
+                            driverEntries = fallbackShard[originalKey] || [];
+                        }
+                    }
+                }
+
                 if (!Array.isArray(driverEntries) || driverEntries.length === 0) {
                     continue;
                 }
@@ -184,7 +206,6 @@
                     continue;
                 }
 
-                const metaEntry = metadataShard && (metadataShard[normalizedLookupName] || metadataShard[mirrorKey]);
                 if (metaEntry && typeof metaEntry === 'object') {
                     const mirrorMeta = {
                         lookupKey: normalizedLookupName,

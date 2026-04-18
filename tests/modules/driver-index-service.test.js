@@ -156,10 +156,45 @@ describe('Driver index service', () => {
 
         // Pre-populate metadata shard cache for enrichment
         service.driverMetadataShardCache.set('a', metadataShard);
+        service.driverMetadataShardCache.set('_', {});
         vi.spyOn(service, 'waitForDriverIndex').mockResolvedValue(service.driverIndex);
         const rows = [{ name: 'Alice Smith' }];
         await service.enrichEntriesWithDriverMetadata(rows);
         expect(rows[0]).toMatchObject({ Country: 'SE', Team: 'Blue', Rank: 'Pro' });
+    });
+
+    it('falls back to _ shard for diacritical names via search_name alias', async () => {
+        // Mirror has normalized name
+        service.driverIndex = { 'oscar domingo': 'oscar domingo' };
+
+        // _ metadata shard has the original diacritical key with search_name
+        const underscoreShard = {
+            'óscar domingo': { name: 'Óscar Domingo', country: 'Spain', team: 'RRSL1', rank: '', search_name: 'oscar domingo' }
+        };
+        // Build search_name aliases as the real loader would
+        service._buildSearchNameAliases(underscoreShard);
+
+        // Letter shard "o" is empty for this name
+        vi.spyOn(service, '_loadDriverMetadataShard').mockImplementation(async (key) => {
+            if (key === '_') return underscoreShard;
+            return {};
+        });
+
+        const meta = await service.getDriverMetadata('oscar domingo');
+        expect(meta).toMatchObject({
+            displayName: 'Óscar Domingo',
+            country: 'Spain',
+            originalKey: 'óscar domingo',
+            hasMetadata: true
+        });
+
+        // Enrichment also falls back to _ shard
+        service.driverMetadataShardCache.set('o', {});
+        service.driverMetadataShardCache.set('_', underscoreShard);
+        vi.spyOn(service, 'waitForDriverIndex').mockResolvedValue(service.driverIndex);
+        const rows = [{ name: 'oscar domingo' }];
+        await service.enrichEntriesWithDriverMetadata(rows);
+        expect(rows[0]).toMatchObject({ Country: 'Spain', Team: 'RRSL1' });
     });
 
     it('parses JSON at idle, handles timeout helper, and updates index timestamp', async () => {

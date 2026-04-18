@@ -1,0 +1,1053 @@
+﻿/* ========================================
+   12. RESPONSIVE DESIGN (MEDIA QUERIES)
+   ======================================== */
+
+/* Touch devices and pointer-specific behavior */
+@media (hover: none), (pointer: coarse) {
+    .car-link-thumbnail {
+        display: none !important;
+    }
+
+    .info-icon {
+        display: none !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    a.driver-name-top10-glitter,
+    strong.driver-name-top10-glitter,
+    span.driver-name-top10-glitter,
+    a.driver-name-top10-glitter::before,
+    strong.driver-name-top10-glitter::before,
+    span.driver-name-top10-glitter::before,
+    a.driver-name-top10-glitter::after,
+    strong.driver-name-top10-glitter::after,
+    span.driver-name-top10-glitter::after {
+        animation: none;
+    }
+}
+
+/* Medium screens - remove container padding to prevent table border clipping */
+@media (max-width: 1300px) {
+    .tab-content {
+        padding: 2rem 0;
+    }
+
+    .search-container {
+        padding: 0 2rem;
+    }
+
+    .tab-panel .status-section {
+        margin-left: 2rem;
+        margin-right: 2rem;
+    }
+
+    .detail-content {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .detail-header {
+        margin-left: 2rem;
+        margin-right: 2rem;
+    }
+
+    .pagination {
+        padding: 0 2rem;
+    }
+
+    .daily-races-feature .daily-races-grid {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 1000px) {
+    .car-dist-table {
+        font-size: 0.85rem;
+    }
+
+    .car-dist-table th {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.6rem;
+    }
+
+    .car-dist-toggle {
+        font-size: 0.9rem;
+        padding: 0.65rem 0.9rem;
+    }
+
+    .car-dist-table th.car-dist-entries,
+    .car-dist-table td.car-dist-entries,
+    .car-dist-table th.car-dist-percentage,
+    .car-dist-table td.car-dist-percentage,
+    .car-dist-table th.car-dist-median,
+    .car-dist-table td.car-dist-median {
+        width: 6.5em;
+        max-width: 6.5em;
+    }
+
+    .search-container {
+        margin-bottom: 0;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    main {
+        padding: 0 0.75rem;
+    }
+
+    .detail-header {
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 0.85rem 1rem;
+        align-items: stretch;
+        position: relative;
+    }
+
+    .detail-header .custom-select {
+        margin-left: 0;
+        min-width: 100%;
+    }
+
+    #car-filter-ui {
+        order: 2;
+        margin-left: 0;
+        min-width: 100%;
+    }
+
+    #difficulty-filter-ui {
+        order: 1;
+        margin-left: 0;
+        min-width: auto;
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+    }
+
+    .detail-difficulty-badges {
+        width: auto;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        gap: 0.35rem;
+    }
+
+    .detail-header-info {
+        order: 1;
+        padding-right: 5.25rem;
+    }
+
+    #driver-search,
+    .custom-select {
+        flex: 1 1 100%;
+        min-width: 100%;
+        max-width: 100%;
+    }
+
+    .cars-view-toggle {
+        margin-left: 0;
+        align-self: flex-end;
+    }
+
+    #cars-search-container {
+        margin-bottom: 0;
+    }
+
+    #cars-info-table {
+        padding-top: 0.35rem;
+        overflow: visible;
+    }
+
+    #cars-info-table .cars-class-section {
+        margin-top: 1.25rem;
+    }
+
+    #cars-info-table .cars-class-section:first-child {
+        margin-top: 0.75rem;
+    }
+
+    #cars-info-table .cars-class-heading-wrap {
+        left: 0.22rem;
+        top: 0;
+        transform: translateY(-50%);
+    }
+
+    .status-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .car-inline-thumbnail {
+        position: absolute;
+        right: -0.25rem;
+        top: -0.25rem;
+        transform: translateY(-50%);
+        display: block;
+        height: 1.9rem;
+        max-width: 3.2rem;
+        margin-left: 0;
+    }
+
+    .car-inline-meta {
+        padding-right: 2.75rem;
+    }
+
+    #stats-tables {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-selected-class-logo {
+        display: none;
+    }
+
+    .stats-box h2 {
+        font-size: 0.95rem;
+    }
+
+    .stats-table {
+        min-width: 0;
+        table-layout: fixed;
+    }
+
+    #stats-pole-table .results-table,
+    #stats-bested-table .results-table {
+        min-width: 0 !important;
+        width: 100% !important;
+        table-layout: fixed !important;
+    }
+
+    #stats-pole-table .results-table th:nth-child(1),
+    #stats-pole-table .results-table td:nth-child(1),
+    #stats-bested-table .results-table th:nth-child(1),
+    #stats-bested-table .results-table td:nth-child(1) {
+        width: 2.8rem !important;
+        white-space: nowrap !important;
+    }
+
+    #stats-pole-table .results-table th:nth-child(2),
+    #stats-pole-table .results-table td:nth-child(2),
+    #stats-bested-table .results-table th:nth-child(2),
+    #stats-bested-table .results-table td:nth-child(2) {
+        width: auto !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    #stats-pole-table .results-table th:nth-child(3),
+    #stats-pole-table .results-table td:nth-child(3),
+    #stats-bested-table .results-table th:nth-child(3),
+    #stats-bested-table .results-table td:nth-child(3) {
+        width: 3.5rem !important;
+        white-space: nowrap !important;
+        text-align: right !important;
+    }
+
+    .daily-races-grid.daily-races-grid--center-fourth > .daily-race-card-link:nth-child(4):last-child {
+        grid-column: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .car-dist-content {
+        overflow-x: visible;
+    }
+
+    .table-car-class-logo {
+        width: 18px;
+        height: 18px;
+        max-width: 18px;
+    }
+
+    .table-brand-logo {
+        height: 18px;
+        max-width: 31px;
+    }
+
+    .table-brand-logo-slot {
+        width: 18px;
+        height: 18px;
+        flex: 0 0 18px;
+        margin-right: 3px;
+    }
+
+    .car-dist-table {
+        font-size: 0.8rem;
+        table-layout: auto;
+        width: 100%;
+    }
+
+    .car-dist-table th {
+        font-size: 0.75rem;
+        padding: 0.45rem 0.35rem;
+    }
+
+    .car-dist-table td {
+        padding: 0.4rem 0.35rem;
+    }
+
+    .car-dist-toggle,
+    .entries-dist-toggle {
+        font-size: 0.85rem;
+        padding: 0.6rem 0.8rem;
+    }
+
+    .entries-dist-chart {
+        height: 7rem;
+    }
+
+    .entries-dist-max-label {
+        font-size: 0.7rem;
+    }
+
+    .entries-dist-axis {
+        font-size: 0.75rem;
+    }
+
+    .entries-timeframe-controls {
+        grid-template-columns: 1fr;
+        gap: 0.55rem;
+        align-items: stretch;
+    }
+
+    .entries-timeframe-last-week {
+        justify-self: start;
+    }
+
+    .car-dist-table th.car-dist-car,
+    .car-dist-table td.car-dist-car {
+        max-width: none;
+    }
+
+    .car-dist-table th.car-dist-entries,
+    .car-dist-table td.car-dist-entries,
+    .car-dist-table th.car-dist-percentage,
+    .car-dist-table td.car-dist-percentage {
+        width: 3.5em;
+        max-width: 3.5em;
+    }
+
+    .car-dist-table th.car-dist-median,
+    .car-dist-table td.car-dist-median {
+        width: 4.5em;
+        max-width: 4.5em;
+    }
+
+    .car-dist-table th.sortable {
+        padding-right: 1.2rem;
+    }
+
+    .mp-pos-badge {
+        font-size: 0.8rem;
+    }
+
+    #site-header header {
+        padding: 1.25rem 1rem 0.75rem 1rem;
+    }
+
+    header h1 {
+        font-size: 1.35rem;
+        line-height: 1.3;
+    }
+
+    .header-logo {
+        height: 6rem;
+    }
+
+    main {
+        padding: 0 0.75rem;
+        margin: 0.5rem auto;
+    }
+
+    .tabs {
+        flex-direction: row;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        gap: 0.25rem;
+        flex-wrap: nowrap;
+        padding-bottom: 0.25rem;
+        margin-bottom: 0.2rem;
+    }
+
+    .tab-button {
+        padding: 0.45rem 0.8rem;
+        font-size: 0.875rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .tab-content {
+        padding: 1rem 0.5rem;
+    }
+
+    .results-table {
+        font-size: 0.7rem;
+        min-width: 600px;
+        margin-top: 0.25rem;
+    }
+
+    #detail-results-container .results-table {
+        min-width: 0;
+    }
+
+    .results-table th,
+    .results-table td {
+        padding: 0.6rem 0.35rem;
+        font-size: 0.7rem;
+    }
+
+    .results-table th {
+        font-size: 0.75rem;
+    }
+
+    .pos-number {
+        font-size: 0.7rem;
+        padding: 0.12rem 0.4rem;
+    }
+
+    #results-container .results-table th:nth-child(1),
+    #results-container .results-table td:nth-child(1) {
+        min-width: 125px !important;
+    }
+
+    #results-container .results-table th:nth-child(2),
+    #results-container .results-table td:nth-child(2) {
+        min-width: 140px !important;
+    }
+
+    .pos-total {
+        font-size: 0.7rem;
+    }
+
+    .time-delta-inline,
+    .lap-time-cell .time-delta,
+    .gap-time-cell .time-delta {
+        font-size: 0.7rem;
+    }
+
+    .difficulty-pill {
+        font-size: 0.6rem !important;
+        padding: 0.1rem 0.35rem !important;
+    }
+
+    .difficulty-cell {
+        white-space: nowrap;
+    }
+
+    .driver-group-header strong {
+        font-size: 0.85rem;
+    }
+
+    .driver-group-header td {
+        padding: 0.65rem !important;
+    }
+
+    .driver-meta {
+        font-size: 0.75rem;
+    }
+
+    .country-flag {
+        vertical-align: 0;
+        margin-right: 0.4rem;
+    }
+
+    .country-flag .fi {
+        font-size: 0.9em;
+    }
+
+    #cars-search-container .custom-select,
+    #track-search-container .custom-select {
+        flex: 1 1 100%;
+        min-width: 100%;
+        max-width: 100%;
+    }
+
+    #cars-search-container .custom-select:nth-of-type(1) { z-index: 233; }
+    #cars-search-container .custom-select:nth-of-type(2) { z-index: 232; }
+    #cars-search-container .custom-select:nth-of-type(3) { z-index: 231; }
+    #track-search-container .custom-select:nth-of-type(1) { z-index: 232; }
+    #track-search-container .custom-select:nth-of-type(2) { z-index: 231; }
+
+    .custom-select__toggle {
+        white-space: normal;
+        padding: 0.55rem 0.7rem;
+        font-size: 0.85rem;
+    }
+
+    .custom-select__menu {
+        max-height: 60vh;
+    }
+
+    #cars-search-container {
+        margin-bottom: 0;
+    }
+
+    #cars-info-table .cars-class-section {
+        margin-top: 1rem;
+    }
+
+    #cars-info-table .cars-class-section:first-child {
+        margin-top: 1.05rem;
+    }
+
+    #cars-info-table .cars-class-heading-wrap {
+        flex-wrap: nowrap;
+        gap: 0.4rem;
+        left: 0.2rem;
+        top: 0;
+        transform: translateY(-50%);
+    }
+
+    .cars-class-heading {
+        font-size: 0.94rem;
+        padding: 0.3rem 0.75rem;
+    }
+
+    .cars-class-heading .table-car-class-logo {
+        height: calc(1.7em + 5px);
+        max-width: 3.9em;
+    }
+
+    .cars-class-superclass-chip {
+        margin-left: -0.9rem;
+        margin-bottom: 0;
+        align-self: center;
+        transform: translateY(0.03rem);
+        padding: 0.2rem 0.62rem 0.2rem 0.9rem;
+        font-size: 0.68rem;
+        border-left-color: transparent;
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+
+    .cars-class-superclass-chip::before {
+        display: block;
+        left: -0.86rem;
+        width: 0.9rem;
+    }
+
+    .detail-content {
+        padding: 1rem 0.75rem;
+        margin-top: 0;
+    }
+
+    .pagination {
+        margin-top: 0.5rem;
+    }
+
+    .detail-header-line,
+    #detail-track,
+    #detail-class,
+    #detail-layout {
+        font-size: 1rem;
+        word-break: break-word;
+        padding-bottom: 0.2rem;
+        margin-bottom: 0.1rem;
+    }
+
+    .pagination-buttons {
+        gap: 0.35rem;
+    }
+
+    .page-btn {
+        padding: 0.45rem 0.7rem;
+        font-size: 0.85rem;
+        min-width: 36px;
+    }
+
+    .status-section {
+        padding: 0.75rem;
+    }
+
+    .status-section h3 {
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .status-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.4rem;
+    }
+
+    .status-item {
+        padding: 0.4rem;
+        gap: 0.2rem;
+        align-items: flex-start;
+    }
+
+    .status-item .status-label {
+        font-size: 0.7rem;
+    }
+
+    .status-item .status-value {
+        font-size: 0.9rem;
+        font-weight: 600;
+        line-height: 1.2;
+        word-break: break-word;
+    }
+
+    #status-timestamp {
+        white-space: normal;
+        font-size: 0.9rem;
+    }
+
+    .status-item-inline {
+        flex-direction: column;
+        gap: 0.25rem;
+        align-items: flex-start;
+    }
+
+    #cars-info-table,
+    #track-info-table,
+    .table-scroll-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .car-badge {
+        font-size: 0.7rem;
+        padding: 0.12rem 0.4rem;
+        line-height: 1;
+    }
+
+    #cars-info-table .results-table th {
+        padding: 0.7rem 0.3rem;
+        font-size: 0.9rem;
+    }
+
+    #cars-info-table .results-table td {
+        padding: 0.6rem 0.3rem;
+        font-size: 0.75rem;
+    }
+
+    #cars-info-table .results-table th:nth-child(1),
+    #cars-info-table .results-table td:nth-child(1) {
+        width: 32%;
+        max-width: none;
+        min-width: 195px;
+        white-space: normal !important;
+        word-break: break-word;
+    }
+
+    #track-info-table {
+        overflow-x: visible !important;
+        width: 100% !important;
+    }
+
+    #track-info-table .results-table {
+        table-layout: fixed !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    #track-info-table .results-table th,
+    #track-info-table .results-table td {
+        padding: 0.6rem 0.25rem !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+    }
+
+    #track-info-table .results-table th:nth-child(1),
+    #track-info-table .results-table td:nth-child(1),
+    #track-info-table .track-cell {
+        width: 40% !important;
+        max-width: 40% !important;
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
+    }
+
+    .daily-races-container {
+        padding: 1rem 0.5rem;
+    }
+
+    .daily-races-header h2 {
+        font-size: 1.4rem;
+    }
+
+    .daily-races-header h3 {
+        font-size: 1.1rem;
+    }
+
+    .daily-races-section-title {
+        font-size: 1.1rem !important;
+    }
+
+    .daily-races-grid,
+    .hall-of-fame-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .daily-races-feature .daily-races-grid {
+        grid-template-columns: 1fr;
+        max-width: none;
+    }
+
+    .daily-race-card {
+        padding: 1rem;
+    }
+
+    .daily-race-class {
+        font-size: 1rem;
+        padding-right: clamp(72px, 22%, 96px);
+    }
+
+    .daily-race-class-logos {
+        gap: 0.35rem;
+    }
+
+    .daily-race-class-logo {
+        width: auto;
+        max-width: 72px;
+        height: 28px;
+    }
+
+    .daily-race-class-logos--count-1 .daily-race-class-logo {
+        max-width: 152px;
+        height: 42px;
+    }
+
+    .daily-race-track {
+        padding-right: clamp(72px, 22%, 96px);
+        font-size: 0.9rem;
+    }
+
+    .daily-race-schedule {
+        font-size: 0.85rem;
+    }
+
+    .daily-race-tag {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+    }
+
+    #track-info-table .results-table th:nth-child(2),
+    #track-info-table .results-table td:nth-child(2),
+    #track-info-table .class-cell {
+        width: 40% !important;
+        max-width: 40% !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
+    }
+
+    #track-info-table .entries-cell {
+        width: 20% !important;
+        max-width: 20% !important;
+        text-align: right !important;
+        white-space: nowrap !important;
+        overflow: visible !important;
+    }
+
+    footer {
+        padding: 1.25rem 0.75rem;
+        margin-top: 1.5rem;
+    }
+
+    .footer-content {
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+
+    footer p {
+        font-size: 0.8rem;
+    }
+
+    .paypal-button {
+        font-size: 0.85rem;
+        padding: 0.45rem 0.85rem;
+    }
+
+    .faq-title {
+        font-size: 1.4rem;
+        margin-bottom: 0.6rem;
+    }
+
+    .hero-tagline {
+        font-size: 0.9rem;
+        padding: 0 0.5rem;
+    }
+
+    .seo-content {
+        margin: 1.5rem 0 0.5rem 0;
+        padding: 0.75rem;
+    }
+
+    .status-section h2,
+    .seo-content h2 {
+        font-size: 1.1rem;
+    }
+
+    .seo-content h3 {
+        font-size: 0.95rem;
+    }
+
+    .seo-content p,
+    .seo-content ul li {
+        font-size: 0.9rem;
+    }
+
+    #stats-class-filter-ui {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .car-dist-content {
+        overflow-x: visible;
+    }
+
+    .table-car-class-logo {
+        width: 16px;
+        height: 16px;
+        max-width: 16px;
+    }
+
+    .table-brand-logo {
+        height: 16px;
+        max-width: 27px;
+    }
+
+    .table-brand-logo-slot {
+        width: 16px;
+        height: 16px;
+        flex: 0 0 16px;
+        margin-right: 2px;
+    }
+
+    .car-dist-table {
+        font-size: 0.68rem;
+        table-layout: auto;
+        min-width: 0;
+        width: 100%;
+    }
+
+    .car-dist-table th.car-dist-car,
+    .car-dist-table td.car-dist-car {
+        min-width: 0;
+        max-width: none;
+    }
+
+    .car-dist-table th {
+        font-size: 0.7rem;
+        padding: 0.4rem 0.25rem;
+    }
+
+    .car-dist-table td {
+        padding: 0.35rem 0.5rem;
+    }
+
+    .car-dist-table th.car-dist-entries,
+    .car-dist-table td.car-dist-entries,
+    .car-dist-table th.car-dist-percentage,
+    .car-dist-table td.car-dist-percentage {
+        width: 3.2em;
+        max-width: 3.2em;
+    }
+
+    .car-dist-table th.car-dist-median,
+    .car-dist-table td.car-dist-median {
+        width: 3.8em;
+        max-width: 3.8em;
+    }
+
+    .car-dist-table th.sortable {
+        padding-right: 1rem;
+    }
+
+    .car-dist-median-label {
+        font-size: 0;
+    }
+
+    .car-dist-median-label::after {
+        content: 'Med';
+        font-size: 0.7rem;
+        display: inline;
+    }
+
+    .car-dist-toggle,
+    .entries-dist-toggle {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.7rem;
+    }
+
+    .entries-dist-summary {
+        margin: 0.75rem 0;
+    }
+
+    .entries-dist-chart {
+        height: 5rem;
+    }
+
+    .entries-dist-max-label {
+        font-size: 0.65rem;
+        top: 0.6rem;
+        left: 0.1rem;
+    }
+
+    .entries-dist-axis {
+        font-size: 0.68rem;
+        margin-top: 0.3rem;
+    }
+
+    .mp-pos-badge {
+        font-size: 0.7rem;
+    }
+
+    .news-item {
+        flex-direction: column;
+    }
+
+    .news-thumb {
+        width: 100%;
+        height: auto;
+        max-height: 300px;
+        aspect-ratio: 16 / 9;
+    }
+
+    .stats-box h2 {
+        font-size: 0.88rem;
+    }
+
+    .stats-table th,
+    .stats-table td {
+        padding: 0.45rem 0.22rem;
+        font-size: 0.64rem;
+    }
+
+    .stats-table th {
+        font-size: 0.68rem;
+    }
+
+    .stats-table .stats-pos-th,
+    .stats-table .pos-cell {
+        width: 2.1rem;
+    }
+
+    .stats-table th:last-child,
+    .stats-table td.stats-value-cell {
+        width: 2.9rem;
+    }
+
+    #site-header header {
+        padding: 1.25rem 0.75rem 0.6rem 0.75rem;
+    }
+
+    header h1 {
+        font-size: 1.15rem;
+    }
+
+    .results-table {
+        font-size: 0.65rem;
+        margin-top: 0.15rem;
+    }
+
+    .results-table th,
+    .results-table td {
+        padding: 0.35rem 0.25rem;
+        font-size: 0.65rem;
+    }
+
+    .results-table th {
+        font-size: 0.7rem;
+    }
+
+    main {
+        margin: 0.25rem auto;
+        padding: 0 0.5rem;
+    }
+
+    .pagination {
+        margin-top: 0.4rem;
+    }
+
+    .detail-content {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .detail-header {
+        gap: 0.5rem;
+        padding: 0.6rem;
+    }
+
+    .detail-header-info {
+        gap: 0.2rem;
+        padding-right: 4.6rem;
+    }
+
+    .detail-header-line,
+    #detail-track,
+    #detail-class,
+    #detail-layout {
+        font-size: 0.9rem;
+        padding-bottom: 0.15rem;
+        margin-bottom: 0.05rem;
+    }
+
+    .page-btn {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.8rem;
+        min-width: 32px;
+    }
+
+    .pagination-info {
+        font-size: 0.85rem;
+    }
+
+    .pos-number {
+        font-size: 0.65rem;
+        padding: 0.1rem 0.35rem;
+    }
+
+    .pos-total {
+        font-size: 0.65rem;
+    }
+
+    .time-delta-inline,
+    .lap-time-cell .time-delta,
+    .gap-time-cell .time-delta {
+        font-size: 0.65rem;
+    }
+
+    #difficulty-filter-ui {
+        top: 0.6rem;
+        right: 0.6rem;
+    }
+
+    .difficulty-pill {
+        font-size: 0.55rem;
+        padding: 0.08rem 0.3rem;
+    }
+
+    .driver-group-header strong {
+        font-size: 0.8rem;
+    }
+
+    .driver-meta {
+        font-size: 0.7rem;
+    }
+
+    .country-flag {
+        margin-right: 0.35rem;
+    }
+
+    .country-flag .fi {
+        font-size: 0.85em;
+    }
+
+    #results-container .results-table th:nth-child(1),
+    #results-container .results-table td:nth-child(1) {
+        min-width: 118px !important;
+    }
+
+    #results-container .results-table th:nth-child(2),
+    #results-container .results-table td:nth-child(2) {
+        min-width: 140px !important;
+    }
+
+    .mp-pos-badge {
+        font-size: 0.65rem;
+    }
+}
+

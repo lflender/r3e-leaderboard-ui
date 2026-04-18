@@ -1,0 +1,216 @@
+﻿/* ========================================
+   11. DETAIL PAGE SPECIFIC
+   ======================================== */
+
+/* Rank stars displayed inline after driver name */
+.rank-stars-inline {
+    display: inline-block;
+    white-space: nowrap;
+    font-size: 0.7em;
+    line-height: 1;
+    vertical-align: middle;
+    position: relative;
+    top: -2px;
+    /* Prevent the stars from wrapping separately */
+    word-break: keep-all;
+}
+
+/* Ensure the stars stay with the driver name */
+.rank-stars-inline::before {
+    content: '\00A0'; /* Non-breaking space before stars */
+}
+
+/* Detail header lines (Track, Layout, Class) */
+.detail-header-line, 
+#detail-track, 
+#detail-class, 
+#detail-layout {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 0.15rem;
+    letter-spacing: 0.015em;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+
+.detail-header-line .detail-label, 
+#detail-track .detail-label, 
+#detail-layout .detail-label, 
+#detail-class .detail-label {
+    color: var(--primary-color);
+    font-weight: 700;
+    margin-right: 0.25em;
+}
+
+#detail-class {
+    display: flex;
+    align-items: center;
+    gap: 0.42rem;
+}
+
+#detail-class .detail-label {
+    margin-right: 0;
+}
+
+.detail-class-logo {
+    display: block;
+    height: 22px;
+    width: auto;
+    max-width: 42px;
+    object-fit: contain;
+    margin: 0;
+    flex: 0 0 auto;
+}
+
+.detail-subtitle {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+}
+
+.detail-content {
+    background-color: var(--surface);
+    padding: 1.5rem 2rem 2rem 2rem;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px 0 rgba(30, 41, 59, 0.10);
+    margin-top: 0;
+    max-width: var(--results-table-max-width);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.detail-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    background: #1e293b;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px 0 rgba(0,0,0,0.06);
+    padding: 1rem 1.5rem;
+    outline: none;
+    border: none;
+}
+
+.detail-header .custom-select {
+    min-width: 200px;
+}
+
+#car-filter-ui {
+    margin-left: 0;
+}
+
+.detail-header h2 {
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.detail-header-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-right: auto;
+}
+
+#difficulty-filter-ui {
+    margin-left: 0;
+}
+
+#car-filter-ui + #difficulty-filter-ui {
+    margin-left: 0.5rem;
+}
+
+.detail-difficulty-badges {
+    display: flex;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.detail-difficulty-pill {
+    appearance: none;
+    margin: 0;
+    padding: 0.2rem 0.55rem;
+    color: var(--text-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.1;
+    cursor: pointer;
+    transition: opacity 0.15s ease, filter 0.15s ease, transform 0.15s ease;
+}
+
+.detail-difficulty-pill[aria-pressed="false"] {
+    opacity: 0.35;
+    filter: grayscale(100%);
+}
+
+.detail-difficulty-pill:disabled {
+    cursor: not-allowed;
+}
+
+.detail-difficulty-pill:not(:disabled):hover {
+    transform: translateY(-1px);
+}
+
+.no-results {
+    text-align: center;
+    color: #f87171;
+    font-size: 1.2rem;
+    margin: 2rem 0;
+    font-weight: 600;
+}
+
+.pagination {
+    margin-top: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+}
+
+.pagination-info {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.pagination-buttons {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.page-btn {
+    padding: 0.5rem 0.95rem;
+    background-color: var(--surface);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.page-btn:hover {
+    background-color: var(--hover-bg);
+    border-color: var(--primary-color);
+}
+
+.page-btn.active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    font-weight: 700;
+}
+
+.page-ellipsis {
+    color: var(--text-secondary);
+    padding: 0 0.25rem;
+    font-size: 1.1rem;
+}
+

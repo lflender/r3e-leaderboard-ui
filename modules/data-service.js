@@ -11,8 +11,11 @@ class DataService {
         this.driverNameMirror = null;
         this.driverShardPromises = new Map(); // single-flight promises for shard loading
         this.driverShardCache = new Map();
-        this.driverMirrorPath = 'cache/index/driver_index.json.gz';
+        this.driverMirrorPath = 'cache/index/mirror.json.gz';
         this.driverShardBasePath = 'cache/index/shards';
+        this.driverMetadataBasePath = 'cache/index';
+        this.driverMetadataShardCache = new Map();
+        this.driverMetadataShardPromises = new Map();
         // Disable status caching: status.json is precomputed and should be fetched fresh
         this.statusCache = null; // last good status (fallback only, not used to avoid fresh fetches)
         this.statusPromise = null; // single-flight promise for status fetch
@@ -60,6 +63,14 @@ class DataService {
         return this._getDriverIndexModule()._getShardKeyForName.call(this, normalizedName);
     }
 
+    _transformMirrorToNameIndex(mirrorData) {
+        return this._getDriverIndexModule()._transformMirrorToNameIndex.call(this, mirrorData);
+    }
+
+    _buildSearchNameAliases(parsed) {
+        return this._getDriverIndexModule()._buildSearchNameAliases.call(this, parsed);
+    }
+
     _normalizeDriverLookupName(name) {
         return this._getDriverIndexModule()._normalizeDriverLookupName.call(this, name);
     }
@@ -68,7 +79,7 @@ class DataService {
         return this._getDriverIndexModule()._extractDriverMirrorMetadata.call(this, mirrorKey, mirrorEntry);
     }
 
-    getDriverMetadata(driverName, driverMirror = null) {
+    async getDriverMetadata(driverName, driverMirror = null) {
         return this._getDriverIndexModule().getDriverMetadata.call(this, driverName, driverMirror);
     }
 
@@ -84,6 +95,18 @@ class DataService {
         return this._getDriverSearchModule()._matchesDriverSearchTerm.call(this, searchTarget, searchLower, isExactSearch);
     }
 
+    _hasAccents(str) {
+        return this._getDriverSearchModule()._hasAccents.call(this, str);
+    }
+
+    _normalizeExactDisplayName(value) {
+        return this._getDriverSearchModule()._normalizeExactDisplayName.call(this, value);
+    }
+
+    _accentExactWordMatch(candidateName, searchTerm) {
+        return this._getDriverSearchModule()._accentExactWordMatch.call(this, candidateName, searchTerm);
+    }
+
     _getSuperclassClasses(superclassName) {
         return this._getDriverSearchModule()._getSuperclassClasses.call(this, superclassName);
     }
@@ -92,8 +115,20 @@ class DataService {
         return this._getDriverSearchModule()._filterDriverEntries.call(this, entries, filters);
     }
 
+    _extractPathId(record) {
+        return this._getDriverSearchModule()._extractPathId.call(this, record);
+    }
+
+    _normalizeMetadataCandidates(metaEntry) {
+        return this._getDriverSearchModule()._normalizeMetadataCandidates.call(this, metaEntry);
+    }
+
     _buildMetadataSearchResult(filteredEntries, mirrorMeta, mirrorKey, driverEntries) {
         return this._getDriverSearchModule()._buildMetadataSearchResult.call(this, filteredEntries, mirrorMeta, mirrorKey, driverEntries);
+    }
+
+    _buildMetadataSearchResultsForPathIds(filteredEntries, metaEntry, mirrorKey, driverEntries) {
+        return this._getDriverSearchModule()._buildMetadataSearchResultsForPathIds.call(this, filteredEntries, metaEntry, mirrorKey, driverEntries);
     }
 
     _buildLegacySearchResults(filteredEntries, mirrorMeta, mirrorKey, driverEntries) {
@@ -115,6 +150,14 @@ class DataService {
 
     async _fetchSingleDriverShard(shardKey) {
         return this._getDriverIndexModule()._fetchSingleDriverShard.call(this, shardKey);
+    }
+
+    async _loadDriverMetadataShard(shardKey) {
+        return this._getDriverIndexModule()._loadDriverMetadataShard.call(this, shardKey);
+    }
+
+    async _fetchSingleDriverMetadataShard(shardKey) {
+        return this._getDriverIndexModule()._fetchSingleDriverMetadataShard.call(this, shardKey);
     }
 
     async _fetchDriverMirrorData() {

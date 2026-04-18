@@ -1,0 +1,99 @@
+/* ========================================
+   HALL OF FAME SECTION
+   ======================================== */
+
+.hall-of-fame-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    margin-top: 1.2rem;
+}
+
+.hall-of-fame-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: linear-gradient(145deg, rgba(59, 130, 246, 0.1), rgba(30, 41, 59, 0.95));
+    padding: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.hall-of-fame-link:hover .hall-of-fame-card {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
+    transform: translateY(-1px);
+}
+
+.hall-of-fame-header {
+    text-align: center;
+    margin-bottom: 0.85rem;
+}
+
+.hall-of-fame-header h3 {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    margin-bottom: 0.2rem;
+}
+
+.hall-of-fame-header p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.hall-of-fame-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.hall-of-fame-column h4 {
+    color: var(--primary-color);
+    font-size: 0.95rem;
+    margin-bottom: 0.55rem;
+    text-align: center;
+}
+
+.hall-of-fame-column ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.hall-of-fame-item,
+.hall-of-fame-empty {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.45rem 0.55rem;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 8px;
+    background: rgba(15, 23, 42, 0.55);
+    color: var(--text-primary);
+    margin-bottom: 0.4rem;
+    font-size: 0.88rem;
+}
+
+.hall-of-fame-empty {
+    display: block;
+    text-align: center;
+    color: var(--text-secondary);
+    margin-bottom: 0;
+}
+
+.hall-of-fame-rank {
+    color: var(--primary-color);
+    font-weight: 700;
+    min-width: 1.25rem;
+}
+
+.hall-of-fame-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hall-of-fame-value {
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    white-space: nowrap;
+}

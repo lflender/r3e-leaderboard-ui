@@ -1,0 +1,403 @@
+﻿/* ========================================
+   6. TABLES
+   ======================================== */
+
+#results-container {
+    margin-top: 1.5rem;
+}
+
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+}
+
+.error {
+    background-color: #7f1d1d;
+    color: #fecaca;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border: 1px solid #991b1b;
+}
+
+.results-table {
+    width: 100%;
+    table-layout: auto;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px 0 rgba(30, 41, 59, 0.10);
+}
+
+.results-table th,
+.results-table td {
+    padding: 0.65rem 0.6rem;
+    text-align: left;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border);
+}
+
+.results-table th {
+    color: #fff;
+    font-size: 1.05rem;
+    font-weight: 700;
+    padding: 0.7rem 0.8rem;
+    border: none;
+    letter-spacing: 0.01em;
+}
+
+.results-table thead tr {
+    background: #2563eb;
+}
+
+.results-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+}
+
+.results-table th.sortable:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.results-table th.sortable.sort-active {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.results-table th.sortable::after {
+    content: ' ⇅';
+    opacity: 0.5;
+    font-size: 0.9em;
+}
+
+.results-table th.sortable.sort-active::after {
+    content: ' ▼';
+    opacity: 1;
+}
+
+.results-table tr:hover {
+    background-color: var(--hover-bg);
+}
+
+.results-table td {
+    padding: 0.6rem;
+    background: var(--surface);
+    color: var(--text-primary);
+    transition: background 0.2s;
+}
+
+.results-table tr:hover td {
+    background: var(--hover-bg);
+}
+
+.results-table tr:last-child td {
+    border-bottom: none;
+}
+
+.results-table a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.results-table td.no-wrap {
+    white-space: nowrap;
+}
+
+.highlight-row td {
+    background-color: rgba(59, 130, 246, 0.08) !important;
+    box-shadow: inset 0 0 12px rgba(59,130,246,0.05);
+    font-weight: 700;
+}
+
+.highlight-row {
+    transition: background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* Table scrollbar styling */
+#track-info-table,
+#results-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) var(--surface);
+    padding: 2px; /* Prevent border/shadow clipping */
+}
+
+#track-info-table::-webkit-scrollbar,
+#results-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+#track-info-table::-webkit-scrollbar-track,
+#results-container::-webkit-scrollbar-track {
+    background: var(--surface);
+}
+
+#track-info-table::-webkit-scrollbar-thumb,
+#results-container::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+/* Detail results container - no scroll */
+#detail-results-container {
+    overflow-x: visible;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* Scrollable table wrapper - only the table scrolls */
+.table-scroll-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) var(--surface);
+    padding: 2px; /* Prevent border/shadow clipping */
+}
+
+.table-scroll-wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-scroll-wrapper::-webkit-scrollbar-track {
+    background: var(--surface);
+}
+
+.table-scroll-wrapper::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+/* Track Info table specific styles */
+#track-info-table .entries-cell {
+    text-align: right !important;
+}
+
+#track-info-table .results-table {
+    table-layout: fixed;
+}
+
+#track-info-table .results-table th:nth-child(1),
+#track-info-table .results-table td:nth-child(1) {
+    width: 35%;
+    min-width: 200px;
+}
+
+#track-info-table .results-table th:nth-child(2),
+#track-info-table .results-table td:nth-child(2) {
+    width: 50%;
+}
+
+#track-info-table .results-table th:nth-child(3),
+#track-info-table .results-table td:nth-child(3) {
+    width: 15%;
+    min-width: 80px;
+}
+
+/* Detail page table layout - all columns auto-sized to content */
+#detail-results-container .results-table {
+    width: max-content;
+    min-width: 0;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Position column - fixed small width */
+#detail-results-container .results-table th:nth-child(1),
+#detail-results-container .results-table td:nth-child(1) {
+    width: 1px;
+    white-space: nowrap;
+}
+
+/* Driver column - natural content width */
+#detail-results-container .results-table th:nth-child(2),
+#detail-results-container .results-table td:nth-child(2) {
+    width: auto;
+    white-space: nowrap;
+}
+
+/* Laptime, Lap %, Car, Difficulty, Date columns - shrink to minimum content size */
+#detail-results-container .results-table th:nth-child(3),
+#detail-results-container .results-table td:nth-child(3),
+#detail-results-container .results-table th:nth-child(4),
+#detail-results-container .results-table td:nth-child(4),
+#detail-results-container .results-table th:nth-child(5),
+#detail-results-container .results-table td:nth-child(5),
+#detail-results-container .results-table th:nth-child(6),
+#detail-results-container .results-table td:nth-child(6),
+#detail-results-container .results-table th:nth-child(7),
+#detail-results-container .results-table td:nth-child(7),
+#detail-results-container .results-table th:nth-child(8),
+#detail-results-container .results-table td:nth-child(8) {
+    width: 1px;
+    white-space: nowrap;
+}
+
+/* Driver Info page table layout (columns: Car class, Car, Position, Track, Laptime, Lap%, Difficulty, Date) */
+/* Car class and Car columns - keep readable minimums */
+#results-container .results-table th:nth-child(1),
+#results-container .results-table td:nth-child(1) {
+    width: 22%;
+    min-width: 150px;
+    white-space: normal;
+}
+
+#results-container .results-table th:nth-child(2),
+#results-container .results-table td:nth-child(2) {
+    min-width: 200px;
+}
+
+/* Position column - auto-fit content */
+#results-container .results-table th:nth-child(3),
+#results-container .results-table td:nth-child(3) {
+    width: 1px;
+    white-space: nowrap;
+}
+
+/* Track column - share flexible width with Car class and wrap when needed */
+#results-container .results-table th:nth-child(4),
+#results-container .results-table td:nth-child(4) {
+    width: 22%;
+    min-width: 150px;
+    white-space: normal;
+}
+
+/* Laptime column - auto-fit content */
+#results-container .results-table th:nth-child(5),
+#results-container .results-table td:nth-child(5) {
+    width: 1px;
+    white-space: nowrap;
+}
+
+/* Lap % column - auto-fit content */
+#results-container .results-table th:nth-child(6),
+#results-container .results-table td:nth-child(6) {
+    width: 1px;
+    white-space: nowrap;
+}
+
+/* Difficulty column - auto-fit content */
+#results-container .results-table th:nth-child(7),
+#results-container .results-table td:nth-child(7) {
+    width: 1px;
+    white-space: nowrap;
+}
+
+/* Date column - auto-fit content */
+#results-container .results-table th:nth-child(8),
+#results-container .results-table td:nth-child(8) {
+    width: 1px;
+    white-space: nowrap;
+}
+
+/* Car class and Car columns (1 and 2) have no width set, so they share remaining space naturally */
+
+/* Driver group headers */
+.driver-group-header {
+    background-color: #3b4a6b !important;
+    cursor: pointer;
+    user-select: none;
+    color: #f1f5fa;
+    font-weight: 600;
+    font-size: 1.08rem;
+    border-top: 1px solid #475569;
+    border-bottom: 1px solid #475569;
+    transition: background 0.2s;
+    box-shadow: none;
+}
+
+.driver-group-header:hover {
+    background-color: #4b5d85 !important;
+}
+
+.driver-group-header td {
+    padding: 1rem !important;
+    font-weight: 600;
+    border: none;
+    background: none;
+}
+
+.toggle-icon {
+    display: inline-block;
+    margin-right: 0.5rem;
+    font-size: 0.95rem;
+    position: relative;
+    top: -5px;
+    transition: transform 0.2s;
+    color: #60a5fa;
+}
+
+.driver-meta {
+    margin-left: 1rem;
+    font-weight: 400;
+    opacity: 0.9;
+    font-size: 0.97rem;
+    color: #a5b4fc;
+}
+
+.driver-data-row {
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.driver-data-row:hover {
+    background-color: var(--hover-bg);
+}
+
+/* Lap time cells */
+.lap-time-cell {
+    vertical-align: top;
+    text-align: center;
+}
+
+.lap-time-cell .lap-main {
+    display: block;
+    white-space: nowrap;
+}
+
+.lap-time-cell .time-delta,
+.gap-time-cell .time-delta {
+    display: block;
+    white-space: nowrap;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.gap-time-cell {
+    white-space: nowrap;
+    color: var(--text-secondary);
+    text-align: left;
+}
+
+.time-delta-inline {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin-left: 0.4rem;
+}
+
+.mp-pos-badge {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.no-wrap {
+    white-space: nowrap;
+}
+
+/* Track layout styling */
+.track-layout {
+    font-size: 0.85em;
+    color: #999;
+    font-style: italic;
+    font-weight: 400;
+}
+
+#results-container .track-layout {
+    white-space: nowrap;
+    display: block;
+}
+

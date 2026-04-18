@@ -1,5 +1,22 @@
 (function () {
     const DriverIndexService = {
+        _transformMirrorToNameIndex(mirrorData) {
+            if (!mirrorData || typeof mirrorData !== 'object') return mirrorData;
+            const firstKey = Object.keys(mirrorData)[0];
+            if (firstKey === undefined) return mirrorData;
+            // Detect indexed mirror format: keys are sequential numeric strings
+            if (/^\d+$/.test(firstKey) && typeof mirrorData[firstKey] === 'string') {
+                const nameIndex = {};
+                for (const v of Object.values(mirrorData)) {
+                    if (typeof v === 'string' && v) {
+                        nameIndex[v] = v;
+                    }
+                }
+                return nameIndex;
+            }
+            return mirrorData;
+        },
+
         async loadDriverIndex(onProgress = null) {
             if (this.driverIndex) {
                 return this.driverIndex;
@@ -24,7 +41,7 @@
                 for (let attempt = 1; attempt <= maxAttempts; attempt++) {
                     try {
                         const mirrorData = await this._fetchDriverMirrorData();
-                        this.driverIndex = mirrorData;
+                        this.driverIndex = this._transformMirrorToNameIndex(mirrorData);
 
                         if (!this.driverIndex || typeof this.driverIndex !== 'object') {
                             throw new Error('Driver name mirror index is not an object');
@@ -66,7 +83,12 @@
         },
 
         _normalizeDriverLookupName(name) {
-            return String(name || '').trim().replace(/\s+/g, ' ').toLowerCase();
+            return String(name || '')
+                .trim()
+                .replace(/\s+/g, ' ')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase();
         },
 
         _extractDriverMirrorMetadata(mirrorKey, mirrorEntry) {
@@ -106,7 +128,7 @@
             };
         },
 
-        getDriverMetadata(driverName, driverMirror = null) {
+        async getDriverMetadata(driverName, driverMirror = null) {
             const mirror = driverMirror || this.driverIndex || this.driverNameMirror;
             if (!mirror || typeof mirror !== 'object') {
                 return null;
@@ -117,12 +139,47 @@
                 return null;
             }
 
-            const mirrorEntry = mirror[normalizedName] || mirror[String(driverName)] || null;
-            if (!mirrorEntry) {
+            // Check driver exists in mirror
+            if (!(normalizedName in mirror) && !(String(driverName) in mirror)) {
                 return null;
             }
 
-            return this._extractDriverMirrorMetadata(normalizedName, mirrorEntry);
+            // Load metadata from per-letter shard
+            const shardKey = this._getShardKeyForName(normalizedName);
+            try {
+                const metadataShard = await this._loadDriverMetadataShard(shardKey);
+                let metaEntry = metadataShard && metadataShard[normalizedName];
+
+                // Fallback: diacritical names live in _ shard with search_name alias
+                if (!metaEntry && shardKey !== '_') {
+                    const fallbackShard = await this._loadDriverMetadataShard('_');
+                    metaEntry = fallbackShard && fallbackShard[normalizedName];
+                }
+
+                if (metaEntry && typeof metaEntry === 'object') {
+                    return {
+                        lookupKey: normalizedName,
+                        displayName: String(metaEntry.name || normalizedName),
+                        country: String(metaEntry.country || ''),
+                        team: String(metaEntry.team || ''),
+                        rank: String(metaEntry.rank || ''),
+                        originalKey: metaEntry._originalKey || null,
+                        hasMetadata: true
+                    };
+                }
+            } catch (_) {
+                // Fall through to basic result
+            }
+
+            return {
+                lookupKey: normalizedName,
+                displayName: normalizedName,
+                country: '',
+                team: '',
+                rank: '',
+                originalKey: null,
+                hasMetadata: false
+            };
         },
 
         async enrichEntriesWithDriverMetadata(entries) {
@@ -135,28 +192,56 @@
                 return entries;
             }
 
+            // Collect unique shard keys needed for metadata lookup
+            const shardKeysNeeded = new Set();
             entries.forEach(entry => {
                 const driverName = window.DataNormalizer && typeof window.DataNormalizer.extractName === 'function'
                     ? window.DataNormalizer.extractName(entry)
                     : (entry.name || entry.Name || '');
+                if (!driverName) return;
+                const normalizedName = this._normalizeDriverLookupName(driverName);
+                if (!(normalizedName in driverMirror)) return;
+                shardKeysNeeded.add(this._getShardKeyForName(normalizedName));
+            });
 
-                if (!driverName) {
-                    return;
+            // Always include _ shard for diacritical name fallback
+            shardKeysNeeded.add('_');
+
+            // Pre-load all needed metadata shards in parallel
+            await Promise.all([...shardKeysNeeded].map(key =>
+                this._loadDriverMetadataShard(key).catch(() => null)
+            ));
+
+            // Enrich from cached metadata shards
+            entries.forEach(entry => {
+                const driverName = window.DataNormalizer && typeof window.DataNormalizer.extractName === 'function'
+                    ? window.DataNormalizer.extractName(entry)
+                    : (entry.name || entry.Name || '');
+                if (!driverName) return;
+
+                const normalizedName = this._normalizeDriverLookupName(driverName);
+                if (!(normalizedName in driverMirror)) return;
+
+                const shardKey = this._getShardKeyForName(normalizedName);
+                let metadataShard = this.driverMetadataShardCache.get(shardKey);
+                let metaEntry = metadataShard && metadataShard[normalizedName];
+
+                // Fallback: diacritical names live in _ shard with search_name alias
+                if (!metaEntry && shardKey !== '_') {
+                    metadataShard = this.driverMetadataShardCache.get('_');
+                    metaEntry = metadataShard && metadataShard[normalizedName];
                 }
 
-                const metadata = this.getDriverMetadata(driverName, driverMirror);
-                if (!metadata) {
-                    return;
-                }
+                if (!metaEntry || typeof metaEntry !== 'object') return;
 
-                if (metadata.country) {
-                    entry.country = metadata.country;
-                    entry.Country = metadata.country;
+                if (metaEntry.country) {
+                    entry.country = metaEntry.country;
+                    entry.Country = metaEntry.country;
                 }
-                entry.team = metadata.team || '';
-                entry.Team = metadata.team || '';
-                entry.rank = metadata.rank || '';
-                entry.Rank = metadata.rank || '';
+                entry.team = metaEntry.team || '';
+                entry.Team = metaEntry.team || '';
+                entry.rank = metaEntry.rank || '';
+                entry.Rank = metaEntry.rank || '';
             });
 
             return entries;
@@ -233,6 +318,95 @@
             }
 
             throw new Error(`Failed to load shard ${shardKey}`);
+        },
+
+        async _loadDriverMetadataShard(shardKey) {
+            const safeShardKey = (typeof shardKey === 'string' && shardKey.length > 0) ? shardKey : '_';
+
+            if (this.driverMetadataShardCache.has(safeShardKey)) {
+                return this.driverMetadataShardCache.get(safeShardKey);
+            }
+
+            if (this.driverMetadataShardPromises.has(safeShardKey)) {
+                return this.driverMetadataShardPromises.get(safeShardKey);
+            }
+
+            const shardPromise = (async () => {
+                const parsed = await this._fetchSingleDriverMetadataShard(safeShardKey);
+                this._buildSearchNameAliases(parsed);
+                this.driverMetadataShardCache.set(safeShardKey, parsed);
+                return parsed;
+            })();
+
+            this.driverMetadataShardPromises.set(safeShardKey, shardPromise);
+            try {
+                return await shardPromise;
+            } finally {
+                this.driverMetadataShardPromises.delete(safeShardKey);
+            }
+        },
+
+        async _fetchSingleDriverMetadataShard(shardKey) {
+            const maxAttempts = 6;
+            const baseDelayMs = 200;
+
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                try {
+                    const controller = new AbortController();
+                    const timeout = setTimeout(() => controller.abort(), 8000);
+                    const timestamp = Date.now();
+                    const response = await fetch(`${this.driverMetadataBasePath}/${shardKey}.json.gz?v=${timestamp}`, {
+                        cache: 'no-store',
+                        headers: {
+                            'Cache-Control': 'no-cache, no-store, must-revalidate',
+                            'Pragma': 'no-cache',
+                            'Expires': '0'
+                        },
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeout);
+
+                    if (!response.ok) {
+                        throw new Error(`Failed to load metadata shard ${shardKey}: ${response.status} ${response.statusText}`);
+                    }
+
+                    const helper = this._getCompressedJsonHelper();
+                    const text = await helper.readGzipText(response);
+                    if (!text || text.trim().length === 0) {
+                        throw new Error(`Metadata shard ${shardKey} response is empty`);
+                    }
+
+                    const parsed = await this._parseJsonWhenIdle(text);
+                    if (!parsed || typeof parsed !== 'object') {
+                        throw new Error(`Metadata shard ${shardKey} is not an object`);
+                    }
+
+                    return parsed;
+                } catch (error) {
+                    const delay = baseDelayMs * Math.min(20, attempt);
+                    if (attempt === maxAttempts) {
+                        throw error;
+                    }
+                    await new Promise(r => setTimeout(r, delay));
+                }
+            }
+
+            throw new Error(`Failed to load metadata shard ${shardKey}`);
+        },
+
+        _buildSearchNameAliases(parsed) {
+            const aliasesToAdd = [];
+            for (const [key, entry] of Object.entries(parsed)) {
+                if (entry && typeof entry === 'object' && entry.search_name && entry.search_name !== key) {
+                    if (!(entry.search_name in parsed)) {
+                        entry._originalKey = key;
+                        aliasesToAdd.push([entry.search_name, entry]);
+                    }
+                }
+            }
+            for (const [alias, entry] of aliasesToAdd) {
+                parsed[alias] = entry;
+            }
         },
 
         async _fetchDriverMirrorData() {
@@ -360,11 +534,14 @@
                         if (!parsed || typeof parsed !== 'object' || Object.keys(parsed).length === 0) {
                             throw new Error('Invalid index');
                         }
-                        this.driverIndex = parsed;
-                        this.driverNameMirror = parsed;
+                        const transformed = this._transformMirrorToNameIndex(parsed);
+                        this.driverIndex = transformed;
+                        this.driverNameMirror = transformed;
                         this.driverShardCache.clear();
                         this.driverShardPromises.clear();
-                        this._saveDriverIndexToCache(parsed);
+                        this.driverMetadataShardCache.clear();
+                        this.driverMetadataShardPromises.clear();
+                        this._saveDriverIndexToCache(transformed);
                         setTimeout(() => { this._updateLastIndexFromStatus(); }, 0);
                         return;
                     } catch (e) {

@@ -63,17 +63,27 @@ describe('Driver index service', () => {
         expect(updateSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('loads index from mirror fetch and caches it', async () => {
-        vi.spyOn(service, '_fetchDriverMirrorData').mockResolvedValue({ alice: { name: 'Alice' } });
+    it('transforms indexed mirror to name-keyed lookup', () => {
+        const indexed = { '0': 'alice smith', '1': 'bob jones' };
+        const result = service._transformMirrorToNameIndex(indexed);
+        expect(result).toEqual({ 'alice smith': 'alice smith', 'bob jones': 'bob jones' });
+
+        // Already name-keyed data passes through unchanged
+        const nameKeyed = { 'alice smith': { name: 'Alice Smith' } };
+        expect(service._transformMirrorToNameIndex(nameKeyed)).toBe(nameKeyed);
+    });
+
+    it('loads index from mirror fetch, transforms and caches it', async () => {
+        vi.spyOn(service, '_fetchDriverMirrorData').mockResolvedValue({ '0': 'alice smith' });
         const saveSpy = vi.spyOn(service, '_saveDriverIndexToCache');
         const revalidatorSpy = vi.spyOn(service, '_startIndexStatusRevalidator').mockImplementation(() => {});
         vi.spyOn(service, '_updateLastIndexFromStatus').mockResolvedValue();
 
         const result = await service.loadDriverIndex();
 
-        expect(result).toEqual({ alice: { name: 'Alice' } });
-        expect(service.driverNameMirror).toEqual({ alice: { name: 'Alice' } });
-        expect(saveSpy).toHaveBeenCalledWith({ alice: { name: 'Alice' } });
+        expect(result).toEqual({ 'alice smith': 'alice smith' });
+        expect(service.driverNameMirror).toEqual({ 'alice smith': 'alice smith' });
+        expect(saveSpy).toHaveBeenCalledWith({ 'alice smith': 'alice smith' });
         expect(revalidatorSpy).toHaveBeenCalledTimes(1);
     });
 
@@ -117,30 +127,74 @@ describe('Driver index service', () => {
         await expect(first).resolves.toEqual({ alice: [{ name: 'Alice' }] });
         await expect(second).resolves.toEqual({ alice: [{ name: 'Alice' }] });
 
+        vi.spyOn(service, '_fetchSingleDriverMetadataShard').mockResolvedValue({ alice: { name: 'Alice', country: 'SE' } });
+        const m1 = service._loadDriverMetadataShard('a');
+        const m2 = service._loadDriverMetadataShard('a');
+        await expect(m1).resolves.toEqual({ alice: { name: 'Alice', country: 'SE' } });
+        await expect(m2).resolves.toEqual({ alice: { name: 'Alice', country: 'SE' } });
+
         service.driverIndex = null;
         vi.spyOn(service, 'loadDriverIndex').mockResolvedValue({ ready: true });
         await expect(service.waitForDriverIndex(1)).resolves.toEqual({ ready: true });
     });
 
-    it('extracts metadata and enriches entries', async () => {
+    it('extracts metadata from shards and enriches entries', async () => {
         expect(service._getShardKeyForName('Alice')).toBe('a');
         expect(service._normalizeDriverLookupName('  Alice   Smith ')).toBe('alice smith');
 
-        const meta = service._extractDriverMirrorMetadata('alice smith', {
-            canonical_name: 'Alice Smith',
-            country: 'SE',
-            team: 'Blue',
-            rank: 'Pro'
-        });
+        // Mirror now just has names (no metadata)
+        service.driverIndex = { 'alice smith': 'alice smith' };
+
+        // Metadata comes from per-letter shards
+        const metadataShard = {
+            'alice smith': { name: 'Alice Smith', country: 'SE', team: 'Blue', rank: 'Pro' }
+        };
+        vi.spyOn(service, '_loadDriverMetadataShard').mockResolvedValue(metadataShard);
+
+        const meta = await service.getDriverMetadata('Alice Smith');
         expect(meta).toMatchObject({ displayName: 'Alice Smith', country: 'SE', hasMetadata: true });
 
-        service.driverIndex = { 'alice smith': { canonical_name: 'Alice Smith', country: 'SE', team: 'Blue', rank: 'Pro' } };
-        expect(service.getDriverMetadata('Alice Smith')).toMatchObject({ displayName: 'Alice Smith' });
-
+        // Pre-populate metadata shard cache for enrichment
+        service.driverMetadataShardCache.set('a', metadataShard);
+        service.driverMetadataShardCache.set('_', {});
         vi.spyOn(service, 'waitForDriverIndex').mockResolvedValue(service.driverIndex);
         const rows = [{ name: 'Alice Smith' }];
         await service.enrichEntriesWithDriverMetadata(rows);
         expect(rows[0]).toMatchObject({ Country: 'SE', Team: 'Blue', Rank: 'Pro' });
+    });
+
+    it('falls back to _ shard for diacritical names via search_name alias', async () => {
+        // Mirror has normalized name
+        service.driverIndex = { 'oscar domingo': 'oscar domingo' };
+
+        // _ metadata shard has the original diacritical key with search_name
+        const underscoreShard = {
+            'óscar domingo': { name: 'Óscar Domingo', country: 'Spain', team: 'RRSL1', rank: '', search_name: 'oscar domingo' }
+        };
+        // Build search_name aliases as the real loader would
+        service._buildSearchNameAliases(underscoreShard);
+
+        // Letter shard "o" is empty for this name
+        vi.spyOn(service, '_loadDriverMetadataShard').mockImplementation(async (key) => {
+            if (key === '_') return underscoreShard;
+            return {};
+        });
+
+        const meta = await service.getDriverMetadata('oscar domingo');
+        expect(meta).toMatchObject({
+            displayName: 'Óscar Domingo',
+            country: 'Spain',
+            originalKey: 'óscar domingo',
+            hasMetadata: true
+        });
+
+        // Enrichment also falls back to _ shard
+        service.driverMetadataShardCache.set('o', {});
+        service.driverMetadataShardCache.set('_', underscoreShard);
+        vi.spyOn(service, 'waitForDriverIndex').mockResolvedValue(service.driverIndex);
+        const rows = [{ name: 'oscar domingo' }];
+        await service.enrichEntriesWithDriverMetadata(rows);
+        expect(rows[0]).toMatchObject({ Country: 'Spain', Team: 'RRSL1' });
     });
 
     it('parses JSON at idle, handles timeout helper, and updates index timestamp', async () => {

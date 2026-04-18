@@ -24,6 +24,7 @@ class TableRenderer {
             'ClassID', 'ClassName', 'TrackID', 'TotalEntries', 
             'Class ID', 'Class Name', 'Track ID', 'Total Entries',
             'class_id', 'class_name', 'track_id', 'total_entries',
+            'path_id', 'pathId', 'pathID', 'PathID', 'Path ID',
             'Name', 'name', 'DriverName', 'driver_name',
             'Country', 'country', 'Rank', 'rank', 'Team', 'team',
             'found', 'Found',
@@ -140,13 +141,18 @@ class TableRenderer {
         const country = driverObj.country || firstEntry.country || firstEntry.Country || '-';
         const rank = driverObj.rank || firstEntry.rank || firstEntry.Rank || '';
         const team = driverObj.team || firstEntry.team || firstEntry.Team || '';
+        const avatar = driverObj.avatar || firstEntry.avatar || firstEntry.Avatar || '';
+        const pathId = driverObj.pathId || driverObj.path_id || firstEntry.path_id || firstEntry.pathId || firstEntry.PathID || firstEntry['Path ID'] || '';
         
         // Use a shared group ID builder so header and data rows always match.
         const slugSource = driverObj.driver || driverObj.name || firstEntry.name || firstEntry.Name || 'unknown';
-        const groupId = this.buildGroupId(slugSource, country, team);
+        const groupId = this.buildGroupId(slugSource, country, team, pathId);
         
         const flagHtml = FlagHelper.countryToFlag(country) ? `<span class="country-flag">${FlagHelper.countryToFlag(country)}</span>` : '';
         const rankHtml = rank ? R3EUtils.renderRankStars(rank) : '';
+        const avatarHtml = avatar
+            ? `<img src="${R3EUtils.escapeHtml(String(avatar))}" alt="${R3EUtils.escapeHtml(`${displayName} avatar`)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" style="width:24px;height:24px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:8px;position:relative;top:-2px;background:#1f232a;" />`
+            : '';
         
         // Get multiplayer position if available
         const mpPos = typeof resolveMpPos === 'function' ? resolveMpPos(displayName, country) : null;
@@ -163,7 +169,7 @@ class TableRenderer {
             <tr class="driver-group-header" data-group="${groupId}" onclick="toggleGroup(this)">
                 <td colspan="${colspan}">
                     <span class="toggle-icon">▼</span>
-                    <strong${driverNameClass}>${R3EUtils.escapeHtml(displayName)}</strong>
+                    <strong${driverNameClass}>${avatarHtml}${R3EUtils.escapeHtml(displayName)}</strong>
                     <span class="driver-meta">${flagHtml}${R3EUtils.escapeHtml(country)}${rankHtml}${mpPosHtml}${teamHtml}</span>
                 </td>
             </tr>`;
@@ -395,7 +401,7 @@ class TableRenderer {
                 ? `<img class="table-car-class-logo" src="${R3EUtils.escapeHtml(classLogoUrl)}" alt="${R3EUtils.escapeHtml(className || 'Car class')} class logo" loading="lazy" decoding="async" />`
                 : '';
             const classTextHtml = className ? R3EUtils.escapeHtml(className) : '—';
-            return `<td class="no-wrap car-class-cell"><strong>${classLogoHtml}${classTextHtml}</strong></td>`;
+            return `<td class="car-class-cell"><strong>${classLogoHtml}${classTextHtml}</strong></td>`;
         } else if (isCarKey) {
             return this.renderCarCell(value);
         } else if (isLapTimeKey) {
@@ -582,11 +588,20 @@ class TableRenderer {
         const { brand, model } = R3EUtils.splitCarName(value);
         const escBrand = R3EUtils.escapeHtml(brand);
         const escModel = R3EUtils.escapeHtml(model);
+        const brandLogoUrl = (window.R3EUtils && typeof window.R3EUtils.resolveBrandLogoPath === 'function')
+            ? window.R3EUtils.resolveBrandLogoPath(value)
+            : '';
+        const brandLogoClass = brandLogoUrl.includes('logo-raceroom.png')
+            ? 'table-brand-logo table-brand-logo-raceroom'
+            : 'table-brand-logo';
+        const brandLogoHtml = brandLogoUrl
+            ? `<span class="table-brand-logo-slot"><img class="${brandLogoClass}" src="${R3EUtils.escapeHtml(brandLogoUrl)}" alt="${escBrand || 'Car brand'} logo" loading="lazy" decoding="async" onload='const renderedWidth = this.getBoundingClientRect().width || this.width || 22; const slotWidth = (this.parentElement && this.parentElement.getBoundingClientRect().width) || 22; const offsetX = (slotWidth - renderedWidth) / 2; this.style.marginLeft = offsetX + "px";' onerror='if (this.parentElement) { this.parentElement.remove(); } else { this.remove(); }' /></span>`
+            : '';
         
         if (model) {
-            return `<td class="car-cell"><span class="car-brand">${escBrand}</span> <span class="car-model">${escModel}</span></td>`;
+            return `<td class="car-cell"><span class="car-cell-inline">${brandLogoHtml}<span class="car-brand">${escBrand}</span> <span class="car-model">${escModel}</span></span></td>`;
         } else {
-            return `<td class="car-cell"><span class="car-brand">${escBrand}</span></td>`;
+            return `<td class="car-cell"><span class="car-cell-inline">${brandLogoHtml}<span class="car-brand">${escBrand}</span></span></td>`;
         }
     }
     
@@ -712,7 +727,8 @@ class TableRenderer {
         const slugSource = item.name || item.Name || item.driver || 'unknown';
         const country = item.country || item.Country || '';
         const team = item.team || item.Team || '';
-        return this.buildGroupId(slugSource, country, team);
+        const pathId = item.path_id || item.pathId || item.pathID || item.PathID || item['Path ID'] || '';
+        return this.buildGroupId(slugSource, country, team, pathId);
     }
 
     /**
@@ -721,9 +737,10 @@ class TableRenderer {
      * @param {string} name - Driver name
      * @param {string} country - Driver country
      * @param {string} team - Driver team
+     * @param {string} pathId - Driver path ID
      * @returns {string} Group ID
      */
-    buildGroupId(name, country = '', team = '') {
+    buildGroupId(name, country = '', team = '', pathId = '') {
         const base = String(name || 'unknown')
             .replace(/\s+/g, '-')
             .replace(/[^a-zA-Z0-9\-]/g, '')
@@ -734,7 +751,10 @@ class TableRenderer {
         const teamSlug = team && team !== '-'
             ? `-${String(team).replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-]/g, '').toLowerCase()}`
             : '';
-        return `group-${base}${countrySlug}${teamSlug}`;
+        const pathIdSlug = pathId
+            ? `-${String(pathId).replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-]/g, '').toLowerCase()}`
+            : '';
+        return `group-${base}${countrySlug}${teamSlug}${pathIdSlug}`;
     }
     
     /**

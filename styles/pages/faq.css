@@ -1,0 +1,76 @@
+/* ========================================
+   FAQ PAGE STYLES
+   ======================================== */
+
+.faq-container {
+    max-width: 900px;
+    margin: 0.5rem auto;
+    padding: 0 1rem;
+}
+
+.faq-title {
+    font-size: 1.7rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.faq-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.faq-item {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    overflow: hidden;
+}
+
+.faq-item summary {
+    cursor: pointer;
+    padding: 1rem;
+    list-style: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--text-primary);
+}
+
+.faq-item summary::marker {
+    display: none;
+}
+
+.faq-item summary::after {
+    content: '▾';
+    color: var(--text-secondary);
+    transition: transform 0.2s ease;
+}
+
+.faq-item[open] summary::after {
+    transform: rotate(180deg);
+}
+
+.faq-item .faq-content {
+    padding: 1rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-secondary);
+}
+
+.faq-item .faq-content a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.faq-item .faq-content a:visited {
+    color: var(--primary-color);
+}
+
+.faq-item .faq-content a:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+
+.faq-item .faq-content a:active {
+    color: var(--primary-color);
+}

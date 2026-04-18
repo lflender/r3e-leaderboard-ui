@@ -101,6 +101,39 @@ describe('DataService driver-search module', () => {
         expect(result[0].entries[0]).toMatchObject({ Country: 'SE', Team: 'Blue', Rank: 'Pro' });
     });
 
+    it('searchDriver groups same-name metadata results by path_id', async () => {
+        vi.spyOn(service, 'waitForDriverIndex').mockResolvedValue({
+            'tobias naumann': 'tobias naumann'
+        });
+        vi.spyOn(service, '_loadDriverShard').mockResolvedValue({
+            'tobias naumann': [
+                { name: 'Tobias Naumann', path_id: '1001', Class: 5, track_id: 10, difficulty: 'Get Real' },
+                { name: 'Tobias Naumann', path_id: '1002', Class: 5, track_id: 10, difficulty: 'Get Real' }
+            ]
+        });
+        vi.spyOn(service, '_loadDriverMetadataShard').mockResolvedValue({
+            'tobias naumann': [
+                { name: 'Tobias Naumann', path_id: '1001', country: 'Germany', team: 'Alpha', rank: 'B' },
+                { name: 'Tobias Naumann', path_id: '1002', country: 'Austria', team: 'Beta', rank: 'A' }
+            ]
+        });
+
+        const result = await service.searchDriver('Tobias Naumann', { classId: 5, trackId: 10, difficulty: 'Get Real' });
+
+        expect(result).toHaveLength(2);
+        expect(result.map(group => group.pathId).sort()).toEqual(['1001', '1002']);
+        expect(result.find(group => group.pathId === '1001')).toMatchObject({
+            country: 'Germany',
+            team: 'Alpha',
+            rank: 'B'
+        });
+        expect(result.find(group => group.pathId === '1002')).toMatchObject({
+            country: 'Austria',
+            team: 'Beta',
+            rank: 'A'
+        });
+    });
+
     it('searchDriver supports exact quoted search with legacy grouping', async () => {
         vi.spyOn(service, 'waitForDriverIndex').mockResolvedValue({
             'alice smith': 'alice smith'

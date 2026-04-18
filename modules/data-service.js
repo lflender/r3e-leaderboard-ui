@@ -103,8 +103,20 @@ class DataService {
         return this._getDriverSearchModule()._filterDriverEntries.call(this, entries, filters);
     }
 
+    _extractPathId(record) {
+        return this._getDriverSearchModule()._extractPathId.call(this, record);
+    }
+
+    _normalizeMetadataCandidates(metaEntry) {
+        return this._getDriverSearchModule()._normalizeMetadataCandidates.call(this, metaEntry);
+    }
+
     _buildMetadataSearchResult(filteredEntries, mirrorMeta, mirrorKey, driverEntries) {
         return this._getDriverSearchModule()._buildMetadataSearchResult.call(this, filteredEntries, mirrorMeta, mirrorKey, driverEntries);
+    }
+
+    _buildMetadataSearchResultsForPathIds(filteredEntries, metaEntry, mirrorKey, driverEntries) {
+        return this._getDriverSearchModule()._buildMetadataSearchResultsForPathIds.call(this, filteredEntries, metaEntry, mirrorKey, driverEntries);
     }
 
     _buildLegacySearchResults(filteredEntries, mirrorMeta, mirrorKey, driverEntries) {

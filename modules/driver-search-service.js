@@ -89,6 +89,27 @@
             return filteredEntries;
         },
 
+        _extractPathId(record) {
+            if (!record || typeof record !== 'object') {
+                return '';
+            }
+
+            const rawPathId = record.path_id || record.pathId || record.pathID || record.PathID || record['Path ID'];
+            return String(rawPathId || '').trim();
+        },
+
+        _normalizeMetadataCandidates(metaEntry) {
+            if (Array.isArray(metaEntry)) {
+                return metaEntry.filter(entry => entry && typeof entry === 'object');
+            }
+
+            if (metaEntry && typeof metaEntry === 'object') {
+                return [metaEntry];
+            }
+
+            return [];
+        },
+
         _buildMetadataSearchResult(filteredEntries, mirrorMeta, mirrorKey, driverEntries) {
             const enrichedEntries = filteredEntries.map(entry => {
                 const enrichedEntry = { ...entry };
@@ -111,8 +132,68 @@
                 country: mirrorMeta.country || '-',
                 team: mirrorMeta.team || '',
                 rank: mirrorMeta.rank || '',
+                pathId: mirrorMeta.pathId || '',
                 entries: enrichedEntries
             };
+        },
+
+        _buildMetadataSearchResultsForPathIds(filteredEntries, metaEntry, mirrorKey, driverEntries) {
+            const metadataCandidates = this._normalizeMetadataCandidates(metaEntry);
+            if (metadataCandidates.length === 0) {
+                return [];
+            }
+
+            const metadataByPathId = new Map();
+            metadataCandidates.forEach(candidate => {
+                const pathId = this._extractPathId(candidate);
+                if (pathId && !metadataByPathId.has(pathId)) {
+                    metadataByPathId.set(pathId, candidate);
+                }
+            });
+
+            const entriesByPathId = new Map();
+            filteredEntries.forEach(entry => {
+                const pathId = this._extractPathId(entry);
+                const groupKey = pathId || '__no_path_id__';
+                if (!entriesByPathId.has(groupKey)) {
+                    entriesByPathId.set(groupKey, []);
+                }
+                entriesByPathId.get(groupKey).push(entry);
+            });
+
+            // If we only have metadata and no entries path IDs, keep single-result behavior.
+            if (entriesByPathId.size === 1 && entriesByPathId.has('__no_path_id__')) {
+                const primaryMeta = metadataCandidates[0];
+                const mirrorMeta = {
+                    lookupKey: this._normalizeDriverLookupName(mirrorKey),
+                    displayName: String(primaryMeta.name || mirrorKey),
+                    country: String(primaryMeta.country || ''),
+                    team: String(primaryMeta.team || ''),
+                    rank: String(primaryMeta.rank || ''),
+                    pathId: this._extractPathId(primaryMeta),
+                    hasMetadata: true
+                };
+                return [this._buildMetadataSearchResult(filteredEntries, mirrorMeta, mirrorKey, driverEntries)];
+            }
+
+            const groupedResults = [];
+            entriesByPathId.forEach((entriesForPath, groupKey) => {
+                const pathId = groupKey === '__no_path_id__' ? '' : groupKey;
+                const metadataForPath = (pathId && metadataByPathId.get(pathId)) || metadataCandidates[0];
+                const mirrorMeta = {
+                    lookupKey: this._normalizeDriverLookupName(mirrorKey),
+                    displayName: String(metadataForPath.name || mirrorKey),
+                    country: String(metadataForPath.country || ''),
+                    team: String(metadataForPath.team || ''),
+                    rank: String(metadataForPath.rank || ''),
+                    pathId: pathId || this._extractPathId(metadataForPath),
+                    hasMetadata: true
+                };
+
+                groupedResults.push(this._buildMetadataSearchResult(entriesForPath, mirrorMeta, mirrorKey, driverEntries));
+            });
+
+            return groupedResults;
         },
 
         _buildLegacySearchResults(filteredEntries, mirrorMeta, mirrorKey, driverEntries) {
@@ -190,7 +271,13 @@
 
                     if (!Array.isArray(driverEntries) || driverEntries.length === 0) {
                         // Use original key from metadata to find entries in _ leaderboard shard
-                        const originalKey = metaEntry && metaEntry._originalKey;
+                        let originalKey = null;
+                        if (Array.isArray(metaEntry)) {
+                            const withOriginalKey = metaEntry.find(entry => entry && typeof entry === 'object' && entry._originalKey);
+                            originalKey = withOriginalKey ? withOriginalKey._originalKey : null;
+                        } else {
+                            originalKey = metaEntry && metaEntry._originalKey;
+                        }
                         if (originalKey && fallbackShard) {
                             driverEntries = fallbackShard[originalKey] || [];
                         }
@@ -206,16 +293,9 @@
                     continue;
                 }
 
-                if (metaEntry && typeof metaEntry === 'object') {
-                    const mirrorMeta = {
-                        lookupKey: normalizedLookupName,
-                        displayName: String(metaEntry.name || mirrorKey),
-                        country: String(metaEntry.country || ''),
-                        team: String(metaEntry.team || ''),
-                        rank: String(metaEntry.rank || ''),
-                        hasMetadata: true
-                    };
-                    results.push(this._buildMetadataSearchResult(filteredEntries, mirrorMeta, mirrorKey, driverEntries));
+                const metadataCandidates = this._normalizeMetadataCandidates(metaEntry);
+                if (metadataCandidates.length > 0) {
+                    results.push(...this._buildMetadataSearchResultsForPathIds(filteredEntries, metadataCandidates, mirrorKey, driverEntries));
                 } else {
                     const mirrorMeta = {
                         lookupKey: normalizedLookupName,

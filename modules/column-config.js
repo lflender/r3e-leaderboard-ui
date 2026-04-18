@@ -172,6 +172,14 @@ const COLUMNS = {
         order: 0,
         visible: false
     },
+
+    PATH_ID: {
+        id: 'path_id',
+        aliases: ['path_id', 'pathId', 'pathID', 'PathID', 'Path ID'],
+        displayName: 'Path ID',
+        order: 0,
+        visible: false
+    },
     
     TOTAL_ENTRIES: {
         id: 'total_entries',

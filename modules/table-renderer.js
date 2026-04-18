@@ -24,6 +24,7 @@ class TableRenderer {
             'ClassID', 'ClassName', 'TrackID', 'TotalEntries', 
             'Class ID', 'Class Name', 'Track ID', 'Total Entries',
             'class_id', 'class_name', 'track_id', 'total_entries',
+            'path_id', 'pathId', 'pathID', 'PathID', 'Path ID',
             'Name', 'name', 'DriverName', 'driver_name',
             'Country', 'country', 'Rank', 'rank', 'Team', 'team',
             'found', 'Found',
@@ -140,10 +141,11 @@ class TableRenderer {
         const country = driverObj.country || firstEntry.country || firstEntry.Country || '-';
         const rank = driverObj.rank || firstEntry.rank || firstEntry.Rank || '';
         const team = driverObj.team || firstEntry.team || firstEntry.Team || '';
+        const pathId = driverObj.pathId || driverObj.path_id || firstEntry.path_id || firstEntry.pathId || firstEntry.PathID || firstEntry['Path ID'] || '';
         
         // Use a shared group ID builder so header and data rows always match.
         const slugSource = driverObj.driver || driverObj.name || firstEntry.name || firstEntry.Name || 'unknown';
-        const groupId = this.buildGroupId(slugSource, country, team);
+        const groupId = this.buildGroupId(slugSource, country, team, pathId);
         
         const flagHtml = FlagHelper.countryToFlag(country) ? `<span class="country-flag">${FlagHelper.countryToFlag(country)}</span>` : '';
         const rankHtml = rank ? R3EUtils.renderRankStars(rank) : '';
@@ -721,7 +723,8 @@ class TableRenderer {
         const slugSource = item.name || item.Name || item.driver || 'unknown';
         const country = item.country || item.Country || '';
         const team = item.team || item.Team || '';
-        return this.buildGroupId(slugSource, country, team);
+        const pathId = item.path_id || item.pathId || item.pathID || item.PathID || item['Path ID'] || '';
+        return this.buildGroupId(slugSource, country, team, pathId);
     }
 
     /**
@@ -730,9 +733,10 @@ class TableRenderer {
      * @param {string} name - Driver name
      * @param {string} country - Driver country
      * @param {string} team - Driver team
+     * @param {string} pathId - Driver path ID
      * @returns {string} Group ID
      */
-    buildGroupId(name, country = '', team = '') {
+    buildGroupId(name, country = '', team = '', pathId = '') {
         const base = String(name || 'unknown')
             .replace(/\s+/g, '-')
             .replace(/[^a-zA-Z0-9\-]/g, '')
@@ -743,7 +747,10 @@ class TableRenderer {
         const teamSlug = team && team !== '-'
             ? `-${String(team).replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-]/g, '').toLowerCase()}`
             : '';
-        return `group-${base}${countrySlug}${teamSlug}`;
+        const pathIdSlug = pathId
+            ? `-${String(pathId).replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-]/g, '').toLowerCase()}`
+            : '';
+        return `group-${base}${countrySlug}${teamSlug}${pathIdSlug}`;
     }
     
     /**

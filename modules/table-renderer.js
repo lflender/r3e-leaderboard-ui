@@ -141,6 +141,7 @@ class TableRenderer {
         const country = driverObj.country || firstEntry.country || firstEntry.Country || '-';
         const rank = driverObj.rank || firstEntry.rank || firstEntry.Rank || '';
         const team = driverObj.team || firstEntry.team || firstEntry.Team || '';
+        const avatar = driverObj.avatar || firstEntry.avatar || firstEntry.Avatar || '';
         const pathId = driverObj.pathId || driverObj.path_id || firstEntry.path_id || firstEntry.pathId || firstEntry.PathID || firstEntry['Path ID'] || '';
         
         // Use a shared group ID builder so header and data rows always match.
@@ -149,6 +150,9 @@ class TableRenderer {
         
         const flagHtml = FlagHelper.countryToFlag(country) ? `<span class="country-flag">${FlagHelper.countryToFlag(country)}</span>` : '';
         const rankHtml = rank ? R3EUtils.renderRankStars(rank) : '';
+        const avatarHtml = avatar
+            ? `<img src="${R3EUtils.escapeHtml(String(avatar))}" alt="${R3EUtils.escapeHtml(`${displayName} avatar`)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" style="width:24px;height:24px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:8px;position:relative;top:-2px;background:#1f232a;" />`
+            : '';
         
         // Get multiplayer position if available
         const mpPos = typeof resolveMpPos === 'function' ? resolveMpPos(displayName, country) : null;
@@ -165,7 +169,7 @@ class TableRenderer {
             <tr class="driver-group-header" data-group="${groupId}" onclick="toggleGroup(this)">
                 <td colspan="${colspan}">
                     <span class="toggle-icon">▼</span>
-                    <strong${driverNameClass}>${R3EUtils.escapeHtml(displayName)}</strong>
+                    <strong${driverNameClass}>${avatarHtml}${R3EUtils.escapeHtml(displayName)}</strong>
                     <span class="driver-meta">${flagHtml}${R3EUtils.escapeHtml(country)}${rankHtml}${mpPosHtml}${teamHtml}</span>
                 </td>
             </tr>`;

@@ -147,8 +147,8 @@ describe('DataService driver-search module', () => {
         });
         vi.spyOn(service, '_loadDriverMetadataShard').mockResolvedValue({
             'tobias naumann': [
-                { name: 'Tobias Naumann', path_id: '1001', country: 'Germany', team: 'Alpha', rank: 'B' },
-                { name: 'Tobias Naumann', path_id: '1002', country: 'Austria', team: 'Beta', rank: 'A' }
+                { name: 'Tobias Naumann', path_id: '1001', country: 'Germany', team: 'Alpha', rank: 'B', avatar: 'https://example.com/avatar-1001.png' },
+                { name: 'Tobias Naumann', path_id: '1002', country: 'Austria', team: 'Beta', rank: 'A', avatar: 'https://example.com/avatar-1002.png' }
             ]
         });
 
@@ -159,12 +159,14 @@ describe('DataService driver-search module', () => {
         expect(result.find(group => group.pathId === '1001')).toMatchObject({
             country: 'Germany',
             team: 'Alpha',
-            rank: 'B'
+            rank: 'B',
+            avatar: 'https://example.com/avatar-1001.png'
         });
         expect(result.find(group => group.pathId === '1002')).toMatchObject({
             country: 'Austria',
             team: 'Beta',
-            rank: 'A'
+            rank: 'A',
+            avatar: 'https://example.com/avatar-1002.png'
         });
     });
 

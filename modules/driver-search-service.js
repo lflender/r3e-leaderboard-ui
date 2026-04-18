@@ -168,6 +168,7 @@
                 country: mirrorMeta.country || '-',
                 team: mirrorMeta.team || '',
                 rank: mirrorMeta.rank || '',
+                avatar: mirrorMeta.avatar || '',
                 pathId: mirrorMeta.pathId || '',
                 entries: enrichedEntries
             };
@@ -206,6 +207,7 @@
                     country: String(primaryMeta.country || ''),
                     team: String(primaryMeta.team || ''),
                     rank: String(primaryMeta.rank || ''),
+                    avatar: String(primaryMeta.avatar || ''),
                     pathId: this._extractPathId(primaryMeta),
                     hasMetadata: true
                 };
@@ -222,6 +224,7 @@
                     country: String(metadataForPath.country || ''),
                     team: String(metadataForPath.team || ''),
                     rank: String(metadataForPath.rank || ''),
+                    avatar: String(metadataForPath.avatar || ''),
                     pathId: pathId || this._extractPathId(metadataForPath),
                     hasMetadata: true
                 };

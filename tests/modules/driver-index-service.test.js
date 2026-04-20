@@ -141,6 +141,13 @@ describe('Driver index service', () => {
     it('extracts metadata from shards and enriches entries', async () => {
         expect(service._getShardKeyForName('Alice')).toBe('a');
         expect(service._normalizeDriverLookupName('  Alice   Smith ')).toBe('alice smith');
+        expect(service._normalizeDriverLookupName('Bruno Bæ')).toBe('bruno bæ');
+        expect(service._normalizeDriverLookupName('Søren Kierkegård')).toBe('søren kierkegard');
+        expect(service._normalizeDriverLookupName('François L\'Œuf')).toBe("francois l'œuf");
+        expect(service._normalizeDriverLookupName('Groß')).toBe('groß');
+        expect(service._normalizeDriverLookupName('Łukasz')).toBe('łukasz');
+        expect(service._normalizeDriverLookupName('Þórður')).toBe('þorður');
+        expect(service._normalizeDriverLookupName('D’Angelo')).toBe("d'angelo");
 
         // Mirror now just has names (no metadata)
         service.driverIndex = { 'alice smith': 'alice smith' };

@@ -103,6 +103,22 @@ class DataService {
         return this._getDriverSearchModule()._normalizeExactDisplayName.call(this, value);
     }
 
+    _foldEuropeanSearchName(value) {
+        return this._getDriverSearchModule()._foldEuropeanSearchName.call(this, value);
+    }
+
+    _reduceEuropeanSearchName(value) {
+        return this._getDriverSearchModule()._reduceEuropeanSearchName.call(this, value);
+    }
+
+    _hasSpecialEuropeanLetters(value) {
+        return this._getDriverSearchModule()._hasSpecialEuropeanLetters.call(this, value);
+    }
+
+    _buildLookupKeyCandidates(value) {
+        return this._getDriverSearchModule()._buildLookupKeyCandidates.call(this, value);
+    }
+
     _accentExactWordMatch(candidateName, searchTerm) {
         return this._getDriverSearchModule()._accentExactWordMatch.call(this, candidateName, searchTerm);
     }

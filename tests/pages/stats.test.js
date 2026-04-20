@@ -142,5 +142,24 @@ describe('stats page integration', () => {
             expect.objectContaining({ filter_value: '' })
         );
     });
+
+    it('normalizes double spaces in driver links when navigating to driver search', async () => {
+        window.StatsData.fetchGzipJson = vi.fn((path) => {
+            if (String(path).includes('pole')) {
+                return Promise.resolve([{ driver_name: 'Jean  Noel Chariwe', country: 'CH', rank: 'C', pole_positions: 5 }]);
+            }
+            return Promise.resolve([{ driver_name: 'Bob', country: 'DE', rank: 'B', bested_drivers: 99 }]);
+        });
+
+        loadBrowserScript('modules/pages/stats.js');
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        const driverLink = document.querySelector('#stats-pole-table .stats-driver-cell a');
+        const href = driverLink ? String(driverLink.getAttribute('href') || '') : '';
+
+        expect(href).toContain('drivers.html?driver=');
+        expect(href).toContain('%22Jean%20Noel%20Chariwe%22');
+        expect(href).not.toContain('%20%20');
+    });
 });
 

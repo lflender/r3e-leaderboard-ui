@@ -86,6 +86,7 @@
             return String(name || '')
                 .trim()
                 .replace(/\s+/g, ' ')
+                .replace(/[’ʻʼ]/g, "'")
                 .normalize('NFD')
                 .replace(/[\u0300-\u036f]/g, '')
                 .toLowerCase();

@@ -12,8 +12,8 @@ class DataService {
         this.driverShardPromises = new Map(); // single-flight promises for shard loading
         this.driverShardCache = new Map();
         this.driverMirrorPath = 'cache/index/mirror.json.gz';
-        this.driverShardBasePath = 'cache/index/shards';
-        this.driverMetadataBasePath = 'cache/index';
+        this.driverShardBasePath = 'cache/index/entries';
+        this.driverMetadataBasePath = 'cache/index/metadata';
         this.driverMetadataShardCache = new Map();
         this.driverMetadataShardPromises = new Map();
         // Disable status caching: status.json is precomputed and should be fetched fresh

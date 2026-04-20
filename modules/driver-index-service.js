@@ -238,10 +238,14 @@
                     entry.country = metaEntry.country;
                     entry.Country = metaEntry.country;
                 }
-                entry.team = metaEntry.team || '';
-                entry.Team = metaEntry.team || '';
-                entry.rank = metaEntry.rank || '';
-                entry.Rank = metaEntry.rank || '';
+                if (metaEntry.team) {
+                    entry.team = metaEntry.team;
+                    entry.Team = metaEntry.team;
+                }
+                if (metaEntry.rank) {
+                    entry.rank = metaEntry.rank;
+                    entry.Rank = metaEntry.rank;
+                }
             });
 
             return entries;

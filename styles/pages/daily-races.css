@@ -69,6 +69,13 @@
     margin: 0 auto;
 }
 
+.daily-races-feature--sprint-layout .daily-races-grid,
+.daily-races-feature .daily-races-grid.daily-races-grid--sprint-layout {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    max-width: 100%;
+    margin: 0 0 2rem 0;
+}
+
 .daily-races-grid.daily-races-grid--center-fourth > .daily-race-card-link:nth-child(4):last-child {
     grid-column: 2;
 }

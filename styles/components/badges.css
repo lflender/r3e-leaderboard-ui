@@ -258,6 +258,24 @@
     gap: 0.38rem;
 }
 
+/* Rank stars displayed inline after driver name (used across pages) */
+.rank-stars-inline {
+    display: inline-block;
+    white-space: nowrap;
+    font-size: 0.7em;
+    line-height: 1;
+    vertical-align: middle;
+    position: relative;
+    top: -2px;
+    /* Prevent the stars from wrapping separately */
+    word-break: keep-all;
+}
+
+/* Ensure the stars stay with the driver name */
+.rank-stars-inline::before {
+    content: '\00A0'; /* Non-breaking space before stars */
+}
+
 .table-car-class-logo {
     display: inline-block;
     height: 24px;

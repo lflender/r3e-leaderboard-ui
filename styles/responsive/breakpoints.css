@@ -13,20 +13,6 @@
     }
 }
 
-@media (prefers-reduced-motion: reduce) {
-    a.driver-name-top10-glitter,
-    strong.driver-name-top10-glitter,
-    span.driver-name-top10-glitter,
-    a.driver-name-top10-glitter::before,
-    strong.driver-name-top10-glitter::before,
-    span.driver-name-top10-glitter::before,
-    a.driver-name-top10-glitter::after,
-    strong.driver-name-top10-glitter::after,
-    span.driver-name-top10-glitter::after {
-        animation: none;
-    }
-}
-
 /* Medium screens - remove container padding to prevent table border clipping */
 @media (max-width: 1300px) {
     .tab-content {

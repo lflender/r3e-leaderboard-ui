@@ -471,7 +471,7 @@ span.driver-name-top10-glitter::after {
 }
 
 .driver-group-header td {
-    padding: 1rem !important;
+    padding: 0.65rem !important;
     font-weight: 600;
     border: none;
     background: none;

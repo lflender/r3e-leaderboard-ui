@@ -41,6 +41,12 @@
     overflow: visible;
 }
 
+#results-container .table-car-class-logo {
+    height: 28px;
+    width: 28px;
+    max-width: 28px;
+}
+
 .table-brand-logo-slot {
     display: inline-flex;
     align-items: center;

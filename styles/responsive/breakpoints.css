@@ -140,6 +140,10 @@
         margin-bottom: 0;
     }
 
+    .cars-tile-grid {
+        margin-top: 0.5rem;
+    }
+
     #cars-info-table {
         padding-top: 0.35rem;
         overflow: visible;
@@ -165,8 +169,8 @@
 
     .car-inline-thumbnail {
         position: absolute;
-        right: -0.25rem;
-        top: -0.25rem;
+        right: -0.5rem;
+        top: 0.25rem;
         transform: translateY(-50%);
         display: block;
         height: 1.9rem;
@@ -608,9 +612,9 @@
 
     #cars-info-table .results-table th:nth-child(1),
     #cars-info-table .results-table td:nth-child(1) {
-        width: 32%;
+        width: 35%;
         max-width: none;
-        min-width: 195px;
+        min-width: 300px;
         white-space: normal !important;
         word-break: break-word;
     }

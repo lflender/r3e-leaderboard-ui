@@ -176,7 +176,7 @@
 #cars-info-table .results-table th:nth-child(1),
 #cars-info-table .results-table td:nth-child(1) {
     white-space: nowrap;
-    min-width: 250px;
+    min-width: 300px;
 }
 
 #cars-info-table .results-table th {
@@ -197,6 +197,9 @@
 .car-class-header-text .table-car-class-logo {
     position: relative;
     top: 1px;
+    height: 31px;
+    width: 31px;
+    max-width: 31px;
 }
 
 .cars-tile-grid {
@@ -297,8 +300,9 @@
 }
 
 .cars-class-heading .table-car-class-logo {
-    height: calc(2.2em + 8px);
-    max-width: 5.2em;
+    height: 31px;
+    width: 31px;
+    max-width: 31px;
 }
 
 .cars-tiles {

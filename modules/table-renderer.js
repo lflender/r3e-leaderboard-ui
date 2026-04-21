@@ -151,7 +151,7 @@ class TableRenderer {
         const flagHtml = FlagHelper.countryToFlag(country) ? `<span class="country-flag">${FlagHelper.countryToFlag(country)}</span>` : '';
         const rankHtml = rank ? R3EUtils.renderRankStars(rank) : '';
         const avatarHtml = avatar
-            ? `<img src="${R3EUtils.escapeHtml(String(avatar))}" alt="${R3EUtils.escapeHtml(`${displayName} avatar`)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" style="width:24px;height:24px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:8px;position:relative;top:-2px;background:#1f232a;" />`
+            ? `<img src="${R3EUtils.escapeHtml(String(avatar))}" alt="${R3EUtils.escapeHtml(`${displayName} avatar`)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" style="width:31px;height:31px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:8px;position:relative;top:-2px;background:#1f232a;" />`
             : '';
         
         // Get multiplayer position if available

@@ -18,8 +18,9 @@ const CAR_BRANDS = [
 ];
 
 const CAR_SPECIAL_CASES = {
-    'E36 V8 JUDD': { brand: 'Judd', model: 'E36 V8' },
-    '134 Judd V8': { brand: 'Judd', model: '134 V8' }
+    'E36 V8 JUDD': { brand: 'Georg Plasa', model: 'E36 V8' },
+    '134 Judd V8': { brand: 'Georg Plasa', model: '134 V8' },
+    'Carlsson SLK 340 JUDD': { brand: 'Carlsson', model: 'SLK 340' }
 };
 
 const BRAND_LOGO_OVERRIDES = {
@@ -28,6 +29,7 @@ const BRAND_LOGO_OVERRIDES = {
     'callaway': 'chevrolet',
     'citroen': 'citroen',
     'crossle': 'crossle',
+    'georg plasa': 'georg-plasa',
     'lynk & co': 'lynk-co',
     'mclaren-mercedes': 'mclaren',
     'amg-mercedes': 'mercedes',
@@ -39,7 +41,7 @@ const BRAND_LOGO_OVERRIDES = {
 const AVAILABLE_BRAND_LOGO_KEYS = new Set([
     'alfaromeo', 'alpina', 'alpine', 'aquila', 'audi', 'bentley', 'bmw', 'cadillac',
     'carlsson', 'chevrolet', 'citroen', 'crossle', 'cupra', 'fabcar', 'ferrari', 'ford',
-    'gumpert', 'honda', 'hyundai', 'judd', 'koenigsegg', 'ktm', 'lada', 'lamborghini', 'lotus',
+    'georg-plasa', 'gumpert', 'honda', 'hyundai', 'judd', 'koenigsegg', 'ktm', 'lada', 'lamborghini', 'lotus',
     'lrt', 'lynk-co', 'mazda', 'mclaren', 'mercedes', 'nissan', 'nsu', 'opel', 'p45', 'pagani',
     'peugeot', 'porsche', 'praga', 'raceroom', 'radical', 'renault', 'ruf', 'saleen',
     'seat', 'tatuus', 'volkswagen', 'volvo', 'zakspeed'

@@ -397,8 +397,7 @@ span.driver-name-top10-glitter::after {
 /* Car class and Car columns - keep readable minimums */
 #results-container .results-table th:nth-child(1),
 #results-container .results-table td:nth-child(1) {
-    width: 22%;
-    min-width: 150px;
+    min-width: 210px;
     white-space: normal;
 }
 

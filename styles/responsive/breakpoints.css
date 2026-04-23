@@ -403,7 +403,7 @@
 
     #results-container .results-table th:nth-child(1),
     #results-container .results-table td:nth-child(1) {
-        min-width: 125px !important;
+        min-width: 170px;
     }
 
     #results-container .results-table th:nth-child(2),
@@ -1040,7 +1040,7 @@
 
     #results-container .results-table th:nth-child(1),
     #results-container .results-table td:nth-child(1) {
-        min-width: 118px !important;
+        min-width: 150px !important;
     }
 
     #results-container .results-table th:nth-child(2),

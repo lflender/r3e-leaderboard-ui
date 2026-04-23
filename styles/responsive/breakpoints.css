@@ -249,6 +249,12 @@
         max-width: 18px;
     }
 
+    #results-container .table-car-class-logo {
+        width: 22px;
+        height: 22px;
+        max-width: 22px;
+    }
+
     .table-brand-logo {
         height: 18px;
         max-width: 31px;
@@ -792,6 +798,12 @@
         width: 16px;
         height: 16px;
         max-width: 16px;
+    }
+
+    #results-container .table-car-class-logo {
+        width: 20px;
+        height: 20px;
+        max-width: 20px;
     }
 
     .table-brand-logo {

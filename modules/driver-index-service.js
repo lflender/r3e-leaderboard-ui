@@ -86,6 +86,7 @@
             return String(name || '')
                 .trim()
                 .replace(/\s+/g, ' ')
+                .replace(/[’ʻʼ]/g, "'")
                 .normalize('NFD')
                 .replace(/[\u0300-\u036f]/g, '')
                 .toLowerCase();
@@ -238,10 +239,14 @@
                     entry.country = metaEntry.country;
                     entry.Country = metaEntry.country;
                 }
-                entry.team = metaEntry.team || '';
-                entry.Team = metaEntry.team || '';
-                entry.rank = metaEntry.rank || '';
-                entry.Rank = metaEntry.rank || '';
+                if (metaEntry.team) {
+                    entry.team = metaEntry.team;
+                    entry.Team = metaEntry.team;
+                }
+                if (metaEntry.rank) {
+                    entry.rank = metaEntry.rank;
+                    entry.Rank = metaEntry.rank;
+                }
             });
 
             return entries;

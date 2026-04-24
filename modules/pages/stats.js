@@ -108,7 +108,7 @@
     }
 
     function buildDriverCell(row) {
-        const name = row.name;
+        const name = String(row.name || '').trim().replace(/\s+/g, ' ');
         const country = row.country;
         const rank = row.rank;
         const searchUrl = `drivers.html?driver=${encodeURIComponent(`"${name}"`)}`;  

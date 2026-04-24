@@ -131,5 +131,57 @@ describe('daily-races integration', () => {
             expect.objectContaining({ track_id: '20', classes: '100,200' })
         );
     });
+
+    it('keeps the existing feature layout when there are only two feature races', async () => {
+        const dataWithTwoFeatureRaces = {
+            races: mockDailyData().races,
+            'feature-races': [
+                mockDailyData()['feature-races'][0],
+                {
+                    track_id: 10,
+                    car_class_id: 5,
+                    schedule: 'Every 30 min',
+                    is_free_to_play: false
+                }
+            ]
+        };
+
+        setupGlobalsAndFetch(dataWithTwoFeatureRaces);
+        await window.dailyRaces.showDailyRaces();
+
+        const featureSection = document.querySelector('.daily-races-feature');
+        const featureGrid = featureSection.querySelector('.daily-races-grid');
+        expect(featureSection.classList.contains('daily-races-feature--sprint-layout')).toBe(false);
+        expect(featureGrid.classList.contains('daily-races-grid--sprint-layout')).toBe(false);
+    });
+
+    it('uses sprint-style feature layout when there are more than two feature races', async () => {
+        const dataWithThreeFeatureRaces = {
+            races: mockDailyData().races,
+            'feature-races': [
+                mockDailyData()['feature-races'][0],
+                {
+                    track_id: 10,
+                    car_class_id: 5,
+                    schedule: 'Every 30 min',
+                    is_free_to_play: false
+                },
+                {
+                    track_id: 20,
+                    car_class_id: 5,
+                    schedule: 'Every 30 min',
+                    is_free_to_play: false
+                }
+            ]
+        };
+
+        setupGlobalsAndFetch(dataWithThreeFeatureRaces);
+        await window.dailyRaces.showDailyRaces();
+
+        const featureSection = document.querySelector('.daily-races-feature');
+        const featureGrid = featureSection.querySelector('.daily-races-grid');
+        expect(featureSection.classList.contains('daily-races-feature--sprint-layout')).toBe(true);
+        expect(featureGrid.classList.contains('daily-races-grid--sprint-layout')).toBe(true);
+    });
 });
 

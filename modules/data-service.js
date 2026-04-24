@@ -12,8 +12,8 @@ class DataService {
         this.driverShardPromises = new Map(); // single-flight promises for shard loading
         this.driverShardCache = new Map();
         this.driverMirrorPath = 'cache/index/mirror.json.gz';
-        this.driverShardBasePath = 'cache/index/shards';
-        this.driverMetadataBasePath = 'cache/index';
+        this.driverShardBasePath = 'cache/index/entries';
+        this.driverMetadataBasePath = 'cache/index/metadata';
         this.driverMetadataShardCache = new Map();
         this.driverMetadataShardPromises = new Map();
         // Disable status caching: status.json is precomputed and should be fetched fresh
@@ -101,6 +101,22 @@ class DataService {
 
     _normalizeExactDisplayName(value) {
         return this._getDriverSearchModule()._normalizeExactDisplayName.call(this, value);
+    }
+
+    _foldEuropeanSearchName(value) {
+        return this._getDriverSearchModule()._foldEuropeanSearchName.call(this, value);
+    }
+
+    _reduceEuropeanSearchName(value) {
+        return this._getDriverSearchModule()._reduceEuropeanSearchName.call(this, value);
+    }
+
+    _hasSpecialEuropeanLetters(value) {
+        return this._getDriverSearchModule()._hasSpecialEuropeanLetters.call(this, value);
+    }
+
+    _buildLookupKeyCandidates(value) {
+        return this._getDriverSearchModule()._buildLookupKeyCandidates.call(this, value);
     }
 
     _accentExactWordMatch(candidateName, searchTerm) {

@@ -42,6 +42,15 @@ describe('DataService driver-search module', () => {
         expect(service._matchesDriverSearchTerm('ömer binikli', 'omer binikli', true)).toBe(true);
     });
 
+    it('supports folded matching for common european special letters', () => {
+        expect(service._matchesDriverSearchTerm('Bruno Bæ', 'bruno bae', false)).toBe(true);
+        expect(service._matchesDriverSearchTerm('Søren', 'soren', false)).toBe(true);
+        expect(service._matchesDriverSearchTerm('François L\'Œuf', "francois l'oeuf", false)).toBe(true);
+        expect(service._matchesDriverSearchTerm('Groß', 'gross', false)).toBe(true);
+        expect(service._matchesDriverSearchTerm('Łukasz', 'lukasz', false)).toBe(true);
+        expect(service._matchesDriverSearchTerm('Þórður', 'thordur', false)).toBe(true);
+    });
+
     it('matches exact search with punctuation', () => {
         // Exact match with period - simple string equality after normalization
         expect(service._matchesDriverSearchTerm('Sven B.', 'Sven B.', true)).toBe(true);
@@ -343,6 +352,103 @@ describe('DataService driver-search module', () => {
 
         expect(result).toHaveLength(1);
         expect(result[0]).toMatchObject({ driver: 'Óscar Domingo', country: 'Spain', team: 'RRSL1' });
+    });
+
+    it('searchDriver exact quoted search matches names with non-decomposable european characters', async () => {
+        vi.spyOn(service, 'waitForDriverIndex').mockResolvedValue({
+            'bruno bae': 'bruno bae'
+        });
+
+        vi.spyOn(service, '_loadDriverShard').mockResolvedValue({
+            'bruno bae': [
+                { name: 'Bruno Bæ', path_id: '100', Class: 5, track_id: 10, difficulty: 'Get Real' },
+                { name: 'Bruno Bae', path_id: '200', Class: 5, track_id: 10, difficulty: 'Get Real' }
+            ]
+        });
+
+        vi.spyOn(service, '_loadDriverMetadataShard').mockResolvedValue({
+            'bruno bae': [
+                { name: 'Bruno Bæ', path_id: '100', country: 'Denmark', team: 'Nordic', rank: 'B' },
+                { name: 'Bruno Bae', path_id: '200', country: 'Germany', team: 'Berlin', rank: 'C' }
+            ]
+        });
+
+        const result = await service.searchDriver('"Bruno Bæ"', { classId: 5, trackId: 10, difficulty: 'Get Real' });
+
+        expect(result).toHaveLength(1);
+        expect(result[0]).toMatchObject({
+            driver: 'Bruno Bæ',
+            pathId: '100',
+            country: 'Denmark',
+            team: 'Nordic',
+            rank: 'B'
+        });
+        expect(result.find((row) => row.driver === 'Bruno Bae')).toBeUndefined();
+    });
+
+    it('searchDriver resolves mirror/shard key mismatches for european special characters', async () => {
+        vi.spyOn(service, 'waitForDriverIndex').mockResolvedValue({
+            'bruno bæ': 'bruno bæ'
+        });
+
+        vi.spyOn(service, '_loadDriverShard').mockResolvedValue({
+            'bruno ba': [
+                { name: 'Bruno Bæ', path_id: '300', Class: 5, track_id: 10, difficulty: 'Get Real' }
+            ]
+        });
+
+        vi.spyOn(service, '_loadDriverMetadataShard').mockResolvedValue({
+            'bruno ba': [
+                { name: 'Bruno Bæ', path_id: '300', country: 'Denmark', team: 'Nordic Legacy', rank: 'A' }
+            ]
+        });
+
+        const result = await service.searchDriver('"Bruno Bæ"', { classId: 5, trackId: 10, difficulty: 'Get Real' });
+
+        expect(result).toHaveLength(1);
+        expect(result[0]).toMatchObject({
+            driver: 'Bruno Bæ',
+            pathId: '300',
+            country: 'Denmark',
+            team: 'Nordic Legacy',
+            rank: 'A'
+        });
+    });
+
+    it('searchDriver deduplicates same driver when literal and normalized mirror keys share the same path_id', async () => {
+        vi.spyOn(service, 'waitForDriverIndex').mockResolvedValue({
+            'jonas spätig': 'jonas spätig',
+            'jonas spatig': 'jonas spatig'
+        });
+
+        vi.spyOn(service, '_loadDriverShard').mockResolvedValue({
+            'jonas spätig': [
+                { name: 'Jonas Spätig', path_id: '4057', Class: 5, track_id: 10, difficulty: 'Get Real' }
+            ],
+            'jonas spatig': [
+                { name: 'Jonas Spätig', path_id: '4057', Class: 5, track_id: 10, difficulty: 'Get Real' }
+            ]
+        });
+
+        vi.spyOn(service, '_loadDriverMetadataShard').mockResolvedValue({
+            'jonas spätig': [
+                { name: 'Jonas Spätig', path_id: '4057', country: 'Switzerland', team: '', rank: 'C' }
+            ],
+            'jonas spatig': [
+                { name: 'Jonas Spätig', path_id: '4057', country: 'Switzerland', team: '', rank: 'C' }
+            ]
+        });
+
+        const result = await service.searchDriver('"Jonas Spätig"', { classId: 5, trackId: 10, difficulty: 'Get Real' });
+
+        expect(result).toHaveLength(1);
+        expect(result[0]).toMatchObject({
+            driver: 'Jonas Spätig',
+            pathId: '4057',
+            country: 'Switzerland',
+            rank: 'C'
+        });
+        expect(result[0].entries).toHaveLength(1);
     });
 });
 

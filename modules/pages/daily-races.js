@@ -364,10 +364,13 @@ class DailyRaces {
         }
 
         const buildRaceCards = (races, options = {}) => {
-            const { centerFourthOnDesktop = false } = options;
+            const { centerFourthOnDesktop = false, useSprintLayout = false } = options;
             const gridClasses = ['daily-races-grid'];
             if (centerFourthOnDesktop && races.length === 4) {
                 gridClasses.push('daily-races-grid--center-fourth');
+            }
+            if (useSprintLayout) {
+                gridClasses.push('daily-races-grid--sprint-layout');
             }
 
             let cardsHtml = `<div class="${gridClasses.join(' ')}">`;
@@ -456,14 +459,19 @@ class DailyRaces {
 
         const featureRaces = racesData['feature-races'];
         if (Array.isArray(featureRaces) && featureRaces.length > 0) {
-            html += '<div class="daily-races-feature">';
+            const useSprintLayoutForFeature = featureRaces.length > 2;
+            const featureWrapperClass = useSprintLayoutForFeature
+                ? 'daily-races-feature daily-races-feature--sprint-layout'
+                : 'daily-races-feature';
+
+            html += `<div class="${featureWrapperClass}">`;
             html += '<div class="daily-races-section-header">';
             html += '<h3 class="daily-races-section-title">Daily Feature Races (30 min)</h3>';
             if (this.hasScheduleParsingError(featureRaces)) {
                 html += this.getScheduleParsingErrorBannerHtml();
             }
             html += '</div>';
-            html += buildRaceCards(featureRaces);
+            html += buildRaceCards(featureRaces, { useSprintLayout: useSprintLayoutForFeature });
             html += '</div>';
         }
         

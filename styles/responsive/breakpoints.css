@@ -13,20 +13,6 @@
     }
 }
 
-@media (prefers-reduced-motion: reduce) {
-    a.driver-name-top10-glitter,
-    strong.driver-name-top10-glitter,
-    span.driver-name-top10-glitter,
-    a.driver-name-top10-glitter::before,
-    strong.driver-name-top10-glitter::before,
-    span.driver-name-top10-glitter::before,
-    a.driver-name-top10-glitter::after,
-    strong.driver-name-top10-glitter::after,
-    span.driver-name-top10-glitter::after {
-        animation: none;
-    }
-}
-
 /* Medium screens - remove container padding to prevent table border clipping */
 @media (max-width: 1300px) {
     .tab-content {
@@ -154,6 +140,10 @@
         margin-bottom: 0;
     }
 
+    .cars-tile-grid {
+        margin-top: 0.5rem;
+    }
+
     #cars-info-table {
         padding-top: 0.35rem;
         overflow: visible;
@@ -179,8 +169,8 @@
 
     .car-inline-thumbnail {
         position: absolute;
-        right: -0.25rem;
-        top: -0.25rem;
+        right: -0.5rem;
+        top: 0.25rem;
         transform: translateY(-50%);
         display: block;
         height: 1.9rem;
@@ -257,6 +247,12 @@
         width: 18px;
         height: 18px;
         max-width: 18px;
+    }
+
+    #results-container .table-car-class-logo {
+        width: 22px;
+        height: 22px;
+        max-width: 22px;
     }
 
     .table-brand-logo {
@@ -407,7 +403,7 @@
 
     #results-container .results-table th:nth-child(1),
     #results-container .results-table td:nth-child(1) {
-        min-width: 125px !important;
+        min-width: 170px;
     }
 
     #results-container .results-table th:nth-child(2),
@@ -622,9 +618,9 @@
 
     #cars-info-table .results-table th:nth-child(1),
     #cars-info-table .results-table td:nth-child(1) {
-        width: 32%;
+        width: 35%;
         max-width: none;
-        min-width: 195px;
+        min-width: 300px;
         white-space: normal !important;
         word-break: break-word;
     }
@@ -802,6 +798,12 @@
         width: 16px;
         height: 16px;
         max-width: 16px;
+    }
+
+    #results-container .table-car-class-logo {
+        width: 20px;
+        height: 20px;
+        max-width: 20px;
     }
 
     .table-brand-logo {
@@ -1038,7 +1040,7 @@
 
     #results-container .results-table th:nth-child(1),
     #results-container .results-table td:nth-child(1) {
-        min-width: 118px !important;
+        min-width: 150px !important;
     }
 
     #results-container .results-table th:nth-child(2),

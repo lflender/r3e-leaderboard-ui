@@ -1,0 +1,23 @@
+/* ========================================
+   FLAG ICONS AND STYLING
+   ======================================== */
+
+/* Flag icons */
+.country-flag {
+    display: inline-block;
+    margin-right: 0.6rem;
+    vertical-align: -1px;
+    line-height: 1;
+}
+
+.country-flag .fi {
+    font-size: 1em;
+    line-height: 1;
+}
+
+.various-flag-icon {
+    width: 1.3em;
+    height: 1em;
+    vertical-align: middle;
+    display: inline-block;
+}

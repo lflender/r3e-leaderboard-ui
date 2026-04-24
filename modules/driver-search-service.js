@@ -2,12 +2,91 @@
     const DriverSearchService = {
         _hasAccents(str) {
             if (!str) return false;
-            const normalized = String(str).normalize('NFD');
+            const value = String(str);
+            if (/[^\u0000-\u007f]/.test(value)) {
+                return true;
+            }
+            const normalized = value.normalize('NFD');
             return normalized !== String(str).normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         },
 
         _normalizeExactDisplayName(value) {
             return String(value || '').trim().replace(/\s+/g, ' ').toLowerCase();
+        },
+
+        _foldEuropeanSearchName(value) {
+            const map = {
+                'ß': 'ss',
+                'ẞ': 'ss',
+                'æ': 'ae',
+                'Æ': 'ae',
+                'ǽ': 'ae',
+                'Ǽ': 'ae',
+                'ǣ': 'ae',
+                'Ǣ': 'ae',
+                'œ': 'oe',
+                'Œ': 'oe',
+                'ø': 'o',
+                'Ø': 'o',
+                'ð': 'd',
+                'Ð': 'd',
+                'þ': 'th',
+                'Þ': 'th',
+                'ł': 'l',
+                'Ł': 'l',
+                'đ': 'd',
+                'Đ': 'd',
+                'ħ': 'h',
+                'Ħ': 'h',
+                'ı': 'i',
+                'ĸ': 'k',
+                'ſ': 's'
+            };
+
+            return String(value || '').replace(/[ßẞæÆǽǼǣǢœŒøØðÐþÞłŁđĐħĦıĸſ]/g, (char) => map[char] || char);
+        },
+
+        _reduceEuropeanSearchName(value) {
+            const map = {
+                'ß': 's',
+                'ẞ': 's',
+                'æ': 'a',
+                'Æ': 'a',
+                'ǽ': 'a',
+                'Ǽ': 'a',
+                'ǣ': 'a',
+                'Ǣ': 'a',
+                'œ': 'o',
+                'Œ': 'o',
+                'ø': 'o',
+                'Ø': 'o',
+                'ð': 'd',
+                'Ð': 'd',
+                'þ': 't',
+                'Þ': 't',
+                'ł': 'l',
+                'Ł': 'l',
+                'đ': 'd',
+                'Đ': 'd',
+                'ħ': 'h',
+                'Ħ': 'h',
+                'ı': 'i',
+                'ĸ': 'k',
+                'ſ': 's'
+            };
+
+            return String(value || '').replace(/[ßẞæÆǽǼǣǢœŒøØðÐþÞłŁđĐħĦıĸſ]/g, (char) => map[char] || char);
+        },
+
+        _hasSpecialEuropeanLetters(value) {
+            return /[ßẞæÆǽǼǣǢœŒøØðÐþÞłŁđĐħĦıĸſ]/.test(String(value || ''));
+        },
+
+        _buildLookupKeyCandidates(value) {
+            const normalized = this._normalizeDriverLookupName(value);
+            const folded = this._foldEuropeanSearchName(normalized);
+            const reduced = this._reduceEuropeanSearchName(normalized);
+            return Array.from(new Set([normalized, folded, reduced].filter(Boolean)));
         },
 
         _accentExactWordMatch(candidateName, searchTerm) {
@@ -26,22 +105,38 @@
         _matchesDriverSearchTerm(searchTarget, searchLower, isExactSearch) {
             const normalizedTarget = this._normalizeDriverLookupName(searchTarget);
             const normalizedSearch = this._normalizeDriverLookupName(searchLower);
+            const foldedTarget = this._foldEuropeanSearchName(normalizedTarget);
+            const foldedSearch = this._foldEuropeanSearchName(normalizedSearch);
+            const reducedTarget = this._reduceEuropeanSearchName(normalizedTarget);
+            const reducedSearch = this._reduceEuropeanSearchName(normalizedSearch);
             if (!normalizedTarget) {
                 return false;
             }
 
             if (!isExactSearch) {
-                return normalizedTarget.includes(normalizedSearch);
+                return normalizedTarget.includes(normalizedSearch)
+                    || foldedTarget.includes(foldedSearch)
+                    || reducedTarget.includes(reducedSearch);
             }
 
             // For exact search: if accents are present, allow normalized pre-filtering here.
             // Strict accent-aware equality is applied after shard/metadata lookup.
             if (this._hasAccents(searchLower)) {
-                return normalizedTarget.includes(normalizedSearch);
+                return normalizedTarget.includes(normalizedSearch)
+                    || foldedTarget.includes(foldedSearch)
+                    || reducedTarget.includes(reducedSearch);
             }
 
             // For exact search, use direct string comparison to avoid word boundary issues with punctuation
             if (normalizedTarget === normalizedSearch) {
+                return true;
+            }
+
+            if (foldedTarget === foldedSearch) {
+                return true;
+            }
+
+            if (reducedTarget === reducedSearch) {
                 return true;
             }
 
@@ -324,18 +419,54 @@
                 const metadataShard = metadataByKey.get(shardKey) || null;
 
                 const normalizedLookupName = this._normalizeDriverLookupName(mirrorKey);
-                let metaEntry = metadataShard && (metadataShard[normalizedLookupName] || metadataShard[mirrorKey]);
-                let driverEntries = shardData[normalizedLookupName] || shardData[mirrorKey] || [];
+                const lookupCandidates = this._buildLookupKeyCandidates(mirrorKey);
+                let metaEntry = null;
+                if (metadataShard) {
+                    metaEntry = metadataShard[mirrorKey] || metadataShard[normalizedLookupName] || null;
+                    if (!metaEntry) {
+                        for (const candidateKey of lookupCandidates) {
+                            if (metadataShard[candidateKey]) {
+                                metaEntry = metadataShard[candidateKey];
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                let driverEntries = [];
+                for (const candidateKey of [mirrorKey, normalizedLookupName, ...lookupCandidates]) {
+                    const candidateEntries = shardData[candidateKey];
+                    if (Array.isArray(candidateEntries) && candidateEntries.length > 0) {
+                        driverEntries = candidateEntries;
+                        break;
+                    }
+                }
 
                 // Fallback: diacritical names live in _ shards with search_name alias
                 if ((!metaEntry || !Array.isArray(driverEntries) || driverEntries.length === 0) && shardKey !== '_') {
                     await ensureFallbackData();
 
                     if (!metaEntry && fallbackMetadata) {
-                        metaEntry = fallbackMetadata[normalizedLookupName] || fallbackMetadata[mirrorKey];
+                        metaEntry = fallbackMetadata[normalizedLookupName] || fallbackMetadata[mirrorKey] || null;
+                        if (!metaEntry) {
+                            for (const candidateKey of lookupCandidates) {
+                                if (fallbackMetadata[candidateKey]) {
+                                    metaEntry = fallbackMetadata[candidateKey];
+                                    break;
+                                }
+                            }
+                        }
                     }
 
                     if (!Array.isArray(driverEntries) || driverEntries.length === 0) {
+                        for (const candidateKey of [mirrorKey, normalizedLookupName, ...lookupCandidates]) {
+                            const candidateEntries = fallbackShard && fallbackShard[candidateKey];
+                            if (Array.isArray(candidateEntries) && candidateEntries.length > 0) {
+                                driverEntries = candidateEntries;
+                                break;
+                            }
+                        }
+
                         // Use original key from metadata to find entries in _ leaderboard shard
                         let originalKey = null;
                         if (Array.isArray(metaEntry)) {
@@ -366,10 +497,27 @@
 
                     if (isExactSearch) {
                         const exactMatchTerm = exactAccentSearch ? accentSearchTerm : searchLower;
+                        const useSpecialLetterFallback = exactAccentSearch && this._hasSpecialEuropeanLetters(exactMatchTerm);
+                        const foldedExactMatchTerm = useSpecialLetterFallback ? this._foldEuropeanSearchName(exactMatchTerm) : '';
+                        const reducedExactMatchTerm = useSpecialLetterFallback ? this._reduceEuropeanSearchName(exactMatchTerm) : '';
+
                         matchedMetadataCandidates = metadataCandidates.filter(candidate => {
                             const candidateName = this._normalizeExactDisplayName(candidate && candidate.name);
                             return this._accentExactWordMatch(candidateName, exactMatchTerm);
                         });
+
+                        if (matchedMetadataCandidates.length === 0 && useSpecialLetterFallback) {
+                            matchedMetadataCandidates = metadataCandidates.filter(candidate => {
+                                const candidateName = this._normalizeExactDisplayName(candidate && candidate.name);
+                                const foldedCandidateName = this._foldEuropeanSearchName(candidateName);
+                                if (this._accentExactWordMatch(foldedCandidateName, foldedExactMatchTerm)) {
+                                    return true;
+                                }
+
+                                const reducedCandidateName = this._reduceEuropeanSearchName(candidateName);
+                                return this._accentExactWordMatch(reducedCandidateName, reducedExactMatchTerm);
+                            });
+                        }
 
                         if (matchedMetadataCandidates.length === 0) {
                             continue;
@@ -388,9 +536,26 @@
                             }
                         }
                     } else if (partialAccentSearch) {
+                        const useSpecialLetterFallback = this._hasSpecialEuropeanLetters(accentSearchTerm);
+                        const foldedAccentSearchTerm = useSpecialLetterFallback ? this._foldEuropeanSearchName(accentSearchTerm) : '';
+                        const reducedAccentSearchTerm = useSpecialLetterFallback ? this._reduceEuropeanSearchName(accentSearchTerm) : '';
+
                         matchedMetadataCandidates = metadataCandidates.filter(candidate => {
                             const candidateName = this._normalizeExactDisplayName(candidate && candidate.name);
-                            return candidateName.includes(accentSearchTerm);
+                            if (candidateName.includes(accentSearchTerm)) {
+                                return true;
+                            }
+                            if (!useSpecialLetterFallback) {
+                                return false;
+                            }
+
+                            const foldedCandidateName = this._foldEuropeanSearchName(candidateName);
+                            if (foldedCandidateName.includes(foldedAccentSearchTerm)) {
+                                return true;
+                            }
+
+                            const reducedCandidateName = this._reduceEuropeanSearchName(candidateName);
+                            return reducedCandidateName.includes(reducedAccentSearchTerm);
                         });
 
                         if (matchedMetadataCandidates.length === 0) {
@@ -415,10 +580,27 @@
                 } else {
                     if (isExactSearch) {
                         const exactMatchTerm = exactAccentSearch ? accentSearchTerm : searchLower;
-                        const matchedLegacyEntries = filteredEntries.filter(entry => {
+                        const useSpecialLetterFallback = exactAccentSearch && this._hasSpecialEuropeanLetters(exactMatchTerm);
+                        const foldedExactMatchTerm = useSpecialLetterFallback ? this._foldEuropeanSearchName(exactMatchTerm) : '';
+                        const reducedExactMatchTerm = useSpecialLetterFallback ? this._reduceEuropeanSearchName(exactMatchTerm) : '';
+
+                        let matchedLegacyEntries = filteredEntries.filter(entry => {
                             const entryName = this._normalizeExactDisplayName(entry && (entry.name || entry.Name));
                             return this._accentExactWordMatch(entryName, exactMatchTerm);
                         });
+
+                        if (matchedLegacyEntries.length === 0 && useSpecialLetterFallback) {
+                            matchedLegacyEntries = filteredEntries.filter(entry => {
+                                const entryName = this._normalizeExactDisplayName(entry && (entry.name || entry.Name));
+                                const foldedEntryName = this._foldEuropeanSearchName(entryName);
+                                if (this._accentExactWordMatch(foldedEntryName, foldedExactMatchTerm)) {
+                                    return true;
+                                }
+
+                                const reducedEntryName = this._reduceEuropeanSearchName(entryName);
+                                return this._accentExactWordMatch(reducedEntryName, reducedExactMatchTerm);
+                            });
+                        }
 
                         if (matchedLegacyEntries.length === 0) {
                             continue;
@@ -435,9 +617,26 @@
                         results.push(...this._buildLegacySearchResults(matchedLegacyEntries, mirrorMeta, mirrorKey, driverEntries));
                         continue;
                     } else if (partialAccentSearch) {
+                        const useSpecialLetterFallback = this._hasSpecialEuropeanLetters(accentSearchTerm);
+                        const foldedAccentSearchTerm = useSpecialLetterFallback ? this._foldEuropeanSearchName(accentSearchTerm) : '';
+                        const reducedAccentSearchTerm = useSpecialLetterFallback ? this._reduceEuropeanSearchName(accentSearchTerm) : '';
+
                         const matchedLegacyEntries = filteredEntries.filter(entry => {
                             const entryName = this._normalizeExactDisplayName(entry && (entry.name || entry.Name));
-                            return entryName.includes(accentSearchTerm);
+                            if (entryName.includes(accentSearchTerm)) {
+                                return true;
+                            }
+                            if (!useSpecialLetterFallback) {
+                                return false;
+                            }
+
+                            const foldedEntryName = this._foldEuropeanSearchName(entryName);
+                            if (foldedEntryName.includes(foldedAccentSearchTerm)) {
+                                return true;
+                            }
+
+                            const reducedEntryName = this._reduceEuropeanSearchName(entryName);
+                            return reducedEntryName.includes(reducedAccentSearchTerm);
                         });
 
                         if (matchedLegacyEntries.length === 0) {
@@ -468,7 +667,60 @@
                 }
             }
 
-            return results;
+            const dedupedResultsByIdentity = new Map();
+            for (const result of results) {
+                const normalizedDriver = this._normalizeExactDisplayName(result.driver || '');
+                const identityKey = result.pathId
+                    ? `path:${String(result.pathId)}`
+                    : `legacy:${normalizedDriver}|${String(result.country || '')}|${String(result.team || '')}`;
+
+                if (!dedupedResultsByIdentity.has(identityKey)) {
+                    dedupedResultsByIdentity.set(identityKey, {
+                        ...result,
+                        entries: Array.isArray(result.entries) ? [...result.entries] : []
+                    });
+                    continue;
+                }
+
+                const existing = dedupedResultsByIdentity.get(identityKey);
+                const mergedEntries = [];
+                const seenEntryKeys = new Set();
+                const sourceEntries = []
+                    .concat(Array.isArray(existing.entries) ? existing.entries : [])
+                    .concat(Array.isArray(result.entries) ? result.entries : []);
+
+                for (const entry of sourceEntries) {
+                    const entryKey = [
+                        this._extractPathId(entry),
+                        String(entry.track_id || entry.TrackID || entry.trackId || ''),
+                        String(entry.car_class || entry.CarClass || entry.Class || entry.class || ''),
+                        String(entry.difficulty || entry.Difficulty || entry.driving_model || ''),
+                        String(entry.lap_time || entry.LapTime || entry['Lap Time'] || '')
+                    ].join('|');
+
+                    if (seenEntryKeys.has(entryKey)) {
+                        continue;
+                    }
+                    seenEntryKeys.add(entryKey);
+                    mergedEntries.push(entry);
+                }
+
+                existing.entries = mergedEntries;
+                if (!existing.country && result.country) {
+                    existing.country = result.country;
+                }
+                if (!existing.team && result.team) {
+                    existing.team = result.team;
+                }
+                if (!existing.rank && result.rank) {
+                    existing.rank = result.rank;
+                }
+                if (!existing.avatar && result.avatar) {
+                    existing.avatar = result.avatar;
+                }
+            }
+
+            return Array.from(dedupedResultsByIdentity.values());
         }
     };
 

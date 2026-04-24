@@ -428,9 +428,9 @@
         const flag = countryFlag(car.country || '');
         const flagHtml = flag ? `<span class="country-flag">${flag}</span>` : '';
         const carName = String(car.car || '');
-        const lastSpace = carName.lastIndexOf(' ');
-        const carNameHtml = (lastSpace >= 0)
-          ? `${flagHtml}<b>${R3EUtils.escapeHtml(carName.slice(0, lastSpace))}</b><span class="no-wrap-tail"> <b>${R3EUtils.escapeHtml(carName.slice(lastSpace + 1))}</b> ${metaIcons}</span>`
+        const { brand: carBrand, model: carModel } = (window.R3EUtils && R3EUtils.splitCarName) ? R3EUtils.splitCarName(carName) : { brand: '', model: carName };
+        const carNameHtml = carBrand
+          ? `${flagHtml}<b>${R3EUtils.escapeHtml(carBrand)}</b><span class="no-wrap-tail"> <b>${R3EUtils.escapeHtml(carModel)}</b> ${metaIcons}</span>`
           : `<span class="no-wrap-tail">${flagHtml}<b>${R3EUtils.escapeHtml(carName)}</b> ${metaIcons}</span>`;
 
         html += `\n<tr class="driver-data-row ${slug}" data-link="${rowLink}">` +

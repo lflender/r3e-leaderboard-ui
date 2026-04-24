@@ -104,9 +104,12 @@
   ];
 
   let wheelFilter = '', transFilter = '', classFilter = '';
+  let searchFilter = '';
   let viewMode = 'table';
   const CAR_VIEW_MODE_KEY = 'carInfoViewMode';
   let hasTrackedCarInfoDisplay = false;
+  let searchDebounceTimer = null;
+  const minSearchLength = 3;
   
   // Build class options from data
   const superclassOptions = dataService.getSuperclassOptions();
@@ -164,6 +167,48 @@
       const active = btn.getAttribute('data-view') === viewMode;
       btn.classList.toggle('is-active', active);
       btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+  }
+
+  function setupSearchInput() {
+    const searchInput = document.getElementById('cars-search');
+    if (!searchInput) return;
+
+    searchInput.addEventListener('input', () => {
+      const nextValue = searchInput.value.trim();
+
+      if (searchDebounceTimer) {
+        clearTimeout(searchDebounceTimer);
+      }
+
+      if (nextValue.length === 0) {
+        searchFilter = '';
+        renderResults();
+        return;
+      }
+
+      if (nextValue.length < minSearchLength) {
+        searchFilter = '';
+        renderResults();
+        return;
+      }
+
+      searchDebounceTimer = setTimeout(() => {
+        searchFilter = nextValue.toLowerCase();
+        renderResults();
+      }, 300);
+    });
+
+    searchInput.addEventListener('keypress', (event) => {
+      if (event.key !== 'Enter') return;
+      const nextValue = searchInput.value.trim();
+      if (nextValue.length < minSearchLength) return;
+      if (searchDebounceTimer) {
+        clearTimeout(searchDebounceTimer);
+      }
+      event.target.blur();
+      searchFilter = nextValue.toLowerCase();
+      renderResults();
     });
   }
 
@@ -230,11 +275,13 @@
   });
 
   initViewMode();
+  setupSearchInput();
 
   function carMatchesFilters(car) {
     const w = (car.wheel_cat || '').toLowerCase();
     const t = (car.transmission_cat || '').toLowerCase();
     const c = (car.car_class || car.class || '').toLowerCase();
+    const carName = String(car.car || '').toLowerCase();
     
     // Handle wheel filter - check if it's the combined filter
     let wheelOk = true;
@@ -258,8 +305,16 @@
         classOk = c === classFilter.toLowerCase();
       }
     }
+
+    let searchOk = true;
+    if (searchFilter) {
+      const brand = (window.R3EUtils && typeof R3EUtils.splitCarName === 'function')
+        ? (R3EUtils.splitCarName(car.car || '').brand || '').toLowerCase()
+        : '';
+      searchOk = carName.includes(searchFilter) || c.includes(searchFilter) || brand.includes(searchFilter);
+    }
     
-    return wheelOk && transOk && classOk;
+    return wheelOk && transOk && classOk && searchOk;
   }
 
   function getImageListForCar(car, rawLink) {

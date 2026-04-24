@@ -23,6 +23,10 @@ const CAR_SPECIAL_CASES = {
     'Carlsson SLK 340 JUDD': { brand: 'Carlsson', model: 'SLK 340' }
 };
 
+const MODEL_LOGO_OVERRIDES = [
+    { pattern: 'corvette', logoKey: 'corvette' }
+];
+
 const BRAND_LOGO_OVERRIDES = {
     'alfa romeo': 'alfaromeo',
     'abt-audi': 'audi',
@@ -40,7 +44,7 @@ const BRAND_LOGO_OVERRIDES = {
 
 const AVAILABLE_BRAND_LOGO_KEYS = new Set([
     'alfaromeo', 'alpina', 'alpine', 'aquila', 'audi', 'bentley', 'bmw', 'cadillac',
-    'carlsson', 'chevrolet', 'citroen', 'crossle', 'cupra', 'fabcar', 'ferrari', 'ford',
+    'carlsson', 'chevrolet', 'citroen', 'corvette', 'crossle', 'cupra', 'fabcar', 'ferrari', 'ford',
     'georg-plasa', 'gumpert', 'honda', 'hyundai', 'judd', 'koenigsegg', 'ktm', 'lada', 'lamborghini', 'lotus',
     'lrt', 'lynk-co', 'mazda', 'mclaren', 'mercedes', 'nissan', 'nsu', 'opel', 'p45', 'pagani',
     'peugeot', 'porsche', 'praga', 'raceroom', 'radical', 'renault', 'ruf', 'saleen',
@@ -58,6 +62,11 @@ function normalizeBrandForLogoLookup(brand) {
 function resolveBrandLogoPath(carNameOrBrand) {
     const source = String(carNameOrBrand || '').trim();
     if (!source) return 'images/brands/logo-raceroom.png';
+
+    const sourceLower = source.toLowerCase();
+    for (const { pattern, logoKey } of MODEL_LOGO_OVERRIDES) {
+        if (sourceLower.includes(pattern)) return `images/brands/logo-${logoKey}.png`;
+    }
 
     const split = splitCarName(source);
     const baseBrand = split.brand || source;

@@ -28,6 +28,11 @@ describe('R3ECarUtils', () => {
         expect(window.R3ECarUtils.resolveBrandLogoPath('Some Unknown Brand Prototype')).toBe('images/brands/logo-raceroom.png');
     });
 
+    test('resolves Corvette model override regardless of brand', () => {
+        expect(window.R3ECarUtils.resolveBrandLogoPath('Chevrolet Corvette C6.R GT2')).toBe('images/brands/logo-corvette.png');
+        expect(window.R3ECarUtils.resolveBrandLogoPath('Callaway Corvette C7 GT3-R')).toBe('images/brands/logo-corvette.png');
+    });
+
     test('detects year and DTM suffixes', () => {
         expect(window.R3ECarUtils.detectYearSuffix('BMW M4 GT3 2023')).toEqual({
             baseName: 'BMW M4 GT3',

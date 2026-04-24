@@ -393,6 +393,35 @@ span.driver-name-top10-glitter::after {
     white-space: nowrap;
 }
 
+#detail-results-container .car-cell-stack {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.38rem;
+    transform: translateY(2px);
+}
+
+#detail-results-container .car-text-stack {
+    display: inline;
+    line-height: 1.1;
+}
+
+#detail-results-container .car-model-line {
+    display: inline;
+    margin-left: 0.25em;
+}
+
+#detail-results-container .car-cell-stack .table-brand-logo-slot {
+    align-self: center;
+    justify-content: center;
+    margin-right: 0;
+    overflow: hidden;
+}
+
+#detail-results-container .car-cell-stack .table-brand-logo {
+    margin-left: 0 !important;
+    max-width: 100%;
+}
+
 /* Driver Info page table layout (columns: Car class, Car, Position, Track, Laptime, Lap%, Difficulty, Date) */
 /* Car class and Car columns - keep readable minimums */
 #results-container .results-table th:nth-child(1),
@@ -404,6 +433,49 @@ span.driver-name-top10-glitter::after {
 #results-container .results-table th:nth-child(2),
 #results-container .results-table td:nth-child(2) {
     min-width: 200px;
+}
+
+#results-container .car-model-line {
+    display: block;
+    white-space: nowrap;
+    margin-left: 0;
+    margin-top: 0;
+    line-height: 1.12;
+}
+
+#results-container .car-model-line .car-model {
+    font-size: 0.92em;
+}
+
+#results-container .car-cell-stack {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.38rem;
+}
+
+#results-container .car-text-stack {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1.1;
+}
+
+#results-container .car-cell-stack .table-brand-logo-slot {
+    align-self: center;
+    margin-right: 0;
+    justify-content: center;
+    overflow: hidden;
+    width: 24px;
+    flex: 0 0 24px;
+}
+
+#results-container .car-cell-stack .table-brand-logo {
+    margin-left: 0 !important;
+    max-width: 100%;
+}
+
+#results-container .car-text-stack .car-brand {
+    line-height: 1.1;
 }
 
 /* Position column - auto-fit content */

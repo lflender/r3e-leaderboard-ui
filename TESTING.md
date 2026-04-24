@@ -76,9 +76,8 @@ Coverage output is written to `coverage/`.
 - `tests/detail.test.js`: integration tests for detail page data load and error rendering
 - `tests/track-info.test.js`: integration tests for track combinations rendering and empty-state handling
 - `tests/car-info.test.js`: integration tests for cars table rendering and empty-state behavior
-- `tests/news.test.js`: integration tests for Steam news fetch success/failure rendering
 
-Current total: 16 test files and 129 tests.
+Current total: 29 test files and 231 tests.
 
 ## How Browser Scripts Are Tested Here
 
@@ -168,7 +167,6 @@ Work in layers.
 - `modules/pages/detail.js`
 - `modules/pages/track-info.js`
 - `modules/pages/car-info.js`
-- `modules/pages/news.js`
 
 For those, prefer integration-style tests with mocked globals and DOM fixtures instead of pretending they are small isolated units.
 

@@ -897,17 +897,6 @@
         font-size: 0.7rem;
     }
 
-    .news-item {
-        flex-direction: column;
-    }
-
-    .news-thumb {
-        width: 100%;
-        height: auto;
-        max-height: 300px;
-        aspect-ratio: 16 / 9;
-    }
-
     .stats-box h2 {
         font-size: 0.88rem;
     }

@@ -30,8 +30,8 @@ These literal Unicode characters appear in CSS files and must never be replaced 
 
 - U+21C5 (updown arrows) used in: `tables.css` `.results-table th.sortable::after { content: ' [U+21C5]'; }`
 - U+25BC (black down-pointing triangle) used in: `tables.css` `.results-table th.sortable.sort-active::after { content: ' [U+25BC]'; }`
-- U+2726 (black four pointed star) used in: `news.css` `.driver-name-top10-glitter::before { content: '[U+2726]'; }`
-- U+2727 (white four pointed star) used in: `news.css` `.driver-name-top10-glitter::after { content: '[U+2727]'; }`
+- U+2726 (black four pointed star) used in: `tables.css` `.driver-name-top10-glitter::before { content: '[U+2726]'; }`
+- U+2727 (white four pointed star) used in: `tables.css` `.driver-name-top10-glitter::after { content: '[U+2727]'; }`
 - U+2192 (rightwards arrow) used in: `seo.css` `.seo-content ul li::before { content: "[U+2192]"; }` (stored as CSS escape \2192)
 - U+25BE (black down-pointing small triangle) used in: `detail.css` `.faq-item summary::after { content: '[U+25BE]'; }`
 
@@ -41,7 +41,7 @@ These literal Unicode characters appear in CSS files and must never be replaced 
 After any change to a user-facing page or a page-related module, update `sitemap.xml` `lastmod` for the affected page URL(s) in the same change.
 
 - Trigger this when editing:
-	- Root page files: `index.html`, `drivers.html`, `tracks.html`, `cars.html`, `stats.html`, `faq.html`, `news.html`, `detail.html`
+	- Root page files: `index.html`, `drivers.html`, `tracks.html`, `cars.html`, `stats.html`, `faq.html`, `detail.html`
 	- Page modules: `modules/pages/*.js`
 	- Shared modules that directly affect a specific page's content/behavior
 - Use the same date format already used in `sitemap.xml`: `YYYY-MM-DD`.

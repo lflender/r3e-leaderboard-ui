@@ -10,10 +10,9 @@
  * 6. Tables (results tables, cells, columns)
  * 7. Badges and indicators (position, car, difficulty)
  * 8. Status display
- * 9. News section
- * 10. Pagination
- * 11. Detail page specific styles
- * 12. Media queries (tablet and mobile)
+ * 9. Pagination
+ * 10. Detail page specific styles
+ * 11. Media queries (tablet and mobile)
  * 
  * Note: Some elements use inline styles in JS for dynamic coloring:
  * - Position badges: gradient based on rank

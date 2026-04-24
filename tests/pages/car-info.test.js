@@ -42,7 +42,15 @@ beforeEach(() => {
         getSuperclassOptions: vi.fn().mockReturnValue([])
     };
     window.R3EUtils = {
-        escapeHtml: s => String(s)
+        escapeHtml: s => String(s),
+        splitCarName: vi.fn((name) => {
+            const value = String(name || '');
+            if (value === 'BMW M4 GT3') {
+                return { brand: 'BMW', model: 'M4 GT3' };
+            }
+            return { brand: '', model: value };
+        }),
+        resolveBrandLogoPath: vi.fn(() => 'images/brands/logo-bmw.png')
     };
 
     window.CustomSelect = class {
@@ -58,7 +66,10 @@ describe('car-info integration', () => {
         await new Promise(resolve => setTimeout(resolve, 0));
 
         const html = document.getElementById('cars-info-table').innerHTML;
-        expect(html).toContain('BMW M4');
+        expect(html).toContain('cars-page-car-name');
+        expect(html).toContain('table-brand-logo-slot');
+        expect(html).toContain('BMW');
+        expect(html).toContain('M4 GT3');
         expect(html).toContain('GT3');
         expect(html).toContain('590hp');
         expect(fetchSpy).not.toHaveBeenCalled();

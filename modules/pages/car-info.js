@@ -50,6 +50,36 @@
     return '';
   }
 
+  function renderCarDisplayHtml(rawCarName, options = {}) {
+    const flagHtml = options.flagHtml || '';
+    const metaHtml = options.metaHtml || '';
+    const className = options.className || 'cars-page-car-name';
+    const safeName = String(rawCarName || '');
+    const split = (window.R3EUtils && typeof R3EUtils.splitCarName === 'function')
+      ? R3EUtils.splitCarName(safeName)
+      : { brand: '', model: safeName };
+    const brand = String(split.brand || '').trim();
+    const model = String(split.model || '').trim();
+    const escBrand = R3EUtils.escapeHtml(brand);
+    const escModel = R3EUtils.escapeHtml(model);
+    const escName = R3EUtils.escapeHtml(safeName);
+    const brandLogoUrl = (window.R3EUtils && typeof window.R3EUtils.resolveBrandLogoPath === 'function')
+      ? window.R3EUtils.resolveBrandLogoPath(safeName)
+      : '';
+    const brandLogoClass = brandLogoUrl.includes('logo-raceroom.png')
+      ? 'table-brand-logo table-brand-logo-raceroom'
+      : 'table-brand-logo';
+    const brandLogoHtml = brandLogoUrl
+      ? `<span class="table-brand-logo-slot cars-page-car-logo-slot"><img class="${brandLogoClass}" src="${R3EUtils.escapeHtml(brandLogoUrl)}" alt="${escBrand || 'Car brand'} logo" loading="lazy" decoding="async" onload='const renderedWidth = this.getBoundingClientRect().width || this.width || 22; const slotWidth = (this.parentElement && this.parentElement.getBoundingClientRect().width) || 22; const offsetX = (slotWidth - renderedWidth) / 2; this.style.marginLeft = offsetX + "px";' onerror='if (this.parentElement) { this.parentElement.remove(); } else { this.remove(); }' /></span>`
+      : '';
+
+    if (!brand) {
+      return `<span class="${className}">${flagHtml}${brandLogoHtml}<span class="cars-page-car-text"><span class="car-brand">${escName}</span></span>${metaHtml}</span>`;
+    }
+
+    return `<span class="${className}">${flagHtml}${brandLogoHtml}<span class="cars-page-car-text"><span class="car-brand">${escBrand}</span>${model ? ` <span class="car-model cars-page-car-model">${escModel}</span>` : ''}</span>${metaHtml}</span>`;
+  }
+
   const data = await loadData();
   const tableContainer = document.getElementById('cars-info-table');
   if(!tableContainer) return;
@@ -428,10 +458,11 @@
         const flag = countryFlag(car.country || '');
         const flagHtml = flag ? `<span class="country-flag">${flag}</span>` : '';
         const carName = String(car.car || '');
-        const { brand: carBrand, model: carModel } = (window.R3EUtils && R3EUtils.splitCarName) ? R3EUtils.splitCarName(carName) : { brand: '', model: carName };
-        const carNameHtml = carBrand
-          ? `${flagHtml}<b>${R3EUtils.escapeHtml(carBrand)}</b><span class="no-wrap-tail"> <b>${R3EUtils.escapeHtml(carModel)}</b> ${metaIcons}</span>`
-          : `<span class="no-wrap-tail">${flagHtml}<b>${R3EUtils.escapeHtml(carName)}</b> ${metaIcons}</span>`;
+        const carNameHtml = renderCarDisplayHtml(carName, {
+          flagHtml,
+          metaHtml: metaIcons,
+          className: 'cars-page-car-name'
+        });
 
         html += `\n<tr class="driver-data-row ${slug}" data-link="${rowLink}">` +
                 `<td>${linkOpen}${carNameHtml}${thumbPreview}${linkClose}</td>` +
@@ -517,10 +548,9 @@
         const flag = countryFlag(car.country || '');
         const flagHtml = flag ? `<span class="car-tile-flag-overlay">${flag}</span>` : '';
         const rawCarName = car.car || '';
-        const { brand: carBrand, model: carModel } = (window.R3EUtils && R3EUtils.splitCarName) ? R3EUtils.splitCarName(rawCarName) : { brand: '', model: rawCarName };
-        const carNameHtml = carBrand
-          ? `<strong>${R3EUtils.escapeHtml(carBrand)}</strong> ${R3EUtils.escapeHtml(carModel)}`
-          : R3EUtils.escapeHtml(rawCarName);
+        const carNameHtml = renderCarDisplayHtml(rawCarName, {
+          className: 'cars-page-car-name cars-page-car-name-tile'
+        });
         const carNameAttr = R3EUtils.escapeHtml(rawCarName);
         const isSafetyCar = (car.car_class || car.class || '').toLowerCase() === 'safety car';
         const warningIcon = isSafetyCar ? `<span class="warning-icon" title="Not eligible to Leaderboards" aria-label="Warning" role="img">⚠️</span>` : '';

@@ -2,12 +2,7 @@
   // Helper function for formatting values
   const formatValue = R3EUtils.formatValue;
   
-  // Track list moved to modules/data/tracks.js
-  const TRACKS = Array.isArray(window.TRACKS_DATA) ? window.TRACKS_DATA : [];
-
   // DOM refs
-  const rootToggle = document.querySelector('#track-filter-ui .custom-select__toggle');
-  const rootMenu = document.querySelector('#track-filter-ui .custom-select__menu');
   const classToggle = document.querySelector('#track-class-filter-ui .custom-select__toggle');
   const classMenu = document.querySelector('#track-class-filter-ui .custom-select__menu');
   const classSelect = document.getElementById('class-filter');
@@ -26,9 +21,6 @@
   // DOM refs for combine checkbox
   const combineContainer = document.getElementById('combine-checkbox-container');
   const combineCheckbox = document.getElementById('combine-checkbox');
-
-  function closeMenu() { if (rootMenu) { rootMenu.hidden = true; rootToggle.setAttribute('aria-expanded','false'); } }
-  function openMenu() { if (rootMenu) { rootMenu.hidden = false; rootToggle.setAttribute('aria-expanded','true'); } }
 
   function trackTrackInfoFilter(filterName, filterValue) {
     if (typeof R3EAnalytics === 'undefined' || typeof R3EAnalytics.track !== 'function') return;
@@ -55,13 +47,6 @@
     hasTrackedTrackPageShown = true;
   }
 
-  // Build menu options from TRACKS + All tracks
-  function buildMenu() {
-    if (!rootMenu) return;
-    const options = [{ value: '', label: 'All tracks' }].concat(TRACKS.map(t => ({ value: String(t.id), label: t.label })));
-    rootMenu.innerHTML = options.map(opt => `<div class="custom-select__option" data-value="${R3EUtils.escapeHtml(opt.value)}">${R3EUtils.escapeHtml(opt.label)}</div>`).join('');
-  }
-
   // Build class menu from a list of class options (value/label)
   function buildClassMenu(classOptions) {
     if (!classMenu) return;
@@ -69,30 +54,15 @@
     classMenu.innerHTML = opts.map(opt => `<div class="custom-select__option" data-value="${R3EUtils.escapeHtml(opt.value)}">${R3EUtils.escapeHtml(opt.label)}</div>`).join('');
   }
 
-  // Handle selection
-  function setSelectedTrack(val, label) {
-    activeTrackId = val ? Number(val) : null;
+  // Track filter — CustomSelect handles open/close/logo rendering
+  new CustomSelect('track-filter-ui', dataService.getTrackOptions(), (value, opts) => {
+    activeTrackId = value ? Number(value) : null;
     trackCurrentPage = 1;
-    if (rootToggle) rootToggle.textContent = `${label} ▾`;
-    closeMenu();
-    trackTrackInfoFilter('track', val ? String(val) : '');
+    if (opts?.source === 'user') {
+      trackTrackInfoFilter('track', value || '');
+    }
     fetchAndRender();
-  }
-
-  // Wire menu events
-  if (rootToggle && rootMenu) {
-    rootToggle.addEventListener('click', (e) => { e.stopPropagation(); rootMenu.hidden ? openMenu() : closeMenu(); });
-    document.addEventListener('click', (e) => { if (!document.getElementById('track-filter-ui').contains(e.target)) closeMenu(); });
-    rootMenu.addEventListener('click', (e) => {
-      const opt = e.target.closest('.custom-select__option');
-      if (!opt) return;
-      const val = opt.dataset.value;
-      const label = opt.textContent || opt.innerText || 'All tracks';
-      setSelectedTrack(val, label);
-    });
-  }
-
-  buildMenu();
+  });
   
   // Initialize class menu with superclass categories
   const superclassOptions = dataService.getSuperclassOptions();

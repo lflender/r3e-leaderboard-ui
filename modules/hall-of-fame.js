@@ -28,14 +28,15 @@
             .replace(/'/g, '&#39;');
     };
 
-    const renderList = (rows, metricLabel) => {
+    const renderList = (rows, metricLabel, valueFormatter) => {
         if (!Array.isArray(rows) || rows.length === 0) {
             return '<li class="hall-of-fame-empty">No data</li>';
         }
 
+        const fmt = typeof valueFormatter === 'function' ? valueFormatter : (v) => v.toLocaleString();
         return rows.map((row, index) => {
             const rank = index + 1;
-            const value = Number.isFinite(row.value) ? row.value.toLocaleString() : '0';
+            const value = Number.isFinite(row.value) ? fmt(row.value) : '0';
             const flagRaw = (window.FlagHelper && typeof window.FlagHelper.countryToFlag === 'function')
                 ? window.FlagHelper.countryToFlag(row.country)
                 : '';
@@ -59,12 +60,16 @@
             '</div>',
             '<div class="hall-of-fame-grid">',
             '<div class="hall-of-fame-column">',
-            '<h4>Most poles</h4>',
-            `<ol>${renderList(data.poles, 'poles')}</ol>`,
+            '<h4>Avg bested %</h4>',
+            `<ol>${renderList(data.avgBested, '%', (v) => v.toFixed(1))}</ol>`,
             '</div>',
             '<div class="hall-of-fame-column">',
             '<h4>Most bested</h4>',
             `<ol>${renderList(data.bested, 'bested')}</ol>`,
+            '</div>',
+            '<div class="hall-of-fame-column">',
+            '<h4>Most poles</h4>',
+            `<ol>${renderList(data.poles, 'poles')}</ol>`,
             '</div>',
             '</div>',
             '</section>',
@@ -89,7 +94,7 @@
 
         try {
             const index = await window.StatsData.loadStatsIndex();
-            const paths = window.StatsData.getPathsForFilter(index, '');
+            const paths = window.StatsData.getAllPathsForFilter(index, '');
             if (!paths || !paths.polePath || !paths.bestedPath) {
                 return;
             }
@@ -101,8 +106,9 @@
 
             const poles = window.StatsData.normalizeRows(polePayload, 'pole_positions', 5);
             const bested = window.StatsData.normalizeRows(bestedPayload, 'bested_drivers', 5);
+            const avgBested = window.StatsData.normalizeRows(bestedPayload, 'avg_bested', 5);
 
-            render({ poles, bested });
+            render({ poles, bested, avgBested });
         } catch (error) {
             console.error('Hall of Fame failed to render:', error);
         }

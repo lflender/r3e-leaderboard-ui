@@ -53,6 +53,10 @@
 }
 
 @media (max-width: 1000px) {
+    .hall-of-fame-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
     .car-dist-table {
         font-size: 0.85rem;
     }

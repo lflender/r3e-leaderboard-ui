@@ -191,11 +191,7 @@ class DriverSearch {
     setupCustomSelects() {
         // Track filter custom select
         if (this.elements.trackFilterUI) {
-            const tracks = Array.isArray(window.TRACKS_DATA) ? window.TRACKS_DATA : [];
-            const trackOptions = [{ value: '', label: 'All tracks' }]
-                .concat(tracks.map(t => ({ value: String(t.id), label: t.label })));
-
-            new CustomSelect('track-filter-ui', trackOptions, async (value, opts) => {
+            new CustomSelect('track-filter-ui', dataService.getTrackOptions(), async (value, opts) => {
                 this.selectedTrack = value;
                 if (this.elements.trackFilter) {
                     this.elements.trackFilter.value = value;

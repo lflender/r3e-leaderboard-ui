@@ -45,6 +45,7 @@ beforeEach(() => {
     window.dataService = {
         getSuperclassOptions: vi.fn().mockReturnValue([]),
         getClassOptionsFromCarsData: vi.fn().mockReturnValue([]),
+        getTrackOptions: vi.fn().mockReturnValue([{ value: '', label: 'All tracks' }]),
         waitForDriverIndex: vi.fn().mockResolvedValue({})
     };
 

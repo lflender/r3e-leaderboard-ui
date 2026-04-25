@@ -12,16 +12,19 @@ function buildHofDOM(withSearch = true) {
 }
 
 function makeStatsDataMock(poles = [], bested = []) {
+    const paths = {
+        polePath: 'cache/stats/overall/poles.json.gz',
+        bestedPath: 'cache/stats/overall/bested.json.gz'
+    };
     return {
         loadStatsIndex: vi.fn().mockResolvedValue({}),
-        getPathsForFilter: vi.fn().mockReturnValue({
-            polePath: 'cache/stats/overall/poles.json.gz',
-            bestedPath: 'cache/stats/overall/bested.json.gz'
-        }),
+        getPathsForFilter: vi.fn().mockReturnValue(paths),
+        getAllPathsForFilter: vi.fn().mockReturnValue(paths),
         fetchGzipJson: vi.fn().mockResolvedValue({}),
         normalizeRows: vi.fn().mockImplementation((_payload, metric) => {
             if (metric === 'pole_positions') return poles;
             if (metric === 'bested_drivers') return bested;
+            if (metric === 'avg_bested') return bested;
             return [];
         })
     };

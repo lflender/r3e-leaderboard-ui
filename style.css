@@ -13,7 +13,7 @@
 @import url("./styles/components/difficulty.css?v=1");
 @import url("./styles/components/entries-dist.css");
 @import url("./styles/components/fun-fact.css");
-@import url("./styles/components/hall-of-fame.css");
+@import url("./styles/components/hall-of-fame.css?v=1");
 @import url("./styles/components/seo.css");
 @import url("./styles/pages/cars.css?v=10");
 @import url("./styles/pages/faq.css");
@@ -21,4 +21,4 @@
 @import url("./styles/pages/records.css?v=33");
 @import url("./styles/pages/daily-races.css?v=2");
 @import url("./styles/pages/detail.css?v=3");
-@import url("./styles/responsive/breakpoints.css?v=14");
+@import url("./styles/responsive/breakpoints.css?v=15");

@@ -173,3 +173,6 @@ const R3EAnalytics = (() => {
 
 // Auto-initialise as soon as this script runs
 R3EAnalytics.init();
+
+// Expose on window so other scripts and tests can call R3EAnalytics.track() etc.
+window.R3EAnalytics = R3EAnalytics;

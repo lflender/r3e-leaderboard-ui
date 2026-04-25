@@ -153,6 +153,21 @@
     color: var(--text-primary);
 }
 
+.car-dist-car-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.car-dist-brand-logo {
+    flex: 0 0 auto;
+    width: 36px;
+    height: 20px;
+    max-width: 36px;
+    max-height: 20px;
+    object-fit: contain;
+}
+
 .car-dist-entries {
     text-align: right;
     color: var(--text-secondary);

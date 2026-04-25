@@ -44,6 +44,7 @@ class DriverSearch {
 
         // Analytics: tracks how the search was triggered
         this._searchSource = 'input';
+        this.hasTrackedPageShown = false;
 
         this.init();
     }
@@ -57,12 +58,27 @@ class DriverSearch {
         this.setupCustomSelects();
         this.setupEventListeners();
         this.handleUrlDriverParam();
+        this.trackPageShown();
         
         // Make goToPage available globally for pagination buttons
         window.goToPage = (page) => this.goToPage(page);
         
         // Make sortDriverGroups available globally for sorting
         window.sortDriverGroups = (sortBy) => this.sortDriverGroups(sortBy);
+    }
+
+    trackPageShown() {
+        if (this.hasTrackedPageShown) return;
+        if (typeof R3EAnalytics === 'undefined' || typeof R3EAnalytics.track !== 'function') return;
+
+        const initialSearch = (this.elements.driverSearch && this.elements.driverSearch.value || '').trim();
+        R3EAnalytics.track('driver page shown', {
+            has_initial_search: initialSearch.length >= this.minSearchLength,
+            initial_search_term: initialSearch || '',
+            track_filter: this.selectedTrack || '',
+            class_filter: this.selectedClass || ''
+        });
+        this.hasTrackedPageShown = true;
     }
 
     /**
@@ -175,11 +191,7 @@ class DriverSearch {
     setupCustomSelects() {
         // Track filter custom select
         if (this.elements.trackFilterUI) {
-            const tracks = Array.isArray(window.TRACKS_DATA) ? window.TRACKS_DATA : [];
-            const trackOptions = [{ value: '', label: 'All tracks' }]
-                .concat(tracks.map(t => ({ value: String(t.id), label: t.label })));
-
-            new CustomSelect('track-filter-ui', trackOptions, async (value, opts) => {
+            new CustomSelect('track-filter-ui', dataService.getTrackOptions(), async (value, opts) => {
                 this.selectedTrack = value;
                 if (this.elements.trackFilter) {
                     this.elements.trackFilter.value = value;
@@ -278,6 +290,14 @@ class DriverSearch {
                 await this.searchDriver(searchTerm);
             }
         });
+
+        // Delegated sort handler for table header clicks (data-sort-key attribute)
+        if (this.elements.resultsContainer) {
+            this.elements.resultsContainer.addEventListener('click', (e) => {
+                const th = e.target.closest('th[data-sort-key]');
+                if (th) this.sortDriverGroups(th.getAttribute('data-sort-key'));
+            });
+        }
 
         // Class filter change handler
         if (this.elements.classFilter) {
@@ -488,43 +508,8 @@ class DriverSearch {
      * Generate pagination HTML
      */
     generatePaginationHTML(startIndex, endIndex, totalDrivers, totalEntriesShown, currentPage, totalPages) {
-        let html = '<div class="pagination">';
-        html += `<div class="pagination-info">Showing drivers ${startIndex + 1}-${endIndex} of ${totalDrivers} (${totalEntriesShown} total entries)</div>`;
-        html += '<div class="pagination-buttons">';
-        
-        if (currentPage > 1) {
-            html += `<button onclick="goToPage(${currentPage - 1})" class="page-btn">‹ Previous</button>`;
-        }
-        
-        const maxPagesToShow = 5;
-        let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
-        let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-        
-        if (endPage - startPage < maxPagesToShow - 1) {
-            startPage = Math.max(1, endPage - maxPagesToShow + 1);
-        }
-        
-        if (startPage > 1) {
-            html += `<button onclick="goToPage(1)" class="page-btn">1</button>`;
-            if (startPage > 2) html += '<span class="page-ellipsis">...</span>';
-        }
-        
-        for (let i = startPage; i <= endPage; i++) {
-            const activeClass = i === currentPage ? 'active' : '';
-            html += `<button onclick="goToPage(${i})" class="page-btn ${activeClass}">${i}</button>`;
-        }
-        
-        if (endPage < totalPages) {
-            if (endPage < totalPages - 1) html += '<span class="page-ellipsis">...</span>';
-            html += `<button onclick="goToPage(${totalPages})" class="page-btn">${totalPages}</button>`;
-        }
-        
-        if (currentPage < totalPages) {
-            html += `<button onclick="goToPage(${currentPage + 1})" class="page-btn">Next ›</button>`;
-        }
-        
-        html += '</div></div>';
-        return html;
+        const infoText = `Showing drivers ${startIndex + 1}-${endIndex} of ${totalDrivers} (${totalEntriesShown} total entries)`;
+        return window.generatePaginationHTML({ startIndex, endIndex, total: totalDrivers, currentPage, totalPages, onPageChange: 'goToPage', infoText });
     }
 
     /**
@@ -547,6 +532,18 @@ class DriverSearch {
         this.currentPage = page;
         this.displayResults(this.allResults);
         this.elements.resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        if (typeof R3EAnalytics !== 'undefined' && typeof R3EAnalytics.track === 'function') {
+            const totalPages = Math.max(1, Math.ceil((this.allResults || []).length / this.itemsPerPage));
+            R3EAnalytics.track('driver pagination changed', {
+                page_number: this.currentPage,
+                total_pages: totalPages,
+                result_count: (this.allResults || []).length,
+                search_term: this.lastSearchTerm || '',
+                track_filter: this.selectedTrack || '',
+                class_filter: this.selectedClass || ''
+            });
+        }
     }
     
     /**
@@ -554,6 +551,7 @@ class DriverSearch {
      * @param {string} sortBy - Sort key: 'gap', 'lapTime', 'gapPercent', 'position', or 'date_time'
      */
     sortDriverGroups(sortBy) {
+        const previousSortBy = this.currentSortBy;
         if (sortBy === 'lapTimeToggle') {
             if (this.currentSortBy === 'gap') {
                 sortBy = 'lapTime';
@@ -567,6 +565,17 @@ class DriverSearch {
         this.currentSortBy = sortBy;
         this.saveSortPreference(sortBy); // Save preference to localStorage
         this.displayResults(this.allResults);
+
+        if (typeof R3EAnalytics !== 'undefined' && typeof R3EAnalytics.track === 'function') {
+            R3EAnalytics.track('driver sort changed', {
+                sort_by: sortBy,
+                previous_sort_by: previousSortBy,
+                result_count: (this.allResults || []).length,
+                search_term: this.lastSearchTerm || '',
+                track_filter: this.selectedTrack || '',
+                class_filter: this.selectedClass || ''
+            });
+        }
     }
 }
 

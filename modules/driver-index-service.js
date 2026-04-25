@@ -446,35 +446,6 @@
             return parsed;
         },
 
-        async _streamParseDriverIndex(response, onProgress) {
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let text = '';
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) {
-                    break;
-                }
-
-                text += decoder.decode(value, { stream: true });
-            }
-
-            text += decoder.decode();
-            const index = JSON.parse(text);
-            if (!index || typeof index !== 'object' || Array.isArray(index)) {
-                return {};
-            }
-
-            if (onProgress) {
-                Object.entries(index).forEach(([driverName, entries]) => {
-                    onProgress(driverName, entries);
-                });
-            }
-
-            return index;
-        },
-
         async waitForDriverIndex(maxAttempts = 50) {
             if (this.driverIndex !== null) {
                 return this.driverIndex;

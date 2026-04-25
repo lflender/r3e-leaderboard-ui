@@ -70,7 +70,7 @@
       ? 'table-brand-logo table-brand-logo-raceroom'
       : 'table-brand-logo';
     const brandLogoHtml = brandLogoUrl
-      ? `<span class="table-brand-logo-slot cars-page-car-logo-slot"><img class="${brandLogoClass}" src="${R3EUtils.escapeHtml(brandLogoUrl)}" alt="${escBrand || 'Car brand'} logo" loading="lazy" decoding="async" onload='const renderedWidth = this.getBoundingClientRect().width || this.width || 22; const slotWidth = (this.parentElement && this.parentElement.getBoundingClientRect().width) || 22; const offsetX = (slotWidth - renderedWidth) / 2; this.style.marginLeft = offsetX + "px";' onerror='if (this.parentElement) { this.parentElement.remove(); } else { this.remove(); }' /></span>`
+      ? `<span class="table-brand-logo-slot cars-page-car-logo-slot"><img class="${brandLogoClass}" src="${R3EUtils.escapeHtml(brandLogoUrl)}" alt="${escBrand || 'Car brand'} logo" loading="lazy" decoding="async" data-center-logo="true" /></span>`
       : '';
 
     if (!brand) {
@@ -91,16 +91,16 @@
   // Dropdown options
   const wheelOptions = [
     { value: '', label: 'All wheels' },
-    { value: 'gt', label: 'GT' },
-    { value: 'round', label: 'Round' },
-    { value: 'round (flat)', label: 'Round (flat)' },
-    { value: 'round_and_roundflat', label: 'Round & Round (flat)' }
+    { value: 'gt', label: 'GT', labelHtml: wheelBadge('gt') },
+    { value: 'round', label: 'Round', labelHtml: wheelBadge('round') },
+    { value: 'round (flat)', label: 'Round (flat)', labelHtml: wheelBadge('round (flat)') },
+    { value: 'round_and_roundflat', label: 'Round & Round (flat)', labelHtml: `${wheelBadge('round')} + ${wheelBadge('round (flat)')}` }
   ];
   const transOptions = [
     { value: '', label: 'All transmissions' },
-    { value: 'paddles', label: 'Paddles' },
-    { value: 'sequential', label: 'Sequential' },
-    { value: 'h', label: 'H' }
+    { value: 'paddles', label: 'Paddles', labelHtml: transBadge('paddles') },
+    { value: 'sequential', label: 'Sequential', labelHtml: transBadge('sequential') },
+    { value: 'h', label: 'H', labelHtml: transBadge('h') }
   ];
 
   let wheelFilter = '', transFilter = '', classFilter = '';
@@ -113,18 +113,7 @@
   
   // Build class options from data
   const superclassOptions = dataService.getSuperclassOptions();
-  const regularClassOptions = [];
-  const classesSet = new Set();
-  data.forEach(cls => {
-    const className = (cls.class || '').trim();
-    if (className && className !== '-') {
-      classesSet.add(className);
-    }
-  });
-  const uniqueClasses = Array.from(classesSet).sort();
-  uniqueClasses.forEach(cls => {
-    regularClassOptions.push({ value: cls, label: cls });
-  });
+  const regularClassOptions = dataService.getClassOptionsFromCarsData();
   
   // Combine: All classes, then Category: superclass entries, then regular classes
   const classOptions = [{ value: '', label: 'All classes' }]
@@ -148,7 +137,7 @@
 
   function trackCarInfoViewMode(nextMode, previousMode, stats) {
     if (typeof R3EAnalytics === 'undefined' || typeof R3EAnalytics.track !== 'function') return;
-    R3EAnalytics.track('car info view mode changed', {
+    R3EAnalytics.track('cars toggled view', {
       view_mode: nextMode,
       previous_view_mode: previousMode,
       wheel_filter: wheelFilter || '',
@@ -158,6 +147,35 @@
       displayed_classes: (stats && stats.displayedClasses) || 0,
       is_superclass_filter: !!(classFilter && classFilter.startsWith('superclass:'))
     });
+  }
+
+  function trackCarSearched(searchTerm, source, stats) {
+    if (typeof R3EAnalytics === 'undefined' || typeof R3EAnalytics.track !== 'function') return;
+    R3EAnalytics.track('car searched', {
+      search_term: searchTerm || '',
+      search_length: (searchTerm || '').length,
+      source: source || 'input',
+      view_mode: viewMode,
+      wheel_filter: wheelFilter || '',
+      transmission_filter: transFilter || '',
+      class_filter: classFilter || '',
+      displayed_cars: (stats && stats.displayedCars) || 0,
+      displayed_classes: (stats && stats.displayedClasses) || 0,
+      is_superclass_filter: !!(classFilter && classFilter.startsWith('superclass:'))
+    });
+  }
+
+  function applySearchTerm(nextValue, source) {
+    const trimmed = (nextValue || '').trim();
+    if (trimmed.length === 0 || trimmed.length < minSearchLength) {
+      searchFilter = '';
+      renderResults();
+      return;
+    }
+
+    searchFilter = trimmed.toLowerCase();
+    const stats = renderResults();
+    trackCarSearched(trimmed, source, stats);
   }
 
   function updateViewToggleUI() {
@@ -181,21 +199,13 @@
         clearTimeout(searchDebounceTimer);
       }
 
-      if (nextValue.length === 0) {
-        searchFilter = '';
-        renderResults();
-        return;
-      }
-
-      if (nextValue.length < minSearchLength) {
-        searchFilter = '';
-        renderResults();
+      if (nextValue.length === 0 || nextValue.length < minSearchLength) {
+        applySearchTerm('', 'input');
         return;
       }
 
       searchDebounceTimer = setTimeout(() => {
-        searchFilter = nextValue.toLowerCase();
-        renderResults();
+        applySearchTerm(nextValue, 'input');
       }, 300);
     });
 
@@ -207,8 +217,7 @@
         clearTimeout(searchDebounceTimer);
       }
       event.target.blur();
-      searchFilter = nextValue.toLowerCase();
-      renderResults();
+      applySearchTerm(nextValue, 'enter');
     });
   }
 
@@ -353,6 +362,20 @@
       const b = Math.round((1 - tg) * 0 + tg * 83);
       return `rgb(${r},${g},${b})`;
     };
+  }
+
+  function attachBrandLogoHandlers(rootEl) {
+    Array.from(rootEl.querySelectorAll('img[data-center-logo]')).forEach(img => {
+      img.addEventListener('load', function () {
+        const renderedWidth = this.getBoundingClientRect().width || this.width || 22;
+        const slotWidth = (this.parentElement && this.parentElement.getBoundingClientRect().width) || 22;
+        const offsetX = (slotWidth - renderedWidth) / 2;
+        this.style.marginLeft = offsetX + 'px';
+      });
+      img.addEventListener('error', function () {
+        if (this.parentElement) { this.parentElement.remove(); } else { this.remove(); }
+      });
+    });
   }
 
   function attachImageCyclers(rootEl) {
@@ -534,6 +557,7 @@
 
     html += '\n</tbody></table>';
     tableContainer.innerHTML = html;
+    attachBrandLogoHandlers(tableContainer);
     attachImageCyclers(tableContainer);
 
     Array.from(tableContainer.querySelectorAll('tr.driver-data-row')).forEach(row => {
@@ -632,6 +656,7 @@
 
     html += '</div>';
     tableContainer.innerHTML = html;
+    attachBrandLogoHandlers(tableContainer);
     attachImageCyclers(tableContainer);
     return { displayedCars, displayedClasses };
   }
@@ -644,11 +669,12 @@
   if (!hasTrackedCarInfoDisplay && typeof R3EAnalytics !== 'undefined' && typeof R3EAnalytics.track === 'function') {
     const totalClasses = data.length;
     const totalCars = data.reduce((sum, cls) => sum + ((cls.cars || []).length), 0);
-    R3EAnalytics.track('car info displayed', {
+    R3EAnalytics.track('cars page shown', {
       total_classes: totalClasses,
       total_cars: totalCars,
       displayed_classes: (initialStats && initialStats.displayedClasses) || 0,
-      displayed_cars: (initialStats && initialStats.displayedCars) || 0
+      displayed_cars: (initialStats && initialStats.displayedCars) || 0,
+      view_mode: viewMode
     });
     hasTrackedCarInfoDisplay = true;
   }

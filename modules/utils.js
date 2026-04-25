@@ -15,23 +15,23 @@ function formatHeader(key) {
         return window.ColumnConfig.getDisplayName(key);
     }
 
-    if (key === 'class_name' || key === 'className' || key === 'ClassName') {
-        return 'Car class';
-    }
-    if (key === 'date_time' || key === 'dateTime' || key === 'DateTime') {
-        return 'Date';
-    }
-
-    const lower = String(key || '').toLowerCase();
-    if (lower === 'entry_count' || lower === 'total_entries' || lower === 'totalracers' || lower === 'total_racers') {
-        return 'Entries';
-    }
-
+    // Generic fallback: convert snake_case/camelCase → Title Case
     return key
         .replace(/([A-Z])/g, ' $1')
         .replace(/_/g, ' ')
         .replace(/^./, str => str.toUpperCase())
         .trim();
+}
+
+/**
+ * Returns true when the driver search input or URL params indicate an active search.
+ * Shared between hall-of-fame.js and fun-fact.js to avoid duplication.
+ */
+function isDriverSearchActive() {
+    const input = document.getElementById('driver-search');
+    if (input && input.value.trim().length > 0) return true;
+    const params = new URLSearchParams(window.location.search);
+    return Boolean((params.get('driver') || params.get('query') || '').trim());
 }
 
 function formatValue(value) {
@@ -88,6 +88,7 @@ window.R3EUtils = {
     getTotalEntriesCount,
     renderRankStars,
     getPositionBadgeColor,
+    isDriverSearchActive,
     ...(window.R3ETimeUtils || {}),
     ...(window.R3ETrackUtils || {}),
     ...(window.R3EUrlUtils || {}),

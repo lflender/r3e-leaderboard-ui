@@ -170,6 +170,17 @@
     color: var(--text-primary);
     line-height: 1.4;
     padding-right: clamp(88px, 24%, 118px);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.daily-race-track-logo {
+    flex: 0 0 auto;
+    width: auto;
+    height: 40px;
+    max-width: 64px;
+    object-fit: contain;
 }
 
 .daily-race-track-layout {

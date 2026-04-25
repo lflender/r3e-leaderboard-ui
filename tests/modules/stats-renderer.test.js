@@ -4,10 +4,14 @@ import { loadBrowserScript } from '../helpers/script-loader.js';
 describe('StatsRenderer', () => {
     beforeEach(() => {
         delete window.StatsRenderer;
-        delete window.R3EUtils;
         delete window.FlagHelper;
         delete window.resolveMpPos;
         delete window.getMpPosNameClasses;
+        window.R3EUtils = {
+            escapeHtml: (v) => String(v == null ? '' : v)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+        };
         document.body.innerHTML = '<div id="container"></div>';
         loadBrowserScript('modules/stats-renderer.js');
     });

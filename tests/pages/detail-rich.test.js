@@ -6,8 +6,10 @@ function buildDom() {
         '<div id="detail-track"></div>',
         '<div id="detail-class"></div>',
         '<p id="detail-subtitle"></p>',
+        '<div id="detail-filters-stash" style="display:none;">',
         '<div id="car-filter-ui"></div>',
         '<div id="difficulty-filter-ui"></div>',
+        '</div>',
         '<div id="detail-results-container"></div>'
     ].join('');
 }
@@ -165,6 +167,20 @@ function setupGlobals() {
         }
     };
 
+    window.DetailCarDist = {
+        generateHtml: vi.fn().mockReturnValue(''),
+        getCarDistributionStats: vi.fn().mockReturnValue([])
+    };
+
+    window.DetailEntriesDist = {
+        generateHtml: vi.fn().mockReturnValue(''),
+        parseEntryDate: vi.fn(),
+        getLocalDateKey: vi.fn(),
+        getDataTimeBounds: vi.fn().mockReturnValue({ min: null, max: null }),
+        toLocalDateInputValue: vi.fn().mockReturnValue(''),
+        applyTimeframeFilter: vi.fn(data => data)
+    };
+
     window.CustomSelect = class {
         constructor(rootId, options, onChange) {
             this.rootId = rootId;
@@ -236,15 +252,13 @@ describe('detail page rich integration', () => {
 
         expect(window.dataService.fetchLeaderboardDetails).toHaveBeenCalledWith('10', '5');
         expect(trackHtml).toContain('New Spa');
-        expect(trackHtml).toContain('Track:');
-        expect(classHtml).toContain('Class:');
         expect(classHtml).toContain('/images/gt3.webp');
         expect(tableRows.length).toBe(3);
     });
 
     it('tracks detail view analytics once from URL parameters', () => {
         expect(window.R3EAnalytics.track).toHaveBeenCalledWith(
-            'detail page viewed',
+            'detail page shown',
             expect.objectContaining({
                 track_id: '10',
                 class_param: '5',

@@ -2,12 +2,7 @@
   // Helper function for formatting values
   const formatValue = R3EUtils.formatValue;
   
-  // Track list moved to modules/data/tracks.js
-  const TRACKS = Array.isArray(window.TRACKS_DATA) ? window.TRACKS_DATA : [];
-
   // DOM refs
-  const rootToggle = document.querySelector('#track-filter-ui .custom-select__toggle');
-  const rootMenu = document.querySelector('#track-filter-ui .custom-select__menu');
   const classToggle = document.querySelector('#track-class-filter-ui .custom-select__toggle');
   const classMenu = document.querySelector('#track-class-filter-ui .custom-select__menu');
   const classSelect = document.getElementById('class-filter');
@@ -21,14 +16,11 @@
   let activeClassId = null; // null => All classes
   let activeClassLabel = null; // human-readable label for selected class
   let combineMode = false; // When true, combine all classes in superclass by track
-  let hasTrackedTrackInfoDisplay = false;
+  let hasTrackedTrackPageShown = false;
 
   // DOM refs for combine checkbox
   const combineContainer = document.getElementById('combine-checkbox-container');
   const combineCheckbox = document.getElementById('combine-checkbox');
-
-  function closeMenu() { if (rootMenu) { rootMenu.hidden = true; rootToggle.setAttribute('aria-expanded','false'); } }
-  function openMenu() { if (rootMenu) { rootMenu.hidden = false; rootToggle.setAttribute('aria-expanded','true'); } }
 
   function trackTrackInfoFilter(filterName, filterValue) {
     if (typeof R3EAnalytics === 'undefined' || typeof R3EAnalytics.track !== 'function') return;
@@ -42,11 +34,17 @@
     });
   }
 
-  // Build menu options from TRACKS + All tracks
-  function buildMenu() {
-    if (!rootMenu) return;
-    const options = [{ value: '', label: 'All tracks' }].concat(TRACKS.map(t => ({ value: String(t.id), label: t.label })));
-    rootMenu.innerHTML = options.map(opt => `<div class="custom-select__option" data-value="${R3EUtils.escapeHtml(opt.value)}">${R3EUtils.escapeHtml(opt.label)}</div>`).join('');
+  function trackTrackPageShown(displayedRows) {
+    if (hasTrackedTrackPageShown) return;
+    if (typeof R3EAnalytics === 'undefined' || typeof R3EAnalytics.track !== 'function') return;
+    R3EAnalytics.track('track page shown', {
+      displayed_rows: Number.isFinite(displayedRows) ? displayedRows : 0,
+      track_filter: activeTrackId ? String(activeTrackId) : '',
+      class_filter: activeClassId || '',
+      combine_mode: !!combineMode,
+      is_superclass_filter: !!(activeClassId && activeClassId.startsWith('superclass:'))
+    });
+    hasTrackedTrackPageShown = true;
   }
 
   // Build class menu from a list of class options (value/label)
@@ -56,30 +54,15 @@
     classMenu.innerHTML = opts.map(opt => `<div class="custom-select__option" data-value="${R3EUtils.escapeHtml(opt.value)}">${R3EUtils.escapeHtml(opt.label)}</div>`).join('');
   }
 
-  // Handle selection
-  function setSelectedTrack(val, label) {
-    activeTrackId = val ? Number(val) : null;
+  // Track filter — CustomSelect handles open/close/logo rendering
+  new CustomSelect('track-filter-ui', dataService.getTrackOptions(), (value, opts) => {
+    activeTrackId = value ? Number(value) : null;
     trackCurrentPage = 1;
-    if (rootToggle) rootToggle.textContent = `${label} ▾`;
-    closeMenu();
-    trackTrackInfoFilter('track', val ? String(val) : '');
+    if (opts?.source === 'user') {
+      trackTrackInfoFilter('track', value || '');
+    }
     fetchAndRender();
-  }
-
-  // Wire menu events
-  if (rootToggle && rootMenu) {
-    rootToggle.addEventListener('click', (e) => { e.stopPropagation(); rootMenu.hidden ? openMenu() : closeMenu(); });
-    document.addEventListener('click', (e) => { if (!document.getElementById('track-filter-ui').contains(e.target)) closeMenu(); });
-    rootMenu.addEventListener('click', (e) => {
-      const opt = e.target.closest('.custom-select__option');
-      if (!opt) return;
-      const val = opt.dataset.value;
-      const label = opt.textContent || opt.innerText || 'All tracks';
-      setSelectedTrack(val, label);
-    });
-  }
-
-  buildMenu();
+  });
   
   // Initialize class menu with superclass categories
   const superclassOptions = dataService.getSuperclassOptions();
@@ -526,16 +509,7 @@
   // Render table using the same style/formatting as leaderboards
   async function renderTable(data) {
     trackAllResults = Array.isArray(data) ? data : [];
-    if (!hasTrackedTrackInfoDisplay && typeof R3EAnalytics !== 'undefined' && typeof R3EAnalytics.track === 'function') {
-      R3EAnalytics.track('track info displayed', {
-        displayed_rows: trackAllResults.length,
-        track_filter: activeTrackId ? String(activeTrackId) : '',
-        class_filter: activeClassId || '',
-        combine_mode: !!combineMode,
-        is_superclass_filter: !!(activeClassId && activeClassId.startsWith('superclass:'))
-      });
-      hasTrackedTrackInfoDisplay = true;
-    }
+    trackTrackPageShown(trackAllResults.length);
     if (trackAllResults.length === 0) {
       await TemplateHelper.showNoResults(tableContainer);
       return;
@@ -656,17 +630,23 @@
           if (window.DataNormalizer && window.DataNormalizer.normalizeTrackName) {
             trackStr = window.DataNormalizer.normalizeTrackName(trackStr);
           }
+          const trackLogoUrl = (window.R3ETrackImages && typeof window.R3ETrackImages.resolveTrackLogoByLabel === 'function')
+            ? window.R3ETrackImages.resolveTrackLogoByLabel(trackStr)
+            : '';
+          const trackLogoHtml = trackLogoUrl
+            ? `<img class="table-track-logo" src="${R3EUtils.escapeHtml(trackLogoUrl)}" alt="${R3EUtils.escapeHtml(trackStr || 'Track')} logo" width="34" height="34" loading="lazy" decoding="async" />`
+            : '';
           // Split track name and layout (e.g., "Donington Park - Grand Prix")
           const parts = trackStr.split(/\s*[-–—]\s+/);
           if (parts.length >= 2) {
             const trackName = R3EUtils.escapeHtml(parts[0]);
             const layoutName = R3EUtils.escapeHtml(parts.slice(1).join(' - '));
-            html += `<td class="track-cell">${trackName} <span class="track-layout">${layoutName}</span></td>`;
+            html += `<td class="track-cell"><span class="track-cell-content">${trackLogoHtml}<span class="track-cell-text">${trackName} <span class="track-layout">${layoutName}</span></span></span></td>`;
           } else {
             // No layout part, just return track name with word break
             trackStr = trackStr.replace(/(\s+)([-–—])(\s+)/g, '$1<wbr>$2$3');
             trackStr = R3EUtils.escapeHtml(trackStr).replace(/&lt;wbr&gt;/g, '<wbr>');
-            html += `<td class="track-cell">${trackStr}</td>`;
+            html += `<td class="track-cell"><span class="track-cell-content">${trackLogoHtml}<span class="track-cell-text">${trackStr}</span></span></td>`;
           }
         } else if (key === 'date_time' || key === 'dateTime' || key === 'Date') {
           // Date formatting
@@ -706,7 +686,25 @@
   }
 
   // Expose a global function for pagination buttons to call
-  window.trackInfoGoToPage = function(page){ trackCurrentPage = page; renderTable(trackAllResults); const el = document.getElementById('track-info'); if (el) el.scrollIntoView({behavior:'smooth', block:'start'}); };
+  window.trackInfoGoToPage = function(page){
+    trackCurrentPage = page;
+    renderTable(trackAllResults);
+    const el = document.getElementById('track-info');
+    if (el) el.scrollIntoView({behavior:'smooth', block:'start'});
+
+    if (typeof R3EAnalytics !== 'undefined' && typeof R3EAnalytics.track === 'function') {
+      const totalPages = Math.max(1, Math.ceil((trackAllResults || []).length / trackItemsPerPage));
+      R3EAnalytics.track('track pagination changed', {
+        page_number: trackCurrentPage,
+        total_pages: totalPages,
+        displayed_rows: (trackAllResults || []).length,
+        track_filter: activeTrackId ? String(activeTrackId) : '',
+        class_filter: activeClassId || '',
+        combine_mode: !!combineMode,
+        is_superclass_filter: !!(activeClassId && activeClassId.startsWith('superclass:'))
+      });
+    }
+  };
 
   async function fetchAndRender(){
     // Show a loading indicator during initial heavy aggregations

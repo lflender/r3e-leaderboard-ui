@@ -13,7 +13,7 @@
             titleBuilder: (label) => `Top Drivers by Average Bested % (${label})`,
             infoText: 'Average percentage of opponents beaten per leaderboard entry. Higher is better. Overall: min 5 entries and 100 bested drivers. Class filter: min 2 entries.',
             valueTitle: 'Avg %',
-            valueFormatter: (value) => Number.isFinite(value) ? value.toFixed(1) + '%' : '0.0%',
+            valueFormatter: (value) => Number.isFinite(value) ? value.toFixed(2) + '%' : '0.00%',
             // Returns the row predicate appropriate for the active filter.
             // Overall (no filter): strict thresholds to exclude low-volume drivers.
             // Class filter active: relaxed to min 2 entries since class pools are smaller.
@@ -83,7 +83,7 @@
         return window.StatsRenderer;
     }
 
-    const escapeHtml = (value) => getStatsRenderer().escapeHtml(value);
+    const escapeHtml = (value) => window.R3EUtils.escapeHtml(value);
 
     async function ensureMpPosLoaded() {
         if (typeof loadMpPosCache === 'function') {
@@ -107,7 +107,7 @@
     function trackRecordsDisplayed(value, counts) {
         if (hasTrackedDisplayed) return;
         if (typeof R3EAnalytics === 'undefined' || typeof R3EAnalytics.track !== 'function') return;
-        R3EAnalytics.track('records displayed', {
+        R3EAnalytics.track('records page shown', {
             filter_value: value || '',
             filter_label: getSelectedLabel(value),
             filter_type: getFilterType(value),
@@ -127,13 +127,15 @@
         });
     }
 
-    function trackRecordsExpand(key, value) {
+    function trackRecordsAction(action, recordType, value, extra) {
         if (typeof R3EAnalytics === 'undefined' || typeof R3EAnalytics.track !== 'function') return;
-        R3EAnalytics.track('records section expanded', {
-            section: key,
+        R3EAnalytics.track('records action', {
+            action: action,
+            record_type: recordType || '',
             filter_value: value || '',
             filter_label: getSelectedLabel(value),
-            filter_type: getFilterType(value)
+            filter_type: getFilterType(value),
+            ...(extra || {})
         });
     }
 
@@ -301,6 +303,7 @@
                 expandedKey = null;
                 updateToggleButton(section, false);
                 renderSectionWithFold(section, false);
+                trackRecordsAction('fold', section.key, currentFilter);
             }
             updateNavButtons();
             return;
@@ -325,7 +328,7 @@
         expandedKey = nextKey;
         renderSectionWithFold(nextSection, true);
         updateToggleButton(nextSection, true);
-        trackRecordsExpand(nextKey, currentFilter);
+        trackRecordsAction('unfold', nextKey, currentFilter);
         updateNavButtons();
     }
 
@@ -417,6 +420,12 @@
         const allRows = rowsByKey[section.key] || [];
         const newPage = page + direction;
         if (newPage < 0 || newPage * PAGE_SIZE >= allRows.length) return;
+
+        trackRecordsAction(direction > 0 ? 'next' : 'prev', section.key, currentFilter, {
+            page_index: newPage,
+            page_number: newPage + 1,
+            total_rows: allRows.length
+        });
 
         // Cancel and fully clean up any in-progress animations.
         // We must do the cleanup that the finished-callback would have done,

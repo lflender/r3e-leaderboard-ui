@@ -97,14 +97,12 @@ describe('TemplateHelper.generatePagination', () => {
         expect(result).toContain('pagination');
     });
 
-    it('falls back to inline implementation when generatePaginationHTML is unavailable', () => {
+    it('throws when generatePaginationHTML is unavailable', () => {
         window.generatePaginationHTML = undefined;
-        // totalPages <= 1 → both implementations return ''
-        const result = window.TemplateHelper.generatePagination({
+        expect(() => window.TemplateHelper.generatePagination({
             startIndex: 0, endIndex: 5, total: 5,
             currentPage: 1, totalPages: 1, onPageChange: 'go'
-        });
-        expect(result).toBe('');
+        })).toThrow();
     });
 });
 

@@ -47,6 +47,28 @@
     max-width: 28px;
 }
 
+.table-track-logo {
+    display: inline-block;
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    max-width: 34px;
+    max-height: 34px;
+    object-fit: contain;
+    object-position: center;
+    vertical-align: middle;
+    flex: 0 0 34px;
+}
+
+#results-container .table-track-logo {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    max-width: 34px !important;
+    max-height: 34px !important;
+    flex-basis: 34px !important;
+}
+
 .table-brand-logo-slot {
     display: inline-flex;
     align-items: center;

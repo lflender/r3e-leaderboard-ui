@@ -94,7 +94,7 @@ function trackDetailUrlView() {
     if (hasTrackedDetailUrlView) return;
     if (typeof R3EAnalytics === 'undefined' || typeof R3EAnalytics.track !== 'function') return;
 
-    R3EAnalytics.track('detail page viewed', {
+    R3EAnalytics.track('detail page shown', {
         track_id: trackParam || '',
         class_param: classParam || '',
         classes_param: classesParam || '',
@@ -490,30 +490,48 @@ function renderDetailHeader({ pageTitleText, trackName, layoutName, detailClassH
     const detailClassElem = document.getElementById('detail-class');
 
     if (pageTitleElem) {
-        pageTitleElem.textContent = `${pageTitleText} — RaceRoom Leaderboards`;
+        pageTitleElem.textContent = `${pageTitleText} - RaceRoom Leaderboards`;
     }
+
+    // Remove any separately-created layout element (old pattern)
+    const oldLayoutElem = document.getElementById('detail-layout');
+    if (oldLayoutElem) oldLayoutElem.remove();
 
     if (detailTrackElem) {
-        detailTrackElem.innerHTML = `<span class="detail-label">Track:</span> ${R3EUtils.escapeHtml(trackName)}`;
-    }
-
-    let layoutElem = document.getElementById('detail-layout');
-    if (layoutName) {
-        if (!layoutElem && detailTrackElem) {
-            layoutElem = document.createElement('div');
-            layoutElem.id = 'detail-layout';
-            detailTrackElem.after(layoutElem);
-        }
-        if (layoutElem) {
-            layoutElem.innerHTML = `<span class="detail-label">Layout:</span> ${R3EUtils.escapeHtml(layoutName)}`;
-        }
-    } else if (layoutElem) {
-        layoutElem.remove();
+        const trackLogoUrl = (window.R3ETrackImages && typeof window.R3ETrackImages.resolveTrackLogoById === 'function')
+            ? window.R3ETrackImages.resolveTrackLogoById(trackParam)
+            : '';
+        const trackLogoHtml = trackLogoUrl
+            ? `<img class="detail-track-logo" src="${R3EUtils.escapeHtml(trackLogoUrl)}" alt="${R3EUtils.escapeHtml(trackName)} logo" title="${R3EUtils.escapeHtml(trackName)}" loading="lazy" decoding="async" />`
+            : '';
+        const layoutHtml = layoutName
+            ? `<span class="detail-track-layout">${R3EUtils.escapeHtml(layoutName)}</span>`
+            : '';
+        detailTrackElem.innerHTML = `${trackLogoHtml}<span class="detail-track-name">${R3EUtils.escapeHtml(trackName)}</span>${layoutHtml}`;
     }
 
     if (detailClassElem) {
         detailClassElem.innerHTML = detailClassHtml;
     }
+}
+
+/**
+/**
+ * Build a row of class logos for multi-class/combined views.
+ * Returns an HTML string of <img> elements, or '' if no logos can be resolved.
+ * @param {Array<{className: string, classId: string|number|null}>} specs
+ * @returns {string}
+ */
+function buildClassLogosHtml(specs) {
+    if (!window.R3EUtils || typeof window.R3EUtils.resolveCarClassLogo !== 'function') return '';
+    const imgs = specs
+        .map(({ className, classId }) => {
+            const url = window.R3EUtils.resolveCarClassLogo(className, classId);
+            if (!url) return '';
+            return `<img class="detail-class-logo" src="${R3EUtils.escapeHtml(url)}" alt="${R3EUtils.escapeHtml(className)} class logo" title="${R3EUtils.escapeHtml(className)}" loading="lazy" decoding="async" />`;
+        })
+        .filter(Boolean);
+    return imgs.join('');
 }
 
 /**
@@ -531,11 +549,20 @@ function setSpecificClassesDetailTitles(classIds) {
     
     const title = `${trackName} - ${categoryLabel}`;
 
+    const specs = classIds.map(classId => ({
+        className: window.getCarClassName ? window.getCarClassName(classId) : classId,
+        classId
+    }));
+    const logosHtml = buildClassLogosHtml(specs);
+    const detailClassHtml = logosHtml
+        ? `<span class="detail-class-logos">${logosHtml}</span>`
+        : R3EUtils.escapeHtml(categoryLabel);
+
     renderDetailHeader({
         pageTitleText: title,
         trackName,
         layoutName,
-        detailClassHtml: `<span class="detail-label">Category:</span> ${R3EUtils.escapeHtml(categoryLabel)}`
+        detailClassHtml
     });
 }
 
@@ -544,11 +571,31 @@ function setCombinedDetailTitles(superclass) {
     
     const title = `${trackName} - ${superclass} (Combined)`;
 
+    // Resolve class names from CARS_DATA for this superclass
+    const specs = [];
+    if (window.CARS_DATA && Array.isArray(window.CARS_DATA)) {
+        const seen = new Set();
+        window.CARS_DATA.forEach(entry => {
+            if (entry.superclass === superclass) {
+                const cls = entry.class || entry.car_class || entry.CarClass || '';
+                if (cls && !seen.has(cls)) {
+                    seen.add(cls);
+                    const classId = window.getCarClassId ? window.getCarClassId(cls) : null;
+                    specs.push({ className: cls, classId });
+                }
+            }
+        });
+    }
+    const logosHtml = buildClassLogosHtml(specs);
+    const detailClassHtml = logosHtml
+        ? `<span class="detail-class-logos">${logosHtml}</span>`
+        : R3EUtils.escapeHtml(superclass);
+
     renderDetailHeader({
         pageTitleText: title,
         trackName,
         layoutName,
-        detailClassHtml: `<span class="detail-label">Category:</span> ${R3EUtils.escapeHtml(superclass)} (Combined)`
+        detailClassHtml
     });
 }
 
@@ -639,9 +686,6 @@ function setDetailTitles(data, trackParam, classParam) {
     
     if (!carClassName) carClassName = classParam || '';
     
-    document.getElementById('detail-track').innerHTML = 
-        `<span class="detail-label">Track:</span> ${R3EUtils.escapeHtml(trackName)}`;
-    
     if (layoutName) {
         let layoutElem = document.getElementById('detail-layout');
         if (!layoutElem) {
@@ -666,7 +710,7 @@ function setDetailTitles(data, trackParam, classParam) {
         pageTitleText: `${trackName} - ${carClassName}`,
         trackName,
         layoutName,
-        detailClassHtml: `<span class="detail-label">Class:</span>${classLogoHtml}<span class="detail-class-name">${R3EUtils.escapeHtml(carClassName)}</span>`
+        detailClassHtml: `${classLogoHtml}<span class="detail-class-name">${R3EUtils.escapeHtml(carClassName)}</span>`
     });
 }
 
@@ -681,7 +725,7 @@ async function displayResults(data) {
     preserveDistributionExpandedState();
     updateTimeframeBoundsFromResults(results);
 
-    results = applyTimeframeFilter(results, DetailState.timeframeStart, DetailState.timeframeEnd);
+    results = DetailEntriesDist.applyTimeframeFilter(results, DetailState.timeframeStart, DetailState.timeframeEnd);
     
     // Sort by position - in combined view, data is already sorted by lap time with proper positions
     // For normal view, sort by the position field
@@ -698,6 +742,14 @@ async function displayResults(data) {
         if (baseResults.length > 0) {
             renderEmptyTimeframeState(baseResults, results);
             bindEntriesDistributionInteractions();
+            return;
+        }
+
+        // Data exists but active filters produced no matches — keep filters visible
+        if (unfilteredResults.length > 0) {
+            rescueFiltersToStash();
+            resultsContainer.innerHTML = `<div class="detail-filters-slot"></div><p class="no-results">No entries match the selected filters.</p>`;
+            moveFiltersIntoSlot();
             return;
         }
 
@@ -775,12 +827,13 @@ async function displayResults(data) {
     
     const tableWrapperHTML = `<div class="table-scroll-wrapper">${tableHTML}</div>`;
     
-    const entriesDistHTML = generateEntriesDistributionGraph(
+    const entriesDistHTML = DetailEntriesDist.generateHtml(
         results,
         DetailState.entriesDistributionExpanded,
         DetailState.timeframeStart,
         DetailState.timeframeEnd,
-        baseResults
+        baseResults,
+        DetailState
     );
 
     // Add car distribution summary if multiple cars present
@@ -791,13 +844,15 @@ async function displayResults(data) {
         if (defaultSortBy === 'median') {
             defaultSortDir = 'asc';
         }
-        const summaryHTML = generateCarDistributionSummary(
+        const summaryHTML = DetailCarDist.generateHtml(
             allResults,
             defaultSortBy,
             defaultSortBy === 'median' ? 'asc' : 'desc',
             DetailState.carDistributionExpanded
         );
+        rescueFiltersToStash();
         tableRenderer.renderDetailSections(resultsContainer, summaryHTML, entriesDistHTML, paginationHTML, tableWrapperHTML);
+        moveFiltersIntoSlot();
         bindCarDistributionToggle();
         bindEntriesDistributionInteractions();
         bindCarDistributionSortHandlers({
@@ -808,10 +863,14 @@ async function displayResults(data) {
             tableWrapperHTML
         });
     } else if (entriesDistHTML) {
+        rescueFiltersToStash();
         tableRenderer.renderDetailSections(resultsContainer, '', entriesDistHTML, paginationHTML, tableWrapperHTML);
+        moveFiltersIntoSlot();
         bindEntriesDistributionInteractions();
     } else {
+        rescueFiltersToStash();
         tableRenderer.renderDetailSections(resultsContainer, '', '', paginationHTML, tableWrapperHTML);
+        moveFiltersIntoSlot();
     }
     
     // Highlight position row if needed
@@ -820,8 +879,34 @@ async function displayResults(data) {
     }
 }
 
-function preserveDistributionExpandedState() {
-    const existingCarDistContent = resultsContainer.querySelector('.car-dist-content');
+/**
+ * Move #car-filter-ui and #difficulty-filter-ui back to the stash so they
+ * survive the upcoming resultsContainer innerHTML replacement.
+ */
+function rescueFiltersToStash() {
+    const stash = document.getElementById('detail-filters-stash');
+    if (!stash) return;
+    const carFilter = document.getElementById('car-filter-ui');
+    const diffFilter = document.getElementById('difficulty-filter-ui');
+    if (carFilter && !stash.contains(carFilter)) stash.appendChild(carFilter);
+    if (diffFilter && !stash.contains(diffFilter)) stash.appendChild(diffFilter);
+}
+
+/**
+ * Move #car-filter-ui and #difficulty-filter-ui from their stash into the
+ * .detail-filters-slot placeholder that renderDetailSections inserts.
+ */
+function moveFiltersIntoSlot() {
+    const slot = resultsContainer.querySelector('.detail-filters-slot');
+    if (!slot) return;
+    const carFilter = document.getElementById('car-filter-ui');
+    const diffFilter = document.getElementById('difficulty-filter-ui');
+    if (carFilter) slot.appendChild(carFilter);
+    if (diffFilter) slot.appendChild(diffFilter);
+    slot.classList.add('detail-filters-row');
+}
+
+function preserveDistributionExpandedState() {    const existingCarDistContent = resultsContainer.querySelector('.car-dist-content');
     if (existingCarDistContent) {
         DetailState.carDistributionExpanded = existingCarDistContent.style.display !== 'none';
     }
@@ -833,13 +918,13 @@ function preserveDistributionExpandedState() {
 }
 
 function updateTimeframeBoundsFromResults(results) {
-    const bounds = getDataTimeBounds(results);
+    const bounds = DetailEntriesDist.getDataTimeBounds(results);
     if (bounds) {
         if (!DetailState.timeframeStart) {
-            DetailState.timeframeStart = toLocalDateInputValue(bounds.min);
+            DetailState.timeframeStart = DetailEntriesDist.toLocalDateInputValue(bounds.min);
         }
         if (!DetailState.timeframeEnd) {
-            DetailState.timeframeEnd = toLocalDateInputValue(bounds.max);
+            DetailState.timeframeEnd = DetailEntriesDist.toLocalDateInputValue(bounds.max);
         }
     } else {
         DetailState.timeframeStart = null;
@@ -848,14 +933,17 @@ function updateTimeframeBoundsFromResults(results) {
 }
 
 function renderEmptyTimeframeState(baseResults, filteredResults) {
-    const emptyEntriesDistHTML = generateEntriesDistributionGraph(
+    const emptyEntriesDistHTML = DetailEntriesDist.generateHtml(
         filteredResults,
         DetailState.entriesDistributionExpanded,
         DetailState.timeframeStart,
         DetailState.timeframeEnd,
-        baseResults
+        baseResults,
+        DetailState
     );
-    resultsContainer.innerHTML = `${emptyEntriesDistHTML}<div class="no-results">No entries found for the selected timeframe.</div>`;
+    rescueFiltersToStash();
+    resultsContainer.innerHTML = `${emptyEntriesDistHTML}<div class="detail-filters-slot"></div><div class="no-results">No entries found for the selected timeframe.</div>`;
+    moveFiltersIntoSlot();
 }
 
 async function showNoResultsWithActionDelay() {
@@ -957,8 +1045,8 @@ function bindEntriesDistributionInteractions() {
         lastWeekBtn.addEventListener('click', () => {
             const now = new Date();
             const weekAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
-            DetailState.timeframeStart = toLocalDateInputValue(weekAgo);
-            DetailState.timeframeEnd = toLocalDateInputValue(now);
+            DetailState.timeframeStart = DetailEntriesDist.toLocalDateInputValue(weekAgo);
+            DetailState.timeframeEnd = DetailEntriesDist.toLocalDateInputValue(now);
             currentPage = 1;
             displayResults(allResults);
         });
@@ -988,16 +1076,19 @@ function bindCarDistributionSortHandlers({ allResults, filteredResults, baseResu
                 newDir = currentDir === 'desc' ? 'asc' : 'desc';
             }
 
-            const newSummaryHTML = generateCarDistributionSummary(allResults, clickedSort, newDir, isExpanded);
-            const newEntriesHTML = generateEntriesDistributionGraph(
+            const newSummaryHTML = DetailCarDist.generateHtml(allResults, clickedSort, newDir, isExpanded);
+            const newEntriesHTML = DetailEntriesDist.generateHtml(
                 filteredResults,
                 entriesExpanded,
                 DetailState.timeframeStart,
                 DetailState.timeframeEnd,
-                baseResults
+                baseResults,
+                DetailState
             );
 
+            rescueFiltersToStash();
             tableRenderer.renderDetailSections(resultsContainer, newSummaryHTML, newEntriesHTML, paginationHTML, tableWrapperHTML);
+            moveFiltersIntoSlot();
             bindCarDistributionToggle();
             bindEntriesDistributionInteractions();
             bindCarDistributionSortHandlers({
@@ -1144,6 +1235,20 @@ function goToPage(page) {
     document.getElementById('detail-results-container').scrollIntoView({ 
         behavior: 'smooth', block: 'start' 
     });
+
+    if (typeof R3EAnalytics !== 'undefined' && typeof R3EAnalytics.track === 'function') {
+        const totalPages = Math.max(1, Math.ceil((allResults || []).length / itemsPerPage));
+        R3EAnalytics.track('detail pagination changed', {
+            page_number: currentPage,
+            total_pages: totalPages,
+            result_count: (allResults || []).length,
+            track_id: trackParam || '',
+            class_param: classParam || '',
+            classes_param: classesParam || '',
+            superclass_param: superclassParam || '',
+            is_combined_view: !!DetailState.isCombinedView
+        });
+    }
 }
 
 /**
@@ -1179,7 +1284,10 @@ function buildCarFilter(data) {
         
         availableCars.forEach((car, index) => {
             // Add the car itself
-            carOptions.push({ value: car, label: car });
+            const logoUrl = (typeof R3EUtils.resolveBrandLogoPath === 'function')
+                ? R3EUtils.resolveBrandLogoPath(car)
+                : '';
+            carOptions.push({ value: car, label: car, logoUrl: logoUrl || undefined });
             
             // Check if there's a combination for this car
             const combo = R3EUtils.findCombinationForCar(car, carCombinations);
@@ -1333,323 +1441,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-/**
- * Calculate car distribution statistics
- * @param {Array} data - Full results dataset
- * @returns {Array} Array of car stats sorted by entry count descending
- */
-function getCarDistributionStats(data) {
-    const carStats = {};
-    
-    // Collect position data for each car
-    data.forEach(entry => {
-        const car = entry.Car || entry.car || 'Unknown';
-        const position = parseInt(entry.Position || entry.position || entry.Pos || 0);
-        
-        if (!carStats[car]) {
-            carStats[car] = {
-                car: car,
-                positions: [],
-                entries: 0
-            };
-        }
-        carStats[car].entries++;
-        if (position > 0) {
-            carStats[car].positions.push(position);
-        }
-    });
-    
-    const total = data.length;
-    
-    // Calculate statistics
-    const stats = Object.values(carStats).map(stat => {
-        // Sort positions to find median
-        const sortedPositions = stat.positions.sort((a, b) => a - b);
-        let median = 0;
-        if (sortedPositions.length > 0) {
-            const mid = Math.floor(sortedPositions.length / 2);
-            if (sortedPositions.length % 2 === 0) {
-                median = (sortedPositions[mid - 1] + sortedPositions[mid]) / 2;
-            } else {
-                median = sortedPositions[mid];
-            }
-        }
-        
-        return {
-            car: stat.car,
-            entries: stat.entries,
-            percentage: ((stat.entries / total) * 100).toFixed(1),
-            medianPosition: median
-        };
-    });
-    
-    // Sort by entries descending
-    stats.sort((a, b) => b.entries - a.entries);
-    
-    return stats;
-}
-
-/**
- * Generate car distribution summary HTML
- * @param {Array} data - Full results dataset
- * @param {string} sortBy - Column to sort by ('entries' or 'median'), default 'entries'
- * @param {string} sortDir - Sort direction ('asc' or 'desc'), default 'desc'
- * @returns {string} HTML string for the car distribution summary
- */
-function generateCarDistributionSummary(data, sortBy = 'entries', sortDir = 'desc', isExpanded = false) {
-    let stats = getCarDistributionStats(data);
-    
-    // Sort the stats array
-    if (sortBy === 'entries') {
-        stats.sort((a, b) => sortDir === 'desc' ? b.entries - a.entries : a.entries - b.entries);
-    } else if (sortBy === 'median') {
-        stats.sort((a, b) => {
-            const aVal = a.medianPosition > 0 ? a.medianPosition : Infinity;
-            const bVal = b.medianPosition > 0 ? b.medianPosition : Infinity;
-            return sortDir === 'desc' ? bVal - aVal : aVal - bVal;
-        });
-    }
-    
-    const summaryId = 'car-dist-summary-' + Date.now();
-    
-    let html = '<div class="car-dist-summary" data-sort-by="' + sortBy + '" data-sort-dir="' + sortDir + '">';
-    html += '<button type="button" class="car-dist-toggle' + (isExpanded ? ' expanded' : '') + '" aria-expanded="' + (isExpanded ? 'true' : 'false') + '" aria-controls="' + summaryId + '">';
-    html += '<span class="car-dist-toggle-icon">▼</span>';
-    html += '<span class="car-dist-toggle-text">Car Distribution Summary</span>';
-    html += '</button>';
-    
-    html += '<div id="' + summaryId + '" class="car-dist-content" style="display: ' + (isExpanded ? '' : 'none') + ';">';
-    html += '<table class="car-dist-table">';
-    html += '<thead>';
-    html += '<tr>';
-    html += '<th class="car-dist-car">Car</th>';
-    
-    // Entries header
-    let entriesClass = 'car-dist-entries sortable';
-    let entriesIndicator = '⇅';
-    if (sortBy === 'entries') {
-        entriesClass += ' sort-active';
-        entriesIndicator = sortDir === 'desc' ? '▼' : '▲';
-    }
-    html += '<th class="' + entriesClass + '" data-sort="entries"><span class="sort-label">Nb</span><span class="sort-indicator">' + entriesIndicator + '</span></th>';
-    
-    html += '<th class="car-dist-percentage">%</th>';
-    
-    // Median Position header
-    let medianClass = 'car-dist-median sortable';
-    let medianIndicator = '⇅';
-    if (sortBy === 'median') {
-        medianClass += ' sort-active';
-        medianIndicator = sortDir === 'desc' ? '▼' : '▲';
-    }
-    html += '<th class="' + medianClass + '" data-sort="median"><span class="sort-label car-dist-median-label">Median</span><span class="sort-indicator">' + medianIndicator + '</span></th>';
-    
-    html += '</tr>';
-    html += '</thead>';
-    html += '<tbody>';
-    
-    stats.forEach(stat => {
-        const { brand: carBrand, model: carModel } = R3EUtils.splitCarName(stat.car);
-        let carHtml = '<span class="car-brand">' + R3EUtils.escapeHtml(carBrand) + '</span>';
-        if (carModel) {
-            carHtml += ' <span class="car-model">' + R3EUtils.escapeHtml(carModel) + '</span>';
-        }
-        html += '<tr>';
-        html += '<td class="car-dist-car">' + carHtml + '</td>';
-        html += '<td class="car-dist-entries">' + stat.entries + '</td>';
-        html += '<td class="car-dist-percentage">' + stat.percentage + '%</td>';
-        html += '<td class="car-dist-median">' + (stat.medianPosition > 0 ? Math.round(stat.medianPosition) : '-') + '</td>';
-        html += '</tr>';
-    });
-    
-    html += '</tbody>';
-    html += '</table>';
-    html += '</div>';
-    html += '</div>';
-    
-    return html;
-}
-
-/**
- * Generate entries distribution graph HTML (entries per day)
- * @param {Array} data - Full results dataset
- * @param {boolean} isExpanded - Whether graph is expanded by default
- * @param {string|null} startValue - Selected start date value (yyyy-MM-dd)
- * @param {string|null} endValue - Selected end date value (yyyy-MM-dd)
- * @param {Array} boundsData - Data to use for control default bounds
- * @returns {string} HTML string for the entries distribution graph
- */
-function generateEntriesDistributionGraph(data, isExpanded = false, startValue = null, endValue = null, boundsData = []) {
-    const graphData = Array.isArray(data) ? data : [];
-    const rangeSourceData = (Array.isArray(boundsData) && boundsData.length > 0) ? boundsData : graphData;
-    if (!Array.isArray(rangeSourceData) || rangeSourceData.length === 0) return '';
-
-    const dayCounts = new Map();
-    const fullRangeDayCounts = new Map();
-    let minDate = null;
-    let maxDate = null;
-
-    graphData.forEach(entry => {
-        const d = parseEntryDate(entry);
-        if (!d) return;
-        const dayKey = getLocalDateKey(d);
-        dayCounts.set(dayKey, (dayCounts.get(dayKey) || 0) + 1);
-        if (!minDate || d < minDate) minDate = d;
-        if (!maxDate || d > maxDate) maxDate = d;
-    });
-
-    // Keep the dotted reference line stable by using max entries/day from the full range data.
-    rangeSourceData.forEach(entry => {
-        const d = parseEntryDate(entry);
-        if (!d) return;
-        const dayKey = getLocalDateKey(d);
-        fullRangeDayCounts.set(dayKey, (fullRangeDayCounts.get(dayKey) || 0) + 1);
-    });
-
-    // If selected range has no entries, keep controls visible using source-data bounds
-    if (!minDate || !maxDate) {
-        rangeSourceData.forEach(entry => {
-            const d = parseEntryDate(entry);
-            if (!d) return;
-            if (!minDate || d < minDate) minDate = d;
-            if (!maxDate || d > maxDate) maxDate = d;
-        });
-        if (!minDate || !maxDate) return '';
-    }
-
-    const start = new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate());
-    const end = new Date(maxDate.getFullYear(), maxDate.getMonth(), maxDate.getDate());
-
-    const dayKeys = [];
-    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-        dayKeys.push(getLocalDateKey(d));
-    }
-
-    const counts = dayKeys.map(k => dayCounts.get(k) || 0);
-    const maxCount = Math.max(1, ...Array.from(fullRangeDayCounts.values()));
-
-    const chartHeight = 100;
-    const chartWidth = Math.max(dayKeys.length, 1);
-
-    const summaryId = 'entries-dist-summary-' + Date.now();
-    const startInputValue = startValue || DetailState.timeframeStart || toLocalDateInputValue(start);
-    const endInputValue = endValue || DetailState.timeframeEnd || toLocalDateInputValue(end);
-    let html = '<div class="entries-dist-summary">';
-    html += '<button type="button" class="entries-dist-toggle' + (isExpanded ? ' expanded' : '') + '" aria-expanded="' + (isExpanded ? 'true' : 'false') + '" aria-controls="' + summaryId + '">';
-    html += '<span class="entries-dist-toggle-icon">▼</span>';
-    html += '<span class="entries-dist-toggle-text">Entries Distribution Graph</span>';
-    html += '</button>';
-
-    html += '<div id="' + summaryId + '" class="entries-dist-content" style="display: ' + (isExpanded ? '' : 'none') + ';">';
-    html += '<div class="entries-dist-max-label">' + maxCount + '</div>';
-    html += '<div class="entries-dist-chart" role="img" aria-label="Entries per day from ' + dayKeys[0] + ' to ' + dayKeys[dayKeys.length - 1] + '">';
-    html += '<svg viewBox="0 0 ' + chartWidth + ' ' + chartHeight + '" preserveAspectRatio="none" aria-hidden="true">';
-
-    dayKeys.forEach((key, idx) => {
-        const count = counts[idx];
-        const h = Math.max(1, Math.round((count / maxCount) * chartHeight));
-        const y = chartHeight - h;
-        html += '<rect class="entries-dist-bar" x="' + idx + '" y="' + y + '" width="0.9" height="' + h + '">';
-        html += '<title>' + key + ': ' + count + ' entries</title>';
-        html += '</rect>';
-    });
-
-    html += '</svg>';
-    html += '<div class="entries-dist-max-line-overlay" aria-hidden="true"></div>';
-    html += '</div>';
-    html += '<div class="entries-dist-axis">';
-    html += '<span class="entries-dist-axis-left">' + dayKeys[0] + '</span>';
-    html += '<span class="entries-dist-axis-right">' + dayKeys[dayKeys.length - 1] + '</span>';
-    html += '</div>';
-    if (graphData.length === 0) {
-        html += '<div class="entries-dist-empty">No entries in the selected timeframe.</div>';
-    }
-    html += '<div class="entries-timeframe-controls">';
-    html += '<label class="entries-timeframe-field"><span>Start</span><input type="date" class="entries-timeframe-input entries-timeframe-start" value="' + R3EUtils.escapeHtml(startInputValue) + '"></label>';
-    html += '<button type="button" class="entries-timeframe-last-week">Last week</button>';
-    html += '<label class="entries-timeframe-field"><span>End</span><input type="date" class="entries-timeframe-input entries-timeframe-end" value="' + R3EUtils.escapeHtml(endInputValue) + '"></label>';
-    html += '</div>';
-    html += '</div>';
-    html += '</div>';
-
-    return html;
-}
-
-/**
- * Parse a detail entry date field into a Date instance
- * @param {Object} entry - Leaderboard entry
- * @returns {Date|null} Parsed date or null
- */
-function parseEntryDate(entry) {
-    const raw = entry.date_time || entry.dateTime || entry.Date || entry.DateTime || '';
-    if (!raw) return null;
-    const date = new Date(raw);
-    return Number.isNaN(date.getTime()) ? null : date;
-}
-
-/**
- * Convert Date to local day key (yyyy-MM-dd)
- * @param {Date} date - Date object
- * @returns {string} Local day key
- */
-function getLocalDateKey(date) {
-    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return '';
-    const local = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
-    return local.toISOString().slice(0, 10);
-}
-
-/**
- * Get min/max date bounds from a dataset
- * @param {Array} data - Leaderboard data
- * @returns {{min: Date, max: Date}|null} Bounds object or null
- */
-function getDataTimeBounds(data) {
-    if (!Array.isArray(data) || data.length === 0) return null;
-
-    let min = null;
-    let max = null;
-    data.forEach(entry => {
-        const dt = parseEntryDate(entry);
-        if (!dt) return;
-        if (!min || dt < min) min = dt;
-        if (!max || dt > max) max = dt;
-    });
-
-    if (!min || !max) return null;
-    return { min, max };
-}
-
-/**
- * Convert Date to local date input format
- * @param {Date} date - Date object
- * @returns {string} yyyy-MM-dd string
- */
-function toLocalDateInputValue(date) {
-    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return '';
-    return getLocalDateKey(date);
-}
-
-/**
- * Apply selected timeframe filter to dataset
- * @param {Array} data - Data to filter
- * @param {string|null} startValue - date start (yyyy-MM-dd)
- * @param {string|null} endValue - date end (yyyy-MM-dd)
- * @returns {Array} Filtered data
- */
-function applyTimeframeFilter(data, startValue, endValue) {
-    if (!Array.isArray(data) || data.length === 0) return [];
-    if (!startValue && !endValue) return data;
-
-    return data.filter(entry => {
-        const dt = parseEntryDate(entry);
-        if (!dt) return false;
-        const dayKey = getLocalDateKey(dt);
-        if (!dayKey) return false;
-        if (startValue && dayKey < startValue) return false;
-        if (endValue && dayKey > endValue) return false;
-        return true;
-    });
-}
-
 // Make functions globally accessible
 window.goToPage = goToPage;
+

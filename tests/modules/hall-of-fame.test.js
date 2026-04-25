@@ -12,18 +12,34 @@ function buildHofDOM(withSearch = true) {
 }
 
 function makeStatsDataMock(poles = [], bested = []) {
+    const paths = {
+        polePath: 'cache/stats/overall/poles.json.gz',
+        bestedPath: 'cache/stats/overall/bested.json.gz'
+    };
     return {
         loadStatsIndex: vi.fn().mockResolvedValue({}),
-        getPathsForFilter: vi.fn().mockReturnValue({
-            polePath: 'cache/stats/overall/poles.json.gz',
-            bestedPath: 'cache/stats/overall/bested.json.gz'
-        }),
+        getPathsForFilter: vi.fn().mockReturnValue(paths),
+        getAllPathsForFilter: vi.fn().mockReturnValue(paths),
         fetchGzipJson: vi.fn().mockResolvedValue({}),
         normalizeRows: vi.fn().mockImplementation((_payload, metric) => {
             if (metric === 'pole_positions') return poles;
             if (metric === 'bested_drivers') return bested;
+            if (metric === 'avg_bested') return bested;
             return [];
         })
+    };
+}
+
+function makeR3EUtilsStub() {
+    return {
+        isDriverSearchActive() {
+            const input = document.getElementById('driver-search');
+            if (input && input.value.trim().length > 0) return true;
+            const params = new URLSearchParams(window.location.search);
+            return Boolean((params.get('driver') || params.get('query') || '').trim());
+        },
+        escapeHtml: (v) => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;')
     };
 }
 
@@ -33,7 +49,7 @@ function makeStatsDataMock(poles = [], bested = []) {
 describe('hall-of-fame – visibility via URL params', () => {
     beforeEach(() => {
         window.StatsData = makeStatsDataMock();
-        window.R3EUtils = null;
+        window.R3EUtils = makeR3EUtilsStub();
     });
 
     it('shows the container when no search params are present', () => {
@@ -72,7 +88,7 @@ describe('hall-of-fame – visibility via search input', () => {
     beforeEach(() => {
         window.history.replaceState({}, '', '/');
         window.StatsData = makeStatsDataMock();
-        window.R3EUtils = null;
+        window.R3EUtils = makeR3EUtilsStub();
         document.body.innerHTML = buildHofDOM(true);
         loadBrowserScript('modules/hall-of-fame.js');
     });
@@ -124,7 +140,7 @@ describe('hall-of-fame – missing container', () => {
 describe('hall-of-fame – rendered HTML', () => {
     beforeEach(() => {
         window.history.replaceState({}, '', '/');
-        window.R3EUtils = null;
+        window.R3EUtils = makeR3EUtilsStub();
     });
 
     it('renders Hall of Fame card with poles and bested sections after data loads', async () => {
@@ -186,7 +202,7 @@ describe('hall-of-fame – rendered HTML', () => {
 
     it('uses R3EUtils.escapeHtml when available', async () => {
         const escapeHtml = vi.fn().mockReturnValue('ESCAPED');
-        window.R3EUtils = { escapeHtml };
+        window.R3EUtils = { ...makeR3EUtilsStub(), escapeHtml };
         const poles = [{ name: 'Tester', value: 3 }];
         window.StatsData = makeStatsDataMock(poles, []);
 

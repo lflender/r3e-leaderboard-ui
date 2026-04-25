@@ -337,6 +337,10 @@ span.driver-name-top10-glitter::after {
     table-layout: fixed;
 }
 
+#track-info-table .results-table td {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+}
 #track-info-table .results-table th:nth-child(1),
 #track-info-table .results-table td:nth-child(1) {
     width: 35%;
@@ -627,6 +631,24 @@ span.driver-name-top10-glitter::after {
 #results-container .track-layout {
     white-space: nowrap;
     display: block;
+}
+
+#results-container .track-cell-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-width: 0;
+}
+
+#track-info-table .track-cell-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+#results-container .track-cell-text {
+    min-width: 0;
 }
 
 /* Date cell */

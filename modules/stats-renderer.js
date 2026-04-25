@@ -1,15 +1,5 @@
 (function () {
-    function escapeHtml(value) {
-        if (window.R3EUtils && typeof window.R3EUtils.escapeHtml === 'function') {
-            return window.R3EUtils.escapeHtml(value);
-        }
-        return String(value == null ? '' : value)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-    }
+    const escapeHtml = (v) => window.R3EUtils.escapeHtml(v);
 
     function buildPositionBadge(position) {
         const posClass = position === 1 ? ' pos-1'
@@ -83,7 +73,6 @@
     }
 
     window.StatsRenderer = {
-        escapeHtml,
         buildPositionBadge,
         buildDriverCell,
         renderTable,

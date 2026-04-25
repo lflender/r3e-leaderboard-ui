@@ -181,16 +181,6 @@ class DataService {
     }
 
     /**
-     * Parse driver index JSON and call onProgress for each driver entry
-     * @param {Response} response - Fetch response object
-     * @param {Function} onProgress - Callback(driverName, entries)
-     * @returns {Promise<Object>} Complete driver index
-     */
-    async _streamParseDriverIndex(response, onProgress) {
-        return this._getDriverIndexModule()._streamParseDriverIndex.call(this, response, onProgress);
-    }
-    
-    /**
      * Waits for driver index to be loaded
      * @param {number} maxAttempts - Maximum number of attempts
      * @returns {Promise<Object>} Driver index
@@ -565,6 +555,23 @@ class DataService {
         });
         
         return options.sort((a, b) => a.label.localeCompare(b.label));
+    }
+
+    /**
+     * Get track options for dropdown filters, with logo URLs resolved from track-images data.
+     * Single source of truth for all track filter dropdowns across the site.
+     * @returns {Array<{value: string, label: string, logoUrl: string}>} Track options
+     */
+    getTrackOptions() {
+        const tracks = Array.isArray(window.TRACKS_DATA) ? window.TRACKS_DATA : [];
+        return [{ value: '', label: 'All tracks' }].concat(
+            tracks.map(t => {
+                const logoUrl = (window.R3ETrackImages && typeof window.R3ETrackImages.resolveTrackLogoByLabel === 'function')
+                    ? window.R3ETrackImages.resolveTrackLogoByLabel(t.label) || ''
+                    : '';
+                return { value: String(t.id), label: t.label, logoUrl };
+            })
+        );
     }
 
     /**

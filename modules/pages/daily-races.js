@@ -417,6 +417,9 @@ class DailyRaces {
                 }
 
                 cardsHtml += `<a href="${detailLink}" target="_blank" class="daily-race-card-link">`;
+                const trackLogoUrl = (window.R3ETrackImages && typeof window.R3ETrackImages.resolveTrackLogoById === 'function')
+                    ? window.R3ETrackImages.resolveTrackLogoById(race.track_id)
+                    : '';
                 cardsHtml += '<div class="daily-race-card">';
                 cardsHtml += '<div class="daily-race-content">';
                 const freeIconHtml = isFree
@@ -431,10 +434,15 @@ class DailyRaces {
                 const trackLayout = trackParts.length > 1 ? trackParts.slice(1).join(' - ') : '';
 
                 cardsHtml += '<div class="daily-race-track">';
-                cardsHtml += R3EUtils.escapeHtml(trackMain);
+                const trackLogoInlineHtml = trackLogoUrl
+                    ? `<img class="daily-race-track-logo" src="${R3EUtils.escapeHtml(trackLogoUrl)}" alt="" aria-hidden="true" />`
+                    : '';
+                cardsHtml += trackLogoInlineHtml;
+                cardsHtml += `<span>${R3EUtils.escapeHtml(trackMain)}`;
                 if (trackLayout) {
                     cardsHtml += `<br><span class="daily-race-track-layout">${R3EUtils.escapeHtml(trackLayout)}</span>`;
                 }
+                cardsHtml += '</span>';
                 cardsHtml += '</div>';
                 const cleanedSchedule = race.schedule
                     ? String(race.schedule).replace(/`/g, '').trim()

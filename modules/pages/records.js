@@ -13,7 +13,7 @@
             titleBuilder: (label) => `Top Drivers by Average Bested % (${label})`,
             infoText: 'Average percentage of opponents beaten per leaderboard entry. Higher is better. Overall: min 5 entries and 100 bested drivers. Class filter: min 2 entries.',
             valueTitle: 'Avg %',
-            valueFormatter: (value) => Number.isFinite(value) ? value.toFixed(1) + '%' : '0.0%',
+            valueFormatter: (value) => Number.isFinite(value) ? value.toFixed(2) + '%' : '0.00%',
             // Returns the row predicate appropriate for the active filter.
             // Overall (no filter): strict thresholds to exclude low-volume drivers.
             // Class filter active: relaxed to min 2 entries since class pools are smaller.

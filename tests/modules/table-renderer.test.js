@@ -1,8 +1,9 @@
-import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
+﻿import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { loadBrowserScript } from '../helpers/script-loader.js';
 
 describe('table-renderer track resolution', () => {
     beforeAll(() => {
+        loadBrowserScript('modules/data/track-images.js');
         loadBrowserScript('modules/utils-car.js');
         loadBrowserScript('modules/time-helper.js');
         loadBrowserScript('modules/utils-track.js');
@@ -39,6 +40,25 @@ describe('table-renderer track resolution', () => {
         expect(html).toContain('Spa');
         expect(html).toContain('Grand Prix');
         expect(html).toContain('data-trackid="10"');
+    });
+
+    test('renders a track logo before the resolved track label when a mapping exists', () => {
+        window.TRACKS_DATA = [
+            { id: 1852, label: 'Indianapolis 2012 - Grand Prix' }
+        ];
+
+        const html = window.tableRenderer.renderDriverGroupedTable([
+            {
+                driver: 'Alice',
+                country: 'SE',
+                team: '',
+                entries: [{ position: '1', lap_time: '1:30.000', track_id: '1852', car_class: 'GT3' }]
+            }
+        ], ['track'], 'track');
+
+        expect(html).toContain('table-track-logo');
+        expect(html).toContain('images/tracks/indianapolis-2012-1851-logo-original.png');
+        expect(html).toContain('Indianapolis 2012');
     });
 
     test('sorts by resolved track label instead of a raw track field', () => {
@@ -101,3 +121,5 @@ describe('table-renderer track resolution', () => {
         expect(html).toContain('Kostya Guzyuk avatar');
     });
 });
+
+

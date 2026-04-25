@@ -281,6 +281,15 @@
         max-width: 22px;
     }
 
+    #results-container .table-track-logo {
+        width: 28px !important;
+        height: 28px !important;
+        min-width: 28px !important;
+        max-width: 28px !important;
+        max-height: 28px !important;
+        flex-basis: 28px !important;
+    }
+
     .table-brand-logo {
         height: 18px;
         max-width: 31px;
@@ -843,6 +852,15 @@
         width: 20px;
         height: 20px;
         max-width: 20px;
+    }
+
+    #results-container .table-track-logo {
+        width: 24px !important;
+        height: 24px !important;
+        min-width: 24px !important;
+        max-width: 24px !important;
+        max-height: 24px !important;
+        flex-basis: 24px !important;
     }
 
     .table-brand-logo {

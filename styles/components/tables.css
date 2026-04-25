@@ -629,6 +629,17 @@ span.driver-name-top10-glitter::after {
     display: block;
 }
 
+#results-container .track-cell-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-width: 0;
+}
+
+#results-container .track-cell-text {
+    min-width: 0;
+}
+
 /* Date cell */
 .date-cell {
     white-space: nowrap;

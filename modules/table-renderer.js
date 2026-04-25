@@ -619,18 +619,25 @@ class TableRenderer {
         if (window.DataNormalizer && window.DataNormalizer.normalizeTrackName) {
             trackStr = window.DataNormalizer.normalizeTrackName(trackStr);
         }
+
+        const trackLogoUrl = (window.R3ETrackImages && typeof window.R3ETrackImages.resolveTrackLogoByLabel === 'function')
+            ? window.R3ETrackImages.resolveTrackLogoByLabel(trackStr)
+            : '';
+        const trackLogoHtml = trackLogoUrl
+            ? `<img class="table-track-logo" src="${R3EUtils.escapeHtml(trackLogoUrl)}" alt="${R3EUtils.escapeHtml(trackStr || 'Track')} logo" width="34" height="34" loading="lazy" decoding="async" />`
+            : '';
         
         // Split track name and layout (e.g., "Donington Park - Grand Prix")
         const parts = trackStr.split(/\s*[-–—]\s+/);
         if (parts.length >= 2) {
             const trackName = R3EUtils.escapeHtml(parts[0]);
             const layoutName = R3EUtils.escapeHtml(parts.slice(1).join(' - '));
-            return `<td${classAttr}>${trackName} <span class="track-layout">${layoutName}</span></td>`;
+            return `<td${classAttr}><span class="track-cell-content">${trackLogoHtml}<span class="track-cell-text">${trackName} <span class="track-layout">${layoutName}</span></span></span></td>`;
         } else {
             // No layout part, just return track name with word break
             trackStr = trackStr.replace(/(\s+)([-–—])(\s+)/g, '$1<wbr>$2$3');
             trackStr = R3EUtils.escapeHtml(trackStr).replace(/&lt;wbr&gt;/g, '<wbr>');
-            return `<td${classAttr}>${trackStr}</td>`;
+            return `<td${classAttr}><span class="track-cell-content">${trackLogoHtml}<span class="track-cell-text">${trackStr}</span></span></td>`;
         }
     }
     

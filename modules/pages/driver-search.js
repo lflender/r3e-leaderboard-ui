@@ -500,43 +500,8 @@ class DriverSearch {
      * Generate pagination HTML
      */
     generatePaginationHTML(startIndex, endIndex, totalDrivers, totalEntriesShown, currentPage, totalPages) {
-        let html = '<div class="pagination">';
-        html += `<div class="pagination-info">Showing drivers ${startIndex + 1}-${endIndex} of ${totalDrivers} (${totalEntriesShown} total entries)</div>`;
-        html += '<div class="pagination-buttons">';
-        
-        if (currentPage > 1) {
-            html += `<button onclick="goToPage(${currentPage - 1})" class="page-btn">‹ Previous</button>`;
-        }
-        
-        const maxPagesToShow = 5;
-        let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
-        let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-        
-        if (endPage - startPage < maxPagesToShow - 1) {
-            startPage = Math.max(1, endPage - maxPagesToShow + 1);
-        }
-        
-        if (startPage > 1) {
-            html += `<button onclick="goToPage(1)" class="page-btn">1</button>`;
-            if (startPage > 2) html += '<span class="page-ellipsis">...</span>';
-        }
-        
-        for (let i = startPage; i <= endPage; i++) {
-            const activeClass = i === currentPage ? 'active' : '';
-            html += `<button onclick="goToPage(${i})" class="page-btn ${activeClass}">${i}</button>`;
-        }
-        
-        if (endPage < totalPages) {
-            if (endPage < totalPages - 1) html += '<span class="page-ellipsis">...</span>';
-            html += `<button onclick="goToPage(${totalPages})" class="page-btn">${totalPages}</button>`;
-        }
-        
-        if (currentPage < totalPages) {
-            html += `<button onclick="goToPage(${currentPage + 1})" class="page-btn">Next ›</button>`;
-        }
-        
-        html += '</div></div>';
-        return html;
+        const infoText = `Showing drivers ${startIndex + 1}-${endIndex} of ${totalDrivers} (${totalEntriesShown} total entries)`;
+        return window.generatePaginationHTML({ startIndex, endIndex, total: totalDrivers, currentPage, totalPages, onPageChange: 'goToPage', infoText });
     }
 
     /**

@@ -181,16 +181,6 @@ class DataService {
     }
 
     /**
-     * Parse driver index JSON and call onProgress for each driver entry
-     * @param {Response} response - Fetch response object
-     * @param {Function} onProgress - Callback(driverName, entries)
-     * @returns {Promise<Object>} Complete driver index
-     */
-    async _streamParseDriverIndex(response, onProgress) {
-        return this._getDriverIndexModule()._streamParseDriverIndex.call(this, response, onProgress);
-    }
-    
-    /**
      * Waits for driver index to be loaded
      * @param {number} maxAttempts - Maximum number of attempts
      * @returns {Promise<Object>} Driver index

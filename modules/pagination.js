@@ -189,12 +189,14 @@ class Pagination {
  * @returns {string} Pagination HTML
  */
 function generatePaginationHTML(options) {
-    const { startIndex, endIndex, total, currentPage, totalPages, onPageChange } = options;
+    const { startIndex, endIndex, total, currentPage, totalPages, onPageChange, infoText } = options;
     
     if (totalPages <= 1) return '';
     
-    // Build info text
-    const info = `Showing ${startIndex + 1}-${endIndex} of ${total}`;
+    // Build info text (caller may supply a custom string)
+    const info = infoText !== undefined
+        ? infoText
+        : `Showing ${startIndex + 1}-${endIndex} of ${total}`;
     
     // Build buttons HTML
     let buttons = '';

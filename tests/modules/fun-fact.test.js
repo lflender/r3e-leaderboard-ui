@@ -10,6 +10,18 @@ function flushPromises() {
     return new Promise(resolve => setTimeout(resolve, 0));
 }
 
+function makeR3EUtilsStub() {
+    return {
+        isDriverSearchActive() {
+            const input = document.getElementById('driver-search');
+            if (input && input.value.trim().length > 0) return true;
+            const params = new URLSearchParams(window.location.search);
+            return Boolean((params.get('driver') || params.get('query') || '').trim());
+        },
+        escapeHtml: (v) => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    };
+}
+
 function mockFetchOk(payload) {
     window.fetch = vi.fn().mockResolvedValue({
         ok: true,
@@ -27,6 +39,7 @@ beforeEach(() => {
         writable: true,
         value: Object.assign({}, window.location, { search: '' })
     });
+    window.R3EUtils = makeR3EUtilsStub();
 });
 
 afterEach(() => {

@@ -1,32 +1,10 @@
 (function () {
     const root = document.getElementById('hall-of-fame-container');
-    const driverSearchInput = document.getElementById('driver-search');
     if (!root) return;
 
-    function isSearchActive() {
-        if (driverSearchInput && driverSearchInput.value.trim().length > 0) {
-            return true;
-        }
-
-        const params = new URLSearchParams(window.location.search);
-        return Boolean((params.get('driver') || params.get('query') || '').trim());
-    }
-
     function updateVisibility() {
-        root.style.display = isSearchActive() ? 'none' : '';
+        root.style.display = window.R3EUtils.isDriverSearchActive() ? 'none' : '';
     }
-
-    const escapeHtml = (value) => {
-        if (window.R3EUtils && typeof window.R3EUtils.escapeHtml === 'function') {
-            return window.R3EUtils.escapeHtml(value);
-        }
-        return String(value || '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-    };
 
     const renderList = (rows, metricLabel, valueFormatter) => {
         if (!Array.isArray(rows) || rows.length === 0) {
@@ -44,7 +22,7 @@
             return [
                 '<li class="hall-of-fame-item">',
                 `<span class="hall-of-fame-rank">${rank}</span>`,
-                `<span class="hall-of-fame-name">${flagHtml}${escapeHtml(row.name)}</span>`,
+                `<span class="hall-of-fame-name">${flagHtml}${window.R3EUtils.escapeHtml(row.name)}</span>`,
                 `<span class="hall-of-fame-value">${value} ${metricLabel}</span>`,
                 '</li>'
             ].join('');
@@ -82,6 +60,7 @@
     async function init() {
         updateVisibility();
 
+        const driverSearchInput = document.getElementById('driver-search');
         if (driverSearchInput) {
             driverSearchInput.addEventListener('input', updateVisibility);
             driverSearchInput.addEventListener('change', updateVisibility);

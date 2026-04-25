@@ -3,16 +3,8 @@
   const driverSearchInput = document.getElementById('driver-search');
   if (!banner) return;
 
-  function isSearchActive() {
-    if (driverSearchInput && driverSearchInput.value.trim().length > 0) {
-      return true;
-    }
-    const params = new URLSearchParams(window.location.search);
-    return Boolean((params.get('driver') || params.get('query') || '').trim());
-  }
-
   function updateVisibility() {
-    banner.hidden = isSearchActive();
+    banner.hidden = window.R3EUtils.isDriverSearchActive();
   }
 
   try {

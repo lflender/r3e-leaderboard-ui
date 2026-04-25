@@ -47,59 +47,8 @@
      * @returns {string} Pagination HTML
      */
     function generatePagination(options) {
-        // Delegate to pagination module if available
-        if (typeof window.generatePaginationHTML === 'function') {
-            return window.generatePaginationHTML(options);
-        }
-        
-        // Fallback implementation (should not be reached if pagination.js is loaded)
-        console.warn('pagination.js not loaded, using fallback pagination');
-        const { startIndex, endIndex, total, currentPage, totalPages, onPageChange } = options;
-        
-        if (totalPages <= 1) return '';
-        
-        const info = `Showing ${startIndex + 1}-${endIndex} of ${total}`;
-        let buttons = '';
-        
-        if (currentPage > 1) {
-            buttons += `<button onclick="${onPageChange}(${currentPage - 1})" class="page-btn">‹ Previous</button>`;
-        }
-        
-        const maxPagesToShow = 5;
-        let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
-        let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-        
-        if (endPage - startPage < maxPagesToShow - 1) {
-            startPage = Math.max(1, endPage - maxPagesToShow + 1);
-        }
-        
-        if (startPage > 1) {
-            buttons += `<button onclick="${onPageChange}(1)" class="page-btn">1</button>`;
-            if (startPage > 2) {
-                buttons += '<span class="page-ellipsis">...</span>';
-            }
-        }
-        
-        for (let i = startPage; i <= endPage; i++) {
-            const activeClass = i === currentPage ? 'active' : '';
-            buttons += `<button onclick="${onPageChange}(${i})" class="page-btn ${activeClass}">${i}</button>`;
-        }
-        
-        if (endPage < totalPages) {
-            if (endPage < totalPages - 1) {
-                buttons += '<span class="page-ellipsis">...</span>';
-            }
-            buttons += `<button onclick="${onPageChange}(${totalPages})" class="page-btn">${totalPages}</button>`;
-        }
-        
-        if (currentPage < totalPages) {
-            buttons += `<button onclick="${onPageChange}(${currentPage + 1})" class="page-btn">Next ›</button>`;
-        }
-        
-        return `<div class="pagination">
-    <div class="pagination-info">${info}</div>
-    <div class="pagination-buttons">${buttons}</div>
-</div>`;
+        // Delegate to pagination.js — must be loaded before template-helper.js
+        return window.generatePaginationHTML(options);
     }
 
     /**

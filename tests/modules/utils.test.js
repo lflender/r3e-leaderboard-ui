@@ -20,7 +20,14 @@ describe('R3EUtils', () => {
         expect(window.R3EUtils.escapeHtml('<script>alert(1)</script>')).toBe('&lt;script&gt;alert(1)&lt;/script&gt;');
     });
 
-    test('formats headers with special cases', () => {
+    test('formats headers with generic snake_case conversion when ColumnConfig is absent', () => {
+        expect(window.R3EUtils.formatHeader('class_name')).toBe('Class name');
+        expect(window.R3EUtils.formatHeader('date_time')).toBe('Date time');
+        expect(window.R3EUtils.formatHeader('entry_count')).toBe('Entry count');
+    });
+
+    test('formats headers via ColumnConfig when available', () => {
+        window.ColumnConfig = { getDisplayName: (k) => ({ class_name: 'Car class', date_time: 'Date', entry_count: 'Entries' }[k] || k) };
         expect(window.R3EUtils.formatHeader('class_name')).toBe('Car class');
         expect(window.R3EUtils.formatHeader('date_time')).toBe('Date');
         expect(window.R3EUtils.formatHeader('entry_count')).toBe('Entries');

@@ -83,7 +83,7 @@
         return window.StatsRenderer;
     }
 
-    const escapeHtml = (value) => getStatsRenderer().escapeHtml(value);
+    const escapeHtml = (value) => window.R3EUtils.escapeHtml(value);
 
     async function ensureMpPosLoaded() {
         if (typeof loadMpPosCache === 'function') {

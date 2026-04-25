@@ -3,7 +3,6 @@
    ======================================== */
 
 .cars-view-toggle {
-    margin-left: auto;
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
@@ -11,6 +10,42 @@
     border: 1px solid var(--border);
     border-radius: 10px;
     background: rgba(15, 23, 42, 0.42);
+}
+
+.cars-view-toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 0;
+    margin-bottom: 2rem;
+}
+
+#cars-search {
+    order: 2;
+    flex: 0 1 calc((100% - 2rem) / 3);
+    min-width: 260px;
+    max-width: 420px;
+    padding: 0.78rem 0.9rem;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    background-color: var(--surface);
+    color: var(--text-primary);
+    font-size: max(0.98rem, 16px);
+}
+
+#cars-search:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+#cars-search-container {
+    margin-bottom: 0.9rem;
+}
+
+#cars-view-toggle {
+    order: 1;
 }
 
 .cars-view-btn {
@@ -136,6 +171,35 @@
 /* Keep last word + info icon together */
 .no-wrap-tail {
     white-space: nowrap;
+}
+
+.cars-page-car-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.38rem;
+    white-space: nowrap;
+}
+
+.cars-page-car-text {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.25em;
+}
+
+.cars-page-car-logo-slot {
+    justify-content: center;
+    overflow: hidden;
+    margin-right: 0;
+}
+
+.cars-page-car-name .table-brand-logo {
+    margin-left: 0 !important;
+    max-width: 100%;
+}
+
+.cars-page-car-model {
+    color: var(--text-secondary);
+    font-style: italic;
 }
 
 #cars-info-table .results-table,
@@ -359,6 +423,10 @@
     text-align: center;
     font-weight: 500;
     margin-bottom: 0.4rem;
+}
+
+.car-tile-name .cars-page-car-name {
+    justify-content: center;
 }
 
 .car-tile-image-wrap {

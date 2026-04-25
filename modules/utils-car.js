@@ -18,9 +18,10 @@ const CAR_BRANDS = [
 ];
 
 const CAR_SPECIAL_CASES = {
-    'E36 V8 JUDD': { brand: 'Georg Plasa', model: 'E36 V8' },
-    '134 Judd V8': { brand: 'Georg Plasa', model: '134 V8' },
-    'Carlsson SLK 340 JUDD': { brand: 'Carlsson', model: 'SLK 340' }
+    'E36 V8 JUDD': { brand: 'Georg Plasa', model: 'BMW E36 V8' },
+    '134 Judd V8': { brand: 'Georg Plasa', model: 'BMW 134 V8' },
+    'Carlsson SLK 340 JUDD': { brand: 'Carlsson', model: 'Mercedes SLK 340' },
+    'BMW Alpina B6 GT3': { brand: 'BMW Alpina', model: 'B6 GT3' }
 };
 
 const MODEL_LOGO_OVERRIDES = [
@@ -30,6 +31,7 @@ const MODEL_LOGO_OVERRIDES = [
 const BRAND_LOGO_OVERRIDES = {
     'alfa romeo': 'alfaromeo',
     'abt-audi': 'audi',
+    'bmw alpina': 'alpina',
     'callaway': 'chevrolet',
     'citroen': 'citroen',
     'crossle': 'crossle',

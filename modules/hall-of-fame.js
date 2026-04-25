@@ -52,7 +52,7 @@
 
     function render(data) {
         root.innerHTML = [
-            '<a class="hall-of-fame-link" href="stats.html" aria-label="Open Driver Stats page">',
+            '<a class="hall-of-fame-link" href="records.html" aria-label="Open Driver Stats page">',
             '<section class="hall-of-fame-card" aria-label="Hall of Fame">',
             '<div class="hall-of-fame-header">',
             '<h3>Hall of Fame</h3>',

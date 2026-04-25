@@ -209,8 +209,8 @@ describe('DataService core behavior', () => {
         });
 
         expect(service.getClassOptionsFromCarsData()).toEqual([
-            { value: 'GT3', label: 'GT3' },
-            { value: 'TCR', label: 'TCR' }
+            { value: 'GT3', label: 'GT3', logoUrl: '' },
+            { value: 'TCR', label: 'TCR', logoUrl: '' }
         ]);
         expect(service.getSuperclassOptions()).toEqual([
             { value: 'superclass:GT3', label: 'Category: GT3', classes: ['GT3'] },

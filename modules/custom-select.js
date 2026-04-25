@@ -54,8 +54,13 @@ class CustomSelect {
             } else if (escapedLabel.startsWith('Combined: ')) {
                 formattedLabel = '<strong>Combined:</strong> ' + escapedLabel.substring(10);
             }
+
+            // Optional car class logo prepended to the option label.
+            const logoHtml = opt.logoUrl
+                ? `<img class="custom-select__option-logo" src="${R3EUtils.escapeHtml(opt.logoUrl)}" alt="" aria-hidden="true" loading="lazy" decoding="async">`
+                : '';
             
-            return `<div class="custom-select__option" data-value="${escapedValue}">${formattedLabel}</div>`;
+            return `<div class="custom-select__option" data-value="${escapedValue}">${logoHtml}${formattedLabel}</div>`;
         }).join('');
     }
     
@@ -139,8 +144,13 @@ class CustomSelect {
             } else if (formattedLabel.startsWith('Combined: ')) {
                 formattedLabel = '<strong>Combined:</strong> ' + formattedLabel.substring(10);
             }
+
+            // Mirror the logo into the toggle button so the selected class is visible when closed.
+            const logoHtml = opt.logoUrl
+                ? `<img class="custom-select__option-logo" src="${R3EUtils.escapeHtml(opt.logoUrl)}" alt="" aria-hidden="true" loading="lazy" decoding="async">`
+                : '';
             
-            this.toggle.innerHTML = `${formattedLabel} ▾`;
+            this.toggle.innerHTML = `${logoHtml}${formattedLabel} ▾`;
         }
         
         this.updateSelectedState();

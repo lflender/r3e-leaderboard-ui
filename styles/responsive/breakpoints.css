@@ -23,6 +23,11 @@
         padding: 0 2rem;
     }
 
+    .cars-view-toggle-row {
+        padding: 0 2rem;
+        box-sizing: border-box;
+    }
+
     .tab-panel .status-section {
         margin-left: 2rem;
         margin-right: 2rem;
@@ -134,6 +139,27 @@
     .cars-view-toggle {
         margin-left: 0;
         align-self: flex-end;
+    }
+
+    .cars-view-toggle-row {
+        justify-content: flex-start;
+        margin-top: 1rem;
+        gap: 1rem;
+        flex-wrap: nowrap;
+        padding: 0 2rem;
+        box-sizing: border-box;
+    }
+
+    #cars-search {
+        order: 1;
+        flex: 1 1 auto;
+        min-width: 0;
+        max-width: none;
+    }
+
+    #cars-view-toggle {
+        order: 2;
+        flex: 0 0 auto;
     }
 
     #cars-search-container {
@@ -456,6 +482,19 @@
         flex: 1 1 100%;
         min-width: 100%;
         max-width: 100%;
+    }
+
+    .cars-view-toggle-row {
+        margin-top: 1rem;
+        gap: 1rem;
+        padding: 0 2rem;
+        box-sizing: border-box;
+    }
+
+    #cars-search {
+        flex: 1 1 auto;
+        min-width: 0;
+        max-width: none;
     }
 
     #cars-search-container .custom-select:nth-of-type(1) { z-index: 233; }

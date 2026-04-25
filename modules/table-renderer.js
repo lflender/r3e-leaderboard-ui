@@ -599,9 +599,9 @@ class TableRenderer {
             : '';
         
         if (model) {
-            return `<td class="car-cell"><span class="car-cell-inline">${brandLogoHtml}<span class="car-brand">${escBrand}</span> <span class="car-model">${escModel}</span></span></td>`;
+            return `<td class="car-cell"><span class="car-cell-stack">${brandLogoHtml}<span class="car-text-stack"><span class="car-brand">${escBrand}</span><span class="car-model-line"><span class="car-model">${escModel}</span></span></span></span></td>`;
         } else {
-            return `<td class="car-cell"><span class="car-cell-inline">${brandLogoHtml}<span class="car-brand">${escBrand}</span></span></td>`;
+            return `<td class="car-cell"><span class="car-cell-stack">${brandLogoHtml}<span class="car-text-stack"><span class="car-brand">${escBrand}</span></span></span></td>`;
         }
     }
     

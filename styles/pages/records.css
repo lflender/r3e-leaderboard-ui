@@ -1,0 +1,329 @@
+/* ========================================
+   RECORDS PAGE
+   ======================================== */
+
+#records-panel {
+    max-width: 580px;
+    margin: 0 auto;
+    position: relative;
+}
+
+#records-search-container {
+    justify-content: center;
+}
+
+#records-class-filter-ui {
+    flex: 0 0 auto;
+    width: 420px;
+    max-width: 90%;
+    margin: 0 auto;
+}
+
+.records-tables {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    position: relative;
+}
+
+.records-box {
+    min-width: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) var(--surface);
+    padding: 2px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.records-box::-webkit-scrollbar { height: 6px; }
+.records-box::-webkit-scrollbar-track { background: var(--surface); }
+.records-box::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 4px; }
+
+.records-box__title {
+    font-size: 1.05rem;
+    margin-bottom: 0.75rem;
+    color: var(--text-primary);
+    text-align: center;
+}
+
+.records-box__title .info-icon {
+    margin-left: 0.35rem;
+}
+
+/* table-layout: auto lets pos and value columns shrink to their content width.
+   The driver th gets width:100% so it claims all remaining space.
+   max-width: 0 on the driver td is the standard trick that makes text-overflow
+   respect the column width computed by the browser instead of the content width. */
+.records-table-container .results-table.stats-table {
+    table-layout: auto;
+    width: 100%;
+    min-width: 300px;
+    margin-top: 0; /* override global 1rem margin so top fold button sits flush */
+}
+
+.records-table-container .results-table.stats-table th:nth-child(2) {
+    width: 100%;
+}
+
+.records-table-container .results-table.stats-table td:last-child {
+    width: clamp(5.2rem, 10vw, 6.1rem);
+    white-space: nowrap;
+    text-align: right;
+    padding-left: 0.3rem;
+    padding-right: 0.35rem;
+}
+
+.records-table-container .results-table.stats-table th:last-child {
+    text-align: right;
+    white-space: nowrap;
+    padding-left: 0.2rem;
+    padding-right: 0.25rem;
+}
+
+/* Avg Bested % values are short (e.g. 90.6%), so keep this value column tighter
+   to preserve more width for the central driver cell. */
+#records-avg-bested-table .results-table.stats-table th:last-child,
+#records-avg-bested-table .results-table.stats-table td:last-child {
+    width: 4.45rem;
+}
+
+
+
+.records-table-container .results-table.stats-table .stats-driver-cell {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 0;
+    padding-left: 0.2rem;
+    padding-right: 0.35rem;
+}
+
+.records-table-container .results-table.stats-table .country-flag {
+    margin-right: 0.33rem;
+}
+
+.records-driver-team {
+    font-size: 0.78rem;
+    color: var(--text-secondary, #9aa5b4);
+    margin-left: 0.35rem;
+}
+
+.records-driver-avatar {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 0.4rem;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
+.records-table-container {
+    max-width: 740px;
+    width: 100%;
+    overflow: hidden;
+}
+
+.records-expand-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin: 0;
+    padding: 0.15rem 0.8rem;
+    background: var(--surface);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.records-expand-toggle:hover,
+.records-expand-toggle:focus-visible {
+    background: var(--primary-color);
+    color: var(--text-on-primary, #fff);
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+.records-expand-toggle__label {
+    display: none;
+}
+
+.records-expand-toggle__icon {
+    display: inline-block;
+    line-height: 1;
+    font-size: 1.3rem;
+    transition: transform 0.2s ease;
+}
+
+.records-expand-toggle.is-expanded .records-expand-toggle__icon {
+    transform: rotate(180deg);
+}
+
+.records-expand-toggle--top {
+    display: none;
+    border-top: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+}
+
+.records-expand-toggle--top.is-expanded {
+    display: flex;
+}
+
+/* ── Fixed prev/next page navigation buttons ──────────────────────────────── */
+
+.records-page-nav {
+    position: fixed;
+    top: 50%; /* overridden by JS */
+    transform: translateY(-50%);
+    z-index: 200;
+    width: 2rem;
+    height: 5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-color);
+    color: var(--text-on-primary, #fff);
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    opacity: 0.7;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+    transition: opacity 0.15s ease, background-color 0.15s ease;
+}
+
+.records-page-nav--prev { left: 0; }
+.records-page-nav--next { left: 0; } /* overridden by JS */
+
+.records-page-nav:hover,
+.records-page-nav:focus-visible {
+    opacity: 1;
+    outline: none;
+}
+
+.records-page-nav[hidden] { display: none; }
+
+@media (max-width: 768px) {
+    .records-box__title {
+        font-size: 0.95rem;
+    }
+
+    /* Override the shared mobile .results-table min-width: 600px rule for records.
+       Records only has three columns, so forcing 600px just creates a smaller visible
+       viewport and makes the driver cell truncate earlier than necessary. */
+    .records-table-container {
+        max-width: 100%;
+    }
+
+    .records-table-container .results-table.stats-table {
+        min-width: 0 !important;
+        width: 100% !important;
+        table-layout: auto !important;
+    }
+
+    .records-table-container .results-table.stats-table .stats-pos-th,
+    .records-table-container .results-table.stats-table td.pos-cell {
+        width: 2.9rem !important;
+        white-space: nowrap;
+    }
+
+    .records-table-container .results-table.stats-table td:last-child {
+        width: 5.25rem !important;
+        white-space: nowrap;
+        text-align: right;
+        padding-left: 0.2rem;
+        padding-right: 0.25rem;
+    }
+
+    .records-table-container .results-table.stats-table th:last-child {
+        text-align: right;
+        white-space: nowrap;
+        padding-left: 0.16rem;
+        padding-right: 0.2rem;
+    }
+
+    #records-avg-bested-table .results-table.stats-table th:last-child,
+    #records-avg-bested-table .results-table.stats-table td:last-child {
+        width: 4.1rem !important;
+    }
+
+
+
+    .records-table-container .results-table.stats-table .stats-driver-cell {
+        max-width: 0;
+        padding-left: 0.12rem;
+        padding-right: 0.22rem;
+    }
+
+    .records-table-container .results-table.stats-table .country-flag {
+        margin-right: 0.26rem;
+    }
+
+    .records-driver-team {
+        font-size: 0.72rem;
+        margin-left: 0.22rem;
+    }
+
+    .records-page-nav {
+        width: 1.55rem;
+        height: 4rem;
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .records-box__title {
+        font-size: 0.88rem;
+    }
+
+    .records-table-container {
+        max-width: 100%;
+    }
+
+    .records-table-container .results-table.stats-table td:last-child {
+        width: 4.9rem !important;
+        padding-left: 0.16rem;
+        padding-right: 0.2rem;
+    }
+
+    .records-table-container .results-table.stats-table th:last-child {
+        text-align: right;
+        white-space: nowrap;
+        padding-left: 0.12rem;
+        padding-right: 0.16rem;
+    }
+
+    #records-avg-bested-table .results-table.stats-table th:last-child,
+    #records-avg-bested-table .results-table.stats-table td:last-child {
+        width: 3.75rem !important;
+    }
+
+    #records-avg-bested-table .results-table.stats-table th:last-child {
+        font-size: 0.64rem;
+    }
+
+    .records-table-container .results-table.stats-table .country-flag {
+        margin-right: 0.22rem;
+    }
+
+    .records-driver-team {
+        font-size: 0.68rem;
+        margin-left: 0.18rem;
+    }
+
+    .records-page-nav {
+        width: 1.35rem;
+        height: 3.4rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+    }
+}

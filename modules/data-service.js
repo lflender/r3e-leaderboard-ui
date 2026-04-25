@@ -559,7 +559,9 @@ class DataService {
             }
             
             seen.add(cls);
-            options.push({ value: cls, label: cls });
+            const classId = window.getCarClassId ? window.getCarClassId(cls) : null;
+            const logoUrl = window.R3EUtils?.resolveCarClassLogo?.(cls, classId) || '';
+            options.push({ value: cls, label: cls, logoUrl });
         });
         
         return options.sort((a, b) => a.label.localeCompare(b.label));

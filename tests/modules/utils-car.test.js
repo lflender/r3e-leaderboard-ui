@@ -12,9 +12,10 @@ describe('R3ECarUtils', () => {
 
     test('splits car names including special cases', () => {
         expect(window.R3ECarUtils.splitCarName('Audi R8 LMS')).toEqual({ brand: 'Audi', model: 'R8 LMS' });
-        expect(window.R3ECarUtils.splitCarName('E36 V8 JUDD')).toEqual({ brand: 'Georg Plasa', model: 'E36 V8' });
-        expect(window.R3ECarUtils.splitCarName('134 Judd V8')).toEqual({ brand: 'Georg Plasa', model: '134 V8' });
-        expect(window.R3ECarUtils.splitCarName('Carlsson SLK 340 JUDD')).toEqual({ brand: 'Carlsson', model: 'SLK 340' });
+        expect(window.R3ECarUtils.splitCarName('E36 V8 JUDD')).toEqual({ brand: 'Georg Plasa', model: 'BMW E36 V8' });
+        expect(window.R3ECarUtils.splitCarName('134 Judd V8')).toEqual({ brand: 'Georg Plasa', model: 'BMW 134 V8' });
+        expect(window.R3ECarUtils.splitCarName('Carlsson SLK 340 JUDD')).toEqual({ brand: 'Carlsson', model: 'Mercedes SLK 340' });
+        expect(window.R3ECarUtils.splitCarName('BMW Alpina B6 GT3')).toEqual({ brand: 'BMW Alpina', model: 'B6 GT3' });
     });
 
     test('resolves local brand logo paths from car names', () => {
@@ -24,6 +25,7 @@ describe('R3ECarUtils', () => {
         expect(window.R3ECarUtils.resolveBrandLogoPath('Lynk & Co 03 TCR')).toBe('images/brands/logo-lynk-co.png');
         expect(window.R3ECarUtils.resolveBrandLogoPath('134 Judd V8')).toBe('images/brands/logo-georg-plasa.png');
         expect(window.R3ECarUtils.resolveBrandLogoPath('E36 V8 JUDD')).toBe('images/brands/logo-georg-plasa.png');
+        expect(window.R3ECarUtils.resolveBrandLogoPath('BMW Alpina B6 GT3')).toBe('images/brands/logo-alpina.png');
         expect(window.R3ECarUtils.resolveBrandLogoPath('')).toBe('images/brands/logo-raceroom.png');
         expect(window.R3ECarUtils.resolveBrandLogoPath('Some Unknown Brand Prototype')).toBe('images/brands/logo-raceroom.png');
     });

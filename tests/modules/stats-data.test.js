@@ -52,8 +52,111 @@ describe('StatsData', () => {
         ], 'pole_positions', 2);
 
         expect(rows).toEqual([
-            { name: 'A', country: 'FR', rank: 'B', value: 9 },
-            { name: 'B', country: 'DE', rank: 'A', value: 4 }
+            { name: 'A', country: 'FR', rank: 'B', avatar: '', team: '', value: 9 },
+            { name: 'B', country: 'DE', rank: 'A', avatar: '', team: '', value: 4 }
         ]);
+    });
+
+    test('exposes METRIC_DEFINITIONS for the record types with correct directions', () => {
+        const defs = window.StatsData.METRIC_DEFINITIONS;
+        expect(defs.pole).toEqual({ metricKey: 'pole_positions', fileKey: 'pole_file', direction: 'desc' });
+        expect(defs.bested).toEqual({ metricKey: 'bested_drivers', fileKey: 'bested_file', direction: 'desc' });
+        expect(defs.podium).toEqual({ metricKey: 'podiums', fileKey: 'podium_file', direction: 'desc' });
+        expect(defs.avg_bested).toEqual({ metricKey: 'avg_bested', fileKey: 'bested_file', direction: 'desc' });
+        expect(defs.entries).toEqual({ metricKey: 'entries', fileKey: 'entries_file', direction: 'desc' });
+    });
+
+    test('getAllPathsForFilter returns all file paths for overall/superclass/class', () => {
+        window.getCarClassId = vi.fn(() => '1703');
+        const index = {
+            overall: {
+                pole_file: 'overall-pole.gz',
+                bested_file: 'overall-bested.gz',
+                podium_file: 'overall-podium.gz',
+                entries_file: 'overall-entries.gz'
+            },
+            superclasses: [{
+                name: 'GT3',
+                files: {
+                    pole_file: 'gt3-pole.gz',
+                    bested_file: 'gt3-bested.gz',
+                    podium_file: 'gt3-podium.gz',
+                    entries_file: 'gt3-entries.gz'
+                }
+            }],
+            classes: [{
+                id: '1703',
+                files: {
+                    pole_file: 'class-pole.gz',
+                    bested_file: 'class-bested.gz',
+                    podium_file: 'class-podium.gz',
+                    entries_file: 'class-entries.gz'
+                }
+            }]
+        };
+
+        expect(window.StatsData.getAllPathsForFilter(index, '')).toEqual({
+            polePath: 'overall-pole.gz',
+            bestedPath: 'overall-bested.gz',
+            podiumPath: 'overall-podium.gz',
+            avgBestedPath: 'overall-bested.gz',
+            entriesPath: 'overall-entries.gz'
+        });
+
+        const cacheStyleIndex = {
+            overall: {
+                pole_file: 'cache/stats/overall_pole.json.gz',
+                bested_file: 'cache/stats/overall_bested.json.gz',
+                podium_file: 'cache/stats/overall_podium.json.gz',
+                entries_file: 'cache/stats/overall_entries.json.gz'
+            }
+        };
+        expect(window.StatsData.getAllPathsForFilter(cacheStyleIndex, '')).toEqual({
+            polePath: 'cache/stats/overall_top_pole.json.gz',
+            bestedPath: 'cache/stats/overall_top_bested.json.gz',
+            podiumPath: 'cache/stats/overall_top_podium.json.gz',
+            avgBestedPath: 'cache/stats/overall_top_bested.json.gz',
+            entriesPath: 'cache/stats/overall_top_entries.json.gz'
+        });
+        expect(window.StatsData.getAllPathsForFilter(index, 'superclass:GT3')).toEqual({
+            polePath: 'gt3-pole.gz',
+            bestedPath: 'gt3-bested.gz',
+            podiumPath: 'gt3-podium.gz',
+            avgBestedPath: 'gt3-bested.gz',
+            entriesPath: 'gt3-entries.gz'
+        });
+        expect(window.StatsData.getAllPathsForFilter(index, 'GTR 3')).toEqual({
+            polePath: 'class-pole.gz',
+            bestedPath: 'class-bested.gz',
+            podiumPath: 'class-podium.gz',
+            avgBestedPath: 'class-bested.gz',
+            entriesPath: 'class-entries.gz'
+        });
+    });
+
+    test('normalizeRows supports ascending direction (lower value is better)', () => {
+        const rows = window.StatsData.normalizeRows([
+            { name: 'A', avg_percentile: 12.5, country: 'DE', rank: 'A' },
+            { name: 'B', avg_percentile: 1.5, country: 'FR', rank: 'B' },
+            { name: 'C', avg_percentile: 7.0, country: 'IT', rank: 'C' }
+        ], 'avg_percentile', 2, { direction: 'asc' });
+
+        expect(rows.map((r) => r.name)).toEqual(['B', 'C']);
+        expect(rows[0].value).toBe(1.5);
+    });
+
+    test('getPathsForFilter remains backward compatible (only pole/bested)', () => {
+        const index = {
+            overall: {
+                pole_file: 'overall-pole.gz',
+                bested_file: 'overall-bested.gz',
+                podium_file: 'overall-podium.gz',
+                percentile_file: 'overall-percentile.gz'
+            }
+        };
+        expect(window.StatsData.getPathsForFilter(index, '')).toEqual({
+            polePath: 'overall-pole.gz',
+            bestedPath: 'overall-bested.gz'
+        });
     });
 });

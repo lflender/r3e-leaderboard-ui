@@ -6,7 +6,6 @@ function buildDom() {
         '<div id="stats-class-filter-ui"></div>',
         '<h3 id="stats-pole-title"></h3>',
         '<h3 id="stats-bested-title"></h3>',
-        '<div id="stats-selected-class-logo" hidden></div>',
         '<div id="stats-pole-table"></div>',
         '<div id="stats-bested-table"></div>'
     ].join('');
@@ -115,19 +114,16 @@ describe('stats page integration', () => {
         expect(bestedHtml).toContain('Failed to load stats');
     });
 
-    it('applies user-selected filters, tracks analytics, and renders class logo', async () => {
+    it('applies user-selected filters and tracks analytics', async () => {
         loadBrowserScript('modules/pages/stats.js');
         await new Promise(resolve => setTimeout(resolve, 0));
 
         window.__statsFilterOnChange('GT3', { source: 'user' });
         await new Promise(resolve => setTimeout(resolve, 0));
 
-        const logoEl = document.getElementById('stats-selected-class-logo');
         const poleTitle = document.getElementById('stats-pole-title').textContent;
 
         expect(poleTitle).toContain('GT3');
-        expect(logoEl.hidden).toBe(false);
-        expect(logoEl.innerHTML).toContain('/images/gt3.webp');
 
         expect(window.R3EAnalytics.track).toHaveBeenCalledWith(
             'stats filter changed',

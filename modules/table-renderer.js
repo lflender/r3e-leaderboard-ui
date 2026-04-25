@@ -283,7 +283,7 @@ class TableRenderer {
 
     renderDetailSections(resultsContainer, summaryHTML, entriesDistHTML, paginationHTML, tableWrapperHTML) {
         const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = `${summaryHTML || ''}${entriesDistHTML || ''}${paginationHTML || ''}${tableWrapperHTML || ''}${paginationHTML || ''}`;
+        tempDiv.innerHTML = `${summaryHTML || ''}${entriesDistHTML || ''}<div class="detail-filters-slot"></div>${paginationHTML || ''}${tableWrapperHTML || ''}${paginationHTML || ''}`;
         resultsContainer.innerHTML = tempDiv.innerHTML;
     }
 

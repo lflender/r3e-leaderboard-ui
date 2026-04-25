@@ -60,6 +60,20 @@ beforeAll(async () => {
         setValue() {}
     };
 
+    window.DetailCarDist = {
+        generateHtml: vi.fn().mockReturnValue(''),
+        getCarDistributionStats: vi.fn().mockReturnValue([])
+    };
+
+    window.DetailEntriesDist = {
+        generateHtml: vi.fn().mockReturnValue(''),
+        parseEntryDate: vi.fn(),
+        getLocalDateKey: vi.fn(),
+        getDataTimeBounds: vi.fn().mockReturnValue({ min: null, max: null }),
+        toLocalDateInputValue: vi.fn().mockReturnValue(''),
+        applyTimeframeFilter: vi.fn(data => data)
+    };
+
     loadBrowserScript('modules/difficulty-filter.js');
     loadBrowserScript('modules/pages/detail.js');
     await new Promise(resolve => setTimeout(resolve, 0));

@@ -70,7 +70,9 @@
 .custom-select__menu {
     position: absolute;
     left: 0;
-    right: 0;
+    right: auto;
+    width: max-content;
+    min-width: 100%;
     margin-top: 6px;
     background: var(--surface);
     border: 1px solid var(--border);
@@ -87,10 +89,13 @@
     padding: 0.6rem 0.9rem;
     cursor: pointer;
     color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .custom-select__option-logo {
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 2rem;
+    height: 1.1rem;
     object-fit: contain;
     flex-shrink: 0;
 }

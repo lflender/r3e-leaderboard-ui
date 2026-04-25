@@ -148,7 +148,7 @@ describe('hall-of-fame – rendered HTML', () => {
         expect(container.innerHTML).toContain('20');
     });
 
-    it('links the card to stats.html', async () => {
+    it('links the card to records.html', async () => {
         window.StatsData = makeStatsDataMock([{ name: 'X', value: 1 }], [{ name: 'Y', value: 1 }]);
 
         document.body.innerHTML = buildHofDOM();
@@ -157,7 +157,7 @@ describe('hall-of-fame – rendered HTML', () => {
 
         const link = document.querySelector('#hall-of-fame-container a.hall-of-fame-link');
         expect(link).not.toBeNull();
-        expect(link.getAttribute('href')).toBe('stats.html');
+        expect(link.getAttribute('href')).toBe('records.html');
     });
 
     it('renders "No data" placeholder when poles array is empty', async () => {

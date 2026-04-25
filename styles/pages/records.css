@@ -3,7 +3,7 @@
    ======================================== */
 
 #records-panel {
-    max-width: 900px;
+    max-width: 580px;
     margin: 0 auto;
     position: relative;
 }
@@ -90,9 +90,7 @@
     width: 4.45rem;
 }
 
-#records-avg-bested-table .results-table.stats-table th:last-child {
-    font-size: 0.72rem;
-}
+
 
 .records-table-container .results-table.stats-table .stats-driver-cell {
     overflow: hidden;
@@ -215,6 +213,10 @@
 .records-page-nav[hidden] { display: none; }
 
 @media (max-width: 768px) {
+    .records-box__title {
+        font-size: 0.95rem;
+    }
+
     /* Override the shared mobile .results-table min-width: 600px rule for records.
        Records only has three columns, so forcing 600px just creates a smaller visible
        viewport and makes the driver cell truncate earlier than necessary. */
@@ -254,9 +256,7 @@
         width: 4.1rem !important;
     }
 
-    #records-avg-bested-table .results-table.stats-table th:last-child {
-        font-size: 0.68rem;
-    }
+
 
     .records-table-container .results-table.stats-table .stats-driver-cell {
         max-width: 0;
@@ -281,6 +281,10 @@
 }
 
 @media (max-width: 480px) {
+    .records-box__title {
+        font-size: 0.88rem;
+    }
+
     .records-table-container {
         max-width: 100%;
     }

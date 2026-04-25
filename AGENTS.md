@@ -41,7 +41,7 @@ These literal Unicode characters appear in CSS files and must never be replaced 
 After any change to a user-facing page or a page-related module, update `sitemap.xml` `lastmod` for the affected page URL(s) in the same change.
 
 - Trigger this when editing:
-	- Root page files: `index.html`, `drivers.html`, `tracks.html`, `cars.html`, `stats.html`, `faq.html`, `detail.html`
+	- Root page files: `index.html`, `drivers.html`, `tracks.html`, `cars.html`, `records.html`, `faq.html`, `detail.html`
 	- Page modules: `modules/pages/*.js`
 	- Shared modules that directly affect a specific page's content/behavior
 - Use the same date format already used in `sitemap.xml`: `YYYY-MM-DD`.

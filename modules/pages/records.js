@@ -351,10 +351,19 @@
         const rect = anchorEl.getBoundingClientRect();
         const btnW = navPrevBtn.offsetWidth || 32;
         const btnH = navPrevBtn.offsetHeight || 80;
+        const isMobile = window.innerWidth <= 768;
         const edgeGap = window.innerWidth <= 480 ? 2 : window.innerWidth <= 768 ? 4 : 6;
-        // Horizontal: pin to viewport edges so table width is not reduced for nav space.
-        navPrevBtn.style.left = `${edgeGap}px`;
-        navNextBtn.style.left = `${window.innerWidth - btnW - edgeGap}px`;
+        
+        // Horizontal positioning: mobile pins to viewport edges, desktop positions relative to table.
+        if (isMobile) {
+            navPrevBtn.style.left = `${edgeGap}px`;
+            navNextBtn.style.left = `${window.innerWidth - btnW - edgeGap}px`;
+        } else {
+            // Desktop: position relative to table edges
+            navPrevBtn.style.left = `${Math.max(0, rect.left - btnW - edgeGap)}px`;
+            navNextBtn.style.left = `${rect.right + edgeGap}px`;
+        }
+        
         // Vertical: stay at viewport center, but clamp inside the table's top/bottom.
         // When the table scrolls off-screen the button follows it out.
         const viewportCenter = window.innerHeight / 2;

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Detail page script for RaceRoom Leaderboards
  * Refactored to use modular architecture
  */
@@ -454,7 +454,7 @@ function splitTrackAndLayout(fullTrack) {
         return { trackName: '', layoutName: '' };
     }
 
-    const match = safeTrack.match(/^(.*?)(?:\s*[-â€“â€”]\s*)(.+)$/);
+    const match = safeTrack.match(/^(.*?)(?:\s*[-–—]\s*)(.+)$/);
     if (match) {
         return {
             trackName: match[1].trim(),
@@ -490,7 +490,7 @@ function renderDetailHeader({ pageTitleText, trackName, layoutName, detailClassH
     const detailClassElem = document.getElementById('detail-class');
 
     if (pageTitleElem) {
-        pageTitleElem.textContent = `${pageTitleText} â€” RaceRoom Leaderboards`;
+        pageTitleElem.textContent = `${pageTitleText} - RaceRoom Leaderboards`;
     }
 
     // Remove any separately-created layout element (old pattern)
@@ -962,7 +962,7 @@ async function showNoResultsWithActionDelay() {
 
 function isCarFilterCurrentlyActive() {
     const carToggle = document.querySelector('#car-filter-ui .custom-select__toggle');
-    const selectedCar = carToggle ? carToggle.textContent.replace(' â–¾', '').trim() : 'All cars';
+    const selectedCar = carToggle ? carToggle.textContent.replace(' ▾', '').trim() : 'All cars';
     return selectedCar !== 'All cars';
 }
 
@@ -1328,7 +1328,7 @@ function getSelectedFilter(selector, defaultValue) {
     }
     // Fallback to reading button text (backward compatibility)
     const toggle = document.querySelector(`${selector} .custom-select__toggle`);
-    return toggle ? toggle.textContent.replace(' â–¾', '').trim() : defaultValue;
+    return toggle ? toggle.textContent.replace(' ▾', '').trim() : defaultValue;
 }
 
 function normalizeDifficultyForPreference(value) {

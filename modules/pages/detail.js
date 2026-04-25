@@ -1515,12 +1515,18 @@ function generateCarDistributionSummary(data, sortBy = 'entries', sortDir = 'des
     
     stats.forEach(stat => {
         const { brand: carBrand, model: carModel } = R3EUtils.splitCarName(stat.car);
+        const brandLogoUrl = (typeof R3EUtils.resolveBrandLogoPath === 'function')
+            ? R3EUtils.resolveBrandLogoPath(stat.car)
+            : '';
+        const brandLogoHtml = brandLogoUrl
+            ? `<img class="car-dist-brand-logo" src="${R3EUtils.escapeHtml(brandLogoUrl)}" alt="${R3EUtils.escapeHtml(carBrand)} logo" width="36" height="20" loading="lazy" decoding="async" />`
+            : '';
         let carHtml = '<span class="car-brand">' + R3EUtils.escapeHtml(carBrand) + '</span>';
         if (carModel) {
             carHtml += ' <span class="car-model">' + R3EUtils.escapeHtml(carModel) + '</span>';
         }
         html += '<tr>';
-        html += '<td class="car-dist-car">' + carHtml + '</td>';
+        html += '<td class="car-dist-car"><span class="car-dist-car-cell">' + brandLogoHtml + '<span>' + carHtml + '</span></span></td>';
         html += '<td class="car-dist-entries">' + stat.entries + '</td>';
         html += '<td class="car-dist-percentage">' + stat.percentage + '%</td>';
         html += '<td class="car-dist-median">' + (stat.medianPosition > 0 ? Math.round(stat.medianPosition) : '-') + '</td>';

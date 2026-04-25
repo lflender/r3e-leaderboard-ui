@@ -9,7 +9,7 @@
 @import url("./styles/components/flags.css?v=1");
 @import url("./styles/components/logos.css?v=8");
 @import url("./styles/components/db-status.css");
-@import url("./styles/components/car-dist.css");
+@import url("./styles/components/car-dist.css?v=3");
 @import url("./styles/components/difficulty.css?v=1");
 @import url("./styles/components/entries-dist.css");
 @import url("./styles/components/fun-fact.css");

@@ -494,7 +494,13 @@ function renderDetailHeader({ pageTitleText, trackName, layoutName, detailClassH
     }
 
     if (detailTrackElem) {
-        detailTrackElem.innerHTML = `<span class="detail-label">Track:</span> ${R3EUtils.escapeHtml(trackName)}`;
+        const trackLogoUrl = (window.R3ETrackImages && typeof window.R3ETrackImages.resolveTrackLogoById === 'function')
+            ? window.R3ETrackImages.resolveTrackLogoById(trackParam)
+            : '';
+        const trackLogoHtml = trackLogoUrl
+            ? `<img class="detail-track-logo" src="${R3EUtils.escapeHtml(trackLogoUrl)}" alt="${R3EUtils.escapeHtml(trackName)} logo" title="${R3EUtils.escapeHtml(trackName)}" loading="lazy" decoding="async" />`
+            : '';
+        detailTrackElem.innerHTML = `<span class="detail-label">Track:</span>${trackLogoHtml}${R3EUtils.escapeHtml(trackName)}`;
     }
 
     let layoutElem = document.getElementById('detail-layout');
@@ -517,6 +523,25 @@ function renderDetailHeader({ pageTitleText, trackName, layoutName, detailClassH
 }
 
 /**
+/**
+ * Build a row of class logos for multi-class/combined views.
+ * Returns an HTML string of <img> elements, or '' if no logos can be resolved.
+ * @param {Array<{className: string, classId: string|number|null}>} specs
+ * @returns {string}
+ */
+function buildClassLogosHtml(specs) {
+    if (!window.R3EUtils || typeof window.R3EUtils.resolveCarClassLogo !== 'function') return '';
+    const imgs = specs
+        .map(({ className, classId }) => {
+            const url = window.R3EUtils.resolveCarClassLogo(className, classId);
+            if (!url) return '';
+            return `<img class="detail-class-logo" src="${R3EUtils.escapeHtml(url)}" alt="${R3EUtils.escapeHtml(className)} class logo" title="${R3EUtils.escapeHtml(className)}" loading="lazy" decoding="async" />`;
+        })
+        .filter(Boolean);
+    return imgs.join('');
+}
+
+/**
  * Set detail page titles for specific classes view
  */
 function setSpecificClassesDetailTitles(classIds) {
@@ -531,11 +556,20 @@ function setSpecificClassesDetailTitles(classIds) {
     
     const title = `${trackName} - ${categoryLabel}`;
 
+    const specs = classIds.map(classId => ({
+        className: window.getCarClassName ? window.getCarClassName(classId) : classId,
+        classId
+    }));
+    const logosHtml = buildClassLogosHtml(specs);
+    const detailClassHtml = logosHtml
+        ? `<span class="detail-label">Category:</span><span class="detail-class-logos">${logosHtml}</span>`
+        : `<span class="detail-label">Category:</span> ${R3EUtils.escapeHtml(categoryLabel)}`;
+
     renderDetailHeader({
         pageTitleText: title,
         trackName,
         layoutName,
-        detailClassHtml: `<span class="detail-label">Category:</span> ${R3EUtils.escapeHtml(categoryLabel)}`
+        detailClassHtml
     });
 }
 
@@ -544,11 +578,31 @@ function setCombinedDetailTitles(superclass) {
     
     const title = `${trackName} - ${superclass} (Combined)`;
 
+    // Resolve class names from CARS_DATA for this superclass
+    const specs = [];
+    if (window.CARS_DATA && Array.isArray(window.CARS_DATA)) {
+        const seen = new Set();
+        window.CARS_DATA.forEach(entry => {
+            if (entry.superclass === superclass) {
+                const cls = entry.class || entry.car_class || entry.CarClass || '';
+                if (cls && !seen.has(cls)) {
+                    seen.add(cls);
+                    const classId = window.getCarClassId ? window.getCarClassId(cls) : null;
+                    specs.push({ className: cls, classId });
+                }
+            }
+        });
+    }
+    const logosHtml = buildClassLogosHtml(specs);
+    const detailClassHtml = logosHtml
+        ? `<span class="detail-label">Category:</span><span class="detail-class-logos">${logosHtml}</span>`
+        : `<span class="detail-label">Category:</span> ${R3EUtils.escapeHtml(superclass)} (Combined)`;
+
     renderDetailHeader({
         pageTitleText: title,
         trackName,
         layoutName,
-        detailClassHtml: `<span class="detail-label">Category:</span> ${R3EUtils.escapeHtml(superclass)} (Combined)`
+        detailClassHtml
     });
 }
 
@@ -638,9 +692,6 @@ function setDetailTitles(data, trackParam, classParam) {
     }
     
     if (!carClassName) carClassName = classParam || '';
-    
-    document.getElementById('detail-track').innerHTML = 
-        `<span class="detail-label">Track:</span> ${R3EUtils.escapeHtml(trackName)}`;
     
     if (layoutName) {
         let layoutElem = document.getElementById('detail-layout');

@@ -25,13 +25,15 @@
     margin-right: 0.25em;
 }
 
+#detail-track,
 #detail-class {
     display: flex;
     align-items: center;
     gap: 0.42rem;
 }
 
-#detail-class .detail-label {
+#detail-class .detail-label,
+#detail-track .detail-label {
     margin-right: 0;
 }
 
@@ -43,6 +45,24 @@
     object-fit: contain;
     margin: 0;
     flex: 0 0 auto;
+}
+
+.detail-track-logo {
+    display: block;
+    height: 28px;
+    width: auto;
+    max-width: 56px;
+    object-fit: contain;
+    margin: 0;
+    flex: 0 0 auto;
+}
+
+.detail-class-logos {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-left: 0.35rem;
+    vertical-align: middle;
 }
 
 .detail-subtitle {

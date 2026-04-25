@@ -30,7 +30,7 @@ describe('R3ETrackImages', () => {
             'images/tracks/hockenheimring-1692-logo-original.png'
         );
         expect(window.R3ETrackImages.resolveTrackLogoByLabel('Brands Hatch - Indy')).toBe(
-            'images/tracks/brands-hatch-indy-2519-logo-original.png'
+            'images/tracks/brands-hatch-grand-prix-9472-logo-original.png'
         );
     });
 

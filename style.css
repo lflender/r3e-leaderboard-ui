@@ -3,7 +3,7 @@
 @import url("./styles/components/tabs.css");
 @import url("./styles/components/support.css");
 @import url("./styles/components/search-filters.css?v=3");
-@import url("./styles/components/tables.css?v=15");
+@import url("./styles/components/tables.css?v=16");
 @import url("./styles/components/pagination.css?v=1");
 @import url("./styles/components/badges.css?v=6");
 @import url("./styles/components/flags.css?v=1");
@@ -21,4 +21,4 @@
 @import url("./styles/pages/records.css?v=33");
 @import url("./styles/pages/daily-races.css?v=2");
 @import url("./styles/pages/detail.css?v=3");
-@import url("./styles/responsive/breakpoints.css?v=13");
+@import url("./styles/responsive/breakpoints.css?v=14");

@@ -686,7 +686,7 @@
 
     #track-info-table .results-table th,
     #track-info-table .results-table td {
-        padding: 0.6rem 0.25rem !important;
+        padding: 0.25rem 0.25rem !important;
         min-width: 0 !important;
         overflow: hidden !important;
     }

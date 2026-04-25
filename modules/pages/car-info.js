@@ -91,16 +91,16 @@
   // Dropdown options
   const wheelOptions = [
     { value: '', label: 'All wheels' },
-    { value: 'gt', label: 'GT' },
-    { value: 'round', label: 'Round' },
-    { value: 'round (flat)', label: 'Round (flat)' },
-    { value: 'round_and_roundflat', label: 'Round & Round (flat)' }
+    { value: 'gt', label: 'GT', labelHtml: wheelBadge('gt') },
+    { value: 'round', label: 'Round', labelHtml: wheelBadge('round') },
+    { value: 'round (flat)', label: 'Round (flat)', labelHtml: wheelBadge('round (flat)') },
+    { value: 'round_and_roundflat', label: 'Round & Round (flat)', labelHtml: `${wheelBadge('round')} + ${wheelBadge('round (flat)')}` }
   ];
   const transOptions = [
     { value: '', label: 'All transmissions' },
-    { value: 'paddles', label: 'Paddles' },
-    { value: 'sequential', label: 'Sequential' },
-    { value: 'h', label: 'H' }
+    { value: 'paddles', label: 'Paddles', labelHtml: transBadge('paddles') },
+    { value: 'sequential', label: 'Sequential', labelHtml: transBadge('sequential') },
+    { value: 'h', label: 'H', labelHtml: transBadge('h') }
   ];
 
   let wheelFilter = '', transFilter = '', classFilter = '';
@@ -113,18 +113,7 @@
   
   // Build class options from data
   const superclassOptions = dataService.getSuperclassOptions();
-  const regularClassOptions = [];
-  const classesSet = new Set();
-  data.forEach(cls => {
-    const className = (cls.class || '').trim();
-    if (className && className !== '-') {
-      classesSet.add(className);
-    }
-  });
-  const uniqueClasses = Array.from(classesSet).sort();
-  uniqueClasses.forEach(cls => {
-    regularClassOptions.push({ value: cls, label: cls });
-  });
+  const regularClassOptions = dataService.getClassOptionsFromCarsData();
   
   // Combine: All classes, then Category: superclass entries, then regular classes
   const classOptions = [{ value: '', label: 'All classes' }]

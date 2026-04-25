@@ -41,7 +41,8 @@ beforeEach(() => {
     };
     window.R3EAnalytics = { track: vi.fn() };
     window.dataService = {
-        getSuperclassOptions: vi.fn().mockReturnValue([])
+        getSuperclassOptions: vi.fn().mockReturnValue([]),
+        getClassOptionsFromCarsData: vi.fn().mockReturnValue([])
     };
     window.R3EUtils = {
         escapeHtml: s => String(s),

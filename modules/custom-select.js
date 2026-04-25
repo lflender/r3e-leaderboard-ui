@@ -48,11 +48,13 @@ class CustomSelect {
             const escapedLabel = R3EUtils.escapeHtml(opt.label);
             
             // Format label with bold prefix for Category: and Combined:
-            let formattedLabel = escapedLabel;
-            if (escapedLabel.startsWith('Category: ')) {
-                formattedLabel = '<strong>Category:</strong> ' + escapedLabel.substring(10);
-            } else if (escapedLabel.startsWith('Combined: ')) {
-                formattedLabel = '<strong>Combined:</strong> ' + escapedLabel.substring(10);
+            let formattedLabel = opt.labelHtml || escapedLabel;
+            if (!opt.labelHtml) {
+                if (escapedLabel.startsWith('Category: ')) {
+                    formattedLabel = '<strong>Category:</strong> ' + escapedLabel.substring(10);
+                } else if (escapedLabel.startsWith('Combined: ')) {
+                    formattedLabel = '<strong>Combined:</strong> ' + escapedLabel.substring(10);
+                }
             }
 
             // Optional car class logo prepended to the option label.
@@ -138,11 +140,13 @@ class CustomSelect {
         
         if (opt) {
             // Format label with bold prefix for Category: and Combined:
-            let formattedLabel = opt.label;
-            if (formattedLabel.startsWith('Category: ')) {
-                formattedLabel = '<strong>Category:</strong> ' + formattedLabel.substring(10);
-            } else if (formattedLabel.startsWith('Combined: ')) {
-                formattedLabel = '<strong>Combined:</strong> ' + formattedLabel.substring(10);
+            let formattedLabel = opt.labelHtml || opt.label;
+            if (!opt.labelHtml) {
+                if (formattedLabel.startsWith('Category: ')) {
+                    formattedLabel = '<strong>Category:</strong> ' + formattedLabel.substring(10);
+                } else if (formattedLabel.startsWith('Combined: ')) {
+                    formattedLabel = '<strong>Combined:</strong> ' + formattedLabel.substring(10);
+                }
             }
 
             // Mirror the logo into the toggle button so the selected class is visible when closed.

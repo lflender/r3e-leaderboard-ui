@@ -21,7 +21,7 @@
   let activeClassId = null; // null => All classes
   let activeClassLabel = null; // human-readable label for selected class
   let combineMode = false; // When true, combine all classes in superclass by track
-  let hasTrackedTrackInfoDisplay = false;
+  let hasTrackedTrackPageShown = false;
 
   // DOM refs for combine checkbox
   const combineContainer = document.getElementById('combine-checkbox-container');
@@ -40,6 +40,19 @@
       combine_mode: !!combineMode,
       is_superclass_filter: !!(activeClassId && activeClassId.startsWith('superclass:'))
     });
+  }
+
+  function trackTrackPageShown(displayedRows) {
+    if (hasTrackedTrackPageShown) return;
+    if (typeof R3EAnalytics === 'undefined' || typeof R3EAnalytics.track !== 'function') return;
+    R3EAnalytics.track('track page shown', {
+      displayed_rows: Number.isFinite(displayedRows) ? displayedRows : 0,
+      track_filter: activeTrackId ? String(activeTrackId) : '',
+      class_filter: activeClassId || '',
+      combine_mode: !!combineMode,
+      is_superclass_filter: !!(activeClassId && activeClassId.startsWith('superclass:'))
+    });
+    hasTrackedTrackPageShown = true;
   }
 
   // Build menu options from TRACKS + All tracks
@@ -526,16 +539,7 @@
   // Render table using the same style/formatting as leaderboards
   async function renderTable(data) {
     trackAllResults = Array.isArray(data) ? data : [];
-    if (!hasTrackedTrackInfoDisplay && typeof R3EAnalytics !== 'undefined' && typeof R3EAnalytics.track === 'function') {
-      R3EAnalytics.track('track info displayed', {
-        displayed_rows: trackAllResults.length,
-        track_filter: activeTrackId ? String(activeTrackId) : '',
-        class_filter: activeClassId || '',
-        combine_mode: !!combineMode,
-        is_superclass_filter: !!(activeClassId && activeClassId.startsWith('superclass:'))
-      });
-      hasTrackedTrackInfoDisplay = true;
-    }
+    trackTrackPageShown(trackAllResults.length);
     if (trackAllResults.length === 0) {
       await TemplateHelper.showNoResults(tableContainer);
       return;
@@ -706,7 +710,25 @@
   }
 
   // Expose a global function for pagination buttons to call
-  window.trackInfoGoToPage = function(page){ trackCurrentPage = page; renderTable(trackAllResults); const el = document.getElementById('track-info'); if (el) el.scrollIntoView({behavior:'smooth', block:'start'}); };
+  window.trackInfoGoToPage = function(page){
+    trackCurrentPage = page;
+    renderTable(trackAllResults);
+    const el = document.getElementById('track-info');
+    if (el) el.scrollIntoView({behavior:'smooth', block:'start'});
+
+    if (typeof R3EAnalytics !== 'undefined' && typeof R3EAnalytics.track === 'function') {
+      const totalPages = Math.max(1, Math.ceil((trackAllResults || []).length / trackItemsPerPage));
+      R3EAnalytics.track('track pagination changed', {
+        page_number: trackCurrentPage,
+        total_pages: totalPages,
+        displayed_rows: (trackAllResults || []).length,
+        track_filter: activeTrackId ? String(activeTrackId) : '',
+        class_filter: activeClassId || '',
+        combine_mode: !!combineMode,
+        is_superclass_filter: !!(activeClassId && activeClassId.startsWith('superclass:'))
+      });
+    }
+  };
 
   async function fetchAndRender(){
     // Show a loading indicator during initial heavy aggregations

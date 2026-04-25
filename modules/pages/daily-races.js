@@ -17,9 +17,25 @@ class DailyRaces {
 
         this.dailyRacesData = null;
         this.lastUpdateTime = null;
+        this.hasTrackedDailyRacesPageShown = false;
         this.handleDetailTileClick = this.handleDetailTileClick.bind(this);
         
         this.init();
+    }
+
+    trackDailyRacesPageShown(racesData) {
+        if (this.hasTrackedDailyRacesPageShown) return;
+        if (typeof R3EAnalytics === 'undefined' || typeof R3EAnalytics.track !== 'function') return;
+
+        const sprintRaces = Array.isArray(racesData && racesData.races) ? racesData.races : [];
+        const featureRaces = Array.isArray(racesData && racesData['feature-races']) ? racesData['feature-races'] : [];
+
+        R3EAnalytics.track('daily races page shown', {
+            sprint_races_count: sprintRaces.length,
+            feature_races_count: featureRaces.length,
+            total_races_count: sprintRaces.length + featureRaces.length
+        });
+        this.hasTrackedDailyRacesPageShown = true;
     }
 
     /**
@@ -478,6 +494,7 @@ class DailyRaces {
         html += '</div>'; // daily-races-container
 
         this.elements.resultsContainer.innerHTML = html;
+        this.trackDailyRacesPageShown(racesData);
     }
 }
 

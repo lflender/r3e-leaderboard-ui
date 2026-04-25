@@ -94,7 +94,7 @@ function trackDetailUrlView() {
     if (hasTrackedDetailUrlView) return;
     if (typeof R3EAnalytics === 'undefined' || typeof R3EAnalytics.track !== 'function') return;
 
-    R3EAnalytics.track('detail page viewed', {
+    R3EAnalytics.track('detail page shown', {
         track_id: trackParam || '',
         class_param: classParam || '',
         classes_param: classesParam || '',
@@ -1144,6 +1144,20 @@ function goToPage(page) {
     document.getElementById('detail-results-container').scrollIntoView({ 
         behavior: 'smooth', block: 'start' 
     });
+
+    if (typeof R3EAnalytics !== 'undefined' && typeof R3EAnalytics.track === 'function') {
+        const totalPages = Math.max(1, Math.ceil((allResults || []).length / itemsPerPage));
+        R3EAnalytics.track('detail pagination changed', {
+            page_number: currentPage,
+            total_pages: totalPages,
+            result_count: (allResults || []).length,
+            track_id: trackParam || '',
+            class_param: classParam || '',
+            classes_param: classesParam || '',
+            superclass_param: superclassParam || '',
+            is_combined_view: !!DetailState.isCombinedView
+        });
+    }
 }
 
 /**

@@ -148,7 +148,7 @@
 
   function trackCarInfoViewMode(nextMode, previousMode, stats) {
     if (typeof R3EAnalytics === 'undefined' || typeof R3EAnalytics.track !== 'function') return;
-    R3EAnalytics.track('car info view mode changed', {
+    R3EAnalytics.track('cars toggled view', {
       view_mode: nextMode,
       previous_view_mode: previousMode,
       wheel_filter: wheelFilter || '',
@@ -158,6 +158,35 @@
       displayed_classes: (stats && stats.displayedClasses) || 0,
       is_superclass_filter: !!(classFilter && classFilter.startsWith('superclass:'))
     });
+  }
+
+  function trackCarSearched(searchTerm, source, stats) {
+    if (typeof R3EAnalytics === 'undefined' || typeof R3EAnalytics.track !== 'function') return;
+    R3EAnalytics.track('car searched', {
+      search_term: searchTerm || '',
+      search_length: (searchTerm || '').length,
+      source: source || 'input',
+      view_mode: viewMode,
+      wheel_filter: wheelFilter || '',
+      transmission_filter: transFilter || '',
+      class_filter: classFilter || '',
+      displayed_cars: (stats && stats.displayedCars) || 0,
+      displayed_classes: (stats && stats.displayedClasses) || 0,
+      is_superclass_filter: !!(classFilter && classFilter.startsWith('superclass:'))
+    });
+  }
+
+  function applySearchTerm(nextValue, source) {
+    const trimmed = (nextValue || '').trim();
+    if (trimmed.length === 0 || trimmed.length < minSearchLength) {
+      searchFilter = '';
+      renderResults();
+      return;
+    }
+
+    searchFilter = trimmed.toLowerCase();
+    const stats = renderResults();
+    trackCarSearched(trimmed, source, stats);
   }
 
   function updateViewToggleUI() {
@@ -181,21 +210,13 @@
         clearTimeout(searchDebounceTimer);
       }
 
-      if (nextValue.length === 0) {
-        searchFilter = '';
-        renderResults();
-        return;
-      }
-
-      if (nextValue.length < minSearchLength) {
-        searchFilter = '';
-        renderResults();
+      if (nextValue.length === 0 || nextValue.length < minSearchLength) {
+        applySearchTerm('', 'input');
         return;
       }
 
       searchDebounceTimer = setTimeout(() => {
-        searchFilter = nextValue.toLowerCase();
-        renderResults();
+        applySearchTerm(nextValue, 'input');
       }, 300);
     });
 
@@ -207,8 +228,7 @@
         clearTimeout(searchDebounceTimer);
       }
       event.target.blur();
-      searchFilter = nextValue.toLowerCase();
-      renderResults();
+      applySearchTerm(nextValue, 'enter');
     });
   }
 
@@ -644,11 +664,12 @@
   if (!hasTrackedCarInfoDisplay && typeof R3EAnalytics !== 'undefined' && typeof R3EAnalytics.track === 'function') {
     const totalClasses = data.length;
     const totalCars = data.reduce((sum, cls) => sum + ((cls.cars || []).length), 0);
-    R3EAnalytics.track('car info displayed', {
+    R3EAnalytics.track('cars page shown', {
       total_classes: totalClasses,
       total_cars: totalCars,
       displayed_classes: (initialStats && initialStats.displayedClasses) || 0,
-      displayed_cars: (initialStats && initialStats.displayedCars) || 0
+      displayed_cars: (initialStats && initialStats.displayedCars) || 0,
+      view_mode: viewMode
     });
     hasTrackedCarInfoDisplay = true;
   }

@@ -120,13 +120,15 @@ describe('daily-races integration', () => {
         sprintLink.dispatchEvent(new MouseEvent('click', { bubbles: true }));
         featureLink.dispatchEvent(new MouseEvent('click', { bubbles: true }));
 
-        expect(window.R3EAnalytics.track).toHaveBeenNthCalledWith(
-            1,
+        expect(window.R3EAnalytics.track).toHaveBeenCalledWith(
+            'daily races page shown',
+            expect.objectContaining({ sprint_races_count: 1, feature_races_count: 1, total_races_count: 2 })
+        );
+        expect(window.R3EAnalytics.track).toHaveBeenCalledWith(
             'daily sprint race viewed',
             expect.objectContaining({ track_id: '10', class_id: '5' })
         );
-        expect(window.R3EAnalytics.track).toHaveBeenNthCalledWith(
-            2,
+        expect(window.R3EAnalytics.track).toHaveBeenCalledWith(
             'daily feature race viewed',
             expect.objectContaining({ track_id: '20', classes: '100,200' })
         );

@@ -91,6 +91,28 @@ class Navigation {
             if (selectedDifficulty !== 'All difficulties') {
                 url += `&difficulty=${encodeURIComponent(selectedDifficulty)}`;
             }
+
+            // Determine whether click originated from driver-search or track-info page.
+            const sourcePage = document.getElementById('driver-search')
+                ? 'driver'
+                : document.getElementById('track-info-table')
+                    ? 'track'
+                    : 'unknown';
+
+            if (typeof R3EAnalytics !== 'undefined' && typeof R3EAnalytics.track === 'function') {
+                try {
+                    R3EAnalytics.track('leaderboard row opened', {
+                        track_id: trackId || track || '',
+                        class_id: classId || carClass || '',
+                        superclass: superclass || '',
+                        position: pos || '',
+                        has_driver_name: !!driverName,
+                        source_page: sourcePage,
+                        is_combined_view: !!superclass
+                    });
+                } catch (_) { /* never block navigation */ }
+            }
+
             window.open(url, '_blank');
         }
     }

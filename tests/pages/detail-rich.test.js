@@ -244,7 +244,7 @@ describe('detail page rich integration', () => {
 
     it('tracks detail view analytics once from URL parameters', () => {
         expect(window.R3EAnalytics.track).toHaveBeenCalledWith(
-            'detail page viewed',
+            'detail page shown',
             expect.objectContaining({
                 track_id: '10',
                 class_param: '5',

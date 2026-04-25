@@ -204,13 +204,13 @@ class TableRenderer {
                 } else if (sortBy === 'lapTime') {
                     title = 'Click to sort by gap time';
                 }
-                return `<th class="sortable${activeClass}" onclick="window.sortDriverGroups('lapTimeToggle')" title="${title}">${displayName}</th>`;
+                return `<th class="sortable${activeClass}" data-sort-key="lapTimeToggle" title="${title}">${displayName}</th>`;
             }
             const sortKey = sortConfig.sortKey;
             const activeClass = sortBy === sortKey ? ' sort-active' : '';
             const title = `Click to sort by ${displayName.toLowerCase()}`;
             
-            return `<th class="sortable${activeClass}" onclick="window.sortDriverGroups('${sortKey}')" title="${title}">${displayName}</th>`;
+            return `<th class="sortable${activeClass}" data-sort-key="${sortKey}" title="${title}">${displayName}</th>`;
         } else {
             return `<th>${displayName}</th>`;
         }

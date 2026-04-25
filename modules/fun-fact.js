@@ -14,7 +14,11 @@
     const facts = data.Facts;
     if (!facts || facts.length === 0) return;
     const fact = facts[Math.floor(Math.random() * facts.length)].Fact;
-    banner.innerHTML = '<strong>&#128161; Did you know?</strong> ' + fact;
+    const strong = document.createElement('strong');
+    strong.textContent = '\ud83d\udca1 Did you know?';
+    banner.innerHTML = '';
+    banner.appendChild(strong);
+    banner.appendChild(document.createTextNode(' ' + fact));
     updateVisibility();
 
     // Listen for search input changes to hide banner when searching

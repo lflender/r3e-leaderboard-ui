@@ -291,6 +291,14 @@ class DriverSearch {
             }
         });
 
+        // Delegated sort handler for table header clicks (data-sort-key attribute)
+        if (this.elements.resultsContainer) {
+            this.elements.resultsContainer.addEventListener('click', (e) => {
+                const th = e.target.closest('th[data-sort-key]');
+                if (th) this.sortDriverGroups(th.getAttribute('data-sort-key'));
+            });
+        }
+
         // Class filter change handler
         if (this.elements.classFilter) {
             this.elements.classFilter.addEventListener('change', async () => {

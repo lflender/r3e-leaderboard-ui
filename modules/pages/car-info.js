@@ -70,7 +70,7 @@
       ? 'table-brand-logo table-brand-logo-raceroom'
       : 'table-brand-logo';
     const brandLogoHtml = brandLogoUrl
-      ? `<span class="table-brand-logo-slot cars-page-car-logo-slot"><img class="${brandLogoClass}" src="${R3EUtils.escapeHtml(brandLogoUrl)}" alt="${escBrand || 'Car brand'} logo" loading="lazy" decoding="async" onload='const renderedWidth = this.getBoundingClientRect().width || this.width || 22; const slotWidth = (this.parentElement && this.parentElement.getBoundingClientRect().width) || 22; const offsetX = (slotWidth - renderedWidth) / 2; this.style.marginLeft = offsetX + "px";' onerror='if (this.parentElement) { this.parentElement.remove(); } else { this.remove(); }' /></span>`
+      ? `<span class="table-brand-logo-slot cars-page-car-logo-slot"><img class="${brandLogoClass}" src="${R3EUtils.escapeHtml(brandLogoUrl)}" alt="${escBrand || 'Car brand'} logo" loading="lazy" decoding="async" data-center-logo="true" /></span>`
       : '';
 
     if (!brand) {
@@ -364,6 +364,20 @@
     };
   }
 
+  function attachBrandLogoHandlers(rootEl) {
+    Array.from(rootEl.querySelectorAll('img[data-center-logo]')).forEach(img => {
+      img.addEventListener('load', function () {
+        const renderedWidth = this.getBoundingClientRect().width || this.width || 22;
+        const slotWidth = (this.parentElement && this.parentElement.getBoundingClientRect().width) || 22;
+        const offsetX = (slotWidth - renderedWidth) / 2;
+        this.style.marginLeft = offsetX + 'px';
+      });
+      img.addEventListener('error', function () {
+        if (this.parentElement) { this.parentElement.remove(); } else { this.remove(); }
+      });
+    });
+  }
+
   function attachImageCyclers(rootEl) {
     Array.from(rootEl.querySelectorAll('img.car-rotating-image[data-image-list]')).forEach(img => {
       const host = img.closest('a.row-link, a.car-tile-link, .car-tile-link');
@@ -543,6 +557,7 @@
 
     html += '\n</tbody></table>';
     tableContainer.innerHTML = html;
+    attachBrandLogoHandlers(tableContainer);
     attachImageCyclers(tableContainer);
 
     Array.from(tableContainer.querySelectorAll('tr.driver-data-row')).forEach(row => {
@@ -641,6 +656,7 @@
 
     html += '</div>';
     tableContainer.innerHTML = html;
+    attachBrandLogoHandlers(tableContainer);
     attachImageCyclers(tableContainer);
     return { displayedCars, displayedClasses };
   }

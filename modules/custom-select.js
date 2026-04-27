@@ -10,8 +10,10 @@ class CustomSelect {
      * @param {string} elementId - ID of the root element
      * @param {Array<{value: string, label: string}>} options - Dropdown options
      * @param {Function} onChange - Callback when selection changes
+     * @param {Object} [opts] - Additional options
+     * @param {boolean} [opts.searchable=true] - Whether to show the search input
      */
-    constructor(elementId, options = [], onChange = null) {
+    constructor(elementId, options = [], onChange = null, opts = {}) {
         this.root = document.getElementById(elementId);
         if (!this.root) {
             console.warn(`CustomSelect: element ${elementId} not found`);
@@ -22,6 +24,7 @@ class CustomSelect {
         this.menu = this.root.querySelector('.custom-select__menu');
         this.options = options;
         this.onChange = onChange;
+        this.searchable = opts.searchable !== false;
         this.currentValue = '';
         
         this.init();
@@ -43,7 +46,14 @@ class CustomSelect {
      * Builds the dropdown menu from options
      */
     buildMenu() {
-        this.menu.innerHTML = this.options.map(opt => {
+        const searchHtml = this.searchable
+            ? `<div class="custom-select__search-wrap">
+            <input class="custom-select__search" type="search" placeholder="Search…" autocomplete="off" aria-label="Filter options">
+        </div>
+        <div class="custom-select__no-results" hidden>No results</div>`
+            : '';
+
+        const optionsHtml = this.options.map(opt => {
             const escapedValue = R3EUtils.escapeHtml(opt.value);
             const escapedLabel = R3EUtils.escapeHtml(opt.label);
             
@@ -64,6 +74,11 @@ class CustomSelect {
             
             return `<div class="custom-select__option" data-value="${escapedValue}">${logoHtml}${formattedLabel}</div>`;
         }).join('');
+
+        this.menu.innerHTML = searchHtml + `<div class="custom-select__options-list">${optionsHtml}</div>`;
+        this.searchInput = this.searchable ? this.menu.querySelector('.custom-select__search') : null;
+        this.noResults = this.searchable ? this.menu.querySelector('.custom-select__no-results') : null;
+        this.optionsList = this.menu.querySelector('.custom-select__options-list');
     }
     
     /**
@@ -82,6 +97,12 @@ class CustomSelect {
             if (!opt) return;
             const value = opt.dataset.value;
             this.setValue(value, { source: 'user' });
+        });
+
+        // Live search filter
+        this.menu.addEventListener('input', (e) => {
+            if (e.target !== this.searchInput) return;
+            this._filterOptions(e.target.value);
         });
         
         // Close when clicking outside
@@ -108,6 +129,13 @@ class CustomSelect {
         this.menu.hidden = false;
         this.toggle.setAttribute('aria-expanded', 'true');
         this.root.classList.add('is-open');
+        // Reset search and focus input
+        if (this.searchInput) {
+            this.searchInput.value = '';
+            this._filterOptions('');
+            // Defer focus so the menu is visible first
+            requestAnimationFrame(() => this.searchInput.focus());
+        }
     }
     
     /**
@@ -117,6 +145,11 @@ class CustomSelect {
         this.menu.hidden = true;
         this.toggle.setAttribute('aria-expanded', 'false');
         this.root.classList.remove('is-open');
+        // Reset search state
+        if (this.searchInput) {
+            this.searchInput.value = '';
+            this._filterOptions('');
+        }
     }
     
     /**
@@ -185,6 +218,25 @@ class CustomSelect {
                 opt.removeAttribute('aria-selected');
             }
         });
+    }
+
+    /**
+     * Filters visible options by query string
+     * @param {string} query
+     */
+    _filterOptions(query) {
+        const q = query.trim().toLowerCase();
+        const allOptions = this.menu.querySelectorAll('.custom-select__option');
+        let visibleCount = 0;
+        allOptions.forEach(opt => {
+            const label = (opt.dataset.value === '' ? 'all' : '') + (opt.textContent || '').toLowerCase();
+            const matches = !q || label.includes(q);
+            opt.hidden = !matches;
+            if (matches) visibleCount++;
+        });
+        if (this.noResults) {
+            this.noResults.hidden = visibleCount > 0;
+        }
     }
     
     /**

@@ -267,14 +267,14 @@
     if (opts?.source === 'user') {
       trackCarInfoFilter('wheel', v, stats);
     }
-  });
+  }, { searchable: false });
   new CustomSelect('trans-filter-ui', transOptions, (v, opts) => {
     transFilter = v;
     const stats = renderResults();
     if (opts?.source === 'user') {
       trackCarInfoFilter('transmission', v, stats);
     }
-  });
+  }, { searchable: false });
   new CustomSelect('class-filter-ui-cars', classOptions, (v, opts) => {
     classFilter = v;
     const stats = renderResults();

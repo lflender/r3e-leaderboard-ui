@@ -23,15 +23,15 @@
 
 #cars-search {
     order: 2;
-    flex: 0 1 calc((100% - 2rem) / 3);
-    min-width: 260px;
-    max-width: 420px;
-    padding: 0.78rem 0.9rem;
+    flex: 0 1 240px;
+    min-width: 220px;
+    max-width: 300px;
+    padding: 0.55rem 0.75rem;
     border: 2px solid var(--border);
     border-radius: 8px;
     background-color: var(--surface);
     color: var(--text-primary);
-    font-size: max(0.98rem, 16px);
+    font-size: max(0.95rem, 16px);
 }
 
 #cars-search:focus {
@@ -42,6 +42,37 @@
 
 #cars-search-container {
     margin-bottom: 0.9rem;
+}
+
+.cars-tools-row {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.35rem;
+    margin-bottom: 0.55rem;
+}
+
+.cars-tool-btn {
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.28);
+    color: rgba(148, 163, 184, 0.9);
+    padding: 0.16rem 0.5rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    opacity: 0.82;
+    cursor: pointer;
+    transition: color 0.12s ease, border-color 0.12s ease, background 0.12s ease, opacity 0.12s ease;
+}
+
+.cars-tool-btn:hover,
+.cars-tool-btn:focus-visible {
+    color: rgba(226, 232, 240, 0.98);
+    border-color: rgba(148, 163, 184, 0.42);
+    background: rgba(15, 23, 42, 0.55);
+    opacity: 1;
+    outline: none;
 }
 
 #cars-view-toggle {
@@ -240,7 +271,41 @@
 #cars-info-table .results-table th:nth-child(1),
 #cars-info-table .results-table td:nth-child(1) {
     white-space: nowrap;
-    min-width: 300px;
+    min-width: 260px;
+}
+
+#cars-info-table .results-table th:nth-child(2),
+#cars-info-table .results-table td:nth-child(2) {
+    width: 108px;
+    min-width: 108px;
+    text-align: left;
+}
+
+@media (max-width: 1300px) {
+    #cars-info-table .results-table th:nth-child(1),
+    #cars-info-table .results-table td:nth-child(1) {
+        min-width: 240px;
+    }
+}
+
+@media (max-width: 1000px) {
+    #cars-info-table .results-table th:nth-child(1),
+    #cars-info-table .results-table td:nth-child(1) {
+        min-width: 220px;
+    }
+
+    #cars-info-table .results-table th:nth-child(2),
+    #cars-info-table .results-table td:nth-child(2) {
+        width: 100px;
+        min-width: 100px;
+    }
+}
+
+@media (max-width: 768px) {
+    #cars-info-table .results-table th:nth-child(1),
+    #cars-info-table .results-table td:nth-child(1) {
+        min-width: 205px;
+    }
 }
 
 #cars-info-table .results-table th {
@@ -396,6 +461,32 @@
     font-size: 1.2rem;
 }
 
+/* Shared row that holds flag + rating together in a flex line */
+.car-tile-top-row {
+    position: absolute;
+    top: 0.6rem;
+    left: 0.6rem;
+    z-index: 101;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    pointer-events: none; /* row itself not interactive; buttons re-enable below */
+}
+
+/* Inside the row, flag and rating are flow elements — no absolute positioning */
+.car-tile-top-row .car-tile-flag-overlay {
+    position: static;
+    top: auto;
+    left: auto;
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.car-tile-top-row .car-rating-widget--tile {
+    position: static;
+    pointer-events: auto;
+}
+
 .car-tile-year-overlay {
     position: absolute;
     top: 0.6rem;
@@ -502,4 +593,206 @@
 .car-model {
     color: var(--text-secondary);
     font-style: italic;
+}
+
+.cars-rating-filter-label {
+    display: inline-flex;
+    align-items: center;
+}
+
+.cars-rating-filter-symbols {
+    color: #fbbf24;
+    letter-spacing: 0.04em;
+    text-shadow: 0 0 4px rgba(251, 191, 36, 0.3);
+}
+
+.cars-rating-filter-heart {
+    color: #f43f5e;
+    text-shadow: 0 0 4px rgba(244, 63, 94, 0.45);
+}
+
+/* ========================================
+   CAR TILE RATING WIDGET
+   ======================================== */
+
+/* Shared rating widget base */
+.car-rating-widget {
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+.car-rating-widget--table {
+    justify-content: flex-start;
+    min-height: 1.4rem;
+}
+
+.car-rating-widget--table .car-rating-btn {
+    font-size: 1rem;
+}
+
+.car-rating-widget--table[data-rated="false"] .car-rating-btn:first-child {
+    max-width: 1.22rem;
+    padding: 0 0.02rem;
+}
+
+.car-rating-widget--table[data-rated="true"] .car-rating-btn[data-filled="true"] {
+    max-width: 1.22rem;
+    padding: 0;
+}
+
+/* All buttons: default state — collapsed and invisible */
+.car-rating-btn {
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    border: none;
+    background: none;
+    outline: none;
+    padding: 0;
+    max-width: 0;
+    overflow: hidden;
+    opacity: 0;
+    user-select: none;
+    -webkit-user-select: none;
+    color: rgba(255, 255, 255, 0.5);
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 1px rgba(0, 0, 0, 0.8));
+    transition: opacity 0.12s ease, max-width 0.12s ease, padding 0.12s ease, color 0.08s ease;
+}
+
+@media (max-width: 1000px) {
+    .car-rating-btn {
+        font-size: 1.02rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .car-rating-btn {
+        font-size: 0.94rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .car-rating-btn {
+        font-size: 0.88rem;
+    }
+}
+
+/* Unrated at rest: one faint ghost star hinting the feature */
+.car-rating-widget[data-rated="false"] .car-rating-btn:first-child {
+    opacity: 0.35;
+    max-width: 1.6rem;
+    padding: 0 0.05rem;
+}
+
+/* Rated at rest: show ONLY filled symbols */
+.car-rating-widget[data-rated="true"] .car-rating-btn[data-filled="true"] {
+    opacity: 1;
+    max-width: 1.6rem;
+    padding: 0 0.03rem;
+}
+
+/* Filled symbols: baseline (very bland/neutral) */
+.car-rating-widget[data-rated="true"] .car-rating-btn[data-filled="true"] {
+    color: #b4b4b4;
+    filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.04)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+}
+
+/* Progressive intensity by rating level: 1 (grayscale) -> 6 (very shiny) */
+.car-rating-widget[data-rated="true"][data-score-level="1"] .car-rating-btn[data-filled="true"] {
+    color: #9e9e9e;
+    filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.03)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+}
+
+.car-rating-widget[data-rated="true"][data-score-level="2"] .car-rating-btn[data-filled="true"] {
+    color: #b6b6b6;
+    filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.06)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+}
+
+.car-rating-widget[data-rated="true"][data-score-level="3"] .car-rating-btn[data-filled="true"] {
+    color: #dfc47a;
+    filter: drop-shadow(0 0 2px rgba(236, 190, 92, 0.32)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+}
+
+.car-rating-widget[data-rated="true"][data-score-level="4"] .car-rating-btn[data-filled="true"] {
+    color: #f0c24e;
+    filter: drop-shadow(0 0 4px rgba(250, 192, 64, 0.52)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+}
+
+.car-rating-widget[data-rated="true"][data-score-level="5"] .car-rating-btn[data-filled="true"] {
+    color: #f8c12b;
+    filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.72)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+}
+
+.car-rating-widget[data-rated="true"][data-score-level="6"] .car-rating-btn[data-filled="true"] {
+    color: #ffbf1f;
+    filter: drop-shadow(0 0 8px rgba(255, 199, 46, 0.9)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+}
+
+/* Stars — hover preview */
+.car-rating-btn.is-preview {
+    color: #fde68a;
+    filter: drop-shadow(0 0 4px rgba(253, 230, 138, 0.4)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+}
+
+/* Heart — base */
+.car-rating-heart {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* Heart: only gets strong highlight on top score (6) */
+.car-rating-widget[data-rated="true"][data-score-level="6"] .car-rating-heart[data-filled="true"] {
+    color: #f43f5e;
+    filter: drop-shadow(0 0 5px rgba(244, 63, 94, 0.72)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+}
+
+/* Heart — hover preview */
+.car-rating-heart.is-preview {
+    color: #fda4af;
+    filter: drop-shadow(0 0 4px rgba(253, 164, 175, 0.4)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+}
+
+/* Reveal all buttons on tile hover or score-cell hover */
+.car-tile:hover .car-rating-widget .car-rating-btn,
+.driver-data-row:hover .car-rating-widget--table .car-rating-btn,
+.car-score-cell:hover .car-rating-widget--table .car-rating-btn {
+    opacity: 1;
+    max-width: 1.6rem;
+    padding: 0 0.03rem;
+}
+
+.driver-data-row:hover .car-rating-widget--table .car-rating-btn,
+.car-score-cell:hover .car-rating-widget--table .car-rating-btn {
+    max-width: 1.22rem;
+    padding: 0;
+}
+
+/* Staggered unfold for unrated tiles only (rated tiles are already open) */
+.car-tile:hover .car-rating-widget[data-rated="false"] .car-rating-btn:nth-child(1),
+.driver-data-row:hover .car-rating-widget--table[data-rated="false"] .car-rating-btn:nth-child(1),
+.car-score-cell:hover .car-rating-widget--table[data-rated="false"] .car-rating-btn:nth-child(1) { transition-delay: 0s,    0s,    0s,    0s; }
+
+.car-tile:hover .car-rating-widget[data-rated="false"] .car-rating-btn:nth-child(2),
+.driver-data-row:hover .car-rating-widget--table[data-rated="false"] .car-rating-btn:nth-child(2),
+.car-score-cell:hover .car-rating-widget--table[data-rated="false"] .car-rating-btn:nth-child(2) { transition-delay: 0.04s, 0.04s, 0.04s, 0s; }
+
+.car-tile:hover .car-rating-widget[data-rated="false"] .car-rating-btn:nth-child(3),
+.driver-data-row:hover .car-rating-widget--table[data-rated="false"] .car-rating-btn:nth-child(3),
+.car-score-cell:hover .car-rating-widget--table[data-rated="false"] .car-rating-btn:nth-child(3) { transition-delay: 0.08s, 0.08s, 0.08s, 0s; }
+
+.car-tile:hover .car-rating-widget[data-rated="false"] .car-rating-btn:nth-child(4),
+.driver-data-row:hover .car-rating-widget--table[data-rated="false"] .car-rating-btn:nth-child(4),
+.car-score-cell:hover .car-rating-widget--table[data-rated="false"] .car-rating-btn:nth-child(4) { transition-delay: 0.12s, 0.12s, 0.12s, 0s; }
+
+.car-tile:hover .car-rating-widget[data-rated="false"] .car-rating-btn:nth-child(5),
+.driver-data-row:hover .car-rating-widget--table[data-rated="false"] .car-rating-btn:nth-child(5),
+.car-score-cell:hover .car-rating-widget--table[data-rated="false"] .car-rating-btn:nth-child(5) { transition-delay: 0.16s, 0.16s, 0.16s, 0s; }
+
+.car-tile:hover .car-rating-widget[data-rated="false"] .car-rating-btn:nth-child(6),
+.driver-data-row:hover .car-rating-widget--table[data-rated="false"] .car-rating-btn:nth-child(6),
+.car-score-cell:hover .car-rating-widget--table[data-rated="false"] .car-rating-btn:nth-child(6) { transition-delay: 0.20s, 0.20s, 0.20s, 0s; }
+
+.car-score-cell {
+    vertical-align: middle;
+    padding-left: 0.45rem;
 }

@@ -103,7 +103,7 @@
     { value: 'h', label: 'H', labelHtml: transBadge('h') }
   ];
 
-  let wheelFilter = '', transFilter = '', classFilter = '';
+  let wheelFilter = '', transFilter = '', classFilter = '', ratingFilter = '';
   let searchFilter = '';
   let viewMode = 'table';
   const CAR_VIEW_MODE_KEY = 'carInfoViewMode';
@@ -119,6 +119,25 @@
   const classOptions = [{ value: '', label: 'All classes' }]
     .concat(superclassOptions)
     .concat(regularClassOptions);
+
+  function buildRatingFilterLabel(stars, options = {}) {
+    const heart = options.heart === true
+      ? '<span class="cars-rating-filter-heart">♥</span>'
+      : '';
+    return `<span class="cars-rating-filter-label"><span class="cars-rating-filter-symbols">${stars}${heart}</span></span>`;
+  }
+  
+  // Rating filter options: unrated, 1+ stars, 2+ stars, ..., 5 stars, favorites
+  const ratingOptions = [
+    { value: '', label: 'All ratings' },
+    { value: '0', label: 'Unrated', labelHtml: buildRatingFilterLabel('☆') },
+    { value: '1', label: '1+ stars', labelHtml: buildRatingFilterLabel('★+') },
+    { value: '2', label: '2+ stars', labelHtml: buildRatingFilterLabel('★★+') },
+    { value: '3', label: '3+ stars', labelHtml: buildRatingFilterLabel('★★★+') },
+    { value: '4', label: '4+ stars', labelHtml: buildRatingFilterLabel('★★★★+') },
+    { value: '5', label: '5 stars', labelHtml: buildRatingFilterLabel('★★★★★+') },
+    { value: '6', label: 'Favorites', labelHtml: buildRatingFilterLabel('★★★★★', { heart: true }) }
+  ];
   
   // Use the new CustomSelect component
   function trackCarInfoFilter(filterName, filterValue, stats) {
@@ -221,6 +240,52 @@
     });
   }
 
+  function setupRatingTransferControls() {
+    const exportBtn = document.getElementById('cars-export-ratings');
+    const importBtn = document.getElementById('cars-import-ratings');
+    const importInput = document.getElementById('cars-import-ratings-input');
+    if (!exportBtn || !importBtn || !importInput || typeof CarRatings === 'undefined') return;
+
+    exportBtn.addEventListener('click', () => {
+      try {
+        const payload = CarRatings.exportPayload();
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'r3e-car-ratings.json';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+      } catch (err) {
+        console.error('Failed to export car scores', err);
+        window.alert('Could not export car scores.');
+      }
+    });
+
+    importBtn.addEventListener('click', () => {
+      importInput.value = '';
+      importInput.click();
+    });
+
+    importInput.addEventListener('change', async (event) => {
+      const file = event.target && event.target.files ? event.target.files[0] : null;
+      if (!file) return;
+
+      try {
+        const text = await file.text();
+        CarRatings.importPayload(text);
+        renderResults();
+      } catch (err) {
+        console.error('Failed to import car scores', err);
+        window.alert('Could not import car scores. Please select a valid JSON export file.');
+      } finally {
+        importInput.value = '';
+      }
+    });
+  }
+
   function setViewMode(nextMode, options = {}) {
     if (nextMode !== 'table' && nextMode !== 'tiles') return;
     const previousMode = viewMode;
@@ -282,9 +347,17 @@
       trackCarInfoFilter('class', v, stats);
     }
   });
+  new CustomSelect('rating-filter-ui', ratingOptions, (v, opts) => {
+    ratingFilter = v;
+    const stats = renderResults();
+    if (opts?.source === 'user') {
+      trackCarInfoFilter('rating', v, stats);
+    }
+  }, { searchable: false });
 
   initViewMode();
   setupSearchInput();
+  setupRatingTransferControls();
 
   function carMatchesFilters(car) {
     const w = (car.wheel_cat || '').toLowerCase();
@@ -314,6 +387,25 @@
         classOk = c === classFilter.toLowerCase();
       }
     }
+    
+    // Handle rating filter
+    let ratingOk = true;
+    if (ratingFilter) {
+      if (typeof CarRatings !== 'undefined') {
+        const carId = CarRatings.buildCarId(car);
+        const carRating = CarRatings.get(carId);
+        if (ratingFilter === '0') {
+          ratingOk = carRating === 0;
+        } else if (ratingFilter === '6') {
+          ratingOk = carRating === 6;
+        } else {
+          const minRating = parseInt(ratingFilter);
+          ratingOk = carRating >= minRating;
+        }
+      } else {
+        ratingOk = false; // Can't filter if ratings not available
+      }
+    }
 
     let searchOk = true;
     if (searchFilter) {
@@ -323,7 +415,7 @@
       searchOk = carName.includes(searchFilter) || c.includes(searchFilter) || brand.includes(searchFilter);
     }
     
-    return wheelOk && transOk && classOk && searchOk;
+    return wheelOk && transOk && classOk && searchOk && ratingOk;
   }
 
   function getImageListForCar(car, rawLink) {
@@ -467,13 +559,102 @@
     });
   }
 
+  // ---- Car rating helpers ----
+
+  function buildRatingHtml(carId, currentRating, variant = 'tile') {
+    if (typeof CarRatings === 'undefined') return '';
+    const encId = R3EUtils.escapeHtml(carId);
+    const widgetClass = variant === 'table'
+      ? 'car-rating-widget car-rating-widget--table'
+      : 'car-rating-widget car-rating-widget--tile';
+
+    let html = `<div class="${widgetClass}" data-car-id="${encId}" data-rated="${currentRating > 0}" data-score-level="${currentRating}" aria-label="Rate this car">`;
+    for (let s = 1; s <= 5; s++) {
+      const filled = currentRating >= s;
+      const btnCls = ['car-rating-btn', filled ? 'is-rated' : ''].filter(Boolean).join(' ');
+      html += `<span class="${btnCls}" role="button" tabindex="-1" data-score="${s}" data-filled="${filled}" aria-label="Rate ${s} star${s > 1 ? 's' : ''}">${filled ? '★' : '☆'}</span>`;
+    }
+    const heartFilled = currentRating === 6;
+    const heartCls = ['car-rating-btn car-rating-heart', heartFilled ? 'is-rated' : ''].filter(Boolean).join(' ');
+    html += `<span class="${heartCls}" role="button" tabindex="-1" data-score="6" data-filled="${heartFilled}" aria-label="Add to favorites">${heartFilled ? '♥' : '♡'}</span>`;
+    html += '</div>';
+    return html;
+  }
+
+  function attachRatingHandlers(rootEl) {
+    if (typeof CarRatings === 'undefined') return;
+    Array.from(rootEl.querySelectorAll('.car-rating-widget')).forEach(widget => {
+      const carId = widget.getAttribute('data-car-id');
+      if (!carId) return;
+      const buttons = Array.from(widget.querySelectorAll('.car-rating-btn'));
+
+      function updateDisplay(rating) {
+        widget.setAttribute('data-rated', rating > 0 ? 'true' : 'false');
+        widget.setAttribute('data-score-level', String(rating));
+        buttons.forEach(btn => {
+          const score = parseInt(btn.getAttribute('data-score'));
+          const isHeart = btn.classList.contains('car-rating-heart');
+          btn.classList.remove('is-preview');
+          if (isHeart) {
+            const filled = rating === 6;
+            btn.classList.toggle('is-rated', filled);
+            btn.setAttribute('data-filled', filled);
+            btn.textContent = filled ? '♥' : '♡';
+          } else {
+            const filled = rating >= score;
+            btn.classList.toggle('is-rated', filled);
+            btn.setAttribute('data-filled', filled);
+            btn.textContent = filled ? '★' : '☆';
+          }
+        });
+      }
+
+      widget.addEventListener('mouseover', (e) => {
+        const btn = e.target.closest('.car-rating-btn');
+        if (!btn) return;
+        const previewScore = parseInt(btn.getAttribute('data-score'));
+        buttons.forEach(b => {
+          const s = parseInt(b.getAttribute('data-score'));
+          const isHeart = b.classList.contains('car-rating-heart');
+          if (previewScore === 6) {
+            b.classList.add('is-preview');
+            b.textContent = isHeart ? '♥' : '★';
+          } else if (isHeart) {
+            b.classList.remove('is-preview');
+            b.textContent = '♡';
+          } else {
+            b.classList.toggle('is-preview', s <= previewScore);
+            b.textContent = s <= previewScore ? '★' : '☆';
+          }
+        });
+      });
+
+      widget.addEventListener('mouseout', (e) => {
+        if (widget.contains(e.relatedTarget)) return;
+        updateDisplay(CarRatings.get(carId));
+      });
+
+      buttons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const score = parseInt(btn.getAttribute('data-score'));
+          const current = CarRatings.get(carId);
+          const newRating = current === score ? 0 : score; // click same score = clear
+          CarRatings.set(carId, newRating);
+          updateDisplay(newRating);
+        });
+      });
+    });
+  }
+
   function renderTable() {
     let displayedClasses = 0;
     let displayedCars = 0;
     const yearColor = createYearColorFn();
 
     let html = '<table class="results-table"><thead><tr>' +
-      '<th>Car</th><th>Wheel</th><th>Transmission</th><th>Drive</th><th>Year</th><th>Power</th><th>Weight<br><span style="display:block;font-size:0.72em;font-weight:500;line-height:1.05;letter-spacing:0;">*with driver</span></th><th>Engine</th>' +
+      '<th>Car</th><th>Rating</th><th>Wheel</th><th>Transmission</th><th>Drive</th><th>Year</th><th>Power</th><th>Weight<br><span style="display:block;font-size:0.72em;font-weight:500;line-height:1.05;letter-spacing:0;">*with driver</span></th><th>Engine</th>' +
       '</tr></thead><tbody>';
 
     const isSuperclassFilter = classFilter && classFilter.startsWith('superclass:');
@@ -508,12 +689,15 @@
         ? `${R3EUtils.escapeHtml(className)} (${R3EUtils.escapeHtml(superclass)})`
         : R3EUtils.escapeHtml(className);
 
-      html += `\n<tr class="driver-group-header" data-group="${slug}" onclick="toggleGroup(this)">` +
-              `<td colspan="9"><span class="toggle-icon">▼</span> <strong class="car-class-header-text">${classLogoHtml}${classHeaderText}</strong></td></tr>`;
+            html += `\n<tr class="driver-group-header" data-group="${slug}" onclick="toggleGroup(this)">` +
+              `<td colspan="10"><span class="toggle-icon">▼</span> <strong class="car-class-header-text">${classLogoHtml}${classHeaderText}</strong></td></tr>`;
 
       filteredCars.forEach(car => {
         displayedCars++;
         const rawLink = String(car.link || '').trim();
+        const carId = CarRatings.buildCarId(car);
+        const currentRating = (typeof CarRatings !== 'undefined') ? CarRatings.get(carId) : 0;
+        const scoreHtml = buildRatingHtml(carId, currentRating, 'table');
         const rowLink = R3EUtils.escapeHtml(rawLink);
         const linkOpen = rowLink ? `<a class="row-link" href="${rowLink}" target="_blank" rel="noopener">` : '';
         const linkClose = rowLink ? `</a>` : '';
@@ -544,6 +728,7 @@
 
         html += `\n<tr class="driver-data-row ${slug}" data-link="${rowLink}">` +
                 `<td>${linkOpen}${carNameHtml}${thumbPreview}${linkClose}</td>` +
+          `<td class="car-score-cell">${scoreHtml}</td>` +
                 `<td>${linkOpen}${wheelBadge(car.wheel_cat)}${linkClose}</td>` +
                 `<td>${linkOpen}${transBadge(car.transmission_cat)}${linkClose}</td>` +
                 `<td>${linkOpen}${driveBadge(car.drive)}${linkClose}</td>` +
@@ -559,6 +744,7 @@
     tableContainer.innerHTML = html;
     attachBrandLogoHandlers(tableContainer);
     attachImageCyclers(tableContainer);
+    attachRatingHandlers(tableContainer);
 
     Array.from(tableContainer.querySelectorAll('tr.driver-data-row')).forEach(row => {
       const link = row.getAttribute('data-link') || '';
@@ -638,11 +824,14 @@
         const description = car.description ? `<div class="car-tile-description">${R3EUtils.escapeHtml(car.description)}</div>` : '';
         const yearBadgeHtml = `<span class="car-tile-year-overlay car-badge year-badge" data-year="${car.year}" style="background:${yearColor(car.year)}">${R3EUtils.escapeHtml(car.year || '')}</span>`;
         const weightDisplay = (car.weight || '—').replace(/kg\*$/, 'kg with driver');
+        const carId = CarRatings.buildCarId(car);
+        const currentRating = (typeof CarRatings !== 'undefined') ? CarRatings.get(carId) : 0;
+        const ratingHtml = buildRatingHtml(carId, currentRating, 'tile');
 
         html += `<article class="car-tile">` +
                 `${open}` +
                 `<div class="car-tile-name">${carNameHtml}${warningIcon}</div>` +
-                `${imageUrl ? `<div class="car-tile-image-wrap">${flagHtml}<img class="car-tile-image car-rotating-image" data-image-list="${encodedImageList}" src="${imageUrl}" alt="${carNameAttr}" loading="lazy" decoding="async">${yearBadgeHtml}</div>` : ''}` +
+                `${imageUrl ? `<div class="car-tile-image-wrap"><div class="car-tile-top-row">${flagHtml}${ratingHtml}</div><img class="car-tile-image car-rotating-image" data-image-list="${encodedImageList}" src="${imageUrl}" alt="${carNameAttr}" loading="lazy" decoding="async">${yearBadgeHtml}</div>` : ''}` +
                 `${close}` +
                 `<div class="car-tile-meta">` +
                 `<span>${wheelBadge(car.wheel_cat)}</span><span>${transBadge(car.transmission_cat)}</span><span>${driveBadge(car.drive)}</span>` +
@@ -658,6 +847,7 @@
     tableContainer.innerHTML = html;
     attachBrandLogoHandlers(tableContainer);
     attachImageCyclers(tableContainer);
+    attachRatingHandlers(tableContainer);
     return { displayedCars, displayedClasses };
   }
 

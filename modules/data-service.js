@@ -615,10 +615,7 @@ class DataService {
             const logosHtml = logos.map(url =>
                 `<img class="custom-select__option-logo" src="${escape(url)}" alt="" aria-hidden="true" loading="lazy" decoding="async">`
             ).join('');
-            const groupClass = logos.length >= 5
-                ? 'custom-select__logos-group custom-select__logos-group--wrap'
-                : 'custom-select__logos-group';
-            const labelHtml = (logosHtml ? `<span class="${groupClass}">${logosHtml}</span>` : '') + escape(superclass);
+            const labelHtml = (logosHtml ? `<span class="custom-select__logos-group">${logosHtml}</span>` : '') + escape(superclass);
 
             options.push({
                 value: `superclass:${superclass}`,

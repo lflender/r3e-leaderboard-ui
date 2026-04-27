@@ -57,6 +57,12 @@
         grid-template-columns: 1fr 1fr;
     }
 
+    .hall-of-fame-grid > :nth-child(3):last-child {
+        grid-column: 1 / -1;
+        justify-self: center;
+        width: calc(50% - 0.5rem);
+    }
+
     #detail-results-container .car-dist-summary,
     #detail-results-container .entries-dist-summary {
         max-width: none;
@@ -88,8 +94,6 @@
 
     .search-container {
         margin-bottom: 0;
-        flex-direction: column;
-        align-items: stretch;
     }
 
     main {
@@ -111,13 +115,6 @@
 
     .detail-header-info {
         order: 1;
-    }
-
-    #driver-search,
-    .custom-select {
-        flex: 1 1 100%;
-        min-width: 100%;
-        max-width: 100%;
     }
 
     .detail-filters-row .custom-select {
@@ -477,13 +474,6 @@
         font-size: 0.9em;
     }
 
-    #cars-search-container .custom-select,
-    #track-search-container .custom-select {
-        flex: 1 1 100%;
-        min-width: 100%;
-        max-width: 100%;
-    }
-
     .cars-view-toggle-row {
         margin-top: 1rem;
         gap: 1rem;
@@ -511,6 +501,25 @@
 
     .custom-select__menu {
         max-height: 60vh;
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        top: auto;
+        width: max-content;
+        max-width: calc(100vw - 1.5rem);
+    }
+
+    .custom-select__option {
+        font-size: 0.82rem;
+        padding: 0.5rem 0.75rem;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+        line-height: 1.25;
+    }
+
+    .custom-select__search {
+        font-size: 0.82rem;
     }
 
     #cars-search-container {
@@ -711,6 +720,12 @@
     .hall-of-fame-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
+    }
+
+    .hall-of-fame-grid > :nth-child(3):last-child {
+        grid-column: auto;
+        justify-self: stretch;
+        width: auto;
     }
 
     .daily-races-feature .daily-races-grid {

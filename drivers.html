@@ -33,7 +33,7 @@
     <script src="modules/analytics.js?v=7"></script>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     
-    <link rel="stylesheet" href="style.css?v=192">
+    <link rel="stylesheet" href="style.css?v=199">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"/>
     <!-- Site Icons -->
     <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png?v=3">
@@ -137,13 +137,15 @@
                     <select id="track-filter" aria-label="Filter by track" hidden>
                         <option value="">All tracks</option>
                     </select>
-                    <div id="track-filter-ui" class="custom-select" role="listbox" aria-label="Filter by track">
-                        <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All tracks ▾</button>
-                        <div class="custom-select__menu" role="presentation" hidden></div>
-                    </div>
-                    <div id="track-class-filter-ui" class="custom-select" role="listbox" aria-label="Filter by car class">
-                        <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All classes ▾</button>
-                        <div class="custom-select__menu" role="presentation" hidden></div>
+                    <div class="filters-group">
+                        <div id="track-filter-ui" class="custom-select" role="listbox" aria-label="Filter by track">
+                            <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All tracks ▾</button>
+                            <div class="custom-select__menu" role="presentation" hidden></div>
+                        </div>
+                        <div id="track-class-filter-ui" class="custom-select" role="listbox" aria-label="Filter by car class">
+                            <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All classes ▾</button>
+                            <div class="custom-select__menu" role="presentation" hidden></div>
+                        </div>
                     </div>
                 </div>
                 <div id="fun-fact-banner" hidden></div>
@@ -202,7 +204,7 @@
     <script src="modules/data-normalizer.js?v=1" defer></script>
     <script src="modules/driver-index-service.js?v=7" defer></script>
     <script src="modules/driver-search-service.js?v=17" defer></script>
-    <script src="modules/data-service.js?v=34" defer></script>
+    <script src="modules/data-service.js?v=35" defer></script>
     <script src="modules/field-mappings.js?v=1" defer></script>
     <script src="modules/flag-helper.js?v=2" defer></script>
     <script src="modules/mp-pos-service.js?v=7" defer></script>

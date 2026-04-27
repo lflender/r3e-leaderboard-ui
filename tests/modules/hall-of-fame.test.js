@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+﻿import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { loadBrowserScript } from '../helpers/script-loader.js';
 
 // hall-of-fame.js is an IIFE – safe to reload per test group.
@@ -11,20 +11,31 @@ function buildHofDOM(withSearch = true) {
     `;
 }
 
-function makeStatsDataMock(poles = [], bested = []) {
+function makeStatsDataMock(poles = [], bested = [], avgBested = []) {
     const paths = {
         polePath: 'cache/stats/overall/poles.json.gz',
-        bestedPath: 'cache/stats/overall/bested.json.gz'
+        bestedPath: 'cache/stats/overall/bested.json.gz',
+        avgBestedPath: 'cache/stats/overall/avg_bested.json.gz'
+    };
+    const payloadByPath = {
+        [paths.polePath]: { kind: 'pole' },
+        [paths.bestedPath]: { kind: 'bested' },
+        [paths.avgBestedPath]: { kind: 'avg_bested' }
     };
     return {
+        METRIC_DEFINITIONS: {
+            pole: { metricKey: 'pole_positions', fileKey: 'pole_file', direction: 'desc' },
+            bested: { metricKey: 'bested_drivers', fileKey: 'bested_file', direction: 'desc' },
+            avg_bested: { metricKey: 'avg_bested', fileKey: 'avg_bested_file', direction: 'desc' }
+        },
         loadStatsIndex: vi.fn().mockResolvedValue({}),
         getPathsForFilter: vi.fn().mockReturnValue(paths),
         getAllPathsForFilter: vi.fn().mockReturnValue(paths),
-        fetchGzipJson: vi.fn().mockResolvedValue({}),
-        normalizeRows: vi.fn().mockImplementation((_payload, metric) => {
-            if (metric === 'pole_positions') return poles;
-            if (metric === 'bested_drivers') return bested;
-            if (metric === 'avg_bested') return bested;
+        fetchGzipJson: vi.fn().mockImplementation((path) => Promise.resolve(payloadByPath[path] || {})),
+        normalizeRows: vi.fn().mockImplementation((payload) => {
+            if (payload && payload.kind === 'pole') return poles;
+            if (payload && payload.kind === 'bested') return bested;
+            if (payload && payload.kind === 'avg_bested') return avgBested;
             return [];
         })
     };
@@ -214,10 +225,34 @@ describe('hall-of-fame – rendered HTML', () => {
         expect(document.getElementById('hall-of-fame-container').innerHTML)
             .toContain('ESCAPED');
     });
+    it('fetches avg_bested from its own dedicated file, not from the bested file', async () => {
+        const avgBestedRows = [{ name: 'TopAvg', value: 99.5 }];
+        const bestedRows = [{ name: 'TopBested', value: 500000 }];
+        window.StatsData = makeStatsDataMock([], bestedRows, avgBestedRows);
+
+        document.body.innerHTML = buildHofDOM();
+        loadBrowserScript('modules/hall-of-fame.js');
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        const { fetchGzipJson } = window.StatsData;
+        const avgBestedPath = 'cache/stats/overall/avg_bested.json.gz';
+        const bestedPath = 'cache/stats/overall/bested.json.gz';
+
+        // avgBestedPath must have been fetched
+        expect(fetchGzipJson).toHaveBeenCalledWith(avgBestedPath);
+
+        const container = document.getElementById('hall-of-fame-container');
+        // The avg bested column shows the driver from avgBestedRows, not bestedRows
+        expect(container.innerHTML).toContain('TopAvg');
+
+        // fetchGzipJson calls for avg_bested and bested must be distinct
+        const calls = fetchGzipJson.mock.calls.map(([p]) => p);
+        expect(calls).toContain(avgBestedPath);
+        expect(calls).toContain(bestedPath);
+        expect(calls.indexOf(avgBestedPath)).not.toBe(calls.indexOf(bestedPath));
+    });
 });
 
-// ---------------------------------------------------------------------------
-// StatsData unavailable
 // ---------------------------------------------------------------------------
 describe('hall-of-fame – missing StatsData', () => {
     it('does not throw and leaves the container empty when StatsData is absent', async () => {

@@ -192,5 +192,15 @@
       }
     });
   </script>
+  <script>
+    (function(){
+        var K='records_new_badge_dismissed';
+        var hide=function(){document.querySelectorAll('a[href="records.html"] .tab-badge,a[href*="records.html"] .tab-badge').forEach(function(b){b.hidden=true;});};
+        try{if(localStorage.getItem(K)){hide();return;}}catch(_){}
+        document.querySelectorAll('a[href="records.html"],a[href*="records.html"]').forEach(function(a){
+            a.addEventListener('click',function(){try{localStorage.setItem(K,'1');}catch(_){}hide();},{once:true});
+        });
+    })();
+  </script>
 </body>
 </html>

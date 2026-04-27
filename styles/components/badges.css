@@ -5,8 +5,8 @@
 /* Car badges - Base styling */
 .car-badge {
     padding: 0.18rem 0.6rem;
-    border-radius: 999px;
-    font-weight: 800;
+    border-radius: 4px;
+    font-weight: 700;
     font-size: 0.95rem;
     text-decoration: none !important;
     border: none;
@@ -57,10 +57,6 @@
 }
 
 /* Drive type badges */
-.car-badge.drive { 
-    font-weight: 700; 
-}
-
 .car-badge.drive.rwd { 
     background: #35cbe6; 
     color: #fff; 
@@ -87,17 +83,19 @@
 }
 
 .pos-number {
-    background: var(--pos-badge-default);
+    background: rgba(59, 130, 246, 0.15);
     color: var(--text-primary);
-    padding: 0.18rem 0.6rem;
+    padding: 0.18rem 0.55rem;
     border-radius: 999px;
-    font-weight: 800;
-    font-size: 0.95rem;
+    border: 1px solid rgba(59, 130, 246, 0.35);
+    font-weight: 700;
+    font-size: 0.9rem;
     text-decoration: none !important;
-    border: none;
     line-height: 1.2;
     display: inline-block;
     vertical-align: baseline;
+    min-width: 2.4rem;
+    text-align: center;
 }
 
 /* Podium positions - Gold, Silver, Bronze */

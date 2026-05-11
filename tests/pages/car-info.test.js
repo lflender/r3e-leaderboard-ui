@@ -40,6 +40,10 @@ beforeEach(() => {
         countryToFlag: vi.fn().mockReturnValue('<span class="fi fi-de"></span>')
     };
     window.R3EAnalytics = { track: vi.fn() };
+    window.CarRatings = {
+        buildCarId: vi.fn(() => ''),
+        get: vi.fn(() => 0)
+    };
     window.dataService = {
         getSuperclassOptions: vi.fn().mockReturnValue([]),
         getClassOptionsFromCarsData: vi.fn().mockReturnValue([])

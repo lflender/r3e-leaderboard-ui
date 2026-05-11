@@ -55,6 +55,14 @@ After any change to a user-facing page or a page-related module, update `sitemap
 - Never copy/paste logic between modules. Always reuse existing helpers or extract shared logic into a single reusable module.
 - Keep a single source of truth for shared behavior and data derivations.
 - Keep module responsibilities clearly separated (UI rendering, data access, formatting, and domain-specific transforms).
+- Never use inline `style` attributes in HTML or JS-generated markup when the styles can be expressed as a CSS class. Define classes in the appropriate stylesheet under `styles/` instead.
+
+## Testing
+
+- After any code change, run the full test suite (`npx vitest run`) and ensure all tests pass before considering the task complete.
+- Never leave failing tests. If a change breaks existing tests, fix them in the same change.
+- When adding new globals or dependencies used by production code, add matching mocks in all affected test files.
+- Do not dismiss test failures as "pre-existing" or "unrelated" without investigating and fixing them.
 
 ## Responsive Table Fixes
 

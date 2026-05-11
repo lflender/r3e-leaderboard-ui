@@ -247,8 +247,8 @@
         text-align: right !important;
     }
 
-    .daily-races-grid.daily-races-grid--center-fourth > .daily-race-card-link:nth-child(4):last-child {
-        grid-column: auto;
+    .daily-races-grid > .daily-race-card-link {
+        flex: 0 1 100%;
     }
 }
 
@@ -501,10 +501,8 @@
 
     .custom-select__menu {
         max-height: 60vh;
-        position: fixed;
-        left: 50%;
-        transform: translateX(-50%);
-        top: auto;
+        left: 0;
+        right: auto;
         width: max-content;
         max-width: calc(100vw - 1.5rem);
     }
@@ -587,6 +585,17 @@
         word-break: break-word;
         padding-bottom: 0.2rem;
         margin-bottom: 0.1rem;
+    }
+
+    #detail-track {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    #detail-track .detail-track-layout {
+        flex-basis: 100%;
+        text-align: center;
+        padding-left: 0;
     }
 
     .pagination-buttons {
@@ -716,16 +725,23 @@
         font-size: 1.1rem !important;
     }
 
+    .daily-races-grid > .daily-race-card-link {
+        flex: 0 1 100%;
+        min-width: 0;
+    }
+
     .daily-races-grid,
     .hall-of-fame-grid {
-        grid-template-columns: 1fr;
         gap: 1rem;
     }
 
+    .hall-of-fame-grid {
+        grid-template-columns: 1fr;
+    }
+
     .hall-of-fame-grid > :nth-child(3):last-child {
-        grid-column: auto;
-        justify-self: stretch;
         width: auto;
+        justify-self: stretch;
     }
 
     .daily-races-feature .daily-races-grid {

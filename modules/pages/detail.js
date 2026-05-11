@@ -60,6 +60,7 @@ const DetailState = {
     availableCars: [],
     lastActionTime: 0,
     isCombinedView: false, // True when showing combined superclass data
+    categoryClassNames: null, // Map<superclass, [{classId, className}]> for category filtering
     carDistributionExpanded: false,
     entriesDistributionExpanded: false,
     timeframeStart: null,
@@ -454,7 +455,9 @@ function splitTrackAndLayout(fullTrack) {
         return { trackName: '', layoutName: '' };
     }
 
-    const match = safeTrack.match(/^(.*?)(?:\s*[-–—]\s*)(.+)$/);
+    // Use greedy match so we split on the LAST dash separator,
+    // keeping compound names like "Spa-Francorchamps" intact.
+    const match = safeTrack.match(/^(.+)(?:\s+[-–—]\s+)(.+)$/);
     if (match) {
         return {
             trackName: match[1].trim(),
@@ -1272,6 +1275,12 @@ function buildCarFilter(data) {
         const carOptions = [
             { value: '', label: 'All cars' }
         ];
+
+        // Build category filter entries for multi-class views (e.g. "GT3 + WTCR")
+        const categoryOptions = buildCategoryFilterOptions();
+        if (categoryOptions.length > 0) {
+            carOptions.push(...categoryOptions);
+        }
         
         // If in combined view, find all car combinations
         let carCombinations = [];
@@ -1308,6 +1317,31 @@ function buildCarFilter(data) {
             carFilterContainer.style.display = '';
         }
     }
+}
+
+/**
+ * Build category filter options for multi-class views.
+ * Delegates to dataService.getCategoryOptionsForClassIds() as the single
+ * source of truth for rendering class logos in dropdown options.
+ * @returns {Array<{value: string, label: string, labelHtml: string}>}
+ */
+function buildCategoryFilterOptions() {
+    if (!classesParam) return [];
+
+    const specificClassIds = classesParam.split(',').map(id => id.trim()).filter(id => id);
+    const options = dataService.getCategoryOptionsForClassIds(specificClassIds);
+
+    if (options.length > 0) {
+        // Store mapping for filter matching
+        const categoryMap = new Map();
+        options.forEach(opt => {
+            const superclass = opt.value.substring(9); // strip "CATEGORY:"
+            categoryMap.set(superclass, opt.classNames);
+        });
+        DetailState.categoryClassNames = categoryMap;
+    }
+
+    return options;
 }
 
 // ===========================================
@@ -1379,6 +1413,18 @@ function matchesDifficultyFilter(entry, selectedDifficulties) {
  * @returns {boolean} True if matches
  */
 function matchesCarFilter(entry, selectedCar) {
+    // Category filter: match by the entry's car class membership
+    if (selectedCar && selectedCar.startsWith('CATEGORY:')) {
+        const categoryName = selectedCar.substring(9);
+        const categoryClasses = DetailState.categoryClassNames?.get(categoryName);
+        if (categoryClasses) {
+            const entryClassName = getField(entry, FIELD_NAMES.CAR_CLASS);
+            return categoryClasses.some(c =>
+                String(c.className).trim().toLowerCase() === String(entryClassName).trim().toLowerCase()
+            );
+        }
+        return true;
+    }
     const car = getField(entry, FIELD_NAMES.CAR);
     return R3EUtils.matchesCarFilterValue(car, selectedCar);
 }

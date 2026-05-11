@@ -11,15 +11,15 @@
         {
             key: 'avg_bested',
             titleBuilder: (label) => `Top Drivers by Average Bested % (${label})`,
-            infoText: 'Average percentage of opponents beaten per leaderboard entry. Higher is better. Overall: min 5 entries and 100 bested drivers. Class filter: min 2 entries.',
+            infoText: 'Average percentage of opponents beaten per leaderboard entry. Higher is better. Overall: min 5 entries and 100 bested drivers. Category filter: min 2 entries and 10 bested drivers.',
             valueTitle: 'Avg %',
             valueFormatter: (value) => Number.isFinite(value) ? value.toFixed(2) + '%' : '0.00%',
             // Returns the row predicate appropriate for the active filter.
             // Overall (no filter): strict thresholds to exclude low-volume drivers.
-            // Class filter active: relaxed to min 2 entries since class pools are smaller.
+            // Category filter active: relaxed to min 2 entries and 10 bested drivers.
             preFilter: (filterValue) => !filterValue
                 ? (row) => (row.entries || 0) >= 5 && (row.bested_drivers || 0) >= 100
-                : (row) => (row.entries || 0) >= 2,
+                : (row) => (row.entries || 0) >= 2 && (row.bested_drivers || 0) >= 10,
             containerId: 'records-avg-bested-table',
             titleId: 'records-avg-bested-title'
         },

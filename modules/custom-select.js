@@ -133,8 +133,10 @@ class CustomSelect {
         if (this.searchInput) {
             this.searchInput.value = '';
             this._filterOptions('');
-            // Defer focus so the menu is visible first
-            requestAnimationFrame(() => this.searchInput.focus());
+            // Only auto-focus on desktop to avoid mobile keyboard popping up
+            if (window.matchMedia('(min-width: 1001px)').matches) {
+                requestAnimationFrame(() => this.searchInput.focus());
+            }
         }
     }
     

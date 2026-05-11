@@ -303,7 +303,16 @@ class DailyRaces {
      */
     getScheduleParsingErrorBannerHtml() {
         const message = 'Automated schedule parsing error detected, please allow me a few hours to fix it, thank you';
-        return `<p style="margin: 0.5rem auto 0; max-width: 760px; padding: 0.65rem 0.9rem; border: 1px solid rgba(220, 38, 38, 0.35); border-left: 4px solid #dc2626; border-radius: 8px; background: rgba(220, 38, 38, 0.08); color: var(--text-primary); font-size: 0.95rem;">${R3EUtils.escapeHtml(message)}</p>`;
+        return `<p class="daily-races-banner daily-races-banner--error">${R3EUtils.escapeHtml(message)}</p>`;
+    }
+
+    /**
+     * Build the holiday notice banner
+     */
+    getHolidayNoticeBannerHtml() {
+        const line1 = 'I was in holidays last week, thank you for your patience.';
+        const line2 = 'A hardened version of the schedule parsing has been deployed!';
+        return `<p class="daily-races-banner daily-races-banner--success">${R3EUtils.escapeHtml(line1)}<br>${R3EUtils.escapeHtml(line2)}</p>`;
     }
 
     /**
@@ -470,6 +479,8 @@ class DailyRaces {
             html += `<p class="daily-races-update">Last cache update: ${this.formatTimestamp(updateTime)}</p><br/>`;
         }
         html += '</div>';
+
+        html += this.getHolidayNoticeBannerHtml();
 
         html += '<div class="daily-races-section-header">';
         html += '<h3 class="daily-races-section-title">Daily Sprint Races (15 min)</h3>';

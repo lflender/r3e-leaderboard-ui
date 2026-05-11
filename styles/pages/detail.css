@@ -90,7 +90,6 @@
 
 .detail-filters-row .custom-select {
     flex: 0 0 auto;
-    min-width: 220px;
     max-width: none;
     width: auto;
 }

@@ -487,6 +487,52 @@
     pointer-events: auto;
 }
 
+/* Assists badges row */
+.car-tile-assists-row {
+    position: absolute;
+    bottom: 0.5rem;
+    left: 0;
+    right: 0;
+    z-index: 5;
+    display: flex;
+    justify-content: center;
+    gap: 0.25rem;
+}
+
+.car-tile-assist-badge {
+    padding: 0.15rem 0.35rem;
+    font-size: 0.6rem;
+    font-weight: 700;
+    border-radius: 3px;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
+
+.car-assists-cell {
+    text-align: center;
+}
+
+#cars-info .results-table td:nth-child(n+3),
+#cars-info .results-table th:nth-child(n+3) {
+    text-align: center;
+}
+
+.car-tile-assist--tc {
+    background: #1e3a5f;
+    color: #a8d0f0;
+}
+
+.car-tile-assist--abs {
+    background: #5c4a00;
+    color: #ffd966;
+}
+
+.car-tile-assist--lc {
+    background: #3a3a3a;
+    color: #d4d4d4;
+}
+
 .car-tile-year-overlay {
     position: absolute;
     top: 0.6rem;
@@ -532,7 +578,7 @@
     width: 100%;
     aspect-ratio: 16 / 9;
     object-fit: contain;
-    --car-tile-image-offset-y: 15%;
+    --car-tile-image-offset-y: 10%;
     border-radius: 8px;
     transition: transform 0.5s ease-in-out, z-index 0s;
     transform: translateY(var(--car-tile-image-offset-y));
@@ -540,7 +586,7 @@
     z-index: 1;
 }
 
-.car-tile-image-wrap:hover .car-tile-image {
+.car-tile-image:hover {
     transform: translateY(var(--car-tile-image-offset-y)) scale(1.3);
     z-index: 100;
     transition: transform 2s ease-in-out, z-index 0s;
@@ -553,6 +599,11 @@
     gap: 0.4rem;
     align-items: center;
     justify-content: center;
+}
+
+.car-tile-meta .car-badge {
+    font-size: 0.75rem;
+    padding: 0.15rem 0.45rem;
 }
 
 .car-tile-specs {

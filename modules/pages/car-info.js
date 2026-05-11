@@ -20,7 +20,7 @@
     if (!v) return '<span class="car-badge unknown">—</span>';
     if (v === 'gt') return '<span class="car-badge gt">GT</span>';
     if (v === 'round') return '<span class="car-badge round">Round</span>';
-    if (v === 'round (flat)' || v === 'round(flat)' || v === 'round(flat)') return '<span class="car-badge round-flat" title="Round (flat)">Round (flat)</span>';
+    if (v === 'round flat' || v === 'round (flat)' || v === 'round(flat)') return '<span class="car-badge round-flat" title="Round flat">Round flat</span>';
     return `<span class="car-badge unknown">${R3EUtils.escapeHtml(cat)}</span>`;
   }
 
@@ -93,8 +93,8 @@
     { value: '', label: 'All wheels' },
     { value: 'gt', label: 'GT', labelHtml: wheelBadge('gt') },
     { value: 'round', label: 'Round', labelHtml: wheelBadge('round') },
-    { value: 'round (flat)', label: 'Round (flat)', labelHtml: wheelBadge('round (flat)') },
-    { value: 'round_and_roundflat', label: 'Round & Round (flat)', labelHtml: `${wheelBadge('round')} + ${wheelBadge('round (flat)')}` }
+    { value: 'round flat', label: 'Round flat', labelHtml: wheelBadge('round flat') },
+    { value: 'round_and_roundflat', label: 'Round & Round flat', labelHtml: `${wheelBadge('round')} + ${wheelBadge('round flat')}` }
   ];
   const transOptions = [
     { value: '', label: 'All transmissions' },
@@ -369,7 +369,7 @@
     let wheelOk = true;
     if (wheelFilter) {
       if (wheelFilter === 'round_and_roundflat') {
-        wheelOk = w === 'round' || w === 'round (flat)';
+        wheelOk = w === 'round' || w === 'round flat' || w === 'round (flat)';
       } else {
         wheelOk = w === wheelFilter;
       }
@@ -654,7 +654,7 @@
     const yearColor = createYearColorFn();
 
     let html = '<table class="results-table"><thead><tr>' +
-      '<th>Car</th><th>Rating</th><th>Wheel</th><th>Transmission</th><th>Drive</th><th>Year</th><th>Power</th><th>Weight<br><span style="display:block;font-size:0.72em;font-weight:500;line-height:1.05;letter-spacing:0;">*with driver</span></th><th>Engine</th>' +
+      '<th>Car</th><th>Rating</th><th>Wheel</th><th>Transmission</th><th>Drive</th><th>Assists</th><th>Year</th><th>Power</th><th>Weight<br><span style="display:block;font-size:0.72em;font-weight:500;line-height:1.05;letter-spacing:0;">*with driver</span></th><th>Engine</th>' +
       '</tr></thead><tbody>';
 
     const isSuperclassFilter = classFilter && classFilter.startsWith('superclass:');
@@ -690,7 +690,7 @@
         : R3EUtils.escapeHtml(className);
 
             html += `\n<tr class="driver-group-header" data-group="${slug}" onclick="toggleGroup(this)">` +
-              `<td colspan="10"><span class="toggle-icon">▼</span> <strong class="car-class-header-text">${classLogoHtml}${classHeaderText}</strong></td></tr>`;
+              `<td colspan="11"><span class="toggle-icon">▼</span> <strong class="car-class-header-text">${classLogoHtml}${classHeaderText}</strong></td></tr>`;
 
       filteredCars.forEach(car => {
         displayedCars++;
@@ -732,6 +732,7 @@
                 `<td>${linkOpen}${wheelBadge(car.wheel_cat)}${linkClose}</td>` +
                 `<td>${linkOpen}${transBadge(car.transmission_cat)}${linkClose}</td>` +
                 `<td>${linkOpen}${driveBadge(car.drive)}${linkClose}</td>` +
+                `<td class="car-assists-cell">${[car.TC === 'true' ? '<span class="car-tile-assist-badge car-tile-assist--tc">TC</span>' : '', car.ABS === 'true' ? '<span class="car-tile-assist-badge car-tile-assist--abs">ABS</span>' : '', car.LC === 'true' ? '<span class="car-tile-assist-badge car-tile-assist--lc">Launch Control</span>' : ''].filter(Boolean).join(' ')}</td>` +
                 `<td>${linkOpen}<span class="car-badge year-badge" data-year="${car.year}" style="background:${yearColor(car.year)}">${R3EUtils.escapeHtml(car.year || '')}</span>${linkClose}</td>` +
                 `<td class="carinfo-meta">${linkOpen}${R3EUtils.escapeHtml(car.power || '')}${linkClose}</td>` +
                 `<td class="carinfo-meta">${linkOpen}${R3EUtils.escapeHtml(car.weight || '')}${linkClose}</td>` +
@@ -827,11 +828,17 @@
         const carId = CarRatings.buildCarId(car);
         const currentRating = (typeof CarRatings !== 'undefined') ? CarRatings.get(carId) : 0;
         const ratingHtml = buildRatingHtml(carId, currentRating, 'tile');
+        const assistBadges = [
+          car.TC === 'true' ? '<span class="car-tile-assist-badge car-tile-assist--tc">TC</span>' : '',
+          car.ABS === 'true' ? '<span class="car-tile-assist-badge car-tile-assist--abs">ABS</span>' : '',
+          car.LC === 'true' ? '<span class="car-tile-assist-badge car-tile-assist--lc">Launch Control</span>' : ''
+        ].filter(Boolean).join('');
+        const assistsHtml = assistBadges ? `<div class="car-tile-assists-row">${assistBadges}</div>` : '';
 
         html += `<article class="car-tile">` +
                 `${open}` +
                 `<div class="car-tile-name">${carNameHtml}${warningIcon}</div>` +
-                `${imageUrl ? `<div class="car-tile-image-wrap"><div class="car-tile-top-row">${flagHtml}${ratingHtml}</div><img class="car-tile-image car-rotating-image" data-image-list="${encodedImageList}" src="${imageUrl}" alt="${carNameAttr}" loading="lazy" decoding="async">${yearBadgeHtml}</div>` : ''}` +
+                `${imageUrl ? `<div class="car-tile-image-wrap"><div class="car-tile-top-row">${flagHtml}${ratingHtml}</div>${assistsHtml}<img class="car-tile-image car-rotating-image" data-image-list="${encodedImageList}" src="${imageUrl}" alt="${carNameAttr}" loading="lazy" decoding="async">${yearBadgeHtml}</div>` : ''}` +
                 `${close}` +
                 `<div class="car-tile-meta">` +
                 `<span>${wheelBadge(car.wheel_cat)}</span><span>${transBadge(car.transmission_cat)}</span><span>${driveBadge(car.drive)}</span>` +

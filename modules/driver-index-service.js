@@ -193,9 +193,18 @@
                 return entries;
             }
 
-            // Collect unique shard keys needed for metadata lookup
+            // Collect unique shard keys needed for metadata lookup.
+            // Skip entries that already have all metadata (country+rank+team)
+            // to avoid fetching shards unnecessarily.
             const shardKeysNeeded = new Set();
+            const entriesToEnrich = [];
             entries.forEach(entry => {
+                // Skip fully-populated entries
+                const hasCountry = !!(entry.country || entry.Country);
+                const hasRank = !!(entry.rank || entry.Rank);
+                const hasTeam = !!(entry.team || entry.Team);
+                if (hasCountry && hasRank && hasTeam) return;
+
                 const driverName = window.DataNormalizer && typeof window.DataNormalizer.extractName === 'function'
                     ? window.DataNormalizer.extractName(entry)
                     : (entry.name || entry.Name || '');
@@ -203,7 +212,12 @@
                 const normalizedName = this._normalizeDriverLookupName(driverName);
                 if (!(normalizedName in driverMirror)) return;
                 shardKeysNeeded.add(this._getShardKeyForName(normalizedName));
+                entriesToEnrich.push(entry);
             });
+
+            if (entriesToEnrich.length === 0) {
+                return entries;
+            }
 
             // Always include _ shard for diacritical name fallback
             shardKeysNeeded.add('_');
@@ -213,8 +227,8 @@
                 this._loadDriverMetadataShard(key).catch(() => null)
             ));
 
-            // Enrich from cached metadata shards
-            entries.forEach(entry => {
+            // Enrich only entries that need metadata
+            entriesToEnrich.forEach(entry => {
                 const driverName = window.DataNormalizer && typeof window.DataNormalizer.extractName === 'function'
                     ? window.DataNormalizer.extractName(entry)
                     : (entry.name || entry.Name || '');
@@ -285,14 +299,8 @@
                 try {
                     const controller = new AbortController();
                     const timeout = setTimeout(() => controller.abort(), 8000);
-                    const timestamp = Date.now();
-                    const response = await fetch(`${this.driverShardBasePath}/${shardKey}.json.gz?v=${timestamp}`, {
-                        cache: 'no-store',
-                        headers: {
-                            'Cache-Control': 'no-cache, no-store, must-revalidate',
-                            'Pragma': 'no-cache',
-                            'Expires': '0'
-                        },
+                    const cacheVersion = await this._getIndexCacheVersion();
+                    const response = await fetch(`${this.driverShardBasePath}/${shardKey}.json.gz?v=${cacheVersion}`, {
                         signal: controller.signal
                     });
                     clearTimeout(timeout);
@@ -359,14 +367,8 @@
                 try {
                     const controller = new AbortController();
                     const timeout = setTimeout(() => controller.abort(), 8000);
-                    const timestamp = Date.now();
-                    const response = await fetch(`${this.driverMetadataBasePath}/${shardKey}.json.gz?v=${timestamp}`, {
-                        cache: 'no-store',
-                        headers: {
-                            'Cache-Control': 'no-cache, no-store, must-revalidate',
-                            'Pragma': 'no-cache',
-                            'Expires': '0'
-                        },
+                    const cacheVersion = await this._getIndexCacheVersion();
+                    const response = await fetch(`${this.driverMetadataBasePath}/${shardKey}.json.gz?v=${cacheVersion}`, {
                         signal: controller.signal
                     });
                     clearTimeout(timeout);
@@ -417,13 +419,8 @@
         async _fetchDriverMirrorData() {
             const controller = new AbortController();
             const timeout = setTimeout(() => controller.abort(), 8000);
-            const response = await fetch(`${this.driverMirrorPath}?v=${Date.now()}`, {
-                cache: 'no-store',
-                headers: {
-                    'Cache-Control': 'no-cache, no-store, must-revalidate',
-                    'Pragma': 'no-cache',
-                    'Expires': '0'
-                },
+            const cacheVersion = await this._getIndexCacheVersion();
+            const response = await fetch(`${this.driverMirrorPath}?v=${cacheVersion}`, {
                 signal: controller.signal
             });
             clearTimeout(timeout);
@@ -466,14 +463,10 @@
         },
 
         async _parseJsonWhenIdle(text) {
-            if (typeof requestIdleCallback === 'function') {
-                return await new Promise((resolve, reject) => {
-                    requestIdleCallback(() => {
-                        try { resolve(JSON.parse(text)); }
-                        catch (e) { reject(e); }
-                    }, { timeout: 2000 });
-                });
-            }
+            // Direct JSON.parse: ~10-100ms per shard, much faster than
+            // requestIdleCallback which serializes parses with up to 2s
+            // delay each. For 20+ parallel shard loads this eliminates
+            // 10-40s of idle-callback latency.
             return JSON.parse(text);
         },
 

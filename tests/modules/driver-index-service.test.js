@@ -112,6 +112,8 @@ describe('Driver index service', () => {
         vi.spyOn(service, '_parseJsonWhenIdle')
             .mockResolvedValueOnce({ alice: [{ name: 'Alice' }] })
             .mockResolvedValueOnce({ alice: { name: 'Alice' } });
+        // Pre-set cache version to avoid status.json fetch during shard/mirror loads
+        service._indexCacheVersion = 'test1';
         global.fetch
             .mockResolvedValueOnce({ ok: true, status: 200, statusText: 'OK' })
             .mockResolvedValueOnce({ ok: true, status: 200, statusText: 'OK' });

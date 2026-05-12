@@ -27,6 +27,43 @@ class DataService {
         // Minimal index change detection via status.json
         this.lastIndexUpdate = null;
         this.indexRevalidatorStarted = false;
+        // Stable cache-busting version derived from status.json last_index_update.
+        // Using a stable key lets the browser HTTP-cache index/shard/metadata files
+        // across navigations within the same data epoch instead of re-downloading
+        // ~3 MB of gzipped data on every page load.
+        this._indexCacheVersion = null;
+        this._indexCacheVersionPromise = null;
+    }
+
+    /**
+     * Returns a stable cache-busting version string derived from
+     * status.json's last_index_update. Falls back to Date.now() if
+     * status is unavailable. The result is cached for the page lifetime
+     * so all fetches within the same session share the same version key,
+     * allowing the browser to serve index/shard/metadata from HTTP cache.
+     * @returns {Promise<string>}
+     */
+    async _getIndexCacheVersion() {
+        if (this._indexCacheVersion) {
+            return this._indexCacheVersion;
+        }
+        if (this._indexCacheVersionPromise) {
+            return this._indexCacheVersionPromise;
+        }
+        this._indexCacheVersionPromise = (async () => {
+            try {
+                const status = await this.calculateStatus();
+                const ts = status && (status.last_index_update || status.last_scrape_end);
+                if (ts) {
+                    // Compact: strip non-alphanumeric chars from ISO timestamp
+                    this._indexCacheVersion = String(ts).replace(/[^0-9a-zA-Z]/g, '');
+                    return this._indexCacheVersion;
+                }
+            } catch (_) { /* fall through */ }
+            this._indexCacheVersion = String(Date.now());
+            return this._indexCacheVersion;
+        })();
+        return this._indexCacheVersionPromise;
     }
 
     _getCompressedJsonHelper() {
@@ -198,10 +235,8 @@ class DataService {
     async fetchLeaderboardDetails(trackId, classId) {
         const filePath = `cache/tracks/track_${trackId}/class_${classId}.json.gz`;
         
-        const timestamp = new Date().getTime();
-        const response = await fetch(`${filePath}?v=${timestamp}`, {
-            cache: 'no-store'
-        });
+        const cacheVersion = await this._getIndexCacheVersion();
+        const response = await fetch(`${filePath}?v=${cacheVersion}`);
         
         if (!response.ok) {
             throw new Error(`Failed to load data: ${response.status} ${response.statusText}`);
@@ -216,10 +251,8 @@ class DataService {
      * @returns {Promise<Array>} Combinations array
      */
     async fetchTopCombinations() {
-        const timestamp = new Date().getTime();
-        const response = await fetch(`cache/top_combinations.json.gz?v=${timestamp}`, {
-            cache: 'no-store'
-        });
+        const cacheVersion = await this._getIndexCacheVersion();
+        const response = await fetch(`cache/top_combinations.json.gz?v=${cacheVersion}`);
         
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
@@ -576,7 +609,7 @@ class DataService {
 
     /**
      * Get unique superclass options with classes that belong to each
-     * @returns {Array<{value: string, label: string, classes: Array<string>}>} Superclass options with associated classes
+     * @returns {Array<{value: string, label: string, labelHtml: string, classes: Array<string>}>} Superclass options with associated classes
      */
     getSuperclassOptions() {
         if (!window.CARS_DATA || !Array.isArray(window.CARS_DATA)) {
@@ -597,16 +630,101 @@ class DataService {
             }
         });
         
+        const escape = window.R3EUtils?.escapeHtml || (v => String(v ?? ''));
         const options = [];
         superclassMap.forEach((classes, superclass) => {
+            // Collect unique logos for all classes in this superclass
+            const seenUrls = new Set();
+            const logos = [];
+            classes.forEach(cls => {
+                const logoUrl = window.R3EUtils?.resolveCarClassLogoByName?.(cls) || '';
+                if (logoUrl && !seenUrls.has(logoUrl)) {
+                    seenUrls.add(logoUrl);
+                    logos.push(logoUrl);
+                }
+            });
+
+            // Build labelHtml: logos for each class + superclass name (no "Category:" prefix)
+            const logosHtml = logos.map(url =>
+                `<img class="custom-select__option-logo" src="${escape(url)}" alt="" aria-hidden="true" loading="lazy" decoding="async">`
+            ).join('');
+            const labelHtml = (logosHtml ? `<span class="custom-select__logos-group">${logosHtml}</span>` : '') + escape(superclass);
+
             options.push({
                 value: `superclass:${superclass}`,
                 label: `Category: ${superclass}`,
+                labelHtml,
                 classes: Array.from(classes)
             });
         });
         
         return options.sort((a, b) => a.label.localeCompare(b.label));
+    }
+
+    /**
+     * Build category filter options for a specific set of class IDs.
+     * Groups the IDs by superclass and builds dropdown entries with class logos,
+     * using the same rendering pattern as getSuperclassOptions().
+     * @param {string[]} classIds - Array of class IDs (e.g. ["1703","12770","4680"])
+     * @returns {Array<{value: string, label: string, labelHtml: string, classNames: Array<{classId: string, className: string}>}>}
+     */
+    getCategoryOptionsForClassIds(classIds) {
+        if (!Array.isArray(classIds) || classIds.length < 2) return [];
+
+        // Group class IDs by superclass
+        const categoryMap = new Map();
+        classIds.forEach(classId => {
+            const className = window.getCarClassName ? window.getCarClassName(classId) : classId;
+            let superclass = null;
+
+            if (window.CARS_DATA && Array.isArray(window.CARS_DATA)) {
+                const carEntry = window.CARS_DATA.find(entry => {
+                    const cls = entry.class || entry.car_class || entry.CarClass || '';
+                    return String(cls).trim().toLowerCase() === String(className).trim().toLowerCase();
+                });
+                superclass = carEntry?.superclass || null;
+            }
+
+            if (!superclass) superclass = className;
+
+            if (!categoryMap.has(superclass)) {
+                categoryMap.set(superclass, []);
+            }
+            categoryMap.get(superclass).push({ classId, className });
+        });
+
+        // Only produce entries if there are 2+ distinct categories
+        if (categoryMap.size < 2) return [];
+
+        const escape = window.R3EUtils?.escapeHtml || (v => String(v ?? ''));
+        const options = [];
+
+        categoryMap.forEach((classes, superclass) => {
+            // Collect unique logos — same pattern as getSuperclassOptions()
+            const seenUrls = new Set();
+            const logos = [];
+            classes.forEach(({ className, classId }) => {
+                const logoUrl = window.R3EUtils?.resolveCarClassLogo?.(className, classId) || '';
+                if (logoUrl && !seenUrls.has(logoUrl)) {
+                    seenUrls.add(logoUrl);
+                    logos.push(logoUrl);
+                }
+            });
+
+            const logosHtml = logos.map(url =>
+                `<img class="custom-select__option-logo" src="${escape(url)}" alt="" aria-hidden="true" loading="lazy" decoding="async">`
+            ).join('');
+            const labelHtml = (logosHtml ? `<span class="custom-select__logos-group">${logosHtml}</span>` : '') + escape(superclass);
+
+            options.push({
+                value: `CATEGORY:${superclass}`,
+                label: `Category: ${superclass}`,
+                labelHtml,
+                classNames: classes
+            });
+        });
+
+        return options;
     }
 }
 

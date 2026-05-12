@@ -28,7 +28,7 @@
   <!-- Analytics (PostHog via first-party proxy) -->
   <script src="modules/analytics.js?v=7"></script>
 
-  <link rel="stylesheet" href="style.css?v=191">
+  <link rel="stylesheet" href="style.css?v=237">
   <!-- Site Icons -->
   <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png?v=2">
   <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png?v=2">
@@ -191,6 +191,16 @@
         });
       }
     });
+  </script>
+  <script>
+    (function(){
+        var K='records_new_badge_dismissed';
+        var hide=function(){document.querySelectorAll('a[href="records.html"] .tab-badge,a[href*="records.html"] .tab-badge').forEach(function(b){b.hidden=true;});};
+        try{if(localStorage.getItem(K)){hide();return;}}catch(_){}
+        document.querySelectorAll('a[href="records.html"],a[href*="records.html"]').forEach(function(a){
+            a.addEventListener('click',function(){try{localStorage.setItem(K,'1');}catch(_){}hide();},{once:true});
+        });
+    })();
   </script>
 </body>
 </html>

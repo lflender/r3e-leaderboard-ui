@@ -115,7 +115,7 @@ body {
 
 main {
     flex: 1;
-    max-width: 1400px;
+    max-width: 1500px;
     width: 100%;
     margin: 2rem auto;
     padding: 0 1.5rem;
@@ -136,6 +136,11 @@ footer {
     gap: 2rem;
     max-width: 1200px;
     margin: 0 auto;
+}
+
+/* Utility classes */
+.nowrap {
+    white-space: nowrap;
 }
 
 .footer-text {

@@ -49,6 +49,9 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
+.tab-badge[hidden] {
+    display: none;
+}
 
 .tab-content {
     background-color: var(--surface);

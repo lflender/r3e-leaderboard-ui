@@ -6,6 +6,7 @@ describe('CustomSelect', () => {
         window.R3EUtils = {
             escapeHtml: (value) => String(value)
         };
+        window.matchMedia = vi.fn().mockReturnValue({ matches: true });
         loadBrowserScript('modules/custom-select.js');
     });
 

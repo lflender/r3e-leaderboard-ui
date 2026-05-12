@@ -93,6 +93,15 @@ function splitCarName(carName) {
         return CAR_SPECIAL_CASES[name];
     }
 
+    // Normalize known DTM-prefixed Mercedes naming so brand/logo resolve correctly.
+    const dtmMercedesAmgMatch = name.match(/^DTM\s+Mercedes\s+AMG\s+(.+)$/i);
+    if (dtmMercedesAmgMatch) {
+        return {
+            brand: 'Mercedes-AMG',
+            model: String(dtmMercedesAmgMatch[1] || '').trim()
+        };
+    }
+
     for (const brand of CAR_BRANDS) {
         if (name.startsWith(brand + ' ') || name === brand) {
             const model = name.slice(brand.length).trim();

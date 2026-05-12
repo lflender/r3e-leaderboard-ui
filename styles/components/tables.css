@@ -552,6 +552,18 @@ span.driver-name-top10-glitter::after {
     background: none;
 }
 
+.driver-group-avatar {
+    width: 31px;
+    height: 31px;
+    border-radius: 50%;
+    object-fit: cover;
+    vertical-align: middle;
+    margin-right: 8px;
+    position: relative;
+    top: -2px;
+    background: #1f232a;
+}
+
 .toggle-icon {
     display: inline-block;
     margin-right: 0.5rem;
@@ -572,6 +584,10 @@ span.driver-name-top10-glitter::after {
 
 .driver-data-row {
     transition: all 0.2s;
+    cursor: pointer;
+}
+
+.clickable-row {
     cursor: pointer;
 }
 

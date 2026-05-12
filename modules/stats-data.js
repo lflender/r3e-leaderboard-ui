@@ -8,14 +8,38 @@
         pole: { metricKey: 'pole_positions', fileKey: 'pole_file', direction: 'desc' },
         bested: { metricKey: 'bested_drivers', fileKey: 'bested_file', direction: 'desc' },
         podium: { metricKey: 'podiums', fileKey: 'podium_file', direction: 'desc' },
-        avg_bested: { metricKey: 'avg_bested', fileKey: 'bested_file', direction: 'desc' },
+        avg_bested: { metricKey: 'avg_bested', fileKey: 'avg_bested_file', direction: 'desc' },
         entries: { metricKey: 'entries', fileKey: 'entries_file', direction: 'desc' }
     };
 
-    const createCacheBustedUrl = (path) => `${path}?v=${Date.now()}`;
+    // Stable cache version: reuse dataService's version (derived from status.json)
+    // so the browser can serve stats files from HTTP cache on subsequent visits.
+    let _cacheVersion = null;
+    let _cacheVersionPromise = null;
+    async function getCacheVersion() {
+        if (_cacheVersion) return _cacheVersion;
+        if (_cacheVersionPromise) return _cacheVersionPromise;
+        _cacheVersionPromise = (async () => {
+            try {
+                if (window.dataService && typeof window.dataService._getIndexCacheVersion === 'function') {
+                    _cacheVersion = await window.dataService._getIndexCacheVersion();
+                    return _cacheVersion;
+                }
+            } catch (_) { /* fall through */ }
+            _cacheVersion = String(Date.now());
+            return _cacheVersion;
+        })();
+        return _cacheVersionPromise;
+    }
+
+    async function createCacheBustedUrl(path) {
+        const version = await getCacheVersion();
+        return `${path}?v=${version}`;
+    }
 
     async function fetchJson(path) {
-        const response = await fetch(createCacheBustedUrl(path), { cache: 'no-store' });
+        const url = await createCacheBustedUrl(path);
+        const response = await fetch(url);
         if (!response.ok) {
             throw new Error(`Failed to fetch ${path}: ${response.status} ${response.statusText}`);
         }
@@ -23,7 +47,8 @@
     }
 
     async function fetchGzipJson(path) {
-        const response = await fetch(createCacheBustedUrl(path), { cache: 'no-store' });
+        const url = await createCacheBustedUrl(path);
+        const response = await fetch(url);
         if (!response.ok) {
             throw new Error(`Failed to fetch ${path}: ${response.status} ${response.statusText}`);
         }
@@ -76,8 +101,8 @@
         if (!files) return null;
 
         const preferOverallTopFile = (path) => {
-            const raw = String(path || '');
-            if (!raw) return raw;
+            if (!path) return undefined;
+            const raw = String(path);
             // Prefer smaller overall_top_* files when available.
             // Example: cache/stats/overall_pole.json.gz -> cache/stats/overall_top_pole.json.gz
             if (!filterValue && raw.includes('/overall_')) {
@@ -90,7 +115,7 @@
             polePath: preferOverallTopFile(files.pole_file),
             bestedPath: preferOverallTopFile(files.bested_file),
             podiumPath: preferOverallTopFile(files.podium_file),
-            avgBestedPath: preferOverallTopFile(files.bested_file),
+            avgBestedPath: preferOverallTopFile(files.avg_bested_file),
             entriesPath: preferOverallTopFile(files.entries_file)
         };
     }

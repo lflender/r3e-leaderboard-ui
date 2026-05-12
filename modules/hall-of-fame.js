@@ -19,10 +19,12 @@
                 ? window.FlagHelper.countryToFlag(row.country)
                 : '';
             const flagHtml = flagRaw ? `<span class="country-flag">${flagRaw}</span>` : '';
+            const avatarHtml = row.avatar
+                ? `<img class="hall-of-fame-avatar" src="${window.R3EUtils.escapeHtml(row.avatar)}" alt="" aria-hidden="true" loading="lazy" decoding="async">` : '';
             return [
                 '<li class="hall-of-fame-item">',
                 `<span class="hall-of-fame-rank">${rank}</span>`,
-                `<span class="hall-of-fame-name">${flagHtml}${window.R3EUtils.escapeHtml(row.name)}</span>`,
+                `<span class="hall-of-fame-name">${flagHtml}${avatarHtml}${window.R3EUtils.escapeHtml(row.name)}</span>`,
                 `<span class="hall-of-fame-value">${value} ${metricLabel}</span>`,
                 '</li>'
             ].join('');
@@ -74,18 +76,20 @@
         try {
             const index = await window.StatsData.loadStatsIndex();
             const paths = window.StatsData.getAllPathsForFilter(index, '');
-            if (!paths || !paths.polePath || !paths.bestedPath) {
+            if (!paths || !paths.polePath || !paths.bestedPath || !paths.avgBestedPath) {
                 return;
             }
 
-            const [polePayload, bestedPayload] = await Promise.all([
+            const defs = window.StatsData.METRIC_DEFINITIONS;
+            const [polePayload, bestedPayload, avgBestedPayload] = await Promise.all([
                 window.StatsData.fetchGzipJson(paths.polePath),
-                window.StatsData.fetchGzipJson(paths.bestedPath)
+                window.StatsData.fetchGzipJson(paths.bestedPath),
+                window.StatsData.fetchGzipJson(paths.avgBestedPath)
             ]);
 
-            const poles = window.StatsData.normalizeRows(polePayload, 'pole_positions', 5);
-            const bested = window.StatsData.normalizeRows(bestedPayload, 'bested_drivers', 5);
-            const avgBested = window.StatsData.normalizeRows(bestedPayload, 'avg_bested', 5);
+            const poles = window.StatsData.normalizeRows(polePayload, defs.pole.metricKey, 5);
+            const bested = window.StatsData.normalizeRows(bestedPayload, defs.bested.metricKey, 5);
+            const avgBested = window.StatsData.normalizeRows(avgBestedPayload, defs.avg_bested.metricKey, 5);
 
             render({ poles, bested, avgBested });
         } catch (error) {

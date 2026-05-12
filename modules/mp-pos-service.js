@@ -24,7 +24,9 @@ async function loadMpPosCache() {
     
     mpPosCachePromise = (async () => {
         try {
-            const response = await fetch(`cache/mp_pos.json.gz?v=${Date.now()}`, { cache: 'no-store' });
+            // 30-minute cache bucket: same version string for 30 min, then rotates
+            const cacheVersion = Math.floor(Date.now() / (30 * 60 * 1000));
+            const response = await fetch(`cache/mp_pos.json.gz?v=${cacheVersion}`);
             if (!response.ok) throw new Error('Failed to load mp_pos.json.gz');
             if (!window.CompressedJsonHelper || typeof window.CompressedJsonHelper.readGzipJson !== 'function') {
                 throw new Error('CompressedJsonHelper is not loaded.');

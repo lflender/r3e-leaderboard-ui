@@ -33,7 +33,7 @@
     <script src="modules/analytics.js?v=7"></script>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     
-    <link rel="stylesheet" href="style.css?v=191">
+    <link rel="stylesheet" href="style.css?v=237">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"/>
     <!-- Site Icons -->
     <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png?v=3">
@@ -143,21 +143,31 @@
     <script src="modules/loaders/header-loader.js?v=2" defer></script>
     
     <!-- Core modules -->
-    <script src="modules/data/country-mappings.js?v=4" defer></script>
+    <script src="modules/data/country-mappings.js?v=5" defer></script>
     <script src="modules/compressed-json-helper.js?v=1" defer></script>
     <script src="modules/time-helper.js?v=3" defer></script>
     <script src="modules/utils-track.js?v=1" defer></script>
     <script src="modules/url-helper.js?v=2" defer></script>
-    <script src="modules/utils-car.js?v=7" defer></script>
+    <script src="modules/utils-car.js?v=8" defer></script>
     <script src="modules/utils.js?v=12" defer></script>
     
     <!-- Data files - must load before feature modules that depend on them -->
     <script src="modules/data/car-classes.js?v=3" defer></script>
-    <script src="modules/data/cars.js?v=9" defer></script>
+    <script src="modules/data/cars.js?v=10" defer></script>
     <script src="modules/data/tracks.js?v=4" defer></script>
     <script src="modules/data/track-images.js?v=3" defer></script>
     
     <!-- Feature modules -->
-    <script src="modules/pages/daily-races.js?v=36" defer></script>
+    <script src="modules/pages/daily-races.js?v=40" defer></script>
+    <script>
+    (function(){
+        var K='records_new_badge_dismissed';
+        var hide=function(){document.querySelectorAll('a[href="records.html"] .tab-badge,a[href*="records.html"] .tab-badge').forEach(function(b){b.hidden=true;});};
+        try{if(localStorage.getItem(K)){hide();return;}}catch(_){}
+        document.querySelectorAll('a[href="records.html"],a[href*="records.html"]').forEach(function(a){
+            a.addEventListener('click',function(){try{localStorage.setItem(K,'1');}catch(_){}hide();},{once:true});
+        });
+    })();
+    </script>
 </body>
 </html>

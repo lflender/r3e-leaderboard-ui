@@ -151,7 +151,7 @@ class TableRenderer {
         const flagHtml = FlagHelper.countryToFlag(country) ? `<span class="country-flag">${FlagHelper.countryToFlag(country)}</span>` : '';
         const rankHtml = rank ? R3EUtils.renderRankStars(rank) : '';
         const avatarHtml = avatar
-            ? `<img src="${R3EUtils.escapeHtml(String(avatar))}" alt="${R3EUtils.escapeHtml(`${displayName} avatar`)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" style="width:31px;height:31px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:8px;position:relative;top:-2px;background:#1f232a;" />`
+            ? `<img class="driver-group-avatar" src="${R3EUtils.escapeHtml(String(avatar))}" alt="${R3EUtils.escapeHtml(`${displayName} avatar`)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`
             : '';
         
         // Get multiplayer position if available
@@ -624,7 +624,7 @@ class TableRenderer {
             ? window.R3ETrackImages.resolveTrackLogoByLabel(trackStr)
             : '';
         const trackLogoHtml = trackLogoUrl
-            ? `<img class="table-track-logo" src="${R3EUtils.escapeHtml(trackLogoUrl)}" alt="${R3EUtils.escapeHtml(trackStr || 'Track')} logo" width="34" height="34" loading="lazy" decoding="async" />`
+            ? `<img class="table-track-logo" src="${R3EUtils.escapeHtml(trackLogoUrl)}" alt="${R3EUtils.escapeHtml(trackStr || 'Track')} logo" loading="lazy" decoding="async" />`
             : '';
         
         // Split track name and layout (e.g., "Donington Park - Grand Prix")

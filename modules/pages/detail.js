@@ -1122,7 +1122,7 @@ function attachHighlightedRowExternalLink(row) {
         window.open(url, '_blank');
     };
 
-    row.style.cursor = 'pointer';
+    row.classList.add('clickable-row');
     if (!row.dataset.externalClickAdded) {
         row.addEventListener('click', openExternal);
         row.dataset.externalClickAdded = '1';
@@ -1135,7 +1135,7 @@ function attachHighlightedRowExternalLink(row) {
             e.stopPropagation();
             openExternal();
         });
-        nameLink.style.cursor = 'pointer';
+        nameLink.classList.add('clickable-row');
         nameLink.dataset.preventDefault = '1';
     }
 }

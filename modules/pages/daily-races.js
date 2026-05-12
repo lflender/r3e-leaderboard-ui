@@ -311,7 +311,7 @@ class DailyRaces {
      */
     getHolidayNoticeBannerHtml() {
         const line1 = 'I was in holidays last week, thank you for your patience.';
-        const line2 = 'A hardened version of the schedule parsing has been deployed!';
+        const line2 = 'The schedule parser has been reworked and should now handle all cases!';
         return `<p class="daily-races-banner daily-races-banner--success">${R3EUtils.escapeHtml(line1)}<br>${R3EUtils.escapeHtml(line2)}</p>`;
     }
 
@@ -352,7 +352,7 @@ class DailyRaces {
                 hour12: false
             });
             
-            return `${formatted} <span style="white-space: nowrap;">(${relativeTime})</span>`;
+            return `${formatted} <span class="nowrap">(${relativeTime})</span>`;
         } catch (error) {
             return timestamp;
         }

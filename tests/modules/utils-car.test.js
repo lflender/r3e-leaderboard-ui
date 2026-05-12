@@ -16,6 +16,8 @@ describe('R3ECarUtils', () => {
         expect(window.R3ECarUtils.splitCarName('134 Judd V8')).toEqual({ brand: 'Georg Plasa', model: 'BMW 134 V8' });
         expect(window.R3ECarUtils.splitCarName('Carlsson SLK 340 JUDD')).toEqual({ brand: 'Carlsson', model: 'Mercedes SLK 340' });
         expect(window.R3ECarUtils.splitCarName('BMW Alpina B6 GT3')).toEqual({ brand: 'BMW Alpina', model: 'B6 GT3' });
+        expect(window.R3ECarUtils.splitCarName('DTM Mercedes AMG C-Coupé')).toEqual({ brand: 'Mercedes-AMG', model: 'C-Coupé' });
+        expect(window.R3ECarUtils.splitCarName('DTM Mercedes AMG C Coupe 14')).toEqual({ brand: 'Mercedes-AMG', model: 'C Coupe 14' });
     });
 
     test('resolves local brand logo paths from car names', () => {
@@ -26,6 +28,7 @@ describe('R3ECarUtils', () => {
         expect(window.R3ECarUtils.resolveBrandLogoPath('134 Judd V8')).toBe('images/brands/logo-georg-plasa.png');
         expect(window.R3ECarUtils.resolveBrandLogoPath('E36 V8 JUDD')).toBe('images/brands/logo-georg-plasa.png');
         expect(window.R3ECarUtils.resolveBrandLogoPath('BMW Alpina B6 GT3')).toBe('images/brands/logo-alpina.png');
+        expect(window.R3ECarUtils.resolveBrandLogoPath('DTM Mercedes AMG C-Coupé')).toBe('images/brands/logo-mercedes.png');
         expect(window.R3ECarUtils.resolveBrandLogoPath('')).toBe('images/brands/logo-raceroom.png');
         expect(window.R3ECarUtils.resolveBrandLogoPath('Some Unknown Brand Prototype')).toBe('images/brands/logo-raceroom.png');
     });

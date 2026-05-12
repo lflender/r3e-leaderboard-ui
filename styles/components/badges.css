@@ -59,17 +59,17 @@
 /* Drive type badges */
 .car-badge.drive.rwd { 
     background: #35cbe6; 
-    color: #fff; 
+    color: #1f2937; 
 }
 
 .car-badge.drive.fwd { 
-    background: #755377; 
-    color: #fff; 
+    background: #c59fc0; 
+    color: #1f2937; 
 }
 
 .car-badge.drive.awd { 
-    background: #f0b5e8; 
-    color: #fff; 
+    background: #af35a9; 
+    color: #1f2937; 
 }
 
 /* Year badge (dynamic coloring via inline style) */

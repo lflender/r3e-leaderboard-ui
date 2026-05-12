@@ -634,7 +634,7 @@
             ? window.R3ETrackImages.resolveTrackLogoByLabel(trackStr)
             : '';
           const trackLogoHtml = trackLogoUrl
-            ? `<img class="table-track-logo" src="${R3EUtils.escapeHtml(trackLogoUrl)}" alt="${R3EUtils.escapeHtml(trackStr || 'Track')} logo" width="34" height="34" loading="lazy" decoding="async" />`
+            ? `<img class="table-track-logo" src="${R3EUtils.escapeHtml(trackLogoUrl)}" alt="${R3EUtils.escapeHtml(trackStr || 'Track')} logo" loading="lazy" decoding="async" />`
             : '';
           // Split track name and layout (e.g., "Donington Park - Grand Prix")
           const parts = trackStr.split(/\s*[-–—]\s+/);

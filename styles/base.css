@@ -138,6 +138,11 @@ footer {
     margin: 0 auto;
 }
 
+/* Utility classes */
+.nowrap {
+    white-space: nowrap;
+}
+
 .footer-text {
     text-align: center;
     flex: 1;

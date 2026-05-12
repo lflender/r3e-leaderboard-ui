@@ -513,6 +513,15 @@
     text-align: center;
 }
 
+#cars-info-table .results-table .car-badge,
+#cars-info-table .results-table .car-tile-assist-badge {
+    font-size: 0.85rem;
+}
+
+#cars-info-table .results-table .car-assists-cell .car-tile-assist--lc {
+    font-size: 0.65rem;
+}
+
 #cars-info .results-table td:nth-child(n+3),
 #cars-info .results-table th:nth-child(n+3) {
     text-align: center;

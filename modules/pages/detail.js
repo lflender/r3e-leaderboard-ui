@@ -174,7 +174,10 @@ async function fetchLeaderboardDetails() {
         // Set page titles
         setDetailTitles(data, trackParam, classParam);
         
-        await dataService.enrichEntriesWithDriverMetadata(transformedData);
+        // Render immediately with data already available from the leaderboard
+        // JSON (country, rank, team are partially populated). Metadata
+        // enrichment runs in the background and refreshes the table if it
+        // adds new rank/team values — avoids blocking on 27 HTTP requests.
 
         // Store unfiltered results
         unfilteredResults = transformedData;
@@ -210,6 +213,13 @@ async function fetchLeaderboardDetails() {
         }
         
         displayResults(allResults);
+
+        // Background enrichment: adds rank/team from metadata shards for
+        // entries that don't already have them. Refreshes table on completion.
+        dataService.enrichEntriesWithDriverMetadata(transformedData).then(() => {
+            allResults = applyInitialDifficultyFilter(transformedData);
+            displayResults(allResults);
+        }).catch(() => { /* metadata enrichment is best-effort */ });
     } catch (error) {
         console.error('Error loading leaderboard:', error);
         await displayError(error.message);
@@ -324,8 +334,6 @@ async function fetchSpecificClassesDetails() {
         
         // Set page titles for specific classes view
         setSpecificClassesDetailTitles(specificClassIds);
-        
-        await dataService.enrichEntriesWithDriverMetadata(allEntries);
 
         // Store unfiltered results
         unfilteredResults = allEntries;
@@ -362,6 +370,12 @@ async function fetchSpecificClassesDetails() {
         }
         
         await displayResults(allResults);
+
+        // Background enrichment
+        dataService.enrichEntriesWithDriverMetadata(allEntries).then(() => {
+            allResults = applyInitialDifficultyFilter(allEntries);
+            displayResults(allResults);
+        }).catch(() => {});
         
     } catch (error) {
         console.error('Error fetching specific classes details:', error);
@@ -413,8 +427,6 @@ async function fetchCombinedSuperclassDetails() {
         
         // Set page titles for combined view
         setCombinedDetailTitles(superclassParam);
-        
-        await dataService.enrichEntriesWithDriverMetadata(allEntries);
 
         // Store unfiltered results
         unfilteredResults = allEntries;
@@ -440,6 +452,12 @@ async function fetchCombinedSuperclassDetails() {
         }
         
         displayResults(allResults);
+
+        // Background enrichment
+        dataService.enrichEntriesWithDriverMetadata(allEntries).then(() => {
+            allResults = applyInitialDifficultyFilter(allEntries);
+            displayResults(allResults);
+        }).catch(() => {});
     } catch (error) {
         console.error('Error loading combined leaderboard:', error);
         await displayError(error.message);

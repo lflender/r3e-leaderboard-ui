@@ -27,6 +27,43 @@ class DataService {
         // Minimal index change detection via status.json
         this.lastIndexUpdate = null;
         this.indexRevalidatorStarted = false;
+        // Stable cache-busting version derived from status.json last_index_update.
+        // Using a stable key lets the browser HTTP-cache index/shard/metadata files
+        // across navigations within the same data epoch instead of re-downloading
+        // ~3 MB of gzipped data on every page load.
+        this._indexCacheVersion = null;
+        this._indexCacheVersionPromise = null;
+    }
+
+    /**
+     * Returns a stable cache-busting version string derived from
+     * status.json's last_index_update. Falls back to Date.now() if
+     * status is unavailable. The result is cached for the page lifetime
+     * so all fetches within the same session share the same version key,
+     * allowing the browser to serve index/shard/metadata from HTTP cache.
+     * @returns {Promise<string>}
+     */
+    async _getIndexCacheVersion() {
+        if (this._indexCacheVersion) {
+            return this._indexCacheVersion;
+        }
+        if (this._indexCacheVersionPromise) {
+            return this._indexCacheVersionPromise;
+        }
+        this._indexCacheVersionPromise = (async () => {
+            try {
+                const status = await this.calculateStatus();
+                const ts = status && (status.last_index_update || status.last_scrape_end);
+                if (ts) {
+                    // Compact: strip non-alphanumeric chars from ISO timestamp
+                    this._indexCacheVersion = String(ts).replace(/[^0-9a-zA-Z]/g, '');
+                    return this._indexCacheVersion;
+                }
+            } catch (_) { /* fall through */ }
+            this._indexCacheVersion = String(Date.now());
+            return this._indexCacheVersion;
+        })();
+        return this._indexCacheVersionPromise;
     }
 
     _getCompressedJsonHelper() {
@@ -198,10 +235,8 @@ class DataService {
     async fetchLeaderboardDetails(trackId, classId) {
         const filePath = `cache/tracks/track_${trackId}/class_${classId}.json.gz`;
         
-        const timestamp = new Date().getTime();
-        const response = await fetch(`${filePath}?v=${timestamp}`, {
-            cache: 'no-store'
-        });
+        const cacheVersion = await this._getIndexCacheVersion();
+        const response = await fetch(`${filePath}?v=${cacheVersion}`);
         
         if (!response.ok) {
             throw new Error(`Failed to load data: ${response.status} ${response.statusText}`);
@@ -216,10 +251,8 @@ class DataService {
      * @returns {Promise<Array>} Combinations array
      */
     async fetchTopCombinations() {
-        const timestamp = new Date().getTime();
-        const response = await fetch(`cache/top_combinations.json.gz?v=${timestamp}`, {
-            cache: 'no-store'
-        });
+        const cacheVersion = await this._getIndexCacheVersion();
+        const response = await fetch(`cache/top_combinations.json.gz?v=${cacheVersion}`);
         
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);

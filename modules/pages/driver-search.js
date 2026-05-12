@@ -60,11 +60,29 @@ class DriverSearch {
         this.handleUrlDriverParam();
         this.trackPageShown();
         
+        // Preload the driver mirror index so it's ready when the user types
+        this.preloadDriverIndex();
+        
         // Make goToPage available globally for pagination buttons
         window.goToPage = (page) => this.goToPage(page);
         
         // Make sortDriverGroups available globally for sorting
         window.sortDriverGroups = (sortBy) => this.sortDriverGroups(sortBy);
+    }
+
+    /**
+     * Start loading the driver mirror index in the background.
+     * This avoids the cold-start delay when the user types their first search.
+     */
+    preloadDriverIndex() {
+        try {
+            const dataService = window.R3EData;
+            if (dataService && typeof dataService.loadDriverIndex === 'function') {
+                dataService.loadDriverIndex().catch(() => {});
+            }
+        } catch (_) {
+            // Non-critical: index will load on first search instead
+        }
     }
 
     trackPageShown() {

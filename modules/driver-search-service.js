@@ -381,10 +381,64 @@
             const accentSearchTerm = accentSearch ? this._normalizeExactDisplayName(searchTerm) : '';
             const results = [];
 
-            const mirrorKeys = Object.keys(driverMirror);
-            const matchedMirrorKeys = mirrorKeys.filter(mirrorKey => this._matchesDriverSearchTerm(mirrorKey, searchLower, isExactSearch));
+            let matchedMirrorKeys;
+
+            // Fast path for exact search: O(1) key lookup instead of scanning 87K+ keys
+            if (isExactSearch) {
+                const candidates = this._buildLookupKeyCandidates(searchTerm);
+                const exactMatches = new Set();
+                for (const candidate of candidates) {
+                    if (candidate in driverMirror) {
+                        exactMatches.add(candidate);
+                    }
+                }
+                // Also try the raw search term as-is (handles case where mirror
+                // stores the original display name as key)
+                if (searchTerm in driverMirror) {
+                    exactMatches.add(searchTerm);
+                }
+                const searchLowerTrimmed = searchLower.trim();
+                if (searchLowerTrimmed in driverMirror) {
+                    exactMatches.add(searchLowerTrimmed);
+                }
+                matchedMirrorKeys = [...exactMatches];
+
+                // Fallback: if direct lookup found nothing, do a word-boundary
+                // scan but only for single-word exact searches where the name
+                // might be a component (e.g. searching for "Smith")
+                if (matchedMirrorKeys.length === 0) {
+                    const mirrorKeys = Object.keys(driverMirror);
+                    matchedMirrorKeys = mirrorKeys.filter(mirrorKey =>
+                        this._matchesDriverSearchTerm(mirrorKey, searchLower, isExactSearch)
+                    );
+                }
+            } else {
+                const mirrorKeys = Object.keys(driverMirror);
+                matchedMirrorKeys = mirrorKeys.filter(mirrorKey =>
+                    this._matchesDriverSearchTerm(mirrorKey, searchLower, isExactSearch)
+                );
+            }
+
             if (matchedMirrorKeys.length === 0) {
                 return results;
+            }
+
+            // Cap matched keys for broad searches to avoid loading 20+ shards
+            // (each shard is 1-14 MB uncompressed). Prioritize shorter/more
+            // relevant names (exact prefix matches bubble up first).
+            const MAX_MATCHED_DRIVERS = 500;
+            if (matchedMirrorKeys.length > MAX_MATCHED_DRIVERS) {
+                // Sort: prefer prefix matches over substring matches
+                const normalizedSearch = this._normalizeDriverLookupName(searchLower);
+                matchedMirrorKeys.sort((a, b) => {
+                    const aN = this._normalizeDriverLookupName(a);
+                    const bN = this._normalizeDriverLookupName(b);
+                    const aPrefix = aN.startsWith(normalizedSearch) ? 0 : 1;
+                    const bPrefix = bN.startsWith(normalizedSearch) ? 0 : 1;
+                    if (aPrefix !== bPrefix) return aPrefix - bPrefix;
+                    return aN.length - bN.length;
+                });
+                matchedMirrorKeys = matchedMirrorKeys.slice(0, MAX_MATCHED_DRIVERS);
             }
 
             const shardKeysToLoad = new Set(matchedMirrorKeys.map(mirrorKey => this._getShardKeyForName(mirrorKey)));

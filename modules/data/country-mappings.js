@@ -69,7 +69,11 @@ const COUNTRY_NAME_MAP = {
     'vatican city': 'VA',
     'holy see': 'VA',
     'holy see (vatican city state)': 'VA',
-    'apostolic see': 'VA'
+    'apostolic see': 'VA',
+    'macedonia': 'MK',
+    'macedonia, republic of': 'MK',
+    'republic of macedonia': 'MK',
+    'north macedonia': 'MK'
 };
 
 /**

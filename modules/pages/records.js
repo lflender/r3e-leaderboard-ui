@@ -11,7 +11,7 @@
         {
             key: 'avg_bested',
             titleBuilder: (label) => `Top Drivers by Average Bested % (${label})`,
-            infoText: 'Average percentage of opponents beaten per leaderboard entry. Higher is better. Overall: min 5 entries and 100 bested drivers. Category filter: min 2 entries and 10 bested drivers.',
+            infoText: 'Average percentage of opponents beaten per leaderboard entry. Higher is better. Overall: min 5 entries and 100 bested drivers. Category: min 2 entries and 10 bested drivers.',
             valueTitle: 'Avg %',
             valueFormatter: (value) => Number.isFinite(value) ? value.toFixed(2) + '%' : '0.00%',
             // Returns the row predicate appropriate for the active filter.
@@ -584,9 +584,9 @@
             updateTitles(getSelectedLabel(currentFilter));
             updateNavButtons();
 
-            // Fetch and render sections in display order so the page fills from top to bottom.
-            // The requestId guard still prevents stale responses from an older filter
-            // selection from mutating the UI.
+            // Fetch all sections in parallel. Each section renders into its own
+            // container as soon as its data arrives, so the page fills progressively.
+            // The requestId guard prevents stale responses from mutating the UI.
             const counts = {};
             const renderSectionWhenReady = async (section) => {
                 const path = pathByKey[section.key];
@@ -625,10 +625,7 @@
                 updateNavButtons();
             };
 
-            for (const section of RECORD_SECTIONS) {
-                await renderSectionWhenReady(section);
-                if (requestId !== currentRequestId) return;
-            }
+            await Promise.all(RECORD_SECTIONS.map(section => renderSectionWhenReady(section)));
 
             if (requestId !== currentRequestId) return;
 

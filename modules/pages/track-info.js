@@ -378,6 +378,25 @@
     return result;
   }
 
+  // Stable cache version for HTTP caching (same pattern as driver index)
+  let _trackCacheVersion = null;
+  let _trackCacheVersionPromise = null;
+  async function getTrackCacheVersion() {
+      if (_trackCacheVersion) return _trackCacheVersion;
+      if (_trackCacheVersionPromise) return _trackCacheVersionPromise;
+      _trackCacheVersionPromise = (async () => {
+          try {
+              if (window.dataService && typeof window.dataService._getIndexCacheVersion === 'function') {
+                  _trackCacheVersion = await window.dataService._getIndexCacheVersion();
+                  return _trackCacheVersion;
+              }
+          } catch (_) { /* fall through */ }
+          _trackCacheVersion = String(Date.now());
+          return _trackCacheVersion;
+      })();
+      return _trackCacheVersionPromise;
+  }
+
   // Single-flight cache for all_combinations.json.gz to handle concurrent requests
   let allCombinationsPromise = null;
   let allCombinations = null;
@@ -388,11 +407,9 @@
     if (allCombinationsPromise) return allCombinationsPromise;
 
     allCombinationsPromise = (async () => {
-      const timestamp = new Date().getTime();
+      const cacheVersion = await getTrackCacheVersion();
       try {
-        const resp = await fetch(`cache/all_combinations.json.gz?v=${timestamp}`, {
-          cache: 'no-store'
-        });
+        const resp = await fetch(`cache/all_combinations.json.gz?v=${cacheVersion}`);
         if (!resp.ok) throw new Error('HTTP ' + resp.status);
         const data = await decompressGzipToJson(resp);
         let combinations = [];
@@ -423,7 +440,6 @@
     try {
       await TemplateHelper.showLoading(tableContainer);
 
-      const timestamp = new Date().getTime();
       let combinations = [];
 
       // If filters are active, use the full uncapped data
@@ -431,9 +447,8 @@
         combinations = await loadAllCombinations();
       } else {
         // No filters: use legacy top_combinations.json.gz for speed (1000 cap is intentional for default view)
-        const resp = await fetch(`cache/top_combinations.json.gz?v=${timestamp}`, {
-          cache: 'no-store'
-        });
+        const cacheVersion = await getTrackCacheVersion();
+        const resp = await fetch(`cache/top_combinations.json.gz?v=${cacheVersion}`);
         if (!resp.ok) throw new Error('HTTP ' + resp.status);
         const data = await decompressGzipToJson(resp);
         if (Array.isArray(data)) {

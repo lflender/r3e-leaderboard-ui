@@ -157,45 +157,45 @@ class DriverProfile {
     }
 
     /**
-     * Asynchronously load stats and update each card as data arrives
+     * Asynchronously load stats and update each card independently as data arrives
      * @param {string} driverName - Driver name to look up
      */
-    async loadStats(driverName) {
+    loadStats(driverName) {
         if (!window.DriverStatsService) return;
 
-        try {
-            const results = await DriverStatsService.lookupDriverStats(driverName);
-            results.forEach(metric => {
-                const card = document.getElementById('stat-' + metric.key);
-                if (!card) return;
+        const metrics = DriverStatsService.PROFILE_METRICS;
+        metrics.forEach(metric => {
+            DriverStatsService.lookupSingleStat(driverName, metric.key)
+                .then(result => {
+                    const card = document.getElementById('stat-' + metric.key);
+                    if (!card) return;
 
-                card.classList.remove('driver-stat-loading');
+                    card.classList.remove('driver-stat-loading');
 
-                const valueEl = card.querySelector('.driver-stat-value');
-                const posEl = card.querySelector('.driver-stat-position');
+                    const valueEl = card.querySelector('.driver-stat-value');
+                    const posEl = card.querySelector('.driver-stat-position');
 
-                if (metric.result) {
-                    valueEl.textContent = DriverStatsService.formatValue(
-                        metric.result.value, metric.format
-                    );
-                    posEl.textContent = '#' + metric.result.position.toLocaleString() +
-                        ' of ' + metric.result.total.toLocaleString();
-                } else {
+                    if (result) {
+                        valueEl.textContent = DriverStatsService.formatValue(
+                            result.value, metric.format
+                        );
+                        posEl.textContent = '#' + result.position.toLocaleString() +
+                            ' of ' + result.total.toLocaleString();
+                    } else {
+                        card.classList.add('driver-stat-not-ranked');
+                        valueEl.textContent = '—';
+                        posEl.textContent = 'Not ranked';
+                    }
+                })
+                .catch(() => {
+                    const card = document.getElementById('stat-' + metric.key);
+                    if (!card) return;
+                    card.classList.remove('driver-stat-loading');
                     card.classList.add('driver-stat-not-ranked');
-                    valueEl.textContent = '—';
-                    posEl.textContent = 'Not ranked';
-                }
-            });
-        } catch (error) {
-            console.warn('Failed to load driver stats:', error);
-            const cards = this.elements.statsContainer.querySelectorAll('.driver-stat-card');
-            cards.forEach(card => {
-                card.classList.remove('driver-stat-loading');
-                card.classList.add('driver-stat-not-ranked');
-                const posEl = card.querySelector('.driver-stat-position');
-                if (posEl) posEl.textContent = 'Unavailable';
-            });
-        }
+                    const posEl = card.querySelector('.driver-stat-position');
+                    if (posEl) posEl.textContent = 'Unavailable';
+                });
+        });
     }
 
     /**

@@ -94,6 +94,15 @@ beforeAll(() => {
             { key: 'pole', label: 'Pole Positions', format: 'number', result: { value: 5, position: 500, total: 10000 } },
             { key: 'podium', label: 'Podiums', format: 'number', result: null }
         ]),
+        lookupSingleStat: vi.fn((driverName, key) => {
+            const results = {
+                avg_bested: { value: 78.5, position: 42, total: 10000 },
+                bested: { value: 150, position: 100, total: 10000 },
+                pole: { value: 5, position: 500, total: 10000 },
+                podium: null
+            };
+            return Promise.resolve(results[key] || null);
+        }),
         formatValue: vi.fn((value, format) => {
             if (value == null || isNaN(value)) return '—';
             if (format === 'percent') return value.toFixed(1) + '%';
@@ -129,6 +138,15 @@ beforeEach(() => {
         { key: 'pole', label: 'Pole Positions', format: 'number', result: { value: 5, position: 500, total: 10000 } },
         { key: 'podium', label: 'Podiums', format: 'number', result: null }
     ]);
+    window.DriverStatsService.lookupSingleStat.mockImplementation((driverName, key) => {
+        const results = {
+            avg_bested: { value: 78.5, position: 42, total: 10000 },
+            bested: { value: 150, position: 100, total: 10000 },
+            pole: { value: 5, position: 500, total: 10000 },
+            podium: null
+        };
+        return Promise.resolve(results[key] || null);
+    });
 });
 
 describe('DriverProfile', () => {
@@ -269,12 +287,15 @@ describe('DriverProfile', () => {
         expect(cards.length).toBe(4);
     });
 
-    it('calls lookupDriverStats with driver name', async () => {
+    it('calls lookupSingleStat for each metric', async () => {
         const dp = new window.DriverProfile();
         await dp.init();
         // Wait for async stats load to complete
         await vi.waitFor(() => {
-            expect(window.DriverStatsService.lookupDriverStats).toHaveBeenCalledWith('Test Driver');
+            expect(window.DriverStatsService.lookupSingleStat).toHaveBeenCalledWith('Test Driver', 'avg_bested');
+            expect(window.DriverStatsService.lookupSingleStat).toHaveBeenCalledWith('Test Driver', 'bested');
+            expect(window.DriverStatsService.lookupSingleStat).toHaveBeenCalledWith('Test Driver', 'pole');
+            expect(window.DriverStatsService.lookupSingleStat).toHaveBeenCalledWith('Test Driver', 'podium');
         });
     });
 
@@ -282,9 +303,9 @@ describe('DriverProfile', () => {
         const dp = new window.DriverProfile();
         await dp.init();
         await vi.waitFor(() => {
-            expect(window.DriverStatsService.lookupDriverStats).toHaveBeenCalled();
+            expect(window.DriverStatsService.lookupSingleStat).toHaveBeenCalled();
         });
-        // Allow the loadStats promise to resolve
+        // Allow the loadStats promises to resolve
         await new Promise(r => setTimeout(r, 10));
 
         const avgCard = document.getElementById('stat-avg_bested');
@@ -296,7 +317,7 @@ describe('DriverProfile', () => {
         const dp = new window.DriverProfile();
         await dp.init();
         await vi.waitFor(() => {
-            expect(window.DriverStatsService.lookupDriverStats).toHaveBeenCalled();
+            expect(window.DriverStatsService.lookupSingleStat).toHaveBeenCalled();
         });
         await new Promise(r => setTimeout(r, 10));
 
@@ -306,7 +327,7 @@ describe('DriverProfile', () => {
     });
 
     it('handles stats service error gracefully', async () => {
-        window.DriverStatsService.lookupDriverStats.mockRejectedValue(new Error('Stats error'));
+        window.DriverStatsService.lookupSingleStat.mockRejectedValue(new Error('Stats error'));
         const dp = new window.DriverProfile();
         await dp.init();
         await new Promise(r => setTimeout(r, 10));
@@ -367,5 +388,75 @@ describe('DriverProfile', () => {
         await dp.init();
         const highlights = document.getElementById('driver-profile-highlights');
         expect(highlights.innerHTML).toBe('');
+    });
+
+    it('stats cards update independently without waiting for each other', async () => {
+        // Each metric resolves at a different time; faster ones should render
+        // before slower ones resolve.
+        let resolvePole;
+        const polePromise = new Promise(r => { resolvePole = r; });
+
+        window.DriverStatsService.lookupSingleStat.mockImplementation((name, key) => {
+            if (key === 'pole') return polePromise;
+            const results = {
+                avg_bested: { value: 78.5, position: 42, total: 10000 },
+                bested: { value: 150, position: 100, total: 10000 },
+                podium: null
+            };
+            return Promise.resolve(results[key] || null);
+        });
+
+        const dp = new window.DriverProfile();
+        await dp.init();
+        // Let resolved promises flush
+        await new Promise(r => setTimeout(r, 10));
+
+        // avg_bested and bested should already be rendered
+        const avgCard = document.getElementById('stat-avg_bested');
+        expect(avgCard.classList.contains('driver-stat-loading')).toBe(false);
+        expect(avgCard.querySelector('.driver-stat-value').textContent).toBe('78.5%');
+
+        const bestedCard = document.getElementById('stat-bested');
+        expect(bestedCard.classList.contains('driver-stat-loading')).toBe(false);
+
+        // pole should still be loading
+        const poleCard = document.getElementById('stat-pole');
+        expect(poleCard.classList.contains('driver-stat-loading')).toBe(true);
+        expect(poleCard.querySelector('.driver-stat-position').textContent).toContain('Loading');
+
+        // Now resolve pole
+        resolvePole({ value: 5, position: 500, total: 10000 });
+        await new Promise(r => setTimeout(r, 10));
+
+        expect(poleCard.classList.contains('driver-stat-loading')).toBe(false);
+        expect(poleCard.querySelector('.driver-stat-value').textContent).toBe('5');
+    });
+
+    it('a failing stat does not block other stats from rendering', async () => {
+        window.DriverStatsService.lookupSingleStat.mockImplementation((name, key) => {
+            if (key === 'bested') return Promise.reject(new Error('network'));
+            const results = {
+                avg_bested: { value: 78.5, position: 42, total: 10000 },
+                pole: { value: 5, position: 500, total: 10000 },
+                podium: null
+            };
+            return Promise.resolve(results[key] || null);
+        });
+
+        const dp = new window.DriverProfile();
+        await dp.init();
+        await new Promise(r => setTimeout(r, 10));
+
+        // Successful stats should render normally
+        const avgCard = document.getElementById('stat-avg_bested');
+        expect(avgCard.querySelector('.driver-stat-value').textContent).toBe('78.5%');
+
+        const poleCard = document.getElementById('stat-pole');
+        expect(poleCard.querySelector('.driver-stat-value').textContent).toBe('5');
+
+        // Failed stat should show Unavailable, not block others
+        const bestedCard = document.getElementById('stat-bested');
+        expect(bestedCard.classList.contains('driver-stat-not-ranked')).toBe(true);
+        expect(bestedCard.querySelector('.driver-stat-position').textContent).toBe('Unavailable');
     });
 });

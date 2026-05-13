@@ -190,6 +190,8 @@
     justify-content: center;
     text-align: center;
     gap: 0.5rem;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .highlight-card-label {
@@ -205,10 +207,13 @@
     align-items: center;
     justify-content: center;
     gap: 0.75rem;
+    max-width: 100%;
+    min-width: 0;
 }
 
 .highlight-image-wrap {
-    flex-shrink: 0;
+    flex-shrink: 1;
+    min-width: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -216,6 +221,7 @@
 
 .highlight-car-image {
     width: 180px;
+    max-width: 100%;
     height: auto;
     object-fit: contain;
 }
@@ -299,6 +305,8 @@
     border-radius: 12px;
     padding: 1.25rem;
     box-shadow: 0 2px 8px var(--shadow);
+    min-width: 0;
+    overflow: hidden;
 }
 
 /* --- Pie chart component styles --- */

@@ -145,9 +145,47 @@
         return Number(value).toLocaleString();
     }
 
+    /**
+     * Look up a single stat metric for a driver independently.
+     * For avg_bested and bested, applies the authoritative total from the full avg_bested file.
+     * @param {string} driverName
+     * @param {string} metricKey - One of the PROFILE_METRICS keys
+     * @returns {Promise<{value, position, total}|null>}
+     */
+    async function lookupSingleStat(driverName, metricKey) {
+        const index = await window.StatsData.loadStatsIndex();
+        const topFiles = index.overall_top || {};
+        const fullFiles = index.overall || {};
+        const defs = window.StatsData.METRIC_DEFINITIONS;
+
+        const def = defs[metricKey];
+        if (!def) return null;
+
+        const topPath = topFiles[def.fileKey] || '';
+        const fullPath = fullFiles[def.fileKey] || '';
+
+        const result = await lookupMetric(driverName, def.metricKey, topPath, fullPath);
+        if (!result) return null;
+
+        // For avg_bested and bested, get authoritative total from the avg_bested full file
+        if (metricKey === 'avg_bested' || metricKey === 'bested') {
+            const avgBestedDef = defs.avg_bested;
+            const avgBestedFullPath = avgBestedDef ? (fullFiles[avgBestedDef.fileKey] || '') : '';
+            if (avgBestedFullPath) {
+                try {
+                    const fullPayload = await _fetchWithDedup(avgBestedFullPath);
+                    result.total = window.StatsData.extractRows(fullPayload).length;
+                } catch (_) { /* keep existing total */ }
+            }
+        }
+
+        return result;
+    }
+
     window.DriverStatsService = {
         PROFILE_METRICS,
         lookupDriverStats,
+        lookupSingleStat,
         findDriverInPayload,
         formatValue,
         _fetchWithDedup,

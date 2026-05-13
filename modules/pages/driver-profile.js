@@ -147,7 +147,7 @@ class DriverProfile {
         const cards = metrics.map(m =>
             `<div class="driver-stat-card driver-stat-loading" id="stat-${m.key}">` +
             `<div class="driver-stat-label">${R3EUtils.escapeHtml(m.label)}</div>` +
-            '<div class="driver-stat-value">—</div>' +
+            '<div class="driver-stat-value"><span class="driver-stat-spinner"></span></div>' +
             '<div class="driver-stat-position">Loading\u2026</div>' +
             '</div>'
         ).join('');

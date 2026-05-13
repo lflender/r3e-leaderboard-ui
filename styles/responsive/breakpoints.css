@@ -461,6 +461,11 @@
         padding: 0.65rem !important;
     }
 
+    .driver-profile-link-btn {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+    }
+
     .driver-meta {
         font-size: 0.75rem;
     }
@@ -1100,6 +1105,11 @@
         font-size: 0.8rem;
     }
 
+    .driver-profile-link-btn {
+        font-size: 0.65rem;
+        padding: 0.15rem 0.4rem;
+    }
+
     .driver-meta {
         font-size: 0.7rem;
     }
@@ -1124,6 +1134,103 @@
 
     .mp-pos-badge {
         font-size: 0.65rem;
+    }
+}
+
+/* --- Driver Profile responsive --- */
+
+@media (max-width: 1000px) {
+    .driver-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .driver-profile-charts-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .driver-profile-charts-grid > :nth-child(3):last-child {
+        grid-column: 1 / -1;
+        justify-self: center;
+        width: calc(50% - 0.75rem);
+    }
+}
+
+@media (max-width: 768px) {
+    .driver-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+
+    .driver-stat-value {
+        font-size: 1.25rem;
+    }
+
+    .driver-profile-container {
+        padding: 1rem;
+    }
+
+    .driver-profile-header {
+        padding: 1rem 1.25rem;
+    }
+
+    .driver-profile-avatar,
+    .driver-profile-avatar-placeholder {
+        width: 72px;
+        height: 72px;
+    }
+
+    .driver-profile-name {
+        font-size: 1.25rem;
+    }
+
+    .driver-profile-charts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .driver-profile-charts-grid > :nth-child(3):last-child {
+        grid-column: auto;
+        width: 100%;
+    }
+
+    .driver-profile-highlights-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .driver-stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+
+    .driver-stat-card {
+        padding: 0.75rem;
+    }
+
+    .driver-stat-value {
+        font-size: 1.1rem;
+    }
+
+    .driver-stat-label {
+        font-size: 0.7rem;
+    }
+
+    .driver-profile-identity {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .driver-profile-meta {
+        justify-content: center;
+    }
+
+    .driver-profile-name {
+        font-size: 1.1rem;
+    }
+
+    .pie-chart-svg-container {
+        max-width: 180px;
     }
 }
 

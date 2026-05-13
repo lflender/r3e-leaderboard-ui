@@ -62,4 +62,33 @@ describe('Navigation', () => {
         window.openDetailView(event, row);
         expect(window.open).not.toHaveBeenCalled();
     });
+
+    test('openDriverProfile opens profile page with driver name', () => {
+        const header = document.createElement('tr');
+        header.dataset.driverName = 'TestDriver';
+
+        window.openDriverProfile(header);
+        expect(window.open).toHaveBeenCalledWith(
+            'driver-profile.html?driver=%22TestDriver%22',
+            '_blank'
+        );
+    });
+
+    test('openDriverProfile does nothing when no driver name', () => {
+        const header = document.createElement('tr');
+
+        window.openDriverProfile(header);
+        expect(window.open).not.toHaveBeenCalled();
+    });
+
+    test('openDriverProfile encodes special characters', () => {
+        const header = document.createElement('tr');
+        header.dataset.driverName = 'Test Driver With Spaces';
+
+        window.openDriverProfile(header);
+        expect(window.open).toHaveBeenCalledWith(
+            'driver-profile.html?driver=%22Test%20Driver%20With%20Spaces%22',
+            '_blank'
+        );
+    });
 });

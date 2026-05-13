@@ -166,9 +166,9 @@ class TableRenderer {
         const teamHtml = team ? ` | 🏁 ${teamPrefix}${team}` : '';
         
         return `
-            <tr class="driver-group-header" data-group="${groupId}" onclick="toggleGroup(this)">
+            <tr class="driver-group-header driver-group-header-link" data-group="${groupId}" data-driver-name="${R3EUtils.escapeHtml(displayName)}" onclick="openDriverProfile(this)">
                 <td colspan="${colspan}">
-                    <span class="toggle-icon">▼</span>
+                    <span class="driver-profile-link-btn">View Profile ›</span>
                     <strong${driverNameClass}>${avatarHtml}${R3EUtils.escapeHtml(displayName)}</strong>
                     <span class="driver-meta">${flagHtml}${R3EUtils.escapeHtml(country)}${rankHtml}${mpPosHtml}${teamHtml}</span>
                 </td>

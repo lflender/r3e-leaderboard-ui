@@ -15,6 +15,7 @@ class Navigation {
         // Make functions globally accessible for onclick handlers
         window.toggleGroup = (target) => this.toggleGroup(target);
         window.openDetailView = (event, row) => this.openDetailView(event, row);
+        window.openDriverProfile = (headerEl) => this.openDriverProfile(headerEl);
     }
 
     /**
@@ -115,6 +116,19 @@ class Navigation {
 
             window.open(url, '_blank');
         }
+    }
+
+    /**
+     * Open driver profile page for a driver group header
+     * @param {HTMLElement} headerEl - Driver group header row element
+     */
+    openDriverProfile(headerEl) {
+        const driverName = headerEl?.dataset?.driverName;
+        if (!driverName) return;
+
+        const encodedDriver = encodeURIComponent(`"${driverName}"`);
+        const url = `driver-profile.html?driver=${encodedDriver}`;
+        window.open(url, '_blank');
     }
 }
 

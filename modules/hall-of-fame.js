@@ -40,7 +40,7 @@
             '</div>',
             '<div class="hall-of-fame-grid">',
             '<div class="hall-of-fame-column">',
-            '<h4>Avg bested %</h4>',
+            '<h4>Average bested %</h4>',
             `<ol>${renderList(data.avgBested, '%', (v) => v.toFixed(1))}</ol>`,
             '</div>',
             '<div class="hall-of-fame-column">',

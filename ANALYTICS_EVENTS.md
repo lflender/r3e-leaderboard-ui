@@ -33,6 +33,7 @@ This document defines the canonical front-end analytics taxonomy used by page mo
 | `detail page shown` | Detail page initializes from URL params | `track_id`, `class_param`, `classes_param`, `superclass_param`, `car_param` |
 | `detail filter changed` | Detail page car/difficulty filters change via user input | `selected_difficulty`, `selected_car`, `result_count` |
 | `detail pagination changed` | Detail table page changes | `page_number`, `total_pages`, `result_count` |
+| `driver profile page shown` | Driver profile page renders with data | `driver_name`, `country`, `total_entries`, `has_team`, `has_avatar` |
 | `records page shown` | Records page first successful render completes | `filter_value`, `filter_label`, `filter_type` |
 | `records filter changed` | Records class/superclass filter changes via user input | `filter_value`, `filter_label`, `filter_type`, `source` |
 | `records action` | Records user action (fold/unfold/next/prev) | `action`, `record_type`, `filter_value`, `filter_label`, `filter_type` |

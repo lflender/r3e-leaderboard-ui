@@ -128,7 +128,8 @@ a.driver-name-silver,
 
 a.driver-name-top10-glitter,
 strong.driver-name-top10-glitter,
-span.driver-name-top10-glitter {
+span.driver-name-top10-glitter,
+h2.driver-name-top10-glitter {
     position: relative;
     display: inline-block;
     animation: top10-glitter-pulse 3.4s ease-in-out infinite;
@@ -138,9 +139,11 @@ span.driver-name-top10-glitter {
 a.driver-name-top10-glitter::before,
 strong.driver-name-top10-glitter::before,
 span.driver-name-top10-glitter::before,
+h2.driver-name-top10-glitter::before,
 a.driver-name-top10-glitter::after,
 strong.driver-name-top10-glitter::after,
-span.driver-name-top10-glitter::after {
+span.driver-name-top10-glitter::after,
+h2.driver-name-top10-glitter::after {
     position: absolute;
     pointer-events: none;
     font-size: 0.7em;
@@ -153,7 +156,8 @@ span.driver-name-top10-glitter::after {
 
 a.driver-name-top10-glitter::before,
 strong.driver-name-top10-glitter::before,
-span.driver-name-top10-glitter::before {
+span.driver-name-top10-glitter::before,
+h2.driver-name-top10-glitter::before {
     content: '✦';
     top: -0.38em;
     right: -0.42em;
@@ -168,7 +172,8 @@ span.driver-name-top10-glitter::before {
 
 a.driver-name-top10-glitter::after,
 strong.driver-name-top10-glitter::after,
-span.driver-name-top10-glitter::after {
+span.driver-name-top10-glitter::after,
+h2.driver-name-top10-glitter::after {
     content: '✧';
     left: -0.55em;
     bottom: -0.12em;
@@ -185,12 +190,15 @@ span.driver-name-top10-glitter::after {
     a.driver-name-top10-glitter,
     strong.driver-name-top10-glitter,
     span.driver-name-top10-glitter,
+    h2.driver-name-top10-glitter,
     a.driver-name-top10-glitter::before,
     strong.driver-name-top10-glitter::before,
     span.driver-name-top10-glitter::before,
+    h2.driver-name-top10-glitter::before,
     a.driver-name-top10-glitter::after,
     strong.driver-name-top10-glitter::after,
-    span.driver-name-top10-glitter::after {
+    span.driver-name-top10-glitter::after,
+    h2.driver-name-top10-glitter::after {
         animation: none;
     }
 }
@@ -564,14 +572,24 @@ span.driver-name-top10-glitter::after {
     background: #1f232a;
 }
 
-.toggle-icon {
-    display: inline-block;
-    margin-right: 0.5rem;
-    font-size: 0.95rem;
-    position: relative;
-    top: -5px;
-    transition: transform 0.2s;
-    color: #60a5fa;
+.driver-profile-link-btn {
+    float: right;
+    padding: 0.2rem 0.65rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #e0e7ff;
+    background: rgba(96, 165, 250, 0.15);
+    border: 1px solid rgba(96, 165, 250, 0.35);
+    border-radius: 6px;
+    white-space: nowrap;
+    margin-top: 0.1rem;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.driver-group-header:hover .driver-profile-link-btn {
+    background: rgba(96, 165, 250, 0.3);
+    border-color: #60a5fa;
+    color: #fff;
 }
 
 .driver-meta {

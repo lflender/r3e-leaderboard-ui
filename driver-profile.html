@@ -1,0 +1,101 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Profile - RaceRoom Leaderboards</title>
+    <meta name="description" content="Driver profile and statistics on RaceRoom Leaderboards. View car class usage, car usage, and track distribution for any driver.">
+    <meta name="robots" content="noindex, follow">
+    <meta property="og:site_name" content="RaceRoom Leaderboards">
+    <meta property="og:title" content="Driver Profile - RaceRoom Leaderboards">
+    <meta property="og:description" content="Driver profile and statistics on RaceRoom Leaderboards.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://r3e-leaderboards.info/driver-profile.html">
+    <meta property="og:image" content="https://r3e-leaderboards.info/images/rle-share.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="RaceRoom Leaderboards Driver Profile">
+    <meta property="og:locale" content="en_US">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Driver Profile - RaceRoom Leaderboards">
+    <meta name="twitter:description" content="Driver profile and statistics on RaceRoom Leaderboards.">
+    <meta name="twitter:image" content="https://r3e-leaderboards.info/images/rle-share.png">
+
+    <!-- Analytics (PostHog via first-party proxy) -->
+    <script src="modules/analytics.js?v=7"></script>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+
+    <link rel="stylesheet" href="style.css?v=246">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"/>
+    <!-- Site Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png?v=3">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png?v=3">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png?v=3">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico?v=3">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Driver Profile",
+        "url": "https://r3e-leaderboards.info/driver-profile.html",
+        "description": "Driver profile and statistics on RaceRoom Leaderboards.",
+        "inLanguage": "en"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://r3e-leaderboards.info/" },
+            { "@type": "ListItem", "position": 2, "name": "Driver Search", "item": "https://r3e-leaderboards.info/drivers.html" },
+            { "@type": "ListItem", "position": 3, "name": "Driver Profile" }
+        ]
+    }
+    </script>
+</head>
+<body>
+    <div id="site-header"></div>
+
+    <main>
+        <h1 class="sr-only">RaceRoom Driver Profile</h1>
+        <div id="driver-profile-container" class="driver-profile-container">
+            <div id="driver-profile-header"></div>
+            <div id="driver-profile-charts"></div>
+        </div>
+    </main>
+
+    <div id="site-footer"></div>
+
+    <!-- Loaders -->
+    <script src="modules/loaders/template-loader.js?v=2" defer></script>
+    <script src="modules/loaders/footer-loader.js?v=2" defer></script>
+    <script src="modules/loaders/header-loader.js?v=2" defer></script>
+
+    <!-- Core modules -->
+    <script src="modules/data/country-mappings.js?v=5" defer></script>
+    <script src="modules/data/cars.js?v=10" defer></script>
+    <script src="modules/data/tracks.js?v=4" defer></script>
+    <script src="modules/data/track-images.js?v=3" defer></script>
+    <script src="modules/data/car-classes.js?v=3" defer></script>
+    <script src="modules/compressed-json-helper.js?v=1" defer></script>
+    <script src="modules/data-normalizer.js?v=1" defer></script>
+    <script src="modules/driver-index-service.js?v=8" defer></script>
+    <script src="modules/driver-search-service.js?v=18" defer></script>
+    <script src="modules/data-service.js?v=38" defer></script>
+    <script src="modules/flag-helper.js?v=2" defer></script>
+    <script src="modules/mp-pos-service.js?v=9" defer></script>
+    <script src="modules/template-helper.js?v=3" defer></script>
+    <script src="modules/utils-track.js?v=1" defer></script>
+    <script src="modules/url-helper.js?v=2" defer></script>
+    <script src="modules/utils-car.js?v=8" defer></script>
+    <script src="modules/utils.js?v=12" defer></script>
+
+    <!-- Feature modules -->
+    <script src="modules/stats-data.js?v=1" defer></script>
+    <script src="modules/pie-chart.js?v=11" defer></script>
+    <script src="modules/driver-profile-data.js?v=2" defer></script>
+    <script src="modules/driver-stats-service.js?v=6" defer></script>
+    <script src="modules/pages/driver-profile.js?v=9" defer></script>
+</body>
+</html>

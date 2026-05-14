@@ -2,7 +2,7 @@
 @import url("./styles/base.css?v=2");
 @import url("./styles/components/tabs.css?v=2");
 @import url("./styles/components/support.css");
-@import url("./styles/components/search-filters.css?v=25");
+@import url("./styles/components/search-filters.css?v=26");
 @import url("./styles/components/tables.css?v=19");
 @import url("./styles/components/pagination.css?v=1");
 @import url("./styles/components/badges.css?v=9");
@@ -22,5 +22,5 @@
 @import url("./styles/pages/daily-races.css?v=13");
 @import url("./styles/pages/detail.css?v=17");
 @import url("./styles/pages/driver-profile.css?v=19");
-@import url("./styles/pages/challenge.css?v=26");
-@import url("./styles/responsive/breakpoints.css?v=33");
+@import url("./styles/pages/challenge.css?v=41");
+@import url("./styles/responsive/breakpoints.css?v=36");

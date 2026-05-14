@@ -25,7 +25,7 @@
     <meta name="twitter:image" content="https://r3e-leaderboards.info/images/rle-share.png">
 
     <script src="modules/analytics.js?v=7"></script>
-    <link rel="stylesheet" href="style.css?v=249">
+    <link rel="stylesheet" href="style.css?v=260">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"/>
     <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png?v=3">
     <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png?v=3">
@@ -38,12 +38,12 @@
     <main>
         <h1 class="sr-only">RaceRoom Challenge Picker</h1>
         <div class="tabs">
-            <a class="tab-button" href="drivers.html">Driver Search</a>
+            <a class="tab-button" href="drivers.html">Drivers</a>
+            <a class="tab-button" href="records.html">Records</a>
             <a class="tab-button" href="tracks.html">Tracks</a>
             <a class="tab-button" href="cars.html">Cars</a>
-            <a class="tab-button" href="records.html">Records</a>
-            <a class="tab-button" href="faq.html">FAQ</a>
             <button class="tab-button active">Challenge</button>
+            <a class="tab-button" href="faq.html">FAQ</a>
         </div>
 
         <div class="tab-content">
@@ -79,6 +79,8 @@
                 </div>
 
                 <div class="challenge-pickers">
+                    <div id="challenge-track-stats"></div>
+
                     <div class="challenge-picker challenge-picker--car" id="challenge-car-picker">
                         <div class="challenge-picker__options" role="radiogroup" aria-label="Car pick granularity">
                             <button type="button" class="challenge-granularity-btn is-active" data-granularity="class" aria-checked="true" role="radio">Class</button>
@@ -131,6 +133,11 @@
     <script src="modules/data/country-mappings.js?v=5" defer></script>
 
     <!-- Core modules -->
+    <script src="modules/compressed-json-helper.js?v=1" defer></script>
+    <script src="modules/field-mappings.js?v=1" defer></script>
+    <script src="modules/data-service.js?v=39" defer></script>
+    <script src="modules/data-normalizer.js?v=1" defer></script>
+    <script src="modules/time-helper.js?v=1" defer></script>
     <script src="modules/custom-select.js?v=8" defer></script>
     <script src="modules/flag-helper.js?v=2" defer></script>
     <script src="modules/car-ratings.js?v=5" defer></script>
@@ -139,8 +146,8 @@
     <script src="modules/utils.js?v=12" defer></script>
 
     <!-- Page modules -->
-    <script src="modules/challenge-picker-service.js?v=11" defer></script>
-    <script src="modules/pages/challenge-picker.js?v=17" defer></script>
+    <script src="modules/challenge-picker-service.js?v=12" defer></script>
+    <script src="modules/pages/challenge-picker.js?v=34" defer></script>
 
     <script src="script.js?v=9" defer></script>
 </body>

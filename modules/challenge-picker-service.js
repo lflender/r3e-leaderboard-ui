@@ -221,10 +221,8 @@
         if (!Array.isArray(carsData) || carsData.length === 0) return null;
         const groupByCat = options && options.groupByCategory;
 
-        // When groupByCategory, first narrow classes by category history
-        const availableData = groupByCat
-            ? excludeRecent(carsData, 'class', classKeyFn(true))
-            : carsData;
+        // Always narrow classes by history (by superclass when grouped, by class name otherwise)
+        const availableData = excludeRecent(carsData, 'class', classKeyFn(groupByCat));
 
         // Flatten to pick from all cars, excluding recent
         const allCars = [];
@@ -238,16 +236,13 @@
         }
         if (allCars.length === 0) {
             // No cars at all — fall back to class pick
-            const fallbackData = groupByCat
-                ? excludeRecent(carsData, 'car', classKeyFn(true))
-                : carsData;
+            const fallbackData = excludeRecent(carsData, 'class', classKeyFn(groupByCat));
             const candidates = excludeRecent(fallbackData, 'car', e => e.class || '');
             const classEntry = candidates[randomIndex(candidates.length, randomFn)];
             const className = classEntry.class || '';
             history.add('car', className);
-            if (groupByCat) {
-                history.add('class', classEntry.superclass || className);
-            }
+            const classKey = groupByCat ? (classEntry.superclass || className) : className;
+            history.add('class', classKey);
             return {
                 className,
                 classLogo: resolveClassLogo(className),
@@ -261,9 +256,8 @@
         const pick = candidates[randomIndex(candidates.length, randomFn)];
         const carName = pick.car.car || '';
         history.add('car', carName);
-        if (groupByCat) {
-            history.add('class', pick.superclass || pick.className);
-        }
+        const classHistoryKey = groupByCat ? (pick.superclass || pick.className) : pick.className;
+        history.add('class', classHistoryKey);
         return {
             className: pick.className,
             classLogo: resolveClassLogo(pick.className),

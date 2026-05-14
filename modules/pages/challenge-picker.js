@@ -47,7 +47,11 @@
 
     // Last picked results for granularity refinement
     let lastCarClassResult = null;   // { className, classLogo }
+    let lastCarPickResult = null;    // full pick result for re-rendering
     let lastTrackBaseResult = null;  // { trackBase, trackLogo }
+    let lastPickedClassName = null;  // for track stats class ID lookup
+    let lastPickedSuperclass = null; // for combined category stats
+    let lastPickedLayoutId = null;   // for track stats track ID
 
     // Cached rendered HTML for each granularity level
     let carClassHtml = '';
@@ -58,6 +62,40 @@
     let groupByCategory = false;
     let hardcoreMode = false;
     let hardcoreCb, hardcoreLabel;
+
+    // Track stats
+    let trackStatsContainer;
+    const leaderboardPromises = new Map(); // single-flight promise cache
+
+    // Valid combinations index: classId → Set of trackId strings
+    let validTracksByClass = null; // null = not loaded yet
+    let combinationsIndexPromise = null;
+
+    async function loadCombinationsIndex() {
+        if (validTracksByClass) return;
+        if (combinationsIndexPromise) return combinationsIndexPromise;
+        combinationsIndexPromise = (async () => {
+            try {
+                const ds = window.dataService;
+                if (!ds) return;
+                const combos = await ds.fetchAllCombinations();
+                const map = new Map();
+                for (const c of combos) {
+                    const cid = String(c.class_id);
+                    const tid = String(c.track_id);
+                    if (!map.has(cid)) map.set(cid, new Set());
+                    map.get(cid).add(tid);
+                }
+                validTracksByClass = map;
+            } catch (_) { /* index unavailable – pick without filtering */ }
+        })();
+        return combinationsIndexPromise;
+    }
+
+    function getValidTracksForClass(classId) {
+        if (!validTracksByClass || !classId) return null; // null = no filtering
+        return validTracksByClass.get(String(classId)) || new Set();
+    }
 
     /* ── selectors (cached once on init) ──────────────────── */
 
@@ -85,6 +123,259 @@
         return window.R3ECarUtils ? window.R3ECarUtils.resolveBrandLogoPath(carName) : '';
     }
 
+    /* ── class ID reverse-lookup ──────────────────────────── */
+
+    function resolveClassId(className) {
+        const map = window.CAR_CLASSES_DATA;
+        if (!map || !className) return null;
+        for (const [id, name] of Object.entries(map)) {
+            if (name === className) return id;
+        }
+        return null;
+    }
+
+    /* ── track stats (leaderboard fetch) ──────────────────── */
+
+    function fetchLeaderboard(trackId, classId) {
+        const key = `${trackId}_${classId}`;
+        if (leaderboardPromises.has(key)) return leaderboardPromises.get(key);
+
+        const promise = (async () => {
+            try {
+                const ds = window.dataService;
+                if (!ds) return null;
+                const data = await ds.fetchLeaderboardDetails(trackId, classId);
+                return ds.extractLeaderboardArray(data);
+            } catch (_) {
+                return null;
+            } finally {
+                leaderboardPromises.delete(key);
+            }
+        })();
+        leaderboardPromises.set(key, promise);
+        return promise;
+    }
+
+    function extractLapTimeRaw(item) {
+        const raw = item.LapTime || item['Lap Time'] || item.lap_time || item.laptime || item.Time || '';
+        // Strip gap portion: "1m 23.456s, +01.533s" → "1m 23.456s"
+        return String(raw).split(',')[0].trim();
+    }
+
+    function formatLapTime(raw) {
+        if (window.R3ETimeUtils && window.R3ETimeUtils.formatClassicLapTime) {
+            return window.R3ETimeUtils.formatClassicLapTime(raw);
+        }
+        return raw;
+    }
+
+    function extractDriverName(item) {
+        // Raw cache entries have nested driver.Name
+        const nested = item.driver?.Name || item.driver?.name;
+        if (nested) return nested;
+        return window.DataNormalizer ? window.DataNormalizer.extractName(item) : (item.Name || item.name || '-');
+    }
+
+    function extractDriverCountry(item) {
+        // Raw cache entries have nested country.Name
+        const nested = item.country?.Name || item.country?.name;
+        if (nested) return nested;
+        return window.DataNormalizer ? window.DataNormalizer.extractCountry(item) : (item.Country || item.country || '');
+    }
+
+    function extractDriverRank(item) {
+        if (item.rank && typeof item.rank === 'object') return item.rank.Name || item.rank.name || '';
+        if (item.Rank && typeof item.Rank === 'object') return item.Rank.Name || item.Rank.name || '';
+        return item.Rank || item.rank || '';
+    }
+
+    function buildTrackStats(entries) {
+        if (!Array.isArray(entries) || entries.length === 0) return null;
+        const first = entries[0];
+        const last = entries[entries.length - 1];
+        return {
+            count: entries.length,
+            bestTime: extractLapTimeRaw(first),
+            worstTime: extractLapTimeRaw(last),
+            topDriver: extractDriverName(first),
+            topCountry: extractDriverCountry(first),
+            topRank: extractDriverRank(first)
+        };
+    }
+
+    function getCategoryClassSpecs(superclass) {
+        const rawCarsData = Array.isArray(window.CARS_DATA) ? window.CARS_DATA : [];
+        const classNames = rawCarsData
+            .filter(entry => (entry.superclass || '') === superclass)
+            .map(entry => entry.class || '');
+        const unique = [...new Set(classNames)];
+        return unique
+            .map(name => ({ classId: resolveClassId(name), className: name }))
+            .filter(spec => spec.classId != null);
+    }
+
+    function buildCombinedStats(entries) {
+        if (!Array.isArray(entries) || entries.length === 0) return null;
+        const first = entries[0];
+        const last = entries[entries.length - 1];
+        // Combined entries are normalized — use flat fields
+        const name = first.Name || extractDriverName(first);
+        const country = first.Country || extractDriverCountry(first);
+        const bestRaw = first.LapTime || first['Lap Time'] || '';
+        const worstRaw = last.LapTime || last['Lap Time'] || '';
+        return {
+            count: entries.length,
+            bestTime: String(bestRaw).split(',')[0].trim(),
+            worstTime: String(worstRaw).split(',')[0].trim(),
+            topDriver: name,
+            topCountry: country,
+            topRank: first.Rank || extractDriverRank(first)
+        };
+    }
+
+    function renderDriverHtml(driverName, countryName, rank) {
+        const FH = typeof FlagHelper !== 'undefined' ? FlagHelper : null;
+        const flag = FH && FH.countryToFlag ? FH.countryToFlag(countryName) : '';
+        const flagHtml = flag ? `<span class="challenge-stats-flag">${flag}</span>` : '';
+        const driverHref = `drivers.html?driver=${encodeURIComponent('"' + driverName + '"')}`;
+
+        const rankStarsHtml = (window.R3EUtils && typeof window.R3EUtils.renderRankStars === 'function')
+            ? window.R3EUtils.renderRankStars(rank, true) : '';
+
+        const getMpPos = typeof window.getMpPos === 'function' ? window.getMpPos : null;
+        const getMpPosNameCls = typeof window.getMpPosNameClasses === 'function' ? window.getMpPosNameClasses : null;
+        const countryCode = FH && FH.findCountryCodeByName ? FH.findCountryCodeByName(countryName) : '';
+        const mpPos = getMpPos ? getMpPos(driverName, countryCode) : null;
+        const nameClasses = getMpPosNameCls && mpPos ? getMpPosNameCls(mpPos) : '';
+        const linkClasses = ['challenge-stats-driver', nameClasses].filter(Boolean).join(' ');
+
+        return `<a class="${linkClasses}" href="${escapeHtml(driverHref)}">${flagHtml}${escapeHtml(driverName)}${rankStarsHtml}</a>`;
+    }
+
+    function renderTrackStatsHtml(stats, trackId, classId, combinedStats, superclass, combinedOnly) {
+        if (!stats && !combinedStats) return '';
+        const detailHref = `detail.html?track=${encodeURIComponent(trackId)}&class=${encodeURIComponent(classId)}`;
+
+        let rows = '';
+
+        if (combinedStats && superclass && combinedOnly) {
+            // Combined-only view (Class granularity): show only combined stats
+            const combiDetailHref = `detail.html?track=${encodeURIComponent(trackId)}&superclass=${encodeURIComponent(superclass)}`;
+            const combiLast = combinedStats.count > 1 ? `
+                <span class="challenge-stats-label">Last</span>
+                <span class="challenge-stats-value challenge-stats-time challenge-stats-time--last">${escapeHtml(formatLapTime(combinedStats.worstTime))}</span>` : '';
+            rows += `<div class="challenge-stats-row">
+                <span class="challenge-stats-label">Entries</span>
+                <span class="challenge-stats-value">${combinedStats.count}</span>
+                <span class="challenge-stats-label">Best</span>
+                <span class="challenge-stats-value challenge-stats-time challenge-stats-time--best">${escapeHtml(formatLapTime(combinedStats.bestTime))}</span>${combiLast}
+            </div>`;
+
+            rows += `<div class="challenge-stats-row">
+                <span class="challenge-stats-label">#1</span>
+                <span class="challenge-stats-value">${renderDriverHtml(combinedStats.topDriver, combinedStats.topCountry, combinedStats.topRank)}</span>
+            </div>`;
+            rows += `<div class="challenge-stats-row challenge-stats-row--link">
+                <a class="challenge-stats-detail-link" href="${escapeHtml(combiDetailHref)}">View full leaderboard →</a>
+            </div>`;
+        } else if (combinedStats && superclass) {
+            // Full view: class row + combined row + both drivers + both links
+            const combiDetailHref = `detail.html?track=${encodeURIComponent(trackId)}&superclass=${encodeURIComponent(superclass)}`;
+
+            const classLast = stats.count > 1 ? `
+                <span class="challenge-stats-label">Last</span>
+                <span class="challenge-stats-value challenge-stats-time challenge-stats-time--last">${escapeHtml(formatLapTime(stats.worstTime))}</span>` : '';
+            const combiLast2 = combinedStats.count > 1 ? `
+                <span class="challenge-stats-label">Last</span>
+                <span class="challenge-stats-value challenge-stats-time challenge-stats-time--last">${escapeHtml(formatLapTime(combinedStats.worstTime))}</span>` : '';
+            rows += `<div class="challenge-stats-row">
+                <span class="challenge-stats-label">Entries</span>
+                <span class="challenge-stats-value">${stats.count}</span>
+                <span class="challenge-stats-label">Best</span>
+                <span class="challenge-stats-value challenge-stats-time challenge-stats-time--best">${escapeHtml(formatLapTime(stats.bestTime))}</span>${classLast}
+            </div>`;
+            rows += `<div class="challenge-stats-row">
+                <span class="challenge-stats-label">Combined</span>
+                <span class="challenge-stats-value">${combinedStats.count}</span>
+                <span class="challenge-stats-label">Best</span>
+                <span class="challenge-stats-value challenge-stats-time challenge-stats-time--best">${escapeHtml(formatLapTime(combinedStats.bestTime))}</span>${combiLast2}
+            </div>`;
+
+            // #1 class driver
+            rows += `<div class="challenge-stats-row">
+                <span class="challenge-stats-label">#1 class</span>
+                <span class="challenge-stats-value">${renderDriverHtml(stats.topDriver, stats.topCountry, stats.topRank)}</span>
+            </div>`;
+
+            // #1 combined driver
+            rows += `<div class="challenge-stats-row">
+                <span class="challenge-stats-label">#1 ${escapeHtml(superclass)}</span>
+                <span class="challenge-stats-value">${renderDriverHtml(combinedStats.topDriver, combinedStats.topCountry, combinedStats.topRank)}</span>
+            </div>`;
+
+            rows += `<div class="challenge-stats-row challenge-stats-row--link">
+                <a class="challenge-stats-detail-link" href="${escapeHtml(detailHref)}">Class leaderboard →</a>
+                <a class="challenge-stats-detail-link" href="${escapeHtml(combiDetailHref)}">Combined leaderboard →</a>
+            </div>`;
+        } else if (stats) {
+            // Single-class view (no combined)
+            const singleLast = stats.count > 1 ? `
+                <span class="challenge-stats-label">Last</span>
+                <span class="challenge-stats-value challenge-stats-time challenge-stats-time--last">${escapeHtml(formatLapTime(stats.worstTime))}</span>` : '';
+            rows += `<div class="challenge-stats-row">
+                <span class="challenge-stats-label">Entries</span>
+                <span class="challenge-stats-value">${stats.count}</span>
+                <span class="challenge-stats-label">Best</span>
+                <span class="challenge-stats-value challenge-stats-time challenge-stats-time--best">${escapeHtml(formatLapTime(stats.bestTime))}</span>${singleLast}
+            </div>`;
+            rows += `<div class="challenge-stats-row">
+                <span class="challenge-stats-label">#1</span>
+                <span class="challenge-stats-value">${renderDriverHtml(stats.topDriver, stats.topCountry, stats.topRank)}</span>
+            </div>`;
+            rows += `<div class="challenge-stats-row challenge-stats-row--link">
+                <a class="challenge-stats-detail-link" href="${escapeHtml(detailHref)}">View full leaderboard →</a>
+            </div>`;
+        }
+
+        return `<div class="challenge-track-stats">${rows}</div>`;
+    }
+
+    async function showTrackStats(trackId, classId) {
+        if (!trackStatsContainer) return;
+        if (currentMode !== MODE_BOTH || !trackId || !classId) {
+            trackStatsContainer.innerHTML = '';
+            return;
+        }
+        trackStatsContainer.innerHTML = '<div class="challenge-stats-loading">Loading stats…</div>';
+
+        // Fetch single-class stats
+        const entries = await fetchLeaderboard(trackId, classId);
+        const stats = buildTrackStats(entries);
+        if (!stats) {
+            trackStatsContainer.innerHTML = '';
+            return;
+        }
+
+        // If grouped by category, also fetch combined stats
+        const showCombinedOnly = groupByCategory && lastPickedSuperclass && carGranularity === GRANULARITY_CLASS;
+        let combinedStats = null;
+        if (groupByCategory && lastPickedSuperclass) {
+            if (!showCombinedOnly) {
+                trackStatsContainer.innerHTML = renderTrackStatsHtml(stats, trackId, classId)
+                    + '<div class="challenge-stats-loading">Loading combined stats…</div>';
+            }
+            try {
+                const classSpecs = getCategoryClassSpecs(lastPickedSuperclass);
+                if (classSpecs.length > 1 && window.dataService) {
+                    const combined = await window.dataService.buildCombinedLeaderboard(trackId, classSpecs);
+                    combinedStats = buildCombinedStats(combined);
+                }
+            } catch (_) { /* ignore */ }
+        }
+
+        trackStatsContainer.innerHTML = renderTrackStatsHtml(stats, trackId, classId, combinedStats, lastPickedSuperclass, showCombinedOnly);
+    }
+
     /* ── toggle helpers ───────────────────────────────────── */
 
     function activateButton(buttons, activeBtn) {
@@ -105,12 +396,12 @@
 
     /* ── rendering ────────────────────────────────────────── */
 
-    function renderCarClassResult(result) {
+    function renderCarClassResult(result, showSpecificClass) {
         if (!result) return '<span>No car data available</span>';
 
         // When grouped by category and the pick has a superclass, show category with all class logos
         if (groupByCategory && result.superclass) {
-            return renderCategoryClassResult(result);
+            return renderCategoryClassResult(result, showSpecificClass);
         }
 
         const logo = result.classLogo
@@ -119,7 +410,7 @@
         return `<div class="challenge-result-class">${logo}<span>${escapeHtml(result.className)}</span></div>`;
     }
 
-    function renderCategoryClassResult(result) {
+    function renderCategoryClassResult(result, showSpecificClass) {
         const rawCarsData = Array.isArray(window.CARS_DATA) ? window.CARS_DATA : [];
         const classesInCategory = rawCarsData
             .filter(entry => (entry.superclass || '') === result.superclass)
@@ -134,16 +425,19 @@
             }
             const logo = resolveClassLogo(uniqueClasses[i]);
             if (logo) {
-                logosHtml += `<img class="challenge-category-logo" src="${escapeHtml(logo)}" alt="${escapeHtml(uniqueClasses[i])} logo" loading="lazy" decoding="async">`;
+                logosHtml += `<img class="challenge-category-logo" src="${escapeHtml(logo)}" alt="${escapeHtml(uniqueClasses[i])} logo" title="${escapeHtml(uniqueClasses[i])}" loading="lazy" decoding="async">`;
             }
         }
         logosHtml += '</div>';
-        return `<div class="challenge-result-class challenge-result-category"><span>${escapeHtml(result.superclass)}</span>${logosHtml}</div>`;
+        const displayName = showSpecificClass && result.className && result.className !== result.superclass
+            ? `${result.className} - ${result.superclass}`
+            : result.superclass;
+        return `<div class="challenge-result-class challenge-result-category"><span>${escapeHtml(displayName)}</span>${logosHtml}</div>`;
     }
 
     function renderCarResult(result) {
         if (!result) return '<span>No car data available</span>';
-        let html = renderCarClassResult(result);
+        let html = renderCarClassResult(result, true);
         if (!result.carName) return html;
 
         const car = result.carData || {};
@@ -190,9 +484,13 @@
 
         const weightDisplay = (car.weight || '—').replace(/kg\*$/, 'kg with driver');
 
+        const classLogoHtml = (groupByCategory && result.superclass && result.classLogo)
+            ? `<img class="challenge-car-class-logo" src="${escapeHtml(result.classLogo)}" alt="${escapeHtml(result.className)} logo" title="${escapeHtml(result.className)}" loading="lazy" decoding="async">`
+            : '';
+
         html += `<article class="car-tile challenge-car-tile">
           <div class="car-tile-link">
-            <div class="car-tile-name">${carNameWrapped}</div>
+            <div class="car-tile-name">${classLogoHtml}${carNameWrapped}</div>
             ${imageUrl ? `<div class="car-tile-image-wrap">
               <div class="car-tile-top-row">${flagHtml}${ratingHtml}</div>
               ${assistsHtml}
@@ -240,9 +538,6 @@
     /* ── pick action ──────────────────────────────────────── */
 
     function attachCarHandlers() {
-        if (window.R3ECarUtils && window.R3ECarUtils.attachRatingHandlers) {
-            window.R3ECarUtils.attachRatingHandlers(carResult);
-        }
         if (window.R3ECarUtils && window.R3ECarUtils.attachBrandLogoHandlers) {
             window.R3ECarUtils.attachBrandLogoHandlers(carResult);
         }
@@ -259,11 +554,17 @@
             carClassHtml = '<span>No cars match the current filters</span>';
             carDetailHtml = '';
             lastCarClassResult = null;
+            lastCarPickResult = null;
+            lastPickedClassName = null;
+            lastPickedSuperclass = null;
         } else {
             const pickOpts = groupByCategory ? { groupByCategory: true } : undefined;
             // Always pick a full car result (class + car)
             const result = svc.pickCar(carsData, resolveClassLogo, resolveBrandLogo, rng, pickOpts);
             lastCarClassResult = result ? { className: result.className, classLogo: result.classLogo } : null;
+            lastCarPickResult = result;
+            lastPickedClassName = result ? result.className : null;
+            lastPickedSuperclass = result ? result.superclass : null;
             carClassHtml = renderCarClassResult(result);
             carDetailHtml = renderCarResult(result);
         }
@@ -273,14 +574,18 @@
         attachCarHandlers();
     }
 
-    function doPickTrack() {
-        const tracksData = Array.isArray(window.TRACKS_DATA) ? window.TRACKS_DATA : [];
+    function doPickTrack(validTrackIds) {
+        let tracksData = Array.isArray(window.TRACKS_DATA) ? window.TRACKS_DATA : [];
+        if (validTrackIds) {
+            tracksData = tracksData.filter(t => validTrackIds.has(String(t.id)));
+        }
         const svc = window.ChallengePickerService;
         const rng = Math.random;
 
         // Always pick a full layout result (base + layout)
         const result = svc.pickLayout(tracksData, resolveTrackLogo, rng);
         lastTrackBaseResult = result ? { trackBase: result.trackBase, trackLogo: result.trackLogo } : null;
+        lastPickedLayoutId = result ? result.layoutId : null;
         trackBaseHtml = renderTrackResult(lastTrackBaseResult);
         trackLayoutHtml = renderTrackResult(result);
 
@@ -295,9 +600,20 @@
             doPickCar();
         }
         if (currentMode !== MODE_CAR) {
-            doPickTrack();
+            // Filter tracks to those with entries for the picked class
+            const classId = lastPickedClassName ? resolveClassId(lastPickedClassName) : null;
+            const validIds = (currentMode === MODE_BOTH) ? getValidTracksForClass(classId) : null;
+            doPickTrack(validIds);
         }
         updateRepickButtons();
+
+        // Show track stats when we have both a car class and a track
+        const classId = lastPickedClassName ? resolveClassId(lastPickedClassName) : null;
+        if (lastPickedLayoutId && classId) {
+            showTrackStats(lastPickedLayoutId, classId);
+        } else if (trackStatsContainer) {
+            trackStatsContainer.innerHTML = '';
+        }
 
         if (hardcoreMode) {
             activateHardcoreLock();
@@ -403,6 +719,12 @@
         const html = newGranularity === GRANULARITY_CAR ? (carDetailHtml || carClassHtml) : carClassHtml;
         animateResult(carResult, html);
         attachCarHandlers();
+
+        // Refresh track stats to reflect combined-only vs full view
+        const classId = lastPickedClassName ? resolveClassId(lastPickedClassName) : null;
+        if (lastPickedLayoutId && classId) {
+            showTrackStats(lastPickedLayoutId, classId);
+        }
     }
 
     function refineTrackGranularity(newGranularity) {
@@ -431,12 +753,36 @@
         if (!repickCarBtn || repickCarBtn.disabled) return;
         doPickCar();
         repickCarBtn.disabled = true;
+
+        const classId = lastPickedClassName ? resolveClassId(lastPickedClassName) : null;
+        // If current track has no entries for the new class, repick track too
+        const validIds = getValidTracksForClass(classId);
+        if (validIds && lastPickedLayoutId && !validIds.has(String(lastPickedLayoutId))) {
+            doPickTrack(validIds);
+        }
+
+        // Refresh track stats
+        const cid = lastPickedClassName ? resolveClassId(lastPickedClassName) : null;
+        if (lastPickedLayoutId && cid) {
+            showTrackStats(lastPickedLayoutId, cid);
+        } else if (trackStatsContainer) {
+            trackStatsContainer.innerHTML = '';
+        }
     }
 
     function repickTrack() {
         if (!repickTrackBtn || repickTrackBtn.disabled) return;
-        doPickTrack();
+        // Filter tracks to those with entries for the current class
+        const classId = lastPickedClassName ? resolveClassId(lastPickedClassName) : null;
+        const validIds = getValidTracksForClass(classId);
+        doPickTrack(validIds);
         repickTrackBtn.disabled = true;
+        // Refresh track stats with new track
+        if (lastPickedLayoutId && classId) {
+            showTrackStats(lastPickedLayoutId, classId);
+        } else if (trackStatsContainer) {
+            trackStatsContainer.innerHTML = '';
+        }
     }
 
     /* ── filter definitions ───────────────────────────────── */
@@ -519,7 +865,11 @@
         filterTrans = '';
         filterRating = '';
         lastCarClassResult = null;
+        lastCarPickResult = null;
         lastTrackBaseResult = null;
+        lastPickedClassName = null;
+        lastPickedSuperclass = null;
+        lastPickedLayoutId = null;
         carClassHtml = '';
         carDetailHtml = '';
         trackBaseHtml = '';
@@ -545,6 +895,7 @@
         pickBtn = document.getElementById('challenge-pick-btn');
         repickCarBtn = document.getElementById('repick-car-btn');
         repickTrackBtn = document.getElementById('repick-track-btn');
+        trackStatsContainer = document.getElementById('challenge-track-stats');
 
         modeButtons.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -554,6 +905,15 @@
                 updatePickerVisibility();
                 updateRepickButtons();
                 ssSet('mode', currentMode);
+                // Show/hide stats based on mode
+                if (currentMode === MODE_BOTH) {
+                    const classId = lastPickedClassName ? resolveClassId(lastPickedClassName) : null;
+                    if (lastPickedLayoutId && classId) {
+                        showTrackStats(lastPickedLayoutId, classId);
+                    }
+                } else if (trackStatsContainer) {
+                    trackStatsContainer.innerHTML = '';
+                }
             });
         });
 
@@ -587,6 +947,19 @@
             groupCb.addEventListener('change', () => {
                 groupByCategory = groupCb.checked;
                 ssSet('group-cat', groupCb.checked);
+                // Re-render current car display with updated grouping
+                if (lastCarPickResult) {
+                    carClassHtml = renderCarClassResult(lastCarPickResult);
+                    carDetailHtml = renderCarResult(lastCarPickResult);
+                    const html = carGranularity === GRANULARITY_CAR ? carDetailHtml || carClassHtml : carClassHtml;
+                    animateResult(carResult, html);
+                    attachCarHandlers();
+                    // Refresh stats for new superclass state
+                    const classId = lastPickedClassName ? resolveClassId(lastPickedClassName) : null;
+                    if (lastPickedLayoutId && classId) {
+                        showTrackStats(lastPickedLayoutId, classId);
+                    }
+                }
             });
         }
 
@@ -600,6 +973,9 @@
         }
 
         initFilters();
+
+        // Pre-load valid combinations index (async, non-blocking)
+        loadCombinationsIndex();
 
         // Restore toggle states from session
         const savedMode = ssGet('mode');

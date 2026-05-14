@@ -63,20 +63,16 @@
 
 /* Pickers row */
 .challenge-pickers {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 440px));
     gap: 1.5rem;
     justify-content: center;
-    align-items: stretch;
-    flex-wrap: wrap;
     margin: 0 auto;
     max-width: 920px;
     width: 100%;
 }
 
 .challenge-picker {
-    flex: 1;
-    min-width: 300px;
-    max-width: 440px;
     background-color: var(--surface);
     border: 1px solid var(--border);
     border-radius: 12px;
@@ -287,6 +283,13 @@
     color: var(--primary-color);
 }
 
+.challenge-car-class-logo {
+    height: 36px;
+    object-fit: contain;
+    vertical-align: middle;
+    margin-right: 0.35rem;
+}
+
 .challenge-track-description {
     font-size: 0.82rem;
     color: var(--text-secondary);
@@ -474,4 +477,121 @@
     opacity: 0.4;
     cursor: default;
     pointer-events: none;
+}
+
+/* Read-only car ratings on challenge page */
+.challenge-picker .car-rating-btn {
+    cursor: default;
+    pointer-events: none;
+}
+
+.challenge-picker .car-tile:hover .car-rating-widget .car-rating-btn {
+    opacity: 0;
+    max-width: 0;
+    padding: 0;
+}
+
+.challenge-picker .car-rating-widget[data-rated="true"] .car-rating-btn[data-filled="true"] {
+    opacity: 1;
+    max-width: 1.6rem;
+    padding: 0 0.03rem;
+}
+
+/* Center single picker when the other is hidden */
+.challenge-pickers:has(.challenge-picker--hidden) .challenge-picker:not(.challenge-picker--hidden) {
+    grid-column: 1 / -1;
+    justify-self: center;
+    max-width: 440px;
+    width: 100%;
+}
+
+/* Track stats */
+#challenge-track-stats {
+    grid-column: 1 / -1;
+}
+
+.challenge-track-stats {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1.5rem;
+    padding: 0.8rem 1.2rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    box-sizing: border-box;
+    animation: challenge-spin-fade 0.4s ease-out;
+}
+
+.challenge-stats-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-basis: 100%;
+    justify-content: center;
+}
+
+.challenge-stats-label {
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.challenge-stats-value {
+    color: var(--text-primary);
+    font-size: 0.92rem;
+    font-weight: 600;
+}
+
+.challenge-stats-time {
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.88rem;
+}
+
+.challenge-stats-time--best {
+    color: #6ee7a0;
+}
+
+.challenge-stats-time--last {
+    color: #fca5a5;
+}
+
+.challenge-stats-driver {
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: color 0.15s;
+}
+
+.challenge-stats-driver:hover {
+    color: var(--primary-color);
+}
+
+.challenge-stats-flag {
+    margin-right: 0.25rem;
+}
+
+.challenge-stats-row--link {
+    flex-basis: 100%;
+    justify-content: center;
+    margin-top: 0.2rem;
+}
+
+.challenge-stats-detail-link {
+    color: var(--primary-color);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: opacity 0.15s;
+}
+
+.challenge-stats-detail-link:hover {
+    opacity: 0.8;
+}
+
+.challenge-stats-loading {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-style: italic;
 }

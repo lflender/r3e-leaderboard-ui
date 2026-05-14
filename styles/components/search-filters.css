@@ -67,6 +67,7 @@
     width: auto;
     text-align: left;
     padding: 0.78rem 0.9rem;
+    font-family: inherit;
     font-size: 0.98rem;
     border-radius: 8px;
     border: 2px solid var(--border);

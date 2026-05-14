@@ -525,6 +525,37 @@
         font-size: 0.82rem;
     }
 
+    .challenge-group-category,
+    .challenge-hardcore-label,
+    .combine-checkbox-label {
+        padding: 0.55rem 0.7rem;
+        font-size: 0.85rem;
+    }
+
+    .challenge-action {
+        gap: 0.4rem;
+    }
+
+    .challenge-repick-btn {
+        min-width: 0;
+        padding: 0.45rem 0.6rem;
+        font-size: 0.75rem;
+        flex: 1 1 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .challenge-pick-btn {
+        padding: 0.6rem 1.8rem;
+        font-size: 0.95rem;
+        flex-shrink: 0;
+    }
+
+    .challenge-pickers {
+        grid-template-columns: 1fr;
+    }
+
     #cars-search-container {
         margin-bottom: 0;
     }

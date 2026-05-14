@@ -14,7 +14,7 @@
   </url>
   <url>
     <loc>https://r3e-leaderboards.info/tracks.html</loc>
-    <lastmod>2026-05-14</lastmod>
+    <lastmod>2026-05-15</lastmod>
     <priority>0.8</priority>
     <changefreq>weekly</changefreq>
   </url>
@@ -34,6 +34,12 @@
     <loc>https://r3e-leaderboards.info/faq.html</loc>
     <lastmod>2026-05-14</lastmod>
     <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://r3e-leaderboards.info/challenge.html</loc>
+    <lastmod>2026-05-15</lastmod>
+    <priority>0.6</priority>
     <changefreq>monthly</changefreq>
   </url>
 </urlset>

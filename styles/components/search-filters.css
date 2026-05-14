@@ -184,3 +184,35 @@
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
+/* Combine checkbox — filter-row style matching custom-select toggles */
+.combine-checkbox-container {
+    align-items: center;
+}
+
+.combine-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.78rem 0.9rem;
+    font-size: 0.98rem;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+    background: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+    transition: border-color 0.15s;
+}
+
+.combine-checkbox-label:hover {
+    border-color: var(--primary-color);
+}
+
+.combine-checkbox-label input[type="checkbox"] {
+    accent-color: var(--primary-color);
+    cursor: pointer;
+    width: 1em;
+    height: 1em;
+}
+

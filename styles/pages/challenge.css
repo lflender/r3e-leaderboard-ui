@@ -331,6 +331,7 @@
     align-items: center;
     justify-content: center;
     gap: 0.75rem;
+    width: 100%;
 }
 
 .challenge-pick-btn {
@@ -358,6 +359,7 @@
 
 .challenge-repick-btn {
     padding: 0.55rem 1.4rem;
+    min-width: 140px;
     font-size: 0.92rem;
     font-weight: 600;
     border: 1px solid var(--border);
@@ -392,4 +394,84 @@
 @keyframes challenge-spin-fade {
     0% { opacity: 0; transform: translateY(12px); }
     100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Hardcore mode */
+.challenge-hardcore-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.5rem 0.9rem;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #f87171;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    background: transparent;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.15s;
+}
+
+.challenge-action + .challenge-action {
+    margin-top: 0.4rem;
+}
+
+.challenge-hardcore-label:hover {
+    border-color: var(--primary-color);
+}
+
+.challenge-hardcore-label input[type="checkbox"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 1.1em;
+    height: 1.1em;
+    border: 2px solid var(--border);
+    border-radius: 3px;
+    background: transparent;
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.challenge-hardcore-label input[type="checkbox"]:checked {
+    background: #dc2626;
+    border-color: #dc2626;
+}
+
+.challenge-hardcore-label input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 0px;
+    width: 5px;
+    height: 9px;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.challenge-hardcore-label .info-icon {
+    font-size: 0.72em;
+    margin-left: 0;
+    color: #f87171;
+}
+
+.challenge-pick-btn--hardcore {
+    background: #b91c1c;
+    border-color: #dc2626;
+    box-shadow: 0 2px 8px rgba(185, 28, 28, 0.25);
+}
+
+.challenge-pick-btn--hardcore:hover {
+    background: #991b1b;
+    box-shadow: 0 4px 16px rgba(185, 28, 28, 0.35);
+}
+
+.challenge-pick-btn--locked {
+    opacity: 0.4;
+    cursor: default;
+    pointer-events: none;
 }

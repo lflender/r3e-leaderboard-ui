@@ -25,7 +25,7 @@
     <meta name="twitter:image" content="https://r3e-leaderboards.info/images/rle-share.png">
 
     <script src="modules/analytics.js?v=7"></script>
-    <link rel="stylesheet" href="style.css?v=246">
+    <link rel="stylesheet" href="style.css?v=249">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"/>
     <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png?v=3">
     <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png?v=3">
@@ -101,6 +101,13 @@
                     <button type="button" class="challenge-pick-btn" id="challenge-pick-btn">Pick!</button>
                     <button type="button" class="challenge-repick-btn" id="repick-track-btn" disabled>Re-Pick Track</button>
                 </div>
+                <div class="challenge-action">
+                    <label class="challenge-hardcore-label" id="challenge-hardcore-label">
+                        <input type="checkbox" id="challenge-hardcore-cb">
+                        <span>Hardcore</span>
+                        <span class="info-icon" title="You will not be able to pick again for 10 minutes" aria-label="Hardcore info" role="img">i</span>
+                    </label>
+                </div>
             </div>
         </div>
 
@@ -133,7 +140,7 @@
 
     <!-- Page modules -->
     <script src="modules/challenge-picker-service.js?v=11" defer></script>
-    <script src="modules/pages/challenge-picker.js?v=16" defer></script>
+    <script src="modules/pages/challenge-picker.js?v=17" defer></script>
 
     <script src="script.js?v=9" defer></script>
 </body>

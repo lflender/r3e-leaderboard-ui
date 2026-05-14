@@ -19,6 +19,20 @@
     const GRANULARITY_LAYOUT = 'layout';
 
     const SPIN_CLASS = 'challenge-picker__result--spinning';
+    const HARDCORE_LOCKOUT_MS = 10 * 60 * 1000; // 10 minutes
+    const SS_PREFIX = 'challenge-';
+
+    /* ── sessionStorage helpers ────────────────────────────── */
+
+    function ssGet(key) {
+        try { return sessionStorage.getItem(SS_PREFIX + key); } catch (_) { return null; }
+    }
+    function ssSet(key, val) {
+        try { sessionStorage.setItem(SS_PREFIX + key, val); } catch (_) { /* ignored */ }
+    }
+    function ssRemove(key) {
+        try { sessionStorage.removeItem(SS_PREFIX + key); } catch (_) { /* ignored */ }
+    }
 
     /* ── state ────────────────────────────────────────────── */
 
@@ -42,6 +56,8 @@
     let trackLayoutHtml = '';
 
     let groupByCategory = false;
+    let hardcoreMode = false;
+    let hardcoreCb, hardcoreLabel;
 
     /* ── selectors (cached once on init) ──────────────────── */
 
@@ -273,6 +289,8 @@
     }
 
     function doPick() {
+        if (isHardcoreLocked()) return;
+
         if (currentMode !== MODE_TRACK) {
             doPickCar();
         }
@@ -280,6 +298,97 @@
             doPickTrack();
         }
         updateRepickButtons();
+
+        if (hardcoreMode) {
+            activateHardcoreLock();
+        }
+    }
+
+    /* ── hardcore lockout ─────────────────────────────────── */
+
+    function isHardcoreLocked() {
+        const until = ssGet('hardcore-until');
+        if (!until) return false;
+        return Date.now() < Number(until);
+    }
+
+    function hardcoreRemainingMs() {
+        const until = ssGet('hardcore-until');
+        if (!until) return 0;
+        return Math.max(0, Number(until) - Date.now());
+    }
+
+    function activateHardcoreLock() {
+        const until = Date.now() + HARDCORE_LOCKOUT_MS;
+        ssSet('hardcore-until', until);
+        ssSet('hardcore-car-html', carResult.innerHTML);
+        ssSet('hardcore-track-html', trackResult.innerHTML);
+        ssSet('hardcore-mode', currentMode);
+        applyHardcoreLockUI();
+    }
+
+    function applyHardcoreLockUI() {
+        pickBtn.classList.add('challenge-pick-btn--locked');
+        if (repickCarBtn) repickCarBtn.disabled = true;
+        if (repickTrackBtn) repickTrackBtn.disabled = true;
+        if (hardcoreCb) hardcoreCb.disabled = true;
+
+        const remaining = hardcoreRemainingMs();
+        if (remaining > 0) {
+            updateLockTimer();
+        }
+    }
+
+    function updateLockTimer() {
+        const remaining = hardcoreRemainingMs();
+        if (remaining <= 0) {
+            clearHardcoreLock();
+            return;
+        }
+        const mins = Math.floor(remaining / 60000);
+        const secs = Math.floor((remaining % 60000) / 1000);
+        pickBtn.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+        setTimeout(updateLockTimer, 1000);
+    }
+
+    function clearHardcoreLock() {
+        ssRemove('hardcore-until');
+        ssRemove('hardcore-car-html');
+        ssRemove('hardcore-track-html');
+        ssRemove('hardcore-mode');
+        pickBtn.classList.remove('challenge-pick-btn--locked', 'challenge-pick-btn--hardcore');
+        pickBtn.textContent = 'Pick!';
+        if (hardcoreCb) {
+            hardcoreCb.checked = false;
+            hardcoreCb.disabled = false;
+        }
+        hardcoreMode = false;
+        updateRepickButtons();
+    }
+
+    function restoreHardcorePick() {
+        if (!isHardcoreLocked()) return false;
+        const savedMode = ssGet('hardcore-mode') || MODE_BOTH;
+        const savedCarHtml = ssGet('hardcore-car-html') || '';
+        const savedTrackHtml = ssGet('hardcore-track-html') || '';
+
+        currentMode = savedMode;
+        // Activate the matching mode button
+        modeButtons.forEach(btn => {
+            btn.classList.toggle('is-active', btn.dataset.mode === savedMode);
+            btn.setAttribute('aria-checked', btn.dataset.mode === savedMode ? 'true' : 'false');
+        });
+        updatePickerVisibility();
+
+        if (savedCarHtml) carResult.innerHTML = savedCarHtml;
+        if (savedTrackHtml) trackResult.innerHTML = savedTrackHtml;
+        attachCarHandlers();
+
+        hardcoreMode = true;
+        if (hardcoreCb) hardcoreCb.checked = true;
+        pickBtn.classList.add('challenge-pick-btn--hardcore');
+        applyHardcoreLockUI();
+        return true;
     }
 
     /* ── granularity toggle (show/hide only) ──────────────── */
@@ -439,10 +548,12 @@
 
         modeButtons.forEach(btn => {
             btn.addEventListener('click', () => {
+                if (isHardcoreLocked()) return;
                 currentMode = btn.dataset.mode;
                 activateButton(modeButtons, btn);
                 updatePickerVisibility();
                 updateRepickButtons();
+                ssSet('mode', currentMode);
             });
         });
 
@@ -451,6 +562,7 @@
                 const newGranularity = btn.dataset.granularity;
                 activateButton(carGranularityButtons, btn);
                 refineCarGranularity(newGranularity);
+                ssSet('car-gran', carGranularity);
             });
         });
 
@@ -459,6 +571,7 @@
                 const newGranularity = btn.dataset.granularity;
                 activateButton(trackGranularityButtons, btn);
                 refineTrackGranularity(newGranularity);
+                ssSet('track-gran', trackGranularity);
             });
         });
 
@@ -468,17 +581,58 @@
 
         const groupCb = document.getElementById('challenge-group-category-cb');
         if (groupCb) {
-            const stored = typeof sessionStorage !== 'undefined' && sessionStorage.getItem('challenge-group-cat');
+            const stored = ssGet('group-cat');
             groupByCategory = stored === 'true';
             groupCb.checked = groupByCategory;
             groupCb.addEventListener('change', () => {
                 groupByCategory = groupCb.checked;
-                try { sessionStorage.setItem('challenge-group-cat', groupCb.checked); } catch (_) { /* ignored */ }
+                ssSet('group-cat', groupCb.checked);
+            });
+        }
+
+        hardcoreCb = document.getElementById('challenge-hardcore-cb');
+        hardcoreLabel = document.getElementById('challenge-hardcore-label');
+        if (hardcoreCb) {
+            hardcoreCb.addEventListener('change', () => {
+                hardcoreMode = hardcoreCb.checked;
+                pickBtn.classList.toggle('challenge-pick-btn--hardcore', hardcoreMode);
             });
         }
 
         initFilters();
+
+        // Restore toggle states from session
+        const savedMode = ssGet('mode');
+        if (savedMode && [MODE_CAR, MODE_BOTH, MODE_TRACK].includes(savedMode)) {
+            currentMode = savedMode;
+            modeButtons.forEach(btn => {
+                btn.classList.toggle('is-active', btn.dataset.mode === savedMode);
+                btn.setAttribute('aria-checked', btn.dataset.mode === savedMode ? 'true' : 'false');
+            });
+        }
+        const savedCarGran = ssGet('car-gran');
+        if (savedCarGran && [GRANULARITY_CLASS, GRANULARITY_CAR].includes(savedCarGran)) {
+            carGranularity = savedCarGran;
+            carGranularityButtons.forEach(btn => {
+                btn.classList.toggle('is-active', btn.dataset.granularity === savedCarGran);
+                btn.setAttribute('aria-checked', btn.dataset.granularity === savedCarGran ? 'true' : 'false');
+            });
+        }
+        const savedTrackGran = ssGet('track-gran');
+        if (savedTrackGran && [GRANULARITY_TRACK, GRANULARITY_LAYOUT].includes(savedTrackGran)) {
+            trackGranularity = savedTrackGran;
+            trackGranularityButtons.forEach(btn => {
+                btn.classList.toggle('is-active', btn.dataset.granularity === savedTrackGran);
+                btn.setAttribute('aria-checked', btn.dataset.granularity === savedTrackGran ? 'true' : 'false');
+            });
+        }
+
         updatePickerVisibility();
+
+        // Restore hardcore lock if active
+        if (!restoreHardcorePick()) {
+            // No active lock — normal state
+        }
     }
 
     /* ── auto-start ───────────────────────────────────────── */

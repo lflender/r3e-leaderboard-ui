@@ -50,6 +50,9 @@ describe('ChallengePicker page', () => {
         const bodyMatch = fullHtml.match(/<main>([\s\S]*?)<\/main>/);
         document.body.innerHTML = `<main>${bodyMatch ? bodyMatch[1] : ''}</main>`;
 
+        // Clear sessionStorage so stored state doesn't leak between tests
+        sessionStorage.clear();
+
         window.ChallengePicker.init();
     });
 

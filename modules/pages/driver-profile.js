@@ -27,8 +27,9 @@ class DriverProfile {
 
         try {
             const searchTerm = driverParam || `"${idParam}"`;
-            const [, results] = await Promise.all([
+            const [, , results] = await Promise.all([
                 loadMpPosCache(),
+                typeof loadMpPosInactiveCache === 'function' ? loadMpPosInactiveCache() : Promise.resolve(),
                 dataService.searchDriver(searchTerm, {})
             ]);
 
@@ -112,11 +113,15 @@ class DriverProfile {
             ? `<img class="driver-profile-avatar" src="${escape(profile.avatar)}" alt="${escape(profile.name)} avatar" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`
             : '<div class="driver-profile-avatar-placeholder"></div>';
 
-        const mpPos = typeof resolveMpPos === 'function' ? resolveMpPos(profile.name, profile.pathId) : null;
+        const mpResult = typeof resolveMpPosWithInactive === 'function' ? resolveMpPosWithInactive(profile.name, profile.pathId) : { position: null, inactive: false };
+        const mpPos = mpResult.position;
+        const mpPosInactive = mpResult.inactive;
+        const inactiveLabel = mpPosInactive ? ' (inactive)' : '';
+        const mpPosCssClass = mpPosInactive ? 'driver-profile-mp-pos-inactive' : 'driver-profile-mp-pos';
         const mpPosHtml = mpPos !== null
-            ? `<span class="driver-profile-mp-pos">Multiplayer #${mpPos}</span>`
+            ? `<span class="${mpPosCssClass}">Multiplayer #${mpPos}${inactiveLabel}</span>`
             : '';
-        const nameClasses = typeof getMpPosNameClasses === 'function' ? getMpPosNameClasses(mpPos) : '';
+        const nameClasses = typeof getMpPosNameClasses === 'function' ? getMpPosNameClasses(mpPos, { inactive: mpPosInactive }) : '';
         const nameClass = nameClasses ? ` ${nameClasses}` : '';
 
         const rankHtml = profile.rank ? R3EUtils.renderRankStars(profile.rank) : '';

@@ -6,9 +6,48 @@
 
 let mpPosCache = null;
 let mpPosCachePromise = null;
+let mpPosInactiveCache = null;
+let mpPosInactiveCachePromise = null;
 
 /**
- * Load MP position cache from cache/mp_pos.json.gz
+ * Build a dual-index cache structure from an array of ranking entries.
+ * Shared by both active and inactive loaders (DRY).
+ * @param {Array} results - Array of { name, user_id, position } entries
+ * @returns {Object} Cache with byName, byNameUserId, nameStats Maps
+ */
+function buildMpPosIndex(results) {
+    const cache = {
+        byName: new Map(),
+        byNameUserId: new Map(),
+        nameStats: new Map()
+    };
+
+    if (Array.isArray(results)) {
+        results.forEach(entry => {
+            if (entry.name && entry.position) {
+                const nameLower = String(entry.name).trim().toLowerCase();
+
+                const currentStats = cache.nameStats.get(nameLower) || { count: 0 };
+                currentStats.count += 1;
+                cache.nameStats.set(nameLower, currentStats);
+
+                if (!cache.byName.has(nameLower)) {
+                    cache.byName.set(nameLower, entry.position);
+                }
+
+                if (entry.user_id) {
+                    const key = `${nameLower}|${String(entry.user_id).trim()}`;
+                    cache.byNameUserId.set(key, entry.position);
+                }
+            }
+        });
+    }
+
+    return cache;
+}
+
+/**
+ * Load MP position cache from cache/mp_pos/mp_pos.json.gz
  * Uses single-flight pattern to prevent concurrent fetches
  * Creates a dual-index cache structure:
  * - byName: name -> position (for backward compatibility)
@@ -26,57 +65,80 @@ async function loadMpPosCache() {
         try {
             // 30-minute cache bucket: same version string for 30 min, then rotates
             const cacheVersion = Math.floor(Date.now() / (30 * 60 * 1000));
-            const response = await fetch(`cache/mp_pos.json.gz?v=${cacheVersion}`);
+            const response = await fetch(`cache/mp_pos/mp_pos.json.gz?v=${cacheVersion}`);
             if (!response.ok) throw new Error('Failed to load mp_pos.json.gz');
             if (!window.CompressedJsonHelper || typeof window.CompressedJsonHelper.readGzipJson !== 'function') {
                 throw new Error('CompressedJsonHelper is not loaded.');
             }
             const data = await window.CompressedJsonHelper.readGzipJson(response);
             
-            // Create dual-index cache structure
-            mpPosCache = {
-                byName: new Map(),      // name (lowercase) -> position (for backward compatibility)
-                byNameUserId: new Map(), // (name|user_id) -> position (keyed by name + user_id)
-                nameStats: new Map() // name (lowercase) -> { count: number }
-            };
-            
-            if (data.results && Array.isArray(data.results)) {
-                data.results.forEach(entry => {
-                    if (entry.name && entry.position) {
-                        const nameLower = String(entry.name).trim().toLowerCase();
-
-                        // Track how many times a name appears so we can avoid ambiguous fallbacks.
-                        const currentStats = mpPosCache.nameStats.get(nameLower) || { count: 0 };
-                        currentStats.count += 1;
-                        mpPosCache.nameStats.set(nameLower, currentStats);
-                        
-                        // Index by name (backward compatibility)
-                        // Only set if not already set (first occurrence wins)
-                        if (!mpPosCache.byName.has(nameLower)) {
-                            mpPosCache.byName.set(nameLower, entry.position);
-                        }
-                        
-                        // Index by (name|user_id) if user_id is provided
-                        if (entry.user_id) {
-                            const key = `${nameLower}|${String(entry.user_id).trim()}`;
-                            mpPosCache.byNameUserId.set(key, entry.position);
-                        }
-                    }
-                });
-            }
+            mpPosCache = buildMpPosIndex(data.results);
             return mpPosCache;
         } catch (err) {
             console.warn('Could not load mp_pos cache:', err);
-            mpPosCache = { 
-                byName: new Map(), 
-                byNameUserId: new Map(),
-                nameStats: new Map()
-            }; // Empty maps to prevent retries
+            mpPosCache = buildMpPosIndex([]);
             return mpPosCache;
         }
     })();
     
     return mpPosCachePromise;
+}
+
+/**
+ * Load inactive MP position cache from cache/mp_pos/mp_pos_inactive.json.gz
+ * Uses single-flight pattern to prevent concurrent fetches.
+ * Loaded asynchronously — never blocks the main render path.
+ * @returns {Promise<Object>} Cache object with both index types
+ */
+async function loadMpPosInactiveCache() {
+    if (mpPosInactiveCache !== null) return mpPosInactiveCache;
+
+    if (mpPosInactiveCachePromise) return mpPosInactiveCachePromise;
+
+    mpPosInactiveCachePromise = (async () => {
+        try {
+            const cacheVersion = Math.floor(Date.now() / (30 * 60 * 1000));
+            const response = await fetch(`cache/mp_pos/mp_pos_inactive.json.gz?v=${cacheVersion}`);
+            if (!response.ok) throw new Error('Failed to load mp_pos_inactive.json.gz');
+            if (!window.CompressedJsonHelper || typeof window.CompressedJsonHelper.readGzipJson !== 'function') {
+                throw new Error('CompressedJsonHelper is not loaded.');
+            }
+            const data = await window.CompressedJsonHelper.readGzipJson(response);
+
+            mpPosInactiveCache = buildMpPosIndex(data.results);
+            return mpPosInactiveCache;
+        } catch (err) {
+            console.warn('Could not load mp_pos_inactive cache:', err);
+            mpPosInactiveCache = buildMpPosIndex([]);
+            return mpPosInactiveCache;
+        }
+    })();
+
+    return mpPosInactiveCachePromise;
+}
+
+/**
+ * Look up a position in a given cache by name and optional user ID.
+ * @param {Object} cache - Cache object with byName/byNameUserId Maps
+ * @param {string} driverName - Driver name
+ * @param {string} userId - Optional user ID
+ * @returns {number|null} Position or null
+ */
+function lookupPosition(cache, driverName, userId) {
+    if (!cache || !driverName) return null;
+
+    const nameLower = String(driverName).trim().toLowerCase();
+
+    if (userId) {
+        const userIdStr = String(userId).trim();
+        const nameUserIdKey = `${nameLower}|${userIdStr}`;
+        const position = cache.byNameUserId.get(nameUserIdKey);
+        if (position !== undefined) return position;
+        // Strict mode when user_id is known: do not fallback to name-only.
+        return null;
+    }
+
+    return cache.byName.get(nameLower) || null;
 }
 
 /**
@@ -88,25 +150,18 @@ async function loadMpPosCache() {
  * @returns {number|null} MP position or null if not found
  */
 function getMpPos(driverName, userId) {
-    if (!mpPosCache || !driverName) return null;
-    
-    const nameLower = String(driverName).trim().toLowerCase();
-    
-    // If user ID is provided, try user_id-aware lookup first
-    if (userId) {
-        const userIdStr = String(userId).trim();
-        const nameUserIdKey = `${nameLower}|${userIdStr}`;
-        const position = mpPosCache.byNameUserId.get(nameUserIdKey);
-        if (position !== undefined) {
-            return position;
-        }
+    return lookupPosition(mpPosCache, driverName, userId);
+}
 
-        // Strict mode when user_id is known: do not fallback to name-only.
-        return null;
-    }
-    
-    // Fallback to name-only lookup (for backward compatibility)
-    return mpPosCache.byName.get(nameLower) || null;
+/**
+ * Get inactive MP position for a driver by name and optional user ID.
+ * Same lookup semantics as getMpPos but against the inactive cache.
+ * @param {string} driverName - Driver name to look up
+ * @param {string} userId - (Optional) User ID
+ * @returns {number|null} Inactive MP position or null if not found
+ */
+function getInactiveMpPos(driverName, userId) {
+    return lookupPosition(mpPosInactiveCache, driverName, userId);
 }
 
 /**
@@ -120,6 +175,26 @@ function resolveMpPos(driverName, userId) {
     if (!driverName) return null;
 
     return getMpPos(driverName, userId || null);
+}
+
+/**
+ * Resolve MP position with inactive fallback.
+ * Returns { position, inactive } where inactive indicates the source.
+ * Active rankings are checked first; inactive only when no active rank exists.
+ * @param {string} driverName - Driver name to look up
+ * @param {string} userId - User ID from driver path URL slug
+ * @returns {{ position: number|null, inactive: boolean }}
+ */
+function resolveMpPosWithInactive(driverName, userId) {
+    if (!driverName) return { position: null, inactive: false };
+
+    const activePos = getMpPos(driverName, userId || null);
+    if (activePos !== null) return { position: activePos, inactive: false };
+
+    const inactivePos = getInactiveMpPos(driverName, userId || null);
+    if (inactivePos !== null) return { position: inactivePos, inactive: true };
+
+    return { position: null, inactive: false };
 }
 
 /**
@@ -151,27 +226,35 @@ function getMpPosHighlightClass(mpPos, thresholds = { gold: 50, silver: 200 }) {
  * @param {number} options.gold - Max position for gold highlight
  * @param {number} options.silver - Max position for silver highlight
  * @param {number} options.glitter - Max position for glitter effect
+ * @param {boolean} options.inactive - Whether the ranking is from inactive data
  * @returns {string} Space-separated CSS classes
  */
-function getMpPosNameClasses(mpPos, options = { gold: 50, silver: 200, glitter: 10 }) {
+function getMpPosNameClasses(mpPos, options = {}) {
     if (mpPos === null || mpPos === undefined) return '';
 
+    const gold = options.gold ?? 50;
+    const silver = options.silver ?? 200;
+    const glitter = options.glitter ?? 10;
+
+    // Inactive rankings never get name highlight classes
+    if (options.inactive) {
+        return '';
+    }
+
     const classes = [];
-    const highlightClass = getMpPosHighlightClass(mpPos, {
-        gold: options.gold,
-        silver: options.silver
-    });
+    const highlightClass = getMpPosHighlightClass(mpPos, { gold, silver });
 
     if (highlightClass) {
         classes.push(highlightClass);
     }
 
-    if (mpPos <= options.glitter) {
+    if (mpPos <= glitter) {
         classes.push('driver-name-top10-glitter');
     }
 
     return classes.join(' ');
 }
 
-// Load mp_pos cache early
+// Load mp_pos caches early (active immediately, inactive asynchronously)
 loadMpPosCache();
+loadMpPosInactiveCache();

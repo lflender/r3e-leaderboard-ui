@@ -17,9 +17,11 @@
         const idSuffix = pathId ? `&id=${encodeURIComponent(pathId)}` : '';
         const searchUrl = `drivers.html?driver=${encodeURIComponent(`"${name}"`)}${idSuffix}`;
 
-        const mpPos = (typeof window.resolveMpPos === 'function') ? window.resolveMpPos(name) : null;
+        const mpResult = (typeof window.resolveMpPosWithInactive === 'function')
+            ? window.resolveMpPosWithInactive(name) : { position: null, inactive: false };
+        const effectiveMpPos = mpResult.position;
         const nameClasses = (typeof window.getMpPosNameClasses === 'function')
-            ? window.getMpPosNameClasses(mpPos) : '';
+            ? window.getMpPosNameClasses(effectiveMpPos, { inactive: mpResult.inactive }) : '';
 
         const flagRaw = (window.FlagHelper && typeof window.FlagHelper.countryToFlag === 'function')
             ? window.FlagHelper.countryToFlag(country) : '';
@@ -28,7 +30,8 @@
         const rankStarsHtml = (window.R3EUtils && typeof window.R3EUtils.renderRankStars === 'function')
             ? window.R3EUtils.renderRankStars(rank, true) : '';
 
-        const mpPosHtml = mpPos ? ` <span class="mp-pos-badge">#${mpPos}</span>` : '';
+        const mpPosBadgeClass = mpResult.inactive ? 'mp-pos-badge mp-pos-inactive' : 'mp-pos-badge';
+        const mpPosHtml = effectiveMpPos ? ` <span class="${mpPosBadgeClass}">#${effectiveMpPos}</span>` : '';
 
         const avatarHtml = row.avatar
             ? `<img class="records-driver-avatar" src="${escapeHtml(row.avatar)}" alt="" aria-hidden="true" loading="lazy" decoding="async">` : '';

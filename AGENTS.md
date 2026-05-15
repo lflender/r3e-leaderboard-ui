@@ -1,5 +1,17 @@
 # Agent Instructions
 
+## Code Quality
+
+- Follow Clean Code principles: meaningful names, small focused functions, no duplication, clear intent over comments.
+- Apply SOLID principles where applicable (single responsibility, open/closed, Liskov substitution, interface segregation, dependency inversion).
+- Maintain a single source of truth for all data, configuration, and shared logic. Never duplicate state or derive the same value in multiple places.
+
+## Test Coverage
+
+- Always add test coverage for new code. Every new function, module, or behavior change must include corresponding tests.
+- After any code change, run the full test suite in a visible terminal (`npx vitest run`) so the user can observe test progression. Do not run tests silently or suppress output.
+- Never leave failing tests — including pre-existing failures. If you encounter a failing test, investigate and fix it before wrapping up.
+
 ## Cache Busting Requirement
 
 After any code change, always bump cache-busting versions for all edited static assets.
@@ -53,14 +65,17 @@ After any change to a user-facing page or a page-related module, update `sitemap
 ## Architecture And Reuse
 
 - Never copy/paste logic between modules. Always reuse existing helpers or extract shared logic into a single reusable module.
-- Keep a single source of truth for shared behavior and data derivations.
+- Keep a single source of truth for shared behavior, data derivations, and configuration (see also Code Quality above).
 - Keep module responsibilities clearly separated (UI rendering, data access, formatting, and domain-specific transforms).
 - Never use inline `style` attributes in HTML or JS-generated markup when the styles can be expressed as a CSS class. Define classes in the appropriate stylesheet under `styles/` instead.
+- Load secondary/optional data (e.g. inactive MP rankings) asynchronously with concurrent-free (single-flight) promises and display it lazily when ready. Never block the main render path for non-critical data.
+- Use the single-flight (concurrent-free) promise pattern for any shared async data fetch: store the in-flight promise and return it on subsequent calls so only one network request is made, regardless of how many callers trigger it concurrently.
 
 ## Testing
 
-- After any code change, run the full test suite (`npx vitest run`) and ensure all tests pass before considering the task complete.
-- Never leave failing tests. If a change breaks existing tests, fix them in the same change.
+- Always add test coverage for new code (see also Test Coverage above).
+- After any code change, run the full test suite in a visible terminal (`npx vitest run`) so the user can see test progression. Ensure all tests pass before considering the task complete.
+- Never leave failing tests — including pre-existing ones. If a change breaks existing tests or you discover pre-existing failures, fix them in the same change.
 - When adding new globals or dependencies used by production code, add matching mocks in all affected test files.
 - Do not dismiss test failures as "pre-existing" or "unrelated" without investigating and fixing them.
 

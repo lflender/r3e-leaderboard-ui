@@ -360,6 +360,10 @@
         font-size: 0.8rem;
     }
 
+    .mp-pos-badge.mp-pos-inactive {
+        font-size: 0.67rem;
+    }
+
     #site-header header {
         padding: 1.25rem 1rem 0.75rem 1rem;
     }
@@ -1012,6 +1016,10 @@
         font-size: 0.7rem;
     }
 
+    .mp-pos-badge.mp-pos-inactive {
+        font-size: 0.58rem;
+    }
+
     .stats-box h2 {
         font-size: 0.88rem;
     }
@@ -1165,6 +1173,10 @@
 
     .mp-pos-badge {
         font-size: 0.65rem;
+    }
+
+    .mp-pos-badge.mp-pos-inactive {
+        font-size: 0.54rem;
     }
 }
 

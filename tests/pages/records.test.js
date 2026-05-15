@@ -70,8 +70,11 @@ function setupGlobals() {
     window.R3EAnalytics = { track: vi.fn() };
 
     window.loadMpPosCache = vi.fn().mockResolvedValue();
+    window.loadMpPosInactiveCache = vi.fn().mockResolvedValue();
     window.resolveMpPos = vi.fn(() => null);
+    window.resolveMpPosWithInactive = vi.fn(() => ({ position: null, inactive: false }));
     window.getMpPosNameClasses = vi.fn(() => '');
+    window.getInactiveMpPos = vi.fn(() => null);
     window.getCarClassId = vi.fn(() => '');
 
     window.dataService = {

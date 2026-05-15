@@ -77,8 +77,10 @@ beforeAll(() => {
         }])
     };
     window.resolveMpPos = vi.fn().mockReturnValue(42);
+    window.resolveMpPosWithInactive = vi.fn().mockReturnValue({ position: 42, inactive: false });
     window.getMpPosNameClasses = vi.fn().mockReturnValue('driver-name-gold');
     window.loadMpPosCache = vi.fn().mockResolvedValue({});
+    window.loadMpPosInactiveCache = vi.fn().mockResolvedValue({});
     window.DriverProfileData = {
         buildProfileData: vi.fn().mockReturnValue(mockProfileData),
         getRaceRoomProfileUrl: vi.fn((pathId) => pathId ? `https://game.raceroom.com/users/${pathId}` : '')
@@ -140,8 +142,10 @@ beforeEach(() => {
     }]);
     window.DriverProfileData.buildProfileData.mockReturnValue(mockProfileData);
     window.resolveMpPos.mockReturnValue(42);
+    window.resolveMpPosWithInactive.mockReturnValue({ position: 42, inactive: false });
     window.getMpPosNameClasses.mockReturnValue('driver-name-gold');
     window.loadMpPosCache.mockResolvedValue({});
+    window.loadMpPosInactiveCache.mockResolvedValue({});
     window.DriverStatsService.lookupDriverStats.mockResolvedValue([
         { key: 'avg_bested', label: 'Average Bested %', format: 'percent', result: { value: 78.5, position: 42, total: 10000 } },
         { key: 'bested', label: 'Drivers Bested', format: 'number', result: { value: 150, position: 100, total: 10000 } },

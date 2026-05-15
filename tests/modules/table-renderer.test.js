@@ -24,6 +24,7 @@ describe('table-renderer track resolution', () => {
         window.DataNormalizer = { normalizeTrackName: value => value };
         window.FlagHelper = { countryToFlag: () => '' };
         window.resolveMpPos = undefined;
+        window.resolveMpPosWithInactive = undefined;
         window.getMpPosNameClasses = undefined;
     });
 

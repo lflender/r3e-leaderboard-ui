@@ -103,6 +103,21 @@ describe('getMpPosNameClasses', () => {
     it('returns empty string for position above thresholds', () => {
         expect(window.getMpPosNameClasses(201)).toBe('');
     });
+
+    it('returns empty string when inactive option is true (no name styling for inactive)', () => {
+        const cls = window.getMpPosNameClasses(5, { inactive: true });
+        expect(cls).toBe('');
+    });
+
+    it('returns empty string for any position when inactive', () => {
+        expect(window.getMpPosNameClasses(100, { inactive: true })).toBe('');
+        expect(window.getMpPosNameClasses(500, { inactive: true })).toBe('');
+    });
+
+    it('returns normal classes when inactive is false', () => {
+        const cls = window.getMpPosNameClasses(5, { inactive: false });
+        expect(cls).toContain('driver-name-gold');
+    });
 });
 
 describe('getMpPos / resolveMpPos — with injected cache', () => {
@@ -136,5 +151,64 @@ describe('getMpPos / resolveMpPos — with injected cache', () => {
     it('resolveMpPos falls back to name-only when no userId given', () => {
         expect(() => window.resolveMpPos('Alice')).not.toThrow();
         expect(window.resolveMpPos('Alice')).toBeNull();
+    });
+});
+
+describe('resolveMpPosWithInactive', () => {
+    it('returns { position: null, inactive: false } for empty name', () => {
+        const result = window.resolveMpPosWithInactive('');
+        expect(result).toEqual({ position: null, inactive: false });
+    });
+
+    it('returns { position: null, inactive: false } for null name', () => {
+        const result = window.resolveMpPosWithInactive(null);
+        expect(result).toEqual({ position: null, inactive: false });
+    });
+
+    it('returns inactive: false when no match in either cache', () => {
+        const result = window.resolveMpPosWithInactive('Unknown Driver');
+        expect(result).toEqual({ position: null, inactive: false });
+    });
+});
+
+describe('buildMpPosIndex', () => {
+    it('is exposed on window', () => {
+        expect(typeof window.buildMpPosIndex).toBe('function');
+    });
+
+    it('builds correct index from entries', () => {
+        const index = window.buildMpPosIndex([
+            { name: 'Alice', user_id: '100', position: 1 },
+            { name: 'Bob', user_id: '200', position: 2 }
+        ]);
+        expect(index.byName.get('alice')).toBe(1);
+        expect(index.byName.get('bob')).toBe(2);
+        expect(index.byNameUserId.get('alice|100')).toBe(1);
+        expect(index.byNameUserId.get('bob|200')).toBe(2);
+    });
+
+    it('first occurrence wins for name-only index', () => {
+        const index = window.buildMpPosIndex([
+            { name: 'Alice', user_id: '100', position: 5 },
+            { name: 'Alice', user_id: '200', position: 10 }
+        ]);
+        expect(index.byName.get('alice')).toBe(5);
+        expect(index.nameStats.get('alice').count).toBe(2);
+    });
+
+    it('handles empty results array', () => {
+        const index = window.buildMpPosIndex([]);
+        expect(index.byName.size).toBe(0);
+    });
+
+    it('handles null/undefined results', () => {
+        const index = window.buildMpPosIndex(null);
+        expect(index.byName.size).toBe(0);
+    });
+});
+
+describe('loadMpPosInactiveCache', () => {
+    it('is exposed on window', () => {
+        expect(typeof window.loadMpPosInactiveCache).toBe('function');
     });
 });

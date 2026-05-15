@@ -360,6 +360,10 @@
         font-size: 0.8rem;
     }
 
+    .mp-pos-badge.mp-pos-inactive {
+        font-size: 0.67rem;
+    }
+
     #site-header header {
         padding: 1.25rem 1rem 0.75rem 1rem;
     }
@@ -523,6 +527,37 @@
 
     .custom-select__search {
         font-size: 0.82rem;
+    }
+
+    .challenge-group-category,
+    .challenge-hardcore-label,
+    .combine-checkbox-label {
+        padding: 0.55rem 0.7rem;
+        font-size: 0.85rem;
+    }
+
+    .challenge-action {
+        gap: 0.4rem;
+    }
+
+    .challenge-repick-btn {
+        min-width: 0;
+        padding: 0.45rem 0.6rem;
+        font-size: 0.75rem;
+        flex: 1 1 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .challenge-pick-btn {
+        padding: 0.6rem 1.8rem;
+        font-size: 0.95rem;
+        flex-shrink: 0;
+    }
+
+    .challenge-pickers {
+        grid-template-columns: 1fr;
     }
 
     #cars-search-container {
@@ -981,6 +1016,10 @@
         font-size: 0.7rem;
     }
 
+    .mp-pos-badge.mp-pos-inactive {
+        font-size: 0.58rem;
+    }
+
     .stats-box h2 {
         font-size: 0.88rem;
     }
@@ -1134,6 +1173,10 @@
 
     .mp-pos-badge {
         font-size: 0.65rem;
+    }
+
+    .mp-pos-badge.mp-pos-inactive {
+        font-size: 0.54rem;
     }
 }
 

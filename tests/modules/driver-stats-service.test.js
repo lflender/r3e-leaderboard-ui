@@ -19,12 +19,19 @@ beforeAll(() => {
         fetchGzipJson: vi.fn()
     };
 
+    // Provide dataService dependency for total_drivers
+    window.dataService = {
+        calculateStatus: vi.fn()
+    };
+
     loadBrowserScript('modules/driver-stats-service.js');
 });
 
 beforeEach(() => {
     vi.clearAllMocks();
     window.DriverStatsService._fetchPromises.clear();
+    window.DriverStatsService._resetTotalDriversCache();
+    window.dataService.calculateStatus.mockResolvedValue({ total_drivers: 84149 });
 });
 
 describe('DriverStatsService.findDriverInPayload', () => {
@@ -69,6 +76,33 @@ describe('DriverStatsService.findDriverInPayload', () => {
         expect(window.DriverStatsService.findDriverInPayload({ results: [] }, 'A', 'x')).toBeNull();
         expect(window.DriverStatsService.findDriverInPayload(null, 'A', 'x')).toBeNull();
     });
+
+    it('disambiguates drivers with same name using pathId', () => {
+        const payload = {
+            results: [
+                { name: 'Alex Fernandez', driver_key: 'alex-fernandez-45', avg_bested: 98.3 },
+                { name: 'Alex Fernandez', driver_key: 'alex-fernandez-3498', avg_bested: 72.1 }
+            ]
+        };
+        // With pathId, finds the correct one
+        const result = window.DriverStatsService.findDriverInPayload(payload, 'Alex Fernandez', 'avg_bested', 'alex-fernandez-3498');
+        expect(result).toEqual({ value: 72.1, position: 2, total: 2 });
+
+        // Without pathId, finds the first name match
+        const resultNoId = window.DriverStatsService.findDriverInPayload(payload, 'Alex Fernandez', 'avg_bested');
+        expect(resultNoId).toEqual({ value: 98.3, position: 1, total: 2 });
+    });
+
+    it('returns null when pathId provided but not found (no name fallback)', () => {
+        const payload = {
+            results: [
+                { name: 'Alex Fernandez', driver_key: '5094017', avg_bested: 98.3 }
+            ]
+        };
+        // pathId doesn't match any driver_key — should NOT fall back to name
+        const result = window.DriverStatsService.findDriverInPayload(payload, 'Alex Fernandez', 'avg_bested', '8119439');
+        expect(result).toBeNull();
+    });
 });
 
 describe('DriverStatsService.formatValue', () => {
@@ -93,16 +127,16 @@ describe('DriverStatsService.formatValue', () => {
 describe('DriverStatsService.lookupDriverStats', () => {
     const makeIndex = () => ({
         overall_top: {
-            avg_bested_file: 'cache/stats/overall_top_avg_bested.json.gz',
-            bested_file: 'cache/stats/overall_top_bested.json.gz',
-            pole_file: 'cache/stats/overall_top_pole.json.gz',
-            podium_file: 'cache/stats/overall_top_podium.json.gz'
+            avg_bested_file: 'cache/stats/overall/overall_top_avg_bested.json.gz',
+            bested_file: 'cache/stats/overall/overall_top_bested.json.gz',
+            pole_file: 'cache/stats/overall/overall_top_pole.json.gz',
+            podium_file: 'cache/stats/overall/overall_top_podium.json.gz'
         },
         overall: {
-            avg_bested_file: 'cache/stats/overall_avg_bested.json.gz',
-            bested_file: 'cache/stats/overall_bested.json.gz',
-            pole_file: 'cache/stats/overall_pole.json.gz',
-            podium_file: 'cache/stats/overall_podium.json.gz'
+            avg_bested_file: 'cache/stats/overall/overall_avg_bested.json.gz',
+            bested_file: 'cache/stats/overall/overall_bested.json.gz',
+            pole_file: 'cache/stats/overall/overall_pole.json.gz',
+            podium_file: 'cache/stats/overall/overall_podium.json.gz'
         }
     });
 
@@ -138,11 +172,11 @@ describe('DriverStatsService.lookupDriverStats', () => {
         });
 
         const results = await window.DriverStatsService.lookupDriverStats('Test Driver');
-        // Bested and avg_bested use the avg_bested full file total
+        // Bested and avg_bested use status.json total_drivers
         const bested = results.find(r => r.key === 'bested');
-        expect(bested.result.total).toBe(10000);
+        expect(bested.result.total).toBe(84149);
         const avgBested = results.find(r => r.key === 'avg_bested');
-        expect(avgBested.result.total).toBe(10000);
+        expect(avgBested.result.total).toBe(84149);
         // Pole gets full file total even though found in top file
         const pole = results.find(r => r.key === 'pole');
         expect(pole.result.position).toBe(2);
@@ -174,9 +208,11 @@ describe('DriverStatsService.lookupDriverStats', () => {
         });
 
         const results = await window.DriverStatsService.lookupDriverStats('My Driver');
-        // Bested uses avg_bested total (5000)
+        // Bested and avg_bested use status.json total_drivers
         const bested = results.find(r => r.key === 'bested');
-        expect(bested.result.total).toBe(5000);
+        expect(bested.result.total).toBe(84149);
+        const avgBested = results.find(r => r.key === 'avg_bested');
+        expect(avgBested.result.total).toBe(84149);
         // Pole keeps its own full file total (3000)
         const pole = results.find(r => r.key === 'pole');
         expect(pole.result.total).toBe(3000);

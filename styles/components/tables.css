@@ -650,6 +650,18 @@ h2.driver-name-top10-glitter::after {
     white-space: nowrap;
 }
 
+/* Inactive MP ranking — clearly dimmed vs active */
+.mp-pos-inactive {
+    color: #9a9a9a !important;
+    opacity: 0.7;
+}
+
+.mp-pos-badge.mp-pos-inactive {
+    color: #7a7a7a !important;
+    opacity: 0.6;
+    font-size: 0.75rem;
+}
+
 .no-wrap {
     white-space: nowrap;
 }

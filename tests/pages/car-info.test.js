@@ -63,6 +63,11 @@ beforeEach(() => {
     window.CustomSelect = class {
         constructor(_id, _options, _onChange) {}
     };
+
+    // car-info.js references R3ECarUtils badge helpers
+    if (!window.R3ECarUtils) {
+        loadBrowserScript('modules/utils-car.js');
+    }
 });
 
 describe('car-info integration', () => {

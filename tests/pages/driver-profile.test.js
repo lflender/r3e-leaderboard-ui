@@ -28,7 +28,11 @@ beforeAll(() => {
     document.body.innerHTML = '';
     window.R3EUtils = {
         escapeHtml: (s) => String(s || ''),
-        getUrlParam: vi.fn().mockReturnValue('"Test Driver"'),
+        getUrlParam: vi.fn((param) => {
+            if (param === 'driver') return '"Test Driver"';
+            if (param === 'id') return null;
+            return null;
+        }),
         renderRankStars: vi.fn((rank) => ` | ⭐ Rank ${rank}`),
         resolveBrandLogoPath: vi.fn(() => 'images/brands/logo-bmw.png'),
         splitCarName: vi.fn((name) => {
@@ -64,6 +68,7 @@ beforeAll(() => {
             team: 'Team Alpha',
             rank: '5',
             avatar: 'https://example.com/avatar.png',
+            pathId: 'test-driver-123',
             entries: [
                 { car_class: 'GT3', Car: 'BMW M4', track_id: 100 },
                 { car_class: 'GT3', Car: 'BMW M4', track_id: 200 },
@@ -72,8 +77,10 @@ beforeAll(() => {
         }])
     };
     window.resolveMpPos = vi.fn().mockReturnValue(42);
+    window.resolveMpPosWithInactive = vi.fn().mockReturnValue({ position: 42, inactive: false });
     window.getMpPosNameClasses = vi.fn().mockReturnValue('driver-name-gold');
     window.loadMpPosCache = vi.fn().mockResolvedValue({});
+    window.loadMpPosInactiveCache = vi.fn().mockResolvedValue({});
     window.DriverProfileData = {
         buildProfileData: vi.fn().mockReturnValue(mockProfileData),
         getRaceRoomProfileUrl: vi.fn((pathId) => pathId ? `https://game.raceroom.com/users/${pathId}` : '')
@@ -115,13 +122,18 @@ beforeAll(() => {
 beforeEach(() => {
     document.body.innerHTML = buildDom();
     vi.clearAllMocks();
-    window.R3EUtils.getUrlParam.mockReturnValue('"Test Driver"');
+    window.R3EUtils.getUrlParam.mockImplementation((param) => {
+        if (param === 'driver') return '"Test Driver"';
+        if (param === 'id') return null;
+        return null;
+    });
     window.dataService.searchDriver.mockResolvedValue([{
         driver: 'Test Driver',
         country: 'DE',
         team: 'Team Alpha',
         rank: '5',
         avatar: 'https://example.com/avatar.png',
+        pathId: 'test-driver-123',
         entries: [
             { car_class: 'GT3', Car: 'BMW M4', track_id: 100 },
             { car_class: 'GT3', Car: 'BMW M4', track_id: 200 },
@@ -130,8 +142,10 @@ beforeEach(() => {
     }]);
     window.DriverProfileData.buildProfileData.mockReturnValue(mockProfileData);
     window.resolveMpPos.mockReturnValue(42);
+    window.resolveMpPosWithInactive.mockReturnValue({ position: 42, inactive: false });
     window.getMpPosNameClasses.mockReturnValue('driver-name-gold');
     window.loadMpPosCache.mockResolvedValue({});
+    window.loadMpPosInactiveCache.mockResolvedValue({});
     window.DriverStatsService.lookupDriverStats.mockResolvedValue([
         { key: 'avg_bested', label: 'Average Bested %', format: 'percent', result: { value: 78.5, position: 42, total: 10000 } },
         { key: 'bested', label: 'Drivers Bested', format: 'number', result: { value: 150, position: 100, total: 10000 } },
@@ -155,7 +169,7 @@ describe('DriverProfile', () => {
     });
 
     it('shows error when no driver param', async () => {
-        window.R3EUtils.getUrlParam.mockReturnValue(null);
+        window.R3EUtils.getUrlParam.mockImplementation(() => null);
         const dp = new window.DriverProfile();
         await dp.init();
         const container = document.getElementById('driver-profile-container');
@@ -292,10 +306,10 @@ describe('DriverProfile', () => {
         await dp.init();
         // Wait for async stats load to complete
         await vi.waitFor(() => {
-            expect(window.DriverStatsService.lookupSingleStat).toHaveBeenCalledWith('Test Driver', 'avg_bested');
-            expect(window.DriverStatsService.lookupSingleStat).toHaveBeenCalledWith('Test Driver', 'bested');
-            expect(window.DriverStatsService.lookupSingleStat).toHaveBeenCalledWith('Test Driver', 'pole');
-            expect(window.DriverStatsService.lookupSingleStat).toHaveBeenCalledWith('Test Driver', 'podium');
+            expect(window.DriverStatsService.lookupSingleStat).toHaveBeenCalledWith('Test Driver', 'avg_bested', 'test-driver-123');
+            expect(window.DriverStatsService.lookupSingleStat).toHaveBeenCalledWith('Test Driver', 'bested', 'test-driver-123');
+            expect(window.DriverStatsService.lookupSingleStat).toHaveBeenCalledWith('Test Driver', 'pole', 'test-driver-123');
+            expect(window.DriverStatsService.lookupSingleStat).toHaveBeenCalledWith('Test Driver', 'podium', 'test-driver-123');
         });
     });
 
@@ -458,5 +472,63 @@ describe('DriverProfile', () => {
         const bestedCard = document.getElementById('stat-bested');
         expect(bestedCard.classList.contains('driver-stat-not-ranked')).toBe(true);
         expect(bestedCard.querySelector('.driver-stat-position').textContent).toBe('Unavailable');
+    });
+
+    it('selects the correct driver group by pathId from URL', async () => {
+        window.R3EUtils.getUrlParam.mockImplementation((param) => {
+            if (param === 'driver') return '"Alex Fernandez"';
+            if (param === 'id') return '99999';
+            return null;
+        });
+        window.dataService.searchDriver.mockResolvedValue([
+            { driver: 'Alex Fernandez', country: 'ES', pathId: '11111', entries: [{ car_class: 'GT3' }] },
+            { driver: 'Alex Fernandez', country: 'MX', pathId: '99999', entries: [{ car_class: 'TCR' }] }
+        ]);
+        const secondProfile = { ...mockProfileData, name: 'Alex Fernandez', country: 'MX', pathId: '99999' };
+        window.DriverProfileData.buildProfileData.mockReturnValue(secondProfile);
+
+        const dp = new window.DriverProfile();
+        await dp.init();
+
+        // buildProfileData should have been called with the second group (pathId match)
+        expect(window.DriverProfileData.buildProfileData).toHaveBeenCalledWith(
+            expect.objectContaining({ pathId: '99999', country: 'MX' })
+        );
+    });
+
+    it('falls back to first result when pathId does not match', async () => {
+        window.R3EUtils.getUrlParam.mockImplementation((param) => {
+            if (param === 'driver') return '"Alex Fernandez"';
+            if (param === 'id') return 'nonexistent';
+            return null;
+        });
+        window.dataService.searchDriver.mockResolvedValue([
+            { driver: 'Alex Fernandez', country: 'ES', pathId: '11111', entries: [{ car_class: 'GT3' }] },
+            { driver: 'Alex Fernandez', country: 'MX', pathId: '99999', entries: [{ car_class: 'TCR' }] }
+        ]);
+
+        const dp = new window.DriverProfile();
+        await dp.init();
+
+        expect(window.DriverProfileData.buildProfileData).toHaveBeenCalledWith(
+            expect.objectContaining({ pathId: '11111', country: 'ES' })
+        );
+    });
+
+    it('works with only id param (no driver param)', async () => {
+        window.R3EUtils.getUrlParam.mockImplementation((param) => {
+            if (param === 'driver') return null;
+            if (param === 'id') return '99999';
+            return null;
+        });
+        window.dataService.searchDriver.mockResolvedValue([
+            { driver: 'Alex Fernandez', country: 'MX', pathId: '99999', entries: [{ car_class: 'TCR' }] }
+        ]);
+
+        const dp = new window.DriverProfile();
+        await dp.init();
+
+        expect(window.dataService.searchDriver).toHaveBeenCalledWith('"99999"', {});
+        expect(window.DriverProfileData.buildProfileData).toHaveBeenCalled();
     });
 });

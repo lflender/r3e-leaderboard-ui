@@ -409,7 +409,7 @@
     allCombinationsPromise = (async () => {
       const cacheVersion = await getTrackCacheVersion();
       try {
-        const resp = await fetch(`cache/all_combinations.json.gz?v=${cacheVersion}`);
+        const resp = await fetch(`cache/combinations/all_combinations.json.gz?v=${cacheVersion}`);
         if (!resp.ok) throw new Error('HTTP ' + resp.status);
         const data = await decompressGzipToJson(resp);
         let combinations = [];
@@ -448,7 +448,7 @@
       } else {
         // No filters: use legacy top_combinations.json.gz for speed (1000 cap is intentional for default view)
         const cacheVersion = await getTrackCacheVersion();
-        const resp = await fetch(`cache/top_combinations.json.gz?v=${cacheVersion}`);
+        const resp = await fetch(`cache/combinations/top_combinations.json.gz?v=${cacheVersion}`);
         if (!resp.ok) throw new Error('HTTP ' + resp.status);
         const data = await decompressGzipToJson(resp);
         if (Array.isArray(data)) {
@@ -721,7 +721,37 @@
     }
   };
 
+  // DOM ref for track description
+  const trackDescriptionEl = document.getElementById('track-description');
+
+  function updateTrackDescription() {
+    if (!trackDescriptionEl) return;
+    if (!activeTrackId || !window.TRACKS_META) {
+      trackDescriptionEl.hidden = true;
+      trackDescriptionEl.innerHTML = '';
+      return;
+    }
+    // Resolve the track label from its ID, then extract the base name
+    const trackLabel = resolveTrackLabel(activeTrackId, '');
+    if (!trackLabel) {
+      trackDescriptionEl.hidden = true;
+      trackDescriptionEl.innerHTML = '';
+      return;
+    }
+    const baseName = trackLabel.split(/\s*[-–—]\s+/)[0];
+    const meta = window.TRACKS_META[baseName];
+    if (meta && meta.description) {
+      trackDescriptionEl.innerHTML = R3EUtils.escapeHtml(meta.description);
+      trackDescriptionEl.hidden = false;
+    } else {
+      trackDescriptionEl.hidden = true;
+      trackDescriptionEl.innerHTML = '';
+    }
+  }
+
   async function fetchAndRender(){
+    updateTrackDescription();
+
     // Show a loading indicator during initial heavy aggregations
     if (tableContainer && (activeTrackId || activeClassId)) {
       tableContainer.innerHTML = '<div class="loading">Loading...</div>';

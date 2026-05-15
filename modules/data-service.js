@@ -252,7 +252,7 @@ class DataService {
      */
     async fetchTopCombinations() {
         const cacheVersion = await this._getIndexCacheVersion();
-        const response = await fetch(`cache/top_combinations.json.gz?v=${cacheVersion}`);
+        const response = await fetch(`cache/combinations/top_combinations.json.gz?v=${cacheVersion}`);
         
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
@@ -273,6 +273,33 @@ class DataService {
         return combinations;
     }
     
+    /**
+     * Fetches all combinations data (every track+class pair with entries)
+     * @returns {Promise<Array>} Combinations array
+     */
+    async fetchAllCombinations() {
+        const cacheVersion = await this._getIndexCacheVersion();
+        const response = await fetch(`cache/combinations/all_combinations.json.gz?v=${cacheVersion}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const helper = this._getCompressedJsonHelper();
+        const data = await helper.readGzipJson(response);
+        
+        let combinations = [];
+        if (Array.isArray(data)) {
+            combinations = data;
+        } else if (data && Array.isArray(data.results)) {
+            combinations = data.results;
+        } else if (data && Array.isArray(data.data)) {
+            combinations = data.data;
+        }
+        
+        return combinations;
+    }
+
     /**
      * Fetches status from server-provided cache/status.json
      * @returns {Promise<Object>} Status data

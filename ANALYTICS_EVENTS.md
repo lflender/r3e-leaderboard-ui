@@ -37,6 +37,8 @@ This document defines the canonical front-end analytics taxonomy used by page mo
 | `records page shown` | Records page first successful render completes | `filter_value`, `filter_label`, `filter_type` |
 | `records filter changed` | Records class/superclass filter changes via user input | `filter_value`, `filter_label`, `filter_type`, `source` |
 | `records action` | Records user action (fold/unfold/next/prev) | `action`, `record_type`, `filter_value`, `filter_label`, `filter_type` |
+| `challenge page shown` | Challenge Picker page initializes | `mode`, `car_granularity`, `track_granularity`, `group_by_category`, `hardcore`, `exclusions` |
+| `challenge pick clicked` | User clicks the Pick button | `mode`, `car_granularity`, `track_granularity`, `group_by_category`, `hardcore`, `picked_class`, `picked_superclass`, `picked_track`, `picked_layout_id`, `exclusions` |
 
 ## Deprecated Event Names
 

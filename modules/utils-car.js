@@ -245,6 +245,191 @@ function matchesCarFilterValue(carName, selectedCarFilter) {
     return car === selected;
 }
 
+/* ── badge helpers (shared by Cars page + Challenge Picker) ── */
+
+function escHtml(text) {
+    return typeof R3EUtils !== 'undefined' && R3EUtils.escapeHtml
+        ? R3EUtils.escapeHtml(text)
+        : String(text ?? '');
+}
+
+function wheelBadge(cat) {
+    const v = (cat || '').toLowerCase().trim();
+    if (!v) return '<span class="car-badge unknown">—</span>';
+    if (v === 'gt') return '<span class="car-badge gt">GT</span>';
+    if (v === 'round') return '<span class="car-badge round">Round</span>';
+    if (v === 'round flat' || v === 'round (flat)' || v === 'round(flat)') return '<span class="car-badge round-flat" title="Round flat">Round flat</span>';
+    return `<span class="car-badge unknown">${escHtml(cat)}</span>`;
+}
+
+function transBadge(cat) {
+    const v = (cat || '').toLowerCase().trim();
+    if (!v) return '<span class="car-badge trans unknown">—</span>';
+    if (v === 'paddles') return '<span class="car-badge trans">Paddles</span>';
+    if (v === 'sequential') return '<span class="car-badge trans sequential">Sequential</span>';
+    if (v === 'h' || v === 'other') return '<span class="car-badge trans h">H</span>';
+    return `<span class="car-badge trans unknown">${escHtml(cat)}</span>`;
+}
+
+function driveBadge(drive) {
+    const v = (drive || '').toUpperCase().trim();
+    if (!v) return '<span class="car-badge drive unknown">—</span>';
+    if (v === 'RWD') return '<span class="car-badge drive rwd">RWD</span>';
+    if (v === 'FWD') return '<span class="car-badge drive fwd">FWD</span>';
+    if (v === '4WD' || v === 'AWD') return '<span class="car-badge drive awd">4WD</span>';
+    return `<span class="car-badge drive unknown">${escHtml(drive)}</span>`;
+}
+
+/* ── rating widget (shared by Cars page + Challenge Picker) ── */
+
+function buildRatingHtml(carId, currentRating, variant) {
+    if (typeof CarRatings === 'undefined') return '';
+    const encId = escHtml(carId);
+    const widgetClass = variant === 'table'
+        ? 'car-rating-widget car-rating-widget--table'
+        : 'car-rating-widget car-rating-widget--tile';
+
+    let html = `<div class="${widgetClass}" data-car-id="${encId}" data-rated="${currentRating > 0}" data-score-level="${currentRating}" aria-label="Rate this car">`;
+    for (let s = 1; s <= 5; s++) {
+        const filled = currentRating >= s;
+        const btnCls = ['car-rating-btn', filled ? 'is-rated' : ''].filter(Boolean).join(' ');
+        html += `<span class="${btnCls}" role="button" tabindex="-1" data-score="${s}" data-filled="${filled}" aria-label="Rate ${s} star${s > 1 ? 's' : ''}">${filled ? '★' : '☆'}</span>`;
+    }
+    const heartFilled = currentRating === 6;
+    const heartCls = ['car-rating-btn car-rating-heart', heartFilled ? 'is-rated' : ''].filter(Boolean).join(' ');
+    html += `<span class="${heartCls}" role="button" tabindex="-1" data-score="6" data-filled="${heartFilled}" aria-label="Add to favorites">${heartFilled ? '♥' : '♡'}</span>`;
+    html += '</div>';
+    return html;
+}
+
+function attachRatingHandlers(rootEl) {
+    if (typeof CarRatings === 'undefined') return;
+    Array.from(rootEl.querySelectorAll('.car-rating-widget')).forEach(function (widget) {
+        const carId = widget.getAttribute('data-car-id');
+        if (!carId) return;
+        const buttons = Array.from(widget.querySelectorAll('.car-rating-btn'));
+
+        function updateDisplay(rating) {
+            widget.setAttribute('data-rated', rating > 0 ? 'true' : 'false');
+            widget.setAttribute('data-score-level', String(rating));
+            buttons.forEach(function (btn) {
+                const score = parseInt(btn.getAttribute('data-score'));
+                const isHeart = btn.classList.contains('car-rating-heart');
+                btn.classList.remove('is-preview');
+                if (isHeart) {
+                    const filled = rating === 6;
+                    btn.classList.toggle('is-rated', filled);
+                    btn.setAttribute('data-filled', filled);
+                    btn.textContent = filled ? '♥' : '♡';
+                } else {
+                    const filled = rating >= score;
+                    btn.classList.toggle('is-rated', filled);
+                    btn.setAttribute('data-filled', filled);
+                    btn.textContent = filled ? '★' : '☆';
+                }
+            });
+        }
+
+        widget.addEventListener('mouseover', function (e) {
+            const btn = e.target.closest('.car-rating-btn');
+            if (!btn) return;
+            const previewScore = parseInt(btn.getAttribute('data-score'));
+            buttons.forEach(function (b) {
+                const s = parseInt(b.getAttribute('data-score'));
+                const isHeart = b.classList.contains('car-rating-heart');
+                if (previewScore === 6) {
+                    b.classList.add('is-preview');
+                    b.textContent = isHeart ? '♥' : '★';
+                } else if (isHeart) {
+                    b.classList.remove('is-preview');
+                    b.textContent = '♡';
+                } else {
+                    b.classList.toggle('is-preview', s <= previewScore);
+                    b.textContent = s <= previewScore ? '★' : '☆';
+                }
+            });
+        });
+
+        widget.addEventListener('mouseout', function (e) {
+            if (widget.contains(e.relatedTarget)) return;
+            updateDisplay(CarRatings.get(carId));
+        });
+
+        buttons.forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const score = parseInt(btn.getAttribute('data-score'));
+                const current = CarRatings.get(carId);
+                const newRating = current === score ? 0 : score;
+                CarRatings.set(carId, newRating);
+                updateDisplay(newRating);
+            });
+        });
+    });
+}
+
+/* ── year badge color (1969=yellow → 2025=green) ────────── */
+
+var YEAR_COLOR_MIN = 1969;
+var YEAR_COLOR_MAX = 2025;
+
+function yearBadgeColor(year) {
+    var y = parseInt(year);
+    if (isNaN(y)) return '#e0e0e0';
+    var t = Math.min(Math.max((y - YEAR_COLOR_MIN) / (YEAR_COLOR_MAX - YEAR_COLOR_MIN), 0), 1);
+    var r = Math.round((1 - t) * 255 + t * 0);
+    var g = Math.round((1 - t) * 214 + t * 200);
+    var b = Math.round((1 - t) * 0 + t * 83);
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
+}
+
+/* ── shared car-name display HTML ──────────────────────── */
+
+function renderCarDisplayHtml(rawCarName, options) {
+    options = options || {};
+    var esc = (typeof R3EUtils !== 'undefined' && R3EUtils.escapeHtml) ? R3EUtils.escapeHtml : function (t) { return String(t || ''); };
+    var flagHtml = options.flagHtml || '';
+    var metaHtml = options.metaHtml || '';
+    var cn = options.className || 'cars-page-car-name';
+    var safeName = String(rawCarName || '');
+    var split = splitCarName(safeName);
+    var brand = String(split.brand || '').trim();
+    var model = String(split.model || '').trim();
+    var escBrand = esc(brand);
+    var escModel = esc(model);
+    var escName = esc(safeName);
+    var brandLogoUrl = resolveBrandLogoPath(safeName);
+    var brandLogoClass = brandLogoUrl.includes('logo-raceroom.png')
+        ? 'table-brand-logo table-brand-logo-raceroom'
+        : 'table-brand-logo';
+    var brandLogoHtml = brandLogoUrl
+        ? '<span class="table-brand-logo-slot cars-page-car-logo-slot"><img class="' + brandLogoClass + '" src="' + esc(brandLogoUrl) + '" alt="' + (escBrand || 'Car brand') + ' logo" loading="lazy" decoding="async" data-center-logo="true" /></span>'
+        : '';
+
+    if (!brand) {
+        return '<span class="' + cn + '">' + flagHtml + brandLogoHtml + '<span class="cars-page-car-text"><span class="car-brand">' + escName + '</span></span>' + metaHtml + '</span>';
+    }
+
+    return '<span class="' + cn + '">' + flagHtml + brandLogoHtml + '<span class="cars-page-car-text"><span class="car-brand">' + escBrand + '</span>' + (model ? ' <span class="car-model cars-page-car-model">' + escModel + '</span>' : '') + '</span>' + metaHtml + '</span>';
+}
+
+/* ── brand logo centering handler ─────────────────────── */
+
+function attachBrandLogoHandlers(rootEl) {
+    Array.from(rootEl.querySelectorAll('img[data-center-logo]')).forEach(function (img) {
+        img.addEventListener('load', function () {
+            var renderedWidth = this.getBoundingClientRect().width || this.width || 22;
+            var slotWidth = (this.parentElement && this.parentElement.getBoundingClientRect().width) || 22;
+            var offsetX = (slotWidth - renderedWidth) / 2;
+            this.style.marginLeft = offsetX + 'px';
+        });
+        img.addEventListener('error', function () {
+            if (this.parentElement) { this.parentElement.remove(); } else { this.remove(); }
+        });
+    });
+}
+
 window.R3ECarUtils = {
     splitCarName,
     resolveBrandLogoPath,
@@ -253,5 +438,13 @@ window.R3ECarUtils = {
     findCarCombinations,
     findCombinationForCar,
     isLastInCarGroup,
-    matchesCarFilterValue
+    matchesCarFilterValue,
+    wheelBadge,
+    transBadge,
+    driveBadge,
+    buildRatingHtml,
+    attachRatingHandlers,
+    yearBadgeColor,
+    renderCarDisplayHtml,
+    attachBrandLogoHandlers
 };

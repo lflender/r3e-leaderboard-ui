@@ -91,4 +91,16 @@ describe('Navigation', () => {
             '_blank'
         );
     });
+
+    test('openDriverProfile includes pathId in URL when available', () => {
+        const header = document.createElement('tr');
+        header.dataset.driverName = 'Alex Fernandez';
+        header.dataset.pathId = '12345';
+
+        window.openDriverProfile(header);
+        expect(window.open).toHaveBeenCalledWith(
+            'driver-profile.html?driver=%22Alex%20Fernandez%22&id=12345',
+            '_blank'
+        );
+    });
 });

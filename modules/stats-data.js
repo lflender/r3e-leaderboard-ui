@@ -104,7 +104,7 @@
             if (!path) return undefined;
             const raw = String(path);
             // Prefer smaller overall_top_* files when available.
-            // Example: cache/stats/overall_pole.json.gz -> cache/stats/overall_top_pole.json.gz
+            // Example: cache/stats/overall/overall_pole.json.gz -> cache/stats/overall/overall_top_pole.json.gz
             if (!filterValue && raw.includes('/overall_')) {
                 return raw.replace('/overall_', '/overall_top_');
             }
@@ -133,6 +133,7 @@
             rank: row?.rank || '',
             avatar: row?.avatar || '',
             team: row?.team || '',
+            path_id: row?.driver_key || '',
             value: Number(row?.[metricKey] || 0)
         };
     }

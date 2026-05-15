@@ -84,4 +84,74 @@ describe('R3ECarUtils', () => {
         expect(window.R3ECarUtils.matchesCarFilterValue('BMW M4 GT3 2023', 'COMBINED_YEAR:BMW M4 GT3')).toBe(true);
         expect(window.R3ECarUtils.matchesCarFilterValue('Ferrari 296 GT3', 'COMBINED_YEAR:BMW M4 GT3')).toBe(false);
     });
+
+    /* ── badge helpers ───────────────────────────────────── */
+
+    describe('wheelBadge', () => {
+        test('returns correct badge for known types', () => {
+            expect(window.R3ECarUtils.wheelBadge('gt')).toContain('class="car-badge gt"');
+            expect(window.R3ECarUtils.wheelBadge('round')).toContain('class="car-badge round"');
+            expect(window.R3ECarUtils.wheelBadge('round flat')).toContain('class="car-badge round-flat"');
+            expect(window.R3ECarUtils.wheelBadge('round (flat)')).toContain('class="car-badge round-flat"');
+        });
+
+        test('returns unknown badge for empty or unrecognized', () => {
+            expect(window.R3ECarUtils.wheelBadge('')).toContain('unknown');
+            expect(window.R3ECarUtils.wheelBadge('weird')).toContain('unknown');
+        });
+    });
+
+    describe('transBadge', () => {
+        test('returns correct badge for known types', () => {
+            expect(window.R3ECarUtils.transBadge('paddles')).toContain('class="car-badge trans"');
+            expect(window.R3ECarUtils.transBadge('sequential')).toContain('sequential');
+            expect(window.R3ECarUtils.transBadge('h')).toContain('car-badge trans h');
+        });
+
+        test('returns unknown badge for empty', () => {
+            expect(window.R3ECarUtils.transBadge('')).toContain('unknown');
+        });
+    });
+
+    describe('driveBadge', () => {
+        test('returns correct badge for known types', () => {
+            expect(window.R3ECarUtils.driveBadge('RWD')).toContain('car-badge drive rwd');
+            expect(window.R3ECarUtils.driveBadge('FWD')).toContain('car-badge drive fwd');
+            expect(window.R3ECarUtils.driveBadge('4WD')).toContain('car-badge drive awd');
+            expect(window.R3ECarUtils.driveBadge('AWD')).toContain('car-badge drive awd');
+        });
+
+        test('returns unknown badge for empty', () => {
+            expect(window.R3ECarUtils.driveBadge('')).toContain('unknown');
+        });
+    });
+
+    /* ── yearBadgeColor ──────────────────────────────────── */
+
+    describe('yearBadgeColor', () => {
+        test('returns yellow for 1969', () => {
+            expect(window.R3ECarUtils.yearBadgeColor('1969')).toBe('rgb(255,214,0)');
+        });
+
+        test('returns green for 2025', () => {
+            expect(window.R3ECarUtils.yearBadgeColor('2025')).toBe('rgb(0,200,83)');
+        });
+
+        test('returns midpoint color for ~1997', () => {
+            const color = window.R3ECarUtils.yearBadgeColor('1997');
+            expect(color).toMatch(/^rgb\(\d+,\d+,\d+\)$/);
+            expect(color).not.toBe('rgb(255,214,0)');
+            expect(color).not.toBe('rgb(0,200,83)');
+        });
+
+        test('returns fallback for invalid year', () => {
+            expect(window.R3ECarUtils.yearBadgeColor('')).toBe('#e0e0e0');
+            expect(window.R3ECarUtils.yearBadgeColor('abc')).toBe('#e0e0e0');
+        });
+
+        test('clamps years outside range', () => {
+            expect(window.R3ECarUtils.yearBadgeColor('1960')).toBe('rgb(255,214,0)');
+            expect(window.R3ECarUtils.yearBadgeColor('2030')).toBe('rgb(0,200,83)');
+        });
+    });
 });

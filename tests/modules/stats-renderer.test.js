@@ -6,6 +6,8 @@ describe('StatsRenderer', () => {
         delete window.StatsRenderer;
         delete window.FlagHelper;
         delete window.resolveMpPos;
+        delete window.resolveMpPosWithInactive;
+        delete window.getInactiveMpPos;
         delete window.getMpPosNameClasses;
         window.R3EUtils = {
             escapeHtml: (v) => String(v == null ? '' : v)

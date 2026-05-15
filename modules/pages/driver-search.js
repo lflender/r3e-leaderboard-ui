@@ -380,6 +380,7 @@ class DriverSearch {
      */
     handleUrlDriverParam() {
         const driver = R3EUtils.getUrlParam('driver') || R3EUtils.getUrlParam('query');
+        this._urlPathId = R3EUtils.getUrlParam('id') || '';
         if (driver && this.elements.driverSearch) {
             this.elements.driverSearch.value = driver;
             this._searchSource = 'url';
@@ -420,9 +421,16 @@ class DriverSearch {
             // Sort results by MP position (ascending) when multiple drivers have the same name
             this.sortResultsByMpPosition(results);
             
-            this.allResults = results;
+            // Filter to a specific pathId when navigating from detail page
+            const filteredResults = this._urlPathId
+                ? results.filter(g => String(g.pathId || '') === this._urlPathId) 
+                : results;
+            // Clear the URL pathId after first use so subsequent searches are unfiltered
+            this._urlPathId = '';
+
+            this.allResults = filteredResults.length > 0 ? filteredResults : results;
             this.currentPage = 1;
-            this.displayResults(results, searchId);
+            this.displayResults(this.allResults, searchId);
 
             // Analytics: keep the generic search event and additionally log
             // when a single driver result is actually displayed.

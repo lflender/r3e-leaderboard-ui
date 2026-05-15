@@ -126,8 +126,12 @@ class Navigation {
         const driverName = headerEl?.dataset?.driverName;
         if (!driverName) return;
 
+        const pathId = headerEl?.dataset?.pathId || '';
         const encodedDriver = encodeURIComponent(`"${driverName}"`);
-        const url = `driver-profile.html?driver=${encodedDriver}`;
+        let url = `driver-profile.html?driver=${encodedDriver}`;
+        if (pathId) {
+            url += `&id=${encodeURIComponent(pathId)}`;
+        }
         window.open(url, '_blank');
     }
 }

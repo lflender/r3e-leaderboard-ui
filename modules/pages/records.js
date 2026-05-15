@@ -86,9 +86,14 @@
     const escapeHtml = (value) => window.R3EUtils.escapeHtml(value);
 
     async function ensureMpPosLoaded() {
+        const promises = [];
         if (typeof loadMpPosCache === 'function') {
-            try { await loadMpPosCache(); } catch (_) {}
+            promises.push(loadMpPosCache().catch(() => {}));
         }
+        if (typeof loadMpPosInactiveCache === 'function') {
+            promises.push(loadMpPosInactiveCache().catch(() => {}));
+        }
+        await Promise.all(promises);
     }
 
     function getSelectedLabel(value) {

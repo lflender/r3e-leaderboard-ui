@@ -28,7 +28,7 @@
     <!-- Analytics (PostHog via first-party proxy) -->
     <script src="modules/analytics.js?v=7"></script>
     
-    <link rel="stylesheet" href="style.css?v=245">
+    <link rel="stylesheet" href="style.css?v=255">
     <!-- Site Icons -->
     <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png?v=2">
     <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png?v=2">
@@ -48,13 +48,7 @@
 
     <main>
         <h1 class="sr-only">RaceRoom Track Info and Class Leaderboard Combinations</h1>
-        <div class="tabs">
-            <a class="tab-button" href="drivers.html">Driver Search</a>
-            <button class="tab-button active">Tracks</button>
-            <a class="tab-button" href="cars.html">Cars</a>
-            <a class="tab-button" href="records.html">Records <span class="tab-badge">NEW!</span></a>
-            <a class="tab-button" href="faq.html">FAQ</a>
-        </div>
+        <div class="tabs" id="site-tabs" data-active="tracks"></div>
 
         <div class="tab-content">
             <div id="track-info" class="tab-panel active">
@@ -67,9 +61,9 @@
                         <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All classes ▾</button>
                         <div class="custom-select__menu" role="presentation" hidden></div>
                     </div>
-                    <div id="combine-checkbox-container" style="display: none; margin-left: 0.5rem; align-items: center;">
-                        <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; user-select: none; font-size: 0.95rem; white-space: nowrap;">
-                            <input type="checkbox" id="combine-checkbox" style="cursor: pointer; width: 1rem; height: 1rem; accent-color: var(--accent-color, #4a9eff);">
+                    <div id="combine-checkbox-container" class="combine-checkbox-container" style="display: none;">
+                        <label class="combine-checkbox-label">
+                            <input type="checkbox" id="combine-checkbox">
                             <span>Combine</span>
                         </label>
                     </div>
@@ -77,6 +71,7 @@
                         <option value="">All classes</option>
                     </select>
                 </div>
+                <div id="track-description" class="track-description" hidden></div>
                 <div id="track-info-table"></div>
             </div>
         </div>
@@ -120,6 +115,7 @@
 
     <!-- Loaders -->
     <script src="modules/loaders/template-loader.js?v=2" defer></script>
+    <script src="modules/loaders/tabs-loader.js?v=2" defer></script>
     <script src="modules/loaders/footer-loader.js?v=2" defer></script>
     <script src="modules/loaders/header-loader.js?v=2" defer></script>
 
@@ -128,33 +124,33 @@
     <script src="modules/column-config.js?v=4" defer></script>
     <script src="modules/compressed-json-helper.js?v=1" defer></script>
     <script src="modules/custom-select.js?v=8" defer></script>
-    <script src="modules/data-normalizer.js?v=1" defer></script>
+    <script src="modules/data-normalizer.js?v=2" defer></script>
     <script src="modules/driver-index-service.js?v=8" defer></script>
     <script src="modules/driver-search-service.js?v=18" defer></script>
-    <script src="modules/data-service.js?v=38" defer></script>
+    <script src="modules/data-service.js?v=39" defer></script>
     <script src="modules/field-mappings.js?v=1" defer></script>
     <script src="modules/flag-helper.js?v=2" defer></script>
-    <script src="modules/mp-pos-service.js?v=9" defer></script>
+    <script src="modules/mp-pos-service.js?v=11" defer></script>
     <script src="modules/sort-service.js?v=2" defer></script>
-    <script src="modules/table-renderer.js?v=37" defer></script>
+    <script src="modules/table-renderer.js?v=42" defer></script>
     <script src="modules/template-helper.js?v=3" defer></script>
     <script src="modules/time-helper.js?v=3" defer></script>
     <script src="modules/utils-track.js?v=1" defer></script>
     <script src="modules/url-helper.js?v=2" defer></script>
-    <script src="modules/utils-car.js?v=8" defer></script>
+    <script src="modules/utils-car.js?v=12" defer></script>
     <script src="modules/utils.js?v=12" defer></script>
     
     <!-- Feature modules -->
-    <script src="modules/navigation.js?v=3" defer></script>
+    <script src="modules/navigation.js?v=4" defer></script>
     <script src="modules/status-display.js?v=3" defer></script>
     <script src="modules/tab-manager.js?v=2" defer></script>
     
     <!-- Data -->
     <script src="modules/data/car-classes.js?v=3" defer></script>
     <script src="modules/data/cars.js?v=10" defer></script>
-    <script src="modules/data/tracks.js?v=4" defer></script>
+    <script src="modules/data/tracks.js?v=5" defer></script>
     <script src="modules/data/track-images.js?v=3" defer></script>
-    <script src="modules/pages/track-info.js?v=23" defer></script>
+    <script src="modules/pages/track-info.js?v=26" defer></script>
 
     <!-- Application script -->
     <script src="script.js?v=9" defer></script>

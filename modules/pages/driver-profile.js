@@ -17,7 +17,8 @@ class DriverProfile {
 
     async init() {
         const driverParam = R3EUtils.getUrlParam('driver');
-        if (!driverParam) {
+        const idParam = R3EUtils.getUrlParam('id');
+        if (!driverParam && !idParam) {
             this.showError('No driver specified. Go to the <a href="drivers.html">Driver Search</a> to find a driver.');
             return;
         }
@@ -25,18 +26,21 @@ class DriverProfile {
         await TemplateHelper.showLoading(this.elements.profileContainer, 'Loading driver profile...');
 
         try {
-            const [, results] = await Promise.all([
+            const searchTerm = driverParam || `"${idParam}"`;
+            const [, , results] = await Promise.all([
                 loadMpPosCache(),
-                dataService.searchDriver(driverParam, {})
+                typeof loadMpPosInactiveCache === 'function' ? loadMpPosInactiveCache() : Promise.resolve(),
+                dataService.searchDriver(searchTerm, {})
             ]);
 
             if (!Array.isArray(results) || results.length === 0) {
-                this.showError(`Driver "${R3EUtils.escapeHtml(driverParam.replace(/^"|"$/g, ''))}" not found. <a href="drivers.html">Back to search</a>.`);
+                const displayName = driverParam ? driverParam.replace(/^"|"$/g, '') : idParam;
+                this.showError(`Driver "${R3EUtils.escapeHtml(displayName)}" not found. <a href="drivers.html">Back to search</a>.`);
                 return;
             }
 
-            // Use first matching driver group
-            const driverGroup = results[0];
+            // Select the correct driver group by pathId when available
+            const driverGroup = this.findDriverGroup(results, idParam);
             const profileData = DriverProfileData.buildProfileData(driverGroup);
 
             this.renderProfile(profileData);
@@ -45,6 +49,21 @@ class DriverProfile {
             console.error('Driver profile error:', error);
             this.showError('Failed to load driver profile. Please try again later.');
         }
+    }
+
+    /**
+     * Find the correct driver group from search results by pathId.
+     * Falls back to the first result when no pathId match is found.
+     * @param {Array} results - Search result groups
+     * @param {string|null} pathId - Target pathId from URL
+     * @returns {Object} Matching driver group
+     */
+    findDriverGroup(results, pathId) {
+        if (pathId) {
+            const match = results.find(g => String(g.pathId || '') === String(pathId));
+            if (match) return match;
+        }
+        return results[0];
     }
 
     /**
@@ -64,7 +83,7 @@ class DriverProfile {
 
         this.renderHeader(profile);
         this.renderStatsPlaceholders();
-        this.loadStats(profile.name);
+        this.loadStats(profile.name, profile.pathId);
         this.renderHighlights(profile);
         this.renderCharts(profile);
     }
@@ -94,11 +113,15 @@ class DriverProfile {
             ? `<img class="driver-profile-avatar" src="${escape(profile.avatar)}" alt="${escape(profile.name)} avatar" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`
             : '<div class="driver-profile-avatar-placeholder"></div>';
 
-        const mpPos = typeof resolveMpPos === 'function' ? resolveMpPos(profile.name, profile.country) : null;
+        const mpResult = typeof resolveMpPosWithInactive === 'function' ? resolveMpPosWithInactive(profile.name, profile.pathId) : { position: null, inactive: false };
+        const mpPos = mpResult.position;
+        const mpPosInactive = mpResult.inactive;
+        const inactiveLabel = mpPosInactive ? ' (inactive)' : '';
+        const mpPosCssClass = mpPosInactive ? 'driver-profile-mp-pos-inactive' : 'driver-profile-mp-pos';
         const mpPosHtml = mpPos !== null
-            ? `<span class="driver-profile-mp-pos">Multiplayer #${mpPos}</span>`
+            ? `<span class="${mpPosCssClass}">Multiplayer #${mpPos}${inactiveLabel}</span>`
             : '';
-        const nameClasses = typeof getMpPosNameClasses === 'function' ? getMpPosNameClasses(mpPos) : '';
+        const nameClasses = typeof getMpPosNameClasses === 'function' ? getMpPosNameClasses(mpPos, { inactive: mpPosInactive }) : '';
         const nameClass = nameClasses ? ` ${nameClasses}` : '';
 
         const rankHtml = profile.rank ? R3EUtils.renderRankStars(profile.rank) : '';
@@ -118,7 +141,7 @@ class DriverProfile {
             '<div class="driver-profile-identity">',
             avatarHtml,
             '<div class="driver-profile-info">',
-            `<h2 class="driver-profile-name${nameClass}"><a href="drivers.html?driver=${encodeURIComponent('"' + profile.name + '"')}" class="driver-profile-name-link">${escape(profile.name)}</a></h2>`,
+            `<h2 class="driver-profile-name${nameClass}"><a href="drivers.html?driver=${encodeURIComponent('"' + profile.name + '"')}${profile.pathId ? '&id=' + encodeURIComponent(profile.pathId) : ''}" class="driver-profile-name-link">${escape(profile.name)}</a></h2>`,
             '<div class="driver-profile-meta">',
             `<span class="driver-profile-country">${flagHtml} ${escape(profile.country)}</span>`,
             rankHtml ? `<span class="driver-profile-rank">${rankHtml}</span>` : '',
@@ -160,12 +183,12 @@ class DriverProfile {
      * Asynchronously load stats and update each card independently as data arrives
      * @param {string} driverName - Driver name to look up
      */
-    loadStats(driverName) {
+    loadStats(driverName, pathId) {
         if (!window.DriverStatsService) return;
 
         const metrics = DriverStatsService.PROFILE_METRICS;
         metrics.forEach(metric => {
-            DriverStatsService.lookupSingleStat(driverName, metric.key)
+            DriverStatsService.lookupSingleStat(driverName, metric.key, pathId)
                 .then(result => {
                     const card = document.getElementById('stat-' + metric.key);
                     if (!card) return;

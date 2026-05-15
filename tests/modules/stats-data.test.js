@@ -52,8 +52,8 @@ describe('StatsData', () => {
         ], 'pole_positions', 2);
 
         expect(rows).toEqual([
-            { name: 'A', country: 'FR', rank: 'B', avatar: '', team: '', value: 9 },
-            { name: 'B', country: 'DE', rank: 'A', avatar: '', team: '', value: 4 }
+            { name: 'A', country: 'FR', rank: 'B', avatar: '', team: '', path_id: '', value: 9 },
+            { name: 'B', country: 'DE', rank: 'A', avatar: '', team: '', path_id: '', value: 4 }
         ]);
     });
 
@@ -105,19 +105,19 @@ describe('StatsData', () => {
 
         const cacheStyleIndex = {
             overall: {
-                pole_file: 'cache/stats/overall_pole.json.gz',
-                bested_file: 'cache/stats/overall_bested.json.gz',
-                podium_file: 'cache/stats/overall_podium.json.gz',
-                entries_file: 'cache/stats/overall_entries.json.gz',
-                avg_bested_file: 'cache/stats/overall_avg_bested.json.gz'
+                pole_file: 'cache/stats/overall/overall_pole.json.gz',
+                bested_file: 'cache/stats/overall/overall_bested.json.gz',
+                podium_file: 'cache/stats/overall/overall_podium.json.gz',
+                entries_file: 'cache/stats/overall/overall_entries.json.gz',
+                avg_bested_file: 'cache/stats/overall/overall_avg_bested.json.gz'
             }
         };
         expect(window.StatsData.getAllPathsForFilter(cacheStyleIndex, '')).toEqual({
-            polePath: 'cache/stats/overall_top_pole.json.gz',
-            bestedPath: 'cache/stats/overall_top_bested.json.gz',
-            podiumPath: 'cache/stats/overall_top_podium.json.gz',
-            avgBestedPath: 'cache/stats/overall_top_avg_bested.json.gz',
-            entriesPath: 'cache/stats/overall_top_entries.json.gz'
+            polePath: 'cache/stats/overall/overall_top_pole.json.gz',
+            bestedPath: 'cache/stats/overall/overall_top_bested.json.gz',
+            podiumPath: 'cache/stats/overall/overall_top_podium.json.gz',
+            avgBestedPath: 'cache/stats/overall/overall_top_avg_bested.json.gz',
+            entriesPath: 'cache/stats/overall/overall_top_entries.json.gz'
         });
         expect(window.StatsData.getAllPathsForFilter(index, 'superclass:GT3')).toEqual({
             polePath: 'gt3-pole.gz',

@@ -154,11 +154,15 @@ class TableRenderer {
             ? `<img class="driver-group-avatar" src="${R3EUtils.escapeHtml(String(avatar))}" alt="${R3EUtils.escapeHtml(`${displayName} avatar`)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`
             : '';
         
-        // Get multiplayer position if available
-        const mpPos = typeof resolveMpPos === 'function' ? resolveMpPos(displayName, country) : null;
-        const mpPosHtml = mpPos ? ` | Multiplayer #${mpPos}` : '';
+        // Get multiplayer position if available (with inactive fallback)
+        const mpResult = typeof resolveMpPosWithInactive === 'function' ? resolveMpPosWithInactive(displayName, pathId) : { position: null, inactive: false };
+        const mpPos = mpResult.position;
+        const mpPosInactive = mpResult.inactive;
+        const inactiveLabel = mpPosInactive ? ' (inactive)' : '';
+        const mpPosBadgeClass = mpPosInactive ? ' class="mp-pos-inactive"' : '';
+        const mpPosHtml = mpPos ? ` | <span${mpPosBadgeClass}>Multiplayer #${mpPos}${inactiveLabel}</span>` : '';
         
-        const nameClasses = typeof getMpPosNameClasses === 'function' ? getMpPosNameClasses(mpPos) : '';
+        const nameClasses = typeof getMpPosNameClasses === 'function' ? getMpPosNameClasses(mpPos, { inactive: mpPosInactive }) : '';
         const driverNameClass = nameClasses ? ` class="${nameClasses}"` : '';
         
         // Only add "Team" prefix if the team name doesn't already contain "team"
@@ -166,7 +170,7 @@ class TableRenderer {
         const teamHtml = team ? ` | 🏁 ${teamPrefix}${team}` : '';
         
         return `
-            <tr class="driver-group-header driver-group-header-link" data-group="${groupId}" data-driver-name="${R3EUtils.escapeHtml(displayName)}" onclick="openDriverProfile(this)">
+            <tr class="driver-group-header driver-group-header-link" data-group="${groupId}" data-driver-name="${R3EUtils.escapeHtml(displayName)}" data-path-id="${R3EUtils.escapeHtml(String(pathId))}" onclick="openDriverProfile(this)">
                 <td colspan="${colspan}">
                     <span class="driver-profile-link-btn">View Profile ›</span>
                     <strong${driverNameClass}>${avatarHtml}${R3EUtils.escapeHtml(displayName)}</strong>
@@ -489,20 +493,25 @@ class TableRenderer {
         const rank = window.DataNormalizer && typeof window.DataNormalizer.extractRank === 'function'
             ? window.DataNormalizer.extractRank(item)
             : (item.rank || item.Rank || '');
+        const pathId = item.path_id || item.pathId || item.PathID || item['Path ID'] || '';
         const highlisted = item.highlisted || item.Highlisted || false;
         const flag = FlagHelper.countryToFlag(country);
         const flagHtml = flag ? `<span class="country-flag">${flag}</span>` : '';
         const rankStarsHtml = rank ? R3EUtils.renderRankStars(rank, true) : '';
-        const mpPos = typeof resolveMpPos === 'function' ? resolveMpPos(name, country) : null;
-        const mpPosHtml = mpPos ? ` <span class="mp-pos-badge">#${mpPos}</span>` : '';
+        const mpResult = typeof resolveMpPosWithInactive === 'function' ? resolveMpPosWithInactive(name, pathId) : { position: null, inactive: false };
+        const mpPos = mpResult.position;
+        const mpPosInactive = mpResult.inactive;
+        const mpPosBadgeClass = mpPosInactive ? 'mp-pos-badge mp-pos-inactive' : 'mp-pos-badge';
+        const mpPosHtml = mpPos ? ` <span class="${mpPosBadgeClass}">#${mpPos}</span>` : '';
         const driverLinkClass = options.driverLinkClass || 'detail-driver-link';
         const encodedDriver = encodeURIComponent(`"${String(name)}"`);
-        const driverHref = `${options.driverLinkBase || 'drivers.html?driver='}${encodedDriver}`;
+        const idSuffix = pathId ? `&id=${encodeURIComponent(pathId)}` : '';
+        const driverHref = `${options.driverLinkBase || 'drivers.html?driver='}${encodedDriver}${idSuffix}`;
 
         if (!highlisted) {
             let linkClasses = driverLinkClass;
             if (typeof getMpPosNameClasses === 'function') {
-                const nameClasses = getMpPosNameClasses(mpPos);
+                const nameClasses = getMpPosNameClasses(mpPos, { inactive: mpPosInactive });
                 if (nameClasses) {
                     linkClasses += ` ${nameClasses}`;
                 }
@@ -512,7 +521,7 @@ class TableRenderer {
 
         const highlightThresholds = options.highlightedMpPosThresholds || { gold: 10, silver: 100, glitter: 10 };
         const highlightedClasses = typeof getMpPosNameClasses === 'function'
-            ? getMpPosNameClasses(mpPos, highlightThresholds)
+            ? getMpPosNameClasses(mpPos, { ...highlightThresholds, inactive: mpPosInactive })
             : '';
         const classAttr = highlightedClasses ? ` class="${highlightedClasses}"` : '';
         return `<td><span${classAttr}>${flagHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}${mpPosHtml}</span></td>`;

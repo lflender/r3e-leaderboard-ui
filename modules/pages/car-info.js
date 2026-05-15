@@ -15,32 +15,9 @@
   }
 
   // Badge label and class mapping for Wheel and Transmission
-  function wheelBadge(cat){
-    const v = (cat || '').toLowerCase().trim();
-    if (!v) return '<span class="car-badge unknown">—</span>';
-    if (v === 'gt') return '<span class="car-badge gt">GT</span>';
-    if (v === 'round') return '<span class="car-badge round">Round</span>';
-    if (v === 'round flat' || v === 'round (flat)' || v === 'round(flat)') return '<span class="car-badge round-flat" title="Round flat">Round flat</span>';
-    return `<span class="car-badge unknown">${R3EUtils.escapeHtml(cat)}</span>`;
-  }
-
-  function transBadge(cat){
-    const v = (cat || '').toLowerCase().trim();
-    if (!v) return '<span class="car-badge trans unknown">—</span>';
-    if (v === 'paddles') return '<span class="car-badge trans">Paddles</span>';
-    if (v === 'sequential') return '<span class="car-badge trans sequential">Sequential</span>';
-    if (v === 'h' || v === 'other') return '<span class="car-badge trans h">H</span>';
-    return `<span class="car-badge trans unknown">${R3EUtils.escapeHtml(cat)}</span>`;
-  }
-
-  function driveBadge(drive){
-    const v = (drive || '').toUpperCase().trim();
-    if (!v) return '<span class="car-badge drive unknown">—</span>';
-    if (v === 'RWD') return '<span class="car-badge drive rwd">RWD</span>';
-    if (v === 'FWD') return '<span class="car-badge drive fwd">FWD</span>';
-    if (v === '4WD' || v === 'AWD') return '<span class="car-badge drive awd">4WD</span>';
-    return `<span class="car-badge drive unknown">${R3EUtils.escapeHtml(drive)}</span>`;
-  }
+  const wheelBadge = R3ECarUtils.wheelBadge;
+  const transBadge = R3ECarUtils.transBadge;
+  const driveBadge = R3ECarUtils.driveBadge;
 
   function countryFlag(country){
     // Use FlagHelper if available, otherwise return empty
@@ -50,35 +27,7 @@
     return '';
   }
 
-  function renderCarDisplayHtml(rawCarName, options = {}) {
-    const flagHtml = options.flagHtml || '';
-    const metaHtml = options.metaHtml || '';
-    const className = options.className || 'cars-page-car-name';
-    const safeName = String(rawCarName || '');
-    const split = (window.R3EUtils && typeof R3EUtils.splitCarName === 'function')
-      ? R3EUtils.splitCarName(safeName)
-      : { brand: '', model: safeName };
-    const brand = String(split.brand || '').trim();
-    const model = String(split.model || '').trim();
-    const escBrand = R3EUtils.escapeHtml(brand);
-    const escModel = R3EUtils.escapeHtml(model);
-    const escName = R3EUtils.escapeHtml(safeName);
-    const brandLogoUrl = (window.R3EUtils && typeof window.R3EUtils.resolveBrandLogoPath === 'function')
-      ? window.R3EUtils.resolveBrandLogoPath(safeName)
-      : '';
-    const brandLogoClass = brandLogoUrl.includes('logo-raceroom.png')
-      ? 'table-brand-logo table-brand-logo-raceroom'
-      : 'table-brand-logo';
-    const brandLogoHtml = brandLogoUrl
-      ? `<span class="table-brand-logo-slot cars-page-car-logo-slot"><img class="${brandLogoClass}" src="${R3EUtils.escapeHtml(brandLogoUrl)}" alt="${escBrand || 'Car brand'} logo" loading="lazy" decoding="async" data-center-logo="true" /></span>`
-      : '';
-
-    if (!brand) {
-      return `<span class="${className}">${flagHtml}${brandLogoHtml}<span class="cars-page-car-text"><span class="car-brand">${escName}</span></span>${metaHtml}</span>`;
-    }
-
-    return `<span class="${className}">${flagHtml}${brandLogoHtml}<span class="cars-page-car-text"><span class="car-brand">${escBrand}</span>${model ? ` <span class="car-model cars-page-car-model">${escModel}</span>` : ''}</span>${metaHtml}</span>`;
-  }
+  const renderCarDisplayHtml = R3ECarUtils.renderCarDisplayHtml;
 
   const data = await loadData();
   const tableContainer = document.getElementById('cars-info-table');
@@ -431,44 +380,10 @@
   }
 
   function createYearColorFn() {
-    const allYears = [];
-    data.forEach(cls => {
-      (cls.cars || []).forEach(car => {
-        if (!carMatchesFilters(car)) return;
-        const y = parseInt(car.year);
-        if (!isNaN(y)) allYears.push(y);
-      });
-    });
-    const uniqueYears = Array.from(new Set(allYears)).sort((a, b) => a - b);
-
-    return function yearColor(year) {
-      const y = parseInt(year);
-      if (isNaN(y) || uniqueYears.length < 2) return '#e0e0e0';
-      const idx = uniqueYears.indexOf(y);
-      if (idx === -1) return '#e0e0e0';
-      const t = idx / (uniqueYears.length - 1);
-      const gamma = 2.2;
-      const tg = Math.pow(Math.min(Math.max(t, 0), 1), gamma);
-      const r = Math.round((1 - tg) * 255 + tg * 0);
-      const g = Math.round((1 - tg) * 214 + tg * 200);
-      const b = Math.round((1 - tg) * 0 + tg * 83);
-      return `rgb(${r},${g},${b})`;
-    };
+    return R3ECarUtils.yearBadgeColor;
   }
 
-  function attachBrandLogoHandlers(rootEl) {
-    Array.from(rootEl.querySelectorAll('img[data-center-logo]')).forEach(img => {
-      img.addEventListener('load', function () {
-        const renderedWidth = this.getBoundingClientRect().width || this.width || 22;
-        const slotWidth = (this.parentElement && this.parentElement.getBoundingClientRect().width) || 22;
-        const offsetX = (slotWidth - renderedWidth) / 2;
-        this.style.marginLeft = offsetX + 'px';
-      });
-      img.addEventListener('error', function () {
-        if (this.parentElement) { this.parentElement.remove(); } else { this.remove(); }
-      });
-    });
-  }
+  const attachBrandLogoHandlers = R3ECarUtils.attachBrandLogoHandlers;
 
   function attachImageCyclers(rootEl) {
     Array.from(rootEl.querySelectorAll('img.car-rotating-image[data-image-list]')).forEach(img => {
@@ -561,92 +476,8 @@
 
   // ---- Car rating helpers ----
 
-  function buildRatingHtml(carId, currentRating, variant = 'tile') {
-    if (typeof CarRatings === 'undefined') return '';
-    const encId = R3EUtils.escapeHtml(carId);
-    const widgetClass = variant === 'table'
-      ? 'car-rating-widget car-rating-widget--table'
-      : 'car-rating-widget car-rating-widget--tile';
-
-    let html = `<div class="${widgetClass}" data-car-id="${encId}" data-rated="${currentRating > 0}" data-score-level="${currentRating}" aria-label="Rate this car">`;
-    for (let s = 1; s <= 5; s++) {
-      const filled = currentRating >= s;
-      const btnCls = ['car-rating-btn', filled ? 'is-rated' : ''].filter(Boolean).join(' ');
-      html += `<span class="${btnCls}" role="button" tabindex="-1" data-score="${s}" data-filled="${filled}" aria-label="Rate ${s} star${s > 1 ? 's' : ''}">${filled ? '★' : '☆'}</span>`;
-    }
-    const heartFilled = currentRating === 6;
-    const heartCls = ['car-rating-btn car-rating-heart', heartFilled ? 'is-rated' : ''].filter(Boolean).join(' ');
-    html += `<span class="${heartCls}" role="button" tabindex="-1" data-score="6" data-filled="${heartFilled}" aria-label="Add to favorites">${heartFilled ? '♥' : '♡'}</span>`;
-    html += '</div>';
-    return html;
-  }
-
-  function attachRatingHandlers(rootEl) {
-    if (typeof CarRatings === 'undefined') return;
-    Array.from(rootEl.querySelectorAll('.car-rating-widget')).forEach(widget => {
-      const carId = widget.getAttribute('data-car-id');
-      if (!carId) return;
-      const buttons = Array.from(widget.querySelectorAll('.car-rating-btn'));
-
-      function updateDisplay(rating) {
-        widget.setAttribute('data-rated', rating > 0 ? 'true' : 'false');
-        widget.setAttribute('data-score-level', String(rating));
-        buttons.forEach(btn => {
-          const score = parseInt(btn.getAttribute('data-score'));
-          const isHeart = btn.classList.contains('car-rating-heart');
-          btn.classList.remove('is-preview');
-          if (isHeart) {
-            const filled = rating === 6;
-            btn.classList.toggle('is-rated', filled);
-            btn.setAttribute('data-filled', filled);
-            btn.textContent = filled ? '♥' : '♡';
-          } else {
-            const filled = rating >= score;
-            btn.classList.toggle('is-rated', filled);
-            btn.setAttribute('data-filled', filled);
-            btn.textContent = filled ? '★' : '☆';
-          }
-        });
-      }
-
-      widget.addEventListener('mouseover', (e) => {
-        const btn = e.target.closest('.car-rating-btn');
-        if (!btn) return;
-        const previewScore = parseInt(btn.getAttribute('data-score'));
-        buttons.forEach(b => {
-          const s = parseInt(b.getAttribute('data-score'));
-          const isHeart = b.classList.contains('car-rating-heart');
-          if (previewScore === 6) {
-            b.classList.add('is-preview');
-            b.textContent = isHeart ? '♥' : '★';
-          } else if (isHeart) {
-            b.classList.remove('is-preview');
-            b.textContent = '♡';
-          } else {
-            b.classList.toggle('is-preview', s <= previewScore);
-            b.textContent = s <= previewScore ? '★' : '☆';
-          }
-        });
-      });
-
-      widget.addEventListener('mouseout', (e) => {
-        if (widget.contains(e.relatedTarget)) return;
-        updateDisplay(CarRatings.get(carId));
-      });
-
-      buttons.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          const score = parseInt(btn.getAttribute('data-score'));
-          const current = CarRatings.get(carId);
-          const newRating = current === score ? 0 : score; // click same score = clear
-          CarRatings.set(carId, newRating);
-          updateDisplay(newRating);
-        });
-      });
-    });
-  }
+  const buildRatingHtml = R3ECarUtils.buildRatingHtml;
+  const attachRatingHandlers = R3ECarUtils.attachRatingHandlers;
 
   function renderTable() {
     let displayedClasses = 0;

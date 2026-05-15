@@ -8,29 +8,23 @@ import { loadBrowserScript } from '../helpers/script-loader.js';
 function buildCache(entries) {
     // Returns a cache object in the same shape as loadMpPosCache builds
     const byName = new Map();
-    const byNameCountry = new Map();
+    const byNameUserId = new Map();
     const nameStats = new Map();
-    entries.forEach(({ name, country, position }) => {
+    entries.forEach(({ name, user_id, position }) => {
         const nameLower = name.trim().toLowerCase();
         const stats = nameStats.get(nameLower) || { count: 0 };
         stats.count += 1;
         nameStats.set(nameLower, stats);
         if (!byName.has(nameLower)) byName.set(nameLower, position);
-        if (country) {
-            byNameCountry.set(`${nameLower}|${country.toLowerCase()}`, position);
+        if (user_id) {
+            byNameUserId.set(`${nameLower}|${String(user_id).trim()}`, position);
         }
     });
-    return { byName, byNameCountry, nameStats };
+    return { byName, byNameUserId, nameStats };
 }
 
 beforeAll(() => {
     window.CompressedJsonHelper = { readGzipJson: vi.fn() };
-    window.FlagHelper = {
-        findCountryCodeByName: (name) => {
-            const map = { 'germany': 'DE', 'france': 'FR' };
-            return map[name.toLowerCase()] || null;
-        }
-    };
     loadBrowserScript('modules/mp-pos-service.js');
 });
 
@@ -46,7 +40,7 @@ beforeEach(() => {
 
 // Helper: build + inject the cache by mocking the fetch inside loadMpPosCache
 function injectCache(entries) {
-    const data = { results: entries.map(e => ({ name: e.name, country: e.country, position: e.position })) };
+    const data = { results: entries.map(e => ({ name: e.name, user_id: e.user_id, position: e.position })) };
     window.CompressedJsonHelper.readGzipJson = vi.fn().mockResolvedValue(data);
 }
 
@@ -109,6 +103,21 @@ describe('getMpPosNameClasses', () => {
     it('returns empty string for position above thresholds', () => {
         expect(window.getMpPosNameClasses(201)).toBe('');
     });
+
+    it('returns empty string when inactive option is true (no name styling for inactive)', () => {
+        const cls = window.getMpPosNameClasses(5, { inactive: true });
+        expect(cls).toBe('');
+    });
+
+    it('returns empty string for any position when inactive', () => {
+        expect(window.getMpPosNameClasses(100, { inactive: true })).toBe('');
+        expect(window.getMpPosNameClasses(500, { inactive: true })).toBe('');
+    });
+
+    it('returns normal classes when inactive is false', () => {
+        const cls = window.getMpPosNameClasses(5, { inactive: false });
+        expect(cls).toContain('driver-name-gold');
+    });
 });
 
 describe('getMpPos / resolveMpPos — with injected cache', () => {
@@ -134,14 +143,72 @@ describe('getMpPos / resolveMpPos — with injected cache', () => {
         expect(window.resolveMpPos(null)).toBeNull();
     });
 
-    it('resolveMpPos treats 2-char country as ISO code', () => {
-        // Cache is empty so result is null — but the code path runs without error
-        expect(() => window.resolveMpPos('Alice', 'DE')).not.toThrow();
-        expect(window.resolveMpPos('Alice', 'DE')).toBeNull();
+    it('resolveMpPos accepts user_id parameter without error', () => {
+        expect(() => window.resolveMpPos('Alice', '12345')).not.toThrow();
+        expect(window.resolveMpPos('Alice', '12345')).toBeNull();
     });
 
-    it('resolveMpPos looks up country name via FlagHelper', () => {
-        expect(() => window.resolveMpPos('Alice', 'Germany')).not.toThrow();
-        expect(window.resolveMpPos('Alice', 'Germany')).toBeNull();
+    it('resolveMpPos falls back to name-only when no userId given', () => {
+        expect(() => window.resolveMpPos('Alice')).not.toThrow();
+        expect(window.resolveMpPos('Alice')).toBeNull();
+    });
+});
+
+describe('resolveMpPosWithInactive', () => {
+    it('returns { position: null, inactive: false } for empty name', () => {
+        const result = window.resolveMpPosWithInactive('');
+        expect(result).toEqual({ position: null, inactive: false });
+    });
+
+    it('returns { position: null, inactive: false } for null name', () => {
+        const result = window.resolveMpPosWithInactive(null);
+        expect(result).toEqual({ position: null, inactive: false });
+    });
+
+    it('returns inactive: false when no match in either cache', () => {
+        const result = window.resolveMpPosWithInactive('Unknown Driver');
+        expect(result).toEqual({ position: null, inactive: false });
+    });
+});
+
+describe('buildMpPosIndex', () => {
+    it('is exposed on window', () => {
+        expect(typeof window.buildMpPosIndex).toBe('function');
+    });
+
+    it('builds correct index from entries', () => {
+        const index = window.buildMpPosIndex([
+            { name: 'Alice', user_id: '100', position: 1 },
+            { name: 'Bob', user_id: '200', position: 2 }
+        ]);
+        expect(index.byName.get('alice')).toBe(1);
+        expect(index.byName.get('bob')).toBe(2);
+        expect(index.byNameUserId.get('alice|100')).toBe(1);
+        expect(index.byNameUserId.get('bob|200')).toBe(2);
+    });
+
+    it('first occurrence wins for name-only index', () => {
+        const index = window.buildMpPosIndex([
+            { name: 'Alice', user_id: '100', position: 5 },
+            { name: 'Alice', user_id: '200', position: 10 }
+        ]);
+        expect(index.byName.get('alice')).toBe(5);
+        expect(index.nameStats.get('alice').count).toBe(2);
+    });
+
+    it('handles empty results array', () => {
+        const index = window.buildMpPosIndex([]);
+        expect(index.byName.size).toBe(0);
+    });
+
+    it('handles null/undefined results', () => {
+        const index = window.buildMpPosIndex(null);
+        expect(index.byName.size).toBe(0);
+    });
+});
+
+describe('loadMpPosInactiveCache', () => {
+    it('is exposed on window', () => {
+        expect(typeof window.loadMpPosInactiveCache).toBe('function');
     });
 });

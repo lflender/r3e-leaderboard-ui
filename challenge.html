@@ -25,7 +25,7 @@
     <meta name="twitter:image" content="https://r3e-leaderboards.info/images/rle-share.png">
 
     <script src="modules/analytics.js?v=7"></script>
-    <link rel="stylesheet" href="style.css?v=261">
+    <link rel="stylesheet" href="style.css?v=264">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"/>
     <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png?v=3">
     <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png?v=3">
@@ -81,6 +81,25 @@
                 <div class="challenge-pickers">
                     <div id="challenge-track-stats"></div>
 
+                    <div class="challenge-exclusions" id="challenge-exclusions">
+                        <div class="challenge-exclusions__toggle" id="challenge-exclusions-toggle" role="button" tabindex="0" aria-expanded="false">
+                            <span class="challenge-exclusions__arrow">&#9654;</span>
+                            <span>Exclusions</span>
+                            <span class="challenge-exclusions__badge" id="challenge-exclusions-badge"></span>
+                            <button type="button" class="challenge-exclusions__reset" id="challenge-exclusions-reset" hidden>Reset</button>
+                        </div>
+                        <div class="challenge-exclusions__body" id="challenge-exclusions-body">
+                            <div class="challenge-exclusions__col">
+                                <div class="challenge-exclusions__col-title">Tracks</div>
+                                <div class="challenge-exclusions__list" id="challenge-exclusions-tracks"></div>
+                            </div>
+                            <div class="challenge-exclusions__col">
+                                <div class="challenge-exclusions__col-title">Car Classes</div>
+                                <div class="challenge-exclusions__list" id="challenge-exclusions-cars"></div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="challenge-picker challenge-picker--car" id="challenge-car-picker">
                         <div class="challenge-picker__options" role="radiogroup" aria-label="Car pick granularity">
                             <button type="button" class="challenge-granularity-btn is-active" data-granularity="class" aria-checked="true" role="radio">Class</button>
@@ -107,7 +126,7 @@
                     <label class="challenge-hardcore-label" id="challenge-hardcore-label">
                         <input type="checkbox" id="challenge-hardcore-cb">
                         <span>Hardcore</span>
-                        <span class="info-icon" title="You will not be able to pick again for 10 minutes" aria-label="Hardcore info" role="img">i</span>
+                        <span class="info-icon" id="challenge-hardcore-info" aria-label="Hardcore info" role="img">i</span>
                     </label>
                 </div>
             </div>
@@ -147,7 +166,7 @@
 
     <!-- Page modules -->
     <script src="modules/challenge-picker-service.js?v=12" defer></script>
-    <script src="modules/pages/challenge-picker.js?v=34" defer></script>
+    <script src="modules/pages/challenge-picker.js?v=40" defer></script>
 
     <script src="script.js?v=9" defer></script>
 </body>

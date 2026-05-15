@@ -19,7 +19,8 @@
     const GRANULARITY_LAYOUT = 'layout';
 
     const SPIN_CLASS = 'challenge-picker__result--spinning';
-    const HARDCORE_LOCKOUT_MS = 10 * 60 * 1000; // 10 minutes
+    const HARDCORE_LOCKOUT_MINUTES = 15;
+    const HARDCORE_LOCKOUT_MS = HARDCORE_LOCKOUT_MINUTES * 60 * 1000;
     const SS_PREFIX = 'challenge-';
 
     /* ── sessionStorage helpers ────────────────────────────── */
@@ -548,7 +549,8 @@
         const svc = window.ChallengePickerService;
         const rng = Math.random;
         const filters = { era: filterEra, wheel: filterWheel, trans: filterTrans, rating: filterRating };
-        const carsData = svc.filterCarsData(rawCarsData, filters);
+        let carsData = svc.filterCarsData(rawCarsData, filters);
+        carsData = getExcludedCarsFilter(carsData);
 
         if (carsData.length === 0) {
             carClassHtml = '<span>No cars match the current filters</span>';
@@ -576,6 +578,7 @@
 
     function doPickTrack(validTrackIds) {
         let tracksData = Array.isArray(window.TRACKS_DATA) ? window.TRACKS_DATA : [];
+        tracksData = filterTracksWithExclusions(tracksData);
         if (validTrackIds) {
             tracksData = tracksData.filter(t => validTrackIds.has(String(t.id)));
         }
@@ -850,6 +853,392 @@
         }, { searchable: false });
     }
 
+    /* ── exclusions ───────────────────────────────────────── */
+
+    let excludedTracks = new Set();   // track base names
+    let excludedClasses = new Set();  // class names
+    let excludedCars = new Set();     // "ClassName|||CarName" compound keys
+
+    const EXCL_MIN_TRACKS = 10;
+    const EXCL_MIN_CLASSES = 10;
+
+    function loadExclusions() {
+        excludedTracks = new Set();
+        excludedClasses = new Set();
+        excludedCars = new Set();
+        try {
+            const t = ssGet('excl-tracks');
+            if (t) excludedTracks = new Set(JSON.parse(t));
+            const c = ssGet('excl-classes');
+            if (c) excludedClasses = new Set(JSON.parse(c));
+            const cr = ssGet('excl-cars');
+            if (cr) excludedCars = new Set(JSON.parse(cr));
+        } catch (_) { /* ignore corrupt data */ }
+    }
+
+    function saveExclusions() {
+        ssSet('excl-tracks', JSON.stringify([...excludedTracks]));
+        ssSet('excl-classes', JSON.stringify([...excludedClasses]));
+        ssSet('excl-cars', JSON.stringify([...excludedCars]));
+        updateExclusionBadge();
+        updateExclusionLimits();
+    }
+
+    function totalExclusions() {
+        return excludedTracks.size + excludedClasses.size + excludedCars.size;
+    }
+
+    function updateExclusionBadge() {
+        const badge = document.getElementById('challenge-exclusions-badge');
+        if (!badge) return;
+        const count = totalExclusions();
+        badge.textContent = count > 0 ? `(${count})` : '';
+        const resetBtn = document.getElementById('challenge-exclusions-reset');
+        if (resetBtn) resetBtn.hidden = count === 0;
+    }
+
+    /**
+     * Enforce minimum remaining tracks/classes by disabling unchecked
+     * checkboxes when the limit is reached.
+     */
+    function updateExclusionLimits() {
+        const tracksContainer = document.getElementById('challenge-exclusions-tracks');
+        const carsContainer = document.getElementById('challenge-exclusions-cars');
+        if (!tracksContainer || !carsContainer) return;
+
+        // Count totals — only enforce limit when there are more items than the minimum
+        const totalTracks = tracksContainer.querySelectorAll('.challenge-exclusions__item').length;
+        const remainingTracks = totalTracks - excludedTracks.size;
+        const atTrackLimit = totalTracks > EXCL_MIN_TRACKS && remainingTracks <= EXCL_MIN_TRACKS;
+
+        tracksContainer.querySelectorAll('.challenge-exclusions__item input[type="checkbox"]').forEach(cb => {
+            cb.disabled = atTrackLimit && !cb.checked;
+        });
+
+        const totalClasses = carsContainer.querySelectorAll('.challenge-exclusions__class').length;
+        const remainingClasses = totalClasses - excludedClasses.size;
+        const atClassLimit = totalClasses > EXCL_MIN_CLASSES && remainingClasses <= EXCL_MIN_CLASSES;
+
+        carsContainer.querySelectorAll('.challenge-exclusions__class').forEach(classDiv => {
+            const classCb = classDiv.querySelector('.challenge-exclusions__class-cb');
+            if (classCb) classCb.disabled = atClassLimit && !classCb.checked;
+            // Also disable individual car checkboxes if class limit reached and class isn't excluded
+            if (atClassLimit && classCb && !classCb.checked) {
+                classDiv.querySelectorAll('.challenge-exclusions__car-item input[type="checkbox"]').forEach(carCb => {
+                    carCb.disabled = true;
+                });
+            } else {
+                classDiv.querySelectorAll('.challenge-exclusions__car-item input[type="checkbox"]').forEach(carCb => {
+                    carCb.disabled = false;
+                });
+            }
+        });
+    }
+
+    function resetExclusions() {
+        excludedTracks.clear();
+        excludedClasses.clear();
+        excludedCars.clear();
+        saveExclusions();
+
+        // Reset all checkboxes in the UI
+        const tracksContainer = document.getElementById('challenge-exclusions-tracks');
+        if (tracksContainer) {
+            tracksContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = false; cb.disabled = false; });
+            tracksContainer.querySelectorAll('.challenge-exclusions__item--excluded').forEach(el => el.classList.remove('challenge-exclusions__item--excluded'));
+        }
+        const carsContainer = document.getElementById('challenge-exclusions-cars');
+        if (carsContainer) {
+            carsContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = false; cb.disabled = false; cb.indeterminate = false; });
+            carsContainer.querySelectorAll('.challenge-exclusions__class-header--excluded').forEach(el => el.classList.remove('challenge-exclusions__class-header--excluded'));
+            carsContainer.querySelectorAll('.challenge-exclusions__car-item--excluded').forEach(el => el.classList.remove('challenge-exclusions__car-item--excluded'));
+        }
+    }
+
+    function getExcludedTracksData() {
+        // Filter TRACKS_DATA removing excluded base tracks
+        if (excludedTracks.size === 0) return null; // null = no filtering
+        return excludedTracks;
+    }
+
+    function getExcludedCarsFilter(carsData) {
+        // Returns filtered carsData with excluded classes/cars removed
+        if (excludedClasses.size === 0 && excludedCars.size === 0) return carsData;
+        if (!Array.isArray(carsData)) return carsData;
+
+        const result = [];
+        for (const classEntry of carsData) {
+            const className = classEntry.class || '';
+            if (excludedClasses.has(className)) continue;
+
+            // Filter individual cars
+            if (excludedCars.size > 0) {
+                const cars = Array.isArray(classEntry.cars) ? classEntry.cars : [];
+                const filtered = cars.filter(car => {
+                    const key = className + '|||' + (car.car || '');
+                    return !excludedCars.has(key);
+                });
+                if (filtered.length === 0) continue;
+                if (filtered.length !== cars.length) {
+                    result.push({ ...classEntry, cars: filtered });
+                    continue;
+                }
+            }
+            result.push(classEntry);
+        }
+        return result;
+    }
+
+    function filterTracksWithExclusions(tracksData) {
+        if (excludedTracks.size === 0) return tracksData;
+        return tracksData.filter(entry => {
+            const label = entry.label || '';
+            const sepIdx = label.indexOf(' - ');
+            const base = sepIdx !== -1 ? label.substring(0, sepIdx).trim() : label.trim();
+            return !excludedTracks.has(base);
+        });
+    }
+
+    function buildExclusionsPanel() {
+        const tracksContainer = document.getElementById('challenge-exclusions-tracks');
+        const carsContainer = document.getElementById('challenge-exclusions-cars');
+        if (!tracksContainer || !carsContainer) return;
+
+        // ── Build tracks list ──
+        const tracksData = Array.isArray(window.TRACKS_DATA) ? window.TRACKS_DATA : [];
+        const svc = window.ChallengePickerService;
+        const grouped = svc ? svc.groupTracksByBase(tracksData) : new Map();
+        const baseNames = Array.from(grouped.keys()).sort();
+
+        let tracksHtml = '';
+        for (const base of baseNames) {
+            const layouts = grouped.get(base);
+            const logoLabel = layouts[0]?.label || base;
+            const logoUrl = resolveTrackLogo(logoLabel);
+            const checked = excludedTracks.has(base) ? 'checked' : '';
+            const excludedCls = excludedTracks.has(base) ? ' challenge-exclusions__item--excluded' : '';
+            const logoImg = logoUrl
+                ? `<img class="challenge-exclusions__item-logo" src="${escapeHtml(logoUrl)}" alt="" loading="lazy" decoding="async">`
+                : '';
+            tracksHtml += `<label class="challenge-exclusions__item${excludedCls}" data-track="${escapeHtml(base)}">
+                <input type="checkbox" ${checked}>
+                ${logoImg}
+                <span class="challenge-exclusions__item-label">${escapeHtml(base)}</span>
+            </label>`;
+        }
+        tracksContainer.innerHTML = tracksHtml;
+
+        tracksContainer.addEventListener('change', (e) => {
+            const cb = e.target;
+            if (cb.type !== 'checkbox') return;
+            const item = cb.closest('.challenge-exclusions__item');
+            if (!item) return;
+            const trackBase = item.dataset.track;
+            if (cb.checked) {
+                excludedTracks.add(trackBase);
+                item.classList.add('challenge-exclusions__item--excluded');
+            } else {
+                excludedTracks.delete(trackBase);
+                item.classList.remove('challenge-exclusions__item--excluded');
+            }
+            saveExclusions();
+        });
+
+        // ── Build car classes list ──
+        const carsData = Array.isArray(window.CARS_DATA) ? window.CARS_DATA : [];
+        const SKIP_CLASSES = ['Safety Car', 'Shopping Cart'];
+        const sortedClasses = carsData
+            .filter(entry => !SKIP_CLASSES.includes(entry.class || ''))
+            .sort((a, b) => (a.class || '').localeCompare(b.class || ''));
+
+        let carsHtml = '';
+        for (const classEntry of sortedClasses) {
+            const className = classEntry.class || '';
+            const classLogo = classEntry.logo || resolveClassLogo(className);
+            const classChecked = excludedClasses.has(className) ? 'checked' : '';
+            const classExcludedCls = excludedClasses.has(className) ? ' challenge-exclusions__class-header--excluded' : '';
+
+            const logoImg = classLogo
+                ? `<img class="challenge-exclusions__class-logo" src="${escapeHtml(classLogo)}" alt="" loading="lazy" decoding="async">`
+                : '';
+
+            const cars = Array.isArray(classEntry.cars) ? classEntry.cars : [];
+            const isSingle = cars.length <= 1;
+            const singleCls = isSingle ? ' challenge-exclusions__class--single' : '';
+
+            let carsListHtml = '';
+            if (!isSingle) {
+                for (const car of cars) {
+                    const carName = car.car || '';
+                    const carKey = className + '|||' + carName;
+                    const carChecked = excludedCars.has(carKey) ? 'checked' : '';
+                    const carExcludedCls = excludedCars.has(carKey) ? ' challenge-exclusions__car-item--excluded' : '';
+                    carsListHtml += `<label class="challenge-exclusions__car-item${carExcludedCls}" data-car-key="${escapeHtml(carKey)}">
+                    <input type="checkbox" ${carChecked}>
+                    <span class="challenge-exclusions__car-label">${escapeHtml(carName)}</span>
+                </label>`;
+                }
+            }
+
+            carsHtml += `<div class="challenge-exclusions__class${singleCls}" data-class="${escapeHtml(className)}">
+                <div class="challenge-exclusions__class-header${classExcludedCls}">
+                    <span class="challenge-exclusions__class-arrow">&#9654;</span>
+                    ${logoImg}
+                    <span class="challenge-exclusions__class-name">${escapeHtml(className)}</span>
+                    <input type="checkbox" class="challenge-exclusions__class-cb" ${classChecked}>
+                </div>
+                ${carsListHtml ? `<div class="challenge-exclusions__cars">${carsListHtml}</div>` : ''}
+            </div>`;
+        }
+        carsContainer.innerHTML = carsHtml;
+
+        // Set indeterminate state for classes with partial car exclusions
+        carsContainer.querySelectorAll('.challenge-exclusions__class').forEach(classDiv => {
+            const carCbs = classDiv.querySelectorAll('.challenge-exclusions__car-item input[type="checkbox"]');
+            if (carCbs.length === 0) return;
+            const allChecked = Array.from(carCbs).every(c => c.checked);
+            const anyChecked = Array.from(carCbs).some(c => c.checked);
+            const classCb = classDiv.querySelector('.challenge-exclusions__class-cb');
+            if (classCb && !allChecked && anyChecked) {
+                classCb.indeterminate = true;
+            }
+        });
+
+        // Event: toggle class expander or toggle checkbox for single-car classes
+        carsContainer.addEventListener('click', (e) => {
+            const header = e.target.closest('.challenge-exclusions__class-header');
+            if (!header) return;
+            // Don't handle when clicking the checkbox itself
+            if (e.target.type === 'checkbox') return;
+            const classDiv = header.closest('.challenge-exclusions__class');
+            if (!classDiv) return;
+            if (classDiv.classList.contains('challenge-exclusions__class--single')) {
+                // Toggle the checkbox for single-car classes
+                const classCb = classDiv.querySelector('.challenge-exclusions__class-cb');
+                if (classCb && !classCb.disabled) {
+                    classCb.checked = !classCb.checked;
+                    classCb.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            } else {
+                classDiv.classList.toggle('is-open');
+            }
+        });
+
+        // Event: class checkbox
+        carsContainer.addEventListener('change', (e) => {
+            const cb = e.target;
+            if (cb.type !== 'checkbox') return;
+
+            // Class-level checkbox
+            if (cb.classList.contains('challenge-exclusions__class-cb')) {
+                const classDiv = cb.closest('.challenge-exclusions__class');
+                if (!classDiv) return;
+                const className = classDiv.dataset.class;
+                const header = classDiv.querySelector('.challenge-exclusions__class-header');
+                cb.indeterminate = false;
+                if (cb.checked) {
+                    excludedClasses.add(className);
+                    if (header) header.classList.add('challenge-exclusions__class-header--excluded');
+                    // Also check all car checkboxes in this class
+                    classDiv.querySelectorAll('.challenge-exclusions__car-item input[type="checkbox"]').forEach(carCb => {
+                        carCb.checked = true;
+                        const carItem = carCb.closest('.challenge-exclusions__car-item');
+                        if (carItem) {
+                            carItem.classList.add('challenge-exclusions__car-item--excluded');
+                            excludedCars.add(carItem.dataset.carKey);
+                        }
+                    });
+                } else {
+                    excludedClasses.delete(className);
+                    if (header) header.classList.remove('challenge-exclusions__class-header--excluded');
+                    // Also uncheck all car checkboxes in this class
+                    classDiv.querySelectorAll('.challenge-exclusions__car-item input[type="checkbox"]').forEach(carCb => {
+                        carCb.checked = false;
+                        const carItem = carCb.closest('.challenge-exclusions__car-item');
+                        if (carItem) {
+                            carItem.classList.remove('challenge-exclusions__car-item--excluded');
+                            excludedCars.delete(carItem.dataset.carKey);
+                        }
+                    });
+                }
+                saveExclusions();
+                return;
+            }
+
+            // Car-level checkbox
+            const carItem = cb.closest('.challenge-exclusions__car-item');
+            if (carItem) {
+                const carKey = carItem.dataset.carKey;
+                if (cb.checked) {
+                    excludedCars.add(carKey);
+                    carItem.classList.add('challenge-exclusions__car-item--excluded');
+                } else {
+                    excludedCars.delete(carKey);
+                    carItem.classList.remove('challenge-exclusions__car-item--excluded');
+                }
+                // Update class-level checkbox state (checked / indeterminate / unchecked)
+                const classDiv = carItem.closest('.challenge-exclusions__class');
+                if (classDiv) {
+                    const allCarCbs = classDiv.querySelectorAll('.challenge-exclusions__car-item input[type="checkbox"]');
+                    const allChecked = Array.from(allCarCbs).every(c => c.checked);
+                    const anyChecked = Array.from(allCarCbs).some(c => c.checked);
+                    const classCb = classDiv.querySelector('.challenge-exclusions__class-cb');
+                    const header = classDiv.querySelector('.challenge-exclusions__class-header');
+                    if (classCb) {
+                        classCb.checked = allChecked;
+                        classCb.indeterminate = !allChecked && anyChecked;
+                    }
+                    if (allChecked) {
+                        excludedClasses.add(classDiv.dataset.class);
+                        if (header) header.classList.add('challenge-exclusions__class-header--excluded');
+                    } else {
+                        excludedClasses.delete(classDiv.dataset.class);
+                        if (header) header.classList.remove('challenge-exclusions__class-header--excluded');
+                    }
+                }
+                saveExclusions();
+            }
+        });
+
+        updateExclusionBadge();
+        updateExclusionLimits();
+    }
+
+    function initExclusions() {
+        loadExclusions();
+
+        const toggle = document.getElementById('challenge-exclusions-toggle');
+        const container = document.getElementById('challenge-exclusions');
+        if (!toggle || !container) return;
+
+        // Reset built state so panel is rebuilt on next open
+        delete container.dataset.built;
+        container.classList.remove('is-open');
+        toggle.setAttribute('aria-expanded', 'false');
+
+        toggle.addEventListener('click', (e) => {
+            // Don't toggle when clicking the reset button
+            if (e.target.closest('.challenge-exclusions__reset')) return;
+            const isOpen = container.classList.toggle('is-open');
+            toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            // Build panel on first open
+            if (isOpen && !container.dataset.built) {
+                buildExclusionsPanel();
+                container.dataset.built = '1';
+            }
+        });
+
+        const resetBtn = document.getElementById('challenge-exclusions-reset');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                resetExclusions();
+            });
+        }
+
+        updateExclusionBadge();
+    }
+
     /* ── init ─────────────────────────────────────────────── */
 
     function init() {
@@ -965,6 +1354,10 @@
 
         hardcoreCb = document.getElementById('challenge-hardcore-cb');
         hardcoreLabel = document.getElementById('challenge-hardcore-label');
+        const hardcoreInfo = document.getElementById('challenge-hardcore-info');
+        if (hardcoreInfo) {
+            hardcoreInfo.title = 'You will not be able to pick again for ' + HARDCORE_LOCKOUT_MINUTES + ' minutes';
+        }
         if (hardcoreCb) {
             hardcoreCb.addEventListener('change', () => {
                 hardcoreMode = hardcoreCb.checked;
@@ -973,6 +1366,7 @@
         }
 
         initFilters();
+        initExclusions();
 
         // Pre-load valid combinations index (async, non-blocking)
         loadCombinationsIndex();

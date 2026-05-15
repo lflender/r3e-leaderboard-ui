@@ -233,4 +233,224 @@ describe('ChallengePicker page', () => {
         const filtered = svc.filterCarsData(window.CARS_DATA, { era: 'oldies' });
         expect(filtered).toHaveLength(0);
     });
+
+    /* ── exclusions ──────────────────────────────────────── */
+
+    test('exclusions toggle opens and closes the panel', () => {
+        const container = document.getElementById('challenge-exclusions');
+        const toggle = document.getElementById('challenge-exclusions-toggle');
+        expect(container.classList.contains('is-open')).toBe(false);
+
+        toggle.click();
+        expect(container.classList.contains('is-open')).toBe(true);
+        expect(toggle.getAttribute('aria-expanded')).toBe('true');
+
+        toggle.click();
+        expect(container.classList.contains('is-open')).toBe(false);
+        expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    });
+
+    test('exclusions panel builds track and car lists on first open', () => {
+        const toggle = document.getElementById('challenge-exclusions-toggle');
+        toggle.click();
+
+        const trackItems = document.querySelectorAll('#challenge-exclusions-tracks .challenge-exclusions__item');
+        expect(trackItems.length).toBeGreaterThan(0);
+        // Should have 2 base tracks: Spa and Monza
+        expect(trackItems.length).toBe(2);
+
+        const classItems = document.querySelectorAll('#challenge-exclusions-cars .challenge-exclusions__class');
+        expect(classItems.length).toBe(1); // GT3
+    });
+
+    test('excluding a track stores it in sessionStorage', () => {
+        const toggle = document.getElementById('challenge-exclusions-toggle');
+        toggle.click();
+
+        const spaItem = document.querySelector('#challenge-exclusions-tracks .challenge-exclusions__item[data-track="Spa"]');
+        expect(spaItem).not.toBeNull();
+        const cb = spaItem.querySelector('input[type="checkbox"]');
+        cb.checked = true;
+        cb.dispatchEvent(new Event('change', { bubbles: true }));
+
+        const stored = JSON.parse(sessionStorage.getItem('challenge-excl-tracks'));
+        expect(stored).toContain('Spa');
+    });
+
+    test('excluding a track removes it from picks', () => {
+        const toggle = document.getElementById('challenge-exclusions-toggle');
+        toggle.click();
+
+        // Exclude Monza
+        const monzaItem = document.querySelector('#challenge-exclusions-tracks .challenge-exclusions__item[data-track="Monza"]');
+        const cb = monzaItem.querySelector('input[type="checkbox"]');
+        cb.checked = true;
+        cb.dispatchEvent(new Event('change', { bubbles: true }));
+
+        // Pick multiple times — should never get Monza
+        vi.spyOn(Math, 'random').mockReturnValue(0);
+        for (let i = 0; i < 5; i++) {
+            document.getElementById('challenge-pick-btn').click();
+            const html = document.getElementById('challenge-track-result').innerHTML;
+            expect(html).not.toContain('Monza');
+        }
+        Math.random.mockRestore();
+    });
+
+    test('excluding a car class stores it in sessionStorage', () => {
+        const toggle = document.getElementById('challenge-exclusions-toggle');
+        toggle.click();
+
+        const classDiv = document.querySelector('#challenge-exclusions-cars .challenge-exclusions__class[data-class="GT3"]');
+        const classCb = classDiv.querySelector('.challenge-exclusions__class-cb');
+        classCb.checked = true;
+        classCb.dispatchEvent(new Event('change', { bubbles: true }));
+
+        const stored = JSON.parse(sessionStorage.getItem('challenge-excl-classes'));
+        expect(stored).toContain('GT3');
+    });
+
+    test('excluding all classes shows no-match message on pick', () => {
+        const toggle = document.getElementById('challenge-exclusions-toggle');
+        toggle.click();
+
+        const classDiv = document.querySelector('#challenge-exclusions-cars .challenge-exclusions__class[data-class="GT3"]');
+        const classCb = classDiv.querySelector('.challenge-exclusions__class-cb');
+        classCb.checked = true;
+        classCb.dispatchEvent(new Event('change', { bubbles: true }));
+
+        vi.spyOn(Math, 'random').mockReturnValue(0);
+        document.getElementById('challenge-pick-btn').click();
+        Math.random.mockRestore();
+
+        const carHtml = document.getElementById('challenge-car-result').innerHTML;
+        expect(carHtml).toContain('No car');
+    });
+
+    test('checking a class auto-checks all its cars', () => {
+        const toggle = document.getElementById('challenge-exclusions-toggle');
+        toggle.click();
+
+        const classDiv = document.querySelector('#challenge-exclusions-cars .challenge-exclusions__class[data-class="GT3"]');
+        const classCb = classDiv.querySelector('.challenge-exclusions__class-cb');
+        classCb.checked = true;
+        classCb.dispatchEvent(new Event('change', { bubbles: true }));
+
+        const carCbs = classDiv.querySelectorAll('.challenge-exclusions__car-item input[type="checkbox"]');
+        carCbs.forEach(cb => expect(cb.checked).toBe(true));
+    });
+
+    test('exclusion badge shows count', () => {
+        const toggle = document.getElementById('challenge-exclusions-toggle');
+        toggle.click();
+
+        const badge = document.getElementById('challenge-exclusions-badge');
+        expect(badge.textContent).toBe('');
+
+        // Exclude Spa track
+        const spaItem = document.querySelector('#challenge-exclusions-tracks .challenge-exclusions__item[data-track="Spa"]');
+        const cb = spaItem.querySelector('input[type="checkbox"]');
+        cb.checked = true;
+        cb.dispatchEvent(new Event('change', { bubbles: true }));
+
+        expect(badge.textContent).toBe('(1)');
+    });
+
+    test('reset button clears all exclusions', () => {
+        const toggle = document.getElementById('challenge-exclusions-toggle');
+        toggle.click();
+
+        // Exclude Spa track
+        const spaItem = document.querySelector('#challenge-exclusions-tracks .challenge-exclusions__item[data-track="Spa"]');
+        const spaCb = spaItem.querySelector('input[type="checkbox"]');
+        spaCb.checked = true;
+        spaCb.dispatchEvent(new Event('change', { bubbles: true }));
+
+        const badge = document.getElementById('challenge-exclusions-badge');
+        expect(badge.textContent).toBe('(1)');
+
+        // Click reset
+        const resetBtn = document.getElementById('challenge-exclusions-reset');
+        resetBtn.click();
+
+        expect(badge.textContent).toBe('');
+        expect(spaCb.checked).toBe(false);
+        expect(spaItem.classList.contains('challenge-exclusions__item--excluded')).toBe(false);
+    });
+
+    test('single-car class is not expandable but click toggles checkbox', () => {
+        window.CARS_DATA = [
+            {
+                class: 'SingleCarClass',
+                logo: '',
+                cars: [{ car: 'Only Car', thumbnail: '' }]
+            },
+            {
+                class: 'MultiCarClass',
+                logo: '',
+                cars: [
+                    { car: 'Car A', thumbnail: '' },
+                    { car: 'Car B', thumbnail: '' }
+                ]
+            }
+        ];
+        window.ChallengePicker.init();
+        document.getElementById('challenge-exclusions-toggle').click();
+
+        const singleDiv = document.querySelector('.challenge-exclusions__class[data-class="SingleCarClass"]');
+        expect(singleDiv.classList.contains('challenge-exclusions__class--single')).toBe(true);
+        expect(singleDiv.querySelector('.challenge-exclusions__cars')).toBeNull();
+
+        // Clicking the header should toggle the checkbox
+        const classCb = singleDiv.querySelector('.challenge-exclusions__class-cb');
+        expect(classCb.checked).toBe(false);
+        singleDiv.querySelector('.challenge-exclusions__class-header').click();
+        expect(classCb.checked).toBe(true);
+
+        const multiDiv = document.querySelector('.challenge-exclusions__class[data-class="MultiCarClass"]');
+        expect(multiDiv.classList.contains('challenge-exclusions__class--single')).toBe(false);
+        expect(multiDiv.querySelector('.challenge-exclusions__cars')).not.toBeNull();
+    });
+
+    test('partial car exclusion shows indeterminate class checkbox', () => {
+        const toggle = document.getElementById('challenge-exclusions-toggle');
+        toggle.click();
+
+        // GT3 class has 2 cars — exclude just one
+        const classDiv = document.querySelector('#challenge-exclusions-cars .challenge-exclusions__class[data-class="GT3"]');
+        const carCbs = classDiv.querySelectorAll('.challenge-exclusions__car-item input[type="checkbox"]');
+        expect(carCbs.length).toBe(2);
+
+        // Expand and check first car only
+        classDiv.querySelector('.challenge-exclusions__class-header').click(); // expand
+        carCbs[0].checked = true;
+        carCbs[0].dispatchEvent(new Event('change', { bubbles: true }));
+
+        const classCb = classDiv.querySelector('.challenge-exclusions__class-cb');
+        expect(classCb.checked).toBe(false);
+        expect(classCb.indeterminate).toBe(true);
+
+        // Check second car — should become fully checked
+        carCbs[1].checked = true;
+        carCbs[1].dispatchEvent(new Event('change', { bubbles: true }));
+        expect(classCb.checked).toBe(true);
+        expect(classCb.indeterminate).toBe(false);
+    });
+
+    test('exclusions survive re-init via sessionStorage', () => {
+        // Open and exclude Spa
+        const toggle = document.getElementById('challenge-exclusions-toggle');
+        toggle.click();
+        const spaItem = document.querySelector('#challenge-exclusions-tracks .challenge-exclusions__item[data-track="Spa"]');
+        const cb = spaItem.querySelector('input[type="checkbox"]');
+        cb.checked = true;
+        cb.dispatchEvent(new Event('change', { bubbles: true }));
+
+        // Re-init (simulates page reload with sessionStorage preserved)
+        window.ChallengePicker.init();
+
+        // Badge should still show count
+        const badge = document.getElementById('challenge-exclusions-badge');
+        expect(badge.textContent).toBe('(1)');
+    });
 });

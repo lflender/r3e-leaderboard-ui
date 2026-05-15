@@ -595,3 +595,283 @@
     font-size: 0.85rem;
     font-style: italic;
 }
+
+/* ── Exclusions panel ────────────────────────────────────── */
+
+.challenge-exclusions {
+    grid-column: 1 / -1;
+}
+
+.challenge-exclusions__toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.9rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.15s, color 0.15s;
+    width: 100%;
+    text-align: left;
+}
+
+.challenge-exclusions__toggle:hover {
+    border-color: var(--primary-color);
+    color: var(--text-primary);
+}
+
+.challenge-exclusions__arrow {
+    font-size: 0.6em;
+    transition: transform 0.2s;
+}
+
+.challenge-exclusions.is-open .challenge-exclusions__arrow {
+    transform: rotate(90deg);
+}
+
+.challenge-exclusions__badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #f87171;
+}
+
+.challenge-exclusions__reset {
+    margin-left: auto;
+    padding: 0.2rem 0.65rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.challenge-exclusions__reset:hover {
+    border-color: #f87171;
+    color: #f87171;
+    background: rgba(248, 113, 113, 0.08);
+}
+
+.challenge-exclusions__body {
+    display: none;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    margin-top: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.challenge-exclusions.is-open .challenge-exclusions__body {
+    display: grid;
+}
+
+.challenge-exclusions__col {
+    display: flex;
+    flex-direction: column;
+}
+
+.challenge-exclusions__col:first-child {
+    border-right: 1px solid var(--border);
+}
+
+.challenge-exclusions__col-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.5rem 0.7rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid var(--border);
+}
+
+.challenge-exclusions__list {
+    max-height: 280px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    scrollbar-width: thin;
+    padding: 0.25rem;
+}
+
+.challenge-exclusions__item {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.3rem 0.45rem;
+    border-radius: 5px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.12s;
+    font-size: 0.82rem;
+    color: var(--text-primary);
+}
+
+.challenge-exclusions__item:hover {
+    background: var(--hover-bg);
+}
+
+.challenge-exclusions__item input[type="checkbox"] {
+    accent-color: #f87171;
+    cursor: pointer;
+    flex-shrink: 0;
+    width: 0.95em;
+    height: 0.95em;
+}
+
+.challenge-exclusions__item-logo {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.challenge-exclusions__item-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Class expander within exclusions */
+.challenge-exclusions__class-header {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.3rem 0.45rem;
+    border-radius: 5px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.12s;
+    font-size: 0.82rem;
+    color: var(--text-primary);
+}
+
+.challenge-exclusions__class-header:hover {
+    background: var(--hover-bg);
+}
+
+.challenge-exclusions__class-arrow {
+    font-size: 0.55em;
+    color: var(--text-secondary);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+    width: 0.8em;
+    text-align: center;
+}
+
+/* Hide arrow for single-car classes */
+.challenge-exclusions__class--single .challenge-exclusions__class-arrow {
+    visibility: hidden;
+}
+
+.challenge-exclusions__class.is-open .challenge-exclusions__class-arrow {
+    transform: rotate(90deg);
+}
+
+.challenge-exclusions__class-logo {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.challenge-exclusions__class-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.challenge-exclusions__class-cb {
+    accent-color: #f87171;
+    cursor: pointer;
+    flex-shrink: 0;
+    width: 0.95em;
+    height: 0.95em;
+}
+
+.challenge-exclusions__cars {
+    display: none;
+    flex-direction: column;
+    padding-left: 2rem;
+}
+
+.challenge-exclusions__class.is-open .challenge-exclusions__cars {
+    display: flex;
+}
+
+.challenge-exclusions__car-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.4rem;
+    border-radius: 4px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.12s;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.challenge-exclusions__car-item:hover {
+    background: var(--hover-bg);
+}
+
+.challenge-exclusions__car-item input[type="checkbox"] {
+    accent-color: #f87171;
+    cursor: pointer;
+    flex-shrink: 0;
+    width: 0.85em;
+    height: 0.85em;
+}
+
+.challenge-exclusions__car-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Excluded item styling — strikethrough */
+.challenge-exclusions__item--excluded .challenge-exclusions__item-label,
+.challenge-exclusions__car-item--excluded .challenge-exclusions__car-label {
+    text-decoration: line-through;
+    opacity: 0.5;
+}
+
+.challenge-exclusions__class-header--excluded .challenge-exclusions__class-name {
+    text-decoration: line-through;
+    opacity: 0.5;
+}
+
+/* Disabled checkbox when at minimum limit */
+.challenge-exclusions__item input[type="checkbox"]:disabled,
+.challenge-exclusions__class-cb:disabled,
+.challenge-exclusions__car-item input[type="checkbox"]:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* Responsive: stack columns on mobile */
+@media (max-width: 600px) {
+    .challenge-exclusions__body {
+        grid-template-columns: 1fr;
+    }
+
+    .challenge-exclusions__col:first-child {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+    }
+}

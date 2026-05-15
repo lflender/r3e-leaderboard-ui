@@ -136,7 +136,7 @@ class DriverProfile {
             '<div class="driver-profile-identity">',
             avatarHtml,
             '<div class="driver-profile-info">',
-            `<h2 class="driver-profile-name${nameClass}"><a href="drivers.html?driver=${encodeURIComponent('"' + profile.name + '"')}" class="driver-profile-name-link">${escape(profile.name)}</a></h2>`,
+            `<h2 class="driver-profile-name${nameClass}"><a href="drivers.html?driver=${encodeURIComponent('"' + profile.name + '"')}${profile.pathId ? '&id=' + encodeURIComponent(profile.pathId) : ''}" class="driver-profile-name-link">${escape(profile.name)}</a></h2>`,
             '<div class="driver-profile-meta">',
             `<span class="driver-profile-country">${flagHtml} ${escape(profile.country)}</span>`,
             rankHtml ? `<span class="driver-profile-rank">${rankHtml}</span>` : '',

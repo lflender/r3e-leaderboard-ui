@@ -9,6 +9,7 @@ const __dirname = path.dirname(__filename);
 
 describe('ChallengePicker page', () => {
     beforeAll(() => {
+        window.R3EAnalytics = { track: vi.fn() };
         window.R3EUtils = { escapeHtml: (v) => String(v ?? '') };
         window.R3ETrackUtils = {
             resolveCarClassLogoByName: (name) => name ? `class-logo://${name}` : ''
@@ -53,6 +54,7 @@ describe('ChallengePicker page', () => {
         // Clear sessionStorage so stored state doesn't leak between tests
         sessionStorage.clear();
 
+        window.R3EAnalytics.track.mockClear();
         window.ChallengePicker.init();
     });
 
@@ -452,5 +454,23 @@ describe('ChallengePicker page', () => {
         // Badge should still show count
         const badge = document.getElementById('challenge-exclusions-badge');
         expect(badge.textContent).toBe('(1)');
+    });
+
+    /* ── analytics ─────────────────────────────────────────── */
+
+    test('tracks challenge page shown on init', () => {
+        expect(window.R3EAnalytics.track).toHaveBeenCalledWith(
+            'challenge page shown',
+            expect.objectContaining({ mode: 'both', hardcore: false })
+        );
+    });
+
+    test('tracks challenge pick clicked on Pick', () => {
+        window.R3EAnalytics.track.mockClear();
+        document.getElementById('challenge-pick-btn').click();
+        expect(window.R3EAnalytics.track).toHaveBeenCalledWith(
+            'challenge pick clicked',
+            expect.objectContaining({ mode: 'both', hardcore: false })
+        );
     });
 });

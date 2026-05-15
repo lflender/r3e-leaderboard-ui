@@ -621,6 +621,22 @@
         if (hardcoreMode) {
             activateHardcoreLock();
         }
+
+        // Analytics
+        if (window.R3EAnalytics) {
+            R3EAnalytics.track('challenge pick clicked', {
+                mode: currentMode,
+                car_granularity: carGranularity,
+                track_granularity: trackGranularity,
+                group_by_category: groupByCategory,
+                hardcore: hardcoreMode,
+                picked_class: lastPickedClassName || '',
+                picked_superclass: lastPickedSuperclass || '',
+                picked_track: lastTrackBaseResult ? lastTrackBaseResult.trackBase : '',
+                picked_layout_id: lastPickedLayoutId || '',
+                exclusions: totalExclusions()
+            });
+        }
     }
 
     /* ── hardcore lockout ─────────────────────────────────── */
@@ -1402,6 +1418,18 @@
         // Restore hardcore lock if active
         if (!restoreHardcorePick()) {
             // No active lock — normal state
+        }
+
+        // Analytics
+        if (window.R3EAnalytics) {
+            R3EAnalytics.track('challenge page shown', {
+                mode: currentMode,
+                car_granularity: carGranularity,
+                track_granularity: trackGranularity,
+                group_by_category: groupByCategory,
+                hardcore: hardcoreMode,
+                exclusions: totalExclusions()
+            });
         }
     }
 

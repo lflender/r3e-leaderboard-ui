@@ -17,7 +17,8 @@ class DriverProfile {
 
     async init() {
         const driverParam = R3EUtils.getUrlParam('driver');
-        if (!driverParam) {
+        const idParam = R3EUtils.getUrlParam('id');
+        if (!driverParam && !idParam) {
             this.showError('No driver specified. Go to the <a href="drivers.html">Driver Search</a> to find a driver.');
             return;
         }
@@ -25,18 +26,20 @@ class DriverProfile {
         await TemplateHelper.showLoading(this.elements.profileContainer, 'Loading driver profile...');
 
         try {
+            const searchTerm = driverParam || `"${idParam}"`;
             const [, results] = await Promise.all([
                 loadMpPosCache(),
-                dataService.searchDriver(driverParam, {})
+                dataService.searchDriver(searchTerm, {})
             ]);
 
             if (!Array.isArray(results) || results.length === 0) {
-                this.showError(`Driver "${R3EUtils.escapeHtml(driverParam.replace(/^"|"$/g, ''))}" not found. <a href="drivers.html">Back to search</a>.`);
+                const displayName = driverParam ? driverParam.replace(/^"|"$/g, '') : idParam;
+                this.showError(`Driver "${R3EUtils.escapeHtml(displayName)}" not found. <a href="drivers.html">Back to search</a>.`);
                 return;
             }
 
-            // Use first matching driver group
-            const driverGroup = results[0];
+            // Select the correct driver group by pathId when available
+            const driverGroup = this.findDriverGroup(results, idParam);
             const profileData = DriverProfileData.buildProfileData(driverGroup);
 
             this.renderProfile(profileData);
@@ -45,6 +48,21 @@ class DriverProfile {
             console.error('Driver profile error:', error);
             this.showError('Failed to load driver profile. Please try again later.');
         }
+    }
+
+    /**
+     * Find the correct driver group from search results by pathId.
+     * Falls back to the first result when no pathId match is found.
+     * @param {Array} results - Search result groups
+     * @param {string|null} pathId - Target pathId from URL
+     * @returns {Object} Matching driver group
+     */
+    findDriverGroup(results, pathId) {
+        if (pathId) {
+            const match = results.find(g => String(g.pathId || '') === String(pathId));
+            if (match) return match;
+        }
+        return results[0];
     }
 
     /**
@@ -94,7 +112,7 @@ class DriverProfile {
             ? `<img class="driver-profile-avatar" src="${escape(profile.avatar)}" alt="${escape(profile.name)} avatar" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`
             : '<div class="driver-profile-avatar-placeholder"></div>';
 
-        const mpPos = typeof resolveMpPos === 'function' ? resolveMpPos(profile.name, profile.country) : null;
+        const mpPos = typeof resolveMpPos === 'function' ? resolveMpPos(profile.name, profile.pathId) : null;
         const mpPosHtml = mpPos !== null
             ? `<span class="driver-profile-mp-pos">Multiplayer #${mpPos}</span>`
             : '';

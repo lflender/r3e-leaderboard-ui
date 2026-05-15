@@ -13,9 +13,11 @@
         const name = String(row.name || '').trim().replace(/\s+/g, ' ');
         const country = row.country;
         const rank = row.rank;
-        const searchUrl = `drivers.html?driver=${encodeURIComponent(`"${name}"`)}`;
+        const pathId = row.path_id || '';
+        const idSuffix = pathId ? `&id=${encodeURIComponent(pathId)}` : '';
+        const searchUrl = `drivers.html?driver=${encodeURIComponent(`"${name}"`)}${idSuffix}`;
 
-        const mpPos = (typeof window.resolveMpPos === 'function') ? window.resolveMpPos(name, country) : null;
+        const mpPos = (typeof window.resolveMpPos === 'function') ? window.resolveMpPos(name) : null;
         const nameClasses = (typeof window.getMpPosNameClasses === 'function')
             ? window.getMpPosNameClasses(mpPos) : '';
 

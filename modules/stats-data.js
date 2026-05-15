@@ -133,6 +133,7 @@
             rank: row?.rank || '',
             avatar: row?.avatar || '',
             team: row?.team || '',
+            path_id: row?.driver_key || '',
             value: Number(row?.[metricKey] || 0)
         };
     }

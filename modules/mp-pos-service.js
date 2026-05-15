@@ -12,7 +12,7 @@ let mpPosCachePromise = null;
  * Uses single-flight pattern to prevent concurrent fetches
  * Creates a dual-index cache structure:
  * - byName: name -> position (for backward compatibility)
- * - byNameCountry: (name, country) -> position (for new country-aware lookup)
+ * - byNameUserId: (name|user_id) -> position (for user_id-aware lookup)
  * - nameStats: name -> occurrence metadata (for safe fallback decisions)
  * @returns {Promise<Object>} Cache object with both index types
  */
@@ -36,7 +36,7 @@ async function loadMpPosCache() {
             // Create dual-index cache structure
             mpPosCache = {
                 byName: new Map(),      // name (lowercase) -> position (for backward compatibility)
-                byNameCountry: new Map(), // (name|country) -> position (new format with country codes)
+                byNameUserId: new Map(), // (name|user_id) -> position (keyed by name + user_id)
                 nameStats: new Map() // name (lowercase) -> { count: number }
             };
             
@@ -56,10 +56,10 @@ async function loadMpPosCache() {
                             mpPosCache.byName.set(nameLower, entry.position);
                         }
                         
-                        // Index by (name|country) if country is provided
-                        if (entry.country) {
-                            const key = `${nameLower}|${entry.country.toLowerCase()}`;
-                            mpPosCache.byNameCountry.set(key, entry.position);
+                        // Index by (name|user_id) if user_id is provided
+                        if (entry.user_id) {
+                            const key = `${nameLower}|${String(entry.user_id).trim()}`;
+                            mpPosCache.byNameUserId.set(key, entry.position);
                         }
                     }
                 });
@@ -69,7 +69,7 @@ async function loadMpPosCache() {
             console.warn('Could not load mp_pos cache:', err);
             mpPosCache = { 
                 byName: new Map(), 
-                byNameCountry: new Map(),
+                byNameUserId: new Map(),
                 nameStats: new Map()
             }; // Empty maps to prevent retries
             return mpPosCache;
@@ -80,28 +80,28 @@ async function loadMpPosCache() {
 }
 
 /**
- * Get MP position for a driver by name and optional country code.
- * If a country is provided, lookup is strict: it must match (name|country).
- * This prevents incorrect rank assignment for same-name drivers from different countries.
+ * Get MP position for a driver by name and optional user ID.
+ * If a userId is provided, lookup is strict: it must match (name|user_id).
+ * This prevents incorrect rank assignment for same-name drivers.
  * @param {string} driverName - Driver name to look up
- * @param {string} countryCode - (Optional) ISO country code (e.g., "DE", "CH")
+ * @param {string} userId - (Optional) User ID from driver path (e.g., "6098133")
  * @returns {number|null} MP position or null if not found
  */
-function getMpPos(driverName, countryCode) {
+function getMpPos(driverName, userId) {
     if (!mpPosCache || !driverName) return null;
     
     const nameLower = String(driverName).trim().toLowerCase();
     
-    // If country code is provided, try country-aware lookup first
-    if (countryCode) {
-        const countryLower = String(countryCode).toLowerCase();
-        const nameCountryKey = `${nameLower}|${countryLower}`;
-        const position = mpPosCache.byNameCountry.get(nameCountryKey);
+    // If user ID is provided, try user_id-aware lookup first
+    if (userId) {
+        const userIdStr = String(userId).trim();
+        const nameUserIdKey = `${nameLower}|${userIdStr}`;
+        const position = mpPosCache.byNameUserId.get(nameUserIdKey);
         if (position !== undefined) {
             return position;
         }
 
-        // Strict mode when country is known: do not fallback to name-only.
+        // Strict mode when user_id is known: do not fallback to name-only.
         return null;
     }
     
@@ -110,26 +110,16 @@ function getMpPos(driverName, countryCode) {
 }
 
 /**
- * Resolve MP position for a driver using either a country name or ISO country code.
- * Falls back to name-only lookup when country information is unavailable.
+ * Resolve MP position for a driver using name and optional user ID.
+ * Falls back to name-only lookup when user ID is unavailable.
  * @param {string} driverName - Driver name to look up
- * @param {string} country - Country name or ISO country code
+ * @param {string} userId - User ID from driver path URL slug (e.g., "6098133")
  * @returns {number|null} MP position or null if not found
  */
-function resolveMpPos(driverName, country) {
+function resolveMpPos(driverName, userId) {
     if (!driverName) return null;
 
-    let countryCode = null;
-    if (country) {
-        const normalizedCountry = String(country).trim();
-        if (normalizedCountry.length === 2) {
-            countryCode = normalizedCountry;
-        } else if (typeof FlagHelper !== 'undefined' && typeof FlagHelper.findCountryCodeByName === 'function') {
-            countryCode = FlagHelper.findCountryCodeByName(normalizedCountry);
-        }
-    }
-
-    return countryCode ? getMpPos(driverName, countryCode) : getMpPos(driverName);
+    return getMpPos(driverName, userId || null);
 }
 
 /**
@@ -181,22 +171,6 @@ function getMpPosNameClasses(mpPos, options = { gold: 50, silver: 200, glitter: 
     }
 
     return classes.join(' ');
-}
-
-/**
- * Get MP position with country code lookup only (no fallback)
- * @param {string} driverName - Driver name to look up
- * @param {string} countryCode - ISO country code (e.g., "DE", "CH")
- * @returns {number|null} MP position or null if not found
- */
-function getMpPosByCountry(driverName, countryCode) {
-    if (!mpPosCache || !driverName || !countryCode) return null;
-    
-    const nameLower = String(driverName).trim().toLowerCase();
-    const countryLower = String(countryCode).toLowerCase();
-    const key = `${nameLower}|${countryLower}`;
-    
-    return mpPosCache.byNameCountry.get(key) || null;
 }
 
 // Load mp_pos cache early

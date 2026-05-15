@@ -155,7 +155,7 @@ class TableRenderer {
             : '';
         
         // Get multiplayer position if available
-        const mpPos = typeof resolveMpPos === 'function' ? resolveMpPos(displayName, country) : null;
+        const mpPos = typeof resolveMpPos === 'function' ? resolveMpPos(displayName, pathId) : null;
         const mpPosHtml = mpPos ? ` | Multiplayer #${mpPos}` : '';
         
         const nameClasses = typeof getMpPosNameClasses === 'function' ? getMpPosNameClasses(mpPos) : '';
@@ -166,7 +166,7 @@ class TableRenderer {
         const teamHtml = team ? ` | 🏁 ${teamPrefix}${team}` : '';
         
         return `
-            <tr class="driver-group-header driver-group-header-link" data-group="${groupId}" data-driver-name="${R3EUtils.escapeHtml(displayName)}" onclick="openDriverProfile(this)">
+            <tr class="driver-group-header driver-group-header-link" data-group="${groupId}" data-driver-name="${R3EUtils.escapeHtml(displayName)}" data-path-id="${R3EUtils.escapeHtml(String(pathId))}" onclick="openDriverProfile(this)">
                 <td colspan="${colspan}">
                     <span class="driver-profile-link-btn">View Profile ›</span>
                     <strong${driverNameClass}>${avatarHtml}${R3EUtils.escapeHtml(displayName)}</strong>
@@ -489,15 +489,17 @@ class TableRenderer {
         const rank = window.DataNormalizer && typeof window.DataNormalizer.extractRank === 'function'
             ? window.DataNormalizer.extractRank(item)
             : (item.rank || item.Rank || '');
+        const pathId = item.path_id || item.pathId || item.PathID || item['Path ID'] || '';
         const highlisted = item.highlisted || item.Highlisted || false;
         const flag = FlagHelper.countryToFlag(country);
         const flagHtml = flag ? `<span class="country-flag">${flag}</span>` : '';
         const rankStarsHtml = rank ? R3EUtils.renderRankStars(rank, true) : '';
-        const mpPos = typeof resolveMpPos === 'function' ? resolveMpPos(name, country) : null;
+        const mpPos = typeof resolveMpPos === 'function' ? resolveMpPos(name, pathId) : null;
         const mpPosHtml = mpPos ? ` <span class="mp-pos-badge">#${mpPos}</span>` : '';
         const driverLinkClass = options.driverLinkClass || 'detail-driver-link';
         const encodedDriver = encodeURIComponent(`"${String(name)}"`);
-        const driverHref = `${options.driverLinkBase || 'drivers.html?driver='}${encodedDriver}`;
+        const idSuffix = pathId ? `&id=${encodeURIComponent(pathId)}` : '';
+        const driverHref = `${options.driverLinkBase || 'drivers.html?driver='}${encodedDriver}${idSuffix}`;
 
         if (!highlisted) {
             let linkClasses = driverLinkClass;

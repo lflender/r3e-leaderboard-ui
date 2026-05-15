@@ -8,29 +8,23 @@ import { loadBrowserScript } from '../helpers/script-loader.js';
 function buildCache(entries) {
     // Returns a cache object in the same shape as loadMpPosCache builds
     const byName = new Map();
-    const byNameCountry = new Map();
+    const byNameUserId = new Map();
     const nameStats = new Map();
-    entries.forEach(({ name, country, position }) => {
+    entries.forEach(({ name, user_id, position }) => {
         const nameLower = name.trim().toLowerCase();
         const stats = nameStats.get(nameLower) || { count: 0 };
         stats.count += 1;
         nameStats.set(nameLower, stats);
         if (!byName.has(nameLower)) byName.set(nameLower, position);
-        if (country) {
-            byNameCountry.set(`${nameLower}|${country.toLowerCase()}`, position);
+        if (user_id) {
+            byNameUserId.set(`${nameLower}|${String(user_id).trim()}`, position);
         }
     });
-    return { byName, byNameCountry, nameStats };
+    return { byName, byNameUserId, nameStats };
 }
 
 beforeAll(() => {
     window.CompressedJsonHelper = { readGzipJson: vi.fn() };
-    window.FlagHelper = {
-        findCountryCodeByName: (name) => {
-            const map = { 'germany': 'DE', 'france': 'FR' };
-            return map[name.toLowerCase()] || null;
-        }
-    };
     loadBrowserScript('modules/mp-pos-service.js');
 });
 
@@ -46,7 +40,7 @@ beforeEach(() => {
 
 // Helper: build + inject the cache by mocking the fetch inside loadMpPosCache
 function injectCache(entries) {
-    const data = { results: entries.map(e => ({ name: e.name, country: e.country, position: e.position })) };
+    const data = { results: entries.map(e => ({ name: e.name, user_id: e.user_id, position: e.position })) };
     window.CompressedJsonHelper.readGzipJson = vi.fn().mockResolvedValue(data);
 }
 
@@ -134,14 +128,13 @@ describe('getMpPos / resolveMpPos — with injected cache', () => {
         expect(window.resolveMpPos(null)).toBeNull();
     });
 
-    it('resolveMpPos treats 2-char country as ISO code', () => {
-        // Cache is empty so result is null — but the code path runs without error
-        expect(() => window.resolveMpPos('Alice', 'DE')).not.toThrow();
-        expect(window.resolveMpPos('Alice', 'DE')).toBeNull();
+    it('resolveMpPos accepts user_id parameter without error', () => {
+        expect(() => window.resolveMpPos('Alice', '12345')).not.toThrow();
+        expect(window.resolveMpPos('Alice', '12345')).toBeNull();
     });
 
-    it('resolveMpPos looks up country name via FlagHelper', () => {
-        expect(() => window.resolveMpPos('Alice', 'Germany')).not.toThrow();
-        expect(window.resolveMpPos('Alice', 'Germany')).toBeNull();
+    it('resolveMpPos falls back to name-only when no userId given', () => {
+        expect(() => window.resolveMpPos('Alice')).not.toThrow();
+        expect(window.resolveMpPos('Alice')).toBeNull();
     });
 });

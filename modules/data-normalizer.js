@@ -51,6 +51,13 @@ function normalizeLeaderboardEntry(entry, data = {}, index = 0, totalEntries = 0
     const rawTrackName = data.track_info?.Name || data.track_name || '';
     const trackName = normalizeTrackName(rawTrackName);
     
+    // Extract path_id from driver path URL (e.g., "https://game.raceroom.com/users/info/6098133/")
+    let pathId = entry.path_id || entry.pathId || entry.PathID || entry['Path ID'] || null;
+    if (!pathId && entry.driver?.path) {
+        const pathMatch = String(entry.driver.path).match(/\/(\d+)\/?$/);
+        if (pathMatch) pathId = pathMatch[1];
+    }
+    
     return {
         Position: position,
         Name: entry.driver?.Name || entry.driver?.name || getField(entry, FIELD_NAMES.NAME, 'Unknown'),
@@ -67,6 +74,7 @@ function normalizeLeaderboardEntry(entry, data = {}, index = 0, totalEntries = 0
         TrackID: trackIdFromEntry || undefined,
         class_id: classId || undefined,
         track_id: trackIdFromEntry || undefined,
+        path_id: pathId || undefined,
         date_time: getField(entry, FIELD_NAMES.DATE_TIME)
     };
 }

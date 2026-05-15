@@ -157,5 +157,40 @@ describe('driver-search integration', () => {
             { addSynthetic: true }
         );
     });
-});
 
+    it('filters results by pathId from URL id param', async () => {
+        window.R3EUtils.getUrlParam.mockImplementation((param) => {
+            if (param === 'driver') return '"Alex Fernandez"';
+            if (param === 'id') return '99999';
+            return '';
+        });
+        window.dataService.searchDriver.mockResolvedValueOnce([
+            { driver: 'Alex Fernandez', pathId: '11111', entries: [{ position: '1' }] },
+            { driver: 'Alex Fernandez', pathId: '99999', entries: [{ position: '5' }] }
+        ]);
+
+        const ds = new window.driverSearch.constructor();
+        // Wait for URL-triggered search
+        await new Promise(r => setTimeout(r, 100));
+
+        expect(ds.allResults).toHaveLength(1);
+        expect(ds.allResults[0].pathId).toBe('99999');
+    });
+
+    it('shows all results when URL id param does not match any pathId', async () => {
+        window.R3EUtils.getUrlParam.mockImplementation((param) => {
+            if (param === 'driver') return '"Alex Fernandez"';
+            if (param === 'id') return 'nonexistent';
+            return '';
+        });
+        window.dataService.searchDriver.mockResolvedValueOnce([
+            { driver: 'Alex Fernandez', pathId: '11111', entries: [{ position: '1' }] },
+            { driver: 'Alex Fernandez', pathId: '99999', entries: [{ position: '5' }] }
+        ]);
+
+        const ds = new window.driverSearch.constructor();
+        await new Promise(r => setTimeout(r, 100));
+
+        expect(ds.allResults).toHaveLength(2);
+    });
+});

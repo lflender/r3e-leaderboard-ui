@@ -52,8 +52,8 @@ describe('StatsData', () => {
         ], 'pole_positions', 2);
 
         expect(rows).toEqual([
-            { name: 'A', country: 'FR', rank: 'B', avatar: '', team: '', value: 9 },
-            { name: 'B', country: 'DE', rank: 'A', avatar: '', team: '', value: 4 }
+            { name: 'A', country: 'FR', rank: 'B', avatar: '', team: '', path_id: '', value: 9 },
+            { name: 'B', country: 'DE', rank: 'A', avatar: '', team: '', path_id: '', value: 4 }
         ]);
     });
 

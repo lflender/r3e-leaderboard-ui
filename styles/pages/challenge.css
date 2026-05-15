@@ -362,7 +362,7 @@
 
 .challenge-repick-btn {
     padding: 0.55rem 1.4rem;
-    min-width: 140px;
+    width: 150px;
     font-size: 0.92rem;
     font-weight: 600;
     border: 1px solid var(--border);

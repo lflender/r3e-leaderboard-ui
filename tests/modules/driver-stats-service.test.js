@@ -127,16 +127,16 @@ describe('DriverStatsService.formatValue', () => {
 describe('DriverStatsService.lookupDriverStats', () => {
     const makeIndex = () => ({
         overall_top: {
-            avg_bested_file: 'cache/stats/overall_top_avg_bested.json.gz',
-            bested_file: 'cache/stats/overall_top_bested.json.gz',
-            pole_file: 'cache/stats/overall_top_pole.json.gz',
-            podium_file: 'cache/stats/overall_top_podium.json.gz'
+            avg_bested_file: 'cache/stats/overall/overall_top_avg_bested.json.gz',
+            bested_file: 'cache/stats/overall/overall_top_bested.json.gz',
+            pole_file: 'cache/stats/overall/overall_top_pole.json.gz',
+            podium_file: 'cache/stats/overall/overall_top_podium.json.gz'
         },
         overall: {
-            avg_bested_file: 'cache/stats/overall_avg_bested.json.gz',
-            bested_file: 'cache/stats/overall_bested.json.gz',
-            pole_file: 'cache/stats/overall_pole.json.gz',
-            podium_file: 'cache/stats/overall_podium.json.gz'
+            avg_bested_file: 'cache/stats/overall/overall_avg_bested.json.gz',
+            bested_file: 'cache/stats/overall/overall_bested.json.gz',
+            pole_file: 'cache/stats/overall/overall_pole.json.gz',
+            podium_file: 'cache/stats/overall/overall_podium.json.gz'
         }
     });
 

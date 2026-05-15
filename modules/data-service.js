@@ -252,7 +252,7 @@ class DataService {
      */
     async fetchTopCombinations() {
         const cacheVersion = await this._getIndexCacheVersion();
-        const response = await fetch(`cache/top_combinations.json.gz?v=${cacheVersion}`);
+        const response = await fetch(`cache/combinations/top_combinations.json.gz?v=${cacheVersion}`);
         
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
@@ -279,7 +279,7 @@ class DataService {
      */
     async fetchAllCombinations() {
         const cacheVersion = await this._getIndexCacheVersion();
-        const response = await fetch(`cache/all_combinations.json.gz?v=${cacheVersion}`);
+        const response = await fetch(`cache/combinations/all_combinations.json.gz?v=${cacheVersion}`);
         
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);

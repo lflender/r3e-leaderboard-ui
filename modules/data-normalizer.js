@@ -168,15 +168,6 @@ function extractClassId(item) {
 }
 
 /**
- * Extracts date/time from various field names
- * @param {Object} item - Data item
- * @returns {string} Date/time value
- */
-function extractDateTime(item) {
-    return getField(item, FIELD_NAMES.DATE_TIME, '');
-}
-
-/**
  * Normalizes track names to fix known inconsistencies
  * Handles Brands Hatch naming variations without breaking if source data is corrected
  * @param {string} trackName - Raw track name
@@ -216,7 +207,7 @@ if (typeof window !== 'undefined') {
         extractRank,
         extractTrackId,
         extractClassId,
-        extractDateTime,
+
         normalizeTrackName
     };
 }

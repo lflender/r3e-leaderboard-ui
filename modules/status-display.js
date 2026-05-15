@@ -22,7 +22,7 @@ class StatusDisplay {
      * Initialize status display
      */
     async init() {
-        await this.fetchAndDisplay();
+        await this.fetchAndDisplayStatus();
     }
 
     /**
@@ -149,12 +149,6 @@ class StatusDisplay {
         this.elements.led.title = ledTitle;
     }
 
-    /**
-     * Public method alias for backward compatibility
-     */
-    async fetchAndDisplay() {
-        await this.fetchAndDisplayStatus();
-    }
 }
 
 // Auto-initialize when DOM is fully ready.

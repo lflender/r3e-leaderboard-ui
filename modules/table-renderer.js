@@ -108,27 +108,6 @@ class TableRenderer {
      * @param {Array} headers - Header labels
      * @returns {string} HTML string
      */
-    renderSimpleTable(items, headers) {
-        if (!items || items.length === 0) {
-            return '<div class="no-results">No results found</div>';
-        }
-        
-        let html = '<table class="results-table"><thead><tr>';
-        
-        headers.forEach(header => {
-            html += `<th>${header}</th>`;
-        });
-        
-        html += '</tr></thead><tbody>';
-        
-        items.forEach(item => {
-            html += this.renderSimpleRow(item, headers);
-        });
-        
-        html += '</tbody></table>';
-        return html;
-    }
-    
     /**
      * Renders a driver group header row
      * @param {Object} driverObj - Driver object
@@ -261,30 +240,6 @@ class TableRenderer {
         return html;
     }
     
-    /**
-     * Renders a simple row (without grouping)
-     * @param {Object} item - Data item
-     * @param {Array} headers - Header labels
-     * @returns {string} HTML string
-     */
-    renderSimpleRow(item, headers) {
-        const trackId = item.track_id || item.TrackID || item.trackId || '';
-        const classId = item.class_id || item.ClassID || item.classId || '';
-        const pos = item.position || item.Position || item.Pos || '';
-        
-        let html = `<tr data-trackid="${R3EUtils.escapeHtml(String(trackId))}" 
-                       data-classid="${R3EUtils.escapeHtml(String(classId))}" 
-                       data-position="${R3EUtils.escapeHtml(String(pos))}">`;
-        
-        headers.forEach(header => {
-            const key = this.headerToKey(header);
-            html += this.renderCell(item, key);
-        });
-        
-        html += '</tr>';
-        return html;
-    }
-
     renderDetailSections(resultsContainer, summaryHTML, entriesDistHTML, paginationHTML, tableWrapperHTML) {
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = `${summaryHTML || ''}${entriesDistHTML || ''}<div class="detail-filters-slot"></div>${paginationHTML || ''}${tableWrapperHTML || ''}${paginationHTML || ''}`;
@@ -773,15 +728,6 @@ class TableRenderer {
         return `group-${base}${countrySlug}${teamSlug}${pathIdSlug}`;
     }
     
-    /**
-     * Converts header label to key
-     * @param {string} header - Header label
-     * @returns {string} Key
-     */
-    headerToKey(header) {
-        // Simple conversion - could be enhanced
-        return header.replace(/ /g, '');
-    }
 }
 
 // Create singleton instance

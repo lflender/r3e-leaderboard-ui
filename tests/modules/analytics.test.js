@@ -40,44 +40,9 @@ describe('R3EAnalytics.track', () => {
     });
 });
 
-describe('R3EAnalytics.trackSearchResultViewed', () => {
-    it('does not throw when resultCount !== 1', () => {
-        expect(() => window.R3EAnalytics.trackSearchResultViewed('alice', 0, '', {})).not.toThrow();
-        expect(() => window.R3EAnalytics.trackSearchResultViewed('alice', 2, 'Alice B', {})).not.toThrow();
-    });
-
-    it('does not throw when resultCount === 1 with full opts', () => {
-        expect(() => window.R3EAnalytics.trackSearchResultViewed('alice', 1, 'Alice B', {
-            trackFilter: 'track1',
-            classFilter: 'gt3',
-            source: 'url'
-        })).not.toThrow();
-    });
-
-    it('does not throw when opts omitted', () => {
-        expect(() => window.R3EAnalytics.trackSearchResultViewed('bob', 1, 'Bob C')).not.toThrow();
-    });
-
-    it('does not throw when driverName omitted', () => {
-        expect(() => window.R3EAnalytics.trackSearchResultViewed('bob', 1)).not.toThrow();
-    });
-});
-
-describe('R3EAnalytics.trackSearch alias', () => {
-    it('does not throw when called with valid arguments', () => {
-        expect(() => window.R3EAnalytics.trackSearch('charlie', 1, 'Charlie D', { source: 'enter' })).not.toThrow();
-    });
-
-    it('does not throw when resultCount !== 1', () => {
-        expect(() => window.R3EAnalytics.trackSearch('charlie', 0, '', {})).not.toThrow();
-    });
-});
-
 describe('R3EAnalytics public API shape', () => {
-    it('exposes init, track, trackSearch, trackSearchResultViewed', () => {
+    it('exposes init and track', () => {
         expect(typeof window.R3EAnalytics.init).toBe('function');
         expect(typeof window.R3EAnalytics.track).toBe('function');
-        expect(typeof window.R3EAnalytics.trackSearch).toBe('function');
-        expect(typeof window.R3EAnalytics.trackSearchResultViewed).toBe('function');
     });
 });

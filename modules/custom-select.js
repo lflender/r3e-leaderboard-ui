@@ -252,18 +252,5 @@ class CustomSelect {
     }
 }
 
-/**
- * Legacy helper function for backward compatibility
- * Sets up a custom select using the same pattern as original code
- * @param {string} id - Element ID
- * @param {Array<{value: string, label: string}>} options - Options array
- * @param {Function} onChange - Change callback
- * @returns {CustomSelect} Instance
- */
-function setupCustomSelect(id, options, onChange) {
-    return new CustomSelect(id, options, onChange);
-}
-
 // Export for use in other modules
 window.CustomSelect = CustomSelect;
-window.setupCustomSelect = setupCustomSelect;

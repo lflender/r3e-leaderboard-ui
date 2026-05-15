@@ -248,33 +248,6 @@ function generatePaginationHTML(options) {
 </div>`;
 }
 
-/**
- * Legacy helper function - creates pagination and returns goToPage function
- * @param {Array} data - Data to paginate
- * @param {number} itemsPerPage - Items per page
- * @param {Function} displayCallback - Callback to display results
- * @param {HTMLElement} scrollTarget - Element to scroll to
- * @returns {Function} goToPage function
- */
-function createPagination(data, itemsPerPage, displayCallback, scrollTarget) {
-    const pagination = new Pagination({
-        itemsPerPage,
-        onPageChange: (pageData, info) => {
-            if (displayCallback) {
-                displayCallback(data); // Call original display function with full data
-            }
-        },
-        scrollTarget
-    });
-    
-    pagination.setData(data);
-    
-    return function goToPage(page) {
-        pagination.goToPage(page);
-    };
-}
-
 // Export for use in other modules
 window.Pagination = Pagination;
-window.createPagination = createPagination;
 window.generatePaginationHTML = generatePaginationHTML;

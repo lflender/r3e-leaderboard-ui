@@ -307,15 +307,6 @@ class DailyRaces {
     }
 
     /**
-     * Build the holiday notice banner
-     */
-    getHolidayNoticeBannerHtml() {
-        const line1 = 'I was in holidays last week, thank you for your patience.';
-        const line2 = 'The schedule parser has been reworked and should now handle all cases!';
-        return `<p class="daily-races-banner daily-races-banner--success">${R3EUtils.escapeHtml(line1)}<br>${R3EUtils.escapeHtml(line2)}</p>`;
-    }
-
-    /**
      * Format timestamp to readable format
      */
     formatTimestamp(timestamp) {
@@ -480,7 +471,7 @@ class DailyRaces {
         }
         html += '</div>';
 
-        html += this.getHolidayNoticeBannerHtml();
+
 
         html += '<div class="daily-races-section-header">';
         html += '<h3 class="daily-races-section-title">Daily Sprint Races (15 min)</h3>';

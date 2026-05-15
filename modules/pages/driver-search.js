@@ -432,12 +432,14 @@ class DriverSearch {
             this.currentPage = 1;
             this.displayResults(this.allResults, searchId);
 
-            // Analytics: keep the generic search event and additionally log
-            // when a single driver result is actually displayed.
+            // Analytics: log when a single driver result is displayed.
             if (typeof R3EAnalytics !== 'undefined' && results.length === 1) {
                 const driverResult = results[0];
                 const driverDisplayName = driverResult.driver || driverName;
-                R3EAnalytics.trackSearchResultViewed(driverName, results.length, driverDisplayName, {
+                R3EAnalytics.track('search result viewed', {
+                    searchTerm: driverName,
+                    resultCount: results.length,
+                    driverName: driverDisplayName,
                     trackFilter: selectedTrack,
                     classFilter: selectedClass,
                     source: this._searchSource || 'input'

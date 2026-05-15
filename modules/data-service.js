@@ -16,11 +16,8 @@ class DataService {
         this.driverMetadataBasePath = 'cache/index/metadata';
         this.driverMetadataShardCache = new Map();
         this.driverMetadataShardPromises = new Map();
-        // Disable status caching: status.json is precomputed and should be fetched fresh
-        this.statusCache = null; // last good status (fallback only, not used to avoid fresh fetches)
+        this.statusCache = null; // last good status (fallback only)
         this.statusPromise = null; // single-flight promise for status fetch
-        this.CACHE_DURATION = 0;
-        this.STATUS_CACHE_KEY = 'r3e_status_cache';
         this.DRIVER_INDEX_CACHE_KEY = 'r3e_driver_index_cache';
         // Disable expensive localStorage caching of the giant index to keep UI responsive
         this.ENABLE_INDEX_LOCAL_CACHE = false;

@@ -66,19 +66,8 @@ function getField(obj, fields, defaultValue = '') {
     return defaultValue;
 }
 
-/**
- * Check if a key matches any of the field variations
- * @param {string} key - Key to check
- * @param {Array<string>} fields - Array of field names to match against
- * @returns {boolean} True if key matches any field
- */
-function isField(key, fields) {
-    return fields.includes(key);
-}
-
 // Make available globally
 if (typeof window !== 'undefined') {
     window.FIELD_NAMES = FIELD_NAMES;
     window.getField = getField;
-    window.isField = isField;
 }

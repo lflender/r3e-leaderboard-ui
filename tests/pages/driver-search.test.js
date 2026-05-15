@@ -42,7 +42,7 @@ beforeAll(() => {
         getTrackOptions: vi.fn().mockReturnValue([{ value: '', label: 'All tracks' }]),
         searchDriver: vi.fn().mockResolvedValue([])
     };
-    window.R3EAnalytics = { trackSearch: vi.fn(), track: vi.fn() };
+    window.R3EAnalytics = { track: vi.fn() };
 
     window.generatePaginationHTML = vi.fn().mockReturnValue('');
 

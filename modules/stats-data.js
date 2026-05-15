@@ -85,16 +85,6 @@
         return item ? (item.files || null) : null;
     }
 
-    // Backwards-compatible: returns { polePath, bestedPath } only.
-    function getPathsForFilter(index, filterValue) {
-        const files = getFilesEntryForFilter(index, filterValue);
-        if (!files) return null;
-        return {
-            polePath: files.pole_file,
-            bestedPath: files.bested_file
-        };
-    }
-
     // Returns paths for all metrics (any may be undefined if missing).
     function getAllPathsForFilter(index, filterValue) {
         const files = getFilesEntryForFilter(index, filterValue);
@@ -178,7 +168,6 @@
         fetchGzipJson,
         loadStatsIndex,
         getFilesEntryForFilter,
-        getPathsForFilter,
         getAllPathsForFilter,
         extractRows,
         normalizeRows

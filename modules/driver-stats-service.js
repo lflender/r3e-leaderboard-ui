@@ -39,13 +39,33 @@
     }
 
     /**
-     * Search a stats payload for a driver by name (case-insensitive).
+     * Search a stats payload for a driver.
+     * When pathId is provided, matches only by driver_key for accuracy
+     * (avoids returning a different driver with the same name).
+     * Without pathId, falls back to name matching (case-insensitive).
      * Returns { value, position, total } or null.
      */
-    function findDriverInPayload(payload, driverName, metricKey) {
+    function findDriverInPayload(payload, driverName, metricKey, pathId) {
         const rows = window.StatsData.extractRows(payload);
-        const searchName = driverName.toLowerCase().trim();
 
+        // When pathId is available, match exclusively by driver_key
+        if (pathId) {
+            const searchId = pathId.toLowerCase().trim();
+            for (let i = 0; i < rows.length; i++) {
+                const rowKey = (rows[i]?.driver_key || '').toLowerCase().trim();
+                if (rowKey && rowKey === searchId) {
+                    return {
+                        value: Number(rows[i]?.[metricKey] || 0),
+                        position: i + 1,
+                        total: rows.length
+                    };
+                }
+            }
+            return null;
+        }
+
+        // No pathId — match by name
+        const searchName = driverName.toLowerCase().trim();
         for (let i = 0; i < rows.length; i++) {
             const rowName = (rows[i]?.name || rows[i]?.driver_name || rows[i]?.driver_key || '')
                 .toLowerCase().trim();
@@ -68,11 +88,11 @@
      * When skipFullTotal is true, the top file total is kept (caller will
      * override it with the status total_drivers count).
      */
-    async function lookupMetric(driverName, metricKey, topPath, fullPath, skipFullTotal) {
+    async function lookupMetric(driverName, metricKey, topPath, fullPath, skipFullTotal, pathId) {
         if (topPath) {
             try {
                 const topPayload = await _fetchWithDedup(topPath);
-                const found = findDriverInPayload(topPayload, driverName, metricKey);
+                const found = findDriverInPayload(topPayload, driverName, metricKey, pathId);
                 if (found) {
                     // Get accurate total from full file unless caller will provide it
                     if (!skipFullTotal && fullPath) {
@@ -89,7 +109,7 @@
         if (fullPath) {
             try {
                 const fullPayload = await _fetchWithDedup(fullPath);
-                return findDriverInPayload(fullPayload, driverName, metricKey);
+                return findDriverInPayload(fullPayload, driverName, metricKey, pathId);
             } catch (_) { /* full file also unavailable */ }
         }
 
@@ -104,7 +124,7 @@
      * (avoids fetching the large full files). Other metrics (pole, podium)
      * keep their own totals from their full files.
      */
-    async function lookupDriverStats(driverName) {
+    async function lookupDriverStats(driverName, pathId) {
         const index = await window.StatsData.loadStatsIndex();
         const topFiles = index.overall_top || {};
         const fullFiles = index.overall || {};
@@ -123,7 +143,7 @@
                 const fullPath = fullFiles[def.fileKey] || '';
                 // Skip full file fetch for total on bested metrics — status provides it
                 const skipFull = metric.key === 'avg_bested' || metric.key === 'bested';
-                const result = await lookupMetric(driverName, def.metricKey, topPath, fullPath, skipFull);
+                const result = await lookupMetric(driverName, def.metricKey, topPath, fullPath, skipFull, pathId);
                 return { ...metric, result };
             })),
             totalPromise
@@ -158,7 +178,7 @@
      * @param {string} metricKey - One of the PROFILE_METRICS keys
      * @returns {Promise<{value, position, total}|null>}
      */
-    async function lookupSingleStat(driverName, metricKey) {
+    async function lookupSingleStat(driverName, metricKey, pathId) {
         const index = await window.StatsData.loadStatsIndex();
         const topFiles = index.overall_top || {};
         const fullFiles = index.overall || {};
@@ -171,7 +191,7 @@
         const fullPath = fullFiles[def.fileKey] || '';
         const skipFull = metricKey === 'avg_bested' || metricKey === 'bested';
 
-        const result = await lookupMetric(driverName, def.metricKey, topPath, fullPath, skipFull);
+        const result = await lookupMetric(driverName, def.metricKey, topPath, fullPath, skipFull, pathId);
         if (!result) return null;
 
         // For avg_bested and bested, use total_drivers from status.json

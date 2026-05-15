@@ -76,6 +76,33 @@ describe('DriverStatsService.findDriverInPayload', () => {
         expect(window.DriverStatsService.findDriverInPayload({ results: [] }, 'A', 'x')).toBeNull();
         expect(window.DriverStatsService.findDriverInPayload(null, 'A', 'x')).toBeNull();
     });
+
+    it('disambiguates drivers with same name using pathId', () => {
+        const payload = {
+            results: [
+                { name: 'Alex Fernandez', driver_key: 'alex-fernandez-45', avg_bested: 98.3 },
+                { name: 'Alex Fernandez', driver_key: 'alex-fernandez-3498', avg_bested: 72.1 }
+            ]
+        };
+        // With pathId, finds the correct one
+        const result = window.DriverStatsService.findDriverInPayload(payload, 'Alex Fernandez', 'avg_bested', 'alex-fernandez-3498');
+        expect(result).toEqual({ value: 72.1, position: 2, total: 2 });
+
+        // Without pathId, finds the first name match
+        const resultNoId = window.DriverStatsService.findDriverInPayload(payload, 'Alex Fernandez', 'avg_bested');
+        expect(resultNoId).toEqual({ value: 98.3, position: 1, total: 2 });
+    });
+
+    it('returns null when pathId provided but not found (no name fallback)', () => {
+        const payload = {
+            results: [
+                { name: 'Alex Fernandez', driver_key: '5094017', avg_bested: 98.3 }
+            ]
+        };
+        // pathId doesn't match any driver_key — should NOT fall back to name
+        const result = window.DriverStatsService.findDriverInPayload(payload, 'Alex Fernandez', 'avg_bested', '8119439');
+        expect(result).toBeNull();
+    });
 });
 
 describe('DriverStatsService.formatValue', () => {

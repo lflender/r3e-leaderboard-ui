@@ -82,7 +82,7 @@ class DriverProfile {
 
         this.renderHeader(profile);
         this.renderStatsPlaceholders();
-        this.loadStats(profile.name);
+        this.loadStats(profile.name, profile.pathId);
         this.renderHighlights(profile);
         this.renderCharts(profile);
     }
@@ -178,12 +178,12 @@ class DriverProfile {
      * Asynchronously load stats and update each card independently as data arrives
      * @param {string} driverName - Driver name to look up
      */
-    loadStats(driverName) {
+    loadStats(driverName, pathId) {
         if (!window.DriverStatsService) return;
 
         const metrics = DriverStatsService.PROFILE_METRICS;
         metrics.forEach(metric => {
-            DriverStatsService.lookupSingleStat(driverName, metric.key)
+            DriverStatsService.lookupSingleStat(driverName, metric.key, pathId)
                 .then(result => {
                     const card = document.getElementById('stat-' + metric.key);
                     if (!card) return;

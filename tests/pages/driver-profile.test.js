@@ -302,10 +302,10 @@ describe('DriverProfile', () => {
         await dp.init();
         // Wait for async stats load to complete
         await vi.waitFor(() => {
-            expect(window.DriverStatsService.lookupSingleStat).toHaveBeenCalledWith('Test Driver', 'avg_bested');
-            expect(window.DriverStatsService.lookupSingleStat).toHaveBeenCalledWith('Test Driver', 'bested');
-            expect(window.DriverStatsService.lookupSingleStat).toHaveBeenCalledWith('Test Driver', 'pole');
-            expect(window.DriverStatsService.lookupSingleStat).toHaveBeenCalledWith('Test Driver', 'podium');
+            expect(window.DriverStatsService.lookupSingleStat).toHaveBeenCalledWith('Test Driver', 'avg_bested', 'test-driver-123');
+            expect(window.DriverStatsService.lookupSingleStat).toHaveBeenCalledWith('Test Driver', 'bested', 'test-driver-123');
+            expect(window.DriverStatsService.lookupSingleStat).toHaveBeenCalledWith('Test Driver', 'pole', 'test-driver-123');
+            expect(window.DriverStatsService.lookupSingleStat).toHaveBeenCalledWith('Test Driver', 'podium', 'test-driver-123');
         });
     });
 

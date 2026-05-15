@@ -26,10 +26,10 @@
   <meta name="twitter:image" content="https://r3e-leaderboards.info/images/rle-share.png">
   
   <!-- Analytics (PostHog via first-party proxy) -->
-  <script src="modules/analytics.js?v=7"></script>
+  <script src="modules/analytics.js?v=7" defer></script>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   
-  <link rel="stylesheet" href="style.css?v=255">
+  <link rel="stylesheet" href="style.css?v=258">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"/>
   <!-- Site Icons -->
   <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png?v=2">
@@ -52,13 +52,13 @@
     <h1 class="sr-only">RaceRoom Car Specifications and Class Data</h1>
     <div class="tabs" id="site-tabs" data-active="cars"></div>
 
-    <div class="tab-content">
+    <div class="tab-content cars-tab-content">
+      <div class="cars-side-tools">
+        <button type="button" id="cars-export-ratings" class="cars-side-btn" title="Export car ratings">Export</button>
+        <button type="button" id="cars-import-ratings" class="cars-side-btn" title="Import car ratings">Import</button>
+        <input id="cars-import-ratings-input" type="file" accept="application/json,.json" hidden>
+      </div>
       <div id="cars-info" class="tab-panel active">
-        <div class="cars-tools-row" aria-label="Car rating tools">
-          <button type="button" id="cars-export-ratings" class="cars-tool-btn" title="Export car ratings">Export ratings</button>
-          <button type="button" id="cars-import-ratings" class="cars-tool-btn" title="Import car ratings">Import ratings</button>
-          <input id="cars-import-ratings-input" type="file" accept="application/json,.json" hidden>
-        </div>
         <div class="search-container" id="cars-search-container">
           <div id="class-filter-ui-cars" class="custom-select" role="listbox" aria-label="Filter by car class">
             <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All classes ▾</button>
@@ -96,7 +96,7 @@
 
   <!-- Loaders -->
   <script src="modules/loaders/template-loader.js?v=2" defer></script>
-  <script src="modules/loaders/tabs-loader.js?v=2" defer></script>
+  <script src="modules/loaders/tabs-loader.js?v=6" defer></script>
   <script src="modules/loaders/footer-loader.js?v=2" defer></script>
   <script src="modules/loaders/header-loader.js?v=2" defer></script>
 

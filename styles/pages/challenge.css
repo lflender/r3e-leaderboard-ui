@@ -408,13 +408,13 @@
     padding: 0.5rem 0.9rem;
     font-size: 0.92rem;
     font-weight: 600;
-    color: #f87171;
+    color: var(--text-secondary);
     border: 2px solid var(--border);
     border-radius: 8px;
     background: transparent;
     cursor: pointer;
     user-select: none;
-    transition: border-color 0.15s;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
 }
 
 .challenge-action + .challenge-action {
@@ -422,7 +422,15 @@
 }
 
 .challenge-hardcore-label:hover {
-    border-color: var(--primary-color);
+    border-color: #f87171;
+    color: #f87171;
+    background: rgba(248, 113, 113, 0.08);
+}
+
+.challenge-hardcore-label.is-active {
+    border-color: #f87171;
+    color: #f87171;
+    background: rgba(248, 113, 113, 0.08);
 }
 
 .challenge-hardcore-label input[type="checkbox"] {
@@ -459,7 +467,6 @@
 .challenge-hardcore-label .info-icon {
     font-size: 0.72em;
     margin-left: 0;
-    color: #f87171;
 }
 
 .challenge-pick-btn--hardcore {

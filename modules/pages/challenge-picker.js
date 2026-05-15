@@ -697,6 +697,7 @@
             hardcoreCb.checked = false;
             hardcoreCb.disabled = false;
         }
+        if (hardcoreLabel) hardcoreLabel.classList.remove('is-active');
         hardcoreMode = false;
         updateRepickButtons();
     }
@@ -721,6 +722,7 @@
 
         hardcoreMode = true;
         if (hardcoreCb) hardcoreCb.checked = true;
+        if (hardcoreLabel) hardcoreLabel.classList.add('is-active');
         pickBtn.classList.add('challenge-pick-btn--hardcore');
         applyHardcoreLockUI();
         return true;
@@ -1098,10 +1100,10 @@
 
             carsHtml += `<div class="challenge-exclusions__class${singleCls}" data-class="${escapeHtml(className)}">
                 <div class="challenge-exclusions__class-header${classExcludedCls}">
+                    <input type="checkbox" class="challenge-exclusions__class-cb" ${classChecked}>
                     <span class="challenge-exclusions__class-arrow">&#9654;</span>
                     ${logoImg}
                     <span class="challenge-exclusions__class-name">${escapeHtml(className)}</span>
-                    <input type="checkbox" class="challenge-exclusions__class-cb" ${classChecked}>
                 </div>
                 ${carsListHtml ? `<div class="challenge-exclusions__cars">${carsListHtml}</div>` : ''}
             </div>`;
@@ -1378,6 +1380,7 @@
             hardcoreCb.addEventListener('change', () => {
                 hardcoreMode = hardcoreCb.checked;
                 pickBtn.classList.toggle('challenge-pick-btn--hardcore', hardcoreMode);
+                if (hardcoreLabel) hardcoreLabel.classList.toggle('is-active', hardcoreMode);
             });
         }
 

@@ -18,6 +18,17 @@
     /** Single-flight promise cache — prevents duplicate fetches of the same file */
     const _fetchPromises = new Map();
 
+    /** Cache for total_drivers from status.json */
+    let _totalDriversPromise = null;
+
+    function _getTotalDrivers() {
+        if (_totalDriversPromise) return _totalDriversPromise;
+        _totalDriversPromise = window.dataService.calculateStatus()
+            .then(s => (s && s.total_drivers) ? s.total_drivers : null)
+            .catch(() => null);
+        return _totalDriversPromise;
+    }
+
     function _fetchWithDedup(path) {
         if (_fetchPromises.has(path)) return _fetchPromises.get(path);
         const promise = window.StatsData.fetchGzipJson(path).finally(() => {
@@ -52,17 +63,19 @@
     /**
      * Look up a single metric for a driver.
      * Tries the top (smaller) file first, then falls back to the full file.
-     * When found in the top file, the full file is still used to get the
-     * authoritative total count (the top file only has a subset of drivers).
+     * When found in the top file and skipFullTotal is false, the full file is
+     * still used to get the authoritative total (the top file only has a subset).
+     * When skipFullTotal is true, the top file total is kept (caller will
+     * override it with the status total_drivers count).
      */
-    async function lookupMetric(driverName, metricKey, topPath, fullPath) {
+    async function lookupMetric(driverName, metricKey, topPath, fullPath, skipFullTotal) {
         if (topPath) {
             try {
                 const topPayload = await _fetchWithDedup(topPath);
                 const found = findDriverInPayload(topPayload, driverName, metricKey);
                 if (found) {
-                    // Get accurate total from full file
-                    if (fullPath) {
+                    // Get accurate total from full file unless caller will provide it
+                    if (!skipFullTotal && fullPath) {
                         try {
                             const fullPayload = await _fetchWithDedup(fullPath);
                             found.total = window.StatsData.extractRows(fullPayload).length;
@@ -87,10 +100,9 @@
      * Look up all profile metrics for a driver, in parallel.
      * Each result is { key, label, format, result: { value, position, total } | null }.
      *
-     * The avg_bested full file is always fetched to get the true total driver
-     * count. That total is applied to both avg_bested and bested (since drivers
-     * who never bested anyone don't appear in the bested cache). Other metrics
-     * (pole, podium) keep their own totals from their own files.
+     * For avg_bested and bested, total comes from status.json total_drivers
+     * (avoids fetching the large full files). Other metrics (pole, podium)
+     * keep their own totals from their full files.
      */
     async function lookupDriverStats(driverName) {
         const index = await window.StatsData.loadStatsIndex();
@@ -98,15 +110,8 @@
         const fullFiles = index.overall || {};
         const defs = window.StatsData.METRIC_DEFINITIONS;
 
-        // Kick off fetching the avg_bested full file in parallel to get
-        // the authoritative total driver count for bested metrics.
-        const avgBestedDef = defs.avg_bested;
-        const avgBestedFullPath = avgBestedDef ? (fullFiles[avgBestedDef.fileKey] || '') : '';
-        const totalPromise = avgBestedFullPath
-            ? _fetchWithDedup(avgBestedFullPath)
-                .then(p => window.StatsData.extractRows(p).length)
-                .catch(() => null)
-            : Promise.resolve(null);
+        // Get total driver count from status.json (lightweight).
+        const totalPromise = _getTotalDrivers();
 
         // Look up all metrics in parallel.
         const [rawResults, bestedTotal] = await Promise.all([
@@ -116,14 +121,15 @@
 
                 const topPath = topFiles[def.fileKey] || '';
                 const fullPath = fullFiles[def.fileKey] || '';
-
-                const result = await lookupMetric(driverName, def.metricKey, topPath, fullPath);
+                // Skip full file fetch for total on bested metrics — status provides it
+                const skipFull = metric.key === 'avg_bested' || metric.key === 'bested';
+                const result = await lookupMetric(driverName, def.metricKey, topPath, fullPath, skipFull);
                 return { ...metric, result };
             })),
             totalPromise
         ]);
 
-        // Apply avg_bested total only to avg_bested and bested metrics.
+        // Apply status total_drivers to avg_bested and bested metrics.
         // Pole and podium keep their own totals from their own files.
         if (bestedTotal != null) {
             for (const r of rawResults) {
@@ -147,7 +153,7 @@
 
     /**
      * Look up a single stat metric for a driver independently.
-     * For avg_bested and bested, applies the authoritative total from the full avg_bested file.
+     * For avg_bested and bested, total comes from status.json total_drivers.
      * @param {string} driverName
      * @param {string} metricKey - One of the PROFILE_METRICS keys
      * @returns {Promise<{value, position, total}|null>}
@@ -163,19 +169,16 @@
 
         const topPath = topFiles[def.fileKey] || '';
         const fullPath = fullFiles[def.fileKey] || '';
+        const skipFull = metricKey === 'avg_bested' || metricKey === 'bested';
 
-        const result = await lookupMetric(driverName, def.metricKey, topPath, fullPath);
+        const result = await lookupMetric(driverName, def.metricKey, topPath, fullPath, skipFull);
         if (!result) return null;
 
-        // For avg_bested and bested, get authoritative total from the avg_bested full file
+        // For avg_bested and bested, use total_drivers from status.json
         if (metricKey === 'avg_bested' || metricKey === 'bested') {
-            const avgBestedDef = defs.avg_bested;
-            const avgBestedFullPath = avgBestedDef ? (fullFiles[avgBestedDef.fileKey] || '') : '';
-            if (avgBestedFullPath) {
-                try {
-                    const fullPayload = await _fetchWithDedup(avgBestedFullPath);
-                    result.total = window.StatsData.extractRows(fullPayload).length;
-                } catch (_) { /* keep existing total */ }
+            const statusTotal = await _getTotalDrivers();
+            if (statusTotal != null) {
+                result.total = statusTotal;
             }
         }
 
@@ -189,6 +192,8 @@
         findDriverInPayload,
         formatValue,
         _fetchWithDedup,
-        _fetchPromises
+        _fetchPromises,
+        _getTotalDrivers,
+        _resetTotalDriversCache() { _totalDriversPromise = null; }
     };
 })();

@@ -19,12 +19,19 @@ beforeAll(() => {
         fetchGzipJson: vi.fn()
     };
 
+    // Provide dataService dependency for total_drivers
+    window.dataService = {
+        calculateStatus: vi.fn()
+    };
+
     loadBrowserScript('modules/driver-stats-service.js');
 });
 
 beforeEach(() => {
     vi.clearAllMocks();
     window.DriverStatsService._fetchPromises.clear();
+    window.DriverStatsService._resetTotalDriversCache();
+    window.dataService.calculateStatus.mockResolvedValue({ total_drivers: 84149 });
 });
 
 describe('DriverStatsService.findDriverInPayload', () => {
@@ -138,11 +145,11 @@ describe('DriverStatsService.lookupDriverStats', () => {
         });
 
         const results = await window.DriverStatsService.lookupDriverStats('Test Driver');
-        // Bested and avg_bested use the avg_bested full file total
+        // Bested and avg_bested use status.json total_drivers
         const bested = results.find(r => r.key === 'bested');
-        expect(bested.result.total).toBe(10000);
+        expect(bested.result.total).toBe(84149);
         const avgBested = results.find(r => r.key === 'avg_bested');
-        expect(avgBested.result.total).toBe(10000);
+        expect(avgBested.result.total).toBe(84149);
         // Pole gets full file total even though found in top file
         const pole = results.find(r => r.key === 'pole');
         expect(pole.result.position).toBe(2);
@@ -174,9 +181,11 @@ describe('DriverStatsService.lookupDriverStats', () => {
         });
 
         const results = await window.DriverStatsService.lookupDriverStats('My Driver');
-        // Bested uses avg_bested total (5000)
+        // Bested and avg_bested use status.json total_drivers
         const bested = results.find(r => r.key === 'bested');
-        expect(bested.result.total).toBe(5000);
+        expect(bested.result.total).toBe(84149);
+        const avgBested = results.find(r => r.key === 'avg_bested');
+        expect(avgBested.result.total).toBe(84149);
         // Pole keeps its own full file total (3000)
         const pole = results.find(r => r.key === 'pole');
         expect(pole.result.total).toBe(3000);

@@ -247,11 +247,7 @@ function matchesCarFilterValue(carName, selectedCarFilter) {
 
 /* ── badge helpers (shared by Cars page + Challenge Picker) ── */
 
-function escHtml(text) {
-    return typeof R3EUtils !== 'undefined' && R3EUtils.escapeHtml
-        ? R3EUtils.escapeHtml(text)
-        : String(text ?? '');
-}
+const escHtml = (text) => R3EUtils.escapeHtml(text);
 
 function wheelBadge(cat) {
     const v = (cat || '').toLowerCase().trim();

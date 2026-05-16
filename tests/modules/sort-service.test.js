@@ -26,6 +26,7 @@ describe('table-sort-service', () => {
         loadBrowserScript('modules/utils-track.js');
         loadBrowserScript('modules/url-helper.js');
         loadBrowserScript('modules/utils.js');
+        loadBrowserScript('modules/column-config.js');
         loadBrowserScript('modules/field-mappings.js');
         loadBrowserScript('modules/sort-service.js');
     });

@@ -6,31 +6,10 @@
 
 class TableRenderer {
     constructor() {
-        // Use ColumnConfig for excluded columns - no more duplicate lists!
-        this.excludeColumns = window.ColumnConfig ? 
-            window.ColumnConfig.getHiddenColumnAliases() : 
-            this._getFallbackExcludeColumns();
+        this.excludeColumns = window.ColumnConfig.getHiddenColumnAliases();
         this.sortService = window.TableSortService
             ? new window.TableSortService({ resolveTrackLabel: this.resolveTrackLabel.bind(this) })
             : null;
-    }
-    
-    /**
-     * Fallback exclude list if ColumnConfig not loaded
-     * @private
-     */
-    _getFallbackExcludeColumns() {
-        return [
-            'ClassID', 'ClassName', 'TrackID', 'TotalEntries', 
-            'Class ID', 'Class Name', 'Track ID', 'Total Entries',
-            'class_id', 'class_name', 'track_id', 'total_entries',
-            'path_id', 'pathId', 'pathID', 'PathID', 'Path ID',
-            'Name', 'name', 'DriverName', 'driver_name',
-            'Country', 'country', 'Rank', 'rank', 'Team', 'team',
-            'found', 'Found',
-            'time_diff', 'timeDiff', 'timeDifference', 
-            'time_diff_s', 'time_diff_seconds'
-        ];
     }
     
     /**
@@ -44,21 +23,7 @@ class TableRenderer {
         // Get keys from first entry if not provided
         if (!keys && driverGroups.length > 0 && driverGroups[0].entries && driverGroups[0].entries.length > 0) {
             const dataKeys = Object.keys(driverGroups[0].entries[0]);
-            
-            // Use ColumnConfig if available, otherwise fallback to manual filtering
-            if (window.ColumnConfig) {
-                keys = window.ColumnConfig.getOrderedColumns(dataKeys, { addSynthetic: true });
-            } else {
-                // Fallback: manual filtering and sorting
-                keys = this.filterAndSortKeys(dataKeys);
-                if (!keys.includes('Date') && !keys.includes('date_time')) {
-                    keys.push('Date');
-                }
-                const lapTimeIndex = keys.findIndex(k => ['LapTime', 'Lap Time', 'lap_time', 'laptime', 'Time'].includes(k));
-                if (lapTimeIndex !== -1 && !keys.includes('GapPercent')) {
-                    keys.splice(lapTimeIndex + 1, 0, 'GapPercent');
-                }
-            }
+            keys = window.ColumnConfig.getOrderedColumns(dataKeys, { addSynthetic: true });
         }
         
         if (!keys || keys.length === 0) {
@@ -635,37 +600,7 @@ class TableRenderer {
      * @returns {Array} Filtered and sorted keys
      */
     filterAndSortKeys(keys) {
-        // Use ColumnConfig if available (preferred)
-        if (window.ColumnConfig) {
-            return window.ColumnConfig.getOrderedColumns(keys, { addSynthetic: false });
-        }
-        
-        // Fallback: manual filtering
-        keys = keys.filter(key => !this.excludeColumns.includes(key));
-        
-        // Fallback column order (deprecated - use ColumnConfig instead)
-        const fallbackOrder = [
-            'CarClass', 'Car Class', 'car_class', 'Class',
-            'Car', 'car', 'CarName',
-            'Track', 'track', 'TrackName', 'track_name',
-            'Position', 'position', 'Pos',
-            'LapTime', 'Lap Time', 'lap_time', 'laptime', 'Time',
-            'GapPercent',
-            'Difficulty', 'difficulty',
-            'Date', 'date_time', 'dateTime'
-        ];
-        
-        keys.sort((a, b) => {
-            let indexA = fallbackOrder.indexOf(a);
-            let indexB = fallbackOrder.indexOf(b);
-            
-            if (indexA === -1) indexA = 999;
-            if (indexB === -1) indexB = 999;
-            
-            return indexA - indexB;
-        });
-        
-        return keys;
+        return window.ColumnConfig.getOrderedColumns(keys, { addSynthetic: false });
     }
     
     /**

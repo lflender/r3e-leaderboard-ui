@@ -272,14 +272,7 @@
         });
     }
 
-    function escapeHtml(str) {
-        if (window.R3EUtils && typeof window.R3EUtils.escapeHtml === 'function') {
-            return window.R3EUtils.escapeHtml(str);
-        }
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
-    }
+    const escapeHtml = (str) => window.R3EUtils.escapeHtml(str);
 
     function escapeAttr(str) {
         return String(str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

@@ -19,13 +19,7 @@
   const transBadge = R3ECarUtils.transBadge;
   const driveBadge = R3ECarUtils.driveBadge;
 
-  function countryFlag(country){
-    // Use FlagHelper if available, otherwise return empty
-    if (typeof FlagHelper !== 'undefined' && FlagHelper.countryToFlag) {
-      return FlagHelper.countryToFlag(country);
-    }
-    return '';
-  }
+  const countryFlag = (country) => FlagHelper.countryToFlag(country);
 
   const renderCarDisplayHtml = R3ECarUtils.renderCarDisplayHtml;
 

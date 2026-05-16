@@ -106,11 +106,7 @@
 
     /* ── helpers ──────────────────────────────────────────── */
 
-    function escapeHtml(text) {
-        return window.R3EUtils && typeof window.R3EUtils.escapeHtml === 'function'
-            ? window.R3EUtils.escapeHtml(text)
-            : String(text ?? '');
-    }
+    const escapeHtml = (text) => window.R3EUtils.escapeHtml(text);
 
     function resolveClassLogo(className) {
         return window.R3ETrackUtils ? window.R3ETrackUtils.resolveCarClassLogoByName(className) : '';

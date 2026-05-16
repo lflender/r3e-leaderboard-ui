@@ -2,7 +2,8 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { loadBrowserScript } from '../helpers/script-loader.js';
 
 beforeAll(() => {
-    // field-mappings.js provides FIELD_NAMES and getField as globals
+    // column-config.js must load before field-mappings.js (single source of truth for aliases)
+    loadBrowserScript('modules/column-config.js');
     loadBrowserScript('modules/field-mappings.js');
     loadBrowserScript('modules/data-normalizer.js');
 });

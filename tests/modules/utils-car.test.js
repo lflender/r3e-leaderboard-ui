@@ -3,6 +3,7 @@ import { loadBrowserScript } from '../helpers/script-loader.js';
 
 describe('R3ECarUtils', () => {
     beforeAll(() => {
+        loadBrowserScript('modules/utils.js');
         loadBrowserScript('modules/utils-car.js');
     });
 

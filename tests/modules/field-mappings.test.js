@@ -3,6 +3,7 @@ import { loadBrowserScript } from '../helpers/script-loader.js';
 
 describe('FieldMappings', () => {
     beforeAll(() => {
+        loadBrowserScript('modules/column-config.js');
         loadBrowserScript('modules/field-mappings.js');
     });
 
@@ -33,6 +34,15 @@ describe('FieldMappings', () => {
                     expect(typeof v).toBe('string');
                 }
             }
+        });
+
+        test('aliases are derived from ColumnConfig (single source of truth)', () => {
+            const CC = window.ColumnConfig;
+            expect(CC).toBeDefined();
+            // FIELD_NAMES.CAR_CLASS should be the same array as COLUMNS.CAR_CLASS.aliases
+            expect(window.FIELD_NAMES.CAR_CLASS).toBe(CC.COLUMNS.CAR_CLASS.aliases);
+            expect(window.FIELD_NAMES.POSITION).toBe(CC.COLUMNS.POSITION.aliases);
+            expect(window.FIELD_NAMES.LAP_TIME).toBe(CC.COLUMNS.LAP_TIME.aliases);
         });
     });
 

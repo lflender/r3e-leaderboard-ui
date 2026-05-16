@@ -52,13 +52,7 @@
         if (!response.ok) {
             throw new Error(`Failed to fetch ${path}: ${response.status} ${response.statusText}`);
         }
-        if (typeof DecompressionStream === 'undefined') {
-            throw new Error('DecompressionStream is not supported in this browser.');
-        }
-
-        const stream = response.body.pipeThrough(new DecompressionStream('gzip'));
-        const text = await new Response(stream).text();
-        return JSON.parse(text);
+        return window.CompressedJsonHelper.readGzipJson(response);
     }
 
     async function loadStatsIndex() {

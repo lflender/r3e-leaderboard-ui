@@ -102,21 +102,14 @@ const COLUMNS = {
         visible: true,
         sortable: true,
         sortKey: 'date_time',
-        // Format ISO date to "DD MMM YYYY"
+        // Format ISO date to "DD MMM YYYY" — delegates to TimeHelper
         format: (value) => {
             if (!value) return '—';
-            try {
-                const date = new Date(value);
-                if (isNaN(date.getTime())) return '—';
-                const day = date.getDate();
-                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-                               'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                const month = months[date.getMonth()];
-                const year = date.getFullYear();
-                return `${day} ${month} ${year}`;
-            } catch (e) {
-                return '—';
+            if (typeof window !== 'undefined' && window.R3ETimeUtils) {
+                const result = window.R3ETimeUtils.formatDate(value);
+                return result || '—';
             }
+            return '—';
         }
     },
     

@@ -127,6 +127,17 @@
 
     function matchesEra(car, eraFilter) {
         if (!eraFilter) return true;
+        // Support array of eras (multi-select)
+        if (Array.isArray(eraFilter)) {
+            if (eraFilter.length === 0) return true;
+            const year = parseYear(car.year);
+            return eraFilter.some(era => {
+                const predicate = YEAR_ERAS[era];
+                if (!predicate) return true;
+                if (isNaN(year)) return era === 'modern';
+                return predicate(year);
+            });
+        }
         const predicate = YEAR_ERAS[eraFilter];
         if (!predicate) return true;
         const year = parseYear(car.year);
@@ -160,7 +171,10 @@
         // Always exclude non-racing classes
         const base = carsData.filter(entry => !EXCLUDED_CLASSES.includes(entry.class || ''));
 
-        if (!filters || (!filters.era && !filters.wheel && !filters.trans && !filters.rating)) return base;
+        if (!filters) return base;
+
+        const eraEmpty = !filters.era || (Array.isArray(filters.era) && filters.era.length === 0);
+        if (eraEmpty && !filters.wheel && !filters.trans && !filters.rating) return base;
 
         const result = [];
         for (const classEntry of base) {

@@ -236,6 +236,111 @@ describe('ChallengePicker page', () => {
         expect(filtered).toHaveLength(0);
     });
 
+    test('era checkbox filter renders checkboxes and toggles correctly', () => {
+        const root = document.getElementById('challenge-era-filter');
+        const menu = root.querySelector('.custom-select__menu');
+        const toggle = root.querySelector('.custom-select__toggle');
+        const checkboxes = menu.querySelectorAll('input[type="checkbox"]');
+
+        // Should have 4 checkboxes (All years + 3 eras)
+        expect(checkboxes).toHaveLength(4);
+
+        const allCb = menu.querySelector('input[value=""]');
+        const oldiesCb = menu.querySelector('input[value="oldies"]');
+        const recentCb = menu.querySelector('input[value="recent"]');
+        const modernCb = menu.querySelector('input[value="modern"]');
+
+        // "All years" should be checked by default
+        expect(allCb.checked).toBe(true);
+        expect(oldiesCb.checked).toBe(false);
+
+        // Check a specific era — "All years" should uncheck
+        oldiesCb.checked = true;
+        oldiesCb.dispatchEvent(new Event('change', { bubbles: true }));
+        expect(allCb.checked).toBe(false);
+        expect(toggle.textContent).toContain('Oldies');
+
+        // Check another era — both should be selected
+        recentCb.checked = true;
+        recentCb.dispatchEvent(new Event('change', { bubbles: true }));
+        expect(allCb.checked).toBe(false);
+        expect(toggle.textContent).toContain('Oldies');
+        expect(toggle.textContent).toContain('Recent');
+
+        // Uncheck both — "All years" should re-check
+        oldiesCb.checked = false;
+        oldiesCb.dispatchEvent(new Event('change', { bubbles: true }));
+        recentCb.checked = false;
+        recentCb.dispatchEvent(new Event('change', { bubbles: true }));
+        expect(allCb.checked).toBe(true);
+        expect(toggle.textContent).toContain('All years');
+
+        // Check "All years" while eras are selected — eras should uncheck
+        oldiesCb.checked = true;
+        oldiesCb.dispatchEvent(new Event('change', { bubbles: true }));
+        allCb.checked = true;
+        allCb.dispatchEvent(new Event('change', { bubbles: true }));
+        expect(oldiesCb.checked).toBe(false);
+        expect(toggle.textContent).toContain('All years');
+    });
+
+    test('checking all individual eras switches to All years', () => {
+        const root = document.getElementById('challenge-era-filter');
+        const menu = root.querySelector('.custom-select__menu');
+        const toggle = root.querySelector('.custom-select__toggle');
+
+        const allCb = menu.querySelector('input[value=""]');
+        const oldiesCb = menu.querySelector('input[value="oldies"]');
+        const recentCb = menu.querySelector('input[value="recent"]');
+        const modernCb = menu.querySelector('input[value="modern"]');
+
+        // Check oldies and recent first
+        oldiesCb.checked = true;
+        oldiesCb.dispatchEvent(new Event('change', { bubbles: true }));
+        recentCb.checked = true;
+        recentCb.dispatchEvent(new Event('change', { bubbles: true }));
+        expect(allCb.checked).toBe(false);
+
+        // Now check the last era (modern) — should switch to "All years"
+        modernCb.checked = true;
+        modernCb.dispatchEvent(new Event('change', { bubbles: true }));
+        expect(allCb.checked).toBe(true);
+        expect(oldiesCb.checked).toBe(false);
+        expect(recentCb.checked).toBe(false);
+        expect(modernCb.checked).toBe(false);
+        expect(toggle.textContent).toContain('All years');
+    });
+
+    test('era filter state is saved to sessionStorage', () => {
+        const root = document.getElementById('challenge-era-filter');
+        const menu = root.querySelector('.custom-select__menu');
+        const oldiesCb = menu.querySelector('input[value="oldies"]');
+
+        oldiesCb.checked = true;
+        oldiesCb.dispatchEvent(new Event('change', { bubbles: true }));
+
+        const saved = sessionStorage.getItem('challenge-filter-era');
+        expect(saved).toBe(JSON.stringify(['oldies']));
+    });
+
+    test('era filter state is restored from sessionStorage on init', () => {
+        sessionStorage.setItem('challenge-filter-era', JSON.stringify(['recent', 'modern']));
+        window.ChallengePicker.init();
+
+        const root = document.getElementById('challenge-era-filter');
+        const menu = root.querySelector('.custom-select__menu');
+        const allCb = menu.querySelector('input[value=""]');
+        const recentCb = menu.querySelector('input[value="recent"]');
+        const modernCb = menu.querySelector('input[value="modern"]');
+        const toggle = root.querySelector('.custom-select__toggle');
+
+        expect(allCb.checked).toBe(false);
+        expect(recentCb.checked).toBe(true);
+        expect(modernCb.checked).toBe(true);
+        expect(toggle.textContent).toContain('Recent');
+        expect(toggle.textContent).toContain('Modern');
+    });
+
     /* ── exclusions ──────────────────────────────────────── */
 
     test('exclusions toggle opens and closes the panel', () => {

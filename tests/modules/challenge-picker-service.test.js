@@ -512,6 +512,35 @@ describe('ChallengePickerService', () => {
             expect(oldies).toHaveLength(0);
         });
 
+        test('filters by era array combining multiple eras', () => {
+            const data = [makeClass('Mixed', [
+                makeCar('Old', { year: '1990' }),
+                makeCar('Mid', { year: '2010' }),
+                makeCar('New', { year: '2020' })
+            ])];
+            const result = window.ChallengePickerService.filterCarsData(data, { era: ['oldies', 'modern'] });
+            expect(result[0].cars.map(c => c.car)).toEqual(['Old', 'New']);
+        });
+
+        test('empty era array returns all cars', () => {
+            const data = [makeClass('GT3', [
+                makeCar('A', { year: '1990' }),
+                makeCar('B', { year: '2020' })
+            ])];
+            const result = window.ChallengePickerService.filterCarsData(data, { era: [] });
+            expect(result[0].cars).toHaveLength(2);
+        });
+
+        test('era array with single value works like string filter', () => {
+            const data = [makeClass('Mixed', [
+                makeCar('Old', { year: '1990' }),
+                makeCar('New', { year: '2020' })
+            ])];
+            const result = window.ChallengePickerService.filterCarsData(data, { era: ['modern'] });
+            expect(result[0].cars).toHaveLength(1);
+            expect(result[0].cars[0].car).toBe('New');
+        });
+
         test('cars with missing transmission are treated as paddles', () => {
             const data = [makeClass('GT3', [
                 makeCar('NoTrans', { trans: '' }),

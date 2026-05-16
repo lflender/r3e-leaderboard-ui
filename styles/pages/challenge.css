@@ -882,3 +882,36 @@
         border-bottom: 1px solid var(--border);
     }
 }
+
+/* ── Era multi-checkbox dropdown ─────────────────────────── */
+
+.era-checkbox-list {
+    display: flex;
+    flex-direction: column;
+    padding: 0.35rem 0;
+}
+
+.era-checkbox-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.75rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    transition: background 0.12s;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.era-checkbox-option:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.era-checkbox-option input[type="checkbox"] {
+    accent-color: var(--accent, #3b82f6);
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    flex-shrink: 0;
+}

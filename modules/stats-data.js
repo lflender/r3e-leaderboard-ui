@@ -39,7 +39,7 @@
 
     async function fetchJson(path) {
         const url = await createCacheBustedUrl(path);
-        const response = await fetch(url);
+        const response = await R3EUtils.fetchWithTimeout(url, {}, 10000);
         if (!response.ok) {
             throw new Error(`Failed to fetch ${path}: ${response.status} ${response.statusText}`);
         }
@@ -48,7 +48,7 @@
 
     async function fetchGzipJson(path) {
         const url = await createCacheBustedUrl(path);
-        const response = await fetch(url);
+        const response = await R3EUtils.fetchWithTimeout(url, {}, 15000);
         if (!response.ok) {
             throw new Error(`Failed to fetch ${path}: ${response.status} ${response.statusText}`);
         }

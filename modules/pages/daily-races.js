@@ -132,9 +132,9 @@ class DailyRaces {
     async loadDailyRaces() {
         try {
             const timestamp = new Date().getTime();
-            const response = await fetch(`cache/daily_races.json.gz?v=${timestamp}`, {
+            const response = await R3EUtils.fetchWithTimeout(`cache/daily_races.json.gz?v=${timestamp}`, {
                 cache: 'no-store'
-            });
+            }, 15000);
             
             if (!response.ok) {
                 throw new Error(`Failed to load daily races: ${response.status}`);
@@ -158,9 +158,9 @@ class DailyRaces {
     async loadLastUpdateTime() {
         try {
             const timestamp = new Date().getTime();
-            const response = await fetch(`cache/status.json?v=${timestamp}`, {
+            const response = await R3EUtils.fetchWithTimeout(`cache/status.json?v=${timestamp}`, {
                 cache: 'no-store'
-            });
+            }, 5000);
             
             if (!response.ok) {
                 return null;

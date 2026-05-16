@@ -233,7 +233,7 @@ class DataService {
         const filePath = `cache/tracks/track_${trackId}/class_${classId}.json.gz`;
         
         const cacheVersion = await this._getIndexCacheVersion();
-        const response = await fetch(`${filePath}?v=${cacheVersion}`);
+        const response = await R3EUtils.fetchWithTimeout(`${filePath}?v=${cacheVersion}`, {}, 15000);
         
         if (!response.ok) {
             throw new Error(`Failed to load data: ${response.status} ${response.statusText}`);
@@ -249,7 +249,7 @@ class DataService {
      */
     async fetchTopCombinations() {
         const cacheVersion = await this._getIndexCacheVersion();
-        const response = await fetch(`cache/combinations/top_combinations.json.gz?v=${cacheVersion}`);
+        const response = await R3EUtils.fetchWithTimeout(`cache/combinations/top_combinations.json.gz?v=${cacheVersion}`, {}, 15000);
         
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
@@ -276,7 +276,7 @@ class DataService {
      */
     async fetchAllCombinations() {
         const cacheVersion = await this._getIndexCacheVersion();
-        const response = await fetch(`cache/combinations/all_combinations.json.gz?v=${cacheVersion}`);
+        const response = await R3EUtils.fetchWithTimeout(`cache/combinations/all_combinations.json.gz?v=${cacheVersion}`, {}, 15000);
         
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
@@ -310,9 +310,7 @@ class DataService {
         this.statusPromise = (async () => {
             // Always fetch fresh status.json without caching
             try {
-                const controller = new AbortController();
-                const timeout = setTimeout(() => controller.abort(), 5000);
-                const response = await fetch(`cache/status.json?v=${Date.now()}`, {
+                const response = await R3EUtils.fetchWithTimeout(`cache/status.json?v=${Date.now()}`, {
                     method: 'GET',
                     cache: 'no-store',
                     headers: {
@@ -320,10 +318,8 @@ class DataService {
                         'Cache-Control': 'no-cache, no-store, must-revalidate',
                         'Pragma': 'no-cache',
                         'Expires': '0'
-                    },
-                    signal: controller.signal
-                });
-                clearTimeout(timeout);
+                    }
+                }, 5000);
 
                 if (!response.ok) {
                     console.error('Failed to fetch status.json:', response.status, response.statusText);

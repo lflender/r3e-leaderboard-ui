@@ -6,6 +6,7 @@ describe('StatsData', () => {
         delete window.StatsData;
         delete window.getCarClassId;
         global.fetch = vi.fn();
+        window.R3EUtils = { fetchWithTimeout: (url, options = {}) => fetch(url, options) };
         global.Response = class Response {
             constructor(value) {
                 this.value = value;

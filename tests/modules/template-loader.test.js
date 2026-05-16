@@ -5,6 +5,7 @@ describe('TemplateLoader', () => {
     beforeEach(() => {
         // Re-create TemplateLoader fresh each test by reloading the script
         delete window.TemplateLoader;
+        window.R3EUtils = { fetchWithTimeout: (url, options = {}) => fetch(url, options) };
         loadBrowserScript('modules/loaders/template-loader.js');
     });
 

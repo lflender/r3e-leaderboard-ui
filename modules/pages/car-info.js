@@ -5,7 +5,7 @@
       return window.CARS_DATA;
     }
     try{
-      const resp = await fetch('modules/data/cars.json');
+      const resp = await R3EUtils.fetchWithTimeout('modules/data/cars.json', {}, 10000);
       if(!resp.ok) throw new Error('HTTP ' + resp.status);
       return await resp.json();
     }catch(e){

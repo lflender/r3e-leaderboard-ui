@@ -31,7 +31,8 @@ beforeEach(() => {
         resolveTrackLabelForItem: (item, fallback = '') => {
             const trackId = item?.track_id || item?.TrackID || item?.trackId || item?.['Track ID'] || '';
             return window.R3EUtils.resolveTrackLabel(trackId, fallback || item?.track || item?.Track || '');
-        }
+        },
+        fetchWithTimeout: (url, options = {}) => fetch(url, options)
     };
     window.ColumnConfig = {
         getOrderedColumns: keys => keys,

@@ -34,7 +34,8 @@ describe('DataService core behavior', () => {
                 m = s.match(/^(\d+)m\s*(\d+)\.(\d+)$/);
                 if (m) return (parseInt(m[1]) * 60 + parseInt(m[2])) * 1000 + parseInt((m[3] + '000').slice(0, 3));
                 return 0;
-            })
+            }),
+            fetchWithTimeout: vi.fn((url, options = {}) => fetch(url, options))
         };
         window.CARS_DATA = [];
         window.getCarClassId = vi.fn(name => name === 'GT3' ? 5 : null);

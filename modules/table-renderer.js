@@ -324,7 +324,7 @@ class TableRenderer {
             const classLogoHtml = classLogoUrl
                 ? `<img class="table-car-class-logo" src="${R3EUtils.escapeHtml(classLogoUrl)}" alt="${R3EUtils.escapeHtml(className || 'Car class')} class logo" loading="lazy" decoding="async" />`
                 : '';
-            const classTextHtml = className ? R3EUtils.escapeHtml(className) : '—';
+            const classTextHtml = className ? `<span class="car-class-label">${R3EUtils.escapeHtml(className)}</span>` : '—';
             return `<td class="car-class-cell"><strong>${classLogoHtml}${classTextHtml}</strong></td>`;
         } else if (isCarKey) {
             return this.renderCarCell(value);

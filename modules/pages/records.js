@@ -652,8 +652,8 @@
             return;
         }
 
-        const superclassOptions = window.dataService?.getSuperclassOptions?.() || [];
-        const regularClassOptions = window.dataService?.getClassOptionsFromCarsData?.() || [];
+        const superclassOptions = window.FilterOptionsService?.getSuperclassOptions?.() || [];
+        const regularClassOptions = window.FilterOptionsService?.getClassOptionsFromCarsData?.() || [];
         const classOptions = [{ value: '', label: 'All classes' }]
             .concat(superclassOptions)
             .concat(regularClassOptions);

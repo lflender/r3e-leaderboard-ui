@@ -44,10 +44,12 @@ beforeEach(() => {
         showNoResults: vi.fn(async (container) => { container.innerHTML = '<div>No results found</div>'; })
     };
     window.dataService = {
+        waitForDriverIndex: vi.fn().mockResolvedValue({})
+    };
+    window.FilterOptionsService = {
         getSuperclassOptions: vi.fn().mockReturnValue([]),
         getClassOptionsFromCarsData: vi.fn().mockReturnValue([]),
-        getTrackOptions: vi.fn().mockReturnValue([{ value: '', label: 'All tracks' }]),
-        waitForDriverIndex: vi.fn().mockResolvedValue({})
+        getTrackOptions: vi.fn().mockReturnValue([{ value: '', label: 'All tracks' }])
     };
 
     window.CustomSelect = class {

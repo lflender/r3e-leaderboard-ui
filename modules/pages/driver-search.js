@@ -175,7 +175,7 @@ class DriverSearch {
     populateClassFilter() {
         if (!this.elements.classFilter) return;
         
-        const classOptions = dataService.getClassOptionsFromCarsData();
+        const classOptions = FilterOptionsService.getClassOptionsFromCarsData();
         if (classOptions.length === 0) return;
         
         const allOption = '<option value="">All classes</option>';
@@ -209,7 +209,7 @@ class DriverSearch {
     setupCustomSelects() {
         // Track filter custom select
         if (this.elements.trackFilterUI) {
-            new CustomSelect('track-filter-ui', dataService.getTrackOptions(), async (value, opts) => {
+            new CustomSelect('track-filter-ui', FilterOptionsService.getTrackOptions(), async (value, opts) => {
                 this.selectedTrack = value;
                 if (this.elements.trackFilter) {
                     this.elements.trackFilter.value = value;
@@ -227,10 +227,10 @@ class DriverSearch {
         // Class filter custom select
         if (this.elements.classFilter && this.elements.classFilterUI) {
             // Get superclass options first
-            const superclassOptions = dataService.getSuperclassOptions();
+            const superclassOptions = FilterOptionsService.getSuperclassOptions();
             
             // Get regular class options
-            const classOptions = dataService.getClassOptionsFromCarsData();
+            const classOptions = FilterOptionsService.getClassOptionsFromCarsData();
             
             // Combine: All classes, then Category: superclass entries, then regular classes
             const allOptions = [{ value: '', label: 'All classes' }]

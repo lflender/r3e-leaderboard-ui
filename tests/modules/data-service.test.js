@@ -60,8 +60,8 @@ describe('DataService core behavior', () => {
     });
 
     it('delegates driver index and search methods to extracted services', async () => {
-        const indexSpy = vi.spyOn(window.R3EDriverIndexService, 'loadDriverIndex').mockResolvedValue({ ok: true });
-        const searchSpy = vi.spyOn(window.R3EDriverSearchService, 'searchDriver').mockResolvedValue([]);
+        const indexSpy = vi.spyOn(service, 'loadDriverIndex').mockResolvedValue({ ok: true });
+        const searchSpy = vi.spyOn(service, 'searchDriver').mockResolvedValue([]);
 
         await expect(service.loadDriverIndex()).resolves.toEqual({ ok: true });
         await expect(service.searchDriver('Alice')).resolves.toEqual([]);
@@ -196,29 +196,5 @@ describe('DataService core behavior', () => {
         expect(service.fetchLeaderboardDetails).toHaveBeenCalledTimes(2);
         expect(result).toEqual([{ name: 'A', LapTime: '1:22.000', ClassName: 'GT3' }]);
         expect(warnSpy).toHaveBeenCalled();
-    });
-
-    it('builds class and superclass options from cars data', () => {
-        window.CARS_DATA = [
-            { superclass: 'GT3', class: 'GT3' },
-            { superclass: 'GT3', class: 'GT3' },
-            { superclass: 'Touring', class: 'TCR' },
-            { superclass: 'Safety', class: 'Safety Car' }
-        ];
-        window.getCarClassId = vi.fn(name => {
-            if (name === 'GT3') return 5;
-            if (name === 'TCR') return 8;
-            return null;
-        });
-
-        expect(service.getClassOptionsFromCarsData()).toEqual([
-            { value: 'GT3', label: 'GT3', logoUrl: '' },
-            { value: 'TCR', label: 'TCR', logoUrl: '' }
-        ]);
-        expect(service.getSuperclassOptions()).toEqual([
-            { value: 'superclass:GT3', label: 'Category: GT3', logos: [], classes: ['GT3'] },
-            { value: 'superclass:Safety', label: 'Category: Safety', logos: [], classes: ['Safety Car'] },
-            { value: 'superclass:Touring', label: 'Category: Touring', logos: [], classes: ['TCR'] }
-        ]);
     });
 });

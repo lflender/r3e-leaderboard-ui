@@ -37,10 +37,12 @@ beforeAll(() => {
         getUrlParam: vi.fn().mockReturnValue('')
     };
     window.dataService = {
+        searchDriver: vi.fn().mockResolvedValue([])
+    };
+    window.FilterOptionsService = {
         getClassOptionsFromCarsData: vi.fn().mockReturnValue([]),
         getSuperclassOptions: vi.fn().mockReturnValue([]),
-        getTrackOptions: vi.fn().mockReturnValue([{ value: '', label: 'All tracks' }]),
-        searchDriver: vi.fn().mockResolvedValue([])
+        getTrackOptions: vi.fn().mockReturnValue([{ value: '', label: 'All tracks' }])
     };
     window.R3EAnalytics = { track: vi.fn() };
 

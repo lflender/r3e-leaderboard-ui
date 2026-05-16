@@ -55,7 +55,7 @@
   }
 
   // Track filter — CustomSelect handles open/close/logo rendering
-  new CustomSelect('track-filter-ui', dataService.getTrackOptions(), (value, opts) => {
+  new CustomSelect('track-filter-ui', FilterOptionsService.getTrackOptions(), (value, opts) => {
     activeTrackId = value ? Number(value) : null;
     trackCurrentPage = 1;
     if (opts?.source === 'user') {
@@ -65,8 +65,8 @@
   });
   
   // Initialize class menu with superclass categories
-  const superclassOptions = dataService.getSuperclassOptions();
-  const regularClassOptions = dataService.getClassOptionsFromCarsData();
+  const superclassOptions = FilterOptionsService.getSuperclassOptions();
+  const regularClassOptions = FilterOptionsService.getClassOptionsFromCarsData();
   
   const classOptions = [{ value: '', label: 'All classes' }]
     .concat(superclassOptions)

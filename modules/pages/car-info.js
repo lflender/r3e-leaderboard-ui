@@ -55,8 +55,8 @@
   const minSearchLength = 3;
   
   // Build class options from data
-  const superclassOptions = dataService.getSuperclassOptions();
-  const regularClassOptions = dataService.getClassOptionsFromCarsData();
+  const superclassOptions = FilterOptionsService.getSuperclassOptions();
+  const regularClassOptions = FilterOptionsService.getClassOptionsFromCarsData();
   
   // Combine: All classes, then Category: superclass entries, then regular classes
   const classOptions = [{ value: '', label: 'All classes' }]

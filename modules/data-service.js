@@ -1,7 +1,9 @@
 /**
  * Data Service Module
- * Centralized data fetching and caching logic
- * Follows Single Responsibility Principle - only handles data operations
+ * Centralized data fetching and caching logic.
+ * Delegates driver index and search operations to R3EDriverIndexService
+ * and R3EDriverSearchService via mixin (methods copied onto instance so
+ * they share this DataService's state — caches, single-flight promises, etc.).
  */
 
 class DataService {
@@ -30,6 +32,32 @@ class DataService {
         // ~3 MB of gzipped data on every page load.
         this._indexCacheVersion = null;
         this._indexCacheVersionPromise = null;
+
+        // Mixin: copy methods from delegate modules onto this instance so their
+        // internal this.xxx() calls resolve to sibling methods on the same object.
+        this._installDelegateMethods();
+    }
+
+    /**
+     * Copies all methods from R3EDriverIndexService and R3EDriverSearchService
+     * onto this DataService instance.  Because the functions are assigned as own
+     * properties, calling  dataService.someMethod()  sets `this` to the
+     * DataService instance, giving the delegate code access to shared state
+     * (caches, single-flight promises, config paths, etc.).
+     */
+    _installDelegateMethods() {
+        const modules = [
+            window.R3EDriverIndexService,
+            window.R3EDriverSearchService
+        ];
+        for (const mod of modules) {
+            if (!mod) continue;
+            for (const [name, fn] of Object.entries(mod)) {
+                if (typeof fn === 'function' && !(name in this)) {
+                    this[name] = fn;
+                }
+            }
+        }
     }
 
     /**
@@ -70,159 +98,6 @@ class DataService {
         return window.CompressedJsonHelper;
     }
 
-    _getDriverIndexModule() {
-        const module = window.R3EDriverIndexService;
-        if (!module) {
-            throw new Error('R3EDriverIndexService is not loaded.');
-        }
-        return module;
-    }
-    
-    /**
-     * Loads driver mirror index with caching.
-     * Supports both legacy values (name -> canonical name) and new metadata objects.
-     * @param {Function} onProgress - Optional callback for progressive updates (driverName, entries)
-     * @returns {Promise<Object>} Driver index object
-     */
-    async loadDriverIndex(onProgress = null) {
-        return this._getDriverIndexModule().loadDriverIndex.call(this, onProgress);
-    }
-
-    /**
-     * Resolve shard file key from normalized driver key
-     * @param {string} normalizedName - Lowercased/normalized driver key
-     * @returns {string} Shard key: a-z or _
-     */
-    _getShardKeyForName(normalizedName) {
-        return this._getDriverIndexModule()._getShardKeyForName.call(this, normalizedName);
-    }
-
-    _transformMirrorToNameIndex(mirrorData) {
-        return this._getDriverIndexModule()._transformMirrorToNameIndex.call(this, mirrorData);
-    }
-
-    _buildSearchNameAliases(parsed) {
-        return this._getDriverIndexModule()._buildSearchNameAliases.call(this, parsed);
-    }
-
-    _normalizeDriverLookupName(name) {
-        return this._getDriverIndexModule()._normalizeDriverLookupName.call(this, name);
-    }
-
-    _extractDriverMirrorMetadata(mirrorKey, mirrorEntry) {
-        return this._getDriverIndexModule()._extractDriverMirrorMetadata.call(this, mirrorKey, mirrorEntry);
-    }
-
-    async getDriverMetadata(driverName, driverMirror = null) {
-        return this._getDriverIndexModule().getDriverMetadata.call(this, driverName, driverMirror);
-    }
-
-    _getDriverSearchModule() {
-        const module = window.R3EDriverSearchService;
-        if (!module) {
-            throw new Error('R3EDriverSearchService is not loaded.');
-        }
-        return module;
-    }
-
-    _matchesDriverSearchTerm(searchTarget, searchLower, isExactSearch) {
-        return this._getDriverSearchModule()._matchesDriverSearchTerm.call(this, searchTarget, searchLower, isExactSearch);
-    }
-
-    _hasAccents(str) {
-        return this._getDriverSearchModule()._hasAccents.call(this, str);
-    }
-
-    _normalizeExactDisplayName(value) {
-        return this._getDriverSearchModule()._normalizeExactDisplayName.call(this, value);
-    }
-
-    _foldEuropeanSearchName(value) {
-        return this._getDriverSearchModule()._foldEuropeanSearchName.call(this, value);
-    }
-
-    _reduceEuropeanSearchName(value) {
-        return this._getDriverSearchModule()._reduceEuropeanSearchName.call(this, value);
-    }
-
-    _hasSpecialEuropeanLetters(value) {
-        return this._getDriverSearchModule()._hasSpecialEuropeanLetters.call(this, value);
-    }
-
-    _buildLookupKeyCandidates(value) {
-        return this._getDriverSearchModule()._buildLookupKeyCandidates.call(this, value);
-    }
-
-    _accentExactWordMatch(candidateName, searchTerm) {
-        return this._getDriverSearchModule()._accentExactWordMatch.call(this, candidateName, searchTerm);
-    }
-
-    _getSuperclassClasses(superclassName) {
-        return this._getDriverSearchModule()._getSuperclassClasses.call(this, superclassName);
-    }
-
-    _filterDriverEntries(entries, filters = {}) {
-        return this._getDriverSearchModule()._filterDriverEntries.call(this, entries, filters);
-    }
-
-    _extractPathId(record) {
-        return this._getDriverSearchModule()._extractPathId.call(this, record);
-    }
-
-    _normalizeMetadataCandidates(metaEntry) {
-        return this._getDriverSearchModule()._normalizeMetadataCandidates.call(this, metaEntry);
-    }
-
-    _buildMetadataSearchResult(filteredEntries, mirrorMeta, mirrorKey, driverEntries) {
-        return this._getDriverSearchModule()._buildMetadataSearchResult.call(this, filteredEntries, mirrorMeta, mirrorKey, driverEntries);
-    }
-
-    _buildMetadataSearchResultsForPathIds(filteredEntries, metaEntry, mirrorKey, driverEntries) {
-        return this._getDriverSearchModule()._buildMetadataSearchResultsForPathIds.call(this, filteredEntries, metaEntry, mirrorKey, driverEntries);
-    }
-
-    _buildLegacySearchResults(filteredEntries, mirrorMeta, mirrorKey, driverEntries) {
-        return this._getDriverSearchModule()._buildLegacySearchResults.call(this, filteredEntries, mirrorMeta, mirrorKey, driverEntries);
-    }
-
-    async enrichEntriesWithDriverMetadata(entries) {
-        return this._getDriverIndexModule().enrichEntriesWithDriverMetadata.call(this, entries);
-    }
-
-    /**
-     * Loads a single shard file with single-flight dedupe and in-memory caching
-     * @param {string} shardKey - a-z or _
-     * @returns {Promise<Object>} Shard object mapping normalized name -> entries[]
-     */
-    async _loadDriverShard(shardKey) {
-        return this._getDriverIndexModule()._loadDriverShard.call(this, shardKey);
-    }
-
-    async _fetchSingleDriverShard(shardKey) {
-        return this._getDriverIndexModule()._fetchSingleDriverShard.call(this, shardKey);
-    }
-
-    async _loadDriverMetadataShard(shardKey) {
-        return this._getDriverIndexModule()._loadDriverMetadataShard.call(this, shardKey);
-    }
-
-    async _fetchSingleDriverMetadataShard(shardKey) {
-        return this._getDriverIndexModule()._fetchSingleDriverMetadataShard.call(this, shardKey);
-    }
-
-    async _fetchDriverMirrorData() {
-        return this._getDriverIndexModule()._fetchDriverMirrorData.call(this);
-    }
-
-    /**
-     * Waits for driver index to be loaded
-     * @param {number} maxAttempts - Maximum number of attempts
-     * @returns {Promise<Object>} Driver index
-     */
-    async waitForDriverIndex(maxAttempts = 50) {
-        return this._getDriverIndexModule().waitForDriverIndex.call(this, maxAttempts);
-    }
-    
     /**
      * Fetches leaderboard details from gzipped cache
      * @param {string|number} trackId - Track ID
@@ -354,16 +229,6 @@ class DataService {
         })();
 
         return this.statusPromise;
-    }
-    
-    /**
-     * Searches for driver in index
-     * @param {string} driverName - Driver name to search
-     * @param {Object} filters - Filter options (class, difficulty)
-     * @returns {Promise<Array>} Search results
-     */
-    async searchDriver(driverName, filters = {}) {
-        return this._getDriverSearchModule().searchDriver.call(this, driverName, filters);
     }
     
     /**
@@ -548,190 +413,6 @@ class DataService {
         const batches = await Promise.all(fetchPromises);
         const allEntries = batches.flat();
         return this._rebuildCombinedLapTimes(allEntries);
-    }
-
-    // -------- Internal helpers for index caching --------
-    async _parseJsonWhenIdle(text) {
-        return this._getDriverIndexModule()._parseJsonWhenIdle.call(this, text);
-    }
-
-    _getCachedDriverIndex() {
-        return this._getDriverIndexModule()._getCachedDriverIndex.call(this);
-    }
-
-    _saveDriverIndexToCache(idx) {
-        return this._getDriverIndexModule()._saveDriverIndexToCache.call(this, idx);
-    }
-
-    async _refreshDriverIndexInBackground() {
-        return this._getDriverIndexModule()._refreshDriverIndexInBackground.call(this);
-    }
-
-    _withTimeout(promise, ms) {
-        return this._getDriverIndexModule()._withTimeout.call(this, promise, ms);
-    }
-
-    // -------- Minimal index change detection via status.json --------
-    async _updateLastIndexFromStatus() {
-        return this._getDriverIndexModule()._updateLastIndexFromStatus.call(this);
-    }
-
-    _startIndexStatusRevalidator() {
-        return this._getDriverIndexModule()._startIndexStatusRevalidator.call(this);
-    }
-    
-    /**
-     * Populates class filter from cars data, filtered to only classes with leaderboard data
-     * @returns {Array<{value: string, label: string}>} Class options
-     */
-    getClassOptionsFromCarsData() {
-        if (!window.CARS_DATA || !Array.isArray(window.CARS_DATA)) {
-            return [];
-        }
-
-        const seen = new Set();
-        const options = [];
-        
-        window.CARS_DATA.forEach(entry => {
-            const cls = entry.class || entry.car_class || entry.CarClass || '';
-            if (!cls || seen.has(cls)) return;
-            
-            // Only include classes that exist in CAR_CLASSES_DATA (have leaderboard entries)
-            if (window.getCarClassId && !window.getCarClassId(cls)) {
-                return; // Skip classes without leaderboard data (e.g., Safety Car)
-            }
-            
-            seen.add(cls);
-            const classId = window.getCarClassId ? window.getCarClassId(cls) : null;
-            const logoUrl = window.R3EUtils?.resolveCarClassLogo?.(cls, classId) || '';
-            options.push({ value: cls, label: cls, logoUrl });
-        });
-        
-        return options.sort((a, b) => a.label.localeCompare(b.label));
-    }
-
-    /**
-     * Get track options for dropdown filters, with logo URLs resolved from track-images data.
-     * Single source of truth for all track filter dropdowns across the site.
-     * @returns {Array<{value: string, label: string, logoUrl: string}>} Track options
-     */
-    getTrackOptions() {
-        const tracks = Array.isArray(window.TRACKS_DATA) ? window.TRACKS_DATA : [];
-        return [{ value: '', label: 'All tracks' }].concat(
-            tracks.map(t => {
-                const logoUrl = (window.R3ETrackImages && typeof window.R3ETrackImages.resolveTrackLogoByLabel === 'function')
-                    ? window.R3ETrackImages.resolveTrackLogoByLabel(t.label) || ''
-                    : '';
-                return { value: String(t.id), label: t.label, logoUrl };
-            })
-        );
-    }
-
-    /**
-     * Get unique superclass options with classes that belong to each
-     * @returns {Array<{value: string, label: string, logos: string[], classes: Array<string>}>} Superclass options with associated classes
-     */
-    getSuperclassOptions() {
-        if (!window.CARS_DATA || !Array.isArray(window.CARS_DATA)) {
-            return [];
-        }
-        
-        const superclassMap = new Map();
-        
-        window.CARS_DATA.forEach(entry => {
-            const superclass = entry.superclass;
-            const cls = entry.class || entry.car_class || entry.CarClass || '';
-            
-            if (superclass && cls) {
-                if (!superclassMap.has(superclass)) {
-                    superclassMap.set(superclass, new Set());
-                }
-                superclassMap.get(superclass).add(cls);
-            }
-        });
-        
-        const options = [];
-        superclassMap.forEach((classes, superclass) => {
-            // Collect unique logo URLs for all classes in this superclass
-            const seenUrls = new Set();
-            const logos = [];
-            classes.forEach(cls => {
-                const logoUrl = window.R3EUtils?.resolveCarClassLogoByName?.(cls) || '';
-                if (logoUrl && !seenUrls.has(logoUrl)) {
-                    seenUrls.add(logoUrl);
-                    logos.push(logoUrl);
-                }
-            });
-
-            options.push({
-                value: `superclass:${superclass}`,
-                label: `Category: ${superclass}`,
-                logos,
-                classes: Array.from(classes)
-            });
-        });
-        
-        return options.sort((a, b) => a.label.localeCompare(b.label));
-    }
-
-    /**
-     * Build category filter options for a specific set of class IDs.
-     * Groups the IDs by superclass and builds dropdown entries with class logos,
-     * using the same rendering pattern as getSuperclassOptions().
-     * @param {string[]} classIds - Array of class IDs (e.g. ["1703","12770","4680"])
-     * @returns {Array<{value: string, label: string, logos: string[], classNames: Array<{classId: string, className: string}>}>}
-     */
-    getCategoryOptionsForClassIds(classIds) {
-        if (!Array.isArray(classIds) || classIds.length < 2) return [];
-
-        // Group class IDs by superclass
-        const categoryMap = new Map();
-        classIds.forEach(classId => {
-            const className = window.getCarClassName ? window.getCarClassName(classId) : classId;
-            let superclass = null;
-
-            if (window.CARS_DATA && Array.isArray(window.CARS_DATA)) {
-                const carEntry = window.CARS_DATA.find(entry => {
-                    const cls = entry.class || entry.car_class || entry.CarClass || '';
-                    return String(cls).trim().toLowerCase() === String(className).trim().toLowerCase();
-                });
-                superclass = carEntry?.superclass || null;
-            }
-
-            if (!superclass) superclass = className;
-
-            if (!categoryMap.has(superclass)) {
-                categoryMap.set(superclass, []);
-            }
-            categoryMap.get(superclass).push({ classId, className });
-        });
-
-        // Only produce entries if there are 2+ distinct categories
-        if (categoryMap.size < 2) return [];
-
-        const options = [];
-
-        categoryMap.forEach((classes, superclass) => {
-            // Collect unique logo URLs — same pattern as getSuperclassOptions()
-            const seenUrls = new Set();
-            const logos = [];
-            classes.forEach(({ className, classId }) => {
-                const logoUrl = window.R3EUtils?.resolveCarClassLogo?.(className, classId) || '';
-                if (logoUrl && !seenUrls.has(logoUrl)) {
-                    seenUrls.add(logoUrl);
-                    logos.push(logoUrl);
-                }
-            });
-
-            options.push({
-                value: `CATEGORY:${superclass}`,
-                label: `Category: ${superclass}`,
-                logos,
-                classNames: classes
-            });
-        });
-
-        return options;
     }
 }
 

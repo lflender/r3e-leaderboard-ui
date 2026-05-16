@@ -77,7 +77,8 @@ function setupGlobals() {
     window.getInactiveMpPos = vi.fn(() => null);
     window.getCarClassId = vi.fn(() => '');
 
-    window.dataService = {
+    window.dataService = {};
+    window.FilterOptionsService = {
         getSuperclassOptions: vi.fn().mockReturnValue([]),
         getClassOptionsFromCarsData: vi.fn().mockReturnValue([])
     };

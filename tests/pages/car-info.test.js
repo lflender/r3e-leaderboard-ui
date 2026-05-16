@@ -44,7 +44,8 @@ beforeEach(() => {
         buildCarId: vi.fn(() => ''),
         get: vi.fn(() => 0)
     };
-    window.dataService = {
+    window.dataService = {};
+    window.FilterOptionsService = {
         getSuperclassOptions: vi.fn().mockReturnValue([]),
         getClassOptionsFromCarsData: vi.fn().mockReturnValue([])
     };

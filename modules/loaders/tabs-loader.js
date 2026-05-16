@@ -45,6 +45,21 @@
         }
         container.innerHTML = html;
         initScrollHint(container);
+
+        // On mobile, scroll the tabs container so the active tab is visible
+        var activeBtn = container.querySelector('.tab-button.active');
+        if (activeBtn) {
+            var idx = Array.prototype.indexOf.call(container.children, activeBtn);
+            if (idx >= TABS.length - 3) {
+                // Use requestAnimationFrame to ensure layout is complete
+                requestAnimationFrame(function () {
+                    var btnLeft = activeBtn.offsetLeft;
+                    var btnWidth = activeBtn.offsetWidth;
+                    var containerWidth = container.clientWidth;
+                    container.scrollLeft = btnLeft - (containerWidth - btnWidth) / 2;
+                });
+            }
+        }
     }
 
     function initScrollHint(container) {

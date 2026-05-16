@@ -629,7 +629,7 @@ class DataService {
 
     /**
      * Get unique superclass options with classes that belong to each
-     * @returns {Array<{value: string, label: string, labelHtml: string, classes: Array<string>}>} Superclass options with associated classes
+     * @returns {Array<{value: string, label: string, logos: string[], classes: Array<string>}>} Superclass options with associated classes
      */
     getSuperclassOptions() {
         if (!window.CARS_DATA || !Array.isArray(window.CARS_DATA)) {
@@ -650,10 +650,9 @@ class DataService {
             }
         });
         
-        const escape = window.R3EUtils?.escapeHtml || (v => String(v ?? ''));
         const options = [];
         superclassMap.forEach((classes, superclass) => {
-            // Collect unique logos for all classes in this superclass
+            // Collect unique logo URLs for all classes in this superclass
             const seenUrls = new Set();
             const logos = [];
             classes.forEach(cls => {
@@ -664,16 +663,10 @@ class DataService {
                 }
             });
 
-            // Build labelHtml: logos for each class + superclass name (no "Category:" prefix)
-            const logosHtml = logos.map(url =>
-                `<img class="custom-select__option-logo" src="${escape(url)}" alt="" aria-hidden="true" loading="lazy" decoding="async">`
-            ).join('');
-            const labelHtml = (logosHtml ? `<span class="custom-select__logos-group">${logosHtml}</span>` : '') + escape(superclass);
-
             options.push({
                 value: `superclass:${superclass}`,
                 label: `Category: ${superclass}`,
-                labelHtml,
+                logos,
                 classes: Array.from(classes)
             });
         });
@@ -686,7 +679,7 @@ class DataService {
      * Groups the IDs by superclass and builds dropdown entries with class logos,
      * using the same rendering pattern as getSuperclassOptions().
      * @param {string[]} classIds - Array of class IDs (e.g. ["1703","12770","4680"])
-     * @returns {Array<{value: string, label: string, labelHtml: string, classNames: Array<{classId: string, className: string}>}>}
+     * @returns {Array<{value: string, label: string, logos: string[], classNames: Array<{classId: string, className: string}>}>}
      */
     getCategoryOptionsForClassIds(classIds) {
         if (!Array.isArray(classIds) || classIds.length < 2) return [];
@@ -716,11 +709,10 @@ class DataService {
         // Only produce entries if there are 2+ distinct categories
         if (categoryMap.size < 2) return [];
 
-        const escape = window.R3EUtils?.escapeHtml || (v => String(v ?? ''));
         const options = [];
 
         categoryMap.forEach((classes, superclass) => {
-            // Collect unique logos — same pattern as getSuperclassOptions()
+            // Collect unique logo URLs — same pattern as getSuperclassOptions()
             const seenUrls = new Set();
             const logos = [];
             classes.forEach(({ className, classId }) => {
@@ -731,15 +723,10 @@ class DataService {
                 }
             });
 
-            const logosHtml = logos.map(url =>
-                `<img class="custom-select__option-logo" src="${escape(url)}" alt="" aria-hidden="true" loading="lazy" decoding="async">`
-            ).join('');
-            const labelHtml = (logosHtml ? `<span class="custom-select__logos-group">${logosHtml}</span>` : '') + escape(superclass);
-
             options.push({
                 value: `CATEGORY:${superclass}`,
                 label: `Category: ${superclass}`,
-                labelHtml,
+                logos,
                 classNames: classes
             });
         });

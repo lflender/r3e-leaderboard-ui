@@ -216,9 +216,9 @@ describe('DataService core behavior', () => {
             { value: 'TCR', label: 'TCR', logoUrl: '' }
         ]);
         expect(service.getSuperclassOptions()).toEqual([
-            { value: 'superclass:GT3', label: 'Category: GT3', labelHtml: 'GT3', classes: ['GT3'] },
-            { value: 'superclass:Safety', label: 'Category: Safety', labelHtml: 'Safety', classes: ['Safety Car'] },
-            { value: 'superclass:Touring', label: 'Category: Touring', labelHtml: 'Touring', classes: ['TCR'] }
+            { value: 'superclass:GT3', label: 'Category: GT3', logos: [], classes: ['GT3'] },
+            { value: 'superclass:Safety', label: 'Category: Safety', logos: [], classes: ['Safety Car'] },
+            { value: 'superclass:Touring', label: 'Category: Touring', logos: [], classes: ['TCR'] }
         ]);
     });
 });

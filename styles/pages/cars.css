@@ -875,3 +875,11 @@
     vertical-align: middle;
     padding-left: 0.45rem;
 }
+
+.th-sub-label {
+    display: block;
+    font-size: 0.72em;
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: 0;
+}

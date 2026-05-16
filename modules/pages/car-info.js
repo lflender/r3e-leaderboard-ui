@@ -479,7 +479,7 @@
     const yearColor = createYearColorFn();
 
     let html = '<table class="results-table"><thead><tr>' +
-      '<th>Car</th><th>Rating</th><th>Wheel</th><th>Transmission</th><th>Drive</th><th>Assists</th><th>Year</th><th>Power</th><th>Weight<br><span style="display:block;font-size:0.72em;font-weight:500;line-height:1.05;letter-spacing:0;">*with driver</span></th><th>Engine</th>' +
+      '<th>Car</th><th>Rating</th><th>Wheel</th><th>Transmission</th><th>Drive</th><th>Assists</th><th>Year</th><th>Power</th><th>Weight<br><span class="th-sub-label">*with driver</span></th><th>Engine</th>' +
       '</tr></thead><tbody>';
 
     const isSuperclassFilter = classFilter && classFilter.startsWith('superclass:');

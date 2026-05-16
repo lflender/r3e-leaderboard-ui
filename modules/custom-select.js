@@ -43,6 +43,24 @@ class CustomSelect {
     }
     
     /**
+     * Builds logo HTML from a logos array or single logoUrl.
+     * @param {Object} opt - Option object with optional logos[] or logoUrl
+     * @returns {string} HTML string for logos
+     */
+    static buildLogosHtml(opt) {
+        if (opt.logos && opt.logos.length > 0) {
+            const imgs = opt.logos.map(url =>
+                `<img class="custom-select__option-logo" src="${R3EUtils.escapeHtml(url)}" alt="" aria-hidden="true" loading="lazy" decoding="async">`
+            ).join('');
+            return `<span class="custom-select__logos-group">${imgs}</span>`;
+        }
+        if (opt.logoUrl) {
+            return `<img class="custom-select__option-logo" src="${R3EUtils.escapeHtml(opt.logoUrl)}" alt="" aria-hidden="true" loading="lazy" decoding="async">`;
+        }
+        return '';
+    }
+
+    /**
      * Builds the dropdown menu from options
      */
     buildMenu() {
@@ -67,10 +85,7 @@ class CustomSelect {
                 }
             }
 
-            // Optional car class logo prepended to the option label.
-            const logoHtml = opt.logoUrl
-                ? `<img class="custom-select__option-logo" src="${R3EUtils.escapeHtml(opt.logoUrl)}" alt="" aria-hidden="true" loading="lazy" decoding="async">`
-                : '';
+            const logoHtml = CustomSelect.buildLogosHtml(opt);
             
             return `<div class="custom-select__option" data-value="${escapedValue}">${logoHtml}${formattedLabel}</div>`;
         }).join('');
@@ -184,10 +199,8 @@ class CustomSelect {
                 }
             }
 
-            // Mirror the logo into the toggle button so the selected class is visible when closed.
-            const logoHtml = opt.logoUrl
-                ? `<img class="custom-select__option-logo" src="${R3EUtils.escapeHtml(opt.logoUrl)}" alt="" aria-hidden="true" loading="lazy" decoding="async">`
-                : '';
+            // Mirror the logo(s) into the toggle button so the selected class is visible when closed.
+            const logoHtml = CustomSelect.buildLogosHtml(opt);
             
             this.toggle.innerHTML = `${logoHtml}${formattedLabel} ▾`;
         }

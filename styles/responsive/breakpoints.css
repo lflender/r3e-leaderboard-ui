@@ -172,9 +172,7 @@
     }
 
     #cars-info-table .cars-class-heading-wrap {
-        left: 0.22rem;
-        top: 0;
-        transform: translateY(-50%);
+        gap: 0.4rem;
     }
 
     .status-grid {
@@ -614,20 +612,16 @@
     }
 
     #cars-info-table .cars-class-section:first-child {
-        margin-top: 1.05rem;
+        margin-top: 0.75rem;
     }
 
     #cars-info-table .cars-class-heading-wrap {
         flex-wrap: nowrap;
-        gap: 0.4rem;
-        left: 0.2rem;
-        top: 0;
-        transform: translateY(-50%);
+        gap: 0.35rem;
     }
 
     .cars-class-heading {
         font-size: 0.94rem;
-        padding: 0.3rem 0.75rem;
     }
 
     .cars-class-heading .table-car-class-logo {
@@ -636,21 +630,8 @@
     }
 
     .cars-class-superclass-chip {
-        margin-left: -0.9rem;
-        margin-bottom: 0;
-        align-self: center;
-        transform: translateY(0.03rem);
-        padding: 0.2rem 0.62rem 0.2rem 0.9rem;
+        padding: 0.18rem 0.5rem;
         font-size: 0.68rem;
-        border-left-color: transparent;
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 0;
-    }
-
-    .cars-class-superclass-chip::before {
-        display: block;
-        left: -0.86rem;
-        width: 0.9rem;
     }
 
     .detail-content {

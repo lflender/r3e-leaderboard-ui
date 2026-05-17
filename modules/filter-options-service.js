@@ -92,7 +92,7 @@
 
             options.push({
                 value: `superclass:${superclass}`,
-                label: `Category: ${superclass}`,
+                label: superclass,
                 logos,
                 classes: Array.from(classes)
             });
@@ -151,7 +151,7 @@
 
             options.push({
                 value: `CATEGORY:${superclass}`,
-                label: `Category: ${superclass}`,
+                label: superclass,
                 logos,
                 classNames: classes
             });

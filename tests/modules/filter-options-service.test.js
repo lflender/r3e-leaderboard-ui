@@ -133,7 +133,7 @@ describe('FilterOptionsService', () => {
 
             const gt = result.find(o => o.value === 'superclass:GT');
             expect(gt.classes).toEqual(['GT3', 'GT4']);
-            expect(gt.label).toBe('Category: GT');
+            expect(gt.label).toBe('GT');
 
             const touring = result.find(o => o.value === 'superclass:Touring');
             expect(touring.classes).toEqual(['TCR']);
@@ -181,8 +181,8 @@ describe('FilterOptionsService', () => {
             ];
 
             const result = window.FilterOptionsService.getSuperclassOptions();
-            expect(result[0].label).toBe('Category: GT');
-            expect(result[1].label).toBe('Category: Touring');
+            expect(result[0].label).toBe('GT');
+            expect(result[1].label).toBe('Touring');
         });
     });
 
@@ -216,7 +216,7 @@ describe('FilterOptionsService', () => {
             expect(result).toHaveLength(2);
 
             const gt = result.find(o => o.value === 'CATEGORY:GT');
-            expect(gt.label).toBe('Category: GT');
+            expect(gt.label).toBe('GT');
             expect(gt.classNames).toEqual([{ classId: '5', className: 'GT3' }]);
 
             const touring = result.find(o => o.value === 'CATEGORY:Touring');

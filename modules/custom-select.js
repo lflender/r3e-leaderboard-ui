@@ -142,8 +142,28 @@ class CustomSelect {
             }
         });
         this.menu.hidden = false;
+        this.menu.style.left = '';
+        this.menu.style.right = '';
         this.toggle.setAttribute('aria-expanded', 'true');
         this.root.classList.add('is-open');
+        // Keep menu inside viewport: shift left first, then clamp width
+        this.menu.style.maxWidth = '';
+        requestAnimationFrame(() => {
+            const vw = window.innerWidth;
+            const pad = 8;
+            const rect = this.menu.getBoundingClientRect();
+            // 1. Shift left so the right edge fits in the viewport
+            if (rect.right > vw - pad) {
+                this.menu.style.left = -(rect.right - vw + pad) + 'px';
+            }
+            // 2. If that pushed past the left edge, pin to left edge
+            const afterRect = this.menu.getBoundingClientRect();
+            if (afterRect.left < pad) {
+                this.menu.style.left = -(this.root.getBoundingClientRect().left - pad) + 'px';
+                // 3. Clamp width to remaining viewport space
+                this.menu.style.maxWidth = (vw - pad * 2) + 'px';
+            }
+        });
         // Reset search and focus input
         if (this.searchInput) {
             this.searchInput.value = '';
@@ -160,6 +180,9 @@ class CustomSelect {
      */
     close() {
         this.menu.hidden = true;
+        this.menu.style.left = '';
+        this.menu.style.right = '';
+        this.menu.style.maxWidth = '';
         this.toggle.setAttribute('aria-expanded', 'false');
         this.root.classList.remove('is-open');
         // Reset search state

@@ -181,3 +181,115 @@ describe('DriverProfileData.getRaceRoomProfileUrl', () => {
         expect(window.DriverProfileData.getRaceRoomProfileUrl(null)).toBe('');
     });
 });
+
+describe('DriverProfileData.computeClassBreakdown', () => {
+    it('exposes pole and podium threshold constants', () => {
+        expect(window.DriverProfileData.MIN_ENTRIES_FOR_POLE).toBe(2);
+        expect(window.DriverProfileData.MIN_ENTRIES_FOR_PODIUM).toBe(4);
+    });
+
+    it('computes bested per class as sum of (total_entries - position)', () => {
+        const entries = [
+            { car_class: 'GTR 4', position: 10, total_entries: 100 },
+            { car_class: 'GTR 4', position: 5, total_entries: 50 },
+            { car_class: 'GTE', position: 20, total_entries: 200 }
+        ];
+        const result = window.DriverProfileData.computeClassBreakdown(entries);
+        // GTR 4: (100-10) + (50-5) = 90+45 = 135
+        // GTE: 200-20 = 180
+        expect(result.bested).toEqual([
+            { className: 'GTE', value: 180 },
+            { className: 'GTR 4', value: 135 }
+        ]);
+    });
+
+    it('counts pole positions only when total_entries >= MIN_ENTRIES_FOR_POLE', () => {
+        const entries = [
+            { car_class: 'GTR 4', position: 1, total_entries: 100 }, // counts (100 >= 2)
+            { car_class: 'GTR 4', position: 1, total_entries: 2 },   // counts (2 >= 2)
+            { car_class: 'GTR 4', position: 1, total_entries: 1 },   // does NOT count (1 < 2)
+            { car_class: 'GTE', position: 1, total_entries: 200 }    // counts
+        ];
+        const result = window.DriverProfileData.computeClassBreakdown(entries);
+        expect(result.pole).toEqual([
+            { className: 'GTR 4', value: 2 },
+            { className: 'GTE', value: 1 }
+        ]);
+    });
+
+    it('counts podiums only when total_entries >= MIN_ENTRIES_FOR_PODIUM', () => {
+        const entries = [
+            { car_class: 'GTR 4', position: 1, total_entries: 100 }, // counts (100 >= 4)
+            { car_class: 'GTR 4', position: 3, total_entries: 4 },   // counts (4 >= 4)
+            { car_class: 'GTR 4', position: 2, total_entries: 3 },   // does NOT count (3 < 4)
+            { car_class: 'GTR 4', position: 4, total_entries: 80 }   // not a podium
+        ];
+        const result = window.DriverProfileData.computeClassBreakdown(entries);
+        expect(result.podium).toEqual([{ className: 'GTR 4', value: 2 }]);
+    });
+
+    it('computes avg_bested with entryCount', () => {
+        const entries = [
+            { car_class: 'GTR 4', position: 1, total_entries: 101 }, // 100/100 = 100%
+            { car_class: 'GTR 4', position: 51, total_entries: 101 } // 50/100 = 50%
+        ];
+        const result = window.DriverProfileData.computeClassBreakdown(entries);
+        expect(result.avg_bested[0].className).toBe('GTR 4');
+        expect(result.avg_bested[0].value).toBeCloseTo(75, 1);
+        expect(result.avg_bested[0].entryCount).toBe(2);
+    });
+
+    it('returns empty arrays for no entries', () => {
+        const result = window.DriverProfileData.computeClassBreakdown([]);
+        expect(result.bested).toEqual([]);
+        expect(result.pole).toEqual([]);
+        expect(result.podium).toEqual([]);
+        expect(result.avg_bested).toEqual([]);
+    });
+
+    it('excludes entries with missing car_class', () => {
+        const entries = [
+            { car_class: '', position: 1, total_entries: 100 },
+            { position: 1, total_entries: 100 }
+        ];
+        const result = window.DriverProfileData.computeClassBreakdown(entries);
+        expect(result.pole).toEqual([]);
+    });
+
+    it('excludes zero-bested classes from bested results', () => {
+        const entries = [
+            { car_class: 'GTR 4', position: 50, total_entries: 50 } // bested = 0
+        ];
+        const result = window.DriverProfileData.computeClassBreakdown(entries);
+        expect(result.bested).toEqual([]);
+    });
+
+    it('sorts results descending by value', () => {
+        const entries = [
+            { car_class: 'A', position: 10, total_entries: 20 },  // bested=10
+            { car_class: 'B', position: 5, total_entries: 100 },  // bested=95
+            { car_class: 'C', position: 2, total_entries: 60 }    // bested=58
+        ];
+        const result = window.DriverProfileData.computeClassBreakdown(entries);
+        expect(result.bested.map(r => r.className)).toEqual(['B', 'C', 'A']);
+    });
+});
+
+describe('DriverProfileData.getCarToClassMap', () => {
+    it('maps each car to its most frequent class', () => {
+        const entries = [
+            { Car: 'BMW M4', car_class: 'GT3' },
+            { Car: 'BMW M4', car_class: 'GT3' },
+            { Car: 'BMW M4', car_class: 'DTM' },
+            { Car: 'Hyundai', car_class: 'TCR' }
+        ];
+        const map = window.DriverProfileData.getCarToClassMap(entries);
+        expect(map.get('BMW M4')).toBe('GT3');
+        expect(map.get('Hyundai')).toBe('TCR');
+    });
+
+    it('returns empty map for empty entries', () => {
+        const map = window.DriverProfileData.getCarToClassMap([]);
+        expect(map.size).toBe(0);
+    });
+});

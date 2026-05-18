@@ -6,6 +6,11 @@
 (function () {
     'use strict';
 
+    /** Minimum total_entries required for a pole position to count */
+    const MIN_ENTRIES_FOR_POLE = 2;
+    /** Minimum total_entries required for a podium to count */
+    const MIN_ENTRIES_FOR_PODIUM = 4;
+
     /**
      * Count occurrences of a field across entries
      * @param {Array} entries - Driver leaderboard entries
@@ -116,12 +121,91 @@
         return `https://game.raceroom.com/users/${encodeURIComponent(pathId)}`;
     }
 
+    /**
+     * Compute per-class stat breakdowns directly from entries.
+     * Each entry has position and total_entries, so:
+     *   bested = total_entries - position
+     *   pole = position === 1 (requires total_entries >= MIN_ENTRIES_FOR_POLE)
+     *   podium = position <= 3 (requires total_entries >= MIN_ENTRIES_FOR_PODIUM)
+     *   avg_bested = mean of (bested / (total_entries - 1) * 100)
+     * @param {Array} entries - Driver leaderboard entries
+     * @returns {Object} { bested: [{className, value}], pole: [...], podium: [...], avg_bested: [{className, value, entryCount}] }
+     */
+    function computeClassBreakdown(entries) {
+        const classMap = new Map(); // className → { bested, pole, podium, bestedPcts[], entryCount }
+
+        (entries || []).forEach(entry => {
+            const cls = entry.car_class || entry.CarClass || entry.Class || '';
+            if (!cls) return;
+            const position = Number(entry.position) || 0;
+            const total = Number(entry.total_entries) || 0;
+            if (position <= 0 || total <= 0) return;
+
+            if (!classMap.has(cls)) classMap.set(cls, { bested: 0, pole: 0, podium: 0, bestedPcts: [], entryCount: 0 });
+            const stats = classMap.get(cls);
+
+            stats.entryCount++;
+            const bested = total - position;
+            stats.bested += bested;
+            if (position === 1 && total >= MIN_ENTRIES_FOR_POLE) stats.pole++;
+            if (position <= 3 && total >= MIN_ENTRIES_FOR_PODIUM) stats.podium++;
+            if (total > 1) stats.bestedPcts.push((bested / (total - 1)) * 100);
+        });
+
+        const result = { avg_bested: [], bested: [], pole: [], podium: [] };
+
+        classMap.forEach((stats, className) => {
+            if (stats.bested > 0) result.bested.push({ className, value: stats.bested });
+            if (stats.pole > 0) result.pole.push({ className, value: stats.pole });
+            if (stats.podium > 0) result.podium.push({ className, value: stats.podium });
+            if (stats.bestedPcts.length > 0) {
+                const avg = stats.bestedPcts.reduce((a, b) => a + b, 0) / stats.bestedPcts.length;
+                result.avg_bested.push({ className, value: Math.round(avg * 100) / 100, entryCount: stats.entryCount });
+            }
+        });
+
+        // Sort each metric descending
+        for (const key of Object.keys(result)) {
+            result[key].sort((a, b) => b.value - a.value);
+        }
+        return result;
+    }
+
+    /**
+     * Build a mapping of car name → car class from entries.
+     * A car may appear in multiple classes; uses the most frequent one.
+     * @param {Array} entries - Driver leaderboard entries
+     * @returns {Map<string, string>} car name → class name
+     */
+    function getCarToClassMap(entries) {
+        const carClassCounts = new Map(); // car → Map<class, count>
+        (entries || []).forEach(entry => {
+            const car = (entry.Car || entry.car || entry.CarName || entry.car_name || entry.vehicle || '').trim();
+            const cls = (entry.car_class || entry.CarClass || entry.Class || '').trim();
+            if (!car || !cls) return;
+            if (!carClassCounts.has(car)) carClassCounts.set(car, new Map());
+            const clsMap = carClassCounts.get(car);
+            clsMap.set(cls, (clsMap.get(cls) || 0) + 1);
+        });
+        const result = new Map();
+        carClassCounts.forEach((clsMap, car) => {
+            let best = '', bestCount = 0;
+            clsMap.forEach((count, cls) => { if (count > bestCount) { best = cls; bestCount = count; } });
+            if (best) result.set(car, best);
+        });
+        return result;
+    }
+
     window.DriverProfileData = {
+        MIN_ENTRIES_FOR_POLE,
+        MIN_ENTRIES_FOR_PODIUM,
         countByField,
         getCarClassDistribution,
         getCarDistribution,
         getTrackDistribution,
+        getCarToClassMap,
         buildProfileData,
+        computeClassBreakdown,
         getRaceRoomProfileUrl
     };
 })();

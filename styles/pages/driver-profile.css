@@ -145,6 +145,7 @@
     box-shadow: 0 2px 8px var(--shadow);
     text-align: center;
     transition: opacity 0.3s;
+    min-width: 0;
 }
 
 .driver-stat-card.driver-stat-loading {
@@ -190,6 +191,25 @@
 .driver-stat-position {
     font-size: 0.82rem;
     color: var(--text-secondary);
+}
+
+/* --- Stat Card Class Breakdown --- */
+
+.driver-stat-breakdown {
+    margin-top: 0.5rem;
+    text-align: left;
+}
+
+.driver-stat-breakdown .stat-breakdown-list {
+    max-height: 150px;
+    border-top: 1px solid var(--border);
+    padding-top: 0.35rem;
+}
+
+.driver-stat-breakdown .pie-legend-item {
+    padding: 0.15rem 0;
+    font-size: 0.75rem;
+    cursor: pointer;
 }
 
 /* --- Highlights (Most Used Car & Track) --- */
@@ -420,6 +440,19 @@
 
 .pie-legend-item-active {
     color: var(--text-primary);
+}
+
+.pie-legend-item-dimmed {
+    opacity: 0.3;
+}
+
+.pie-slice-active {
+    opacity: 1;
+    filter: brightness(1.2);
+}
+
+.pie-slice-dimmed {
+    opacity: 0.25;
 }
 
 .pie-legend-color {

@@ -70,9 +70,9 @@ beforeAll(() => {
             avatar: 'https://example.com/avatar.png',
             pathId: 'test-driver-123',
             entries: [
-                { car_class: 'GT3', Car: 'BMW M4', track_id: 100 },
-                { car_class: 'GT3', Car: 'BMW M4', track_id: 200 },
-                { car_class: 'TCR', Car: 'Hyundai', track_id: 100 }
+                { car_class: 'GT3', Car: 'BMW M4', track_id: 100, position: 1, total_entries: 100 },
+                { car_class: 'GT3', Car: 'BMW M4', track_id: 200, position: 5, total_entries: 50 },
+                { car_class: 'TCR', Car: 'Hyundai', track_id: 100, position: 2, total_entries: 80 }
             ]
         }])
     };
@@ -83,10 +83,93 @@ beforeAll(() => {
     window.loadMpPosInactiveCache = vi.fn().mockResolvedValue({});
     window.DriverProfileData = {
         buildProfileData: vi.fn().mockReturnValue(mockProfileData),
-        getRaceRoomProfileUrl: vi.fn((pathId) => pathId ? `https://game.raceroom.com/users/${pathId}` : '')
+        getRaceRoomProfileUrl: vi.fn((pathId) => pathId ? `https://game.raceroom.com/users/${pathId}` : ''),
+        MIN_ENTRIES_FOR_POLE: 2,
+        MIN_ENTRIES_FOR_PODIUM: 4,
+        getCarToClassMap: vi.fn((entries) => {
+            const carClassCounts = new Map();
+            (entries || []).forEach(e => {
+                const car = e.Car || e.car || '';
+                const cls = e.car_class || '';
+                if (!car || !cls) return;
+                if (!carClassCounts.has(car)) carClassCounts.set(car, new Map());
+                const counts = carClassCounts.get(car);
+                counts.set(cls, (counts.get(cls) || 0) + 1);
+            });
+            const result = new Map();
+            carClassCounts.forEach((counts, car) => {
+                let best = '', max = 0;
+                counts.forEach((c, cls) => { if (c > max) { max = c; best = cls; } });
+                result.set(car, best);
+            });
+            return result;
+        }),
+        computeClassBreakdown: vi.fn((entries) => {
+            const MIN_POLE = 2, MIN_PODIUM = 4;
+            const classMap = new Map();
+            (entries || []).forEach(entry => {
+                const cls = entry.car_class || '';
+                if (!cls) return;
+                const position = Number(entry.position) || 0;
+                const total = Number(entry.total_entries) || 0;
+                if (position <= 0 || total <= 0) return;
+                if (!classMap.has(cls)) classMap.set(cls, { bested: 0, pole: 0, podium: 0, bestedPcts: [], count: 0 });
+                const stats = classMap.get(cls);
+                const bested = total - position;
+                stats.bested += bested;
+                stats.count++;
+                if (position === 1 && total >= MIN_POLE) stats.pole++;
+                if (position <= 3 && total >= MIN_PODIUM) stats.podium++;
+                if (total > 1) stats.bestedPcts.push((bested / (total - 1)) * 100);
+            });
+            const result = { avg_bested: [], bested: [], pole: [], podium: [] };
+            classMap.forEach((stats, className) => {
+                if (stats.bested > 0) result.bested.push({ className, value: stats.bested });
+                if (stats.pole > 0) result.pole.push({ className, value: stats.pole });
+                if (stats.podium > 0) result.podium.push({ className, value: stats.podium });
+                if (stats.bestedPcts.length > 0) {
+                    const avg = stats.bestedPcts.reduce((a, b) => a + b, 0) / stats.bestedPcts.length;
+                    result.avg_bested.push({ className, value: Math.round(avg * 100) / 100, entryCount: stats.count });
+                }
+            });
+            for (const key of Object.keys(result)) result[key].sort((a, b) => b.value - a.value);
+            return result;
+        })
     };
     window.PieChart = {
-        render: vi.fn()
+        render: vi.fn((container, data, options) => {
+            // Render a minimal DOM structure matching real PieChart output
+            // so cross-interaction wiring can find legend items and slices
+            if (!container || !Array.isArray(data) || data.length === 0) return;
+            const slices = window.PieChart.computeSlices(data);
+            const legendHtml = slices.map((s, i) =>
+                '<li class="pie-legend-item" data-index="' + i + '">' +
+                '<span class="pie-legend-color" style="background:' + s.color + '"></span>' +
+                '<span class="pie-legend-label">' + s.label + '</span>' +
+                '<span class="pie-legend-value">' + s.value + '</span></li>'
+            ).join('');
+            const sliceHtml = slices.map((s, i) =>
+                '<circle class="pie-slice" data-index="' + i + '" data-label="' + s.label + '"></circle>'
+            ).join('');
+            container.innerHTML =
+                '<div class="pie-chart-wrapper"><div class="pie-chart-body">' +
+                '<div class="pie-chart-svg-container"><svg>' + sliceHtml + '</svg></div>' +
+                '<ul class="pie-legend">' + legendHtml + '</ul>' +
+                '</div></div>';
+        }),
+        COLORS: ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'],
+        computeSlices: vi.fn((data) => {
+            if (!Array.isArray(data) || data.length === 0) return [];
+            const total = data.reduce((s, d) => s + d.value, 0);
+            const colors = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'];
+            return data.slice().sort((a, b) => b.value - a.value).map((d, i) => ({
+                label: d.label,
+                value: d.value,
+                percentage: (d.value / total) * 100,
+                color: colors[i % colors.length],
+                midAngle: 0
+            }));
+        })
     };
     window.DriverStatsService = {
         PROFILE_METRICS: [
@@ -135,9 +218,9 @@ beforeEach(() => {
         avatar: 'https://example.com/avatar.png',
         pathId: 'test-driver-123',
         entries: [
-            { car_class: 'GT3', Car: 'BMW M4', track_id: 100 },
-            { car_class: 'GT3', Car: 'BMW M4', track_id: 200 },
-            { car_class: 'TCR', Car: 'Hyundai', track_id: 100 }
+            { car_class: 'GT3', Car: 'BMW M4', track_id: 100, position: 1, total_entries: 100 },
+            { car_class: 'GT3', Car: 'BMW M4', track_id: 200, position: 5, total_entries: 50 },
+            { car_class: 'TCR', Car: 'Hyundai', track_id: 100, position: 2, total_entries: 80 }
         ]
     }]);
     window.DriverProfileData.buildProfileData.mockReturnValue(mockProfileData);
@@ -530,5 +613,288 @@ describe('DriverProfile', () => {
 
         expect(window.dataService.searchDriver).toHaveBeenCalledWith('"99999"', {});
         expect(window.DriverProfileData.buildProfileData).toHaveBeenCalled();
+    });
+
+    it('stat cards include a breakdown container', async () => {
+        const dp = new window.DriverProfile();
+        await dp.init();
+        const breakdowns = document.querySelectorAll('.driver-stat-breakdown');
+        expect(breakdowns.length).toBe(4);
+    });
+
+    it('calls computeClassBreakdown with driver entries', async () => {
+        const dp = new window.DriverProfile();
+        await dp.init();
+        await vi.waitFor(() => {
+            expect(window.DriverProfileData.computeClassBreakdown).toHaveBeenCalledWith([
+                { car_class: 'GT3', Car: 'BMW M4', track_id: 100, position: 1, total_entries: 100 },
+                { car_class: 'GT3', Car: 'BMW M4', track_id: 200, position: 5, total_entries: 50 },
+                { car_class: 'TCR', Car: 'Hyundai', track_id: 100, position: 2, total_entries: 80 }
+            ]);
+        });
+    });
+
+    it('renders class breakdown lists inside stat cards', async () => {
+        const dp = new window.DriverProfile();
+        await dp.init();
+        await vi.waitFor(() => {
+            expect(window.DriverProfileData.computeClassBreakdown).toHaveBeenCalled();
+        });
+        await new Promise(r => setTimeout(r, 50));
+
+        // GT3 bested=144, TCR bested=78
+        const bestedCard = document.getElementById('stat-bested');
+        const list = bestedCard.querySelector('.stat-breakdown-list');
+        expect(list).toBeTruthy();
+        const items = list.querySelectorAll('.pie-legend-item');
+        expect(items.length).toBe(2);
+        expect(items[0].textContent).toContain('GT3');
+        expect(items[1].textContent).toContain('TCR');
+    });
+
+    it('renders color dots matching pie chart class colors', async () => {
+        const dp = new window.DriverProfile();
+        await dp.init();
+        await vi.waitFor(() => {
+            expect(window.DriverProfileData.computeClassBreakdown).toHaveBeenCalled();
+        });
+        await new Promise(r => setTimeout(r, 50));
+
+        const bestedCard = document.getElementById('stat-bested');
+        const colorDots = bestedCard.querySelectorAll('.pie-legend-color');
+        expect(colorDots.length).toBe(2);
+        colorDots.forEach(dot => {
+            expect(dot.style.background).toBeTruthy();
+        });
+    });
+
+    it('adds hover interaction to breakdown items', async () => {
+        const dp = new window.DriverProfile();
+        await dp.init();
+        await vi.waitFor(() => {
+            expect(window.DriverProfileData.computeClassBreakdown).toHaveBeenCalled();
+        });
+        await new Promise(r => setTimeout(r, 50));
+
+        const bestedCard = document.getElementById('stat-bested');
+        const items = bestedCard.querySelectorAll('.pie-legend-item');
+        items[0].dispatchEvent(new Event('mouseenter'));
+        expect(items[0].classList.contains('pie-legend-item-active')).toBe(true);
+        items[0].dispatchEvent(new Event('mouseleave'));
+        expect(items[0].classList.contains('pie-legend-item-active')).toBe(false);
+    });
+
+    it('cross-highlights pie chart when hovering breakdown item', async () => {
+        const dp = new window.DriverProfile();
+        await dp.init();
+        await vi.waitFor(() => {
+            expect(window.DriverProfileData.computeClassBreakdown).toHaveBeenCalled();
+        });
+        await new Promise(r => setTimeout(r, 50));
+
+        // The car class chart has GT3 legend item (first slice)
+        const chartContainer = document.getElementById('chart-car-class');
+        const chartLegendGT3 = chartContainer.querySelector('.pie-legend-item[data-index="0"]');
+        expect(chartLegendGT3).toBeTruthy();
+
+        // Hover the breakdown item for GT3
+        const bestedCard = document.getElementById('stat-bested');
+        const bdItem = bestedCard.querySelector('.pie-legend-item[data-class-label="GT3"]');
+        expect(bdItem).toBeTruthy();
+
+        const spy = vi.spyOn(chartLegendGT3, 'dispatchEvent');
+        bdItem.dispatchEvent(new Event('mouseenter'));
+        expect(spy).toHaveBeenCalled();
+        expect(bdItem.classList.contains('pie-legend-item-active')).toBe(true);
+
+        bdItem.dispatchEvent(new Event('mouseleave'));
+        expect(bdItem.classList.contains('pie-legend-item-active')).toBe(false);
+        spy.mockRestore();
+    });
+
+    it('cross-highlights breakdown items when hovering pie chart', async () => {
+        const dp = new window.DriverProfile();
+        await dp.init();
+        await vi.waitFor(() => {
+            expect(window.DriverProfileData.computeClassBreakdown).toHaveBeenCalled();
+        });
+        await new Promise(r => setTimeout(r, 50));
+
+        const chartContainer = document.getElementById('chart-car-class');
+        const chartLegendGT3 = chartContainer.querySelector('.pie-legend-item[data-index="0"]');
+
+        chartLegendGT3.dispatchEvent(new Event('mouseenter'));
+
+        const bdItems = document.querySelectorAll('.driver-stat-breakdown .pie-legend-item[data-class-label="GT3"]');
+        bdItems.forEach(bd => {
+            expect(bd.classList.contains('pie-legend-item-active')).toBe(true);
+        });
+
+        chartLegendGT3.dispatchEvent(new Event('mouseleave'));
+        bdItems.forEach(bd => {
+            expect(bd.classList.contains('pie-legend-item-active')).toBe(false);
+        });
+    });
+
+    it('does not render breakdown for metrics with empty results', async () => {
+        const dp = new window.DriverProfile();
+        await dp.init();
+        await vi.waitFor(() => {
+            expect(window.DriverProfileData.computeClassBreakdown).toHaveBeenCalled();
+        });
+        await new Promise(r => setTimeout(r, 50));
+
+        // avg_bested should have items (both classes have entries with total > 1)
+        // but podium: only GT3 has position=1 (podium) and TCR has position=2 (podium)
+        // Actually both have podiums, so check a metric where a class might be missing
+        // pole: only GT3 has position=1 entries
+        const poleCard = document.getElementById('stat-pole');
+        const items = poleCard.querySelectorAll('.pie-legend-item');
+        expect(items.length).toBe(1);
+        expect(items[0].textContent).toContain('GT3');
+    });
+
+    it('still computes breakdown even with empty class distribution', async () => {
+        window.DriverProfileData.buildProfileData.mockReturnValue({
+            ...mockProfileData,
+            carClassDistribution: []
+        });
+        const dp = new window.DriverProfile();
+        await dp.init();
+        await vi.waitFor(() => {
+            expect(window.DriverProfileData.computeClassBreakdown).toHaveBeenCalled();
+        });
+    });
+
+    it('cross-highlights car chart items when hovering class chart legend', async () => {
+        const dp = new window.DriverProfile();
+        await dp.init();
+        await vi.waitFor(() => {
+            expect(window.DriverProfileData.computeClassBreakdown).toHaveBeenCalled();
+        });
+        await new Promise(r => setTimeout(r, 50));
+
+        const classChart = document.getElementById('chart-car-class');
+        const carChart = document.getElementById('chart-car');
+
+        // Car chart legend items should be annotated with data-class-label
+        const carItems = carChart.querySelectorAll('.pie-legend-item[data-class-label]');
+        expect(carItems.length).toBeGreaterThan(0);
+
+        // BMW M4 → GT3, Hyundai → TCR
+        const bmwItem = Array.from(carItems).find(el => el.textContent.includes('BMW M4'));
+        expect(bmwItem.getAttribute('data-class-label')).toBe('GT3');
+
+        // Hover GT3 in class chart → BMW M4 active, Hyundai dimmed
+        const classGT3 = classChart.querySelector('.pie-legend-item[data-index="0"]');
+        classGT3.dispatchEvent(new Event('mouseenter'));
+
+        expect(bmwItem.classList.contains('pie-legend-item-active')).toBe(true);
+        const hyundaiItem = Array.from(carItems).find(el => el.textContent.includes('Hyundai'));
+        expect(hyundaiItem.classList.contains('pie-legend-item-dimmed')).toBe(true);
+
+        classGT3.dispatchEvent(new Event('mouseleave'));
+        expect(bmwItem.classList.contains('pie-legend-item-active')).toBe(false);
+        expect(hyundaiItem.classList.contains('pie-legend-item-dimmed')).toBe(false);
+    });
+
+    it('cross-highlights class chart when hovering car chart legend', async () => {
+        const dp = new window.DriverProfile();
+        await dp.init();
+        await vi.waitFor(() => {
+            expect(window.DriverProfileData.computeClassBreakdown).toHaveBeenCalled();
+        });
+        await new Promise(r => setTimeout(r, 50));
+
+        const classChart = document.getElementById('chart-car-class');
+        const carChart = document.getElementById('chart-car');
+
+        const carItems = carChart.querySelectorAll('.pie-legend-item[data-class-label]');
+        const bmwItem = Array.from(carItems).find(el => el.textContent.includes('BMW M4'));
+
+        // Hover BMW M4 in car chart → GT3 class active, TCR dimmed
+        bmwItem.dispatchEvent(new Event('mouseenter'));
+
+        const classLegendItems = classChart.querySelectorAll('.pie-legend-item');
+        const gt3Class = Array.from(classLegendItems).find(el => el.textContent.includes('GT3'));
+        const tcrClass = Array.from(classLegendItems).find(el => el.textContent.includes('TCR'));
+
+        expect(gt3Class.classList.contains('pie-legend-item-active')).toBe(true);
+        expect(tcrClass.classList.contains('pie-legend-item-dimmed')).toBe(true);
+
+        bmwItem.dispatchEvent(new Event('mouseleave'));
+        expect(gt3Class.classList.contains('pie-legend-item-active')).toBe(false);
+        expect(tcrClass.classList.contains('pie-legend-item-dimmed')).toBe(false);
+    });
+
+    it('shows entry count after avg_bested value in breakdown', async () => {
+        const dp = new window.DriverProfile();
+        await dp.init();
+        await vi.waitFor(() => {
+            expect(window.DriverProfileData.computeClassBreakdown).toHaveBeenCalled();
+        });
+        await new Promise(r => setTimeout(r, 50));
+
+        const avgCard = document.getElementById('stat-avg_bested');
+        const items = avgCard.querySelectorAll('.pie-legend-item');
+        // Should contain entry count in parentheses
+        const gt3Item = Array.from(items).find(el => el.textContent.includes('GT3'));
+        expect(gt3Item.textContent).toMatch(/\(\d+\)/);
+    });
+
+    it('cross-highlights car chart when hovering class chart pie slice', async () => {
+        const dp = new window.DriverProfile();
+        await dp.init();
+        await vi.waitFor(() => {
+            expect(window.DriverProfileData.computeClassBreakdown).toHaveBeenCalled();
+        });
+        await new Promise(r => setTimeout(r, 50));
+
+        const classChart = document.getElementById('chart-car-class');
+        const carChart = document.getElementById('chart-car');
+        const carItems = carChart.querySelectorAll('.pie-legend-item[data-class-label]');
+        const bmwItem = Array.from(carItems).find(el => el.textContent.includes('BMW M4'));
+        const hyundaiItem = Array.from(carItems).find(el => el.textContent.includes('Hyundai'));
+
+        // Hover the GT3 pie slice directly
+        const gt3Slice = classChart.querySelector('.pie-slice[data-label="GT3"]');
+        expect(gt3Slice).toBeTruthy();
+        gt3Slice.dispatchEvent(new Event('mouseenter'));
+
+        expect(bmwItem.classList.contains('pie-legend-item-active')).toBe(true);
+        expect(hyundaiItem.classList.contains('pie-legend-item-dimmed')).toBe(true);
+
+        gt3Slice.dispatchEvent(new Event('mouseleave'));
+        expect(bmwItem.classList.contains('pie-legend-item-active')).toBe(false);
+        expect(hyundaiItem.classList.contains('pie-legend-item-dimmed')).toBe(false);
+    });
+
+    it('cross-highlights class chart when hovering car chart pie slice', async () => {
+        const dp = new window.DriverProfile();
+        await dp.init();
+        await vi.waitFor(() => {
+            expect(window.DriverProfileData.computeClassBreakdown).toHaveBeenCalled();
+        });
+        await new Promise(r => setTimeout(r, 50));
+
+        const classChart = document.getElementById('chart-car-class');
+        const carChart = document.getElementById('chart-car');
+
+        // Hover the BMW M4 pie slice directly
+        const bmwSlice = carChart.querySelector('.pie-slice[data-label="BMW M4"]');
+        expect(bmwSlice).toBeTruthy();
+        expect(bmwSlice.getAttribute('data-class-label')).toBe('GT3');
+        bmwSlice.dispatchEvent(new Event('mouseenter'));
+
+        const classLegendItems = classChart.querySelectorAll('.pie-legend-item');
+        const gt3Class = Array.from(classLegendItems).find(el => el.textContent.includes('GT3'));
+        const tcrClass = Array.from(classLegendItems).find(el => el.textContent.includes('TCR'));
+
+        expect(gt3Class.classList.contains('pie-legend-item-active')).toBe(true);
+        expect(tcrClass.classList.contains('pie-legend-item-dimmed')).toBe(true);
+
+        bmwSlice.dispatchEvent(new Event('mouseleave'));
+        expect(gt3Class.classList.contains('pie-legend-item-active')).toBe(false);
+        expect(tcrClass.classList.contains('pie-legend-item-dimmed')).toBe(false);
     });
 });

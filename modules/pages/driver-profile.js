@@ -43,7 +43,7 @@ class DriverProfile {
             const driverGroup = this.findDriverGroup(results, idParam);
             const profileData = DriverProfileData.buildProfileData(driverGroup);
 
-            this.renderProfile(profileData);
+            this.renderProfile(profileData, driverGroup.entries);
             this.trackProfileShown(profileData);
         } catch (error) {
             console.error('Driver profile error:', error);
@@ -70,7 +70,7 @@ class DriverProfile {
      * Render the full profile page
      * @param {Object} profile - Profile data from DriverProfileData.buildProfileData
      */
-    renderProfile(profile) {
+    renderProfile(profile, entries) {
         this.elements.profileContainer.innerHTML =
             '<div id="driver-profile-header"></div>' +
             '<div id="driver-profile-stats"></div>' +
@@ -85,7 +85,8 @@ class DriverProfile {
         this.renderStatsPlaceholders();
         this.loadStats(profile.name, profile.pathId);
         this.renderHighlights(profile);
-        this.renderCharts(profile);
+        this.renderCharts(profile, entries || []);
+        this.scheduleClassBreakdowns(entries || []);
     }
 
     trackProfileShown(profile) {
@@ -172,6 +173,7 @@ class DriverProfile {
             `<div class="driver-stat-label">${R3EUtils.escapeHtml(m.label)}</div>` +
             '<div class="driver-stat-value"><span class="driver-stat-spinner"></span></div>' +
             '<div class="driver-stat-position">Loading\u2026</div>' +
+            '<div class="driver-stat-breakdown"></div>' +
             '</div>'
         ).join('');
 
@@ -218,6 +220,136 @@ class DriverProfile {
                     const posEl = card.querySelector('.driver-stat-position');
                     if (posEl) posEl.textContent = 'Unavailable';
                 });
+        });
+    }
+
+    /**
+     * Compute and render class breakdowns from driver entries.
+     * Runs at idle priority so the main profile renders first.
+     * @param {Array} entries - Raw driver leaderboard entries
+     */
+    scheduleClassBreakdowns(entries) {
+        if (!window.DriverProfileData || !DriverProfileData.computeClassBreakdown) return;
+        if (!entries || entries.length === 0) return;
+
+        const run = () => {
+            const results = DriverProfileData.computeClassBreakdown(entries);
+            this.renderClassBreakdowns(results);
+        };
+
+        if (typeof requestIdleCallback === 'function') {
+            requestIdleCallback(run);
+        } else {
+            setTimeout(run, 0);
+        }
+    }
+
+    /**
+     * Render class breakdown lists into each stat card.
+     * Colors match the Car Classes pie chart; hovering cross-highlights.
+     * @param {Object} results - { [metricKey]: [{className, value, entryCount?}] }
+     */
+    renderClassBreakdowns(results) {
+        if (!results) return;
+        const metrics = (window.DriverStatsService && DriverStatsService.PROFILE_METRICS) || [
+            { key: 'avg_bested', label: 'Average Bested %', format: 'percent' },
+            { key: 'bested', label: 'Drivers Bested', format: 'number' },
+            { key: 'pole', label: 'Pole Positions', format: 'number' },
+            { key: 'podium', label: 'Podiums', format: 'number' }
+        ];
+        const formatValue = (window.DriverStatsService && DriverStatsService.formatValue) ||
+            function (v, fmt) { return fmt === 'percent' ? v.toFixed(1) + '%' : Number(v).toLocaleString(); };
+        const colorMap = this._classColorMap || new Map();
+        const fallbackColors = (window.PieChart && PieChart.COLORS) || [];
+
+        metrics.forEach(metric => {
+            const items = results[metric.key];
+            const card = document.getElementById('stat-' + metric.key);
+            if (!card) return;
+            const container = card.querySelector('.driver-stat-breakdown');
+            if (!container) return;
+
+            if (!items || items.length === 0) return;
+
+            const listItems = items.map((item, i) => {
+                let displayValue = formatValue(item.value, metric.format);
+                if (metric.key === 'avg_bested' && item.entryCount) {
+                    displayValue += ' (' + item.entryCount + ')';
+                }
+                const color = colorMap.get(item.className) || fallbackColors[i % fallbackColors.length] || '#888';
+                return '<li class="pie-legend-item" data-class-label="' + R3EUtils.escapeHtml(item.className) + '">' +
+                    '<span class="pie-legend-color" style="background:' + color + '"></span>' +
+                    '<span class="pie-legend-label">' + R3EUtils.escapeHtml(item.className) + '</span>' +
+                    '<span class="pie-legend-value">' + displayValue + '</span>' +
+                    '</li>';
+            }).join('');
+
+            container.innerHTML = '<ul class="pie-legend stat-breakdown-list">' + listItems + '</ul>';
+        });
+
+        this._wireBreakdownChartInteraction();
+    }
+
+    /**
+     * Wire bidirectional hover interaction between stat breakdowns and the
+     * Car Classes pie chart so they highlight the same class in sync.
+     */
+    _wireBreakdownChartInteraction() {
+        const chartContainer = document.getElementById('chart-car-class');
+        if (!chartContainer) return;
+
+        const chartLegendItems = chartContainer.querySelectorAll('.pie-legend-item');
+        const chartSlices = chartContainer.querySelectorAll('.pie-slice');
+        const allBreakdownItems = document.querySelectorAll('.driver-stat-breakdown .pie-legend-item');
+
+        // Build label → chart legend element map
+        const labelToChartLegend = new Map();
+        chartLegendItems.forEach(el => {
+            const label = (el.querySelector('.pie-legend-label') || {}).textContent || '';
+            if (label) labelToChartLegend.set(label.trim(), el);
+        });
+
+        // Stat breakdown → pie chart: dispatch mouseenter/leave on matching legend item
+        allBreakdownItems.forEach(el => {
+            const label = el.getAttribute('data-class-label');
+            const matchingLegend = labelToChartLegend.get(label);
+
+            el.addEventListener('mouseenter', () => {
+                el.classList.add('pie-legend-item-active');
+                if (matchingLegend) matchingLegend.dispatchEvent(new Event('mouseenter'));
+            });
+            el.addEventListener('mouseleave', () => {
+                el.classList.remove('pie-legend-item-active');
+                if (matchingLegend) matchingLegend.dispatchEvent(new Event('mouseleave'));
+            });
+        });
+
+        // Pie chart legend → stat breakdowns
+        chartLegendItems.forEach(el => {
+            const label = ((el.querySelector('.pie-legend-label') || {}).textContent || '').trim();
+            if (!label) return;
+            el.addEventListener('mouseenter', () => {
+                allBreakdownItems.forEach(bd => {
+                    if (bd.getAttribute('data-class-label') === label) bd.classList.add('pie-legend-item-active');
+                });
+            });
+            el.addEventListener('mouseleave', () => {
+                allBreakdownItems.forEach(bd => bd.classList.remove('pie-legend-item-active'));
+            });
+        });
+
+        // Pie chart slices → stat breakdowns
+        chartSlices.forEach(el => {
+            const label = el.getAttribute('data-label');
+            if (!label) return;
+            el.addEventListener('mouseenter', () => {
+                allBreakdownItems.forEach(bd => {
+                    if (bd.getAttribute('data-class-label') === label) bd.classList.add('pie-legend-item-active');
+                });
+            });
+            el.addEventListener('mouseleave', () => {
+                allBreakdownItems.forEach(bd => bd.classList.remove('pie-legend-item-active'));
+            });
         });
     }
 
@@ -329,7 +461,7 @@ class DriverProfile {
      * Render the charts section
      * @param {Object} profile - Profile data
      */
-    renderCharts(profile) {
+    renderCharts(profile, entries) {
         this.elements.chartsContainer.innerHTML = [
             '<div class="driver-profile-charts-grid">',
             '<div id="chart-car-class" class="driver-profile-chart-card"></div>',
@@ -344,6 +476,12 @@ class DriverProfile {
             { title: 'Car Classes' }
         );
 
+        // Build class→color map from the pie chart slices so breakdowns match
+        if (PieChart.computeSlices) {
+            const slices = PieChart.computeSlices(profile.carClassDistribution);
+            this._classColorMap = new Map(slices.map(s => [s.label, s.color]));
+        }
+
         PieChart.render(
             document.getElementById('chart-car'),
             profile.carDistribution,
@@ -355,6 +493,141 @@ class DriverProfile {
             profile.trackDistribution,
             { title: 'Tracks' }
         );
+
+        // Wire car chart ↔ class chart cross-highlighting
+        this._wireCarClassChartInteraction(entries);
+    }
+
+    /**
+     * Wire bidirectional hover between the Car Classes chart and the Cars chart.
+     * Hovering a class highlights all cars belonging to that class (and vice versa).
+     */
+    _wireCarClassChartInteraction(entries) {
+        const classChart = document.getElementById('chart-car-class');
+        const carChart = document.getElementById('chart-car');
+        if (!classChart || !carChart) return;
+
+        // Build car→class mapping
+        const carToClass = (window.DriverProfileData && DriverProfileData.getCarToClassMap)
+            ? DriverProfileData.getCarToClassMap(entries)
+            : new Map();
+
+        const classLegendItems = classChart.querySelectorAll('.pie-legend-item');
+        const carLegendItems = carChart.querySelectorAll('.pie-legend-item');
+        const carSlices = carChart.querySelectorAll('.pie-slice');
+
+        // Annotate car legend items with their class
+        carLegendItems.forEach(el => {
+            const label = (el.querySelector('.pie-legend-label') || {}).textContent || '';
+            const cls = carToClass.get(label.trim()) || '';
+            if (cls) el.setAttribute('data-class-label', cls);
+        });
+
+        // Annotate car slices with their class
+        carSlices.forEach(el => {
+            const label = el.getAttribute('data-label') || '';
+            const cls = carToClass.get(label.trim()) || '';
+            if (cls) el.setAttribute('data-class-label', cls);
+        });
+
+        const classSlices = classChart.querySelectorAll('.pie-slice');
+
+        const POP_DISTANCE = 8;
+
+        // Helpers to apply / clear cross-chart highlighting
+        function highlightCarsByClass(classLabel) {
+            carLegendItems.forEach(carEl => {
+                if (carEl.getAttribute('data-class-label') === classLabel) {
+                    carEl.classList.add('pie-legend-item-active');
+                } else {
+                    carEl.classList.add('pie-legend-item-dimmed');
+                }
+            });
+            carSlices.forEach(slice => {
+                if (slice.getAttribute('data-class-label') === classLabel) {
+                    slice.classList.add('pie-slice-active');
+                    const midAngle = parseFloat(slice.getAttribute('data-mid-angle'));
+                    if (!isNaN(midAngle)) {
+                        const tx = Math.cos(midAngle) * POP_DISTANCE;
+                        const ty = Math.sin(midAngle) * POP_DISTANCE;
+                        slice.style.transform = `translate(${tx.toFixed(2)}px, ${ty.toFixed(2)}px)`;
+                    }
+                } else {
+                    slice.classList.add('pie-slice-dimmed');
+                    slice.style.transform = '';
+                }
+            });
+        }
+        function clearCarHighlights() {
+            carLegendItems.forEach(carEl => {
+                carEl.classList.remove('pie-legend-item-active', 'pie-legend-item-dimmed');
+            });
+            carSlices.forEach(slice => {
+                slice.classList.remove('pie-slice-active', 'pie-slice-dimmed');
+                slice.style.transform = '';
+            });
+        }
+        function highlightClassByCar(cls) {
+            classLegendItems.forEach(clsEl => {
+                const clsLabel = ((clsEl.querySelector('.pie-legend-label') || {}).textContent || '').trim();
+                if (clsLabel === cls) {
+                    clsEl.classList.add('pie-legend-item-active');
+                } else {
+                    clsEl.classList.add('pie-legend-item-dimmed');
+                }
+            });
+            classSlices.forEach(slice => {
+                if ((slice.getAttribute('data-label') || '') === cls) {
+                    slice.classList.add('pie-slice-active');
+                    const midAngle = parseFloat(slice.getAttribute('data-mid-angle'));
+                    if (!isNaN(midAngle)) {
+                        const tx = Math.cos(midAngle) * POP_DISTANCE;
+                        const ty = Math.sin(midAngle) * POP_DISTANCE;
+                        slice.style.transform = `translate(${tx.toFixed(2)}px, ${ty.toFixed(2)}px)`;
+                    }
+                } else {
+                    slice.classList.add('pie-slice-dimmed');
+                    slice.style.transform = '';
+                }
+            });
+        }
+        function clearClassHighlights() {
+            classLegendItems.forEach(clsEl => {
+                clsEl.classList.remove('pie-legend-item-active', 'pie-legend-item-dimmed');
+            });
+            classSlices.forEach(slice => {
+                slice.classList.remove('pie-slice-active', 'pie-slice-dimmed');
+                slice.style.transform = '';
+            });
+        }
+
+        // Class chart legend + slices → highlight matching cars
+        classLegendItems.forEach(el => {
+            const classLabel = ((el.querySelector('.pie-legend-label') || {}).textContent || '').trim();
+            if (!classLabel) return;
+            el.addEventListener('mouseenter', () => highlightCarsByClass(classLabel));
+            el.addEventListener('mouseleave', clearCarHighlights);
+        });
+        classSlices.forEach(el => {
+            const classLabel = (el.getAttribute('data-label') || '').trim();
+            if (!classLabel) return;
+            el.addEventListener('mouseenter', () => highlightCarsByClass(classLabel));
+            el.addEventListener('mouseleave', clearCarHighlights);
+        });
+
+        // Car chart legend + slices → highlight matching class
+        carLegendItems.forEach(el => {
+            const cls = el.getAttribute('data-class-label') || '';
+            if (!cls) return;
+            el.addEventListener('mouseenter', () => highlightClassByCar(cls));
+            el.addEventListener('mouseleave', clearClassHighlights);
+        });
+        carSlices.forEach(el => {
+            const cls = el.getAttribute('data-class-label') || '';
+            if (!cls) return;
+            el.addEventListener('mouseenter', () => highlightClassByCar(cls));
+            el.addEventListener('mouseleave', clearClassHighlights);
+        });
     }
 
     /**

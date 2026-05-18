@@ -590,6 +590,12 @@ class DriverProfile {
                     slice.style.transform = '';
                 }
             });
+            // Query breakdown items lazily — they are rendered asynchronously
+            document.querySelectorAll('.driver-stat-breakdown .pie-legend-item').forEach(bd => {
+                if (bd.getAttribute('data-class-label') === cls) {
+                    bd.classList.add('pie-legend-item-active');
+                }
+            });
         }
         function clearClassHighlights() {
             classLegendItems.forEach(clsEl => {
@@ -598,6 +604,9 @@ class DriverProfile {
             classSlices.forEach(slice => {
                 slice.classList.remove('pie-slice-active', 'pie-slice-dimmed');
                 slice.style.transform = '';
+            });
+            document.querySelectorAll('.driver-stat-breakdown .pie-legend-item').forEach(bd => {
+                bd.classList.remove('pie-legend-item-active');
             });
         }
 

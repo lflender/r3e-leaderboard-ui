@@ -199,6 +199,7 @@
 
             const bars = Array.from(svg.querySelectorAll('.entries-dist-bar'));
             if (bars.length === 0) return;
+            const contentBars = bars.filter(b => b.getAttribute('data-count') !== '0');
 
             let activeBar = null;
 
@@ -211,27 +212,18 @@
                 const mouseXRatio = (e.clientX - rect.left) / svgWidth;
                 const svgX = mouseXRatio * viewBox.width;
 
-                // Find the bar at this x position
+                // Always snap to nearest bar with content
                 let nearest = null;
-                bars.forEach(bar => {
-                    const bx = parseFloat(bar.getAttribute('x'));
-                    if (svgX >= bx && svgX <= bx + 1) {
+                let minDist = Infinity;
+                var searchBars = contentBars.length > 0 ? contentBars : bars;
+                searchBars.forEach(bar => {
+                    const bx = parseFloat(bar.getAttribute('x')) + 0.45;
+                    const dist = Math.abs(bx - svgX);
+                    if (dist < minDist) {
+                        minDist = dist;
                         nearest = bar;
                     }
                 });
-
-                if (!nearest) {
-                    let minDist = Infinity;
-                    bars.forEach(bar => {
-                        const bx = parseFloat(bar.getAttribute('x')) + 0.45;
-                        const dist = Math.abs(bx - svgX);
-                        if (dist < minDist) {
-                            minDist = dist;
-                            nearest = bar;
-                        }
-                    });
-                    if (minDist > 1.5) nearest = null;
-                }
 
                 if (!nearest) {
                     if (activeBar) {

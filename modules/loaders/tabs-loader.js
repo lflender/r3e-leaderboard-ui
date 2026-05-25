@@ -44,6 +44,65 @@
             }
         }
         container.innerHTML = html;
+        initScrollHint(container);
+
+        // On mobile, scroll the tabs container so the active tab is visible
+        var activeBtn = container.querySelector('.tab-button.active');
+        if (activeBtn) {
+            var idx = Array.prototype.indexOf.call(container.children, activeBtn);
+            if (idx >= TABS.length - 3) {
+                // Use requestAnimationFrame to ensure layout is complete
+                requestAnimationFrame(function () {
+                    var btnLeft = activeBtn.offsetLeft;
+                    var btnWidth = activeBtn.offsetWidth;
+                    var containerWidth = container.clientWidth;
+                    container.scrollLeft = btnLeft - (containerWidth - btnWidth) / 2;
+                });
+            }
+        }
+    }
+
+    function initScrollHint(container) {
+        // Wrap in a relative container so chevrons sit outside the mask
+        var wrapper = document.createElement('div');
+        wrapper.className = 'tabs-scroll-wrapper';
+        container.parentNode.insertBefore(wrapper, container);
+        wrapper.appendChild(container);
+
+        var chevronSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>';
+
+        var leftChev = document.createElement('button');
+        leftChev.className = 'tabs-chevron tabs-chevron--left';
+        leftChev.setAttribute('aria-label', 'Scroll tabs left');
+        leftChev.innerHTML = chevronSvg;
+        wrapper.appendChild(leftChev);
+
+        var rightChev = document.createElement('button');
+        rightChev.className = 'tabs-chevron tabs-chevron--right';
+        rightChev.setAttribute('aria-label', 'Scroll tabs right');
+        rightChev.innerHTML = chevronSvg;
+        wrapper.appendChild(rightChev);
+
+        leftChev.addEventListener('click', function () {
+            container.scrollBy({ left: -120, behavior: 'smooth' });
+        });
+        rightChev.addEventListener('click', function () {
+            container.scrollBy({ left: 120, behavior: 'smooth' });
+        });
+
+        function update() {
+            var overflows = container.scrollWidth > container.clientWidth + 1;
+            var atStart = container.scrollLeft <= 1;
+            var atEnd = container.scrollLeft + container.clientWidth >= container.scrollWidth - 1;
+            container.classList.toggle('tabs--fade-right', overflows && !atEnd);
+            container.classList.toggle('tabs--fade-left', overflows && !atStart);
+            leftChev.classList.toggle('visible', overflows && !atStart);
+            rightChev.classList.toggle('visible', overflows && !atEnd);
+        }
+        // Check after layout settles
+        update();
+        container.addEventListener('scroll', update, { passive: true });
+        window.addEventListener('resize', update, { passive: true });
     }
 
     // With defer, the DOM is already parsed — render immediately

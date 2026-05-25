@@ -2,7 +2,8 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { loadBrowserScript } from '../helpers/script-loader.js';
 
 beforeAll(() => {
-    // field-mappings.js provides FIELD_NAMES and getField as globals
+    // column-config.js must load before field-mappings.js (single source of truth for aliases)
+    loadBrowserScript('modules/column-config.js');
     loadBrowserScript('modules/field-mappings.js');
     loadBrowserScript('modules/data-normalizer.js');
 });
@@ -156,12 +157,6 @@ describe('DataNormalizer extract helpers', () => {
         expect(window.DataNormalizer.extractDifficulty({ Difficulty: 'Real' })).toBe('Real');
         expect(window.DataNormalizer.extractDifficulty({ driving_model: 'Casual' })).toBe('Casual');
         expect(window.DataNormalizer.extractDifficulty({})).toBe('-');
-    });
-
-    it('extractDateTime finds date field variations', () => {
-        expect(window.DataNormalizer.extractDateTime({ date_time: '2025-01-01' })).toBe('2025-01-01');
-        expect(window.DataNormalizer.extractDateTime({ Date: '2025-06-15' })).toBe('2025-06-15');
-        expect(window.DataNormalizer.extractDateTime({})).toBe('');
     });
 });
 

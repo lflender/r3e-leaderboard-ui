@@ -1072,6 +1072,11 @@ function bindEntriesDistributionInteractions() {
             displayResults(allResults);
         });
     }
+
+    // Wire bar tooltips
+    if (DetailEntriesDist.wireTooltips) {
+        DetailEntriesDist.wireTooltips(resultsContainer);
+    }
 }
 
 function bindCarDistributionSortHandlers({ allResults, filteredResults, baseResults, paginationHTML, tableWrapperHTML }) {
@@ -1339,7 +1344,7 @@ function buildCarFilter(data) {
 
 /**
  * Build category filter options for multi-class views.
- * Delegates to dataService.getCategoryOptionsForClassIds() as the single
+ * Delegates to FilterOptionsService.getCategoryOptionsForClassIds() as the single
  * source of truth for rendering class logos in dropdown options.
  * @returns {Array<{value: string, label: string, labelHtml: string}>}
  */
@@ -1347,7 +1352,7 @@ function buildCategoryFilterOptions() {
     if (!classesParam) return [];
 
     const specificClassIds = classesParam.split(',').map(id => id.trim()).filter(id => id);
-    const options = dataService.getCategoryOptionsForClassIds(specificClassIds);
+    const options = FilterOptionsService.getCategoryOptionsForClassIds(specificClassIds);
 
     if (options.length > 0) {
         // Store mapping for filter matching

@@ -65,7 +65,7 @@ async function loadMpPosCache() {
         try {
             // 30-minute cache bucket: same version string for 30 min, then rotates
             const cacheVersion = Math.floor(Date.now() / (30 * 60 * 1000));
-            const response = await fetch(`cache/mp_pos/mp_pos.json.gz?v=${cacheVersion}`);
+            const response = await R3EUtils.fetchWithTimeout(`cache/mp_pos/mp_pos.json.gz?v=${cacheVersion}`, {}, 15000);
             if (!response.ok) throw new Error('Failed to load mp_pos.json.gz');
             if (!window.CompressedJsonHelper || typeof window.CompressedJsonHelper.readGzipJson !== 'function') {
                 throw new Error('CompressedJsonHelper is not loaded.');
@@ -98,7 +98,7 @@ async function loadMpPosInactiveCache() {
     mpPosInactiveCachePromise = (async () => {
         try {
             const cacheVersion = Math.floor(Date.now() / (30 * 60 * 1000));
-            const response = await fetch(`cache/mp_pos/mp_pos_inactive.json.gz?v=${cacheVersion}`);
+            const response = await R3EUtils.fetchWithTimeout(`cache/mp_pos/mp_pos_inactive.json.gz?v=${cacheVersion}`, {}, 15000);
             if (!response.ok) throw new Error('Failed to load mp_pos_inactive.json.gz');
             if (!window.CompressedJsonHelper || typeof window.CompressedJsonHelper.readGzipJson !== 'function') {
                 throw new Error('CompressedJsonHelper is not loaded.');

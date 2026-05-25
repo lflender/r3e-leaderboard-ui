@@ -39,7 +39,7 @@
 
     async function fetchJson(path) {
         const url = await createCacheBustedUrl(path);
-        const response = await fetch(url);
+        const response = await R3EUtils.fetchWithTimeout(url, {}, 10000);
         if (!response.ok) {
             throw new Error(`Failed to fetch ${path}: ${response.status} ${response.statusText}`);
         }
@@ -48,17 +48,11 @@
 
     async function fetchGzipJson(path) {
         const url = await createCacheBustedUrl(path);
-        const response = await fetch(url);
+        const response = await R3EUtils.fetchWithTimeout(url, {}, 15000);
         if (!response.ok) {
             throw new Error(`Failed to fetch ${path}: ${response.status} ${response.statusText}`);
         }
-        if (typeof DecompressionStream === 'undefined') {
-            throw new Error('DecompressionStream is not supported in this browser.');
-        }
-
-        const stream = response.body.pipeThrough(new DecompressionStream('gzip'));
-        const text = await new Response(stream).text();
-        return JSON.parse(text);
+        return window.CompressedJsonHelper.readGzipJson(response);
     }
 
     async function loadStatsIndex() {
@@ -83,16 +77,6 @@
 
         const item = (index.classes || []).find((entry) => String(entry.id) === String(classId));
         return item ? (item.files || null) : null;
-    }
-
-    // Backwards-compatible: returns { polePath, bestedPath } only.
-    function getPathsForFilter(index, filterValue) {
-        const files = getFilesEntryForFilter(index, filterValue);
-        if (!files) return null;
-        return {
-            polePath: files.pole_file,
-            bestedPath: files.bested_file
-        };
     }
 
     // Returns paths for all metrics (any may be undefined if missing).
@@ -178,7 +162,6 @@
         fetchGzipJson,
         loadStatsIndex,
         getFilesEntryForFilter,
-        getPathsForFilter,
         getAllPathsForFilter,
         extractRows,
         normalizeRows

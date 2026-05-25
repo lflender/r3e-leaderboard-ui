@@ -31,7 +31,8 @@ beforeEach(() => {
         resolveTrackLabelForItem: (item, fallback = '') => {
             const trackId = item?.track_id || item?.TrackID || item?.trackId || item?.['Track ID'] || '';
             return window.R3EUtils.resolveTrackLabel(trackId, fallback || item?.track || item?.Track || '');
-        }
+        },
+        fetchWithTimeout: (url, options = {}) => fetch(url, options)
     };
     window.ColumnConfig = {
         getOrderedColumns: keys => keys,
@@ -43,10 +44,12 @@ beforeEach(() => {
         showNoResults: vi.fn(async (container) => { container.innerHTML = '<div>No results found</div>'; })
     };
     window.dataService = {
+        waitForDriverIndex: vi.fn().mockResolvedValue({})
+    };
+    window.FilterOptionsService = {
         getSuperclassOptions: vi.fn().mockReturnValue([]),
         getClassOptionsFromCarsData: vi.fn().mockReturnValue([]),
-        getTrackOptions: vi.fn().mockReturnValue([{ value: '', label: 'All tracks' }]),
-        waitForDriverIndex: vi.fn().mockResolvedValue({})
+        getTrackOptions: vi.fn().mockReturnValue([{ value: '', label: 'All tracks' }])
     };
 
     window.CustomSelect = class {

@@ -132,9 +132,9 @@ class DailyRaces {
     async loadDailyRaces() {
         try {
             const timestamp = new Date().getTime();
-            const response = await fetch(`cache/daily_races.json.gz?v=${timestamp}`, {
+            const response = await R3EUtils.fetchWithTimeout(`cache/daily_races.json.gz?v=${timestamp}`, {
                 cache: 'no-store'
-            });
+            }, 15000);
             
             if (!response.ok) {
                 throw new Error(`Failed to load daily races: ${response.status}`);
@@ -158,9 +158,9 @@ class DailyRaces {
     async loadLastUpdateTime() {
         try {
             const timestamp = new Date().getTime();
-            const response = await fetch(`cache/status.json?v=${timestamp}`, {
+            const response = await R3EUtils.fetchWithTimeout(`cache/status.json?v=${timestamp}`, {
                 cache: 'no-store'
-            });
+            }, 5000);
             
             if (!response.ok) {
                 return null;
@@ -304,15 +304,6 @@ class DailyRaces {
     getScheduleParsingErrorBannerHtml() {
         const message = 'Automated schedule parsing error detected, please allow me a few hours to fix it, thank you';
         return `<p class="daily-races-banner daily-races-banner--error">${R3EUtils.escapeHtml(message)}</p>`;
-    }
-
-    /**
-     * Build the holiday notice banner
-     */
-    getHolidayNoticeBannerHtml() {
-        const line1 = 'I was in holidays last week, thank you for your patience.';
-        const line2 = 'The schedule parser has been reworked and should now handle all cases!';
-        return `<p class="daily-races-banner daily-races-banner--success">${R3EUtils.escapeHtml(line1)}<br>${R3EUtils.escapeHtml(line2)}</p>`;
     }
 
     /**
@@ -480,7 +471,7 @@ class DailyRaces {
         }
         html += '</div>';
 
-        html += this.getHolidayNoticeBannerHtml();
+
 
         html += '<div class="daily-races-section-header">';
         html += '<h3 class="daily-races-section-title">Daily Sprint Races (15 min)</h3>';

@@ -5,7 +5,7 @@
       return window.CARS_DATA;
     }
     try{
-      const resp = await fetch('modules/data/cars.json');
+      const resp = await R3EUtils.fetchWithTimeout('modules/data/cars.json', {}, 10000);
       if(!resp.ok) throw new Error('HTTP ' + resp.status);
       return await resp.json();
     }catch(e){
@@ -19,13 +19,7 @@
   const transBadge = R3ECarUtils.transBadge;
   const driveBadge = R3ECarUtils.driveBadge;
 
-  function countryFlag(country){
-    // Use FlagHelper if available, otherwise return empty
-    if (typeof FlagHelper !== 'undefined' && FlagHelper.countryToFlag) {
-      return FlagHelper.countryToFlag(country);
-    }
-    return '';
-  }
+  const countryFlag = (country) => FlagHelper.countryToFlag(country);
 
   const renderCarDisplayHtml = R3ECarUtils.renderCarDisplayHtml;
 
@@ -61,8 +55,8 @@
   const minSearchLength = 3;
   
   // Build class options from data
-  const superclassOptions = dataService.getSuperclassOptions();
-  const regularClassOptions = dataService.getClassOptionsFromCarsData();
+  const superclassOptions = FilterOptionsService.getSuperclassOptions();
+  const regularClassOptions = FilterOptionsService.getClassOptionsFromCarsData();
   
   // Combine: All classes, then Category: superclass entries, then regular classes
   const classOptions = [{ value: '', label: 'All classes' }]
@@ -485,7 +479,7 @@
     const yearColor = createYearColorFn();
 
     let html = '<table class="results-table"><thead><tr>' +
-      '<th>Car</th><th>Rating</th><th>Wheel</th><th>Transmission</th><th>Drive</th><th>Assists</th><th>Year</th><th>Power</th><th>Weight<br><span style="display:block;font-size:0.72em;font-weight:500;line-height:1.05;letter-spacing:0;">*with driver</span></th><th>Engine</th>' +
+      '<th>Car</th><th>Rating</th><th>Wheel</th><th>Transmission</th><th>Drive</th><th>Assists</th><th>Year</th><th>Power</th><th>Weight<br><span class="th-sub-label">*with driver</span></th><th>Engine</th>' +
       '</tr></thead><tbody>';
 
     const isSuperclassFilter = classFilter && classFilter.startsWith('superclass:');

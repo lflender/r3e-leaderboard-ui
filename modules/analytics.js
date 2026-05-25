@@ -150,25 +150,8 @@ const R3EAnalytics = (() => {
      * @param {string}  opts.classFilter  - Active class filter value ('' = none)
      * @param {string}  opts.source       - 'input' | 'enter' | 'url' | 'filter'
      */
-    function trackSearchResultViewed(searchTerm, resultCount, driverName, opts) {
-        if (!_ready) return;
-        if (resultCount !== 1) return;
-        opts = opts || {};
-        track('driver search result viewed', {
-            driver_name:   driverName || '',
-            search_term:   searchTerm,
-            track_filter:  opts.trackFilter || '',
-            class_filter:  opts.classFilter || '',
-            source:        opts.source || 'input'
-        });
-    }
-
-    function trackSearch(searchTerm, resultCount, driverName, opts) {
-        trackSearchResultViewed(searchTerm, resultCount, driverName, opts);
-    }
-
     // Public API
-    return { init, track, trackSearch, trackSearchResultViewed };
+    return { init, track };
 })();
 
 // Auto-initialise as soon as this script runs

@@ -48,7 +48,8 @@ function setupGlobalsAndFetch(data = mockDailyData()) {
     ];
     window.R3EUtils = {
         escapeHtml: value => String(value ?? ''),
-        getDailyRaceClassLogosHtml: vi.fn().mockReturnValue('<div class="logos">logos</div>')
+        getDailyRaceClassLogosHtml: vi.fn().mockReturnValue('<div class="logos">logos</div>'),
+        fetchWithTimeout: (url, options = {}) => fetch(url, options)
     };
     window.CompressedJsonHelper = {
         readGzipJson: vi.fn().mockResolvedValue(data)

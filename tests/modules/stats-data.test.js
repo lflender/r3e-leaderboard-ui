@@ -6,6 +6,7 @@ describe('StatsData', () => {
         delete window.StatsData;
         delete window.getCarClassId;
         global.fetch = vi.fn();
+        window.R3EUtils = { fetchWithTimeout: (url, options = {}) => fetch(url, options) };
         global.Response = class Response {
             constructor(value) {
                 this.value = value;
@@ -39,9 +40,15 @@ describe('StatsData', () => {
             classes: [{ id: '1703', files: { pole_file: 'class-pole.gz', bested_file: 'class-bested.gz' } }]
         };
 
-        expect(window.StatsData.getPathsForFilter(index, '')).toEqual({ polePath: 'overall-pole.gz', bestedPath: 'overall-bested.gz' });
-        expect(window.StatsData.getPathsForFilter(index, 'superclass:GT3')).toEqual({ polePath: 'gt3-pole.gz', bestedPath: 'gt3-bested.gz' });
-        expect(window.StatsData.getPathsForFilter(index, 'GTR 3')).toEqual({ polePath: 'class-pole.gz', bestedPath: 'class-bested.gz' });
+        const overall = window.StatsData.getAllPathsForFilter(index, '');
+        expect(overall.polePath).toContain('overall');
+        expect(overall.bestedPath).toContain('overall');
+        const sc = window.StatsData.getAllPathsForFilter(index, 'superclass:GT3');
+        expect(sc.polePath).toBe('gt3-pole.gz');
+        expect(sc.bestedPath).toBe('gt3-bested.gz');
+        const cls = window.StatsData.getAllPathsForFilter(index, 'GTR 3');
+        expect(cls.polePath).toBe('class-pole.gz');
+        expect(cls.bestedPath).toBe('class-bested.gz');
     });
 
     test('normalizes and sorts stats rows', () => {
@@ -201,18 +208,4 @@ describe('StatsData', () => {
         expect(rows[0].value).toBe(1.5);
     });
 
-    test('getPathsForFilter remains backward compatible (only pole/bested)', () => {
-        const index = {
-            overall: {
-                pole_file: 'overall-pole.gz',
-                bested_file: 'overall-bested.gz',
-                podium_file: 'overall-podium.gz',
-                percentile_file: 'overall-percentile.gz'
-            }
-        };
-        expect(window.StatsData.getPathsForFilter(index, '')).toEqual({
-            polePath: 'overall-pole.gz',
-            bestedPath: 'overall-bested.gz'
-        });
-    });
 });

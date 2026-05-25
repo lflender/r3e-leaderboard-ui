@@ -175,7 +175,7 @@ class DriverSearch {
     populateClassFilter() {
         if (!this.elements.classFilter) return;
         
-        const classOptions = dataService.getClassOptionsFromCarsData();
+        const classOptions = FilterOptionsService.getClassOptionsFromCarsData();
         if (classOptions.length === 0) return;
         
         const allOption = '<option value="">All classes</option>';
@@ -209,7 +209,7 @@ class DriverSearch {
     setupCustomSelects() {
         // Track filter custom select
         if (this.elements.trackFilterUI) {
-            new CustomSelect('track-filter-ui', dataService.getTrackOptions(), async (value, opts) => {
+            new CustomSelect('track-filter-ui', FilterOptionsService.getTrackOptions(), async (value, opts) => {
                 this.selectedTrack = value;
                 if (this.elements.trackFilter) {
                     this.elements.trackFilter.value = value;
@@ -227,10 +227,10 @@ class DriverSearch {
         // Class filter custom select
         if (this.elements.classFilter && this.elements.classFilterUI) {
             // Get superclass options first
-            const superclassOptions = dataService.getSuperclassOptions();
+            const superclassOptions = FilterOptionsService.getSuperclassOptions();
             
             // Get regular class options
-            const classOptions = dataService.getClassOptionsFromCarsData();
+            const classOptions = FilterOptionsService.getClassOptionsFromCarsData();
             
             // Combine: All classes, then Category: superclass entries, then regular classes
             const allOptions = [{ value: '', label: 'All classes' }]
@@ -432,12 +432,14 @@ class DriverSearch {
             this.currentPage = 1;
             this.displayResults(this.allResults, searchId);
 
-            // Analytics: keep the generic search event and additionally log
-            // when a single driver result is actually displayed.
+            // Analytics: log when a single driver result is displayed.
             if (typeof R3EAnalytics !== 'undefined' && results.length === 1) {
                 const driverResult = results[0];
                 const driverDisplayName = driverResult.driver || driverName;
-                R3EAnalytics.trackSearchResultViewed(driverName, results.length, driverDisplayName, {
+                R3EAnalytics.track('search result viewed', {
+                    searchTerm: driverName,
+                    resultCount: results.length,
+                    driverName: driverDisplayName,
                     trackFilter: selectedTrack,
                     classFilter: selectedClass,
                     source: this._searchSource || 'input'

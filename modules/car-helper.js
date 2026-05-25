@@ -247,11 +247,7 @@ function matchesCarFilterValue(carName, selectedCarFilter) {
 
 /* ── badge helpers (shared by Cars page + Challenge Picker) ── */
 
-function escHtml(text) {
-    return typeof R3EUtils !== 'undefined' && R3EUtils.escapeHtml
-        ? R3EUtils.escapeHtml(text)
-        : String(text ?? '');
-}
+const escHtml = (text) => R3EUtils.escapeHtml(text);
 
 function wheelBadge(cat) {
     const v = (cat || '').toLowerCase().trim();
@@ -304,6 +300,30 @@ function buildRatingHtml(carId, currentRating, variant) {
 
 function attachRatingHandlers(rootEl) {
     if (typeof CarRatings === 'undefined') return;
+
+    function syncSiblingWidgets(root, sourceWidget, newRating) {
+        if (typeof CarRatings === 'undefined' || typeof CarRatings.normalizeCarName !== 'function') return;
+        const sourceId = sourceWidget.getAttribute('data-car-id');
+        if (!sourceId) return;
+        const sourceParts = sourceId.split('||');
+        if (sourceParts.length !== 4) return;
+        const sourceName = CarRatings.normalizeCarName(sourceParts[1]);
+        const sourceYear = (sourceParts[2] || '').trim().toLowerCase();
+
+        Array.from(root.querySelectorAll('.car-rating-widget')).forEach(function (w) {
+            if (w === sourceWidget) return;
+            const wId = w.getAttribute('data-car-id');
+            if (!wId) return;
+            const wParts = wId.split('||');
+            if (wParts.length !== 4) return;
+            const wName = CarRatings.normalizeCarName(wParts[1]);
+            const wYear = (wParts[2] || '').trim().toLowerCase();
+            if (wName === sourceName && wYear === sourceYear && w._updateRatingDisplay) {
+                w._updateRatingDisplay(newRating);
+            }
+        });
+    }
+
     Array.from(rootEl.querySelectorAll('.car-rating-widget')).forEach(function (widget) {
         const carId = widget.getAttribute('data-car-id');
         if (!carId) return;
@@ -329,6 +349,9 @@ function attachRatingHandlers(rootEl) {
                 }
             });
         }
+
+        // Store updateDisplay on the element so sibling syncing can use it
+        widget._updateRatingDisplay = updateDisplay;
 
         widget.addEventListener('mouseover', function (e) {
             const btn = e.target.closest('.car-rating-btn');
@@ -364,6 +387,8 @@ function attachRatingHandlers(rootEl) {
                 const newRating = current === score ? 0 : score;
                 CarRatings.set(carId, newRating);
                 updateDisplay(newRating);
+                // Sync all sibling widgets on the page
+                syncSiblingWidgets(rootEl, widget, newRating);
             });
         });
     });
@@ -430,6 +455,133 @@ function attachBrandLogoHandlers(rootEl) {
     });
 }
 
+/* ── car class logo resolution ─────────────────────────── */
+
+let cachedCarsDataRef = null;
+let cachedClassLogoByName = new Map();
+let cachedClassLogoById = new Map();
+
+function rebuildCarClassLogoMaps() {
+    const carsData = Array.isArray(window.CARS_DATA) ? window.CARS_DATA : [];
+    cachedClassLogoByName = new Map();
+    cachedClassLogoById = new Map();
+
+    for (const classEntry of carsData) {
+        const className = String(classEntry.class || classEntry.car_class || '').trim().toLowerCase();
+        const logoUrl = String(classEntry.logo || '').trim();
+        if (!className || !logoUrl || cachedClassLogoByName.has(className)) {
+            continue;
+        }
+        cachedClassLogoByName.set(className, logoUrl);
+    }
+
+    if (window.CAR_CLASSES_DATA && typeof window.CAR_CLASSES_DATA === 'object') {
+        for (const [classId, className] of Object.entries(window.CAR_CLASSES_DATA)) {
+            const normalizedClassName = String(className || '').trim().toLowerCase();
+            const logoUrl = cachedClassLogoByName.get(normalizedClassName);
+            if (logoUrl) {
+                cachedClassLogoById.set(String(classId), logoUrl);
+            }
+        }
+    }
+
+    cachedCarsDataRef = carsData;
+}
+
+function ensureCarClassLogoMaps() {
+    const carsData = Array.isArray(window.CARS_DATA) ? window.CARS_DATA : [];
+    if (carsData !== cachedCarsDataRef) {
+        rebuildCarClassLogoMaps();
+    }
+}
+
+function resolveCarClassLogoByName(className) {
+    if (!className) return '';
+    ensureCarClassLogoMaps();
+    return cachedClassLogoByName.get(String(className).trim().toLowerCase()) || '';
+}
+
+function resolveCarClassLogoById(classId) {
+    if (!classId) return '';
+    ensureCarClassLogoMaps();
+    return cachedClassLogoById.get(String(classId)) || '';
+}
+
+function resolveCarClassLogo(className, classId) {
+    const logoFromName = resolveCarClassLogoByName(className);
+    if (logoFromName) {
+        return logoFromName;
+    }
+    return resolveCarClassLogoById(classId);
+}
+
+function resolveDailyRaceClassLogos(race, resolveClassNameById, raceClassName) {
+    if (!race) return [];
+
+    const resolveName = typeof resolveClassNameById === 'function'
+        ? resolveClassNameById
+        : (classId) => String(classId || '');
+
+    const categoryClassIds = Array.isArray(race.category_class_ids) ? race.category_class_ids : [];
+    if (categoryClassIds.length > 0) {
+        const logoItems = [];
+        const seenIds = new Set();
+
+        for (const rawId of categoryClassIds) {
+            const classId = String(rawId || '').trim();
+            if (!classId || seenIds.has(classId)) {
+                continue;
+            }
+            seenIds.add(classId);
+
+            const logoUrl = resolveCarClassLogoById(classId);
+            if (!logoUrl) {
+                continue;
+            }
+
+            logoItems.push({
+                classId,
+                className: resolveName(classId),
+                logoUrl
+            });
+        }
+
+        if (logoItems.length > 0) {
+            return logoItems;
+        }
+    }
+
+    const classId = String(race.car_class_id || '').trim();
+    const className = String(raceClassName || race.car_class || '').trim();
+    const logoUrl = resolveCarClassLogo(className, classId);
+
+    if (!logoUrl) {
+        return [];
+    }
+
+    return [{ classId, className, logoUrl }];
+}
+
+function getDailyRaceClassLogosHtml(race, resolveClassNameById, raceClassName) {
+    const logos = resolveDailyRaceClassLogos(race, resolveClassNameById, raceClassName);
+    if (logos.length === 0) {
+        return '';
+    }
+
+    const escape = window.R3EUtils && typeof window.R3EUtils.escapeHtml === 'function'
+        ? window.R3EUtils.escapeHtml
+        : (value) => String(value ?? '');
+
+    let logosHtml = `<div class="daily-race-class-logos daily-race-class-logos--count-${Math.min(logos.length, 6)}">`;
+    for (const logo of logos) {
+        const altText = logo.className ? `${logo.className} class logo` : 'Car class logo';
+        logosHtml += `<img class="daily-race-class-logo" src="${escape(logo.logoUrl)}" alt="${escape(altText)}" loading="lazy" decoding="async">`;
+    }
+    logosHtml += '</div>';
+
+    return logosHtml;
+}
+
 window.R3ECarUtils = {
     splitCarName,
     resolveBrandLogoPath,
@@ -446,5 +598,10 @@ window.R3ECarUtils = {
     attachRatingHandlers,
     yearBadgeColor,
     renderCarDisplayHtml,
-    attachBrandLogoHandlers
+    attachBrandLogoHandlers,
+    resolveCarClassLogoByName,
+    resolveCarClassLogoById,
+    resolveCarClassLogo,
+    resolveDailyRaceClassLogos,
+    getDailyRaceClassLogosHtml
 };

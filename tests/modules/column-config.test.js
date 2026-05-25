@@ -2,6 +2,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { loadBrowserScript } from '../helpers/script-loader.js';
 
 beforeAll(() => {
+    loadBrowserScript('modules/time-helper.js');
     loadBrowserScript('modules/column-config.js');
 });
 

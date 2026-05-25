@@ -3,7 +3,8 @@ import { loadBrowserScript } from '../helpers/script-loader.js';
 
 describe('R3ECarUtils', () => {
     beforeAll(() => {
-        loadBrowserScript('modules/utils-car.js');
+        loadBrowserScript('modules/utils.js');
+        loadBrowserScript('modules/car-helper.js');
     });
 
     beforeEach(() => {
@@ -152,6 +153,45 @@ describe('R3ECarUtils', () => {
         test('clamps years outside range', () => {
             expect(window.R3ECarUtils.yearBadgeColor('1960')).toBe('rgb(255,214,0)');
             expect(window.R3ECarUtils.yearBadgeColor('2030')).toBe('rgb(0,200,83)');
+        });
+    });
+
+    /* ── car class logo resolution ───────────────────────── */
+
+    describe('car class logo resolution', () => {
+        beforeEach(() => {
+            window.CARS_DATA = [{ class: 'GT3', logo: 'https://example.com/gt3-logo.png' }];
+            window.CAR_CLASSES_DATA = { 1703: 'GT3' };
+        });
+
+        test('resolves class logos by name and id', () => {
+            expect(window.R3ECarUtils.resolveCarClassLogoByName('GT3')).toBe('https://example.com/gt3-logo.png');
+            expect(window.R3ECarUtils.resolveCarClassLogoById('1703')).toBe('https://example.com/gt3-logo.png');
+            expect(window.R3ECarUtils.resolveCarClassLogo('GT3', '1703')).toBe('https://example.com/gt3-logo.png');
+        });
+
+        test('builds daily race class logo entries and html', () => {
+            const logos = window.R3ECarUtils.resolveDailyRaceClassLogos(
+                { category_class_ids: [1703] },
+                classId => `Class ${classId}`,
+                ''
+            );
+            expect(logos).toEqual([
+                {
+                    classId: '1703',
+                    className: 'Class 1703',
+                    logoUrl: 'https://example.com/gt3-logo.png'
+                }
+            ]);
+
+            const html = window.R3ECarUtils.getDailyRaceClassLogosHtml(
+                { category_class_ids: [1703] },
+                classId => `Class ${classId}`,
+                ''
+            );
+            expect(html).toContain('daily-race-class-logo');
+            expect(html).toContain('https://example.com/gt3-logo.png');
+            expect(html).toContain('Class 1703 class logo');
         });
     });
 });

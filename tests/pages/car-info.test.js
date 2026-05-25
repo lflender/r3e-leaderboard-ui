@@ -44,7 +44,8 @@ beforeEach(() => {
         buildCarId: vi.fn(() => ''),
         get: vi.fn(() => 0)
     };
-    window.dataService = {
+    window.dataService = {};
+    window.FilterOptionsService = {
         getSuperclassOptions: vi.fn().mockReturnValue([]),
         getClassOptionsFromCarsData: vi.fn().mockReturnValue([])
     };
@@ -66,7 +67,7 @@ beforeEach(() => {
 
     // car-info.js references R3ECarUtils badge helpers
     if (!window.R3ECarUtils) {
-        loadBrowserScript('modules/utils-car.js');
+        loadBrowserScript('modules/car-helper.js');
     }
 });
 

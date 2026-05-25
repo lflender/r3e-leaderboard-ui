@@ -1,11 +1,11 @@
-import { beforeAll, beforeEach, describe, expect, test } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { loadBrowserScript } from '../helpers/script-loader.js';
 
 describe('R3EUtils', () => {
     beforeAll(() => {
-        loadBrowserScript('modules/utils-car.js');
+        loadBrowserScript('modules/car-helper.js');
         loadBrowserScript('modules/time-helper.js');
-        loadBrowserScript('modules/utils-track.js');
+        loadBrowserScript('modules/track-helper.js');
         loadBrowserScript('modules/url-helper.js');
         loadBrowserScript('modules/utils.js');
     });
@@ -80,5 +80,47 @@ describe('R3EUtils', () => {
     test('re-exports time and date helpers', () => {
         expect(window.R3EUtils.formatClassicLapTime('1m 26.693s')).toBe('1:26:693s');
         expect(window.R3EUtils.formatDate('2025-10-06T19:15:20')).toBe('6 Oct 2025');
+    });
+
+    describe('fetchWithTimeout', () => {
+        let originalFetch;
+
+        beforeEach(() => {
+            originalFetch = globalThis.fetch;
+        });
+
+        test('returns response on successful fetch', async () => {
+            globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200 });
+            const resp = await window.R3EUtils.fetchWithTimeout('http://example.com/data.json');
+            expect(resp).toEqual({ ok: true, status: 200 });
+            expect(globalThis.fetch).toHaveBeenCalledOnce();
+            // Verify signal was passed
+            const callArgs = globalThis.fetch.mock.calls[0];
+            expect(callArgs[1].signal).toBeInstanceOf(AbortSignal);
+            globalThis.fetch = originalFetch;
+        });
+
+        test('merges options and passes signal', async () => {
+            globalThis.fetch = vi.fn().mockResolvedValue({ ok: true });
+            await window.R3EUtils.fetchWithTimeout('http://example.com', { cache: 'no-store' }, 5000);
+            const callArgs = globalThis.fetch.mock.calls[0];
+            expect(callArgs[1].cache).toBe('no-store');
+            expect(callArgs[1].signal).toBeInstanceOf(AbortSignal);
+            globalThis.fetch = originalFetch;
+        });
+
+        test('aborts fetch when timeout elapses', async () => {
+            vi.useFakeTimers();
+            globalThis.fetch = vi.fn().mockImplementation((url, opts) => {
+                return new Promise((resolve, reject) => {
+                    opts.signal.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')));
+                });
+            });
+            const promise = window.R3EUtils.fetchWithTimeout('http://example.com', {}, 3000);
+            vi.advanceTimersByTime(3000);
+            await expect(promise).rejects.toThrow();
+            globalThis.fetch = originalFetch;
+            vi.useRealTimers();
+        });
     });
 });

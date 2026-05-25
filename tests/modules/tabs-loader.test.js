@@ -34,6 +34,12 @@ describe('TabsLoader', () => {
             }
         }
         container.innerHTML = html;
+        // Scroll hint: jsdom doesn't support scrollWidth, so just toggle the class check
+        const overflows = container.scrollWidth > container.clientWidth + 1;
+        const atStart = container.scrollLeft <= 1;
+        const atEnd = container.scrollLeft + container.clientWidth >= container.scrollWidth - 1;
+        container.classList.toggle('tabs--fade-right', overflows && !atEnd);
+        container.classList.toggle('tabs--fade-left', overflows && !atStart);
     }
 
     it('renders all tabs with correct active state', () => {

@@ -8,7 +8,7 @@
   }
 
   try {
-    const resp = await fetch('modules/data/fun-facts.json');
+    const resp = await R3EUtils.fetchWithTimeout('modules/data/fun-facts.json', {}, 5000);
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const data = await resp.json();
     const facts = data.Facts;

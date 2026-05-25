@@ -41,10 +41,15 @@
     let carGranularity = GRANULARITY_CLASS;
     let trackGranularity = GRANULARITY_TRACK;
 
-    let filterEra = '';
+    let filterEra = [];
     let filterWheel = '';
     let filterTrans = '';
     let filterRating = '';
+
+    // CustomSelect instances for programmatic restore
+    let wheelSelect = null;
+    let transSelect = null;
+    let ratingSelect = null;
 
     // Last picked results for granularity refinement
     let lastCarClassResult = null;   // { className, classLogo }
@@ -106,14 +111,10 @@
 
     /* ── helpers ──────────────────────────────────────────── */
 
-    function escapeHtml(text) {
-        return window.R3EUtils && typeof window.R3EUtils.escapeHtml === 'function'
-            ? window.R3EUtils.escapeHtml(text)
-            : String(text ?? '');
-    }
+    const escapeHtml = (text) => window.R3EUtils.escapeHtml(text);
 
     function resolveClassLogo(className) {
-        return window.R3ETrackUtils ? window.R3ETrackUtils.resolveCarClassLogoByName(className) : '';
+        return window.R3ECarUtils ? window.R3ECarUtils.resolveCarClassLogoByName(className) : '';
     }
 
     function resolveTrackLogo(label) {
@@ -277,7 +278,7 @@
                 <span class="challenge-stats-value">${renderDriverHtml(combinedStats.topDriver, combinedStats.topCountry, combinedStats.topRank)}</span>
             </div>`;
             rows += `<div class="challenge-stats-row challenge-stats-row--link">
-                <a class="challenge-stats-detail-link" href="${escapeHtml(combiDetailHref)}">View full leaderboard →</a>
+                <a class="challenge-stats-detail-link" href="${escapeHtml(combiDetailHref)}" target="_blank" rel="noopener">View full leaderboard →</a>
             </div>`;
         } else if (combinedStats && superclass) {
             // Full view: class row + combined row + both drivers + both links
@@ -315,8 +316,8 @@
             </div>`;
 
             rows += `<div class="challenge-stats-row challenge-stats-row--link">
-                <a class="challenge-stats-detail-link" href="${escapeHtml(detailHref)}">Class leaderboard →</a>
-                <a class="challenge-stats-detail-link" href="${escapeHtml(combiDetailHref)}">Combined leaderboard →</a>
+                <a class="challenge-stats-detail-link" href="${escapeHtml(detailHref)}" target="_blank" rel="noopener">Class leaderboard →</a>
+                <a class="challenge-stats-detail-link" href="${escapeHtml(combiDetailHref)}" target="_blank" rel="noopener">Combined leaderboard →</a>
             </div>`;
         } else if (stats) {
             // Single-class view (no combined)
@@ -334,7 +335,7 @@
                 <span class="challenge-stats-value">${renderDriverHtml(stats.topDriver, stats.topCountry, stats.topRank)}</span>
             </div>`;
             rows += `<div class="challenge-stats-row challenge-stats-row--link">
-                <a class="challenge-stats-detail-link" href="${escapeHtml(detailHref)}">View full leaderboard →</a>
+                <a class="challenge-stats-detail-link" href="${escapeHtml(detailHref)}" target="_blank" rel="noopener">View full leaderboard →</a>
             </div>`;
         }
 
@@ -697,6 +698,7 @@
             hardcoreCb.checked = false;
             hardcoreCb.disabled = false;
         }
+        if (hardcoreLabel) hardcoreLabel.classList.remove('is-active');
         hardcoreMode = false;
         updateRepickButtons();
     }
@@ -721,6 +723,7 @@
 
         hardcoreMode = true;
         if (hardcoreCb) hardcoreCb.checked = true;
+        if (hardcoreLabel) hardcoreLabel.classList.add('is-active');
         pickBtn.classList.add('challenge-pick-btn--hardcore');
         applyHardcoreLockUI();
         return true;
@@ -811,8 +814,8 @@
 
     const ERA_OPTIONS = [
         { value: '', label: 'All years' },
-        { value: 'oldies', label: 'Oldies (1969–1999)' },
-        { value: 'recent', label: 'Recent (2000–2015)' },
+        { value: 'oldies', label: 'Oldies (1969-1999)' },
+        { value: 'recent', label: 'Recent (2000-2015)' },
         { value: 'modern', label: 'Modern (2016-2026)' }
     ];
 
@@ -850,23 +853,156 @@
     ];
 
     function initFilters() {
+        initEraCheckboxFilter();
+
         if (typeof CustomSelect !== 'function') return;
 
-        new CustomSelect('challenge-era-filter', ERA_OPTIONS, (v) => {
-            filterEra = v;
-        }, { searchable: false });
-
-        new CustomSelect('challenge-wheel-filter', WHEEL_OPTIONS, (v) => {
+        wheelSelect = new CustomSelect('challenge-wheel-filter', WHEEL_OPTIONS, (v) => {
             filterWheel = v;
+            ssSet('filter-wheel', v);
         }, { searchable: false });
 
-        new CustomSelect('challenge-trans-filter', TRANS_OPTIONS, (v) => {
+        transSelect = new CustomSelect('challenge-trans-filter', TRANS_OPTIONS, (v) => {
             filterTrans = v;
+            ssSet('filter-trans', v);
         }, { searchable: false });
 
-        new CustomSelect('challenge-rating-filter', RATING_OPTIONS, (v) => {
+        ratingSelect = new CustomSelect('challenge-rating-filter', RATING_OPTIONS, (v) => {
             filterRating = v;
+            ssSet('filter-rating', v);
         }, { searchable: false });
+    }
+
+    /* ── era multi-checkbox dropdown ─────────────────────── */
+
+    function initEraCheckboxFilter() {
+        const root = document.getElementById('challenge-era-filter');
+        if (!root) return;
+        const toggle = root.querySelector('.custom-select__toggle');
+        const menu = root.querySelector('.custom-select__menu');
+        if (!toggle || !menu) return;
+
+        // Build checkbox options
+        const optionsHtml = ERA_OPTIONS.map(opt => {
+            const checked = opt.value === '' ? 'checked' : '';
+            const id = `era-cb-${opt.value || 'all'}`;
+            return `<label class="era-checkbox-option" for="${id}">
+                <input type="checkbox" id="${id}" value="${R3EUtils.escapeHtml(opt.value)}" ${checked}>
+                <span>${R3EUtils.escapeHtml(opt.label)}</span>
+            </label>`;
+        }).join('');
+
+        menu.innerHTML = `<div class="era-checkbox-list">${optionsHtml}</div>`;
+
+        // Toggle open/close
+        toggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = !menu.hidden;
+            if (isOpen) {
+                menu.hidden = true;
+                toggle.setAttribute('aria-expanded', 'false');
+                root.classList.remove('is-open');
+            } else {
+                // Close other open custom-selects
+                document.querySelectorAll('.custom-select.is-open').forEach(el => {
+                    if (el !== root) {
+                        el.classList.remove('is-open');
+                        const m = el.querySelector('.custom-select__menu');
+                        const t = el.querySelector('.custom-select__toggle');
+                        if (m) m.hidden = true;
+                        if (t) t.setAttribute('aria-expanded', 'false');
+                    }
+                });
+                menu.hidden = false;
+                toggle.setAttribute('aria-expanded', 'true');
+                root.classList.add('is-open');
+            }
+        });
+
+        // Close when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!root.contains(e.target)) {
+                menu.hidden = true;
+                toggle.setAttribute('aria-expanded', 'false');
+                root.classList.remove('is-open');
+            }
+        });
+
+        // Checkbox change logic
+        const allCb = menu.querySelector('input[value=""]');
+        const eraCbs = Array.from(menu.querySelectorAll('input[type="checkbox"]')).filter(cb => cb.value !== '');
+
+        menu.addEventListener('change', (e) => {
+            const cb = e.target;
+            if (cb.value === '') {
+                // "All years" clicked — uncheck others
+                if (cb.checked) {
+                    eraCbs.forEach(c => { c.checked = false; });
+                } else {
+                    // Don't allow unchecking "All" if nothing else is checked
+                    cb.checked = true;
+                }
+            } else {
+                // Specific era clicked
+                if (cb.checked) {
+                    allCb.checked = false;
+                    // If all individual eras are now checked, switch to "All years"
+                    if (eraCbs.every(c => c.checked)) {
+                        eraCbs.forEach(c => { c.checked = false; });
+                        allCb.checked = true;
+                    }
+                } else {
+                    // If nothing is checked, re-check "All"
+                    const anyChecked = eraCbs.some(c => c.checked);
+                    if (!anyChecked) allCb.checked = true;
+                }
+            }
+            updateEraFilterState(allCb, eraCbs, toggle);
+            ssSet('filter-era', JSON.stringify(filterEra));
+        });
+
+        // Restore saved era state from session
+        const savedEra = ssGet('filter-era');
+        if (savedEra) {
+            try {
+                const savedEras = JSON.parse(savedEra);
+                if (Array.isArray(savedEras) && savedEras.length > 0) {
+                    allCb.checked = false;
+                    eraCbs.forEach(cb => { cb.checked = savedEras.includes(cb.value); });
+                }
+            } catch (_) { /* ignore bad data */ }
+        }
+
+        updateEraFilterState(allCb, eraCbs, toggle);
+    }
+
+    function updateEraFilterState(allCb, eraCbs, toggle) {
+        if (allCb.checked) {
+            filterEra = [];
+            toggle.innerHTML = 'All years \u25be';
+        } else {
+            filterEra = eraCbs.filter(cb => cb.checked).map(cb => cb.value);
+            const labels = filterEra.map(v => {
+                const opt = ERA_OPTIONS.find(o => o.value === v);
+                return opt ? opt.label.replace(/\s*\(.*\)/, '') : v;
+            });
+            toggle.innerHTML = (labels.join(' + ') || 'All years') + ' \u25be';
+        }
+    }
+
+    function restoreFilterState() {
+        const savedWheel = ssGet('filter-wheel');
+        if (savedWheel && wheelSelect && WHEEL_OPTIONS.some(o => o.value === savedWheel)) {
+            wheelSelect.setValue(savedWheel, { source: 'restore' });
+        }
+        const savedTrans = ssGet('filter-trans');
+        if (savedTrans && transSelect && TRANS_OPTIONS.some(o => o.value === savedTrans)) {
+            transSelect.setValue(savedTrans, { source: 'restore' });
+        }
+        const savedRating = ssGet('filter-rating');
+        if (savedRating && ratingSelect && RATING_OPTIONS.some(o => o.value === savedRating)) {
+            ratingSelect.setValue(savedRating, { source: 'restore' });
+        }
     }
 
     /* ── exclusions ───────────────────────────────────────── */
@@ -1098,10 +1234,10 @@
 
             carsHtml += `<div class="challenge-exclusions__class${singleCls}" data-class="${escapeHtml(className)}">
                 <div class="challenge-exclusions__class-header${classExcludedCls}">
+                    <input type="checkbox" class="challenge-exclusions__class-cb" ${classChecked}>
                     <span class="challenge-exclusions__class-arrow">&#9654;</span>
                     ${logoImg}
                     <span class="challenge-exclusions__class-name">${escapeHtml(className)}</span>
-                    <input type="checkbox" class="challenge-exclusions__class-cb" ${classChecked}>
                 </div>
                 ${carsListHtml ? `<div class="challenge-exclusions__cars">${carsListHtml}</div>` : ''}
             </div>`;
@@ -1265,7 +1401,7 @@
         currentMode = MODE_BOTH;
         carGranularity = GRANULARITY_CLASS;
         trackGranularity = GRANULARITY_TRACK;
-        filterEra = '';
+        filterEra = [];
         filterWheel = '';
         filterTrans = '';
         filterRating = '';
@@ -1378,10 +1514,12 @@
             hardcoreCb.addEventListener('change', () => {
                 hardcoreMode = hardcoreCb.checked;
                 pickBtn.classList.toggle('challenge-pick-btn--hardcore', hardcoreMode);
+                if (hardcoreLabel) hardcoreLabel.classList.toggle('is-active', hardcoreMode);
             });
         }
 
         initFilters();
+        restoreFilterState();
         initExclusions();
 
         // Pre-load valid combinations index (async, non-blocking)

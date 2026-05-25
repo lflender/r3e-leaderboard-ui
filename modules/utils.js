@@ -81,6 +81,24 @@ function getPositionBadgeColor(position, total) {
     return `rgb(${r},${g},${b})`;
 }
 
+/**
+ * Fetch with an AbortController timeout.
+ * @param {string} url
+ * @param {Object} [options] - fetch options
+ * @param {number} [timeoutMs=10000] - timeout in milliseconds
+ * @returns {Promise<Response>}
+ */
+async function fetchWithTimeout(url, options = {}, timeoutMs = 10000) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+        const response = await fetch(url, { ...options, signal: controller.signal });
+        return response;
+    } finally {
+        clearTimeout(timer);
+    }
+}
+
 window.R3EUtils = {
     escapeHtml,
     formatHeader,
@@ -89,6 +107,7 @@ window.R3EUtils = {
     renderRankStars,
     getPositionBadgeColor,
     isDriverSearchActive,
+    fetchWithTimeout,
     ...(window.R3ETimeUtils || {}),
     ...(window.R3ETrackUtils || {}),
     ...(window.R3EUrlUtils || {}),

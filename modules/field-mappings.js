@@ -2,52 +2,31 @@
  * Field Mappings Module
  * Centralized field name variations for consistent data access
  * 
- * NOTE: For column configuration (display names, order, visibility),
- * use ColumnConfig from column-config.js instead.
- * This module is for field value extraction from data objects.
+ * Alias arrays are derived from ColumnConfig (the single source of truth).
+ * ColumnConfig is loaded before this module via <script defer> order.
  */
 
-const FIELD_NAMES = {
-    // Position fields
-    POSITION: ['Position', 'position', 'Pos'],
-    
-    // Driver/Name fields
-    NAME: ['Name', 'name', 'DriverName', 'driver_name'],
-    
-    // Country fields
-    COUNTRY: ['Country', 'country'],
-    
-    // Car Class fields
-    CAR_CLASS: ['CarClass', 'Car Class', 'car_class', 'Class', 'class', 'ClassName', 'className', 'class_name'],
-    
-    // Car fields
-    CAR: ['Car', 'car', 'CarName', 'car_name'],
-    
-    // Lap Time fields
-    LAP_TIME: ['LapTime', 'Lap Time', 'lap_time', 'laptime', 'Time', 'time'],
-    
-    // Track fields
-    TRACK: ['Track', 'track', 'TrackName', 'track_name'],
-    
-    // Difficulty fields
-    DIFFICULTY: ['Difficulty', 'difficulty', 'driving_model', 'DrivingModel'],
-    
-    // Rank fields
-    RANK: ['Rank', 'rank'],
-    
-    // Team fields
-    TEAM: ['Team', 'team'],
-    
-    // ID fields
-    TRACK_ID: ['track_id', 'TrackID', 'trackId', 'Track ID'],
-    CLASS_ID: ['class_id', 'ClassID', 'classId', 'Class ID'],
-    
-    // Entry count fields
-    TOTAL_ENTRIES: ['TotalEntries', 'total_entries', 'entry_count', 'EntryCount'],
-    
-    // Date/Time fields
-    DATE_TIME: ['date_time', 'dateTime', 'Date', 'DateTime']
-};
+const FIELD_NAMES = (() => {
+    const CC = typeof window !== 'undefined' && window.ColumnConfig;
+    const col = (key) => CC ? CC.getColumnByKey(key)?.aliases || [key] : [key];
+
+    return {
+        POSITION:      col('position'),
+        NAME:          col('name'),
+        COUNTRY:       col('country'),
+        CAR_CLASS:     col('car_class'),
+        CAR:           col('car'),
+        LAP_TIME:      col('laptime'),
+        TRACK:         col('track'),
+        DIFFICULTY:    col('difficulty'),
+        RANK:          col('rank'),
+        TEAM:          col('team'),
+        TRACK_ID:      col('track_id'),
+        CLASS_ID:      col('class_id'),
+        TOTAL_ENTRIES: col('total_entries'),
+        DATE_TIME:     col('date_time')
+    };
+})();
 
 /**
  * Helper function to get first matching field value from an object
@@ -66,19 +45,8 @@ function getField(obj, fields, defaultValue = '') {
     return defaultValue;
 }
 
-/**
- * Check if a key matches any of the field variations
- * @param {string} key - Key to check
- * @param {Array<string>} fields - Array of field names to match against
- * @returns {boolean} True if key matches any field
- */
-function isField(key, fields) {
-    return fields.includes(key);
-}
-
 // Make available globally
 if (typeof window !== 'undefined') {
     window.FIELD_NAMES = FIELD_NAMES;
     window.getField = getField;
-    window.isField = isField;
 }

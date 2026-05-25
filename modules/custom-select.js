@@ -43,6 +43,24 @@ class CustomSelect {
     }
     
     /**
+     * Builds logo HTML from a logos array or single logoUrl.
+     * @param {Object} opt - Option object with optional logos[] or logoUrl
+     * @returns {string} HTML string for logos
+     */
+    static buildLogosHtml(opt) {
+        if (opt.logos && opt.logos.length > 0) {
+            const imgs = opt.logos.map(url =>
+                `<img class="custom-select__option-logo" src="${R3EUtils.escapeHtml(url)}" alt="" aria-hidden="true" loading="lazy" decoding="async">`
+            ).join('');
+            return `<span class="custom-select__logos-group">${imgs}</span>`;
+        }
+        if (opt.logoUrl) {
+            return `<img class="custom-select__option-logo" src="${R3EUtils.escapeHtml(opt.logoUrl)}" alt="" aria-hidden="true" loading="lazy" decoding="async">`;
+        }
+        return '';
+    }
+
+    /**
      * Builds the dropdown menu from options
      */
     buildMenu() {
@@ -67,10 +85,7 @@ class CustomSelect {
                 }
             }
 
-            // Optional car class logo prepended to the option label.
-            const logoHtml = opt.logoUrl
-                ? `<img class="custom-select__option-logo" src="${R3EUtils.escapeHtml(opt.logoUrl)}" alt="" aria-hidden="true" loading="lazy" decoding="async">`
-                : '';
+            const logoHtml = CustomSelect.buildLogosHtml(opt);
             
             return `<div class="custom-select__option" data-value="${escapedValue}">${logoHtml}${formattedLabel}</div>`;
         }).join('');
@@ -127,8 +142,13 @@ class CustomSelect {
             }
         });
         this.menu.hidden = false;
+        this.menu.style.left = '';
+        this.menu.style.right = '';
         this.toggle.setAttribute('aria-expanded', 'true');
         this.root.classList.add('is-open');
+        // Keep menu inside viewport: shift left first, then clamp width
+        this.menu.style.maxWidth = '';
+        this._clampToViewport();
         // Reset search and focus input
         if (this.searchInput) {
             this.searchInput.value = '';
@@ -139,12 +159,45 @@ class CustomSelect {
             }
         }
     }
+
+    /**
+     * Clamps the dropdown menu within the viewport using a double-rAF
+     * to ensure layout is computed on mobile devices. Uses visualViewport
+     * API when available to handle pinch-zoom correctly.
+     */
+    _clampToViewport() {
+        // Double-rAF: first rAF ensures the element is in the render tree,
+        // second rAF ensures layout has been computed (needed on mobile).
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                if (this.menu.hidden) return;
+                const vw = (window.visualViewport && window.visualViewport.width) || window.innerWidth;
+                const pad = 8;
+                const rect = this.menu.getBoundingClientRect();
+                if (!rect.width) return; // not laid out yet
+                // 1. Shift left so the right edge fits in the viewport
+                if (rect.right > vw - pad) {
+                    this.menu.style.left = -(rect.right - vw + pad) + 'px';
+                }
+                // 2. If that pushed past the left edge, pin to left edge
+                const afterRect = this.menu.getBoundingClientRect();
+                if (afterRect.left < pad) {
+                    this.menu.style.left = -(this.root.getBoundingClientRect().left - pad) + 'px';
+                    // 3. Clamp width to remaining viewport space
+                    this.menu.style.maxWidth = (vw - pad * 2) + 'px';
+                }
+            });
+        });
+    }
     
     /**
      * Closes the dropdown
      */
     close() {
         this.menu.hidden = true;
+        this.menu.style.left = '';
+        this.menu.style.right = '';
+        this.menu.style.maxWidth = '';
         this.toggle.setAttribute('aria-expanded', 'false');
         this.root.classList.remove('is-open');
         // Reset search state
@@ -184,10 +237,8 @@ class CustomSelect {
                 }
             }
 
-            // Mirror the logo into the toggle button so the selected class is visible when closed.
-            const logoHtml = opt.logoUrl
-                ? `<img class="custom-select__option-logo" src="${R3EUtils.escapeHtml(opt.logoUrl)}" alt="" aria-hidden="true" loading="lazy" decoding="async">`
-                : '';
+            // Mirror the logo(s) into the toggle button so the selected class is visible when closed.
+            const logoHtml = CustomSelect.buildLogosHtml(opt);
             
             this.toggle.innerHTML = `${logoHtml}${formattedLabel} ▾`;
         }
@@ -252,18 +303,5 @@ class CustomSelect {
     }
 }
 
-/**
- * Legacy helper function for backward compatibility
- * Sets up a custom select using the same pattern as original code
- * @param {string} id - Element ID
- * @param {Array<{value: string, label: string}>} options - Options array
- * @param {Function} onChange - Change callback
- * @returns {CustomSelect} Instance
- */
-function setupCustomSelect(id, options, onChange) {
-    return new CustomSelect(id, options, onChange);
-}
-
 // Export for use in other modules
 window.CustomSelect = CustomSelect;
-window.setupCustomSelect = setupCustomSelect;

@@ -14,7 +14,7 @@
         }
 
         try {
-            const response = await fetch(`templates/${templateName}.html`);
+            const response = await R3EUtils.fetchWithTimeout(`templates/${templateName}.html`, {}, 5000);
             if (!response.ok) {
                 throw new Error(`Failed to load template: ${templateName}`);
             }

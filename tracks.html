@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Track Info - RaceRoom Leaderboards Explorer</title>
+    <title>Leaderboards - RaceRoom Leaderboards Explorer</title>
     <meta name="description" content="View RaceRoom (R3E) track/class combinations with entry counts and filters.">
     <link rel="canonical" href="https://r3e-leaderboards.info/tracks.html">
     <link rel="alternate" hreflang="en" href="https://r3e-leaderboards.info/tracks.html">
@@ -11,7 +11,7 @@
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <!-- Open Graph -->
     <meta property="og:site_name" content="RaceRoom Leaderboards Explorer">
-    <meta property="og:title" content="Track Info - RaceRoom Leaderboards Explorer">
+    <meta property="og:title" content="Leaderboards - RaceRoom Leaderboards Explorer">
     <meta property="og:description" content="Browse track/class combinations and entries for RaceRoom leaderboards.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://r3e-leaderboards.info/tracks.html">
@@ -21,14 +21,14 @@
     <meta property="og:image:alt" content="RaceRoom Leaderboards track information page">
     <meta property="og:locale" content="en_US">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Track Info - RaceRoom Leaderboards Explorer">
+    <meta name="twitter:title" content="Leaderboards - RaceRoom Leaderboards Explorer">
     <meta name="twitter:description" content="Browse track/class combinations and entries for RaceRoom leaderboards.">
     <meta name="twitter:image" content="https://r3e-leaderboards.info/images/rle-share.png">
     
     <!-- Analytics (PostHog via first-party proxy) -->
-    <script src="modules/analytics.js?v=7"></script>
+    <script src="modules/analytics.js?v=8" defer></script>
     
-    <link rel="stylesheet" href="style.css?v=255">
+    <link rel="stylesheet" href="style.css?v=257">
     <!-- Site Icons -->
     <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png?v=2">
     <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png?v=2">
@@ -38,7 +38,7 @@
     {
         "@context": "https://schema.org",
         "@type": "WebPage",
-        "name": "Track Info",
+        "name": "Leaderboards",
         "url": "https://r3e-leaderboards.info/tracks.html"
     }
     </script>
@@ -53,12 +53,12 @@
         <div class="tab-content">
             <div id="track-info" class="tab-panel active">
                 <div class="search-container" id="track-search-container">
-                    <div id="track-filter-ui" class="custom-select" role="listbox" aria-label="Filter by track">
-                        <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All tracks ▾</button>
-                        <div class="custom-select__menu" role="presentation" hidden></div>
-                    </div>
                     <div id="track-class-filter-ui" class="custom-select" role="listbox" aria-label="Filter by class">
                         <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All classes ▾</button>
+                        <div class="custom-select__menu" role="presentation" hidden></div>
+                    </div>
+                    <div id="track-filter-ui" class="custom-select" role="listbox" aria-label="Filter by track">
+                        <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All tracks ▾</button>
                         <div class="custom-select__menu" role="presentation" hidden></div>
                     </div>
                     <div id="combine-checkbox-container" class="combine-checkbox-container" style="display: none;">
@@ -114,35 +114,36 @@
     <div id="site-footer"></div>
 
     <!-- Loaders -->
-    <script src="modules/loaders/template-loader.js?v=2" defer></script>
-    <script src="modules/loaders/tabs-loader.js?v=2" defer></script>
+    <script src="modules/loaders/template-loader.js?v=3" defer></script>
+    <script src="modules/loaders/tabs-loader.js?v=7" defer></script>
     <script src="modules/loaders/footer-loader.js?v=2" defer></script>
     <script src="modules/loaders/header-loader.js?v=2" defer></script>
 
     <!-- Core modules -->
     <script src="modules/data/country-mappings.js?v=3" defer></script>
-    <script src="modules/column-config.js?v=4" defer></script>
-    <script src="modules/compressed-json-helper.js?v=1" defer></script>
-    <script src="modules/custom-select.js?v=8" defer></script>
-    <script src="modules/data-normalizer.js?v=2" defer></script>
+    <script src="modules/column-config.js?v=5" defer></script>
+    <script src="modules/compressed-json-helper.js?v=2" defer></script>
+    <script src="modules/custom-select.js?v=12" defer></script>
+    <script src="modules/data-normalizer.js?v=4" defer></script>
     <script src="modules/driver-index-service.js?v=8" defer></script>
     <script src="modules/driver-search-service.js?v=18" defer></script>
-    <script src="modules/data-service.js?v=39" defer></script>
-    <script src="modules/field-mappings.js?v=1" defer></script>
+    <script src="modules/data-service.js?v=44" defer></script>
+    <script src="modules/filter-options-service.js?v=1" defer></script>
+    <script src="modules/field-mappings.js?v=4" defer></script>
     <script src="modules/flag-helper.js?v=2" defer></script>
-    <script src="modules/mp-pos-service.js?v=11" defer></script>
-    <script src="modules/sort-service.js?v=2" defer></script>
-    <script src="modules/table-renderer.js?v=42" defer></script>
-    <script src="modules/template-helper.js?v=3" defer></script>
     <script src="modules/time-helper.js?v=3" defer></script>
-    <script src="modules/utils-track.js?v=1" defer></script>
+    <script src="modules/track-helper.js?v=2" defer></script>
     <script src="modules/url-helper.js?v=2" defer></script>
-    <script src="modules/utils-car.js?v=12" defer></script>
-    <script src="modules/utils.js?v=12" defer></script>
+    <script src="modules/car-helper.js?v=15" defer></script>
+    <script src="modules/utils.js?v=13" defer></script>
+    <script src="modules/mp-pos-service.js?v=12" defer></script>
+    <script src="modules/sort-service.js?v=2" defer></script>
+    <script src="modules/table-renderer.js?v=45" defer></script>
+    <script src="modules/template-helper.js?v=3" defer></script>
     
     <!-- Feature modules -->
     <script src="modules/navigation.js?v=4" defer></script>
-    <script src="modules/status-display.js?v=3" defer></script>
+    <script src="modules/status-display.js?v=5" defer></script>
     <script src="modules/tab-manager.js?v=2" defer></script>
     
     <!-- Data -->
@@ -150,7 +151,7 @@
     <script src="modules/data/cars.js?v=10" defer></script>
     <script src="modules/data/tracks.js?v=5" defer></script>
     <script src="modules/data/track-images.js?v=3" defer></script>
-    <script src="modules/pages/track-info.js?v=26" defer></script>
+    <script src="modules/pages/track-info.js?v=28" defer></script>
 
     <!-- Application script -->
     <script src="script.js?v=9" defer></script>

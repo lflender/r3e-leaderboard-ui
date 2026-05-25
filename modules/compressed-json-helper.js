@@ -31,7 +31,6 @@
     }
 
     window.CompressedJsonHelper = {
-        ensureDecompressionSupport,
         readGzipText,
         readGzipJson
     };

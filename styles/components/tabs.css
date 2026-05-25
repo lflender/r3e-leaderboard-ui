@@ -53,6 +53,63 @@
     display: none;
 }
 
+/* Scroll-overflow fade hints */
+.tabs-scroll-wrapper {
+    position: relative;
+}
+
+.tabs-chevron {
+    display: none;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--surface-alt, var(--surface));
+    color: var(--text-secondary);
+    border: none;
+    border-radius: 50%;
+    width: 1.6rem;
+    height: 1.6rem;
+    cursor: pointer;
+    z-index: 2;
+    padding: 0;
+    opacity: 0;
+    transition: opacity 0.2s;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+.tabs-chevron--left {
+    left: -0.6rem;
+}
+.tabs-chevron--left svg {
+    transform: rotate(180deg);
+}
+.tabs-chevron--right {
+    right: -0.6rem;
+}
+.tabs-chevron.visible {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.9;
+}
+.tabs-chevron:hover {
+    opacity: 1;
+    color: var(--text);
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+}
+
+.tabs--fade-right {
+    -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+    mask-image: linear-gradient(to right, black 85%, transparent 100%);
+}
+.tabs--fade-left {
+    -webkit-mask-image: linear-gradient(to left, black 85%, transparent 100%);
+    mask-image: linear-gradient(to left, black 85%, transparent 100%);
+}
+.tabs--fade-left.tabs--fade-right {
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%);
+}
+
 .tab-content {
     background-color: var(--surface);
     padding: 2rem;

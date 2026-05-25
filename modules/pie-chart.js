@@ -107,7 +107,7 @@
                     `<circle cx="${cx}" cy="${cy}" r="${r}" ` +
                     `fill="${slice.color}" class="pie-slice" data-index="${index}" ` +
                     `data-label="${escapeAttr(slice.label)}" data-value="${slice.value}" ` +
-                    `data-percentage="${slice.percentage.toFixed(1)}" />`
+                    `data-percentage="${slice.percentage.toFixed(1)}" data-mid-angle="${slice.midAngle}" />`
                 );
             } else {
                 const endAngle = currentAngle + sliceAngle;
@@ -115,7 +115,8 @@
                 paths.push(
                     `<path d="${d}" fill="${slice.color}" class="pie-slice" ` +
                     `data-index="${index}" data-label="${escapeAttr(slice.label)}" ` +
-                    `data-value="${slice.value}" data-percentage="${slice.percentage.toFixed(1)}" />`
+                    `data-value="${slice.value}" data-percentage="${slice.percentage.toFixed(1)}" ` +
+                    `data-mid-angle="${slice.midAngle}" />`
                 );
                 currentAngle = endAngle;
             }
@@ -272,18 +273,11 @@
         });
     }
 
-    function escapeHtml(str) {
-        if (window.R3EUtils && typeof window.R3EUtils.escapeHtml === 'function') {
-            return window.R3EUtils.escapeHtml(str);
-        }
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
-    }
+    const escapeHtml = (str) => window.R3EUtils.escapeHtml(str);
 
     function escapeAttr(str) {
         return String(str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
-    window.PieChart = { render, computeSlices };
+    window.PieChart = { render, computeSlices, COLORS };
 })();

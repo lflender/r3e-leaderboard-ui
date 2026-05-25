@@ -18,7 +18,8 @@ function makeR3EUtilsStub() {
             const params = new URLSearchParams(window.location.search);
             return Boolean((params.get('driver') || params.get('query') || '').trim());
         },
-        escapeHtml: (v) => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        escapeHtml: (v) => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'),
+        fetchWithTimeout: (url, options = {}) => fetch(url, options)
     };
 }
 

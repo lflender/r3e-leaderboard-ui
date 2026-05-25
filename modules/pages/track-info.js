@@ -55,7 +55,7 @@
   }
 
   // Track filter — CustomSelect handles open/close/logo rendering
-  new CustomSelect('track-filter-ui', dataService.getTrackOptions(), (value, opts) => {
+  new CustomSelect('track-filter-ui', FilterOptionsService.getTrackOptions(), (value, opts) => {
     activeTrackId = value ? Number(value) : null;
     trackCurrentPage = 1;
     if (opts?.source === 'user') {
@@ -65,8 +65,8 @@
   });
   
   // Initialize class menu with superclass categories
-  const superclassOptions = dataService.getSuperclassOptions();
-  const regularClassOptions = dataService.getClassOptionsFromCarsData();
+  const superclassOptions = FilterOptionsService.getSuperclassOptions();
+  const regularClassOptions = FilterOptionsService.getClassOptionsFromCarsData();
   
   const classOptions = [{ value: '', label: 'All classes' }]
     .concat(superclassOptions)
@@ -409,7 +409,7 @@
     allCombinationsPromise = (async () => {
       const cacheVersion = await getTrackCacheVersion();
       try {
-        const resp = await fetch(`cache/combinations/all_combinations.json.gz?v=${cacheVersion}`);
+        const resp = await R3EUtils.fetchWithTimeout(`cache/combinations/all_combinations.json.gz?v=${cacheVersion}`, {}, 15000);
         if (!resp.ok) throw new Error('HTTP ' + resp.status);
         const data = await decompressGzipToJson(resp);
         let combinations = [];
@@ -448,7 +448,7 @@
       } else {
         // No filters: use legacy top_combinations.json.gz for speed (1000 cap is intentional for default view)
         const cacheVersion = await getTrackCacheVersion();
-        const resp = await fetch(`cache/combinations/top_combinations.json.gz?v=${cacheVersion}`);
+        const resp = await R3EUtils.fetchWithTimeout(`cache/combinations/top_combinations.json.gz?v=${cacheVersion}`, {}, 15000);
         if (!resp.ok) throw new Error('HTTP ' + resp.status);
         const data = await decompressGzipToJson(resp);
         if (Array.isArray(data)) {

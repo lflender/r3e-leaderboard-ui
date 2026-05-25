@@ -114,7 +114,7 @@
     const escapeHtml = (text) => window.R3EUtils.escapeHtml(text);
 
     function resolveClassLogo(className) {
-        return window.R3ETrackUtils ? window.R3ETrackUtils.resolveCarClassLogoByName(className) : '';
+        return window.R3ECarUtils ? window.R3ECarUtils.resolveCarClassLogoByName(className) : '';
     }
 
     function resolveTrackLogo(label) {

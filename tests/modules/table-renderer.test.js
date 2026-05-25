@@ -4,9 +4,9 @@ import { loadBrowserScript } from '../helpers/script-loader.js';
 describe('table-renderer track resolution', () => {
     beforeAll(() => {
         loadBrowserScript('modules/data/track-images.js');
-        loadBrowserScript('modules/utils-car.js');
+        loadBrowserScript('modules/car-helper.js');
         loadBrowserScript('modules/time-helper.js');
-        loadBrowserScript('modules/utils-track.js');
+        loadBrowserScript('modules/track-helper.js');
         loadBrowserScript('modules/url-helper.js');
         loadBrowserScript('modules/utils.js');
         loadBrowserScript('modules/field-mappings.js');

@@ -11,11 +11,10 @@ describe('ChallengePicker page', () => {
     beforeAll(() => {
         window.R3EAnalytics = { track: vi.fn() };
         window.R3EUtils = { escapeHtml: (v) => String(v ?? '') };
-        window.R3ETrackUtils = {
-            resolveCarClassLogoByName: (name) => name ? `class-logo://${name}` : ''
-        };
+        window.R3ETrackUtils = {};
         window.R3ECarUtils = {
             resolveBrandLogoPath: (name) => name ? `brand-logo://${name}` : '',
+            resolveCarClassLogoByName: (name) => name ? `class-logo://${name}` : '',
             wheelBadge: (cat) => `<span class="car-badge">${cat}</span>`,
             transBadge: (cat) => `<span class="car-badge trans">${cat}</span>`,
             driveBadge: (drive) => `<span class="car-badge drive">${drive}</span>`,

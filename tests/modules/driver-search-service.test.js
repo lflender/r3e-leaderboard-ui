@@ -452,3 +452,383 @@ describe('DataService driver-search module', () => {
     });
 });
 
+describe('Extracted searchDriver helper methods', () => {
+    let service;
+
+    beforeEach(() => {
+        service = new window.DataService();
+        window.CARS_DATA = [];
+    });
+
+    describe('_parseSearchInput', () => {
+        it('returns plain search context for unquoted input', () => {
+            const ctx = service._parseSearchInput('Alice Smith');
+            expect(ctx.searchTerm).toBe('Alice Smith');
+            expect(ctx.searchLower).toBe('alice smith');
+            expect(ctx.isExactSearch).toBe(false);
+            expect(ctx.accentSearch).toBe(false);
+            expect(ctx.exactAccentSearch).toBe(false);
+            expect(ctx.partialAccentSearch).toBe(false);
+            expect(ctx.accentSearchTerm).toBe('');
+        });
+
+        it('detects double-quoted exact search', () => {
+            const ctx = service._parseSearchInput('"Alice Smith"');
+            expect(ctx.searchTerm).toBe('Alice Smith');
+            expect(ctx.isExactSearch).toBe(true);
+            expect(ctx.accentSearch).toBe(false);
+        });
+
+        it('detects single-quoted exact search', () => {
+            const ctx = service._parseSearchInput("'Bob'");
+            expect(ctx.searchTerm).toBe('Bob');
+            expect(ctx.isExactSearch).toBe(true);
+        });
+
+        it('detects accent search for accented input', () => {
+            const ctx = service._parseSearchInput('José');
+            expect(ctx.accentSearch).toBe(true);
+            expect(ctx.partialAccentSearch).toBe(true);
+            expect(ctx.exactAccentSearch).toBe(false);
+            expect(ctx.accentSearchTerm).toBe('josé');
+        });
+
+        it('detects exact accent search for quoted accented input', () => {
+            const ctx = service._parseSearchInput('"José"');
+            expect(ctx.isExactSearch).toBe(true);
+            expect(ctx.accentSearch).toBe(true);
+            expect(ctx.exactAccentSearch).toBe(true);
+            expect(ctx.partialAccentSearch).toBe(false);
+        });
+
+        it('trims whitespace from input', () => {
+            const ctx = service._parseSearchInput('  Alice  ');
+            expect(ctx.searchTerm).toBe('Alice');
+        });
+    });
+
+    describe('_findMatchedMirrorKeys', () => {
+        it('returns direct O(1) lookup matches for exact search', () => {
+            const mirror = { 'alice smith': true, 'bob jones': true, 'alice jones': true };
+            const ctx = service._parseSearchInput('"Alice Smith"');
+            const keys = service._findMatchedMirrorKeys(mirror, ctx);
+            expect(keys).toContain('alice smith');
+            expect(keys).not.toContain('bob jones');
+        });
+
+        it('falls back to linear scan when no direct match in exact mode', () => {
+            const mirror = { 'alice smith': true, 'bob smith': true };
+            const ctx = service._parseSearchInput('"Smith"');
+            const keys = service._findMatchedMirrorKeys(mirror, ctx);
+            expect(keys).toContain('alice smith');
+            expect(keys).toContain('bob smith');
+        });
+
+        it('returns substring matches for partial search', () => {
+            const mirror = { 'alice smith': true, 'bob jones': true, 'alice jones': true };
+            const ctx = service._parseSearchInput('alice');
+            const keys = service._findMatchedMirrorKeys(mirror, ctx);
+            expect(keys).toContain('alice smith');
+            expect(keys).toContain('alice jones');
+            expect(keys).not.toContain('bob jones');
+        });
+
+        it('returns empty array when no keys match', () => {
+            const mirror = { 'alice smith': true };
+            const ctx = service._parseSearchInput('zzz');
+            const keys = service._findMatchedMirrorKeys(mirror, ctx);
+            expect(keys).toHaveLength(0);
+        });
+    });
+
+    describe('_capAndSortMirrorKeys', () => {
+        it('returns keys unchanged when below the cap', () => {
+            const keys = ['alice', 'bob', 'charlie'];
+            const result = service._capAndSortMirrorKeys(keys, 'alice');
+            expect(result).toEqual(['alice', 'bob', 'charlie']);
+        });
+
+        it('caps at 500 and prioritizes prefix matches', () => {
+            const keys = [];
+            for (let i = 0; i < 600; i++) {
+                keys.push(`driver_${String(i).padStart(4, '0')}`);
+            }
+            keys.push('max_short');
+            keys.push('max_longer_name');
+            const result = service._capAndSortMirrorKeys(keys, 'max');
+            expect(result).toHaveLength(500);
+            expect(result[0]).toBe('max_short');
+            expect(result[1]).toBe('max_longer_name');
+        });
+    });
+
+    describe('_loadShardsForKeys', () => {
+        it('loads shards and metadata for matched keys', async () => {
+            vi.spyOn(service, '_getShardKeyForName').mockReturnValue('a');
+            vi.spyOn(service, '_loadDriverShard').mockResolvedValue({ 'alice': [{ name: 'Alice' }] });
+            vi.spyOn(service, '_loadDriverMetadataShard').mockResolvedValue({ 'alice': { name: 'Alice', country: 'SE' } });
+
+            const ctx = await service._loadShardsForKeys(['alice']);
+            expect(ctx.shardDataByKey.get('a')).toEqual({ 'alice': [{ name: 'Alice' }] });
+            expect(ctx.metadataByKey.get('a')).toEqual({ 'alice': { name: 'Alice', country: 'SE' } });
+        });
+
+        it('provides lazy fallback loading', async () => {
+            vi.spyOn(service, '_getShardKeyForName').mockReturnValue('a');
+            vi.spyOn(service, '_loadDriverShard').mockImplementation(async (key) => {
+                if (key === '_') return { 'special': [{ name: 'Special' }] };
+                return {};
+            });
+            vi.spyOn(service, '_loadDriverMetadataShard').mockImplementation(async (key) => {
+                if (key === '_') return { 'special': { name: 'Special' } };
+                return {};
+            });
+
+            const ctx = await service._loadShardsForKeys(['alice']);
+            // Fallback not loaded yet
+            expect(ctx.getFallback().fallbackShard).toBeNull();
+            // Trigger lazy load
+            await ctx.ensureFallbackData();
+            expect(ctx.getFallback().fallbackShard).toEqual({ 'special': [{ name: 'Special' }] });
+        });
+    });
+
+    describe('_resolveDriverData', () => {
+        it('resolves metadata and entries from primary shard', async () => {
+            vi.spyOn(service, '_getShardKeyForName').mockReturnValue('a');
+            const shardCtx = {
+                shardDataByKey: new Map([['a', { 'alice smith': [{ name: 'Alice Smith', track_id: 10 }] }]]),
+                metadataByKey: new Map([['a', { 'alice smith': { name: 'Alice Smith', country: 'SE' } }]]),
+                ensureFallbackData: vi.fn(),
+                getFallback: () => ({ fallbackShard: null, fallbackMetadata: null })
+            };
+
+            const result = await service._resolveDriverData('alice smith', shardCtx);
+            expect(result.metaEntry).toEqual({ name: 'Alice Smith', country: 'SE' });
+            expect(result.driverEntries).toEqual([{ name: 'Alice Smith', track_id: 10 }]);
+        });
+
+        it('falls back to _ shard when primary has no data', async () => {
+            vi.spyOn(service, '_getShardKeyForName').mockReturnValue('o');
+            const shardCtx = {
+                shardDataByKey: new Map([['o', {}]]),
+                metadataByKey: new Map([['o', {}]]),
+                ensureFallbackData: vi.fn(),
+                getFallback: () => ({
+                    fallbackShard: { 'oscar': [{ name: 'Óscar', track_id: 5 }] },
+                    fallbackMetadata: { 'oscar': { name: 'Óscar', country: 'Spain' } }
+                })
+            };
+
+            const result = await service._resolveDriverData('oscar', shardCtx);
+            expect(shardCtx.ensureFallbackData).toHaveBeenCalled();
+            expect(result.metaEntry).toEqual({ name: 'Óscar', country: 'Spain' });
+            expect(result.driverEntries).toEqual([{ name: 'Óscar', track_id: 5 }]);
+        });
+    });
+
+    describe('_filterMetadataExact', () => {
+        it('filters metadata candidates by exact word match', () => {
+            const candidates = [
+                { name: 'José López', path_id: '1' },
+                { name: 'jose lopez', path_id: '2' }
+            ];
+            const ctx = service._parseSearchInput('"José"');
+            const result = service._filterMetadataExact(candidates, ctx);
+            expect(result).toHaveLength(1);
+            expect(result[0].name).toBe('José López');
+        });
+
+        it('returns empty when no candidates match', () => {
+            const candidates = [{ name: 'Alice Smith', path_id: '1' }];
+            const ctx = service._parseSearchInput('"Bob"');
+            const result = service._filterMetadataExact(candidates, ctx);
+            expect(result).toHaveLength(0);
+        });
+
+        it('falls back to folded matching for special european letters', () => {
+            const candidates = [{ name: 'Bruno Bæ', path_id: '1' }];
+            const ctx = service._parseSearchInput('"Bruno Bæ"');
+            const result = service._filterMetadataExact(candidates, ctx);
+            expect(result).toHaveLength(1);
+            expect(result[0].name).toBe('Bruno Bæ');
+        });
+    });
+
+    describe('_filterMetadataPartialAccent', () => {
+        it('includes candidates whose name contains accented search term', () => {
+            const candidates = [
+                { name: 'José López', path_id: '1' },
+                { name: 'jose plain', path_id: '2' }
+            ];
+            const ctx = service._parseSearchInput('José');
+            const result = service._filterMetadataPartialAccent(candidates, ctx);
+            expect(result).toHaveLength(1);
+            expect(result[0].name).toBe('José López');
+        });
+
+        it('uses folded matching for special european letters', () => {
+            const candidates = [
+                { name: 'Søren Hansen', path_id: '1' },
+                { name: 'Sven Hansen', path_id: '2' }
+            ];
+            const ctx = service._parseSearchInput('Søren');
+            const result = service._filterMetadataPartialAccent(candidates, ctx);
+            expect(result).toHaveLength(1);
+            expect(result[0].name).toBe('Søren Hansen');
+        });
+    });
+
+    describe('_filterEntriesByPathIds', () => {
+        it('filters entries to those matching allowed path_ids', () => {
+            const entries = [
+                { path_id: '100', track_id: 10 },
+                { path_id: '200', track_id: 10 },
+                { path_id: '300', track_id: 10 }
+            ];
+            const metaCandidates = [
+                { path_id: '100' },
+                { path_id: '300' }
+            ];
+            const result = service._filterEntriesByPathIds(entries, metaCandidates);
+            expect(result).toHaveLength(2);
+            expect(result.map(e => e.path_id)).toEqual(['100', '300']);
+        });
+
+        it('returns all entries when metadata has no path_ids', () => {
+            const entries = [{ track_id: 10 }, { track_id: 11 }];
+            const metaCandidates = [{ name: 'Alice' }];
+            const result = service._filterEntriesByPathIds(entries, metaCandidates);
+            expect(result).toHaveLength(2);
+        });
+    });
+
+    describe('_filterLegacyEntriesExact', () => {
+        it('filters entries by exact name match', () => {
+            const entries = [
+                { name: 'Alice Smith', track_id: 10 },
+                { name: 'Alice Jones', track_id: 11 }
+            ];
+            const ctx = service._parseSearchInput('"Alice Smith"');
+            const result = service._filterLegacyEntriesExact(entries, ctx);
+            expect(result).toHaveLength(1);
+            expect(result[0].name).toBe('Alice Smith');
+        });
+
+        it('falls back to folded matching for european letters', () => {
+            const entries = [
+                { name: 'Bruno Bæ', track_id: 10 },
+                { name: 'Bruno Bae', track_id: 11 }
+            ];
+            const ctx = service._parseSearchInput('"Bruno Bæ"');
+            const result = service._filterLegacyEntriesExact(entries, ctx);
+            expect(result).toHaveLength(1);
+            expect(result[0].name).toBe('Bruno Bæ');
+        });
+    });
+
+    describe('_filterLegacyEntriesPartialAccent', () => {
+        it('filters entries whose name contains the accented term', () => {
+            const entries = [
+                { name: 'José López', track_id: 10 },
+                { name: 'Joseph Martin', track_id: 11 }
+            ];
+            const ctx = service._parseSearchInput('José');
+            const result = service._filterLegacyEntriesPartialAccent(entries, ctx);
+            expect(result).toHaveLength(1);
+            expect(result[0].name).toBe('José López');
+        });
+
+        it('uses folded matching for special european letters', () => {
+            const entries = [
+                { name: 'Łukasz Nowak', track_id: 10 },
+                { name: 'Luke Smith', track_id: 11 }
+            ];
+            const ctx = service._parseSearchInput('Łukasz');
+            const result = service._filterLegacyEntriesPartialAccent(entries, ctx);
+            expect(result).toHaveLength(1);
+            expect(result[0].name).toBe('Łukasz Nowak');
+        });
+    });
+
+    describe('_buildResultsForMirrorKey', () => {
+        it('returns metadata-based results when metadata candidates exist', () => {
+            const entries = [{ name: 'Alice', path_id: '100', track_id: 10 }];
+            const metaEntry = { name: 'Alice Smith', path_id: '100', country: 'SE', team: 'A', rank: 'B' };
+            const ctx = service._parseSearchInput('Alice');
+            const result = service._buildResultsForMirrorKey(entries, metaEntry, 'alice smith', entries, ctx);
+            expect(result).toHaveLength(1);
+            expect(result[0].driver).toBe('Alice Smith');
+            expect(result[0].country).toBe('SE');
+        });
+
+        it('returns legacy results when no metadata exists', () => {
+            const entries = [{ name: 'Alice Smith', country: 'SE', team: 'Alpha', track_id: 10 }];
+            const ctx = service._parseSearchInput('Alice');
+            const result = service._buildResultsForMirrorKey(entries, null, 'alice smith', entries, ctx);
+            expect(result).toHaveLength(1);
+            expect(result[0].driver).toBe('Alice Smith');
+            expect(result[0].country).toBe('SE');
+            expect(result[0].team).toBe('Alpha');
+        });
+
+        it('returns null for exact search when no metadata candidates match', () => {
+            const entries = [{ name: 'Bob Jones', path_id: '100', track_id: 10 }];
+            const metaEntry = { name: 'Bob Jones', path_id: '100', country: 'US' };
+            const ctx = service._parseSearchInput('"Alice"');
+            const result = service._buildResultsForMirrorKey(entries, metaEntry, 'bob jones', entries, ctx);
+            expect(result).toBeNull();
+        });
+
+        it('returns null for exact legacy search when no entries match', () => {
+            const entries = [{ name: 'Bob Jones', track_id: 10 }];
+            const ctx = service._parseSearchInput('"Alice"');
+            const result = service._buildResultsForMirrorKey(entries, null, 'bob jones', entries, ctx);
+            expect(result).toBeNull();
+        });
+    });
+
+    describe('_deduplicateResults', () => {
+        it('merges results with the same pathId', () => {
+            const results = [
+                { driver: 'Alice', pathId: '100', country: 'SE', team: '', rank: '', entries: [{ track_id: 10, path_id: '100' }] },
+                { driver: 'Alice', pathId: '100', country: '', team: 'Alpha', rank: 'A', entries: [{ track_id: 11, path_id: '100' }] }
+            ];
+            const deduped = service._deduplicateResults(results);
+            expect(deduped).toHaveLength(1);
+            expect(deduped[0].entries).toHaveLength(2);
+            expect(deduped[0].country).toBe('SE');
+            expect(deduped[0].team).toBe('Alpha');
+            expect(deduped[0].rank).toBe('A');
+        });
+
+        it('keeps distinct results separate', () => {
+            const results = [
+                { driver: 'Alice', pathId: '100', country: 'SE', entries: [{ track_id: 10 }] },
+                { driver: 'Bob', pathId: '200', country: 'US', entries: [{ track_id: 11 }] }
+            ];
+            const deduped = service._deduplicateResults(results);
+            expect(deduped).toHaveLength(2);
+        });
+
+        it('deduplicates legacy results by driver+country+team', () => {
+            const results = [
+                { driver: 'Alice', country: 'SE', team: 'Alpha', entries: [{ track_id: 10, car_class: 'GT3', difficulty: 'Get Real', lap_time: '1:30' }] },
+                { driver: 'Alice', country: 'SE', team: 'Alpha', entries: [{ track_id: 10, car_class: 'GT3', difficulty: 'Get Real', lap_time: '1:30' }] }
+            ];
+            const deduped = service._deduplicateResults(results);
+            expect(deduped).toHaveLength(1);
+            expect(deduped[0].entries).toHaveLength(1);
+        });
+
+        it('removes duplicate entries within a merged result', () => {
+            const results = [
+                { driver: 'Alice', pathId: '100', entries: [{ path_id: '100', track_id: 10, car_class: 'GT3', difficulty: 'X', lap_time: '1:30' }] },
+                { driver: 'Alice', pathId: '100', entries: [{ path_id: '100', track_id: 10, car_class: 'GT3', difficulty: 'X', lap_time: '1:30' }] }
+            ];
+            const deduped = service._deduplicateResults(results);
+            expect(deduped).toHaveLength(1);
+            expect(deduped[0].entries).toHaveLength(1);
+        });
+    });
+});

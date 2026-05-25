@@ -3,9 +3,9 @@ import { loadBrowserScript } from '../helpers/script-loader.js';
 
 describe('R3EUtils', () => {
     beforeAll(() => {
-        loadBrowserScript('modules/utils-car.js');
+        loadBrowserScript('modules/car-helper.js');
         loadBrowserScript('modules/time-helper.js');
-        loadBrowserScript('modules/utils-track.js');
+        loadBrowserScript('modules/track-helper.js');
         loadBrowserScript('modules/url-helper.js');
         loadBrowserScript('modules/utils.js');
     });

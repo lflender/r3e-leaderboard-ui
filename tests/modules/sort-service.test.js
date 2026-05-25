@@ -21,9 +21,9 @@ function makeEntry({
 
 describe('table-sort-service', () => {
     beforeAll(() => {
-        loadBrowserScript('modules/utils-car.js');
+        loadBrowserScript('modules/car-helper.js');
         loadBrowserScript('modules/time-helper.js');
-        loadBrowserScript('modules/utils-track.js');
+        loadBrowserScript('modules/track-helper.js');
         loadBrowserScript('modules/url-helper.js');
         loadBrowserScript('modules/utils.js');
         loadBrowserScript('modules/column-config.js');

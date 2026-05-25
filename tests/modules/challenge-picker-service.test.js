@@ -3,11 +3,10 @@ import { loadBrowserScript } from '../helpers/script-loader.js';
 
 describe('ChallengePickerService', () => {
     beforeAll(() => {
-        window.R3ETrackUtils = {
-            resolveCarClassLogoByName: (name) => name ? `logo://${name}` : ''
-        };
+        window.R3ETrackUtils = {};
         window.R3ECarUtils = {
-            resolveBrandLogoPath: (carName) => carName ? `brand://${carName}` : ''
+            resolveBrandLogoPath: (carName) => carName ? `brand://${carName}` : '',
+            resolveCarClassLogoByName: (name) => name ? `logo://${name}` : ''
         };
         window.R3ETrackImages = {
             resolveTrackLogoByLabel: (label) => label ? `track://${label}` : ''

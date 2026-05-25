@@ -67,7 +67,7 @@ beforeEach(() => {
 
     // car-info.js references R3ECarUtils badge helpers
     if (!window.R3ECarUtils) {
-        loadBrowserScript('modules/utils-car.js');
+        loadBrowserScript('modules/car-helper.js');
     }
 });
 

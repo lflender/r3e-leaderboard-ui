@@ -358,13 +358,7 @@
             }));
         },
 
-        async searchDriver(driverName, filters = {}) {
-            const driverMirror = await this.waitForDriverIndex();
-
-            if (!driverMirror || Object.keys(driverMirror).length === 0) {
-                throw new Error('Driver index is loading or unavailable. Please try again in a moment.');
-            }
-
+        _parseSearchInput(driverName) {
             let searchTerm = driverName.trim();
             let isExactSearch = false;
 
@@ -376,14 +370,21 @@
 
             const searchLower = searchTerm.toLowerCase();
             const accentSearch = this._hasAccents(searchTerm);
-            const exactAccentSearch = isExactSearch && accentSearch;
-            const partialAccentSearch = !isExactSearch && accentSearch;
-            const accentSearchTerm = accentSearch ? this._normalizeExactDisplayName(searchTerm) : '';
-            const results = [];
 
-            let matchedMirrorKeys;
+            return {
+                searchTerm,
+                searchLower,
+                isExactSearch,
+                accentSearch,
+                exactAccentSearch: isExactSearch && accentSearch,
+                partialAccentSearch: !isExactSearch && accentSearch,
+                accentSearchTerm: accentSearch ? this._normalizeExactDisplayName(searchTerm) : ''
+            };
+        },
 
-            // Fast path for exact search: O(1) key lookup instead of scanning 87K+ keys
+        _findMatchedMirrorKeys(driverMirror, searchCtx) {
+            const { searchTerm, searchLower, isExactSearch } = searchCtx;
+
             if (isExactSearch) {
                 const candidates = this._buildLookupKeyCandidates(searchTerm);
                 const exactMatches = new Set();
@@ -392,8 +393,6 @@
                         exactMatches.add(candidate);
                     }
                 }
-                // Also try the raw search term as-is (handles case where mirror
-                // stores the original display name as key)
                 if (searchTerm in driverMirror) {
                     exactMatches.add(searchTerm);
                 }
@@ -401,49 +400,46 @@
                 if (searchLowerTrimmed in driverMirror) {
                     exactMatches.add(searchLowerTrimmed);
                 }
-                matchedMirrorKeys = [...exactMatches];
+                let matchedKeys = [...exactMatches];
 
-                // Fallback: if direct lookup found nothing, do a word-boundary
-                // scan but only for single-word exact searches where the name
-                // might be a component (e.g. searching for "Smith")
-                if (matchedMirrorKeys.length === 0) {
+                if (matchedKeys.length === 0) {
                     const mirrorKeys = Object.keys(driverMirror);
-                    matchedMirrorKeys = mirrorKeys.filter(mirrorKey =>
+                    matchedKeys = mirrorKeys.filter(mirrorKey =>
                         this._matchesDriverSearchTerm(mirrorKey, searchLower, isExactSearch)
                     );
                 }
-            } else {
-                const mirrorKeys = Object.keys(driverMirror);
-                matchedMirrorKeys = mirrorKeys.filter(mirrorKey =>
-                    this._matchesDriverSearchTerm(mirrorKey, searchLower, isExactSearch)
-                );
+                return matchedKeys;
             }
 
-            if (matchedMirrorKeys.length === 0) {
-                return results;
-            }
+            const mirrorKeys = Object.keys(driverMirror);
+            return mirrorKeys.filter(mirrorKey =>
+                this._matchesDriverSearchTerm(mirrorKey, searchLower, isExactSearch)
+            );
+        },
 
-            // Cap matched keys for broad searches to avoid loading 20+ shards
-            // (each shard is 1-14 MB uncompressed). Prioritize shorter/more
-            // relevant names (exact prefix matches bubble up first).
+        _capAndSortMirrorKeys(matchedMirrorKeys, searchLower) {
             const MAX_MATCHED_DRIVERS = 500;
-            if (matchedMirrorKeys.length > MAX_MATCHED_DRIVERS) {
-                // Sort: prefer prefix matches over substring matches
-                const normalizedSearch = this._normalizeDriverLookupName(searchLower);
-                matchedMirrorKeys.sort((a, b) => {
-                    const aN = this._normalizeDriverLookupName(a);
-                    const bN = this._normalizeDriverLookupName(b);
-                    const aPrefix = aN.startsWith(normalizedSearch) ? 0 : 1;
-                    const bPrefix = bN.startsWith(normalizedSearch) ? 0 : 1;
-                    if (aPrefix !== bPrefix) return aPrefix - bPrefix;
-                    return aN.length - bN.length;
-                });
-                matchedMirrorKeys = matchedMirrorKeys.slice(0, MAX_MATCHED_DRIVERS);
+            if (matchedMirrorKeys.length <= MAX_MATCHED_DRIVERS) {
+                return matchedMirrorKeys;
             }
 
+            const normalizedSearch = this._normalizeDriverLookupName(searchLower);
+            matchedMirrorKeys.sort((a, b) => {
+                const aN = this._normalizeDriverLookupName(a);
+                const bN = this._normalizeDriverLookupName(b);
+                const aPrefix = aN.startsWith(normalizedSearch) ? 0 : 1;
+                const bPrefix = bN.startsWith(normalizedSearch) ? 0 : 1;
+                if (aPrefix !== bPrefix) return aPrefix - bPrefix;
+                return aN.length - bN.length;
+            });
+            return matchedMirrorKeys.slice(0, MAX_MATCHED_DRIVERS);
+        },
+
+        async _loadShardsForKeys(matchedMirrorKeys) {
             const shardKeysToLoad = new Set(matchedMirrorKeys.map(mirrorKey => this._getShardKeyForName(mirrorKey)));
             const shardDataByKey = new Map();
             const metadataByKey = new Map();
+
             await Promise.all(Array.from(shardKeysToLoad).map(async shardKey => {
                 const [shardData, metadataShard] = await Promise.all([
                     this._loadDriverShard(shardKey),
@@ -456,10 +452,9 @@
             let fallbackLoaded = false;
             let fallbackShard = null;
             let fallbackMetadata = null;
+
             const ensureFallbackData = async () => {
-                if (fallbackLoaded) {
-                    return;
-                }
+                if (fallbackLoaded) return;
                 fallbackLoaded = true;
                 [fallbackShard, fallbackMetadata] = await Promise.all([
                     this._loadDriverShard('_'),
@@ -467,261 +462,247 @@
                 ]);
             };
 
-            for (const mirrorKey of matchedMirrorKeys) {
-                const shardKey = this._getShardKeyForName(mirrorKey);
-                const shardData = shardDataByKey.get(shardKey) || {};
-                const metadataShard = metadataByKey.get(shardKey) || null;
+            return { shardDataByKey, metadataByKey, ensureFallbackData, getFallback: () => ({ fallbackShard, fallbackMetadata }) };
+        },
 
-                const normalizedLookupName = this._normalizeDriverLookupName(mirrorKey);
-                const lookupCandidates = this._buildLookupKeyCandidates(mirrorKey);
-                let metaEntry = null;
-                if (metadataShard) {
-                    metaEntry = metadataShard[mirrorKey] || metadataShard[normalizedLookupName] || null;
+        async _resolveDriverData(mirrorKey, shardCtx) {
+            const { shardDataByKey, metadataByKey, ensureFallbackData, getFallback } = shardCtx;
+            const shardKey = this._getShardKeyForName(mirrorKey);
+            const shardData = shardDataByKey.get(shardKey) || {};
+            const metadataShard = metadataByKey.get(shardKey) || null;
+
+            const normalizedLookupName = this._normalizeDriverLookupName(mirrorKey);
+            const lookupCandidates = this._buildLookupKeyCandidates(mirrorKey);
+
+            let metaEntry = null;
+            if (metadataShard) {
+                metaEntry = metadataShard[mirrorKey] || metadataShard[normalizedLookupName] || null;
+                if (!metaEntry) {
+                    for (const candidateKey of lookupCandidates) {
+                        if (metadataShard[candidateKey]) {
+                            metaEntry = metadataShard[candidateKey];
+                            break;
+                        }
+                    }
+                }
+            }
+
+            let driverEntries = [];
+            for (const candidateKey of [mirrorKey, normalizedLookupName, ...lookupCandidates]) {
+                const candidateEntries = shardData[candidateKey];
+                if (Array.isArray(candidateEntries) && candidateEntries.length > 0) {
+                    driverEntries = candidateEntries;
+                    break;
+                }
+            }
+
+            if ((!metaEntry || !Array.isArray(driverEntries) || driverEntries.length === 0) && shardKey !== '_') {
+                await ensureFallbackData();
+                const { fallbackShard, fallbackMetadata } = getFallback();
+
+                if (!metaEntry && fallbackMetadata) {
+                    metaEntry = fallbackMetadata[normalizedLookupName] || fallbackMetadata[mirrorKey] || null;
                     if (!metaEntry) {
                         for (const candidateKey of lookupCandidates) {
-                            if (metadataShard[candidateKey]) {
-                                metaEntry = metadataShard[candidateKey];
+                            if (fallbackMetadata[candidateKey]) {
+                                metaEntry = fallbackMetadata[candidateKey];
                                 break;
                             }
-                        }
-                    }
-                }
-
-                let driverEntries = [];
-                for (const candidateKey of [mirrorKey, normalizedLookupName, ...lookupCandidates]) {
-                    const candidateEntries = shardData[candidateKey];
-                    if (Array.isArray(candidateEntries) && candidateEntries.length > 0) {
-                        driverEntries = candidateEntries;
-                        break;
-                    }
-                }
-
-                // Fallback: diacritical names live in _ shards with search_name alias
-                if ((!metaEntry || !Array.isArray(driverEntries) || driverEntries.length === 0) && shardKey !== '_') {
-                    await ensureFallbackData();
-
-                    if (!metaEntry && fallbackMetadata) {
-                        metaEntry = fallbackMetadata[normalizedLookupName] || fallbackMetadata[mirrorKey] || null;
-                        if (!metaEntry) {
-                            for (const candidateKey of lookupCandidates) {
-                                if (fallbackMetadata[candidateKey]) {
-                                    metaEntry = fallbackMetadata[candidateKey];
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    if (!Array.isArray(driverEntries) || driverEntries.length === 0) {
-                        for (const candidateKey of [mirrorKey, normalizedLookupName, ...lookupCandidates]) {
-                            const candidateEntries = fallbackShard && fallbackShard[candidateKey];
-                            if (Array.isArray(candidateEntries) && candidateEntries.length > 0) {
-                                driverEntries = candidateEntries;
-                                break;
-                            }
-                        }
-
-                        // Use original key from metadata to find entries in _ leaderboard shard
-                        let originalKey = null;
-                        if (Array.isArray(metaEntry)) {
-                            const withOriginalKey = metaEntry.find(entry => entry && typeof entry === 'object' && entry._originalKey);
-                            originalKey = withOriginalKey ? withOriginalKey._originalKey : null;
-                        } else {
-                            originalKey = metaEntry && metaEntry._originalKey;
-                        }
-                        if (originalKey && fallbackShard) {
-                            driverEntries = fallbackShard[originalKey] || [];
                         }
                     }
                 }
 
                 if (!Array.isArray(driverEntries) || driverEntries.length === 0) {
-                    continue;
-                }
-
-                const filteredEntries = this._filterDriverEntries(driverEntries, filters);
-                if (filteredEntries.length === 0) {
-                    continue;
-                }
-
-                const metadataCandidates = this._normalizeMetadataCandidates(metaEntry);
-                if (metadataCandidates.length > 0) {
-                    let matchedMetadataCandidates = metadataCandidates;
-                    let matchedEntries = filteredEntries;
-
-                    if (isExactSearch) {
-                        const exactMatchTerm = exactAccentSearch ? accentSearchTerm : searchLower;
-                        const useSpecialLetterFallback = exactAccentSearch && this._hasSpecialEuropeanLetters(exactMatchTerm);
-                        const foldedExactMatchTerm = useSpecialLetterFallback ? this._foldEuropeanSearchName(exactMatchTerm) : '';
-                        const reducedExactMatchTerm = useSpecialLetterFallback ? this._reduceEuropeanSearchName(exactMatchTerm) : '';
-
-                        matchedMetadataCandidates = metadataCandidates.filter(candidate => {
-                            const candidateName = this._normalizeExactDisplayName(candidate && candidate.name);
-                            return this._accentExactWordMatch(candidateName, exactMatchTerm);
-                        });
-
-                        if (matchedMetadataCandidates.length === 0 && useSpecialLetterFallback) {
-                            matchedMetadataCandidates = metadataCandidates.filter(candidate => {
-                                const candidateName = this._normalizeExactDisplayName(candidate && candidate.name);
-                                const foldedCandidateName = this._foldEuropeanSearchName(candidateName);
-                                if (this._accentExactWordMatch(foldedCandidateName, foldedExactMatchTerm)) {
-                                    return true;
-                                }
-
-                                const reducedCandidateName = this._reduceEuropeanSearchName(candidateName);
-                                return this._accentExactWordMatch(reducedCandidateName, reducedExactMatchTerm);
-                            });
-                        }
-
-                        if (matchedMetadataCandidates.length === 0) {
-                            continue;
-                        }
-
-                        const allowedPathIds = new Set(
-                            matchedMetadataCandidates
-                                .map(candidate => this._extractPathId(candidate))
-                                .filter(Boolean)
-                        );
-
-                        if (allowedPathIds.size > 0) {
-                            matchedEntries = filteredEntries.filter(entry => allowedPathIds.has(this._extractPathId(entry)));
-                            if (matchedEntries.length === 0) {
-                                continue;
-                            }
-                        }
-                    } else if (partialAccentSearch) {
-                        const useSpecialLetterFallback = this._hasSpecialEuropeanLetters(accentSearchTerm);
-                        const foldedAccentSearchTerm = useSpecialLetterFallback ? this._foldEuropeanSearchName(accentSearchTerm) : '';
-                        const reducedAccentSearchTerm = useSpecialLetterFallback ? this._reduceEuropeanSearchName(accentSearchTerm) : '';
-
-                        matchedMetadataCandidates = metadataCandidates.filter(candidate => {
-                            const candidateName = this._normalizeExactDisplayName(candidate && candidate.name);
-                            if (candidateName.includes(accentSearchTerm)) {
-                                return true;
-                            }
-                            if (!useSpecialLetterFallback) {
-                                return false;
-                            }
-
-                            const foldedCandidateName = this._foldEuropeanSearchName(candidateName);
-                            if (foldedCandidateName.includes(foldedAccentSearchTerm)) {
-                                return true;
-                            }
-
-                            const reducedCandidateName = this._reduceEuropeanSearchName(candidateName);
-                            return reducedCandidateName.includes(reducedAccentSearchTerm);
-                        });
-
-                        if (matchedMetadataCandidates.length === 0) {
-                            continue;
-                        }
-
-                        const allowedPathIds = new Set(
-                            matchedMetadataCandidates
-                                .map(candidate => this._extractPathId(candidate))
-                                .filter(Boolean)
-                        );
-
-                        if (allowedPathIds.size > 0) {
-                            matchedEntries = filteredEntries.filter(entry => allowedPathIds.has(this._extractPathId(entry)));
-                            if (matchedEntries.length === 0) {
-                                continue;
-                            }
+                    for (const candidateKey of [mirrorKey, normalizedLookupName, ...lookupCandidates]) {
+                        const candidateEntries = fallbackShard && fallbackShard[candidateKey];
+                        if (Array.isArray(candidateEntries) && candidateEntries.length > 0) {
+                            driverEntries = candidateEntries;
+                            break;
                         }
                     }
 
-                    results.push(...this._buildMetadataSearchResultsForPathIds(matchedEntries, matchedMetadataCandidates, mirrorKey, driverEntries));
-                } else {
-                    if (isExactSearch) {
-                        const exactMatchTerm = exactAccentSearch ? accentSearchTerm : searchLower;
-                        const useSpecialLetterFallback = exactAccentSearch && this._hasSpecialEuropeanLetters(exactMatchTerm);
-                        const foldedExactMatchTerm = useSpecialLetterFallback ? this._foldEuropeanSearchName(exactMatchTerm) : '';
-                        const reducedExactMatchTerm = useSpecialLetterFallback ? this._reduceEuropeanSearchName(exactMatchTerm) : '';
-
-                        let matchedLegacyEntries = filteredEntries.filter(entry => {
-                            const entryName = this._normalizeExactDisplayName(entry && (entry.name || entry.Name));
-                            return this._accentExactWordMatch(entryName, exactMatchTerm);
-                        });
-
-                        if (matchedLegacyEntries.length === 0 && useSpecialLetterFallback) {
-                            matchedLegacyEntries = filteredEntries.filter(entry => {
-                                const entryName = this._normalizeExactDisplayName(entry && (entry.name || entry.Name));
-                                const foldedEntryName = this._foldEuropeanSearchName(entryName);
-                                if (this._accentExactWordMatch(foldedEntryName, foldedExactMatchTerm)) {
-                                    return true;
-                                }
-
-                                const reducedEntryName = this._reduceEuropeanSearchName(entryName);
-                                return this._accentExactWordMatch(reducedEntryName, reducedExactMatchTerm);
-                            });
-                        }
-
-                        if (matchedLegacyEntries.length === 0) {
-                            continue;
-                        }
-
-                        const mirrorMeta = {
-                            lookupKey: normalizedLookupName,
-                            displayName: mirrorKey,
-                            country: '',
-                            team: '',
-                            rank: '',
-                            hasMetadata: false
-                        };
-                        results.push(...this._buildLegacySearchResults(matchedLegacyEntries, mirrorMeta, mirrorKey, driverEntries));
-                        continue;
-                    } else if (partialAccentSearch) {
-                        const useSpecialLetterFallback = this._hasSpecialEuropeanLetters(accentSearchTerm);
-                        const foldedAccentSearchTerm = useSpecialLetterFallback ? this._foldEuropeanSearchName(accentSearchTerm) : '';
-                        const reducedAccentSearchTerm = useSpecialLetterFallback ? this._reduceEuropeanSearchName(accentSearchTerm) : '';
-
-                        const matchedLegacyEntries = filteredEntries.filter(entry => {
-                            const entryName = this._normalizeExactDisplayName(entry && (entry.name || entry.Name));
-                            if (entryName.includes(accentSearchTerm)) {
-                                return true;
-                            }
-                            if (!useSpecialLetterFallback) {
-                                return false;
-                            }
-
-                            const foldedEntryName = this._foldEuropeanSearchName(entryName);
-                            if (foldedEntryName.includes(foldedAccentSearchTerm)) {
-                                return true;
-                            }
-
-                            const reducedEntryName = this._reduceEuropeanSearchName(entryName);
-                            return reducedEntryName.includes(reducedAccentSearchTerm);
-                        });
-
-                        if (matchedLegacyEntries.length === 0) {
-                            continue;
-                        }
-
-                        const mirrorMeta = {
-                            lookupKey: normalizedLookupName,
-                            displayName: mirrorKey,
-                            country: '',
-                            team: '',
-                            rank: '',
-                            hasMetadata: false
-                        };
-                        results.push(...this._buildLegacySearchResults(matchedLegacyEntries, mirrorMeta, mirrorKey, driverEntries));
-                        continue;
+                    let originalKey = null;
+                    if (Array.isArray(metaEntry)) {
+                        const withOriginalKey = metaEntry.find(entry => entry && typeof entry === 'object' && entry._originalKey);
+                        originalKey = withOriginalKey ? withOriginalKey._originalKey : null;
+                    } else {
+                        originalKey = metaEntry && metaEntry._originalKey;
                     }
-
-                    const mirrorMeta = {
-                        lookupKey: normalizedLookupName,
-                        displayName: mirrorKey,
-                        country: '',
-                        team: '',
-                        rank: '',
-                        hasMetadata: false
-                    };
-                    results.push(...this._buildLegacySearchResults(filteredEntries, mirrorMeta, mirrorKey, driverEntries));
+                    if (originalKey && fallbackShard) {
+                        driverEntries = fallbackShard[originalKey] || [];
+                    }
                 }
             }
 
+            return { metaEntry, driverEntries, normalizedLookupName };
+        },
+
+        _filterMetadataExact(metadataCandidates, searchCtx) {
+            const { exactAccentSearch, accentSearchTerm } = searchCtx;
+            const exactMatchTerm = exactAccentSearch ? accentSearchTerm : searchCtx.searchLower;
+            const useSpecialLetterFallback = exactAccentSearch && this._hasSpecialEuropeanLetters(exactMatchTerm);
+            const foldedExactMatchTerm = useSpecialLetterFallback ? this._foldEuropeanSearchName(exactMatchTerm) : '';
+            const reducedExactMatchTerm = useSpecialLetterFallback ? this._reduceEuropeanSearchName(exactMatchTerm) : '';
+
+            let matched = metadataCandidates.filter(candidate => {
+                const candidateName = this._normalizeExactDisplayName(candidate && candidate.name);
+                return this._accentExactWordMatch(candidateName, exactMatchTerm);
+            });
+
+            if (matched.length === 0 && useSpecialLetterFallback) {
+                matched = metadataCandidates.filter(candidate => {
+                    const candidateName = this._normalizeExactDisplayName(candidate && candidate.name);
+                    const foldedCandidateName = this._foldEuropeanSearchName(candidateName);
+                    if (this._accentExactWordMatch(foldedCandidateName, foldedExactMatchTerm)) {
+                        return true;
+                    }
+                    const reducedCandidateName = this._reduceEuropeanSearchName(candidateName);
+                    return this._accentExactWordMatch(reducedCandidateName, reducedExactMatchTerm);
+                });
+            }
+
+            return matched;
+        },
+
+        _filterMetadataPartialAccent(metadataCandidates, searchCtx) {
+            const { accentSearchTerm } = searchCtx;
+            const useSpecialLetterFallback = this._hasSpecialEuropeanLetters(accentSearchTerm);
+            const foldedAccentSearchTerm = useSpecialLetterFallback ? this._foldEuropeanSearchName(accentSearchTerm) : '';
+            const reducedAccentSearchTerm = useSpecialLetterFallback ? this._reduceEuropeanSearchName(accentSearchTerm) : '';
+
+            return metadataCandidates.filter(candidate => {
+                const candidateName = this._normalizeExactDisplayName(candidate && candidate.name);
+                if (candidateName.includes(accentSearchTerm)) {
+                    return true;
+                }
+                if (!useSpecialLetterFallback) {
+                    return false;
+                }
+                const foldedCandidateName = this._foldEuropeanSearchName(candidateName);
+                if (foldedCandidateName.includes(foldedAccentSearchTerm)) {
+                    return true;
+                }
+                const reducedCandidateName = this._reduceEuropeanSearchName(candidateName);
+                return reducedCandidateName.includes(reducedAccentSearchTerm);
+            });
+        },
+
+        _filterEntriesByPathIds(filteredEntries, matchedMetadataCandidates) {
+            const allowedPathIds = new Set(
+                matchedMetadataCandidates
+                    .map(candidate => this._extractPathId(candidate))
+                    .filter(Boolean)
+            );
+
+            if (allowedPathIds.size === 0) {
+                return filteredEntries;
+            }
+            return filteredEntries.filter(entry => allowedPathIds.has(this._extractPathId(entry)));
+        },
+
+        _filterLegacyEntriesExact(filteredEntries, searchCtx) {
+            const { exactAccentSearch, accentSearchTerm } = searchCtx;
+            const exactMatchTerm = exactAccentSearch ? accentSearchTerm : searchCtx.searchLower;
+            const useSpecialLetterFallback = exactAccentSearch && this._hasSpecialEuropeanLetters(exactMatchTerm);
+            const foldedExactMatchTerm = useSpecialLetterFallback ? this._foldEuropeanSearchName(exactMatchTerm) : '';
+            const reducedExactMatchTerm = useSpecialLetterFallback ? this._reduceEuropeanSearchName(exactMatchTerm) : '';
+
+            let matched = filteredEntries.filter(entry => {
+                const entryName = this._normalizeExactDisplayName(entry && (entry.name || entry.Name));
+                return this._accentExactWordMatch(entryName, exactMatchTerm);
+            });
+
+            if (matched.length === 0 && useSpecialLetterFallback) {
+                matched = filteredEntries.filter(entry => {
+                    const entryName = this._normalizeExactDisplayName(entry && (entry.name || entry.Name));
+                    const foldedEntryName = this._foldEuropeanSearchName(entryName);
+                    if (this._accentExactWordMatch(foldedEntryName, foldedExactMatchTerm)) {
+                        return true;
+                    }
+                    const reducedEntryName = this._reduceEuropeanSearchName(entryName);
+                    return this._accentExactWordMatch(reducedEntryName, reducedExactMatchTerm);
+                });
+            }
+
+            return matched;
+        },
+
+        _filterLegacyEntriesPartialAccent(filteredEntries, searchCtx) {
+            const { accentSearchTerm } = searchCtx;
+            const useSpecialLetterFallback = this._hasSpecialEuropeanLetters(accentSearchTerm);
+            const foldedAccentSearchTerm = useSpecialLetterFallback ? this._foldEuropeanSearchName(accentSearchTerm) : '';
+            const reducedAccentSearchTerm = useSpecialLetterFallback ? this._reduceEuropeanSearchName(accentSearchTerm) : '';
+
+            return filteredEntries.filter(entry => {
+                const entryName = this._normalizeExactDisplayName(entry && (entry.name || entry.Name));
+                if (entryName.includes(accentSearchTerm)) {
+                    return true;
+                }
+                if (!useSpecialLetterFallback) {
+                    return false;
+                }
+                const foldedEntryName = this._foldEuropeanSearchName(entryName);
+                if (foldedEntryName.includes(foldedAccentSearchTerm)) {
+                    return true;
+                }
+                const reducedEntryName = this._reduceEuropeanSearchName(entryName);
+                return reducedEntryName.includes(reducedAccentSearchTerm);
+            });
+        },
+
+        _buildResultsForMirrorKey(filteredEntries, metaEntry, mirrorKey, driverEntries, searchCtx) {
+            const { isExactSearch, partialAccentSearch } = searchCtx;
+            const normalizedLookupName = this._normalizeDriverLookupName(mirrorKey);
+            const metadataCandidates = this._normalizeMetadataCandidates(metaEntry);
+
+            if (metadataCandidates.length > 0) {
+                let matchedMetadataCandidates = metadataCandidates;
+                let matchedEntries = filteredEntries;
+
+                if (isExactSearch) {
+                    matchedMetadataCandidates = this._filterMetadataExact(metadataCandidates, searchCtx);
+                    if (matchedMetadataCandidates.length === 0) return null;
+
+                    matchedEntries = this._filterEntriesByPathIds(filteredEntries, matchedMetadataCandidates);
+                    if (matchedEntries.length === 0) return null;
+                } else if (partialAccentSearch) {
+                    matchedMetadataCandidates = this._filterMetadataPartialAccent(metadataCandidates, searchCtx);
+                    if (matchedMetadataCandidates.length === 0) return null;
+
+                    matchedEntries = this._filterEntriesByPathIds(filteredEntries, matchedMetadataCandidates);
+                    if (matchedEntries.length === 0) return null;
+                }
+
+                return this._buildMetadataSearchResultsForPathIds(matchedEntries, matchedMetadataCandidates, mirrorKey, driverEntries);
+            }
+
+            const mirrorMeta = {
+                lookupKey: normalizedLookupName,
+                displayName: mirrorKey,
+                country: '',
+                team: '',
+                rank: '',
+                hasMetadata: false
+            };
+
+            if (isExactSearch) {
+                const matchedLegacyEntries = this._filterLegacyEntriesExact(filteredEntries, searchCtx);
+                if (matchedLegacyEntries.length === 0) return null;
+                return this._buildLegacySearchResults(matchedLegacyEntries, mirrorMeta, mirrorKey, driverEntries);
+            }
+
+            if (partialAccentSearch) {
+                const matchedLegacyEntries = this._filterLegacyEntriesPartialAccent(filteredEntries, searchCtx);
+                if (matchedLegacyEntries.length === 0) return null;
+                return this._buildLegacySearchResults(matchedLegacyEntries, mirrorMeta, mirrorKey, driverEntries);
+            }
+
+            return this._buildLegacySearchResults(filteredEntries, mirrorMeta, mirrorKey, driverEntries);
+        },
+
+        _deduplicateResults(results) {
             const dedupedResultsByIdentity = new Map();
+
             for (const result of results) {
                 const normalizedDriver = this._normalizeExactDisplayName(result.driver || '');
                 const identityKey = result.pathId
@@ -775,6 +756,45 @@
             }
 
             return Array.from(dedupedResultsByIdentity.values());
+        },
+
+        async searchDriver(driverName, filters = {}) {
+            const driverMirror = await this.waitForDriverIndex();
+
+            if (!driverMirror || Object.keys(driverMirror).length === 0) {
+                throw new Error('Driver index is loading or unavailable. Please try again in a moment.');
+            }
+
+            const searchCtx = this._parseSearchInput(driverName);
+            let matchedMirrorKeys = this._findMatchedMirrorKeys(driverMirror, searchCtx);
+
+            if (matchedMirrorKeys.length === 0) {
+                return [];
+            }
+
+            matchedMirrorKeys = this._capAndSortMirrorKeys(matchedMirrorKeys, searchCtx.searchLower);
+            const shardCtx = await this._loadShardsForKeys(matchedMirrorKeys);
+
+            const results = [];
+            for (const mirrorKey of matchedMirrorKeys) {
+                const { metaEntry, driverEntries } = await this._resolveDriverData(mirrorKey, shardCtx);
+
+                if (!Array.isArray(driverEntries) || driverEntries.length === 0) {
+                    continue;
+                }
+
+                const filteredEntries = this._filterDriverEntries(driverEntries, filters);
+                if (filteredEntries.length === 0) {
+                    continue;
+                }
+
+                const keyResults = this._buildResultsForMirrorKey(filteredEntries, metaEntry, mirrorKey, driverEntries, searchCtx);
+                if (keyResults) {
+                    results.push(...keyResults);
+                }
+            }
+
+            return this._deduplicateResults(results);
         }
     };
 

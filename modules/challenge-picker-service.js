@@ -3,7 +3,7 @@
  *
  * Pure data-picking logic with no DOM dependency.
  * Reads from window.CARS_DATA, window.CAR_CLASSES_DATA, window.TRACKS_DATA,
- * and delegates logo resolution to R3ETrackUtils / R3ECarUtils / R3ETrackImages.
+ * and delegates logo resolution to R3ECarUtils / R3ETrackUtils / R3ETrackImages.
  *
  * randomFn injectable for testability (defaults to Math.random).
  */

@@ -148,22 +148,7 @@ class CustomSelect {
         this.root.classList.add('is-open');
         // Keep menu inside viewport: shift left first, then clamp width
         this.menu.style.maxWidth = '';
-        requestAnimationFrame(() => {
-            const vw = window.innerWidth;
-            const pad = 8;
-            const rect = this.menu.getBoundingClientRect();
-            // 1. Shift left so the right edge fits in the viewport
-            if (rect.right > vw - pad) {
-                this.menu.style.left = -(rect.right - vw + pad) + 'px';
-            }
-            // 2. If that pushed past the left edge, pin to left edge
-            const afterRect = this.menu.getBoundingClientRect();
-            if (afterRect.left < pad) {
-                this.menu.style.left = -(this.root.getBoundingClientRect().left - pad) + 'px';
-                // 3. Clamp width to remaining viewport space
-                this.menu.style.maxWidth = (vw - pad * 2) + 'px';
-            }
-        });
+        this._clampToViewport();
         // Reset search and focus input
         if (this.searchInput) {
             this.searchInput.value = '';
@@ -173,6 +158,36 @@ class CustomSelect {
                 requestAnimationFrame(() => this.searchInput.focus());
             }
         }
+    }
+
+    /**
+     * Clamps the dropdown menu within the viewport using a double-rAF
+     * to ensure layout is computed on mobile devices. Uses visualViewport
+     * API when available to handle pinch-zoom correctly.
+     */
+    _clampToViewport() {
+        // Double-rAF: first rAF ensures the element is in the render tree,
+        // second rAF ensures layout has been computed (needed on mobile).
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                if (this.menu.hidden) return;
+                const vw = (window.visualViewport && window.visualViewport.width) || window.innerWidth;
+                const pad = 8;
+                const rect = this.menu.getBoundingClientRect();
+                if (!rect.width) return; // not laid out yet
+                // 1. Shift left so the right edge fits in the viewport
+                if (rect.right > vw - pad) {
+                    this.menu.style.left = -(rect.right - vw + pad) + 'px';
+                }
+                // 2. If that pushed past the left edge, pin to left edge
+                const afterRect = this.menu.getBoundingClientRect();
+                if (afterRect.left < pad) {
+                    this.menu.style.left = -(this.root.getBoundingClientRect().left - pad) + 'px';
+                    // 3. Clamp width to remaining viewport space
+                    this.menu.style.maxWidth = (vw - pad * 2) + 'px';
+                }
+            });
+        });
     }
     
     /**

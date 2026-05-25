@@ -206,4 +206,122 @@ describe('CarRatings', () => {
             expect(window.CarRatings.getAll()).toEqual([]);
         });
     });
+
+    // ── normalizeCarName ────────────────────────────────────────────
+
+    describe('normalizeCarName', () => {
+        test('removes DTM word (case-insensitive)', () => {
+            expect(window.CarRatings.normalizeCarName('BMW M3 DTM')).toBe('bmw m3');
+            expect(window.CarRatings.normalizeCarName('BMW M3 dtm')).toBe('bmw m3');
+            expect(window.CarRatings.normalizeCarName('DTM BMW M3')).toBe('bmw m3');
+        });
+
+        test('collapses extra spaces', () => {
+            expect(window.CarRatings.normalizeCarName('BMW  M3   DTM')).toBe('bmw m3');
+        });
+
+        test('lowercases entire string', () => {
+            expect(window.CarRatings.normalizeCarName('BMW M4 GT3')).toBe('bmw m4 gt3');
+        });
+
+        test('returns empty string for falsy input', () => {
+            expect(window.CarRatings.normalizeCarName(null)).toBe('');
+            expect(window.CarRatings.normalizeCarName('')).toBe('');
+        });
+
+        test('does not remove DTM as part of another word', () => {
+            expect(window.CarRatings.normalizeCarName('ADTM Car')).toBe('adtm car');
+        });
+    });
+
+    // ── sibling rating propagation ──────────────────────────────────
+
+    describe('sibling rating propagation', () => {
+        test('rating applies to all cars with same normalized name and year', () => {
+            window.CARS_DATA = [
+                { cars: [
+                    { car_class: 'DTM 95', car: 'BMW M3 DTM', year: '1995', link: '/car/1' },
+                    { car_class: 'Group A', car: 'BMW M3', year: '1995', link: '/car/2' }
+                ]}
+            ];
+            window.CarRatings.set('DTM 95||BMW M3 DTM||1995||/car/1', 4);
+            expect(window.CarRatings.get('Group A||BMW M3||1995||/car/2')).toBe(4);
+        });
+
+        test('clearing rating clears all siblings', () => {
+            window.CARS_DATA = [
+                { cars: [
+                    { car_class: 'DTM 95', car: 'BMW M3 DTM', year: '1995', link: '/car/1' },
+                    { car_class: 'Group A', car: 'BMW M3', year: '1995', link: '/car/2' }
+                ]}
+            ];
+            window.CarRatings.set('DTM 95||BMW M3 DTM||1995||/car/1', 4);
+            window.CarRatings.set('DTM 95||BMW M3 DTM||1995||/car/1', 0);
+            expect(window.CarRatings.get('Group A||BMW M3||1995||/car/2')).toBe(0);
+        });
+
+        test('cars with different years are not siblings', () => {
+            window.CARS_DATA = [
+                { cars: [
+                    { car_class: 'DTM 95', car: 'BMW M3 DTM', year: '1995', link: '/car/1' },
+                    { car_class: 'DTM 00', car: 'BMW M3 DTM', year: '2000', link: '/car/2' }
+                ]}
+            ];
+            window.CarRatings.set('DTM 95||BMW M3 DTM||1995||/car/1', 5);
+            expect(window.CarRatings.get('DTM 00||BMW M3 DTM||2000||/car/2')).toBe(0);
+        });
+
+        test('get falls back to sibling rating', () => {
+            window.CARS_DATA = [
+                { cars: [
+                    { car_class: 'DTM 95', car: 'BMW M3 DTM', year: '1995', link: '/car/1' },
+                    { car_class: 'Group A', car: 'BMW M3', year: '1995', link: '/car/2' }
+                ]}
+            ];
+            // Manually store rating for only one sibling
+            const data = { 'DTM 95||BMW M3 DTM||1995||/car/1': 3 };
+            localStorage.setItem(window.CarRatings.STORAGE_KEY, JSON.stringify(data));
+            expect(window.CarRatings.get('Group A||BMW M3||1995||/car/2')).toBe(3);
+        });
+
+        test('casing differences are ignored for sibling matching', () => {
+            window.CARS_DATA = [
+                { cars: [
+                    { car_class: 'ClassA', car: 'bmw m3', year: '1995', link: '/car/1' },
+                    { car_class: 'ClassB', car: 'BMW M3', year: '1995', link: '/car/2' }
+                ]}
+            ];
+            window.CarRatings.set('ClassA||bmw m3||1995||/car/1', 2);
+            expect(window.CarRatings.get('ClassB||BMW M3||1995||/car/2')).toBe(2);
+        });
+
+        test('spacing differences are ignored for sibling matching', () => {
+            window.CARS_DATA = [
+                { cars: [
+                    { car_class: 'ClassA', car: 'BMW  M3', year: '1995', link: '/car/1' },
+                    { car_class: 'ClassB', car: 'BMW M3', year: '1995', link: '/car/2' }
+                ]}
+            ];
+            window.CarRatings.set('ClassA||BMW  M3||1995||/car/1', 5);
+            expect(window.CarRatings.get('ClassB||BMW M3||1995||/car/2')).toBe(5);
+        });
+
+        test('set with car object applies to siblings', () => {
+            window.CARS_DATA = [
+                { cars: [
+                    { car_class: 'DTM 95', car: 'BMW M3 DTM', year: '1995', link: '/car/1' },
+                    { car_class: 'Group A', car: 'BMW M3', year: '1995', link: '/car/2' }
+                ]}
+            ];
+            const car = { car_class: 'DTM 95', car: 'BMW M3 DTM', year: '1995', link: '/car/1' };
+            window.CarRatings.set(car, 6);
+            expect(window.CarRatings.get('Group A||BMW M3||1995||/car/2')).toBe(6);
+        });
+
+        test('no CARS_DATA still works for direct rating', () => {
+            window.CARS_DATA = undefined;
+            window.CarRatings.set('GT3||BMW M4||2022||/car/1', 3);
+            expect(window.CarRatings.get('GT3||BMW M4||2022||/car/1')).toBe(3);
+        });
+    });
 });

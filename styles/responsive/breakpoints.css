@@ -556,7 +556,8 @@
         left: 0;
         right: auto;
         width: max-content;
-        max-width: calc(100vw - 1.5rem);
+        min-width: 0;
+        max-width: calc(100vw - 1rem);
     }
 
     .custom-select__option {

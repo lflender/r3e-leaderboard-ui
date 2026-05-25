@@ -23,6 +23,43 @@ const CarRatings = (() => {
     return parts[0].trim().length > 0 && parts[1].trim().length > 0;
   }
 
+  // Normalize a car name for sibling matching: remove "DTM", lowercase, collapse spaces.
+  function normalizeCarName(name) {
+    if (!name) return '';
+    return String(name)
+      .replace(/\bDTM\b/gi, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+  }
+
+  // Find all structured car IDs in CARS_DATA that share the same normalized name + year.
+  function findSiblingIds(carId) {
+    const normalizedId = buildCarId(carId);
+    if (!isStructuredCarId(normalizedId)) return [normalizedId];
+    if (!Array.isArray(window.CARS_DATA)) return [normalizedId];
+
+    const parts = normalizedId.split('||');
+    const targetName = normalizeCarName(parts[1]);
+    const targetYear = String(parts[2] || '').trim().toLowerCase();
+
+    const siblings = [];
+    window.CARS_DATA.forEach(cls => {
+      (cls.cars || []).forEach(car => {
+        const name = normalizeCarName(String(car.car || ''));
+        const year = String(car.year || '').trim().toLowerCase();
+        if (name === targetName && year === targetYear) {
+          const id = buildCarId(car);
+          if (isStructuredCarId(id)) siblings.push(id);
+        }
+      });
+    });
+
+    // Always include the original ID even if not found in CARS_DATA
+    if (!siblings.includes(normalizedId)) siblings.push(normalizedId);
+    return siblings;
+  }
+
   function load() {
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
@@ -103,21 +140,32 @@ const CarRatings = (() => {
     const score = data[normalizedId];
     if (isValidScore(score)) return score;
 
+    // Check sibling cars (same name+year, ignoring DTM/casing/spacing)
+    const siblings = findSiblingIds(normalizedId);
+    for (const siblingId of siblings) {
+      if (siblingId === normalizedId) continue;
+      const siblingScore = data[siblingId];
+      if (isValidScore(siblingScore)) return siblingScore;
+    }
+
     // Backward-compatible read for legacy link-only keys.
     const legacyLink = getLegacyLinkFromStructuredId(normalizedId);
     const legacyScore = legacyLink ? data[legacyLink] : undefined;
     return isValidScore(legacyScore) ? legacyScore : 0;
   }
 
-  // score = 0 clears the rating
+  // score = 0 clears the rating; applies to all sibling cars (same name+year ignoring DTM/casing/spacing)
   function set(carId, score) {
     const normalizedId = buildCarId(carId);
     if (!normalizedId) return;
     const data = load();
-    if (score === 0) {
-      delete data[normalizedId];
-    } else if (score >= 1 && score <= 6) {
-      data[normalizedId] = score;
+    const siblings = findSiblingIds(normalizedId);
+    for (const id of siblings) {
+      if (score === 0) {
+        delete data[id];
+      } else if (score >= 1 && score <= 6) {
+        data[id] = score;
+      }
     }
     save(data);
   }
@@ -175,7 +223,7 @@ const CarRatings = (() => {
   // Never perform destructive startup cleanup. Only additive migration is allowed.
   migrateLegacyKeysAdditively();
 
-  return { get, set, getAll, buildCarId, exportPayload, importPayload, replaceAll, STORAGE_KEY };
+  return { get, set, getAll, buildCarId, normalizeCarName, exportPayload, importPayload, replaceAll, STORAGE_KEY };
 })();
 
 window.CarRatings = CarRatings;

@@ -300,6 +300,30 @@ function buildRatingHtml(carId, currentRating, variant) {
 
 function attachRatingHandlers(rootEl) {
     if (typeof CarRatings === 'undefined') return;
+
+    function syncSiblingWidgets(root, sourceWidget, newRating) {
+        if (typeof CarRatings === 'undefined' || typeof CarRatings.normalizeCarName !== 'function') return;
+        const sourceId = sourceWidget.getAttribute('data-car-id');
+        if (!sourceId) return;
+        const sourceParts = sourceId.split('||');
+        if (sourceParts.length !== 4) return;
+        const sourceName = CarRatings.normalizeCarName(sourceParts[1]);
+        const sourceYear = (sourceParts[2] || '').trim().toLowerCase();
+
+        Array.from(root.querySelectorAll('.car-rating-widget')).forEach(function (w) {
+            if (w === sourceWidget) return;
+            const wId = w.getAttribute('data-car-id');
+            if (!wId) return;
+            const wParts = wId.split('||');
+            if (wParts.length !== 4) return;
+            const wName = CarRatings.normalizeCarName(wParts[1]);
+            const wYear = (wParts[2] || '').trim().toLowerCase();
+            if (wName === sourceName && wYear === sourceYear && w._updateRatingDisplay) {
+                w._updateRatingDisplay(newRating);
+            }
+        });
+    }
+
     Array.from(rootEl.querySelectorAll('.car-rating-widget')).forEach(function (widget) {
         const carId = widget.getAttribute('data-car-id');
         if (!carId) return;
@@ -325,6 +349,9 @@ function attachRatingHandlers(rootEl) {
                 }
             });
         }
+
+        // Store updateDisplay on the element so sibling syncing can use it
+        widget._updateRatingDisplay = updateDisplay;
 
         widget.addEventListener('mouseover', function (e) {
             const btn = e.target.closest('.car-rating-btn');
@@ -360,6 +387,8 @@ function attachRatingHandlers(rootEl) {
                 const newRating = current === score ? 0 : score;
                 CarRatings.set(carId, newRating);
                 updateDisplay(newRating);
+                // Sync all sibling widgets on the page
+                syncSiblingWidgets(rootEl, widget, newRating);
             });
         });
     });

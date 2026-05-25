@@ -1072,6 +1072,11 @@ function bindEntriesDistributionInteractions() {
             displayResults(allResults);
         });
     }
+
+    // Wire bar tooltips
+    if (DetailEntriesDist.wireTooltips) {
+        DetailEntriesDist.wireTooltips(resultsContainer);
+    }
 }
 
 function bindCarDistributionSortHandlers({ allResults, filteredResults, baseResults, paginationHTML, tableWrapperHTML }) {

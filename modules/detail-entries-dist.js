@@ -136,7 +136,7 @@
             const count = counts[idx];
             const h = Math.max(1, Math.round((count / maxCount) * chartHeight));
             const y = chartHeight - h;
-            html += '<rect class="entries-dist-bar" x="' + idx + '" y="' + y + '" width="0.9" height="' + h + '">';
+            html += '<rect class="entries-dist-bar" x="' + idx + '" y="' + y + '" width="0.9" height="' + h + '" data-date="' + key + '" data-count="' + count + '">';
             html += '<title>' + key + ': ' + count + ' entries</title>';
             html += '</rect>';
         });
@@ -162,12 +162,252 @@
         return html;
     }
 
+    /**
+     * Wire tooltip interactivity for entries distribution bar charts.
+     * Uses proximity-based detection for consistent hover behavior.
+     * @param {HTMLElement} container - The container that holds the entries-dist-summary element(s)
+     * @param {Array} [entries] - Optional raw entries for detailed tooltips (grouped by date)
+     */
+    function wireTooltips(container, entries) {
+        if (!container) return;
+
+        // Pre-group entries by date if provided
+        var entriesByDate = null;
+        if (Array.isArray(entries) && entries.length > 0) {
+            entriesByDate = new Map();
+            entries.forEach(entry => {
+                const dt = parseEntryDate(entry);
+                if (!dt) return;
+                const key = getLocalDateKey(dt);
+                if (!key) return;
+                if (!entriesByDate.has(key)) entriesByDate.set(key, []);
+                entriesByDate.get(key).push(entry);
+            });
+        }
+
+        const charts = container.querySelectorAll('.entries-dist-chart:not(.perf-dist-chart)');
+        charts.forEach(chart => {
+            const svg = chart.querySelector('svg');
+            if (!svg) return;
+
+            let tooltip = chart.querySelector('.dist-tooltip');
+            if (!tooltip) {
+                tooltip = document.createElement('div');
+                tooltip.className = 'dist-tooltip';
+                chart.appendChild(tooltip);
+            }
+
+            const bars = Array.from(svg.querySelectorAll('.entries-dist-bar'));
+            if (bars.length === 0) return;
+
+            let activeBar = null;
+
+            svg.addEventListener('mousemove', (e) => {
+                const rect = svg.getBoundingClientRect();
+                const svgWidth = rect.width;
+                if (svgWidth === 0) return;
+
+                const viewBox = svg.viewBox.baseVal;
+                const mouseXRatio = (e.clientX - rect.left) / svgWidth;
+                const svgX = mouseXRatio * viewBox.width;
+
+                // Find the bar at this x position
+                let nearest = null;
+                bars.forEach(bar => {
+                    const bx = parseFloat(bar.getAttribute('x'));
+                    if (svgX >= bx && svgX <= bx + 1) {
+                        nearest = bar;
+                    }
+                });
+
+                if (!nearest) {
+                    let minDist = Infinity;
+                    bars.forEach(bar => {
+                        const bx = parseFloat(bar.getAttribute('x')) + 0.45;
+                        const dist = Math.abs(bx - svgX);
+                        if (dist < minDist) {
+                            minDist = dist;
+                            nearest = bar;
+                        }
+                    });
+                    if (minDist > 1.5) nearest = null;
+                }
+
+                if (!nearest) {
+                    if (activeBar) {
+                        activeBar.classList.remove('entries-dist-bar-active');
+                        activeBar = null;
+                    }
+                    tooltip.style.display = 'none';
+                    return;
+                }
+
+                if (activeBar !== nearest) {
+                    if (activeBar) activeBar.classList.remove('entries-dist-bar-active');
+                    nearest.classList.add('entries-dist-bar-active');
+                    activeBar = nearest;
+                }
+
+                const date = nearest.getAttribute('data-date');
+                const count = nearest.getAttribute('data-count');
+                tooltip.innerHTML = buildEntriesTooltip(date, count, entriesByDate);
+                tooltip.style.display = 'block';
+                positionTooltipFromSvg(e, chart, tooltip);
+            });
+
+            svg.addEventListener('mouseleave', () => {
+                if (activeBar) {
+                    activeBar.classList.remove('entries-dist-bar-active');
+                    activeBar = null;
+                }
+                tooltip.style.display = 'none';
+            });
+        });
+    }
+
+    function buildEntriesTooltip(date, count, entriesByDate) {
+        let html = '<strong>' + date + '</strong>: ' + count + (count === '1' ? ' entry' : ' entries');
+        if (entriesByDate && entriesByDate.has(date)) {
+            const dayEntries = entriesByDate.get(date);
+            html += '<div class="dist-tooltip-entries">';
+            dayEntries.forEach(entry => {
+                const car = entry.Car || entry.car || entry.CarName || entry.car_name || '';
+                const track = (window.R3EUtils && typeof window.R3EUtils.resolveTrackLabelForItem === 'function')
+                    ? window.R3EUtils.resolveTrackLabelForItem(entry)
+                    : (entry.Track || entry.track || entry.TrackName || entry.track_name || '');
+                const label = car + (track ? ' – ' + track : '');
+                if (label) {
+                    const logoHtml = buildClassLogoHtml(entry);
+                    html += '<div class="dist-tooltip-entry">' + logoHtml + escapeForTooltip(label) + '</div>';
+                }
+            });
+            html += '</div>';
+        }
+        return html;
+    }
+
+    function buildClassLogoHtml(entry) {
+        var className = entry.car_class || entry.CarClass || entry.Class || '';
+        var classId = entry.class_id || entry.ClassID || entry.classId || '';
+        return buildClassLogoHtmlFromValues(className, classId);
+    }
+
+    function buildClassLogoHtmlFromValues(className, classId) {
+        if (!window.R3EUtils || typeof window.R3EUtils.resolveCarClassLogo !== 'function') return '';
+        var url = window.R3EUtils.resolveCarClassLogo(className, classId);
+        if (!url) return '';
+        return '<img class="dist-tooltip-class-logo" src="' + escapeForTooltip(url) + '" alt="" />';
+    }
+
+    function escapeForTooltip(str) {
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    /**
+     * Wire tooltip interactivity for performance distribution scatter charts.
+     * Points are HTML elements positioned with CSS percentages.
+     * Uses proximity-based detection (nearest point by x) for better UX.
+     * @param {HTMLElement} container - The container holding perf-dist-chart element(s)
+     */
+    function wirePerfTooltips(container) {
+        if (!container) return;
+        const charts = container.querySelectorAll('.perf-dist-chart');
+        charts.forEach(chart => {
+            let tooltip = chart.querySelector('.dist-tooltip');
+            if (!tooltip) {
+                tooltip = document.createElement('div');
+                tooltip.className = 'dist-tooltip';
+                chart.appendChild(tooltip);
+            }
+
+            const points = Array.from(chart.querySelectorAll('.perf-dist-point'));
+            if (points.length === 0) return;
+
+            let activePoint = null;
+
+            chart.addEventListener('mousemove', (e) => {
+                const rect = chart.getBoundingClientRect();
+                const chartWidth = rect.width;
+                if (chartWidth === 0) return;
+
+                const mouseXPct = ((e.clientX - rect.left) / chartWidth) * 100;
+
+                // Find nearest point by x percentage
+                let nearest = null;
+                let minDist = Infinity;
+                points.forEach(p => {
+                    const leftPct = parseFloat(p.style.left);
+                    const dist = Math.abs(leftPct - mouseXPct);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        nearest = p;
+                    }
+                });
+
+                // Only show if within reasonable range
+                const threshold = Math.max(2, 100 / points.length);
+                if (!nearest || minDist > threshold) {
+                    if (activePoint) {
+                        activePoint.classList.remove('perf-dist-point-active');
+                        activePoint = null;
+                    }
+                    tooltip.style.display = 'none';
+                    return;
+                }
+
+                if (activePoint !== nearest) {
+                    if (activePoint) activePoint.classList.remove('perf-dist-point-active');
+                    nearest.classList.add('perf-dist-point-active');
+                    activePoint = nearest;
+                }
+
+                const date = nearest.getAttribute('data-date');
+                const pct = nearest.getAttribute('data-pct');
+                const pos = nearest.getAttribute('data-pos');
+                const total = nearest.getAttribute('data-total');
+                const info = nearest.getAttribute('data-info');
+                const className = nearest.getAttribute('data-class') || '';
+                const classId = nearest.getAttribute('data-class-id') || '';
+                const logoHtml = buildClassLogoHtmlFromValues(className, classId);
+                let tipHtml = '<strong>' + date + '</strong>: ' + pct + '% bested';
+                if (pos && total) tipHtml += ' (P' + pos + '/' + total + ')';
+                if (info) tipHtml += '<div class="dist-tooltip-entry">' + logoHtml + escapeForTooltip(info) + '</div>';
+                tooltip.innerHTML = tipHtml;
+                tooltip.style.display = 'block';
+                positionTooltipFromSvg(e, chart, tooltip);
+            });
+
+            chart.addEventListener('mouseleave', () => {
+                if (activePoint) {
+                    activePoint.classList.remove('perf-dist-point-active');
+                    activePoint = null;
+                }
+                tooltip.style.display = 'none';
+            });
+        });
+    }
+
+    function positionTooltipFromSvg(event, chartEl, tooltip) {
+        const rect = chartEl.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        const tipWidth = tooltip.offsetWidth;
+        const tipHeight = tooltip.offsetHeight;
+        let left = x - tipWidth / 2;
+        if (left < 0) left = 0;
+        if (left + tipWidth > rect.width) left = rect.width - tipWidth;
+        tooltip.style.left = left + 'px';
+        tooltip.style.top = (y - tipHeight - 10) + 'px';
+    }
+
     window.DetailEntriesDist = {
         generateHtml: generateEntriesDistributionGraph,
         parseEntryDate,
         getLocalDateKey,
         getDataTimeBounds,
         toLocalDateInputValue,
-        applyTimeframeFilter
+        applyTimeframeFilter,
+        wireTooltips,
+        wirePerfTooltips
     };
 }());

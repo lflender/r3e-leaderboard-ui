@@ -1280,6 +1280,10 @@
         grid-template-columns: 1fr;
     }
 
+    .driver-profile-distributions-grid {
+        grid-template-columns: 1fr;
+    }
+
     .highlight-car-image {
         width: 140px;
     }

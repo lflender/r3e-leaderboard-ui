@@ -75,16 +75,19 @@ class DriverProfile {
             '<div id="driver-profile-header"></div>' +
             '<div id="driver-profile-stats"></div>' +
             '<div id="driver-profile-highlights"></div>' +
+            '<div id="driver-profile-distributions"></div>' +
             '<div id="driver-profile-charts"></div>';
         this.elements.profileHeader = document.getElementById('driver-profile-header');
         this.elements.statsContainer = document.getElementById('driver-profile-stats');
         this.elements.highlightsContainer = document.getElementById('driver-profile-highlights');
+        this.elements.distributionsContainer = document.getElementById('driver-profile-distributions');
         this.elements.chartsContainer = document.getElementById('driver-profile-charts');
 
         this.renderHeader(profile);
         this.renderStatsPlaceholders();
         this.loadStats(profile.name, profile.pathId);
         this.renderHighlights(profile);
+        this.renderDistributions(entries || []);
         this.renderCharts(profile, entries || []);
         this.scheduleClassBreakdowns(entries || []);
     }
@@ -455,6 +458,192 @@ class DriverProfile {
             cards.join(''),
             '</div>'
         ].join('');
+    }
+
+    /**
+     * Render the distributions section: entries over time + performance over time
+     * @param {Array} entries - Raw driver leaderboard entries
+     */
+    renderDistributions(entries) {
+        if (!entries || entries.length === 0) {
+            this.elements.distributionsContainer.innerHTML = '';
+            return;
+        }
+
+        this._distEntries = entries;
+        let html = '<div class="driver-profile-distributions-grid">';
+
+        // Entries distribution graph (reuses DetailEntriesDist module)
+        if (window.DetailEntriesDist) {
+            const entriesDistHtml = DetailEntriesDist.generateHtml(entries, true, null, null, entries, {});
+            if (entriesDistHtml) {
+                html += '<div class="driver-profile-dist-card">' + entriesDistHtml + '</div>';
+            }
+        }
+
+        // Performance distribution graph (bested % over time)
+        html += this._generatePerformanceGraph(entries);
+
+        html += '</div>';
+        this.elements.distributionsContainer.innerHTML = html;
+        this._wireEntriesDistInteraction();
+    }
+
+    /**
+     * Generate the performance distribution graph HTML.
+     * Each entry becomes a point representing its bested % position.
+     * #1 = 100%, last = 0%.
+     * @param {Array} entries - Raw driver leaderboard entries
+     * @returns {string} HTML string
+     */
+    _generatePerformanceGraph(entries) {
+        const parseDate = window.DetailEntriesDist ? DetailEntriesDist.parseEntryDate : null;
+        if (!parseDate) return '';
+
+        // Build data points: [{date, bestedPct, carClass, car, position, total}] sorted by date
+        const points = [];
+        entries.forEach(entry => {
+            const dt = parseDate(entry);
+            if (!dt) return;
+            const pos = entry.position;
+            const total = entry.total_entries;
+            if (!pos || !total || total < 2) return;
+            const bestedPct = ((total - pos) / (total - 1)) * 100;
+            const car = entry.Car || entry.car || entry.CarName || entry.car_name || '';
+            const track = (window.R3EUtils && typeof window.R3EUtils.resolveTrackLabelForItem === 'function')
+                ? window.R3EUtils.resolveTrackLabelForItem(entry)
+                : (entry.Track || entry.track || entry.TrackName || entry.track_name || '');
+            const carClass = entry.car_class || entry.CarClass || entry.Class || '';
+            const classId = entry.class_id || entry.ClassID || entry.classId || '';
+            points.push({ date: dt, bestedPct, car, track, carClass, classId, position: pos, total });
+        });
+
+        if (points.length === 0) return '';
+
+        points.sort((a, b) => a.date - b.date);
+
+        const summaryId = 'perf-dist-summary-' + Date.now();
+
+        let html = '<div class="driver-profile-dist-card">';
+        html += '<div class="entries-dist-summary perf-dist-summary">';
+        html += '<button type="button" class="entries-dist-toggle expanded" aria-expanded="true" aria-controls="' + summaryId + '">';
+        html += '<span class="entries-dist-toggle-icon">\u25BC</span>';
+        html += '<span class="entries-dist-toggle-text">Performance Over Time</span>';
+        html += '</button>';
+
+        html += '<div id="' + summaryId + '" class="entries-dist-content">';
+
+        html += '<div class="perf-dist-chart" role="img" aria-label="Performance over time showing bested percentage for each entry">';
+        html += '<span class="perf-dist-y-label perf-dist-y-top">100%</span>';
+        html += '<span class="perf-dist-y-label perf-dist-y-mid">50%</span>';
+        html += '<span class="perf-dist-y-label perf-dist-y-bottom">0%</span>';
+
+        // Grid lines as divs
+        html += '<div class="perf-dist-grid-line" style="top:25%"></div>';
+        html += '<div class="perf-dist-grid-line" style="top:50%"></div>';
+        html += '<div class="perf-dist-grid-line" style="top:75%"></div>';
+
+        // Draw points as HTML elements positioned by percentage
+        const totalPoints = points.length;
+        const escape = R3EUtils.escapeHtml;
+        points.forEach((pt, idx) => {
+            const leftPct = ((idx + 0.5) / totalPoints) * 100;
+            const topPct = 100 - pt.bestedPct;
+            const dateStr = DetailEntriesDist.getLocalDateKey(pt.date);
+            const info = pt.car + (pt.track ? ' – ' + pt.track : '');
+            html += '<span class="perf-dist-point" style="left:' + leftPct.toFixed(3) + '%;top:' + topPct.toFixed(3) + '%" data-date="' + dateStr + '" data-pct="' + pt.bestedPct.toFixed(1) + '" data-pos="' + pt.position + '" data-total="' + pt.total + '" data-info="' + escape(info) + '" data-class="' + escape(pt.carClass) + '" data-class-id="' + escape(String(pt.classId || '')) + '"></span>';
+        });
+
+        html += '</div>';
+
+        // X-axis dates
+        const firstDate = DetailEntriesDist.getLocalDateKey(points[0].date);
+        const lastDate = DetailEntriesDist.getLocalDateKey(points[points.length - 1].date);
+        html += '<div class="entries-dist-axis">';
+        html += '<span class="entries-dist-axis-left">' + firstDate + '</span>';
+        html += '<span class="entries-dist-axis-right">' + lastDate + '</span>';
+        html += '</div>';
+
+        html += '</div>';
+        html += '</div>';
+        html += '</div>';
+
+        return html;
+    }
+
+    /**
+     * Wire toggle interaction for distribution graphs on the profile page
+     */
+    _wireEntriesDistInteraction() {
+        const container = this.elements.distributionsContainer;
+        if (!container) return;
+
+        container.querySelectorAll('.entries-dist-toggle').forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                const expanded = toggle.getAttribute('aria-expanded') === 'true';
+                const contentId = toggle.getAttribute('aria-controls');
+                const content = document.getElementById(contentId);
+                if (!content) return;
+                toggle.setAttribute('aria-expanded', String(!expanded));
+                toggle.classList.toggle('expanded', !expanded);
+                content.style.display = expanded ? 'none' : '';
+            });
+        });
+
+        // Wire timeframe controls for entries distribution (same as detail page)
+        const entriesDistEl = container.querySelector('.entries-dist-summary:not(.perf-dist-summary)');
+        if (entriesDistEl && window.DetailEntriesDist) {
+            const startInput = entriesDistEl.querySelector('.entries-timeframe-start');
+            const endInput = entriesDistEl.querySelector('.entries-timeframe-end');
+            const lastWeekBtn = entriesDistEl.querySelector('.entries-timeframe-last-week');
+
+            if (startInput && endInput) {
+                const refresh = () => {
+                    const parent = entriesDistEl.closest('.driver-profile-dist-card');
+                    if (!parent) return;
+                    const allEntries = this._distEntries;
+                    if (!allEntries) return;
+                    const filtered = DetailEntriesDist.applyTimeframeFilter(allEntries, startInput.value, endInput.value);
+                    const newHtml = DetailEntriesDist.generateHtml(filtered, true, startInput.value, endInput.value, allEntries, {
+                        timeframeStart: startInput.value,
+                        timeframeEnd: endInput.value
+                    });
+                    parent.innerHTML = newHtml;
+                    // Re-wire toggle
+                    const newToggle = parent.querySelector('.entries-dist-toggle');
+                    if (newToggle) {
+                        newToggle.addEventListener('click', () => {
+                            const exp = newToggle.getAttribute('aria-expanded') === 'true';
+                            const cId = newToggle.getAttribute('aria-controls');
+                            const c = document.getElementById(cId);
+                            if (!c) return;
+                            newToggle.setAttribute('aria-expanded', String(!exp));
+                            newToggle.classList.toggle('expanded', !exp);
+                            c.style.display = exp ? 'none' : '';
+                        });
+                    }
+                    // Re-wire timeframe controls
+                    this._wireEntriesDistInteraction();
+                };
+                startInput.addEventListener('change', refresh);
+                endInput.addEventListener('change', refresh);
+                if (lastWeekBtn) {
+                    lastWeekBtn.addEventListener('click', () => {
+                        const now = new Date();
+                        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                        startInput.value = DetailEntriesDist.toLocalDateInputValue(weekAgo);
+                        endInput.value = DetailEntriesDist.toLocalDateInputValue(now);
+                        refresh();
+                    });
+                }
+            }
+        }
+
+        // Wire tooltips for both graph types
+        if (window.DetailEntriesDist) {
+            DetailEntriesDist.wireTooltips(container, this._distEntries);
+            DetailEntriesDist.wirePerfTooltips(container);
+        }
     }
 
     /**

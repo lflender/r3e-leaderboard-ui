@@ -500,3 +500,109 @@
 .driver-profile-error a:hover {
     text-decoration: underline;
 }
+
+/* --- Distributions (Entries & Performance Over Time) --- */
+
+.driver-profile-distributions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.driver-profile-dist-card {
+    min-width: 0;
+}
+
+.driver-profile-dist-card .entries-dist-summary {
+    margin: 0;
+}
+
+.driver-profile-dist-card .entries-dist-toggle {
+    cursor: default;
+    pointer-events: none;
+}
+
+.driver-profile-dist-card .entries-dist-toggle:hover {
+    background-color: var(--surface);
+}
+
+.driver-profile-dist-card .entries-dist-toggle-icon {
+    display: none;
+}
+
+.driver-profile-dist-card .entries-dist-content {
+    display: block !important;
+}
+
+.driver-profile-dist-card .entries-timeframe-controls {
+    display: none;
+}
+
+.driver-profile-dist-card .entries-dist-max-label,
+.driver-profile-dist-card .entries-dist-max-line-overlay {
+    display: none;
+}
+
+.driver-profile-dist-card .entries-dist-chart {
+    height: 7rem;
+}
+
+/* Performance distribution graph */
+.perf-dist-chart {
+    position: relative;
+    height: 7rem;
+    width: calc(100% - 2.5rem);
+    margin-left: 2.5rem;
+    overflow: visible;
+}
+
+.perf-dist-y-label {
+    position: absolute;
+    right: calc(100% + 0.3rem);
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.perf-dist-y-top {
+    top: 0;
+}
+
+.perf-dist-y-mid {
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.perf-dist-y-bottom {
+    bottom: 0;
+}
+
+.perf-dist-grid-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 0;
+    border-top: 1px dashed var(--border);
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.perf-dist-point {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    margin-left: -3px;
+    margin-top: -3px;
+    border-radius: 50%;
+    background: rgba(59, 130, 246, 0.85);
+    transition: background 0.1s, transform 0.1s;
+}
+
+.perf-dist-point-active {
+    background: rgba(96, 165, 250, 1);
+    transform: scale(1.8);
+    z-index: 4;
+}

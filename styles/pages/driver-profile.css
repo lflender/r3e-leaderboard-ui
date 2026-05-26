@@ -359,7 +359,7 @@
     padding: 1.25rem;
     box-shadow: 0 2px 8px var(--shadow);
     min-width: 0;
-    overflow: hidden;
+    overflow: visible;
 }
 
 /* --- Pie chart component styles --- */

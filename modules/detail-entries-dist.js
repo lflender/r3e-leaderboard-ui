@@ -202,6 +202,22 @@
             const contentBars = bars.filter(b => b.getAttribute('data-count') !== '0');
 
             let activeBar = null;
+            let highlightedPoints = [];
+
+            // Find the perf chart in the same container for cross-highlighting
+            var perfChart = container.querySelector('.perf-dist-chart');
+
+            function clearPerfHighlights() {
+                highlightedPoints.forEach(p => p.classList.remove('perf-dist-point-active'));
+                highlightedPoints = [];
+            }
+
+            function highlightPerfPoints(date) {
+                clearPerfHighlights();
+                if (!perfChart || !date) return;
+                highlightedPoints = Array.from(perfChart.querySelectorAll('.perf-dist-point[data-date="' + date + '"]'));
+                highlightedPoints.forEach(p => p.classList.add('perf-dist-point-active'));
+            }
 
             svg.addEventListener('mousemove', (e) => {
                 const rect = svg.getBoundingClientRect();
@@ -230,6 +246,7 @@
                         activeBar.classList.remove('entries-dist-bar-active');
                         activeBar = null;
                     }
+                    clearPerfHighlights();
                     tooltip.style.display = 'none';
                     return;
                 }
@@ -238,6 +255,7 @@
                     if (activeBar) activeBar.classList.remove('entries-dist-bar-active');
                     nearest.classList.add('entries-dist-bar-active');
                     activeBar = nearest;
+                    highlightPerfPoints(nearest.getAttribute('data-date'));
                 }
 
                 const date = nearest.getAttribute('data-date');
@@ -252,6 +270,7 @@
                     activeBar.classList.remove('entries-dist-bar-active');
                     activeBar = null;
                 }
+                clearPerfHighlights();
                 tooltip.style.display = 'none';
             });
         });
@@ -388,6 +407,9 @@
         let left = x - tipWidth / 2;
         if (left < 0) left = 0;
         if (left + tipWidth > rect.width) left = rect.width - tipWidth;
+        // Prevent tooltip from overflowing left edge of viewport
+        const minLeft = -rect.left + 4;
+        if (left < minLeft) left = minLeft;
         tooltip.style.left = left + 'px';
         tooltip.style.top = (y - tipHeight - 10) + 'px';
     }

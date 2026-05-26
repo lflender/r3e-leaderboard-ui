@@ -209,6 +209,13 @@
     max-width: 450px;
 }
 
+@media (max-width: 768px) {
+    .dist-tooltip {
+        white-space: normal;
+        max-width: min(90vw, 300px);
+    }
+}
+
 .dist-tooltip-entries {
     margin-top: 0.25rem;
     padding-top: 0.25rem;

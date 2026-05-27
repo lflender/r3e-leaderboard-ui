@@ -8,7 +8,7 @@
     padding: 0.2rem;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
-    background: rgba(15, 23, 42, 0.42);
+    background: var(--color-inset-bg);
     margin: var(--space-6) auto var(--space-7);
     justify-content: center;
 }
@@ -52,11 +52,11 @@
 
 .challenge-mode-btn:hover {
     color: var(--color-text-primary);
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--color-white-alpha-4);
 }
 
 .challenge-mode-btn.is-active {
-    color: #fff;
+    color: var(--color-white);
     background: var(--color-primary-hover);
     border-color: var(--color-primary);
 }
@@ -100,7 +100,7 @@
     padding: 0.2rem;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
-    background: rgba(15, 23, 42, 0.42);
+    background: var(--color-inset-bg);
     margin: 0 auto var(--space-5);
 }
 
@@ -118,11 +118,11 @@
 
 .challenge-granularity-btn:hover {
     color: var(--color-text-primary);
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--color-white-alpha-4);
 }
 
 .challenge-granularity-btn.is-active {
-    color: #fff;
+    color: var(--color-white);
     background: var(--color-primary-hover);
     border-color: var(--color-primary);
 }
@@ -204,7 +204,7 @@
     width: 48px;
     height: 48px;
     object-fit: contain;
-    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.25));
+    filter: drop-shadow(0 1px 3px var(--color-black-alpha-25));
 }
 
 .challenge-result-car {
@@ -226,7 +226,7 @@
     width: 26px;
     height: 26px;
     object-fit: contain;
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+    filter: drop-shadow(0 1px 2px var(--color-black-alpha-25));
 }
 
 .challenge-result-car__thumbnail {
@@ -234,7 +234,7 @@
     max-height: 170px;
     border-radius: var(--radius-md);
     object-fit: contain;
-    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.35));
+    filter: drop-shadow(0 2px 8px var(--color-black-alpha-35));
 }
 
 .challenge-result-track {
@@ -250,7 +250,7 @@
     width: 48px;
     height: 48px;
     object-fit: contain;
-    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.25));
+    filter: drop-shadow(0 1px 3px var(--color-black-alpha-25));
 }
 
 .challenge-result-layout {
@@ -344,16 +344,16 @@
     border: 1px solid var(--color-primary);
     border-radius: var(--radius-lg);
     background: var(--color-primary-hover);
-    color: #fff;
+    color: var(--color-white);
     cursor: pointer;
     letter-spacing: 0.02em;
     transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
+    box-shadow: 0 2px 8px var(--color-primary-alpha-25);
 }
 
 .challenge-pick-btn:hover {
-    background: #1d4ed8;
-    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.35);
+    background: var(--color-primary-dark);
+    box-shadow: 0 4px 16px var(--color-primary-alpha-35);
 }
 
 .challenge-pick-btn:active {
@@ -382,7 +382,7 @@
 .challenge-repick-btn:not(:disabled):hover {
     border-color: var(--color-primary);
     color: var(--color-text-primary);
-    background: rgba(59, 130, 246, 0.08);
+    background: var(--color-primary-alpha-8);
 }
 
 .challenge-repick-btn:not(:disabled):active {
@@ -422,15 +422,15 @@
 }
 
 .challenge-hardcore-label:hover {
-    border-color: #f87171;
-    color: #f87171;
-    background: rgba(248, 113, 113, 0.08);
+    border-color: var(--color-danger-light);
+    color: var(--color-danger-light);
+    background: var(--color-danger-alpha-8);
 }
 
 .challenge-hardcore-label.is-active {
-    border-color: #f87171;
-    color: #f87171;
-    background: rgba(248, 113, 113, 0.08);
+    border-color: var(--color-danger-light);
+    color: var(--color-danger-light);
+    background: var(--color-danger-alpha-8);
 }
 
 .challenge-hardcore-label input[type="checkbox"] {
@@ -459,7 +459,7 @@
     top: 0px;
     width: 5px;
     height: 9px;
-    border: solid #fff;
+    border: solid var(--color-white);
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
 }
@@ -470,14 +470,14 @@
 }
 
 .challenge-pick-btn--hardcore {
-    background: #b91c1c;
-    border-color: #dc2626;
-    box-shadow: 0 2px 8px rgba(185, 28, 28, 0.25);
+    background: var(--color-danger-dark);
+    border-color: var(--color-danger-border);
+    box-shadow: 0 2px 8px var(--color-danger-alpha-30);
 }
 
 .challenge-pick-btn--hardcore:hover {
-    background: #991b1b;
-    box-shadow: 0 4px 16px rgba(185, 28, 28, 0.35);
+    background: var(--color-danger-darker);
+    box-shadow: 0 4px 16px var(--color-danger-alpha-30);
 }
 
 .challenge-pick-btn--locked {
@@ -558,11 +558,11 @@
 }
 
 .challenge-stats-time--best {
-    color: #6ee7a0;
+    color: var(--color-success-light);
 }
 
 .challenge-stats-time--last {
-    color: #fca5a5;
+    color: var(--color-danger-lighter);
 }
 
 .challenge-stats-driver {
@@ -644,7 +644,7 @@
 .challenge-exclusions__badge {
     font-size: var(--font-size-xs);
     font-weight: var(--font-weight-bold);
-    color: #f87171;
+    color: var(--color-danger-light);
 }
 
 .challenge-exclusions__reset {
@@ -661,9 +661,9 @@
 }
 
 .challenge-exclusions__reset:hover {
-    border-color: #f87171;
-    color: #f87171;
-    background: rgba(248, 113, 113, 0.08);
+    border-color: var(--color-danger-light);
+    color: var(--color-danger-light);
+    background: var(--color-danger-alpha-8);
 }
 
 .challenge-exclusions__body {
@@ -696,7 +696,7 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     padding: var(--space-2) 0.7rem;
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--color-white-alpha-3);
     border-bottom: 1px solid var(--color-border);
 }
 
@@ -727,7 +727,7 @@
 }
 
 .challenge-exclusions__item input[type="checkbox"] {
-    accent-color: #f87171;
+    accent-color: var(--color-danger-light);
     cursor: pointer;
     flex-shrink: 0;
     width: 0.95em;
@@ -801,7 +801,7 @@
 }
 
 .challenge-exclusions__class-cb {
-    accent-color: #f87171;
+    accent-color: var(--color-danger-light);
     cursor: pointer;
     flex-shrink: 0;
     width: 0.95em;
@@ -836,7 +836,7 @@
 }
 
 .challenge-exclusions__car-item input[type="checkbox"] {
-    accent-color: #f87171;
+    accent-color: var(--color-danger-light);
     cursor: pointer;
     flex-shrink: 0;
     width: 0.85em;
@@ -905,7 +905,7 @@
 }
 
 .era-checkbox-option:hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--color-white-alpha-6);
 }
 
 .era-checkbox-option input[type="checkbox"] {

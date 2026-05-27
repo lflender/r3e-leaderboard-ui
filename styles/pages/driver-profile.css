@@ -109,7 +109,7 @@
 
 .driver-profile-mp-pos-inactive {
     font-weight: var(--font-weight-normal);
-    color: #7a7a7a;
+    color: var(--color-text-muted);
     opacity: 0.6;
     font-size: 0.9em;
 }
@@ -402,7 +402,7 @@
 .pie-slice {
     transition: opacity 0.2s, transform 0.2s ease-out;
     cursor: pointer;
-    stroke: rgba(0, 0, 0, 0.25);
+    stroke: var(--color-black-alpha-25);
     stroke-width: 1;
 }
 
@@ -417,7 +417,7 @@
 
 .pie-tooltip {
     position: absolute;
-    background: rgba(15, 23, 42, 0.95);
+    background: var(--color-inset-bg-dense);
     color: var(--color-text-primary);
     padding: 0.35rem 0.65rem;
     border-radius: var(--radius-md);
@@ -425,7 +425,7 @@
     white-space: nowrap;
     pointer-events: none;
     z-index: var(--z-tooltip);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    box-shadow: 0 2px 6px var(--color-black-alpha-35);
     border: 1px solid var(--color-border);
 }
 
@@ -471,7 +471,7 @@
     height: 10px;
     border-radius: var(--radius-xs);
     flex-shrink: 0;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 1px 3px var(--color-black-alpha-35);
 }
 
 .pie-legend-label {
@@ -608,12 +608,12 @@
     margin-left: -3px;
     margin-top: -3px;
     border-radius: 50%;
-    background: rgba(59, 130, 246, 0.85);
+    background: var(--color-primary-alpha-80);
     transition: background 0.1s, transform 0.1s;
 }
 
 .perf-dist-point-active {
-    background: rgba(96, 165, 250, 1);
+    background: var(--color-primary-light-solid);
     transform: scale(1.8);
     z-index: 4;
 }

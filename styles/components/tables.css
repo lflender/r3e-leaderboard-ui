@@ -1,4 +1,4 @@
-﻿/* ========================================
+/* ========================================
    6. TABLES
    ======================================== */
 
@@ -13,12 +13,12 @@
 }
 
 .error {
-    background-color: #7f1d1d;
-    color: #fecaca;
+    background-color: var(--color-error-bg);
+    color: var(--color-error-text);
     padding: var(--space-4);
     border-radius: var(--radius-lg);
     margin-bottom: var(--space-4);
-    border: 1px solid #991b1b;
+    border: 1px solid var(--color-danger-dark);
 }
 
 .results-table {
@@ -28,7 +28,7 @@
     margin-top: var(--space-4);
     border-radius: var(--radius-xl);
     overflow: hidden;
-    box-shadow: 0 2px 12px 0 rgba(30, 41, 59, 0.10);
+    box-shadow: 0 2px 12px 0 var(--color-surface-alpha-10);
 }
 
 .results-table th,
@@ -40,7 +40,7 @@
 }
 
 .results-table th {
-    color: #fff;
+    color: var(--color-white);
     font-size: 1.05rem;
     font-weight: var(--font-weight-bold);
     padding: 0.7rem 0.8rem;
@@ -59,11 +59,11 @@
 }
 
 .results-table th.sortable:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--color-white-alpha-10);
 }
 
 .results-table th.sortable.sort-active {
-    background-color: rgba(255, 255, 255, 0.15);
+    background-color: var(--color-white-alpha-15);
 }
 
 .results-table th.sortable::after {
@@ -105,24 +105,24 @@
 a.driver-name-gold,
 .driver-name-gold {
     color: var(--color-podium-gold) !important;
-    text-shadow: 0 0 1px #000,
-                 0 0 2px #000,
-                 1px 1px 0 #000,
-                 -1px -1px 0 #000,
-                 1px -1px 0 #000,
-                 -1px 1px 0 #000;
+    text-shadow: 0 0 1px var(--color-black),
+                 0 0 2px var(--color-black),
+                 1px 1px 0 var(--color-black),
+                 -1px -1px 0 var(--color-black),
+                 1px -1px 0 var(--color-black),
+                 -1px 1px 0 var(--color-black);
     font-weight: var(--font-weight-bold);
 }
 
 a.driver-name-silver,
 .driver-name-silver {
     color: var(--color-podium-silver) !important;
-    text-shadow: 0 0 1px #000,
-                 0 0 2px #000,
-                 1px 1px 0 #000,
-                 -1px -1px 0 #000,
-                 1px -1px 0 #000,
-                 -1px 1px 0 #000;
+    text-shadow: 0 0 1px var(--color-black),
+                 0 0 2px var(--color-black),
+                 1px 1px 0 var(--color-black),
+                 -1px -1px 0 var(--color-black),
+                 1px -1px 0 var(--color-black),
+                 -1px 1px 0 var(--color-black);
     font-weight: var(--font-weight-bold);
 }
 
@@ -133,18 +133,7 @@ h2.driver-name-top10-glitter {
     position: relative;
     display: inline-block;
     animation: top10-glitter-pulse 3.4s ease-in-out infinite;
-    filter: drop-shadow(0 0 0.2rem rgba(255, 240, 130, 0.55));
-}
-
-a.driver-name-top10-glitter::before,
-strong.driver-name-top10-glitter::before,
-span.driver-name-top10-glitter::before,
-h2.driver-name-top10-glitter::before,
-a.driver-name-top10-glitter::after,
-strong.driver-name-top10-glitter::after,
-span.driver-name-top10-glitter::after,
-h2.driver-name-top10-glitter::after {
-    content: none;
+    filter: drop-shadow(0 0 0.2rem var(--color-glitter-glow-1));
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -159,23 +148,23 @@ h2.driver-name-top10-glitter::after {
 @keyframes top10-glitter-pulse {
     0%,
     100% {
-        text-shadow: 0 0 1px #000,
-                     0 0 2px #000,
-                     1px 1px 0 #000,
-                     -1px -1px 0 #000,
-                     1px -1px 0 #000,
-                     -1px 1px 0 #000,
-                     0 0 7px rgba(255, 225, 13, 0.28);
+        text-shadow: 0 0 1px var(--color-black),
+                     0 0 2px var(--color-black),
+                     1px 1px 0 var(--color-black),
+                     -1px -1px 0 var(--color-black),
+                     1px -1px 0 var(--color-black),
+                     -1px 1px 0 var(--color-black),
+                     0 0 7px var(--color-glitter-glow-2);
     }
     50% {
-        text-shadow: 0 0 1px #000,
-                     0 0 2px #000,
-                     1px 1px 0 #000,
-                     -1px -1px 0 #000,
-                     1px -1px 0 #000,
-                     -1px 1px 0 #000,
-                     0 0 10px rgba(255, 244, 154, 0.55),
-                     0 0 16px rgba(255, 208, 82, 0.4);
+        text-shadow: 0 0 1px var(--color-black),
+                     0 0 2px var(--color-black),
+                     1px 1px 0 var(--color-black),
+                     -1px -1px 0 var(--color-black),
+                     1px -1px 0 var(--color-black),
+                     -1px 1px 0 var(--color-black),
+                     0 0 10px var(--color-glitter-glow-3),
+                     0 0 16px var(--color-glitter-glow-4);
     }
 }
 
@@ -184,8 +173,8 @@ h2.driver-name-top10-glitter::after {
 }
 
 .highlight-row td {
-    background-color: rgba(59, 130, 246, 0.08) !important;
-    box-shadow: inset 0 0 12px rgba(59,130,246,0.05);
+    background-color: var(--color-primary-alpha-8) !important;
+    box-shadow: inset 0 0 12px var(--color-primary-alpha-5);
     font-weight: 700;
 }
 
@@ -450,20 +439,20 @@ h2.driver-name-top10-glitter::after {
 
 /* Driver group headers */
 .driver-group-header {
-    background-color: #3b4a6b !important;
+    background-color: var(--color-surface-selected) !important;
     cursor: pointer;
     user-select: none;
-    color: #f1f5fa;
+    color: var(--color-text-highlight);
     font-weight: 600;
     font-size: 1.08rem;
-    border-top: 1px solid #475569;
-    border-bottom: 1px solid #475569;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
     transition: background 0.2s;
     box-shadow: none;
 }
 
 .driver-group-header:hover {
-    background-color: #4b5d85 !important;
+    background-color: var(--color-surface-selected-hover) !important;
 }
 
 .driver-group-header td {
@@ -482,7 +471,7 @@ h2.driver-name-top10-glitter::after {
     margin-right: 8px;
     position: relative;
     top: -2px;
-    background: #1f232a;
+    background: var(--color-background);
 }
 
 .driver-profile-link-btn {
@@ -490,9 +479,9 @@ h2.driver-name-top10-glitter::after {
     padding: 0.2rem 0.65rem;
     font-size: 0.78rem;
     font-weight: 600;
-    color: #e0e7ff;
-    background: rgba(96, 165, 250, 0.15);
-    border: 1px solid rgba(96, 165, 250, 0.35);
+    color: var(--color-text-highlight);
+    background: var(--color-primary-light-alpha-15);
+    border: 1px solid var(--color-primary-light-alpha-30);
     border-radius: 6px;
     white-space: nowrap;
     margin-top: 0.1rem;
@@ -500,9 +489,9 @@ h2.driver-name-top10-glitter::after {
 }
 
 .driver-group-header:hover .driver-profile-link-btn {
-    background: rgba(96, 165, 250, 0.3);
-    border-color: #60a5fa;
-    color: #fff;
+    background: var(--color-primary-light-alpha-30);
+    border-color: var(--color-primary-light-solid);
+    color: var(--color-white);
 }
 
 .driver-meta {
@@ -510,7 +499,7 @@ h2.driver-name-top10-glitter::after {
     font-weight: 400;
     opacity: 0.9;
     font-size: 0.97rem;
-    color: #a5b4fc;
+    color: var(--color-text-link-subtle);
 }
 
 .driver-data-row {
@@ -565,12 +554,12 @@ h2.driver-name-top10-glitter::after {
 
 /* Inactive MP ranking — clearly dimmed vs active */
 .mp-pos-inactive {
-    color: #9a9a9a !important;
+    color: var(--color-text-muted) !important;
     opacity: 0.7;
 }
 
 .mp-pos-badge.mp-pos-inactive {
-    color: #7a7a7a !important;
+    color: var(--color-text-muted) !important;
     opacity: 0.6;
     font-size: 0.75rem;
 }
@@ -582,7 +571,7 @@ h2.driver-name-top10-glitter::after {
 /* Track layout styling */
 .track-layout {
     font-size: 0.85em;
-    color: #999;
+    color: var(--color-text-secondary);
     font-style: italic;
     font-weight: 400;
 }

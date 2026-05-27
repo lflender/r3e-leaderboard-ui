@@ -6,13 +6,139 @@
 
 :root {
     /* --- Colors: Core --- */
+    --color-white: #ffffff;
+    --color-black: #000000;
     --color-primary: #3b82f6;
     --color-primary-hover: #2563eb;
+    --color-primary-dark: #1d4ed8;
     --color-background: #0f172a;
+    --color-background-dark: #111827;
     --color-surface: #1e293b;
     --color-surface-alt: rgba(255, 255, 255, 0.03);
     --color-border: #334155;
     --color-hover-bg: #334155;
+
+    /* --- Colors: Alpha overlays --- */
+    --color-primary-alpha-5: rgba(59, 130, 246, 0.05);
+    --color-primary-alpha-8: rgba(59, 130, 246, 0.08);
+    --color-primary-alpha-10: rgba(59, 130, 246, 0.1);
+    --color-primary-alpha-20: rgba(59, 130, 246, 0.2);
+    --color-primary-alpha-25: rgba(59, 130, 246, 0.25);
+    --color-primary-alpha-35: rgba(59, 130, 246, 0.35);
+    --color-primary-alpha-50: rgba(59, 130, 246, 0.5);
+    --color-primary-alpha-80: rgba(59, 130, 246, 0.8);
+    --color-primary-hover-alpha-10: rgba(37, 99, 235, 0.1);
+    --color-primary-hover-alpha-15: rgba(37, 99, 235, 0.15);
+    --color-primary-hover-alpha-25: rgba(37, 99, 235, 0.25);
+    --color-primary-light-alpha-15: rgba(96, 165, 250, 0.15);
+    --color-primary-light-alpha-30: rgba(96, 165, 250, 0.3);
+    --color-primary-light-alpha-82: rgba(96, 165, 250, 0.82);
+    --color-primary-light-solid: rgba(96, 165, 250, 1);
+    --color-danger-alpha-8: rgba(248, 113, 113, 0.08);
+    --color-danger-alpha-30: rgba(220, 38, 38, 0.3);
+    --color-danger-alpha-60: rgba(239, 68, 68, 0.6);
+    --color-success-alpha-15: rgba(34, 197, 94, 0.15);
+    --color-success-alpha-35: rgba(34, 197, 94, 0.35);
+    --color-success-alpha-60: rgba(34, 197, 94, 0.6);
+    --color-white-alpha-3: rgba(255, 255, 255, 0.03);
+    --color-white-alpha-4: rgba(255, 255, 255, 0.04);
+    --color-white-alpha-6: rgba(255, 255, 255, 0.06);
+    --color-white-alpha-10: rgba(255, 255, 255, 0.1);
+    --color-white-alpha-15: rgba(255, 255, 255, 0.15);
+    --color-white-alpha-50: rgba(255, 255, 255, 0.5);
+    --color-black-alpha-25: rgba(0, 0, 0, 0.25);
+    --color-black-alpha-35: rgba(0, 0, 0, 0.35);
+    --color-black-alpha-90: rgba(0, 0, 0, 0.9);
+    --color-dark-overlay-60: rgba(2, 6, 23, 0.6);
+    --color-inset-bg: rgba(15, 23, 42, 0.42);
+    --color-inset-bg-dense: rgba(15, 23, 42, 0.9);
+    --color-surface-alpha-10: rgba(30, 41, 59, 0.10);
+    --color-surface-alpha-95: rgba(30, 41, 59, 0.95);
+    --color-border-alpha-50: rgba(51, 65, 85, 0.5);
+    --color-secondary-alpha-6: rgba(148, 163, 184, 0.06);
+    --color-secondary-alpha-15: rgba(148, 163, 184, 0.15);
+    --color-secondary-alpha-25: rgba(148, 163, 184, 0.25);
+    --color-secondary-alpha-70: rgba(148, 163, 184, 0.7);
+    --color-warning-glow: rgba(255, 214, 0, 0.6);
+
+    /* --- Colors: Metallic (podium/difficulty) --- */
+    --color-gold-alpha-14: rgba(255, 215, 0, 0.14);
+    --color-gold-alpha-30: rgba(255, 215, 0, 0.30);
+    --color-gold-alpha-50: rgba(255, 215, 0, 0.5);
+    --color-gold-alpha-80: rgba(255, 215, 0, 0.8);
+    --color-silver-alpha-14: rgba(192, 192, 192, 0.14);
+    --color-silver-alpha-30: rgba(192, 192, 192, 0.30);
+    --color-silver-dark-alpha-50: rgba(184, 184, 184, 0.5);
+    --color-silver-dark-alpha-80: rgba(184, 184, 184, 0.8);
+    --color-bronze-alpha-14: rgba(205, 127, 50, 0.14);
+    --color-bronze-alpha-30: rgba(205, 127, 50, 0.30);
+    --color-bronze-alpha-50: rgba(205, 127, 50, 0.5);
+    --color-bronze-alpha-80: rgba(205, 127, 50, 0.8);
+
+    /* --- Colors: Rating glows --- */
+    --color-rating-glow-1: rgba(236, 190, 92, 0.32);
+    --color-rating-glow-2: rgba(250, 192, 64, 0.52);
+    --color-rating-glow-3: rgba(251, 191, 36, 0.72);
+    --color-rating-glow-4: rgba(255, 199, 46, 0.9);
+    --color-rating-glow-max: rgba(253, 230, 138, 0.4);
+    --color-rating-text-glow: rgba(251, 191, 36, 0.3);
+    --color-rating-danger-glow: rgba(244, 63, 94, 0.45);
+    --color-rating-danger-glow-strong: rgba(244, 63, 94, 0.72);
+    --color-rating-danger-glow-soft: rgba(253, 164, 175, 0.4);
+
+    /* --- Colors: Glitter effects --- */
+    --color-glitter-glow-1: rgba(255, 240, 130, 0.55);
+    --color-glitter-glow-2: rgba(255, 225, 13, 0.28);
+    --color-glitter-glow-3: rgba(255, 244, 154, 0.55);
+    --color-glitter-glow-4: rgba(255, 208, 82, 0.4);
+
+    /* --- Colors: Badge (car type) --- */
+    --color-badge-text-dark: #222222;
+    --color-badge-text-dark-alt: #1f2937;
+    --color-badge-unknown-bg: #eeeeee;
+    --color-badge-unknown-text: #888888;
+    --color-badge-wheel-gt: #b3e5fc;
+    --color-badge-wheel-round: #ffe082;
+    --color-badge-wheel-flat: #c8e6c9;
+    --color-badge-trans-auto: #1976d2;
+    --color-badge-trans-seq: #7b1fa2;
+    --color-badge-trans-h: #c62828;
+    --color-badge-drive-rwd: #35cbe6;
+    --color-badge-drive-fwd: #c59fc0;
+    --color-badge-drive-awd: #af35a9;
+    --color-badge-assist-tc-bg: #1e3a5f;
+    --color-badge-assist-tc-text: #a8d0f0;
+    --color-badge-assist-abs-bg: #5c4a00;
+    --color-badge-assist-abs-text: #ffd966;
+    --color-badge-assist-lc-bg: #3a3a3a;
+    --color-badge-assist-lc-text: #d4d4d4;
+
+    /* --- Colors: Support buttons --- */
+    --color-support-paypal: #0070ba;
+    --color-support-paypal-hover: #0f94ec;
+    --color-support-raceroom: #691313;
+    --color-support-raceroom-hover: #a32929;
+
+    /* --- Colors: Error/banned --- */
+    --color-error-bg: #7f1d1d;
+    --color-error-text: #fecaca;
+    --color-danger-darker: #991b1b;
+
+    /* --- Colors: Rating level text --- */
+    --color-rating-base: #b4b4b4;
+    --color-rating-level-1: #9e9e9e;
+    --color-rating-level-2: #b6b6b6;
+    --color-rating-level-3: #dfc47a;
+    --color-rating-level-4: #f0c24e;
+    --color-rating-level-5: #f8c12b;
+    --color-rating-level-6: #ffbf1f;
+    --color-rating-preview: #fde68a;
+    --color-rating-gold: #fbbf24;
+    --color-rating-danger: #f43f5e;
+    --color-rating-danger-light: #fda4af;
+    --color-rating-meta: #b6c2d1;
+
+    --color-text-blue-light: #dbeafe;
 
     /* --- Colors: Text --- */
     --color-text-primary: #f1f5f9;
@@ -23,8 +149,23 @@
 
     /* --- Colors: Semantic --- */
     --color-success: #22c55e;
+    --color-success-light: #6ee7a0;
+    --color-success-dark: #059669;
     --color-danger: #ef4444;
+    --color-danger-light: #f87171;
+    --color-danger-lighter: #fca5a5;
+    --color-danger-dark: #b91c1c;
+    --color-danger-border: #dc2626;
     --color-warning: #ffd600;
+
+    /* --- Colors: Surface states --- */
+    --color-surface-selected: #3b4a6b;
+    --color-surface-selected-hover: #4b5d85;
+
+    /* --- Colors: Text states --- */
+    --color-text-muted: #7a7a7a;
+    --color-text-link-subtle: #a5b4fc;
+    --color-text-highlight: #e0e7ff;
 
     /* --- Colors: Podium --- */
     --color-podium-gold: #FFE10D;
@@ -33,8 +174,6 @@
 
     /* --- Colors: Badges (position) --- */
     --color-pos-badge-default: rgba(59, 130, 246, 0.18);
-    --color-pos-badge-first: #22c55e;
-    --color-pos-badge-last: #ef4444;
 
     /* --- Colors: Year badge --- */
     --color-year-badge-text: #222;

@@ -17,34 +17,24 @@
 }
 
 .difficulty-pill.difficulty-get-real {
-    background-color: rgba(255, 215, 0, 0.14);
-    border-color: rgba(255, 215, 0, 0.30);
+    background-color: var(--color-gold-alpha-14);
+    border-color: var(--color-gold-alpha-30);
     border-style: solid;
     border-width: 1px;
 }
 
 .difficulty-pill.difficulty-amateur {
-    background-color: rgba(192, 192, 192, 0.14);
-    border-color: rgba(192, 192, 192, 0.30);
+    background-color: var(--color-silver-alpha-14);
+    border-color: var(--color-silver-alpha-30);
     border-style: solid;
     border-width: 1px;
 }
 
 .difficulty-pill.difficulty-novice {
-    background-color: rgba(205, 127, 50, 0.14);
-    border-color: rgba(205, 127, 50, 0.30);
+    background-color: var(--color-bronze-alpha-14);
+    border-color: var(--color-bronze-alpha-30);
     border-style: solid;
     border-width: 1px;
 }
 
-.difficulty-get-real { 
-    background-color: rgba(255, 215, 0, 0.10); 
-}
 
-.difficulty-amateur { 
-    background-color: rgba(192, 192, 192, 0.10); 
-}
-
-.difficulty-novice { 
-    background-color: rgba(205, 127, 50, 0.10); 
-}

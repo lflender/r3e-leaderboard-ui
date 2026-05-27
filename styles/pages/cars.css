@@ -9,7 +9,7 @@
     padding: 0.2rem;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
-    background: rgba(15, 23, 42, 0.42);
+    background: var(--color-inset-bg);
 }
 
 .cars-view-toggle-row {
@@ -37,15 +37,11 @@
 #cars-search:focus {
     outline: none;
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    box-shadow: 0 0 0 3px var(--color-primary-hover-alpha-10);
 }
 
 #cars-search-container {
     margin-bottom: 0.9rem;
-}
-
-.cars-tools-row {
-    display: none; /* legacy — replaced by side tools */
 }
 
 /* Side-strip rating tools */
@@ -111,7 +107,7 @@
 }
 
 .cars-view-btn.is-active {
-    color: #fff;
+    color: var(--color-white);
     background: var(--color-primary-hover);
     border-color: var(--color-primary);
 }
@@ -169,7 +165,7 @@
     padding: var(--space-1);
     border-radius: var(--radius-lg);
     border: 1px solid var(--color-border);
-    background: #111827;
+    background: var(--color-background-dark);
     box-shadow: var(--shadow-lg);
     transition: opacity 0.15s ease, transform 0.15s ease;
 }
@@ -197,7 +193,7 @@
     margin-left: 0.25em;
     border-radius: var(--radius-full);
     background: var(--color-primary);
-    color: #fff;
+    color: var(--color-white);
     font-weight: var(--font-weight-black);
     font-size: 0.72em;
     line-height: 1em;
@@ -282,7 +278,7 @@
 .carinfo-meta {
     font-size: 0.87em !important;
     font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
-    color: #b6c2d1;
+    color: var(--color-rating-meta);
     font-weight: 500;
     letter-spacing: 0.01em;
     opacity: 0.93;
@@ -318,13 +314,6 @@
     #cars-info-table .results-table td:nth-child(2) {
         width: 100px;
         min-width: 100px;
-    }
-}
-
-@media (max-width: 768px) {
-    #cars-info-table .results-table th:nth-child(1),
-    #cars-info-table .results-table td:nth-child(1) {
-        min-width: 205px;
     }
 }
 
@@ -414,9 +403,9 @@
     align-items: center;
     align-self: center;
     padding: 0.2rem 0.55rem;
-    border: 1px solid rgba(148, 163, 184, 0.25);
+    border: 1px solid var(--color-secondary-alpha-25);
     border-radius: var(--radius-xs);
-    background: rgba(59, 130, 246, 0.1);
+    background: var(--color-primary-alpha-10);
     color: var(--color-text-secondary);
     font-size: 0.7rem;
     font-weight: var(--font-weight-medium);
@@ -439,7 +428,7 @@
 .car-tile {
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
-    background: rgba(15, 23, 42, 0.45);
+    background: var(--color-inset-bg);
     padding: 0.65rem;
     position: relative;
     overflow: visible;
@@ -546,7 +535,7 @@
     position: relative;
     overflow: visible;
     border-radius: var(--radius-md);
-    background: rgba(15, 23, 42, 0.9);
+    background: var(--color-inset-bg-dense);
 }
 
 .car-tile-image {
@@ -627,14 +616,14 @@
 }
 
 .cars-rating-filter-symbols {
-    color: #fbbf24;
+    color: var(--color-rating-gold);
     letter-spacing: 0.04em;
-    text-shadow: 0 0 4px rgba(251, 191, 36, 0.3);
+    text-shadow: 0 0 4px var(--color-rating-text-glow);
 }
 
 .cars-rating-filter-heart {
-    color: #f43f5e;
-    text-shadow: 0 0 4px rgba(244, 63, 94, 0.45);
+    color: var(--color-rating-danger);
+    text-shadow: 0 0 4px var(--color-rating-danger-glow);
 }
 
 /* ========================================
@@ -681,8 +670,8 @@
     opacity: 0;
     user-select: none;
     -webkit-user-select: none;
-    color: rgba(255, 255, 255, 0.5);
-    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 1px rgba(0, 0, 0, 0.8));
+    color: var(--color-white-alpha-50);
+    filter: drop-shadow(0 1px 3px var(--color-black-alpha-90)) drop-shadow(0 0 1px var(--color-black-alpha-90));
     transition: opacity 0.12s ease, max-width 0.12s ease, padding 0.12s ease, color 0.08s ease;
 }
 
@@ -720,62 +709,62 @@
 
 /* Filled symbols: baseline (very bland/neutral) */
 .car-rating-widget[data-rated="true"] .car-rating-btn[data-filled="true"] {
-    color: #b4b4b4;
-    filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.04)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+    color: var(--color-rating-base);
+    filter: drop-shadow(0 0 1px var(--color-white-alpha-4)) drop-shadow(0 1px 2px var(--color-black-alpha-90));
 }
 
 /* Progressive intensity by rating level: 1 (grayscale) -> 6 (very shiny) */
 .car-rating-widget[data-rated="true"][data-score-level="1"] .car-rating-btn[data-filled="true"] {
-    color: #9e9e9e;
-    filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.03)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+    color: var(--color-rating-level-1);
+    filter: drop-shadow(0 0 1px var(--color-white-alpha-3)) drop-shadow(0 1px 2px var(--color-black-alpha-90));
 }
 
 .car-rating-widget[data-rated="true"][data-score-level="2"] .car-rating-btn[data-filled="true"] {
-    color: #b6b6b6;
-    filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.06)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+    color: var(--color-rating-level-2);
+    filter: drop-shadow(0 0 1px var(--color-white-alpha-6)) drop-shadow(0 1px 2px var(--color-black-alpha-90));
 }
 
 .car-rating-widget[data-rated="true"][data-score-level="3"] .car-rating-btn[data-filled="true"] {
-    color: #dfc47a;
-    filter: drop-shadow(0 0 2px rgba(236, 190, 92, 0.32)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+    color: var(--color-rating-level-3);
+    filter: drop-shadow(0 0 2px var(--color-rating-glow-1)) drop-shadow(0 1px 2px var(--color-black-alpha-90));
 }
 
 .car-rating-widget[data-rated="true"][data-score-level="4"] .car-rating-btn[data-filled="true"] {
-    color: #f0c24e;
-    filter: drop-shadow(0 0 4px rgba(250, 192, 64, 0.52)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+    color: var(--color-rating-level-4);
+    filter: drop-shadow(0 0 4px var(--color-rating-glow-2)) drop-shadow(0 1px 2px var(--color-black-alpha-90));
 }
 
 .car-rating-widget[data-rated="true"][data-score-level="5"] .car-rating-btn[data-filled="true"] {
-    color: #f8c12b;
-    filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.72)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+    color: var(--color-rating-level-5);
+    filter: drop-shadow(0 0 6px var(--color-rating-glow-3)) drop-shadow(0 1px 2px var(--color-black-alpha-90));
 }
 
 .car-rating-widget[data-rated="true"][data-score-level="6"] .car-rating-btn[data-filled="true"] {
-    color: #ffbf1f;
-    filter: drop-shadow(0 0 8px rgba(255, 199, 46, 0.9)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+    color: var(--color-rating-level-6);
+    filter: drop-shadow(0 0 8px var(--color-rating-glow-4)) drop-shadow(0 1px 2px var(--color-black-alpha-90));
 }
 
 /* Stars — hover preview */
 .car-rating-btn.is-preview {
-    color: #fde68a;
-    filter: drop-shadow(0 0 4px rgba(253, 230, 138, 0.4)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+    color: var(--color-rating-preview);
+    filter: drop-shadow(0 0 4px var(--color-rating-glow-max)) drop-shadow(0 1px 2px var(--color-black-alpha-90));
 }
 
 /* Heart — base */
 .car-rating-heart {
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--color-white-alpha-50);
 }
 
 /* Heart: only gets strong highlight on top score (6) */
 .car-rating-widget[data-rated="true"][data-score-level="6"] .car-rating-heart[data-filled="true"] {
-    color: #f43f5e;
-    filter: drop-shadow(0 0 5px rgba(244, 63, 94, 0.72)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+    color: var(--color-rating-danger);
+    filter: drop-shadow(0 0 5px var(--color-rating-danger-glow-strong)) drop-shadow(0 1px 2px var(--color-black-alpha-90));
 }
 
 /* Heart — hover preview */
 .car-rating-heart.is-preview {
-    color: #fda4af;
-    filter: drop-shadow(0 0 4px rgba(253, 164, 175, 0.4)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+    color: var(--color-rating-danger-light);
+    filter: drop-shadow(0 0 4px var(--color-rating-danger-glow-soft)) drop-shadow(0 1px 2px var(--color-black-alpha-90));
 }
 
 /* Reveal all buttons on tile hover or score-cell hover */

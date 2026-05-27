@@ -144,7 +144,7 @@
 .records-expand-toggle:hover,
 .records-expand-toggle:focus-visible {
     background: var(--color-primary);
-    color: #fff;
+    color: var(--color-white);
     border-color: var(--color-primary);
     outline: none;
 }
@@ -188,7 +188,7 @@
     align-items: center;
     justify-content: center;
     background: var(--color-primary);
-    color: #fff;
+    color: var(--color-white);
     border: none;
     border-radius: var(--radius-md);
     font-size: 1.1rem;

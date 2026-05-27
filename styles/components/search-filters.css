@@ -1,4 +1,4 @@
-﻿/* ========================================
+/* ========================================
    5. SEARCH AND FILTERS
    ======================================== */
 
@@ -18,7 +18,7 @@
     font-size: 0.98rem;
     border: 2px solid var(--color-border);
     border-radius: var(--radius-lg);
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+    background: linear-gradient(180deg, var(--color-white-alpha-3), transparent);
     color: var(--color-text-primary);
     max-width: 420px;
     appearance: none;
@@ -27,7 +27,7 @@
 #class-filter:focus {
     outline: none;
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.06);
+    box-shadow: 0 0 0 3px var(--color-primary-hover-alpha-10);
 }
 
 /* Small caret tweak for select */
@@ -91,7 +91,7 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+    box-shadow: 0 6px 18px var(--color-dark-overlay-60);
     z-index: var(--z-popover);
 }
 .custom-select__menu[hidden] {
@@ -115,7 +115,7 @@
 }
 .custom-select__search:focus {
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
+    box-shadow: 0 0 0 2px var(--color-primary-hover-alpha-15);
 }
 .custom-select__options-list {
     overflow-y: auto;
@@ -182,7 +182,7 @@
 #driver-search:focus {
     outline: none;
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    box-shadow: 0 0 0 3px var(--color-primary-hover-alpha-10);
 }
 
 /* Combine checkbox — filter-row style matching custom-select toggles */

@@ -33,7 +33,7 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.28));
+    filter: drop-shadow(0 2px 4px var(--color-black-alpha-25));
 }
 
 .stats-box {
@@ -106,5 +106,5 @@
     padding: var(--space-4);
     border: 1px dashed var(--color-border);
     border-radius: var(--radius-lg);
-    background: rgba(148, 163, 184, 0.06);
+    background: var(--color-secondary-alpha-6);
 }

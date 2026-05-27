@@ -3,7 +3,7 @@
    ======================================== */
 
 .donate-button {
-    background: #0070ba;
+    background: var(--color-support-paypal);
     color: white;
     border: none;
     padding: var(--space-2) var(--space-4);
@@ -17,7 +17,7 @@
 }
 
 .donate-button:hover {
-    background: #0f94ec;
+    background: var(--color-support-paypal-hover);
 }
 
 .donate-button span {
@@ -25,7 +25,7 @@
 }
 
 .raceroom-button {
-    background: #691313;
+    background: var(--color-support-raceroom);
     color: white;
     border: none;
     padding: var(--space-2) var(--space-4);
@@ -43,7 +43,7 @@
 }
 
 .raceroom-button:hover {
-    background: #a32929;
+    background: var(--color-support-raceroom-hover);
 }
 
 .raceroom-button span {

@@ -26,23 +26,23 @@
     width: var(--space-3);
     height: var(--space-3);
     border-radius: 50%;
-    background: #666;
-    box-shadow: 0 0 4px rgba(0,0,0,0.3);
+    background: var(--color-text-muted);
+    box-shadow: 0 0 4px var(--color-black-alpha-35);
 }
 
 .status-led.green {
     background: var(--color-success);
-    box-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
+    box-shadow: 0 0 8px var(--color-success-alpha-60);
 }
 
 .status-led.yellow {
     background: var(--color-warning);
-    box-shadow: 0 0 8px rgba(255, 214, 0, 0.6);
+    box-shadow: 0 0 8px var(--color-warning-glow);
 }
 
 .status-led.red {
     background: var(--color-danger);
-    box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+    box-shadow: 0 0 8px var(--color-danger-alpha-60);
     animation: pulse-urgent 1s ease-in-out infinite;
 }
 

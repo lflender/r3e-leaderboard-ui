@@ -487,18 +487,18 @@
 }
 
 /* Read-only car ratings on challenge page */
-.challenge-picker .car-rating-btn {
+.challenge-picker .rating-btn {
     cursor: default;
     pointer-events: none;
 }
 
-.challenge-picker .car-tile:hover .car-rating-widget .car-rating-btn {
+.challenge-picker .car-tile:hover .rating-widget .rating-btn {
     opacity: 0;
     max-width: 0;
     padding: 0;
 }
 
-.challenge-picker .car-rating-widget[data-rated="true"] .car-rating-btn[data-filled="true"] {
+.challenge-picker .rating-widget[data-rated="true"] .rating-btn[data-filled="true"] {
     opacity: 1;
     max-width: 1.6rem;
     padding: 0 0.03rem;

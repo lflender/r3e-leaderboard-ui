@@ -146,8 +146,8 @@ describe('R3ECarUtils', () => {
         });
 
         test('returns fallback for invalid year', () => {
-            expect(window.R3ECarUtils.yearBadgeColor('')).toBe('#e0e0e0');
-            expect(window.R3ECarUtils.yearBadgeColor('abc')).toBe('#e0e0e0');
+            expect(window.R3ECarUtils.yearBadgeColor('')).toBe('var(--color-badge-unknown-bg)');
+            expect(window.R3ECarUtils.yearBadgeColor('abc')).toBe('var(--color-badge-unknown-bg)');
         });
 
         test('clamps years outside range', () => {

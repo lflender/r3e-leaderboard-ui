@@ -553,7 +553,7 @@
 
         html += `\n<tr class="driver-data-row ${slug}" data-link="${rowLink}">` +
                 `<td>${linkOpen}${carNameHtml}${thumbPreview}${linkClose}</td>` +
-          `<td class="car-score-cell">${scoreHtml}</td>` +
+          `<td class="rating-cell">${scoreHtml}</td>` +
                 `<td>${linkOpen}${wheelBadge(car.wheel_cat)}${linkClose}</td>` +
                 `<td>${linkOpen}${transBadge(car.transmission_cat)}${linkClose}</td>` +
                 `<td>${linkOpen}${driveBadge(car.drive)}${linkClose}</td>` +

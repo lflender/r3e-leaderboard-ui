@@ -279,7 +279,7 @@ class DriverProfile {
                 if (metric.key === 'avg_bested' && item.entryCount) {
                     displayValue += ' (' + item.entryCount + ')';
                 }
-                const color = colorMap.get(item.className) || fallbackColors[i % fallbackColors.length] || '#888';
+                const color = colorMap.get(item.className) || fallbackColors[i % fallbackColors.length] || 'var(--color-text-muted)';
                 return '<li class="pie-legend-item" data-class-label="' + R3EUtils.escapeHtml(item.className) + '">' +
                     '<span class="pie-legend-color" style="background:' + color + '"></span>' +
                     '<span class="pie-legend-label">' + R3EUtils.escapeHtml(item.className) + '</span>' +

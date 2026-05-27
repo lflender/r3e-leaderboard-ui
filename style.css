@@ -15,14 +15,15 @@
 @import url("./styles/components/entries-dist.css?v=11");
 @import url("./styles/components/fun-fact.css?v=1");
 @import url("./styles/components/hall-of-fame.css?v=5");
+@import url("./styles/components/rating-widget.css?v=2");
 @import url("./styles/components/seo.css?v=1");
-@import url("./styles/pages/cars.css?v=39");
+@import url("./styles/pages/cars.css?v=41");
 @import url("./styles/pages/faq.css?v=1");
 @import url("./styles/pages/stats.css?v=2");
 @import url("./styles/pages/records.css?v=35");
 @import url("./styles/pages/daily-races.css?v=19");
 @import url("./styles/pages/detail.css?v=19");
 @import url("./styles/pages/driver-profile.css?v=39");
-@import url("./styles/pages/challenge.css?v=52");
+@import url("./styles/pages/challenge.css?v=53");
 @import url("./styles/pages/tracks.css?v=4");
 @import url("./styles/responsive/breakpoints.css?v=45");

@@ -276,122 +276,17 @@ function driveBadge(drive) {
     return `<span class="car-badge drive unknown">${escHtml(drive)}</span>`;
 }
 
-/* ── rating widget (shared by Cars page + Challenge Picker) ── */
+/* ── rating widget (delegated to rating-widget.js) ── */
 
 function buildRatingHtml(carId, currentRating, variant) {
-    if (typeof CarRatings === 'undefined') return '';
-    const encId = escHtml(carId);
-    const widgetClass = variant === 'table'
-        ? 'car-rating-widget car-rating-widget--table'
-        : 'car-rating-widget car-rating-widget--tile';
-
-    let html = `<div class="${widgetClass}" data-car-id="${encId}" data-rated="${currentRating > 0}" data-score-level="${currentRating}" aria-label="Rate this car">`;
-    for (let s = 1; s <= 5; s++) {
-        const filled = currentRating >= s;
-        const btnCls = ['car-rating-btn', filled ? 'is-rated' : ''].filter(Boolean).join(' ');
-        html += `<span class="${btnCls}" role="button" tabindex="-1" data-score="${s}" data-filled="${filled}" aria-label="Rate ${s} star${s > 1 ? 's' : ''}">${filled ? '★' : '☆'}</span>`;
-    }
-    const heartFilled = currentRating === 6;
-    const heartCls = ['car-rating-btn car-rating-heart', heartFilled ? 'is-rated' : ''].filter(Boolean).join(' ');
-    html += `<span class="${heartCls}" role="button" tabindex="-1" data-score="6" data-filled="${heartFilled}" aria-label="Add to favorites">${heartFilled ? '♥' : '♡'}</span>`;
-    html += '</div>';
-    return html;
+    return (window.CarRatingWidget && CarRatingWidget.buildHtml)
+        ? CarRatingWidget.buildHtml(carId, currentRating, variant) : '';
 }
 
 function attachRatingHandlers(rootEl) {
-    if (typeof CarRatings === 'undefined') return;
-
-    function syncSiblingWidgets(root, sourceWidget, newRating) {
-        if (typeof CarRatings === 'undefined' || typeof CarRatings.normalizeCarName !== 'function') return;
-        const sourceId = sourceWidget.getAttribute('data-car-id');
-        if (!sourceId) return;
-        const sourceParts = sourceId.split('||');
-        if (sourceParts.length !== 4) return;
-        const sourceName = CarRatings.normalizeCarName(sourceParts[1]);
-        const sourceYear = (sourceParts[2] || '').trim().toLowerCase();
-
-        Array.from(root.querySelectorAll('.car-rating-widget')).forEach(function (w) {
-            if (w === sourceWidget) return;
-            const wId = w.getAttribute('data-car-id');
-            if (!wId) return;
-            const wParts = wId.split('||');
-            if (wParts.length !== 4) return;
-            const wName = CarRatings.normalizeCarName(wParts[1]);
-            const wYear = (wParts[2] || '').trim().toLowerCase();
-            if (wName === sourceName && wYear === sourceYear && w._updateRatingDisplay) {
-                w._updateRatingDisplay(newRating);
-            }
-        });
+    if (window.CarRatingWidget && CarRatingWidget.attachHandlers) {
+        CarRatingWidget.attachHandlers(rootEl);
     }
-
-    Array.from(rootEl.querySelectorAll('.car-rating-widget')).forEach(function (widget) {
-        const carId = widget.getAttribute('data-car-id');
-        if (!carId) return;
-        const buttons = Array.from(widget.querySelectorAll('.car-rating-btn'));
-
-        function updateDisplay(rating) {
-            widget.setAttribute('data-rated', rating > 0 ? 'true' : 'false');
-            widget.setAttribute('data-score-level', String(rating));
-            buttons.forEach(function (btn) {
-                const score = parseInt(btn.getAttribute('data-score'));
-                const isHeart = btn.classList.contains('car-rating-heart');
-                btn.classList.remove('is-preview');
-                if (isHeart) {
-                    const filled = rating === 6;
-                    btn.classList.toggle('is-rated', filled);
-                    btn.setAttribute('data-filled', filled);
-                    btn.textContent = filled ? '♥' : '♡';
-                } else {
-                    const filled = rating >= score;
-                    btn.classList.toggle('is-rated', filled);
-                    btn.setAttribute('data-filled', filled);
-                    btn.textContent = filled ? '★' : '☆';
-                }
-            });
-        }
-
-        // Store updateDisplay on the element so sibling syncing can use it
-        widget._updateRatingDisplay = updateDisplay;
-
-        widget.addEventListener('mouseover', function (e) {
-            const btn = e.target.closest('.car-rating-btn');
-            if (!btn) return;
-            const previewScore = parseInt(btn.getAttribute('data-score'));
-            buttons.forEach(function (b) {
-                const s = parseInt(b.getAttribute('data-score'));
-                const isHeart = b.classList.contains('car-rating-heart');
-                if (previewScore === 6) {
-                    b.classList.add('is-preview');
-                    b.textContent = isHeart ? '♥' : '★';
-                } else if (isHeart) {
-                    b.classList.remove('is-preview');
-                    b.textContent = '♡';
-                } else {
-                    b.classList.toggle('is-preview', s <= previewScore);
-                    b.textContent = s <= previewScore ? '★' : '☆';
-                }
-            });
-        });
-
-        widget.addEventListener('mouseout', function (e) {
-            if (widget.contains(e.relatedTarget)) return;
-            updateDisplay(CarRatings.get(carId));
-        });
-
-        buttons.forEach(function (btn) {
-            btn.addEventListener('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                const score = parseInt(btn.getAttribute('data-score'));
-                const current = CarRatings.get(carId);
-                const newRating = current === score ? 0 : score;
-                CarRatings.set(carId, newRating);
-                updateDisplay(newRating);
-                // Sync all sibling widgets on the page
-                syncSiblingWidgets(rootEl, widget, newRating);
-            });
-        });
-    });
 }
 
 /* ── year badge color (1969=yellow → 2025=green) ────────── */
@@ -401,7 +296,7 @@ var YEAR_COLOR_MAX = 2025;
 
 function yearBadgeColor(year) {
     var y = parseInt(year);
-    if (isNaN(y)) return '#e0e0e0';
+    if (isNaN(y)) return 'var(--color-badge-unknown-bg)';
     var t = Math.min(Math.max((y - YEAR_COLOR_MIN) / (YEAR_COLOR_MAX - YEAR_COLOR_MIN), 0), 1);
     var r = Math.round((1 - t) * 255 + t * 0);
     var g = Math.round((1 - t) * 214 + t * 200);

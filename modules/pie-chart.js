@@ -238,7 +238,7 @@
             legendItems.forEach(el => {
                 el.classList.remove('pie-legend-item-active');
             });
-            if (tooltip) tooltip.hidden = true;
+            if (tooltip) Tooltip.hide(tooltip);
         }
 
         function showTooltip(index, event) {
@@ -246,14 +246,8 @@
             const slice = slices[index];
             if (!slice) return;
             tooltip.textContent = `${slice.label}: ${slice.value} (${slice.percentage.toFixed(1)}%)`;
-            tooltip.hidden = false;
-
-            // Position tooltip near cursor, within SVG container bounds
-            const rect = svgContainer.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
-            tooltip.style.left = `${x + 12}px`;
-            tooltip.style.top = `${y - 8}px`;
+            Tooltip.show(tooltip);
+            Tooltip.positionNearCursor(event, svgContainer, tooltip);
         }
 
         pieSlices.forEach((el) => {

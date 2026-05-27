@@ -145,7 +145,7 @@ class DriverProfile {
             '<div class="driver-profile-identity">',
             avatarHtml,
             '<div class="driver-profile-info">',
-            `<h2 class="driver-profile-name${nameClass}"><a href="drivers.html?driver=${encodeURIComponent('"' + profile.name + '"')}${profile.pathId ? '&id=' + encodeURIComponent(profile.pathId) : ''}" class="driver-profile-name-link">${escape(profile.name)}</a></h2>`,
+            `<h2 class="driver-profile-name${nameClass}">${escape(profile.name)}</h2>`,
             '<div class="driver-profile-meta">',
             `<span class="driver-profile-country">${flagHtml} ${escape(profile.country)}</span>`,
             rankHtml ? `<span class="driver-profile-rank">${rankHtml}</span>` : '',
@@ -153,7 +153,7 @@ class DriverProfile {
             '</div>',
             teamHtml,
             raceRoomLink,
-            `<div class="driver-profile-entries-count">${profile.totalEntries} leaderboard entries</div>`,
+            `<div class="driver-profile-entries-count"><a href="drivers.html?driver=${encodeURIComponent('"' + profile.name + '"')}${profile.pathId ? '&id=' + encodeURIComponent(profile.pathId) : ''}" class="driver-profile-entries-link">${profile.totalEntries} leaderboard entries</a></div>`,
             '</div>',
             '</div>',
             '</div>'
@@ -685,6 +685,74 @@ class DriverProfile {
 
         // Wire car chart ↔ class chart cross-highlighting
         this._wireCarClassChartInteraction(entries);
+
+        // Wire pie charts → performance graph dot highlighting
+        this._wirePieChartPerfHighlighting();
+    }
+
+    /**
+     * Wire pie chart hover → performance graph dot cross-highlighting.
+     * Hovering a pie slice or legend item highlights matching dots on the perf graph.
+     */
+    _wirePieChartPerfHighlighting() {
+        const perfChart = document.querySelector('.perf-dist-chart');
+        if (!perfChart) return;
+
+        const perfPoints = Array.from(perfChart.querySelectorAll('.perf-dist-point'));
+        if (perfPoints.length === 0) return;
+
+        let highlightedPoints = [];
+
+        function highlightPoints(matchFn) {
+            clearPoints();
+            highlightedPoints = perfPoints.filter(matchFn);
+            highlightedPoints.forEach(p => p.classList.add('perf-dist-point-active'));
+        }
+
+        function clearPoints() {
+            highlightedPoints.forEach(p => p.classList.remove('perf-dist-point-active'));
+            highlightedPoints = [];
+        }
+
+        // Helper: attach hover listeners to all slices + legend items in a chart
+        function wireChart(chartId, matchFn) {
+            const chart = document.getElementById(chartId);
+            if (!chart) return;
+
+            chart.querySelectorAll('.pie-slice').forEach(el => {
+                const label = (el.getAttribute('data-label') || '').trim();
+                if (!label) return;
+                el.addEventListener('mouseenter', () => highlightPoints(p => matchFn(p, label)));
+                el.addEventListener('mouseleave', clearPoints);
+            });
+
+            chart.querySelectorAll('.pie-legend-item').forEach(el => {
+                const labelEl = el.querySelector('.pie-legend-label');
+                const label = (labelEl ? labelEl.textContent : '').trim();
+                if (!label) return;
+                el.addEventListener('mouseenter', () => highlightPoints(p => matchFn(p, label)));
+                el.addEventListener('mouseleave', clearPoints);
+            });
+        }
+
+        // Car Classes pie: match data-class on perf points
+        wireChart('chart-car-class', (point, label) =>
+            point.getAttribute('data-class') === label
+        );
+
+        // Cars pie: match car name (first part of data-info before " – ")
+        wireChart('chart-car', (point, label) => {
+            const info = point.getAttribute('data-info') || '';
+            const car = info.split(' \u2013 ')[0];
+            return car === label;
+        });
+
+        // Tracks pie: match track name (second part of data-info after " – ")
+        wireChart('chart-track', (point, label) => {
+            const info = point.getAttribute('data-info') || '';
+            const parts = info.split(' \u2013 ');
+            return parts.length > 1 && parts[1] === label;
+        });
     }
 
     /**

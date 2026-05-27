@@ -66,6 +66,17 @@
     color: var(--accent);
 }
 
+.driver-profile-entries-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.15s;
+}
+
+.driver-profile-entries-link:hover {
+    color: var(--accent);
+    text-decoration: underline;
+}
+
 .driver-profile-meta {
     display: flex;
     flex-wrap: wrap;
@@ -348,7 +359,7 @@
     padding: 1.25rem;
     box-shadow: 0 2px 8px var(--shadow);
     min-width: 0;
-    overflow: hidden;
+    overflow: visible;
 }
 
 /* --- Pie chart component styles --- */

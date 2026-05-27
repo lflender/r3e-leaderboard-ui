@@ -190,18 +190,29 @@
             const svg = chart.querySelector('svg');
             if (!svg) return;
 
-            let tooltip = chart.querySelector('.dist-tooltip');
-            if (!tooltip) {
-                tooltip = document.createElement('div');
-                tooltip.className = 'dist-tooltip';
-                chart.appendChild(tooltip);
-            }
+            const tooltip = Tooltip.getOrCreate(chart, 'dist-tooltip');
 
             const bars = Array.from(svg.querySelectorAll('.entries-dist-bar'));
             if (bars.length === 0) return;
             const contentBars = bars.filter(b => b.getAttribute('data-count') !== '0');
 
             let activeBar = null;
+            let highlightedPoints = [];
+
+            // Find the perf chart in the same container for cross-highlighting
+            var perfChart = container.querySelector('.perf-dist-chart');
+
+            function clearPerfHighlights() {
+                highlightedPoints.forEach(p => p.classList.remove('perf-dist-point-active'));
+                highlightedPoints = [];
+            }
+
+            function highlightPerfPoints(date) {
+                clearPerfHighlights();
+                if (!perfChart || !date) return;
+                highlightedPoints = Array.from(perfChart.querySelectorAll('.perf-dist-point[data-date="' + date + '"]'));
+                highlightedPoints.forEach(p => p.classList.add('perf-dist-point-active'));
+            }
 
             svg.addEventListener('mousemove', (e) => {
                 const rect = svg.getBoundingClientRect();
@@ -230,7 +241,8 @@
                         activeBar.classList.remove('entries-dist-bar-active');
                         activeBar = null;
                     }
-                    tooltip.style.display = 'none';
+                    clearPerfHighlights();
+                    Tooltip.hide(tooltip);
                     return;
                 }
 
@@ -238,21 +250,24 @@
                     if (activeBar) activeBar.classList.remove('entries-dist-bar-active');
                     nearest.classList.add('entries-dist-bar-active');
                     activeBar = nearest;
+                    highlightPerfPoints(nearest.getAttribute('data-date'));
                 }
 
                 const date = nearest.getAttribute('data-date');
                 const count = nearest.getAttribute('data-count');
                 tooltip.innerHTML = buildEntriesTooltip(date, count, entriesByDate);
-                tooltip.style.display = 'block';
-                positionTooltipFromSvg(e, chart, tooltip);
+                Tooltip.show(tooltip);
+                Tooltip.positionAboveCursor(e, chart, tooltip);
             });
 
             svg.addEventListener('mouseleave', () => {
                 if (activeBar) {
                     activeBar.classList.remove('entries-dist-bar-active');
+
                     activeBar = null;
                 }
-                tooltip.style.display = 'none';
+                clearPerfHighlights();
+                Tooltip.hide(tooltip);
             });
         });
     }
@@ -305,12 +320,7 @@
         if (!container) return;
         const charts = container.querySelectorAll('.perf-dist-chart');
         charts.forEach(chart => {
-            let tooltip = chart.querySelector('.dist-tooltip');
-            if (!tooltip) {
-                tooltip = document.createElement('div');
-                tooltip.className = 'dist-tooltip';
-                chart.appendChild(tooltip);
-            }
+            const tooltip = Tooltip.getOrCreate(chart, 'dist-tooltip');
 
             const points = Array.from(chart.querySelectorAll('.perf-dist-point'));
             if (points.length === 0) return;
@@ -343,7 +353,7 @@
                         activePoint.classList.remove('perf-dist-point-active');
                         activePoint = null;
                     }
-                    tooltip.style.display = 'none';
+                    Tooltip.hide(tooltip);
                     return;
                 }
 
@@ -365,8 +375,8 @@
                 if (pos && total) tipHtml += ' (P' + pos + '/' + total + ')';
                 if (info) tipHtml += '<div class="dist-tooltip-entry">' + logoHtml + escapeForTooltip(info) + '</div>';
                 tooltip.innerHTML = tipHtml;
-                tooltip.style.display = 'block';
-                positionTooltipFromSvg(e, chart, tooltip);
+                Tooltip.show(tooltip);
+                Tooltip.positionAboveCursor(e, chart, tooltip);
             });
 
             chart.addEventListener('mouseleave', () => {
@@ -374,22 +384,9 @@
                     activePoint.classList.remove('perf-dist-point-active');
                     activePoint = null;
                 }
-                tooltip.style.display = 'none';
+                Tooltip.hide(tooltip);
             });
         });
-    }
-
-    function positionTooltipFromSvg(event, chartEl, tooltip) {
-        const rect = chartEl.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-        const tipWidth = tooltip.offsetWidth;
-        const tipHeight = tooltip.offsetHeight;
-        let left = x - tipWidth / 2;
-        if (left < 0) left = 0;
-        if (left + tipWidth > rect.width) left = rect.width - tipWidth;
-        tooltip.style.left = left + 'px';
-        tooltip.style.top = (y - tipHeight - 10) + 'px';
     }
 
     window.DetailEntriesDist = {

@@ -3,21 +3,21 @@
    ======================================== */
 
 #results-container {
-    margin-top: 1.5rem;
+    margin-top: var(--space-6);
 }
 
 .loading {
     text-align: center;
-    padding: 2rem;
-    color: var(--text-secondary);
+    padding: var(--space-7);
+    color: var(--color-text-secondary);
 }
 
 .error {
     background-color: #7f1d1d;
     color: #fecaca;
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 1rem;
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-4);
     border: 1px solid #991b1b;
 }
 
@@ -25,8 +25,8 @@
     width: 100%;
     table-layout: auto;
     border-collapse: collapse;
-    margin-top: 1rem;
-    border-radius: 10px;
+    margin-top: var(--space-4);
+    border-radius: var(--radius-xl);
     overflow: hidden;
     box-shadow: 0 2px 12px 0 rgba(30, 41, 59, 0.10);
 }
@@ -36,20 +36,20 @@
     padding: 0.65rem 0.6rem;
     text-align: left;
     vertical-align: middle;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--color-border);
 }
 
 .results-table th {
     color: #fff;
     font-size: 1.05rem;
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     padding: 0.7rem 0.8rem;
     border: none;
     letter-spacing: 0.01em;
 }
 
 .results-table thead tr {
-    background: #2563eb;
+    background: var(--color-primary-hover);
 }
 
 .results-table th.sortable {
@@ -78,18 +78,18 @@
 }
 
 .results-table tr:hover {
-    background-color: var(--hover-bg);
+    background-color: var(--color-hover-bg);
 }
 
 .results-table td {
     padding: 0.6rem;
-    background: var(--surface);
-    color: var(--text-primary);
+    background: var(--color-surface);
+    color: var(--color-text-primary);
     transition: background 0.2s;
 }
 
 .results-table tr:hover td {
-    background: var(--hover-bg);
+    background: var(--color-hover-bg);
 }
 
 .results-table tr:last-child td {
@@ -104,26 +104,26 @@
 /* Driver name styling based on multiplayer position */
 a.driver-name-gold,
 .driver-name-gold {
-    color: #FFE10D !important;
+    color: var(--color-podium-gold) !important;
     text-shadow: 0 0 1px #000,
                  0 0 2px #000,
                  1px 1px 0 #000,
                  -1px -1px 0 #000,
                  1px -1px 0 #000,
                  -1px 1px 0 #000;
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
 }
 
 a.driver-name-silver,
 .driver-name-silver {
-    color: #AFA9A1 !important;
+    color: var(--color-podium-silver) !important;
     text-shadow: 0 0 1px #000,
                  0 0 2px #000,
                  1px 1px 0 #000,
                  -1px -1px 0 #000,
                  1px -1px 0 #000,
                  -1px 1px 0 #000;
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
 }
 
 a.driver-name-top10-glitter,
@@ -199,7 +199,7 @@ h2.driver-name-top10-glitter::after {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
-    scrollbar-color: var(--primary-color) var(--surface);
+    scrollbar-color: var(--color-primary) var(--color-surface);
     padding: 2px; /* Prevent border/shadow clipping */
 }
 
@@ -210,13 +210,13 @@ h2.driver-name-top10-glitter::after {
 
 #track-info-table::-webkit-scrollbar-track,
 #results-container::-webkit-scrollbar-track {
-    background: var(--surface);
+    background: var(--color-surface);
 }
 
 #track-info-table::-webkit-scrollbar-thumb,
 #results-container::-webkit-scrollbar-thumb {
-    background: var(--primary-color);
-    border-radius: 4px;
+    background: var(--color-primary);
+    border-radius: var(--radius-sm);
 }
 
 /* Detail results container - no scroll */
@@ -232,7 +232,7 @@ h2.driver-name-top10-glitter::after {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
-    scrollbar-color: var(--primary-color) var(--surface);
+    scrollbar-color: var(--color-primary) var(--color-surface);
     padding: 2px; /* Prevent border/shadow clipping */
 }
 
@@ -241,12 +241,12 @@ h2.driver-name-top10-glitter::after {
 }
 
 .table-scroll-wrapper::-webkit-scrollbar-track {
-    background: var(--surface);
+    background: var(--color-surface);
 }
 
 .table-scroll-wrapper::-webkit-scrollbar-thumb {
-    background: var(--primary-color);
-    border-radius: 4px;
+    background: var(--color-primary);
+    border-radius: var(--radius-sm);
 }
 
 /* Track Info table specific styles */
@@ -523,7 +523,7 @@ h2.driver-name-top10-glitter::after {
 }
 
 .driver-data-row:hover {
-    background-color: var(--hover-bg);
+    background-color: var(--color-hover-bg);
 }
 
 /* Lap time cells */
@@ -541,24 +541,24 @@ h2.driver-name-top10-glitter::after {
 .gap-time-cell .time-delta {
     display: block;
     white-space: nowrap;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-size: 0.95rem;
 }
 
 .gap-time-cell {
     white-space: nowrap;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     text-align: left;
 }
 
 .time-delta-inline {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-size: 0.95rem;
     margin-left: 0.4rem;
 }
 
 .mp-pos-badge {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-size: 0.9rem;
     white-space: nowrap;
 }
@@ -614,7 +614,7 @@ h2.driver-name-top10-glitter::after {
 .date-cell {
     white-space: nowrap;
     font-size: 0.85rem;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.01em;
     font-family: "Inter", "Segoe UI", system-ui, sans-serif;

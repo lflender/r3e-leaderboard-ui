@@ -5,12 +5,12 @@
 /* Car badges - Base styling */
 .car-badge {
     padding: 0.18rem 0.6rem;
-    border-radius: 4px;
-    font-weight: 700;
-    font-size: 0.85rem;
+    border-radius: var(--radius-sm);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-base);
     text-decoration: none !important;
     border: none;
-    line-height: 1.2;
+    line-height: var(--line-height-tight);
     display: inline-block;
     vertical-align: baseline;
     background: #b3e5fc;
@@ -74,7 +74,39 @@
 
 /* Year badge (dynamic coloring via inline style) */
 .car-badge.year-badge {
-    color: var(--year-badge-text);
+    color: var(--color-year-badge-text);
+}
+
+/* Assist badges - base styling */
+.car-tile-assist-badge {
+    padding: 0.15rem 0.35rem;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    border-radius: var(--radius-xs);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    display: inline-block;
+    vertical-align: baseline;
+}
+
+.car-tile-assist--tc {
+    background: #1e3a5f;
+    color: #a8d0f0;
+}
+
+.car-tile-assist--abs {
+    background: #5c4a00;
+    color: #ffd966;
+}
+
+.car-tile-assist--lc {
+    background: #3a3a3a;
+    color: #d4d4d4;
+}
+
+.car-assists-cell {
+    text-align: center;
 }
 
 /* Position badges */
@@ -83,15 +115,15 @@
 }
 
 .pos-number {
-    background: rgba(59, 130, 246, 0.15);
-    color: var(--text-primary);
+    background: var(--color-pos-badge-default);
+    color: var(--color-text-primary);
     padding: 0.18rem 0.55rem;
-    border-radius: 999px;
+    border-radius: var(--radius-full);
     border: 1px solid rgba(59, 130, 246, 0.35);
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     font-size: 0.9rem;
     text-decoration: none !important;
-    line-height: 1.2;
+    line-height: var(--line-height-tight);
     display: inline-block;
     vertical-align: baseline;
     min-width: 2.4rem;
@@ -139,14 +171,14 @@
 }
 
 .pos-total {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-size: 0.95rem;
     margin-left: 0.35rem;
     text-decoration: none !important;
 }
 
 .pos-sep {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     opacity: 0.95;
 }
 

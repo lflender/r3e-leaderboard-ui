@@ -6,10 +6,10 @@
     align-items: center;
     gap: 0.35rem;
     padding: 0.2rem;
-    border: 1px solid var(--border);
-    border-radius: 10px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
     background: rgba(15, 23, 42, 0.42);
-    margin: 1.5rem auto 2rem;
+    margin: var(--space-6) auto var(--space-7);
     justify-content: center;
 }
 
@@ -25,7 +25,7 @@
     gap: 0.6rem;
     justify-content: center;
     flex-wrap: wrap;
-    margin-bottom: 1.5rem;
+    margin-bottom: var(--space-6);
     max-width: 920px;
     width: 100%;
 }
@@ -41,31 +41,31 @@
 .challenge-mode-btn {
     border: 1px solid transparent;
     background: transparent;
-    color: var(--text-secondary);
-    border-radius: 8px;
-    padding: 0.5rem 1.4rem;
+    color: var(--color-text-secondary);
+    border-radius: var(--radius-md);
+    padding: var(--space-2) 1.4rem;
     font-size: 0.9rem;
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     cursor: pointer;
     transition: color 0.15s, background 0.15s, border-color 0.15s;
 }
 
 .challenge-mode-btn:hover {
-    color: var(--text-primary);
+    color: var(--color-text-primary);
     background: rgba(255, 255, 255, 0.04);
 }
 
 .challenge-mode-btn.is-active {
     color: #fff;
-    background: #2563eb;
-    border-color: #3b82f6;
+    background: var(--color-primary-hover);
+    border-color: var(--color-primary);
 }
 
 /* Pickers row */
 .challenge-pickers {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 440px));
-    gap: 1.5rem;
+    gap: var(--space-6);
     justify-content: center;
     margin: 0 auto;
     max-width: 920px;
@@ -73,12 +73,12 @@
 }
 
 .challenge-picker {
-    background-color: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.5rem 1.5rem 1.75rem;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-6) var(--space-6) 1.75rem;
     text-align: center;
-    box-shadow: 0 2px 4px var(--shadow);
+    box-shadow: var(--shadow-md);
     transition: border-color 0.2s;
     display: flex;
     flex-direction: column;
@@ -86,9 +86,9 @@
 
 .challenge-picker__title {
     font-size: 1.05rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    margin: 0 0 1rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary);
+    margin: 0 0 var(--space-4);
     letter-spacing: 0.02em;
 }
 
@@ -98,33 +98,33 @@
     align-items: center;
     gap: 0.35rem;
     padding: 0.2rem;
-    border: 1px solid var(--border);
-    border-radius: 10px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
     background: rgba(15, 23, 42, 0.42);
-    margin: 0 auto 1.25rem;
+    margin: 0 auto var(--space-5);
 }
 
 .challenge-granularity-btn {
     border: 1px solid transparent;
     background: transparent;
-    color: var(--text-secondary);
-    border-radius: 8px;
+    color: var(--color-text-secondary);
+    border-radius: var(--radius-md);
     padding: 0.35rem 0.85rem;
     font-size: 0.82rem;
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     cursor: pointer;
     transition: color 0.15s, background 0.15s, border-color 0.15s;
 }
 
 .challenge-granularity-btn:hover {
-    color: var(--text-primary);
+    color: var(--color-text-primary);
     background: rgba(255, 255, 255, 0.04);
 }
 
 .challenge-granularity-btn.is-active {
     color: #fff;
-    background: #2563eb;
-    border-color: #3b82f6;
+    background: var(--color-primary-hover);
+    border-color: var(--color-primary);
 }
 
 /* Group categories checkbox — extends shared .combine-checkbox-label */
@@ -134,10 +134,10 @@
     gap: 0.45rem;
     padding: 0.78rem 0.9rem;
     font-size: 0.98rem;
-    border-radius: 8px;
-    border: 2px solid var(--border);
+    border-radius: var(--radius-md);
+    border: 2px solid var(--color-border);
     background: transparent;
-    color: var(--text-primary);
+    color: var(--color-text-primary);
     cursor: pointer;
     white-space: nowrap;
     user-select: none;
@@ -145,11 +145,11 @@
 }
 
 .challenge-group-category:hover {
-    border-color: var(--primary-color);
+    border-color: var(--color-primary);
 }
 
 .challenge-group-category input[type="checkbox"] {
-    accent-color: var(--primary-color);
+    accent-color: var(--color-primary);
     cursor: pointer;
     width: 1em;
     height: 1em;
@@ -169,7 +169,7 @@
     align-items: center;
     justify-content: center;
     gap: 0.85rem;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-size: 0.95rem;
 }
 
@@ -196,8 +196,8 @@
     align-items: center;
     gap: 0.65rem;
     font-size: 1.05rem;
-    font-weight: 600;
-    color: var(--text-primary);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
 }
 
 .challenge-result-class__logo {
@@ -217,9 +217,9 @@
 .challenge-result-car__name {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--space-2);
     font-size: 0.95rem;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
 }
 
 .challenge-result-car__brand-logo {
@@ -232,7 +232,7 @@
 .challenge-result-car__thumbnail {
     max-width: 280px;
     max-height: 170px;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     object-fit: contain;
     filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.35));
 }
@@ -242,8 +242,8 @@
     align-items: center;
     gap: 0.65rem;
     font-size: 1.05rem;
-    font-weight: 600;
-    color: var(--text-primary);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
 }
 
 .challenge-result-track__logo {
@@ -254,8 +254,8 @@
 }
 
 .challenge-result-layout {
-    font-size: 1rem;
-    color: var(--text-secondary);
+    font-size: var(--font-size-md);
+    color: var(--color-text-secondary);
     margin-top: 0.15rem;
 }
 
@@ -264,13 +264,13 @@
 }
 
 .challenge-track-link {
-    color: var(--text-primary);
+    color: var(--color-text-primary);
     text-decoration: none;
     cursor: pointer;
 }
 
 .challenge-track-link:hover {
-    color: var(--primary-color);
+    color: var(--color-primary);
 }
 
 .challenge-car-link {
@@ -280,7 +280,7 @@
 }
 
 .challenge-car-link:hover {
-    color: var(--primary-color);
+    color: var(--color-primary);
 }
 
 .challenge-car-class-logo {
@@ -292,7 +292,7 @@
 
 .challenge-track-description {
     font-size: 0.82rem;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     margin-top: 0.35rem;
     line-height: 1.45;
     max-width: 540px;
@@ -329,21 +329,21 @@
 /* Pick button */
 .challenge-action {
     text-align: center;
-    margin: 2rem 0 1rem;
+    margin: var(--space-7) 0 var(--space-4);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
+    gap: var(--space-3);
     width: 100%;
 }
 
 .challenge-pick-btn {
     padding: 0.7rem 2.8rem;
     font-size: 1.1rem;
-    font-weight: 700;
-    border: 1px solid #3b82f6;
-    border-radius: 10px;
-    background: #2563eb;
+    font-weight: var(--font-weight-bold);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-lg);
+    background: var(--color-primary-hover);
     color: #fff;
     cursor: pointer;
     letter-spacing: 0.02em;
@@ -364,11 +364,11 @@
     padding: 0.55rem 1.4rem;
     width: 150px;
     font-size: 0.92rem;
-    font-weight: 600;
-    border: 1px solid var(--border);
-    border-radius: 8px;
+    font-weight: var(--font-weight-semibold);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
     background: transparent;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     cursor: pointer;
     letter-spacing: 0.01em;
     transition: background 0.15s, border-color 0.15s, color 0.15s, opacity 0.2s;
@@ -380,8 +380,8 @@
 }
 
 .challenge-repick-btn:not(:disabled):hover {
-    border-color: var(--primary-color);
-    color: var(--text-primary);
+    border-color: var(--color-primary);
+    color: var(--color-text-primary);
     background: rgba(59, 130, 246, 0.08);
 }
 
@@ -405,12 +405,12 @@
     align-items: center;
     justify-content: center;
     gap: 0.45rem;
-    padding: 0.5rem 0.9rem;
+    padding: var(--space-2) 0.9rem;
     font-size: 0.92rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    border: 2px solid var(--border);
-    border-radius: 8px;
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-secondary);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-md);
     background: transparent;
     cursor: pointer;
     user-select: none;
@@ -438,8 +438,8 @@
     appearance: none;
     width: 1.1em;
     height: 1.1em;
-    border: 2px solid var(--border);
-    border-radius: 3px;
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-xs);
     background: transparent;
     cursor: pointer;
     position: relative;
@@ -448,8 +448,8 @@
 }
 
 .challenge-hardcore-label input[type="checkbox"]:checked {
-    background: #dc2626;
-    border-color: #dc2626;
+    background: var(--color-danger);
+    border-color: var(--color-danger);
 }
 
 .challenge-hardcore-label input[type="checkbox"]:checked::after {
@@ -521,11 +521,11 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 0.5rem 1.5rem;
+    gap: var(--space-2) var(--space-6);
     padding: 0.8rem 1.2rem;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
     box-sizing: border-box;
     animation: challenge-spin-fade 0.4s ease-out;
 }
@@ -539,17 +539,17 @@
 }
 
 .challenge-stats-label {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-size: 0.82rem;
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     text-transform: uppercase;
     letter-spacing: 0.03em;
 }
 
 .challenge-stats-value {
-    color: var(--text-primary);
+    color: var(--color-text-primary);
     font-size: 0.92rem;
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
 }
 
 .challenge-stats-time {
@@ -566,13 +566,13 @@
 }
 
 .challenge-stats-driver {
-    color: var(--text-primary);
+    color: var(--color-text-primary);
     text-decoration: none;
     transition: color 0.15s;
 }
 
 .challenge-stats-driver:hover {
-    color: var(--primary-color);
+    color: var(--color-primary);
 }
 
 .challenge-stats-flag {
@@ -586,9 +586,9 @@
 }
 
 .challenge-stats-detail-link {
-    color: var(--primary-color);
+    color: var(--color-primary);
     font-size: 0.85rem;
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     text-decoration: none;
     transition: opacity 0.15s;
 }
@@ -598,7 +598,7 @@
 }
 
 .challenge-stats-loading {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-size: 0.85rem;
     font-style: italic;
 }
@@ -612,14 +612,14 @@
 .challenge-exclusions__toggle {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0.9rem;
+    gap: var(--space-2);
+    padding: var(--space-2) 0.9rem;
     font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-secondary);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-secondary);
     background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
     cursor: pointer;
     user-select: none;
     transition: border-color 0.15s, color 0.15s;
@@ -628,8 +628,8 @@
 }
 
 .challenge-exclusions__toggle:hover {
-    border-color: var(--primary-color);
-    color: var(--text-primary);
+    border-color: var(--color-primary);
+    color: var(--color-text-primary);
 }
 
 .challenge-exclusions__arrow {
@@ -642,20 +642,20 @@
 }
 
 .challenge-exclusions__badge {
-    font-size: 0.75rem;
-    font-weight: 700;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
     color: #f87171;
 }
 
 .challenge-exclusions__reset {
     margin-left: auto;
     padding: 0.2rem 0.65rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--text-secondary);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-secondary);
     background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 5px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
     cursor: pointer;
     transition: border-color 0.15s, color 0.15s, background 0.15s;
 }
@@ -670,9 +670,9 @@
     display: none;
     grid-template-columns: 1fr 1fr;
     gap: 0;
-    margin-top: 0.5rem;
-    border: 1px solid var(--border);
-    border-radius: 8px;
+    margin-top: var(--space-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
     overflow: hidden;
 }
 
@@ -686,18 +686,18 @@
 }
 
 .challenge-exclusions__col:first-child {
-    border-right: 1px solid var(--border);
+    border-right: 1px solid var(--color-border);
 }
 
 .challenge-exclusions__col-title {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--text-secondary);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    padding: 0.5rem 0.7rem;
+    padding: var(--space-2) 0.7rem;
     background: rgba(255, 255, 255, 0.02);
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--color-border);
 }
 
 .challenge-exclusions__list {
@@ -714,16 +714,16 @@
     align-items: center;
     gap: 0.45rem;
     padding: 0.3rem 0.45rem;
-    border-radius: 5px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
     user-select: none;
     transition: background 0.12s;
     font-size: 0.82rem;
-    color: var(--text-primary);
+    color: var(--color-text-primary);
 }
 
 .challenge-exclusions__item:hover {
-    background: var(--hover-bg);
+    background: var(--color-hover-bg);
 }
 
 .challenge-exclusions__item input[type="checkbox"] {
@@ -755,21 +755,21 @@
     align-items: center;
     gap: 0.45rem;
     padding: 0.3rem 0.45rem;
-    border-radius: 5px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
     user-select: none;
     transition: background 0.12s;
     font-size: 0.82rem;
-    color: var(--text-primary);
+    color: var(--color-text-primary);
 }
 
 .challenge-exclusions__class-header:hover {
-    background: var(--hover-bg);
+    background: var(--color-hover-bg);
 }
 
 .challenge-exclusions__class-arrow {
     font-size: 0.55em;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     transition: transform 0.2s;
     flex-shrink: 0;
     width: 0.8em;
@@ -823,16 +823,16 @@
     align-items: center;
     gap: 0.4rem;
     padding: 0.25rem 0.4rem;
-    border-radius: 4px;
+    border-radius: var(--radius-xs);
     cursor: pointer;
     user-select: none;
     transition: background 0.12s;
     font-size: 0.8rem;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
 }
 
 .challenge-exclusions__car-item:hover {
-    background: var(--hover-bg);
+    background: var(--color-hover-bg);
 }
 
 .challenge-exclusions__car-item input[type="checkbox"] {
@@ -879,7 +879,7 @@
 
     .challenge-exclusions__col:first-child {
         border-right: none;
-        border-bottom: 1px solid var(--border);
+        border-bottom: 1px solid var(--color-border);
     }
 }
 
@@ -894,11 +894,11 @@
 .era-checkbox-option {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.45rem 0.75rem;
+    gap: var(--space-2);
+    padding: 0.45rem var(--space-3);
     cursor: pointer;
     font-size: 0.85rem;
-    color: var(--text-primary);
+    color: var(--color-text-primary);
     transition: background 0.12s;
     user-select: none;
     white-space: nowrap;
@@ -909,7 +909,7 @@
 }
 
 .era-checkbox-option input[type="checkbox"] {
-    accent-color: var(--accent, #3b82f6);
+    accent-color: var(--color-accent);
     width: 15px;
     height: 15px;
     cursor: pointer;

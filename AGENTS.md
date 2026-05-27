@@ -6,6 +6,16 @@
 - Apply SOLID principles where applicable (single responsibility, open/closed, Liskov substitution, interface segregation, dependency inversion).
 - Maintain a single source of truth for all data, configuration, and shared logic. Never duplicate state or derive the same value in multiple places.
 
+## Design Tokens (CSS)
+
+All visual values (colors, spacing, radii, font sizes, font weights, z-index, shadows) are centralized in `styles/tokens.css`. When writing or editing CSS:
+
+- **Always use design tokens** — never hardcode colors, spacing, font sizes, font weights, border-radii, z-index, or shadows. Reference existing `var(--token-name)` values from `styles/tokens.css`.
+- **Token naming conventions**: `--color-*` (colors), `--space-*` (spacing), `--font-size-*` (type scale), `--font-weight-*` (weights), `--radius-*` (border-radius), `--z-*` (z-index), `--shadow-*` (box-shadow), `--line-height-*` (line heights).
+- **No legacy aliases** — do not use old variable names like `--primary-color`, `--surface`, `--border`, `--text-primary`, `--text-secondary`, `--hover-bg`, `--accent`, `--shadow`. Always use the canonical `--color-*` / `--space-*` / etc. form.
+- **Before adding a new token**, check if an existing one already covers the value. Avoid near-duplicates. If a new semantic meaning is genuinely needed, add it to `styles/tokens.css` with a clear category comment.
+- **Content-specific pixel values** (e.g. image widths, fixed icon sizes) do not need tokens — only design-system values should be tokenized.
+
 ## Test Coverage
 
 - Always add test coverage for new code. Every new function, module, or behavior change must include corresponding tests.

@@ -4,29 +4,29 @@
 
 .search-container {
     display: flex;
-    gap: 1rem;
+    gap: var(--space-4);
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
-    margin-bottom: 2rem;
+    margin-bottom: var(--space-7);
     position: relative;
-    z-index: 220;
+    z-index: var(--z-dropdown-container);
 }
 
 #class-filter {
     padding: 0.78rem 0.9rem;
     font-size: 0.98rem;
-    border: 2px solid var(--border);
-    border-radius: 8px;
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-lg);
     background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
-    color: var(--text-primary);
+    color: var(--color-text-primary);
     max-width: 420px;
     appearance: none;
 }
 
 #class-filter:focus {
     outline: none;
-    border-color: var(--primary-color);
+    border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.06);
 }
 
@@ -36,13 +36,13 @@
 /* Style options inside the select so they are readable when the native dropdown opens */
 #class-filter option {
     background-color: transparent;
-    color: var(--text-primary);
+    color: var(--color-text-primary);
 }
 
 /* Group wrapper that keeps multiple dropdowns wrapping together as a unit */
 .filters-group {
     display: flex;
-    gap: 1rem;
+    gap: var(--space-4);
     align-items: center;
     flex-wrap: nowrap;
     flex: 0 0 auto;
@@ -53,11 +53,11 @@
     position: relative;
     display: inline-block;
     flex: 0 0 auto;
-    z-index: 230;
+    z-index: var(--z-dropdown);
 }
 
 .custom-select.is-open {
-    z-index: 1700;
+    z-index: var(--z-tooltip);
 }
 
 .custom-select__toggle {
@@ -69,10 +69,10 @@
     padding: 0.78rem 0.9rem;
     font-family: inherit;
     font-size: 0.98rem;
-    border-radius: 8px;
-    border: 2px solid var(--border);
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--color-border);
     background: transparent;
-    color: var(--text-primary);
+    color: var(--color-text-primary);
     cursor: pointer;
     white-space: nowrap;
     overflow: hidden;
@@ -83,38 +83,38 @@
     right: auto;
     width: max-content;
     min-width: 220px;
-    margin-top: 6px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
+    margin-top: var(--space-2);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
     max-height: 300px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     box-shadow: 0 6px 18px rgba(2,6,23,0.6);
-    z-index: 1400;
+    z-index: var(--z-popover);
 }
 .custom-select__menu[hidden] {
     display: none;
 }
 .custom-select__search-wrap {
     padding: 0.45rem 0.6rem;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--color-border);
     flex-shrink: 0;
 }
 .custom-select__search {
     width: 100%;
     padding: 0.38rem 0.6rem;
     font-size: 0.9rem;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    background: var(--bg);
-    color: var(--text-primary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-background);
+    color: var(--color-text-primary);
     outline: none;
     box-sizing: border-box;
 }
 .custom-select__search:focus {
-    border-color: var(--primary-color);
+    border-color: var(--color-primary);
     box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
 }
 .custom-select__options-list {
@@ -124,7 +124,7 @@
 }
 .custom-select__no-results {
     padding: 0.6rem 0.9rem;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-size: 0.9rem;
     font-style: italic;
 }
@@ -134,7 +134,7 @@
     gap: 0.45rem;
     padding: 0.6rem 0.9rem;
     cursor: pointer;
-    color: var(--text-primary);
+    color: var(--color-text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -160,8 +160,8 @@
 }
 .custom-select__option:hover,
 .custom-select__option[aria-selected="true"] {
-    background: var(--hover-bg);
-    color: var(--text-primary);
+    background: var(--color-hover-bg);
+    color: var(--color-text-primary);
 }
 
 #driver-search {
@@ -170,18 +170,18 @@
     max-width: 420px;
     padding: 0.78rem 0.9rem;
     font-size: 0.98rem;
-    border: 2px solid var(--border);
-    border-radius: 8px;
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-md);
     transition: all 0.3s ease;
-    background-color: var(--surface);
-    color: var(--text-primary);
+    background-color: var(--color-surface);
+    color: var(--color-text-primary);
     /* Prevent zoom on mobile when focusing input */
     font-size: max(0.98rem, 16px);
 }
 
 #driver-search:focus {
     outline: none;
-    border-color: var(--primary-color);
+    border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
@@ -196,10 +196,10 @@
     gap: 0.45rem;
     padding: 0.78rem 0.9rem;
     font-size: 0.98rem;
-    border-radius: 8px;
-    border: 2px solid var(--border);
+    border-radius: var(--radius-md);
+    border: 2px solid var(--color-border);
     background: transparent;
-    color: var(--text-primary);
+    color: var(--color-text-primary);
     cursor: pointer;
     white-space: nowrap;
     user-select: none;
@@ -207,11 +207,11 @@
 }
 
 .combine-checkbox-label:hover {
-    border-color: var(--primary-color);
+    border-color: var(--color-primary);
 }
 
 .combine-checkbox-label input[type="checkbox"] {
-    accent-color: var(--primary-color);
+    accent-color: var(--color-primary);
     cursor: pointer;
     width: 1em;
     height: 1em;

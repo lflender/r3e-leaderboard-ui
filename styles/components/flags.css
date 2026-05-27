@@ -5,7 +5,7 @@
 /* Flag icons */
 .country-flag {
     display: inline-block;
-    margin-right: 0.6rem;
+    margin-right: var(--space-2);
     vertical-align: -1px;
     line-height: 1;
 }

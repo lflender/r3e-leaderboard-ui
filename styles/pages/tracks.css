@@ -1,22 +1,22 @@
 .track-description {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    line-height: 1.5;
-    padding: 0.75rem 1rem;
-    margin: 0 auto 1rem auto;
-    background: var(--surface-alt, rgba(255,255,255,0.03));
-    border-radius: 6px;
-    border-left: 3px solid var(--accent, #3b82f6);
+    font-size: var(--font-size-base);
+    color: var(--color-text-secondary);
+    line-height: var(--line-height-normal);
+    padding: var(--space-3) var(--space-4);
+    margin: 0 auto var(--space-4) auto;
+    background: var(--color-surface-alt);
+    border-radius: var(--radius-md);
+    border-left: 3px solid var(--color-accent);
     max-width: 1100px;
     box-sizing: border-box;
 }
 
 .track-description strong {
-    color: var(--text-primary, #fff);
+    color: var(--color-text-primary);
 }
 
 .track-description-link {
-    color: var(--accent, #3b82f6);
+    color: var(--color-accent);
     text-decoration: none;
 }
 

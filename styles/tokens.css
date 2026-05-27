@@ -1,0 +1,106 @@
+/* ========================================
+   DESIGN TOKENS
+   Centralized variables for colors, spacing,
+   typography, radii, z-index, and shadows.
+   ======================================== */
+
+:root {
+    /* --- Colors: Core --- */
+    --color-primary: #3b82f6;
+    --color-primary-hover: #2563eb;
+    --color-background: #0f172a;
+    --color-surface: #1e293b;
+    --color-surface-alt: rgba(255, 255, 255, 0.03);
+    --color-border: #334155;
+    --color-hover-bg: #334155;
+
+    /* --- Colors: Text --- */
+    --color-text-primary: #f1f5f9;
+    --color-text-secondary: #94a3b8;
+
+    /* --- Colors: Accent (alias for primary, can diverge in redesign) --- */
+    --color-accent: var(--color-primary);
+
+    /* --- Colors: Semantic --- */
+    --color-success: #22c55e;
+    --color-danger: #ef4444;
+    --color-warning: #ffd600;
+
+    /* --- Colors: Podium --- */
+    --color-podium-gold: #FFE10D;
+    --color-podium-silver: #AFA9A1;
+    --color-podium-bronze: #976A28;
+
+    /* --- Colors: Badges (position) --- */
+    --color-pos-badge-default: rgba(59, 130, 246, 0.18);
+    --color-pos-badge-first: #22c55e;
+    --color-pos-badge-last: #ef4444;
+
+    /* --- Colors: Year badge --- */
+    --color-year-badge-text: #222;
+
+    /* --- Shadows --- */
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.4);
+
+    /* --- Spacing scale (4px base) --- */
+    --space-1: 0.25rem;  /* 4px */
+    --space-2: 0.5rem;   /* 8px */
+    --space-3: 0.75rem;  /* 12px */
+    --space-4: 1rem;     /* 16px */
+    --space-5: 1.25rem;  /* 20px */
+    --space-6: 1.5rem;   /* 24px */
+    --space-7: 2rem;     /* 32px */
+    --space-8: 3rem;     /* 48px */
+
+    /* --- Typography scale --- */
+    --font-size-xs: 0.75rem;   /* 12px */
+    --font-size-base: 0.875rem;/* 14px */
+    --font-size-md: 1rem;      /* 16px */
+    --font-size-lg: 1.125rem;  /* 18px */
+    --font-size-xl: 1.25rem;   /* 20px */
+    --font-size-2xl: 1.5rem;   /* 24px */
+    --font-size-3xl: 2rem;     /* 32px */
+
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --font-weight-extrabold: 800;
+    --font-weight-black: 900;
+
+    --line-height-tight: 1.2;
+    --line-height-normal: 1.4;
+    --line-height-relaxed: 1.6;
+
+    /* --- Border radius scale --- */
+    --radius-xs: 3px;
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    --radius-xl: 10px;
+    --radius-2xl: 12px;
+    --radius-full: 999px;
+
+    /* --- Z-index map --- */
+    --z-base: 1;
+    --z-raised: 2;
+    --z-above: 5;
+    --z-float: 10;
+    --z-dropdown-container: 220;
+    --z-dropdown: 230;
+    --z-dropdown-stacked-1: 233;
+    --z-dropdown-stacked-2: 232;
+    --z-dropdown-stacked-3: 231;
+    --z-popover: 1400;
+    --z-tooltip: 1700;
+    --z-modal-backdrop: 200;
+
+    /* --- Layout --- */
+    --content-max-width: 1500px;
+    --results-table-max-width: 1500px;
+}

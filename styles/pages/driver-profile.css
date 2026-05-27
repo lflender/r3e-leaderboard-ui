@@ -5,40 +5,40 @@
 .driver-profile-container {
     max-width: var(--results-table-max-width);
     margin: 0 auto;
-    padding: 1.5rem;
+    padding: var(--space-6);
 }
 
 /* --- Header --- */
 
 .driver-profile-header {
-    background: var(--surface);
-    border-radius: 12px;
-    padding: 1.5rem 2rem;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 2px 8px var(--shadow);
+    background: var(--color-surface);
+    border-radius: var(--radius-xl);
+    padding: var(--space-6) var(--space-7);
+    margin-bottom: var(--space-6);
+    box-shadow: var(--shadow-md);
 }
 
 .driver-profile-identity {
     display: flex;
     align-items: flex-start;
-    gap: 1.5rem;
+    gap: var(--space-6);
 }
 
 .driver-profile-avatar {
     width: 96px;
     height: 96px;
-    border-radius: 50%;
+    border-radius: var(--radius-full);
     object-fit: cover;
-    border: 3px solid var(--border);
+    border: 3px solid var(--color-border);
     flex-shrink: 0;
 }
 
 .driver-profile-avatar-placeholder {
     width: 96px;
     height: 96px;
-    border-radius: 50%;
-    background: var(--hover-bg);
-    border: 3px solid var(--border);
+    border-radius: var(--radius-full);
+    background: var(--color-hover-bg);
+    border: 3px solid var(--color-border);
     flex-shrink: 0;
 }
 
@@ -49,8 +49,8 @@
 
 .driver-profile-name {
     font-size: 1.6rem;
-    font-weight: 800;
-    color: var(--text-primary);
+    font-weight: var(--font-weight-extrabold);
+    color: var(--color-text-primary);
     margin: 0 0 0.35rem 0;
     line-height: 1.2;
     word-break: break-word;
@@ -63,17 +63,17 @@
 }
 
 .driver-profile-name-link:hover {
-    color: var(--accent);
+    color: var(--color-accent);
 }
 
 .driver-profile-entries-link {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     text-decoration: none;
     transition: color 0.15s;
 }
 
 .driver-profile-entries-link:hover {
-    color: var(--accent);
+    color: var(--color-accent);
     text-decoration: underline;
 }
 
@@ -81,10 +81,10 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.75rem;
+    gap: var(--space-3);
     margin-bottom: 0.4rem;
     font-size: 0.9rem;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
 }
 
 .driver-profile-country {
@@ -103,12 +103,12 @@
 }
 
 .driver-profile-mp-pos {
-    font-weight: 700;
-    color: var(--primary-color);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary);
 }
 
 .driver-profile-mp-pos-inactive {
-    font-weight: 400;
+    font-weight: var(--font-weight-normal);
     color: #7a7a7a;
     opacity: 0.6;
     font-size: 0.9em;
@@ -117,16 +117,16 @@
 .driver-profile-team {
     margin-bottom: 0.35rem;
     font-size: 0.9rem;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
 }
 
 .driver-profile-raceroom-link {
     display: inline-block;
     margin-bottom: 0.35rem;
-    color: var(--primary-color);
+    color: var(--color-primary);
     text-decoration: none;
     font-size: 0.85rem;
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     transition: opacity 0.15s;
 }
 
@@ -137,7 +137,7 @@
 
 .driver-profile-entries-count {
     font-size: 0.85rem;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
 }
 
 /* --- Stats Cards --- */
@@ -145,15 +145,15 @@
 .driver-stats-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
 }
 
 .driver-stat-card {
-    background: var(--surface);
-    border-radius: 10px;
-    padding: 1rem 1.25rem;
-    box-shadow: 0 2px 8px var(--shadow);
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4) var(--space-5);
+    box-shadow: var(--shadow-md);
     text-align: center;
     transition: opacity 0.3s;
     min-width: 0;
@@ -167,9 +167,9 @@
     display: inline-block;
     width: 1.2em;
     height: 1.2em;
-    border: 2.5px solid var(--border);
-    border-top-color: var(--primary-color);
-    border-radius: 50%;
+    border: 2.5px solid var(--color-border);
+    border-top-color: var(--color-primary);
+    border-radius: var(--radius-full);
     animation: stat-spin 0.7s linear infinite;
     vertical-align: middle;
 }
@@ -184,8 +184,8 @@
 
 .driver-stat-label {
     font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--text-secondary);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.04em;
     margin-bottom: 0.35rem;
@@ -193,15 +193,15 @@
 
 .driver-stat-value {
     font-size: 1.5rem;
-    font-weight: 800;
-    color: var(--text-primary);
+    font-weight: var(--font-weight-extrabold);
+    color: var(--color-text-primary);
     line-height: 1.2;
     margin-bottom: 0.25rem;
 }
 
 .driver-stat-position {
     font-size: 0.82rem;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
 }
 
 /* --- Stat Card Class Breakdown --- */
@@ -213,7 +213,7 @@
 
 .driver-stat-breakdown .stat-breakdown-list {
     max-height: 150px;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--color-border);
     padding-top: 0.35rem;
 }
 
@@ -228,29 +228,29 @@
 .driver-profile-highlights-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
 }
 
 .highlight-card {
-    background: var(--surface);
-    border-radius: 10px;
-    padding: 1rem 1.25rem;
-    box-shadow: 0 2px 8px var(--shadow);
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4) var(--space-5);
+    box-shadow: var(--shadow-md);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
-    gap: 0.5rem;
+    gap: var(--space-2);
     min-width: 0;
     overflow: hidden;
 }
 
 .highlight-card-label {
     font-size: 0.72rem;
-    font-weight: 600;
-    color: var(--text-secondary);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.04em;
 }
@@ -259,7 +259,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
+    gap: var(--space-3);
     max-width: 100%;
     min-width: 0;
 }
@@ -303,8 +303,8 @@
     align-items: center;
     gap: 0.4rem;
     font-size: 0.9rem;
-    font-weight: 700;
-    color: var(--text-primary);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
 }
 
 .highlight-brand-logo {
@@ -321,28 +321,28 @@
 }
 
 .highlight-car-text .car-brand {
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
 }
 
 .highlight-car-text .car-model {
-    font-weight: 400;
-    color: var(--text-secondary);
+    font-weight: var(--font-weight-normal);
+    color: var(--color-text-secondary);
 }
 
 .highlight-track-text {
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     font-size: 0.9rem;
 }
 
 .highlight-track-text .track-layout {
-    font-weight: 400;
-    color: var(--text-secondary);
+    font-weight: var(--font-weight-normal);
+    color: var(--color-text-secondary);
     font-size: 0.9em;
 }
 
 .highlight-card-count {
     font-size: 0.78rem;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
 }
 
 /* --- Charts --- */
@@ -350,14 +350,14 @@
 .driver-profile-charts-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
+    gap: var(--space-6);
 }
 
 .driver-profile-chart-card {
-    background: var(--surface);
-    border-radius: 12px;
-    padding: 1.25rem;
-    box-shadow: 0 2px 8px var(--shadow);
+    background: var(--color-surface);
+    border-radius: var(--radius-xl);
+    padding: var(--space-5);
+    box-shadow: var(--shadow-md);
     min-width: 0;
     overflow: visible;
 }
@@ -371,10 +371,10 @@
 }
 
 .pie-chart-title {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin: 0 0 0.75rem 0;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-3) 0;
     text-align: center;
 }
 
@@ -389,7 +389,7 @@
     position: relative;
     width: 100%;
     max-width: 220px;
-    margin-bottom: 1rem;
+    margin-bottom: var(--space-4);
 }
 
 .pie-chart-svg {
@@ -418,15 +418,15 @@
 .pie-tooltip {
     position: absolute;
     background: rgba(15, 23, 42, 0.95);
-    color: var(--text-primary);
+    color: var(--color-text-primary);
     padding: 0.35rem 0.65rem;
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     font-size: 0.78rem;
     white-space: nowrap;
     pointer-events: none;
-    z-index: 10;
+    z-index: var(--z-tooltip);
     box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-    border: 1px solid var(--border);
+    border: 1px solid var(--color-border);
 }
 
 .pie-legend {
@@ -444,13 +444,13 @@
     gap: 0.45rem;
     padding: 0.2rem 0;
     font-size: 0.78rem;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     cursor: default;
     transition: color 0.15s;
 }
 
 .pie-legend-item-active {
-    color: var(--text-primary);
+    color: var(--color-text-primary);
 }
 
 .pie-legend-item-dimmed {
@@ -469,7 +469,7 @@
 .pie-legend-color {
     width: 10px;
     height: 10px;
-    border-radius: 3px;
+    border-radius: var(--radius-xs);
     flex-shrink: 0;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
@@ -489,8 +489,8 @@
 
 .pie-chart-empty {
     text-align: center;
-    color: var(--text-secondary);
-    padding: 2rem;
+    color: var(--color-text-secondary);
+    padding: var(--space-7);
     font-size: 0.9rem;
 }
 
@@ -498,13 +498,13 @@
 
 .driver-profile-error {
     text-align: center;
-    padding: 3rem 1.5rem;
-    color: var(--text-secondary);
-    font-size: 1rem;
+    padding: var(--space-8) var(--space-6);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-md);
 }
 
 .driver-profile-error a {
-    color: var(--primary-color);
+    color: var(--color-primary);
     text-decoration: none;
 }
 
@@ -517,8 +517,8 @@
 .driver-profile-distributions-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
 }
 
 .driver-profile-dist-card {
@@ -535,7 +535,7 @@
 }
 
 .driver-profile-dist-card .entries-dist-toggle:hover {
-    background-color: var(--surface);
+    background-color: var(--color-surface);
 }
 
 .driver-profile-dist-card .entries-dist-toggle-icon {
@@ -572,8 +572,8 @@
     position: absolute;
     right: calc(100% + 0.3rem);
     font-size: 0.7rem;
-    color: var(--text-secondary);
-    font-weight: 600;
+    color: var(--color-text-secondary);
+    font-weight: var(--font-weight-semibold);
     white-space: nowrap;
     pointer-events: none;
 }
@@ -596,7 +596,7 @@
     left: 0;
     right: 0;
     height: 0;
-    border-top: 1px dashed var(--border);
+    border-top: 1px dashed var(--color-border);
     opacity: 0.5;
     pointer-events: none;
 }

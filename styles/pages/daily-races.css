@@ -54,7 +54,7 @@
 
 .daily-races-grid > .daily-race-card-link {
     flex: 0 1 calc(33.333% - 0.84rem);
-    min-width: 320px;
+    min-width: 280px;
     max-width: 100%;
 }
 
@@ -71,24 +71,14 @@
 }
 
 .daily-races-feature .daily-races-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(280px, 1fr));
     max-width: 750px;
     margin: 0 auto;
 }
 
 .daily-races-feature--sprint-layout .daily-races-grid,
 .daily-races-feature .daily-races-grid.daily-races-grid--sprint-layout {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     max-width: 100%;
     margin: 0 0 2rem 0;
-}
-
-.daily-races-feature--sprint-layout .daily-races-grid > .daily-race-card-link,
-.daily-races-feature .daily-races-grid.daily-races-grid--sprint-layout > .daily-race-card-link {
-    flex: unset;
-    min-width: unset;
 }
 
 .daily-race-card-link {
@@ -317,12 +307,6 @@
     }
 }
 
-@media (max-width: 1000px) {
-    .daily-races-grid > .daily-race-card-link {
-        flex: 0 1 100%;
-    }
-}
-
 @media (max-width: 768px) {
     .daily-races-container {
         padding: 1rem 0.5rem;
@@ -351,7 +335,6 @@
     }
 
     .daily-races-feature .daily-races-grid {
-        grid-template-columns: 1fr;
         max-width: none;
     }
 

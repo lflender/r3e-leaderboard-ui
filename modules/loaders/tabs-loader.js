@@ -8,6 +8,7 @@
     'use strict';
 
     const TABS = [
+        { id: 'ranked',    label: 'Ranked',        href: '/' },
         { id: 'drivers',   label: 'Drivers',      href: 'drivers.html' },
         { id: 'tracks',    label: 'Leaderboards',  href: 'tracks.html' },
         { id: 'records',   label: 'Records',       href: 'records.html' },
@@ -29,7 +30,7 @@
     }
 
     function render(container) {
-        var activeId = container.dataset.active || '';
+        var activeId = container.dataset.active || 'ranked';
         var html = '';
         for (var i = 0; i < TABS.length; i++) {
             var tab = TABS[i];
@@ -50,7 +51,8 @@
         var activeBtn = container.querySelector('.tab-button.active');
         if (activeBtn) {
             var idx = Array.prototype.indexOf.call(container.children, activeBtn);
-            if (idx >= TABS.length - 3) {
+            var middleIdx = Math.floor(TABS.length / 2);
+            if (idx >= middleIdx) {
                 // Use requestAnimationFrame to ensure layout is complete
                 requestAnimationFrame(function () {
                     var btnLeft = activeBtn.offsetLeft;

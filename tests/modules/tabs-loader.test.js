@@ -10,6 +10,7 @@ describe('TabsLoader', () => {
 
     function loadTabs() {
         const TABS = [
+            { id: 'ranked',    label: 'Ranked',        href: '/' },
             { id: 'drivers',   label: 'Drivers',      href: 'drivers.html' },
             { id: 'tracks',    label: 'Leaderboards',  href: 'tracks.html' },
             { id: 'records',   label: 'Records',       href: 'records.html' },
@@ -19,7 +20,7 @@ describe('TabsLoader', () => {
         ];
         const container = document.getElementById('site-tabs');
         if (!container) return;
-        const activeId = container.dataset.active || '';
+        const activeId = container.dataset.active || 'ranked';
         let html = '';
         for (const tab of TABS) {
             const dismissed = tab.id === 'challenge' && localStorage.getItem(BADGE_STORAGE_KEY) === '1';
@@ -47,22 +48,23 @@ describe('TabsLoader', () => {
         loadTabs();
         const container = document.getElementById('site-tabs');
         const buttons = container.querySelectorAll('.tab-button');
-        expect(buttons.length).toBe(6);
+        expect(buttons.length).toBe(7);
 
         const active = container.querySelector('button.tab-button.active');
         expect(active).not.toBeNull();
         expect(active.textContent).toBe('Challenge');
 
         const links = container.querySelectorAll('a.tab-button');
-        expect(links.length).toBe(5);
+        expect(links.length).toBe(6);
     });
 
-    it('renders no active tab when data-active is missing', () => {
+    it('renders Ranked tab active when data-active is missing', () => {
         document.body.innerHTML = '<div class="tabs" id="site-tabs"></div>';
         loadTabs();
         const container = document.getElementById('site-tabs');
         const active = container.querySelector('button.tab-button.active');
-        expect(active).toBeNull();
+        expect(active).not.toBeNull();
+        expect(active.textContent).toBe('Ranked');
 
         const links = container.querySelectorAll('a.tab-button');
         expect(links.length).toBe(6);
@@ -79,7 +81,7 @@ describe('TabsLoader', () => {
         document.body.innerHTML = '<div class="tabs" id="site-tabs" data-active="faq"></div>';
         loadTabs();
         const labels = Array.from(document.querySelectorAll('.tab-button')).map(b => b.textContent.replace(/\s*NEW!$/, ''));
-        expect(labels).toEqual(['Drivers', 'Leaderboards', 'Records', 'Challenge', 'Cars', 'FAQ']);
+        expect(labels).toEqual(['Ranked', 'Drivers', 'Leaderboards', 'Records', 'Challenge', 'Cars', 'FAQ']);
     });
 
     it('active tab is a button, others are links with correct hrefs', () => {
@@ -87,6 +89,7 @@ describe('TabsLoader', () => {
         loadTabs();
         const links = document.querySelectorAll('a.tab-button');
         const hrefs = Array.from(links).map(a => a.getAttribute('href'));
+        expect(hrefs).toContain('/');
         expect(hrefs).toContain('drivers.html');
         expect(hrefs).toContain('cars.html');
         expect(hrefs).toContain('records.html');

@@ -354,6 +354,9 @@ class DriverProfile {
                 allBreakdownItems.forEach(bd => bd.classList.remove('pie-legend-item-active'));
             });
         });
+
+        // Re-wire entries-dist cross-highlighting now that breakdown items exist
+        this._wireEntriesDistCrossHighlighting();
     }
 
     /**
@@ -688,6 +691,9 @@ class DriverProfile {
 
         // Wire pie charts → performance graph dot highlighting
         this._wirePieChartPerfHighlighting();
+
+        // Wire pie charts + perf dots → entries distribution bar highlighting
+        this._wireEntriesDistCrossHighlighting();
     }
 
     /**
@@ -756,12 +762,138 @@ class DriverProfile {
     }
 
     /**
+     * Wire hover on pie charts, perf dots, and stat class breakdowns
+     * to cross-highlight matching bars in the Entries Distribution Graph.
+     */
+    _wireEntriesDistCrossHighlighting() {
+        const entries = this._distEntries;
+        if (!entries || entries.length === 0) return;
+        if (!window.DetailEntriesDist) return;
+
+        const container = this.elements.distributionsContainer;
+        if (!container) return;
+
+        const svg = container.querySelector('.entries-dist-chart svg');
+        if (!svg) return;
+
+        const bars = Array.from(svg.querySelectorAll('.entries-dist-bar'));
+        if (bars.length === 0) return;
+
+        // Build a date→bar map for fast lookup
+        const barByDate = new Map();
+        bars.forEach(bar => {
+            const d = bar.getAttribute('data-date');
+            if (d) barByDate.set(d, bar);
+        });
+
+        // Build reverse lookups: class→dates, car→dates, track→dates
+        const classDates = new Map();
+        const carDates = new Map();
+        const trackDates = new Map();
+
+        entries.forEach(entry => {
+            const dt = DetailEntriesDist.parseEntryDate(entry);
+            if (!dt) return;
+            const dateKey = DetailEntriesDist.getLocalDateKey(dt);
+            if (!dateKey) return;
+
+            const cls = entry.car_class || entry.CarClass || entry.Class || '';
+            const car = entry.Car || entry.car || entry.CarName || entry.car_name || '';
+            const track = (window.R3EUtils && typeof window.R3EUtils.resolveTrackLabelForItem === 'function')
+                ? window.R3EUtils.resolveTrackLabelForItem(entry)
+                : (entry.Track || entry.track || entry.TrackName || entry.track_name || '');
+
+            if (cls) {
+                if (!classDates.has(cls)) classDates.set(cls, new Set());
+                classDates.get(cls).add(dateKey);
+            }
+            if (car) {
+                if (!carDates.has(car)) carDates.set(car, new Set());
+                carDates.get(car).add(dateKey);
+            }
+            if (track) {
+                if (!trackDates.has(track)) trackDates.set(track, new Set());
+                trackDates.get(track).add(dateKey);
+            }
+        });
+
+        let highlightedBars = [];
+
+        function highlightBars(dates) {
+            clearBars();
+            if (!dates) return;
+            dates.forEach(d => {
+                const bar = barByDate.get(d);
+                if (bar) {
+                    bar.classList.add('entries-dist-bar-active');
+                    highlightedBars.push(bar);
+                }
+            });
+        }
+
+        function clearBars() {
+            highlightedBars.forEach(b => b.classList.remove('entries-dist-bar-active'));
+            highlightedBars = [];
+        }
+
+        // Helper: attach hover listeners to slices + legend items in a pie chart
+        function wirePieChart(chartId, dateMap) {
+            const chart = document.getElementById(chartId);
+            if (!chart) return;
+
+            chart.querySelectorAll('.pie-slice').forEach(el => {
+                const label = (el.getAttribute('data-label') || '').trim();
+                if (!label) return;
+                el.addEventListener('mouseenter', () => highlightBars(dateMap.get(label)));
+                el.addEventListener('mouseleave', clearBars);
+            });
+
+            chart.querySelectorAll('.pie-legend-item').forEach(el => {
+                const labelEl = el.querySelector('.pie-legend-label');
+                const label = (labelEl ? labelEl.textContent : '').trim();
+                if (!label) return;
+                el.addEventListener('mouseenter', () => highlightBars(dateMap.get(label)));
+                el.addEventListener('mouseleave', clearBars);
+            });
+        }
+
+        // Pie charts → entries-dist bars
+        wirePieChart('chart-car-class', classDates);
+        wirePieChart('chart-car', carDates);
+        wirePieChart('chart-track', trackDates);
+
+        // Performance dots → entries-dist bars (by matching date)
+        const perfChart = container.querySelector('.perf-dist-chart');
+        if (perfChart) {
+            perfChart.addEventListener('mousemove', () => {
+                const activePoint = perfChart.querySelector('.perf-dist-point-active');
+                if (activePoint) {
+                    const date = activePoint.getAttribute('data-date');
+                    if (date) highlightBars(new Set([date]));
+                } else {
+                    clearBars();
+                }
+            });
+            perfChart.addEventListener('mouseleave', clearBars);
+        }
+
+        // Stats class breakdown items → entries-dist bars
+        document.querySelectorAll('.driver-stat-breakdown .pie-legend-item').forEach(el => {
+            const cls = el.getAttribute('data-class-label') || '';
+            if (!cls) return;
+            el.addEventListener('mouseenter', () => highlightBars(classDates.get(cls)));
+            el.addEventListener('mouseleave', clearBars);
+        });
+    }
+
+    /**
      * Wire bidirectional hover between the Car Classes chart and the Cars chart.
      * Hovering a class highlights all cars belonging to that class (and vice versa).
      */
     _wireCarClassChartInteraction(entries) {
         const classChart = document.getElementById('chart-car-class');
         const carChart = document.getElementById('chart-car');
+        const trackChart = document.getElementById('chart-track');
         if (!classChart || !carChart) return;
 
         // Build car→class mapping
@@ -787,12 +919,109 @@ class DriverProfile {
             if (cls) el.setAttribute('data-class-label', cls);
         });
 
+        // Build track→classes, car→tracks, and track→cars mappings from entries
+        const trackToClasses = new Map();
+        const classToTracks = new Map();
+        const carToTracks = new Map();
+        const trackToCars = new Map();
+        if (entries && entries.length > 0) {
+            entries.forEach(entry => {
+                const cls = entry.car_class || entry.CarClass || entry.Class || '';
+                const car = entry.Car || entry.car || entry.CarName || entry.car_name || '';
+                const track = (window.R3EUtils && typeof window.R3EUtils.resolveTrackLabelForItem === 'function')
+                    ? window.R3EUtils.resolveTrackLabelForItem(entry)
+                    : (entry.Track || entry.track || entry.TrackName || entry.track_name || '');
+                if (cls && track) {
+                    if (!trackToClasses.has(track)) trackToClasses.set(track, new Set());
+                    trackToClasses.get(track).add(cls);
+                    if (!classToTracks.has(cls)) classToTracks.set(cls, new Set());
+                    classToTracks.get(cls).add(track);
+                }
+                if (car && track) {
+                    if (!carToTracks.has(car)) carToTracks.set(car, new Set());
+                    carToTracks.get(car).add(track);
+                    if (!trackToCars.has(track)) trackToCars.set(track, new Set());
+                    trackToCars.get(track).add(car);
+                }
+            });
+        }
+
+        // Track chart elements
+        const trackLegendItems = trackChart ? trackChart.querySelectorAll('.pie-legend-item') : [];
+        const trackSlices = trackChart ? trackChart.querySelectorAll('.pie-slice') : [];
+
+        // Annotate track elements with their classes
+        trackLegendItems.forEach(el => {
+            const label = ((el.querySelector('.pie-legend-label') || {}).textContent || '').trim();
+            const classes = trackToClasses.get(label);
+            if (classes) el.setAttribute('data-class-labels', Array.from(classes).join('|'));
+        });
+        trackSlices.forEach(el => {
+            const label = (el.getAttribute('data-label') || '').trim();
+            const classes = trackToClasses.get(label);
+            if (classes) el.setAttribute('data-class-labels', Array.from(classes).join('|'));
+        });
+
         const classSlices = classChart.querySelectorAll('.pie-slice');
 
         const POP_DISTANCE = 8;
+        const LABEL_RADIUS_PCT = 58; // % from center to place labels
+
+        const MAX_LABELS = 10;
+        const LABEL_MAX_CHARS = 22;
+
+        // Show labels on highlighted slices within a chart
+        function showSliceLabels(chartEl, slices) {
+            const svgContainer = chartEl.querySelector('.pie-chart-svg-container');
+            if (!svgContainer) return;
+            // Collect active slices
+            const active = [];
+            slices.forEach(slice => {
+                if (!slice.classList.contains('pie-slice-active')) return;
+                const label = slice.getAttribute('data-label') || '';
+                if (!label) return;
+                const midAngle = parseFloat(slice.getAttribute('data-mid-angle'));
+                if (isNaN(midAngle)) return;
+                const pct = parseFloat(slice.getAttribute('data-percentage')) || 0;
+                active.push({ label, midAngle, pct });
+            });
+            if (active.length === 0) return;
+            // Sort by percentage descending, keep only the top N
+            active.sort((a, b) => b.pct - a.pct);
+            const shown = active.slice(0, MAX_LABELS);
+            shown.forEach(({ label, midAngle }) => {
+                const x = 50 + Math.cos(midAngle) * LABEL_RADIUS_PCT;
+                const y = 50 + Math.sin(midAngle) * LABEL_RADIUS_PCT;
+                const el = document.createElement('span');
+                el.className = 'pie-cross-label';
+                el.textContent = label.length > LABEL_MAX_CHARS ? label.slice(0, LABEL_MAX_CHARS) + '…' : label;
+                el.style.left = x.toFixed(1) + '%';
+                el.style.top = y.toFixed(1) + '%';
+                svgContainer.appendChild(el);
+            });
+        }
+
+        function clearSliceLabels() {
+            document.querySelectorAll('.pie-cross-label').forEach(el => el.remove());
+        }
 
         // Helpers to apply / clear cross-chart highlighting
-        function highlightCarsByClass(classLabel) {
+        function highlightCarsByClass(classLabel, { fromClassChart = false } = {}) {
+            // Highlight the source class slice itself (useful when triggered from breakdown)
+            classSlices.forEach(slice => {
+                if ((slice.getAttribute('data-label') || '') === classLabel) {
+                    slice.classList.add('pie-slice-active');
+                    const midAngle = parseFloat(slice.getAttribute('data-mid-angle'));
+                    if (!isNaN(midAngle)) {
+                        const tx = Math.cos(midAngle) * POP_DISTANCE;
+                        const ty = Math.sin(midAngle) * POP_DISTANCE;
+                        slice.style.transform = `translate(${tx.toFixed(2)}px, ${ty.toFixed(2)}px)`;
+                    }
+                } else {
+                    slice.classList.add('pie-slice-dimmed');
+                    slice.style.transform = '';
+                }
+            });
             carLegendItems.forEach(carEl => {
                 if (carEl.getAttribute('data-class-label') === classLabel) {
                     carEl.classList.add('pie-legend-item-active');
@@ -814,8 +1043,40 @@ class DriverProfile {
                     slice.style.transform = '';
                 }
             });
+            // Highlight matching tracks (tracks that have entries with this class)
+            trackLegendItems.forEach(el => {
+                const classes = (el.getAttribute('data-class-labels') || '').split('|');
+                if (classes.includes(classLabel)) {
+                    el.classList.add('pie-legend-item-active');
+                } else {
+                    el.classList.add('pie-legend-item-dimmed');
+                }
+            });
+            trackSlices.forEach(slice => {
+                const classes = (slice.getAttribute('data-class-labels') || '').split('|');
+                if (classes.includes(classLabel)) {
+                    slice.classList.add('pie-slice-active');
+                    const midAngle = parseFloat(slice.getAttribute('data-mid-angle'));
+                    if (!isNaN(midAngle)) {
+                        const tx = Math.cos(midAngle) * POP_DISTANCE;
+                        const ty = Math.sin(midAngle) * POP_DISTANCE;
+                        slice.style.transform = `translate(${tx.toFixed(2)}px, ${ty.toFixed(2)}px)`;
+                    }
+                } else {
+                    slice.classList.add('pie-slice-dimmed');
+                    slice.style.transform = '';
+                }
+            });
+            if (!fromClassChart) showSliceLabels(classChart, classSlices);
+            showSliceLabels(carChart, carSlices);
+            if (trackChart) showSliceLabels(trackChart, trackSlices);
         }
         function clearCarHighlights() {
+            clearSliceLabels();
+            classSlices.forEach(slice => {
+                slice.classList.remove('pie-slice-active', 'pie-slice-dimmed');
+                slice.style.transform = '';
+            });
             carLegendItems.forEach(carEl => {
                 carEl.classList.remove('pie-legend-item-active', 'pie-legend-item-dimmed');
             });
@@ -823,8 +1084,15 @@ class DriverProfile {
                 slice.classList.remove('pie-slice-active', 'pie-slice-dimmed');
                 slice.style.transform = '';
             });
+            trackLegendItems.forEach(el => {
+                el.classList.remove('pie-legend-item-active', 'pie-legend-item-dimmed');
+            });
+            trackSlices.forEach(slice => {
+                slice.classList.remove('pie-slice-active', 'pie-slice-dimmed');
+                slice.style.transform = '';
+            });
         }
-        function highlightClassByCar(cls) {
+        function highlightClassByCar(cls, carLabel, { fromCarChart = false } = {}) {
             classLegendItems.forEach(clsEl => {
                 const clsLabel = ((clsEl.querySelector('.pie-legend-label') || {}).textContent || '').trim();
                 if (clsLabel === cls) {
@@ -847,18 +1115,54 @@ class DriverProfile {
                     slice.style.transform = '';
                 }
             });
+            // Highlight tracks driven by this car
+            const tracks = carLabel ? carToTracks.get(carLabel) : null;
+            trackLegendItems.forEach(el => {
+                const lbl = ((el.querySelector('.pie-legend-label') || {}).textContent || '').trim();
+                if (tracks && tracks.has(lbl)) {
+                    el.classList.add('pie-legend-item-active');
+                } else {
+                    el.classList.add('pie-legend-item-dimmed');
+                }
+            });
+            trackSlices.forEach(slice => {
+                const lbl = (slice.getAttribute('data-label') || '').trim();
+                if (tracks && tracks.has(lbl)) {
+                    slice.classList.add('pie-slice-active');
+                    const midAngle = parseFloat(slice.getAttribute('data-mid-angle'));
+                    if (!isNaN(midAngle)) {
+                        const tx = Math.cos(midAngle) * POP_DISTANCE;
+                        const ty = Math.sin(midAngle) * POP_DISTANCE;
+                        slice.style.transform = `translate(${tx.toFixed(2)}px, ${ty.toFixed(2)}px)`;
+                    }
+                } else {
+                    slice.classList.add('pie-slice-dimmed');
+                    slice.style.transform = '';
+                }
+            });
             // Query breakdown items lazily — they are rendered asynchronously
             document.querySelectorAll('.driver-stat-breakdown .pie-legend-item').forEach(bd => {
                 if (bd.getAttribute('data-class-label') === cls) {
                     bd.classList.add('pie-legend-item-active');
                 }
             });
+            showSliceLabels(classChart, classSlices);
+            if (trackChart) showSliceLabels(trackChart, trackSlices);
+            if (!fromCarChart) showSliceLabels(carChart, carSlices);
         }
         function clearClassHighlights() {
+            clearSliceLabels();
             classLegendItems.forEach(clsEl => {
                 clsEl.classList.remove('pie-legend-item-active', 'pie-legend-item-dimmed');
             });
             classSlices.forEach(slice => {
+                slice.classList.remove('pie-slice-active', 'pie-slice-dimmed');
+                slice.style.transform = '';
+            });
+            trackLegendItems.forEach(el => {
+                el.classList.remove('pie-legend-item-active', 'pie-legend-item-dimmed');
+            });
+            trackSlices.forEach(slice => {
                 slice.classList.remove('pie-slice-active', 'pie-slice-dimmed');
                 slice.style.transform = '';
             });
@@ -871,29 +1175,114 @@ class DriverProfile {
         classLegendItems.forEach(el => {
             const classLabel = ((el.querySelector('.pie-legend-label') || {}).textContent || '').trim();
             if (!classLabel) return;
-            el.addEventListener('mouseenter', () => highlightCarsByClass(classLabel));
+            el.addEventListener('mouseenter', (e) => highlightCarsByClass(classLabel, { fromClassChart: e.isTrusted }));
             el.addEventListener('mouseleave', clearCarHighlights);
         });
         classSlices.forEach(el => {
             const classLabel = (el.getAttribute('data-label') || '').trim();
             if (!classLabel) return;
-            el.addEventListener('mouseenter', () => highlightCarsByClass(classLabel));
+            el.addEventListener('mouseenter', () => highlightCarsByClass(classLabel, { fromClassChart: true }));
             el.addEventListener('mouseleave', clearCarHighlights);
         });
 
-        // Car chart legend + slices → highlight matching class
+        // Car chart legend + slices → highlight matching class + tracks
         carLegendItems.forEach(el => {
             const cls = el.getAttribute('data-class-label') || '';
+            const carLabel = ((el.querySelector('.pie-legend-label') || {}).textContent || '').trim();
             if (!cls) return;
-            el.addEventListener('mouseenter', () => highlightClassByCar(cls));
+            el.addEventListener('mouseenter', () => highlightClassByCar(cls, carLabel, { fromCarChart: true }));
             el.addEventListener('mouseleave', clearClassHighlights);
         });
         carSlices.forEach(el => {
             const cls = el.getAttribute('data-class-label') || '';
+            const carLabel = (el.getAttribute('data-label') || '').trim();
             if (!cls) return;
-            el.addEventListener('mouseenter', () => highlightClassByCar(cls));
+            el.addEventListener('mouseenter', () => highlightClassByCar(cls, carLabel, { fromCarChart: true }));
             el.addEventListener('mouseleave', clearClassHighlights);
         });
+
+        // Track chart → highlight matching classes, cars, and breakdowns
+        if (trackChart) {
+            function highlightByTrack(trackLabel, { fromTrackChart = false } = {}) {
+                const classes = trackToClasses.get(trackLabel);
+                if (!classes) return;
+                classLegendItems.forEach(el => {
+                    const lbl = ((el.querySelector('.pie-legend-label') || {}).textContent || '').trim();
+                    if (classes.has(lbl)) {
+                        el.classList.add('pie-legend-item-active');
+                    } else {
+                        el.classList.add('pie-legend-item-dimmed');
+                    }
+                });
+                classSlices.forEach(slice => {
+                    const lbl = (slice.getAttribute('data-label') || '').trim();
+                    if (classes.has(lbl)) {
+                        slice.classList.add('pie-slice-active');
+                        const midAngle = parseFloat(slice.getAttribute('data-mid-angle'));
+                        if (!isNaN(midAngle)) {
+                            const tx = Math.cos(midAngle) * POP_DISTANCE;
+                            const ty = Math.sin(midAngle) * POP_DISTANCE;
+                            slice.style.transform = `translate(${tx.toFixed(2)}px, ${ty.toFixed(2)}px)`;
+                        }
+                    } else {
+                        slice.classList.add('pie-slice-dimmed');
+                        slice.style.transform = '';
+                    }
+                });
+                // Highlight only cars actually driven on this track
+                const cars = trackToCars.get(trackLabel);
+                carLegendItems.forEach(el => {
+                    const lbl = ((el.querySelector('.pie-legend-label') || {}).textContent || '').trim();
+                    if (cars && cars.has(lbl)) {
+                        el.classList.add('pie-legend-item-active');
+                    } else {
+                        el.classList.add('pie-legend-item-dimmed');
+                    }
+                });
+                carSlices.forEach(slice => {
+                    const lbl = (slice.getAttribute('data-label') || '').trim();
+                    if (cars && cars.has(lbl)) {
+                        slice.classList.add('pie-slice-active');
+                        const midAngle = parseFloat(slice.getAttribute('data-mid-angle'));
+                        if (!isNaN(midAngle)) {
+                            const tx = Math.cos(midAngle) * POP_DISTANCE;
+                            const ty = Math.sin(midAngle) * POP_DISTANCE;
+                            slice.style.transform = `translate(${tx.toFixed(2)}px, ${ty.toFixed(2)}px)`;
+                        }
+                    } else {
+                        slice.classList.add('pie-slice-dimmed');
+                        slice.style.transform = '';
+                    }
+                });
+                // Highlight class breakdowns
+                document.querySelectorAll('.driver-stat-breakdown .pie-legend-item').forEach(bd => {
+                    const bdClass = bd.getAttribute('data-class-label') || '';
+                    if (classes.has(bdClass)) {
+                        bd.classList.add('pie-legend-item-active');
+                    }
+                });
+                showSliceLabels(classChart, classSlices);
+                showSliceLabels(carChart, carSlices);
+                if (!fromTrackChart) showSliceLabels(trackChart, trackSlices);
+            }
+            function clearTrackHighlights() {
+                clearClassHighlights();
+                clearCarHighlights();
+            }
+
+            trackLegendItems.forEach(el => {
+                const label = ((el.querySelector('.pie-legend-label') || {}).textContent || '').trim();
+                if (!label) return;
+                el.addEventListener('mouseenter', () => highlightByTrack(label, { fromTrackChart: true }));
+                el.addEventListener('mouseleave', clearTrackHighlights);
+            });
+            trackSlices.forEach(el => {
+                const label = (el.getAttribute('data-label') || '').trim();
+                if (!label) return;
+                el.addEventListener('mouseenter', () => highlightByTrack(label, { fromTrackChart: true }));
+                el.addEventListener('mouseleave', clearTrackHighlights);
+            });
+        }
     }
 
     /**

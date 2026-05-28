@@ -135,12 +135,38 @@
         padding: 0.75rem;
     }
 
+    .seo-content h2 {
+        font-size: var(--font-size-md);
+    }
+
     .seo-content h3 {
-        font-size: 0.95rem;
+        font-size: 0.85rem;
     }
 
     .seo-content p,
     .seo-content ul li {
-        font-size: 0.9rem;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .seo-content {
+        padding: 0.6rem;
+    }
+
+    .seo-content h2 {
+        font-size: var(--font-size-sm);
+        margin-bottom: var(--space-2);
+    }
+
+    .seo-content h3 {
+        font-size: 0.8rem;
+        margin: var(--space-3) 0 var(--space-2) 0;
+    }
+
+    .seo-content p,
+    .seo-content ul li {
+        font-size: 0.75rem;
+        line-height: var(--line-height-normal);
     }
 }

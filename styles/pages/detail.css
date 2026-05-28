@@ -179,3 +179,118 @@
     transform: translateY(-1px);
 }
 
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 1300px) {
+    .detail-content {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .detail-header {
+        margin-left: 2rem;
+        margin-right: 2rem;
+    }
+}
+
+@media (max-width: 1000px) {
+    #detail-results-container .car-dist-summary,
+    #detail-results-container .entries-dist-summary {
+        max-width: none;
+    }
+
+    .detail-header {
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 0.85rem 1rem;
+        align-items: stretch;
+        position: relative;
+    }
+
+    .detail-header .custom-select {
+        margin-left: 0;
+        min-width: 100%;
+    }
+
+    .detail-header-info {
+        order: 1;
+    }
+
+    .detail-filters-row .custom-select {
+        flex: 0 0 auto;
+        width: auto;
+        min-width: 0;
+        max-width: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .detail-content {
+        padding: 1rem 0.75rem;
+        margin-top: 0;
+    }
+
+    #detail-results-container .results-table {
+        min-width: 0;
+    }
+
+    .detail-header-line,
+    #detail-track,
+    #detail-class,
+    #detail-layout {
+        font-size: 1rem;
+        word-break: break-word;
+        padding-bottom: 0.2rem;
+        margin-bottom: 0.1rem;
+    }
+
+    #detail-track {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    #detail-track .detail-track-layout {
+        flex-basis: 100%;
+        text-align: center;
+        padding-left: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .detail-content {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .detail-header {
+        gap: 0.5rem;
+        padding: 0.6rem;
+    }
+
+    .detail-header-info {
+        gap: 0.2rem;
+    }
+
+    .detail-header-line,
+    #detail-track,
+    #detail-class,
+    #detail-layout {
+        font-size: 0.9rem;
+        padding-bottom: 0.15rem;
+        margin-bottom: 0.05rem;
+    }
+
+    #difficulty-filter-ui {
+        top: 0.6rem;
+        right: 0.6rem;
+    }
+
+    .detail-filters-row .custom-select {
+        flex: 0 0 auto;
+        width: auto;
+        min-width: 0;
+        max-width: none;
+    }
+}
+

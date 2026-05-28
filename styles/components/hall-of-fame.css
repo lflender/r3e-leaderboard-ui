@@ -107,3 +107,30 @@
     vertical-align: middle;
     flex-shrink: 0;
 }
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 1000px) {
+    .hall-of-fame-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .hall-of-fame-grid > :nth-child(3):last-child {
+        grid-column: 1 / -1;
+        justify-self: center;
+        width: calc(50% - 0.5rem);
+    }
+}
+
+@media (max-width: 768px) {
+    .hall-of-fame-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hall-of-fame-grid > :nth-child(3):last-child {
+        width: auto;
+        justify-self: stretch;
+    }
+}

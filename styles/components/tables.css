@@ -627,3 +627,150 @@ h2.driver-name-top10-glitter {
     content: '\00A0'; /* Non-breaking space before stars */
 }
 
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+/* Touch devices — hide hover-only elements */
+@media (hover: none), (pointer: coarse) {
+    .car-link-thumbnail {
+        display: none !important;
+    }
+
+    .info-icon {
+        display: none !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .results-table {
+        font-size: 0.7rem;
+        min-width: 600px;
+        margin-top: 0.25rem;
+    }
+
+    .results-table th,
+    .results-table td {
+        padding: 0.6rem 0.35rem;
+        font-size: 0.7rem;
+    }
+
+    .results-table th {
+        font-size: 0.75rem;
+    }
+
+    #results-container .results-table th:nth-child(1) {
+        min-width: unset;
+        width: 1px;
+        white-space: nowrap;
+        font-size: 0;
+        padding: 0.6rem 0.2rem;
+    }
+
+    #results-container .results-table th:nth-child(1)::after {
+        font-size: 0.7rem;
+    }
+
+    #results-container .results-table td:nth-child(1) {
+        min-width: unset;
+        width: 1px;
+        white-space: nowrap;
+        padding: 0.6rem 0.2rem;
+    }
+
+    #results-container .results-table th:nth-child(2),
+    #results-container .results-table td:nth-child(2) {
+        min-width: 140px !important;
+    }
+
+    .time-delta-inline,
+    .lap-time-cell .time-delta,
+    .gap-time-cell .time-delta {
+        font-size: 0.7rem;
+    }
+
+    .driver-group-header strong {
+        font-size: 0.85rem;
+    }
+
+    .driver-group-header td {
+        padding: 0.65rem !important;
+    }
+
+    .driver-profile-link-btn {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+    }
+
+    .driver-meta {
+        font-size: 0.75rem;
+    }
+
+    #cars-info-table,
+    #track-info-table,
+    .table-scroll-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+@media (max-width: 480px) {
+    .results-table {
+        font-size: 0.65rem;
+        margin-top: 0.15rem;
+    }
+
+    .results-table th,
+    .results-table td {
+        padding: 0.35rem 0.25rem;
+        font-size: 0.65rem;
+    }
+
+    .results-table th {
+        font-size: 0.7rem;
+    }
+
+    .time-delta-inline,
+    .lap-time-cell .time-delta,
+    .gap-time-cell .time-delta {
+        font-size: 0.65rem;
+    }
+
+    .driver-group-header strong {
+        font-size: 0.8rem;
+    }
+
+    .driver-profile-link-btn {
+        font-size: 0.65rem;
+        padding: 0.15rem 0.4rem;
+    }
+
+    .driver-meta {
+        font-size: 0.7rem;
+    }
+
+    #results-container .results-table th:nth-child(1) {
+        min-width: unset !important;
+        width: 1px;
+        white-space: nowrap;
+        font-size: 0;
+        padding: 0.4rem 0.15rem;
+    }
+
+    #results-container .results-table th:nth-child(1)::after {
+        font-size: 0.65rem;
+    }
+
+    #results-container .results-table td:nth-child(1) {
+        min-width: unset !important;
+        width: 1px;
+        white-space: nowrap;
+        padding: 0.4rem 0.15rem;
+    }
+
+    #results-container .results-table th:nth-child(2),
+    #results-container .results-table td:nth-child(2) {
+        min-width: 140px !important;
+    }
+}
+

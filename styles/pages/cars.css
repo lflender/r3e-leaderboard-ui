@@ -625,3 +625,188 @@
     color: var(--color-rating-danger);
     text-shadow: 0 0 4px var(--color-rating-danger-glow);
 }
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 1300px) {
+    .cars-view-toggle-row {
+        padding: 0 2rem;
+        box-sizing: border-box;
+    }
+}
+
+@media (max-width: 1000px) {
+    .cars-view-toggle {
+        margin-left: 0;
+        align-self: flex-end;
+    }
+
+    .cars-view-toggle-row {
+        justify-content: flex-start;
+        margin-top: 1rem;
+        gap: 1rem;
+        flex-wrap: nowrap;
+        padding: 0 2rem;
+        box-sizing: border-box;
+    }
+
+    #cars-search {
+        order: 1;
+        flex: 1 1 auto;
+        min-width: 0;
+        max-width: none;
+    }
+
+    #cars-view-toggle {
+        order: 2;
+        flex: 0 0 auto;
+    }
+
+    #cars-search-container {
+        margin-bottom: 0;
+    }
+
+    .cars-tile-grid {
+        margin-top: 0.5rem;
+    }
+
+    #cars-info-table {
+        padding-top: 0.35rem;
+    }
+
+    #cars-info-table .cars-class-section {
+        margin-top: 1.25rem;
+    }
+
+    #cars-info-table .cars-class-section:first-child {
+        margin-top: 0.75rem;
+    }
+
+    #cars-info-table .cars-class-heading-wrap {
+        gap: 0.4rem;
+    }
+
+    .car-inline-thumbnail {
+        position: absolute;
+        right: -0.5rem;
+        top: 0.25rem;
+        transform: translateY(-50%);
+        display: block;
+        height: 1.9rem;
+        max-width: 3.2rem;
+        margin-left: 0;
+    }
+
+    .car-inline-meta {
+        padding-right: 2.75rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .cars-view-toggle-row {
+        margin-top: 1rem;
+        gap: 1rem;
+        padding: 0 2rem;
+        box-sizing: border-box;
+    }
+
+    #cars-info-table {
+        overflow-x: auto;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #cars-search {
+        flex: 1 1 auto;
+        min-width: 0;
+        max-width: none;
+    }
+
+    #cars-search-container .custom-select:nth-of-type(1) { z-index: var(--z-dropdown-stacked-1); }
+    #cars-search-container .custom-select:nth-of-type(2) { z-index: var(--z-dropdown-stacked-2); }
+    #cars-search-container .custom-select:nth-of-type(3) { z-index: var(--z-dropdown-stacked-3); }
+
+    .cars-side-tools {
+        right: 0;
+        transform: none;
+    }
+
+    .cars-side-btn {
+        transform: none;
+        border-radius: var(--radius-md) 0 0 var(--radius-md);
+        border-left: 1px solid var(--color-border);
+        border-right: none;
+    }
+
+    #cars-search-container {
+        margin-bottom: 0;
+    }
+
+    #cars-info-table .cars-class-section {
+        margin-top: 1rem;
+    }
+
+    #cars-info-table .cars-class-section:first-child {
+        margin-top: 0.75rem;
+    }
+
+    #cars-info-table .cars-class-heading-wrap {
+        flex-wrap: nowrap;
+        gap: 0.35rem;
+    }
+
+    .cars-class-heading {
+        font-size: 0.94rem;
+    }
+
+    .cars-class-heading .table-car-class-logo {
+        height: calc(1.7em + 5px);
+        max-width: 3.9em;
+    }
+
+    .cars-class-superclass-chip {
+        padding: 0.18rem 0.5rem;
+        font-size: 0.68rem;
+    }
+
+    #cars-info-table .results-table .car-tile-assist-badge {
+        font-size: 0.7rem;
+        padding: 0.12rem 0.35rem;
+    }
+
+    #cars-info-table .results-table .car-assists-cell .car-tile-assist--lc {
+        font-size: 0.58rem;
+    }
+
+    #cars-info-table .results-table th {
+        padding: 0.7rem 0.3rem;
+        font-size: 0.9rem;
+    }
+
+    #cars-info-table .results-table td {
+        padding: 0.6rem 0.3rem;
+        font-size: 0.75rem;
+    }
+
+    #cars-info-table .results-table th:nth-child(1),
+    #cars-info-table .results-table td:nth-child(1) {
+        width: 35%;
+        max-width: none;
+        min-width: 300px;
+        white-space: normal !important;
+        word-break: break-word;
+    }
+}
+
+@media (max-width: 480px) {
+    #cars-info-table .results-table .car-tile-assist-badge {
+        font-size: 0.6rem;
+        padding: 0.1rem 0.25rem;
+    }
+
+    #cars-info-table .results-table .car-assists-cell .car-tile-assist--lc {
+        font-size: 0.5rem;
+    }
+}

@@ -915,3 +915,33 @@
     cursor: pointer;
     flex-shrink: 0;
 }
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+    .challenge-action {
+        gap: 0.4rem;
+    }
+
+    .challenge-repick-btn {
+        min-width: 0;
+        padding: 0.45rem 0.6rem;
+        font-size: 0.75rem;
+        flex: 1 1 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .challenge-pick-btn {
+        padding: 0.6rem 1.8rem;
+        font-size: 0.95rem;
+        flex-shrink: 0;
+    }
+
+    .challenge-pickers {
+        grid-template-columns: 1fr;
+    }
+}

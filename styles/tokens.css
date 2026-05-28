@@ -242,4 +242,10 @@
     /* --- Layout --- */
     --content-max-width: 1500px;
     --results-table-max-width: 1500px;
+
+    /* --- Breakpoints (reference only — cannot be used in @media queries) --- */
+    /* --bp-lg: 1300px   — large screens */
+    /* --bp-md: 1000px   — tablets / iPad landscape */
+    /* --bp-sm: 768px    — small tablets / large phones */
+    /* --bp-xs: 480px    — phones */
 }

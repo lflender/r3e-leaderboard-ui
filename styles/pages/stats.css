@@ -91,6 +91,96 @@
     white-space: nowrap;
 }
 
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 1000px) {
+    #stats-tables {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-selected-class-logo {
+        display: none;
+    }
+
+    .stats-box h2 {
+        font-size: 0.95rem;
+    }
+
+    .stats-table {
+        min-width: 0;
+        table-layout: fixed;
+    }
+
+    #stats-pole-table .results-table,
+    #stats-bested-table .results-table {
+        min-width: 0 !important;
+        width: 100% !important;
+        table-layout: fixed !important;
+    }
+
+    #stats-pole-table .results-table th:nth-child(1),
+    #stats-pole-table .results-table td:nth-child(1),
+    #stats-bested-table .results-table th:nth-child(1),
+    #stats-bested-table .results-table td:nth-child(1) {
+        width: 2.8rem !important;
+        white-space: nowrap !important;
+    }
+
+    #stats-pole-table .results-table th:nth-child(2),
+    #stats-pole-table .results-table td:nth-child(2),
+    #stats-bested-table .results-table th:nth-child(2),
+    #stats-bested-table .results-table td:nth-child(2) {
+        width: auto !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    #stats-pole-table .results-table th:nth-child(3),
+    #stats-pole-table .results-table td:nth-child(3),
+    #stats-bested-table .results-table th:nth-child(3),
+    #stats-bested-table .results-table td:nth-child(3) {
+        width: 3.5rem !important;
+        white-space: nowrap !important;
+        text-align: right !important;
+    }
+}
+
+@media (max-width: 768px) {
+    #stats-class-filter-ui {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-box h2 {
+        font-size: 0.88rem;
+    }
+
+    .stats-table th,
+    .stats-table td {
+        padding: 0.45rem 0.22rem;
+        font-size: 0.64rem;
+    }
+
+    .stats-table th {
+        font-size: 0.68rem;
+    }
+
+    .stats-table .stats-pos-th,
+    .stats-table .pos-cell {
+        width: 2.1rem;
+    }
+
+    .stats-table th:last-child,
+    .stats-table td.stats-value-cell {
+        width: 2.9rem;
+    }
+}
+
 .stats-table a {
     color: var(--color-text-primary);
     text-decoration: none;

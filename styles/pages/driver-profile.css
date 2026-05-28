@@ -617,3 +617,130 @@
     transform: scale(1.8);
     z-index: 4;
 }
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 1000px) {
+    .driver-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .driver-profile-charts-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .driver-profile-charts-grid > :nth-child(3):last-child {
+        grid-column: 1 / -1;
+        justify-self: center;
+        width: calc(50% - 0.75rem);
+    }
+}
+
+@media (max-width: 768px) {
+    .driver-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+
+    .driver-stat-value {
+        font-size: 1.25rem;
+    }
+
+    .driver-profile-container {
+        padding: 1rem;
+    }
+
+    .driver-profile-header {
+        padding: 1rem 1.25rem;
+    }
+
+    .driver-profile-avatar,
+    .driver-profile-avatar-placeholder {
+        width: 72px;
+        height: 72px;
+    }
+
+    .driver-profile-name {
+        font-size: 1.25rem;
+    }
+
+    .driver-profile-charts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .driver-profile-charts-grid > :nth-child(3):last-child {
+        grid-column: auto;
+        width: 100%;
+    }
+
+    .driver-profile-highlights-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .driver-profile-distributions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .highlight-car-image {
+        width: 140px;
+    }
+
+    .highlight-car-text {
+        white-space: normal;
+    }
+}
+
+@media (max-width: 480px) {
+    .driver-stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+
+    .driver-stat-card {
+        padding: 0.75rem;
+    }
+
+    .driver-stat-value {
+        font-size: 1.1rem;
+    }
+
+    .driver-stat-label {
+        font-size: 0.7rem;
+    }
+
+    .driver-profile-identity {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .driver-profile-meta {
+        justify-content: center;
+    }
+
+    .driver-profile-name {
+        font-size: 1.1rem;
+    }
+
+    .pie-chart-svg-container {
+        max-width: 180px;
+    }
+
+    .highlight-card {
+        padding: 0.75rem 1rem;
+    }
+
+    .highlight-car-image {
+        width: 100px;
+    }
+
+    .highlight-track-logo {
+        width: 70px;
+    }
+
+    .highlight-card-body {
+        gap: 0.5rem;
+    }
+}

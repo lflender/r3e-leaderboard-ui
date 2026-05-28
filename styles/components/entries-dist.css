@@ -248,3 +248,52 @@
 .entries-dist-bar-active {
     fill: var(--color-primary-light-solid);
 }
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+    .entries-dist-chart {
+        height: 7rem;
+    }
+
+    .entries-dist-max-label {
+        font-size: 0.7rem;
+    }
+
+    .entries-dist-axis {
+        font-size: 0.75rem;
+    }
+
+    .entries-timeframe-controls {
+        grid-template-columns: 1fr;
+        gap: 0.55rem;
+        align-items: stretch;
+    }
+
+    .entries-timeframe-last-week {
+        justify-self: start;
+    }
+}
+
+@media (max-width: 480px) {
+    .entries-dist-summary {
+        margin: 0.75rem 0;
+    }
+
+    .entries-dist-chart {
+        height: 5rem;
+    }
+
+    .entries-dist-max-label {
+        font-size: 0.65rem;
+        top: 0.6rem;
+        left: 0.1rem;
+    }
+
+    .entries-dist-axis {
+        font-size: 0.68rem;
+        margin-top: 0.3rem;
+    }
+}

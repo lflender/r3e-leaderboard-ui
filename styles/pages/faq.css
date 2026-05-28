@@ -74,3 +74,14 @@
 .faq-item .faq-content a:active {
     color: var(--color-primary);
 }
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+    .faq-title {
+        font-size: 1.4rem;
+        margin-bottom: 0.6rem;
+    }
+}

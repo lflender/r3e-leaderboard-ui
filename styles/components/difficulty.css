@@ -37,4 +37,26 @@
     border-width: 1px;
 }
 
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+    .difficulty-pill {
+        font-size: 0.6rem !important;
+        padding: 0.1rem 0.35rem !important;
+    }
+
+    .difficulty-cell {
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 480px) {
+    .difficulty-pill {
+        font-size: 0.55rem;
+        padding: 0.08rem 0.3rem;
+    }
+}
+
 

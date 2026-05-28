@@ -217,3 +217,56 @@
     height: 1em;
 }
 
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 1300px) {
+    .search-container {
+        padding: 0 2rem;
+    }
+}
+
+@media (max-width: 1000px) {
+    .search-container {
+        margin-bottom: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .custom-select__toggle {
+        white-space: normal;
+        padding: 0.55rem 0.7rem;
+        font-size: 0.85rem;
+    }
+
+    .custom-select__menu {
+        max-height: 60vh;
+        left: 0;
+        right: auto;
+        width: max-content;
+        min-width: 0;
+        max-width: calc(100vw - 1rem);
+    }
+
+    .custom-select__option {
+        font-size: 0.82rem;
+        padding: 0.5rem 0.75rem;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+        line-height: 1.25;
+    }
+
+    .custom-select__search {
+        font-size: 0.82rem;
+    }
+
+    .challenge-group-category,
+    .challenge-hardcore-label,
+    .combine-checkbox-label {
+        padding: 0.55rem 0.7rem;
+        font-size: 0.85rem;
+    }
+}
+

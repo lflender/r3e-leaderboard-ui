@@ -306,3 +306,90 @@
     border-left: 4px solid var(--color-danger);
     background: var(--color-danger-alpha-8);
 }
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 1300px) {
+    .daily-races-feature .daily-races-grid {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 1000px) {
+    .daily-races-grid > .daily-race-card-link {
+        flex: 0 1 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .daily-races-container {
+        padding: 1rem 0.5rem;
+    }
+
+    .daily-races-header h2 {
+        font-size: 1.4rem;
+    }
+
+    .daily-races-header h3 {
+        font-size: 1.1rem;
+    }
+
+    .daily-races-section-title {
+        font-size: 1.1rem !important;
+    }
+
+    .daily-races-grid > .daily-race-card-link {
+        flex: 0 1 100%;
+        min-width: 0;
+    }
+
+    .daily-races-grid,
+    .hall-of-fame-grid {
+        gap: 1rem;
+    }
+
+    .daily-races-feature .daily-races-grid {
+        grid-template-columns: 1fr;
+        max-width: none;
+    }
+
+    .daily-race-card {
+        padding: 1rem;
+    }
+
+    .daily-race-class {
+        font-size: 1rem;
+        padding-right: clamp(72px, 22%, 96px);
+    }
+
+    .daily-race-class-logos {
+        gap: 0.35rem;
+    }
+
+    .daily-race-class-logo {
+        width: auto;
+        max-width: 72px;
+        height: 28px;
+    }
+
+    .daily-race-class-logos--count-1 .daily-race-class-logo {
+        max-width: 152px;
+        height: 42px;
+    }
+
+    .daily-race-track {
+        padding-right: clamp(72px, 22%, 96px);
+        font-size: 0.9rem;
+    }
+
+    .daily-race-schedule {
+        font-size: 0.85rem;
+    }
+
+    .daily-race-tag {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+    }
+}

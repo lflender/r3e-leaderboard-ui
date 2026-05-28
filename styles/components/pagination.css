@@ -61,3 +61,45 @@
     padding: 0 var(--space-1);
     font-size: 1.1rem;
 }
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 1300px) {
+    .pagination {
+        padding: 0 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .pagination {
+        margin-top: 0.5rem;
+    }
+
+    .pagination-buttons {
+        gap: 0.35rem;
+    }
+
+    .page-btn {
+        padding: 0.45rem 0.7rem;
+        font-size: 0.85rem;
+        min-width: 36px;
+    }
+}
+
+@media (max-width: 480px) {
+    .pagination {
+        margin-top: 0.4rem;
+    }
+
+    .page-btn {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.8rem;
+        min-width: 32px;
+    }
+
+    .pagination-info {
+        font-size: 0.85rem;
+    }
+}

@@ -119,3 +119,28 @@
     align-items: center;
     gap: var(--space-2);
 }
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+    .hero-tagline {
+        font-size: 0.9rem;
+        padding: 0 0.5rem;
+    }
+
+    .seo-content {
+        margin: 1.5rem 0 0.5rem 0;
+        padding: 0.75rem;
+    }
+
+    .seo-content h3 {
+        font-size: 0.95rem;
+    }
+
+    .seo-content p,
+    .seo-content ul li {
+        font-size: 0.9rem;
+    }
+}

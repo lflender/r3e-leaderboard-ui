@@ -203,3 +203,68 @@
     gap: 0.38rem;
 }
 
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+    .car-badge {
+        font-size: 0.7rem;
+        padding: 0.12rem 0.4rem;
+        line-height: 1;
+    }
+
+    .car-tile-assist-badge {
+        font-size: 0.6rem;
+        padding: 0.1rem 0.3rem;
+    }
+
+    .pos-number {
+        font-size: 0.7rem;
+        padding: 0.12rem 0.4rem;
+        min-width: 1.8rem;
+    }
+
+    .pos-total {
+        font-size: 0.7rem;
+    }
+
+    .mp-pos-badge {
+        font-size: 0.8rem;
+    }
+
+    .mp-pos-badge.mp-pos-inactive {
+        font-size: 0.67rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .car-badge {
+        font-size: 0.6rem;
+        padding: 0.1rem 0.3rem;
+    }
+
+    .car-tile-assist-badge {
+        font-size: 0.55rem;
+        padding: 0.08rem 0.22rem;
+    }
+
+    .pos-number {
+        font-size: 0.65rem;
+        padding: 0.1rem 0.35rem;
+        min-width: 1.6rem;
+    }
+
+    .pos-total {
+        font-size: 0.65rem;
+    }
+
+    .mp-pos-badge {
+        font-size: 0.65rem;
+    }
+
+    .mp-pos-badge.mp-pos-inactive {
+        font-size: 0.54rem;
+    }
+}
+

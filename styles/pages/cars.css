@@ -249,7 +249,6 @@
     font-style: italic;
 }
 
-#cars-info-table .results-table,
 #cars-info-table .results-table tbody,
 #cars-info-table .results-table tr {
     overflow: visible;
@@ -282,6 +281,18 @@
     font-weight: 500;
     letter-spacing: 0.01em;
     opacity: 0.93;
+}
+
+#cars-info-table .results-table th {
+    white-space: nowrap;
+    padding: 0.5rem 0.6rem;
+    font-size: 0.95rem;
+}
+
+.th-sub-label {
+    font-size: 0.72em;
+    font-weight: var(--font-weight-normal);
+    opacity: 0.7;
 }
 
 #cars-info-table .results-table th:nth-child(1),
@@ -326,18 +337,10 @@
     padding: 0.65rem 0.65rem;
 }
 
-.car-class-header-text {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.58rem;
-}
-
-.car-class-header-text .table-car-class-logo {
-    position: relative;
-    top: 1px;
-    height: 31px;
-    width: 31px;
-    max-width: 31px;
+#cars-info-table .driver-group-header .cars-class-heading-wrap {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
 }
 
 .cars-tile-grid {

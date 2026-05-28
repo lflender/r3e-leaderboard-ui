@@ -417,7 +417,7 @@
 
 .pie-cross-label {
     position: absolute;
-    transform: translate(-50%, -50%);
+    transform: translateY(-50%);
     font-size: var(--font-size-xs);
     font-weight: var(--font-weight-semibold);
     color: var(--color-text-primary);
@@ -429,6 +429,14 @@
     z-index: var(--z-tooltip);
     opacity: 0;
     animation: pie-label-fade-in 0.15s ease-out forwards;
+}
+
+.pie-cross-label-right {
+    transform: translateY(-50%);
+}
+
+.pie-cross-label-left {
+    transform: translate(-100%, -50%);
 }
 
 @keyframes pie-label-fade-in {

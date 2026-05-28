@@ -199,6 +199,9 @@ beforeAll(() => {
             return String(value);
         })
     };
+    loadBrowserScript('modules/driver-profile-renderers.js');
+    loadBrowserScript('modules/driver-profile-distributions.js');
+    loadBrowserScript('modules/driver-profile-chart-interaction.js');
     loadBrowserScript('modules/pages/driver-profile.js');
 });
 

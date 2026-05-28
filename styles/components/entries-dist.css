@@ -242,11 +242,14 @@
 }
 
 .entries-dist-bar {
-    transition: fill 0.1s;
+    transition: fill 0.1s, transform 0.1s;
+    transform-origin: center bottom;
+    transform-box: fill-box;
 }
 
 .entries-dist-bar-active {
     fill: var(--color-primary-light-solid);
+    transform: scale(2.5, 1.3);
 }
 
 /* ========================================

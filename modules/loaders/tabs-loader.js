@@ -30,14 +30,14 @@
     }
 
     function render(container) {
-        var activeId = container.dataset.active || 'ranked';
+        var activeId = container.getAttribute('data-active') || '';
         var html = '';
         for (var i = 0; i < TABS.length; i++) {
             var tab = TABS[i];
             var badgeHtml = (tab.badge && !isBadgeDismissed(tab.id))
                 ? ' <span class="tab-badge">' + tab.badge + '</span>'
                 : '';
-            if (tab.id === activeId) {
+            if (activeId && tab.id === activeId) {
                 dismissBadge(tab.id);
                 html += '<button class="tab-button active">' + tab.label + '</button>';
             } else {

@@ -5,97 +5,13 @@
  */
 const DriverProfileChartInteraction = (() => {
     const POP_DISTANCE = 8;
-    const LABEL_RADIUS_PCT = 58;
-    const LABEL_MAX_CHARS = 30;
 
-    const LABEL_MIN_GAP_PCT = 8; // minimum vertical gap between labels (% of container)
-
-    /**
-     * Show floating labels on highlighted (active) slices in a chart.
-     * Applies collision avoidance to prevent overlapping labels.
-     * @param {HTMLElement} chartEl - The chart container element
-     * @param {NodeList|Array} slices - The pie slice elements to check
-     */
     function showSliceLabels(chartEl, slices) {
-        const svgContainer = chartEl.querySelector('.pie-chart-svg-container');
-        if (!svgContainer) return;
-        const active = [];
-        slices.forEach(slice => {
-            if (!slice.classList.contains('pie-slice-active')) return;
-            const label = slice.getAttribute('data-label') || '';
-            if (!label) return;
-            const midAngle = parseFloat(slice.getAttribute('data-mid-angle'));
-            if (isNaN(midAngle)) return;
-            const pct = parseFloat(slice.getAttribute('data-percentage')) || 0;
-            active.push({ label, midAngle, pct });
-        });
-        if (active.length === 0) return;
-        active.sort((a, b) => b.pct - a.pct);
-
-        // Compute initial positions
-        const positions = active.map(({ label, midAngle }) => ({
-            label: shortenLabel(label),
-            x: 50 + Math.cos(midAngle) * LABEL_RADIUS_PCT,
-            y: 50 + Math.sin(midAngle) * LABEL_RADIUS_PCT
-        }));
-
-        // Resolve vertical overlaps by nudging labels apart
-        resolveOverlaps(positions);
-
-        positions.forEach(({ label, x, y }) => {
-            const el = document.createElement('span');
-            el.className = 'pie-cross-label' + (x >= 50 ? ' pie-cross-label-right' : ' pie-cross-label-left');
-            el.textContent = label.length > LABEL_MAX_CHARS ? label.slice(0, LABEL_MAX_CHARS) + '\u2026' : label;
-            el.style.left = x.toFixed(1) + '%';
-            el.style.top = y.toFixed(1) + '%';
-            svgContainer.appendChild(el);
-        });
-    }
-
-    /**
-     * Shorten a label for display (e.g. "Grand Prix" → "GP").
-     */
-    function shortenLabel(label) {
-        return label.replace(/Grand Prix/g, 'GP');
-    }
-
-    /**
-     * Nudge label positions so no two labels overlap vertically.
-     * Groups labels by horizontal half (left/right) and spreads within each group.
-     */
-    function resolveOverlaps(positions) {
-        if (positions.length <= 1) return;
-        // Split into left and right halves
-        const left = positions.filter(p => p.x < 50);
-        const right = positions.filter(p => p.x >= 50);
-        spreadGroup(left);
-        spreadGroup(right);
-    }
-
-    function spreadGroup(group) {
-        if (group.length <= 1) return;
-        group.sort((a, b) => a.y - b.y);
-        // Push overlapping labels down
-        for (let i = 1; i < group.length; i++) {
-            const gap = group[i].y - group[i - 1].y;
-            if (gap < LABEL_MIN_GAP_PCT) {
-                group[i].y = group[i - 1].y + LABEL_MIN_GAP_PCT;
-            }
-        }
-        // If bottom labels pushed beyond 95%, compress from bottom up
-        const maxY = 95;
-        if (group[group.length - 1].y > maxY) {
-            group[group.length - 1].y = maxY;
-            for (let i = group.length - 2; i >= 0; i--) {
-                if (group[i].y > group[i + 1].y - LABEL_MIN_GAP_PCT) {
-                    group[i].y = group[i + 1].y - LABEL_MIN_GAP_PCT;
-                }
-            }
-        }
+        PieChart.showSliceLabels(chartEl, slices);
     }
 
     function clearSliceLabels() {
-        document.querySelectorAll('.pie-cross-label').forEach(el => el.remove());
+        PieChart.clearSliceLabels();
     }
 
     /**
@@ -385,6 +301,41 @@ const DriverProfileChartInteraction = (() => {
                 el.addEventListener('mouseenter', () => highlightByTrack(label, { fromTrackChart: true }));
                 el.addEventListener('mouseleave', clearTrackHighlights);
             });
+        }
+
+        // Highlight cards (Most Used Car / Track) → dispatch events on matching pie legend items
+        // so all existing cross-highlighting chains (perf dots, entries-dist bars, etc.) fire.
+        const carHighlight = document.querySelector('.highlight-card-car');
+        if (carHighlight && carChart) {
+            const carName = (carHighlight.getAttribute('data-car-label') || '').trim();
+            let matchedLegend = null;
+            carLegendItems.forEach(el => {
+                const lbl = ((el.querySelector('.pie-legend-label') || {}).textContent || '').trim();
+                if (lbl === carName) matchedLegend = el;
+            });
+            if (matchedLegend) {
+                carHighlight.addEventListener('mouseenter', () => {
+                    matchedLegend.dispatchEvent(new Event('mouseenter'));
+                    showSliceLabels(carChart, carSlices);
+                });
+                carHighlight.addEventListener('mouseleave', () => matchedLegend.dispatchEvent(new Event('mouseleave')));
+            }
+        }
+        const trackHighlight = document.querySelector('.highlight-card-track');
+        if (trackHighlight && trackChart) {
+            const trackLabel = (trackHighlight.getAttribute('data-track-label') || '').trim();
+            let matchedLegend = null;
+            trackLegendItems.forEach(el => {
+                const lbl = ((el.querySelector('.pie-legend-label') || {}).textContent || '').trim();
+                if (lbl === trackLabel) matchedLegend = el;
+            });
+            if (matchedLegend) {
+                trackHighlight.addEventListener('mouseenter', () => {
+                    matchedLegend.dispatchEvent(new Event('mouseenter'));
+                    showSliceLabels(trackChart, trackSlices);
+                });
+                trackHighlight.addEventListener('mouseleave', () => matchedLegend.dispatchEvent(new Event('mouseleave')));
+            }
         }
     }
 

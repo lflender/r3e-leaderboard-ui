@@ -273,5 +273,116 @@
         return String(str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
-    window.PieChart = { render, computeSlices, COLORS };
+    /* --- Slice label helpers (used by cross-chart interactions) --- */
+
+    const LABEL_RADIUS_PCT = 58;
+    const LABEL_MAX_CHARS = 30;
+    const LABEL_MIN_GAP_PCT = 8;
+
+    /**
+     * Show floating labels on highlighted (active) slices in a chart.
+     * Applies collision avoidance to prevent overlapping labels and
+     * clamps to viewport edges.
+     * @param {HTMLElement} chartEl - The chart container element
+     * @param {NodeList|Array} slices - The pie slice elements to check
+     */
+    function showSliceLabels(chartEl, slices) {
+        const svgContainer = chartEl.querySelector('.pie-chart-svg-container');
+        if (!svgContainer) return;
+        const active = [];
+        slices.forEach(slice => {
+            if (!slice.classList.contains('pie-slice-active')) return;
+            const label = slice.getAttribute('data-label') || '';
+            if (!label) return;
+            const midAngle = parseFloat(slice.getAttribute('data-mid-angle'));
+            if (isNaN(midAngle)) return;
+            const pct = parseFloat(slice.getAttribute('data-percentage')) || 0;
+            active.push({ label, midAngle, pct });
+        });
+        if (active.length === 0) return;
+        active.sort((a, b) => b.pct - a.pct);
+
+        const positions = active.map(({ label, midAngle }) => ({
+            label: shortenLabel(label),
+            x: 50 + Math.cos(midAngle) * LABEL_RADIUS_PCT,
+            y: 50 + Math.sin(midAngle) * LABEL_RADIUS_PCT
+        }));
+
+        resolveOverlaps(positions);
+
+        positions.forEach(({ label, x, y }) => {
+            const el = document.createElement('span');
+            el.className = 'pie-cross-label' + (x >= 50 ? ' pie-cross-label-right' : ' pie-cross-label-left');
+            el.textContent = label.length > LABEL_MAX_CHARS ? label.slice(0, LABEL_MAX_CHARS) + '\u2026' : label;
+            el.style.left = x.toFixed(1) + '%';
+            el.style.top = y.toFixed(1) + '%';
+            svgContainer.appendChild(el);
+        });
+
+        clampLabelsToViewport(svgContainer);
+    }
+
+    function shortenLabel(label) {
+        return label.replace(/Grand Prix/g, 'GP');
+    }
+
+    function resolveOverlaps(positions) {
+        if (positions.length <= 1) return;
+        const left = positions.filter(p => p.x < 50);
+        const right = positions.filter(p => p.x >= 50);
+        spreadGroup(left);
+        spreadGroup(right);
+    }
+
+    function spreadGroup(group) {
+        if (group.length <= 1) return;
+        group.sort((a, b) => a.y - b.y);
+        for (let i = 1; i < group.length; i++) {
+            const gap = group[i].y - group[i - 1].y;
+            if (gap < LABEL_MIN_GAP_PCT) {
+                group[i].y = group[i - 1].y + LABEL_MIN_GAP_PCT;
+            }
+        }
+        const maxY = 95;
+        if (group[group.length - 1].y > maxY) {
+            group[group.length - 1].y = maxY;
+            for (let i = group.length - 2; i >= 0; i--) {
+                if (group[i].y > group[i + 1].y - LABEL_MIN_GAP_PCT) {
+                    group[i].y = group[i + 1].y - LABEL_MIN_GAP_PCT;
+                }
+            }
+        }
+    }
+
+    function clearSliceLabels() {
+        document.querySelectorAll('.pie-cross-label').forEach(el => el.remove());
+    }
+
+    /**
+     * Clamp labels horizontally so they don't overflow outside the viewport.
+     * Only adjusts `left` — never touches transform or vertical position.
+     */
+    function clampLabelsToViewport(container) {
+        const labels = container.querySelectorAll('.pie-cross-label');
+        if (!labels.length) return;
+        const vw = window.innerWidth;
+        const containerRect = container.getBoundingClientRect();
+        const containerWidth = containerRect.width || 1;
+        const padding = 4;
+
+        labels.forEach(el => {
+            const rect = el.getBoundingClientRect();
+            if (rect.left < padding) {
+                const shift = padding - rect.left;
+                const currentLeft = parseFloat(el.style.left) || 0;
+                el.style.left = (currentLeft + (shift / containerWidth) * 100).toFixed(1) + '%';
+            } else if (rect.right > vw - padding) {
+                const shift = rect.right - (vw - padding);
+                const currentLeft = parseFloat(el.style.left) || 0;
+                el.style.left = (currentLeft - (shift / containerWidth) * 100).toFixed(1) + '%';
+            }
+        });
+    }
+
+    window.PieChart = { render, computeSlices, COLORS, showSliceLabels, clearSliceLabels };
 })();

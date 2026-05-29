@@ -9,6 +9,7 @@ beforeAll(() => {
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
     };
+    loadBrowserScript('modules/tooltip.js');
     loadBrowserScript('modules/pie-chart.js');
 });
 
@@ -164,5 +165,52 @@ describe('PieChart.render', () => {
         expect(legendLabel.textContent).toContain('<script>');
         // No actual script element rendered
         expect(container.querySelector('script')).toBeNull();
+    });
+});
+
+describe('PieChart.showSliceLabels', () => {
+    let chartEl;
+
+    beforeEach(() => {
+        document.body.innerHTML = '';
+        chartEl = document.createElement('div');
+        chartEl.innerHTML = `
+            <div class="pie-chart-svg-container" style="position:relative;width:200px;height:200px">
+                <svg>
+                    <path class="pie-slice pie-slice-active" data-label="Alpha GP" data-mid-angle="0" data-percentage="50"></path>
+                    <path class="pie-slice pie-slice-active" data-label="Beta Grand Prix" data-mid-angle="3.14" data-percentage="30"></path>
+                    <path class="pie-slice" data-label="Gamma" data-mid-angle="1.57" data-percentage="20"></path>
+                </svg>
+            </div>`;
+        document.body.appendChild(chartEl);
+    });
+
+    it('creates labels only for active slices', () => {
+        window.PieChart.showSliceLabels(chartEl, chartEl.querySelectorAll('.pie-slice'));
+        const labels = document.querySelectorAll('.pie-cross-label');
+        expect(labels.length).toBe(2);
+    });
+
+    it('shortens Grand Prix to GP in labels', () => {
+        window.PieChart.showSliceLabels(chartEl, chartEl.querySelectorAll('.pie-slice'));
+        const labels = Array.from(document.querySelectorAll('.pie-cross-label'));
+        const texts = labels.map(l => l.textContent);
+        expect(texts).toContain('Beta GP');
+    });
+
+    it('assigns right/left class based on position', () => {
+        window.PieChart.showSliceLabels(chartEl, chartEl.querySelectorAll('.pie-slice'));
+        const labels = document.querySelectorAll('.pie-cross-label');
+        const hasRight = Array.from(labels).some(l => l.classList.contains('pie-cross-label-right'));
+        const hasLeft = Array.from(labels).some(l => l.classList.contains('pie-cross-label-left'));
+        expect(hasRight || hasLeft).toBe(true);
+    });
+});
+
+describe('PieChart.clearSliceLabels', () => {
+    it('removes all pie-cross-label elements', () => {
+        document.body.innerHTML = '<span class="pie-cross-label">A</span><span class="pie-cross-label">B</span>';
+        window.PieChart.clearSliceLabels();
+        expect(document.querySelectorAll('.pie-cross-label').length).toBe(0);
     });
 });

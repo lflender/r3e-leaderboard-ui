@@ -22,6 +22,8 @@ beforeAll(() => {
         parseEntryDate: vi.fn(e => e.date ? new Date(e.date) : null),
         getLocalDateKey: vi.fn(d => d ? d.toISOString().slice(0, 10) : null)
     };
+    loadBrowserScript('modules/tooltip.js');
+    loadBrowserScript('modules/pie-chart.js');
     loadBrowserScript('modules/driver-profile-chart-interaction.js');
 });
 

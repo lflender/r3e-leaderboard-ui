@@ -65,20 +65,20 @@ class DriverProfile {
     renderProfile(profile, entries) {
         this.elements.profileContainer.innerHTML =
             '<div id="driver-profile-header"></div>' +
-            '<div id="driver-profile-stats"></div>' +
             '<div id="driver-profile-highlights"></div>' +
+            '<div id="driver-profile-stats"></div>' +
             '<div id="driver-profile-distributions"></div>' +
             '<div id="driver-profile-charts"></div>';
         this.elements.profileHeader = document.getElementById('driver-profile-header');
-        this.elements.statsContainer = document.getElementById('driver-profile-stats');
         this.elements.highlightsContainer = document.getElementById('driver-profile-highlights');
+        this.elements.statsContainer = document.getElementById('driver-profile-stats');
         this.elements.distributionsContainer = document.getElementById('driver-profile-distributions');
         this.elements.chartsContainer = document.getElementById('driver-profile-charts');
 
         this.elements.profileHeader.innerHTML = DriverProfileRenderers.renderHeader(profile);
+        this.elements.highlightsContainer.innerHTML = DriverProfileRenderers.renderHighlights(profile);
         this.elements.statsContainer.innerHTML = DriverProfileRenderers.renderStatsPlaceholders();
         this.loadStats(profile.name, profile.pathId);
-        this.elements.highlightsContainer.innerHTML = DriverProfileRenderers.renderHighlights(profile);
         this.renderDistributions(entries || []);
         this.renderCharts(profile, entries || []);
         this.scheduleClassBreakdowns(entries || []);

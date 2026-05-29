@@ -133,7 +133,7 @@ const DriverProfileRenderers = (() => {
                 : '';
 
             cards.push([
-                '<div class="highlight-card highlight-card-car">',
+                '<div class="highlight-card highlight-card-car" data-car-label="' + escape(carName) + '">',
                 '<div class="highlight-card-label">Most Used Car</div>',
                 '<div class="highlight-card-body">',
                 imgHtml,
@@ -164,7 +164,7 @@ const DriverProfileRenderers = (() => {
             const trackLayout = trackParts.length > 1 ? trackParts.slice(1).join(' - ') : '';
 
             cards.push([
-                '<div class="highlight-card highlight-card-track">',
+                '<div class="highlight-card highlight-card-track" data-track-label="' + escape(trackName) + '">',
                 '<div class="highlight-card-label">Most Used Track</div>',
                 '<div class="highlight-card-body">',
                 trackLogoUrl ? `<div class="highlight-image-wrap"><div class="highlight-track-logo-wrap">${trackLogoHtml}</div></div>` : '',

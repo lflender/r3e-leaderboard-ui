@@ -12,7 +12,7 @@ describe('TabsLoader', () => {
         const TABS = [
             { id: 'ranked',    label: 'Ranked',        href: '/' },
             { id: 'drivers',   label: 'Drivers',      href: 'drivers.html' },
-            { id: 'tracks',    label: 'Leaderboards',  href: 'tracks.html' },
+            { id: 'leaderboards', label: 'Leaderboards',  href: 'leaderboards.html' },
             { id: 'records',   label: 'Records',       href: 'records.html' },
             { id: 'challenge', label: 'Challenge',     href: 'challenge.html', badge: 'NEW!' },
             { id: 'cars',      label: 'Cars',          href: 'cars.html' },
@@ -85,7 +85,7 @@ describe('TabsLoader', () => {
     });
 
     it('active tab is a button, others are links with correct hrefs', () => {
-        document.body.innerHTML = '<div class="tabs" id="site-tabs" data-active="tracks"></div>';
+        document.body.innerHTML = '<div class="tabs" id="site-tabs" data-active="leaderboards"></div>';
         loadTabs();
         const links = document.querySelectorAll('a.tab-button');
         const hrefs = Array.from(links).map(a => a.getAttribute('href'));
@@ -95,7 +95,7 @@ describe('TabsLoader', () => {
         expect(hrefs).toContain('records.html');
         expect(hrefs).toContain('challenge.html');
         expect(hrefs).toContain('faq.html');
-        expect(hrefs).not.toContain('tracks.html');
+        expect(hrefs).not.toContain('leaderboards.html');
     });
 
     it('does nothing when #site-tabs is absent', () => {

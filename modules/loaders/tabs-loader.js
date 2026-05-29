@@ -10,7 +10,7 @@
     const TABS = [
         { id: 'ranked',    label: 'Ranked',        href: '/' },
         { id: 'drivers',   label: 'Drivers',      href: 'drivers.html' },
-        { id: 'tracks',    label: 'Leaderboards',  href: 'tracks.html' },
+        { id: 'leaderboards', label: 'Leaderboards',  href: 'leaderboards.html' },
         { id: 'records',   label: 'Records',       href: 'records.html' },
         { id: 'challenge', label: 'Challenge',     href: 'challenge.html', badge: 'NEW!' },
         { id: 'cars',      label: 'Cars',          href: 'cars.html' },

@@ -58,7 +58,7 @@
 		// Driver Search needs index ASAP
 		preload();
 	} else {
-		// Other pages (e.g., Track Info): defer to idle time
+		// Other pages (e.g., Leaderboards): defer to idle time
 		if (typeof requestIdleCallback === 'function') {
 			requestIdleCallback(preload, { timeout: 3000 });
 		} else {

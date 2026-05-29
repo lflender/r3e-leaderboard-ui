@@ -23,8 +23,8 @@ This document defines the canonical front-end analytics taxonomy used by page mo
 | `driver pagination changed` | Driver results page changes | `page_number`, `total_pages`, `result_count` |
 | `driver sort changed` | Driver results sort changes | `sort_by`, `previous_sort_by`, `result_count` |
 | `leaderboard row opened` | User clicks a leaderboard row to open the detail page (driver or track page) | `track_id`, `class_id`, `superclass`, `position`, `has_driver_name`, `source_page`, `is_combined_view` |
-| `track page shown` | Tracks page first successful data render | `displayed_rows`, `track_filter`, `class_filter`, `combine_mode` |
-| `track info filter changed` | Track/class/combine filters change | `filter_name`, `filter_value`, `track_filter`, `class_filter`, `combine_mode` |
+| `leaderboards page shown` | Leaderboards page first successful data render | `displayed_rows`, `track_filter`, `class_filter`, `combine_mode` |
+| `leaderboards filter changed` | Track/class/combine filters change | `filter_name`, `filter_value`, `track_filter`, `class_filter`, `combine_mode` |
 | `track pagination changed` | Tracks table page changes | `page_number`, `total_pages`, `displayed_rows` |
 | `cars page shown` | Cars page first render completes | `total_classes`, `total_cars`, `displayed_classes`, `displayed_cars`, `view_mode` |
 | `car searched` | Cars search term is applied (debounced or enter) | `search_term`, `search_length`, `source`, `view_mode` |
@@ -46,7 +46,7 @@ These legacy names have been replaced by canonical events:
 
 - `car info displayed` -> `cars page shown`
 - `car info view mode changed` -> `cars toggled view`
-- `track info displayed` -> `track page shown`
+- `track info displayed` -> `leaderboards page shown`
 - `detail page viewed` -> `detail page shown`
 - `records displayed` -> `records page shown`
 - `records section expanded` -> `records action` with `action=unfold`

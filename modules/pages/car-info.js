@@ -473,6 +473,20 @@
   const buildRatingHtml = R3ECarUtils.buildRatingHtml;
   const attachRatingHandlers = R3ECarUtils.attachRatingHandlers;
 
+  function buildClassHeadingHtml(className, superclass) {
+    const classLogoUrl = (window.R3ECarUtils && typeof window.R3ECarUtils.resolveCarClassLogoByName === 'function')
+      ? window.R3ECarUtils.resolveCarClassLogoByName(className)
+      : '';
+    const classLogoHtml = classLogoUrl
+      ? `<img class="table-car-class-logo" src="${R3EUtils.escapeHtml(classLogoUrl)}" alt="${R3EUtils.escapeHtml(className)} class logo" loading="lazy" decoding="async">`
+      : '';
+    const classHeaderText = R3EUtils.escapeHtml(className);
+    const superclassChip = superclass
+      ? `<span class="cars-class-superclass-chip">${R3EUtils.escapeHtml(superclass)}</span>`
+      : '';
+    return { classLogoHtml, classHeaderText, superclassChip };
+  }
+
   function renderTable() {
     let displayedClasses = 0;
     let displayedCars = 0;
@@ -504,18 +518,10 @@
       displayedClasses++;
 
       const superclass = cls.superclass;
-      const classLogoUrl = (window.R3EUtils && typeof window.R3EUtils.resolveCarClassLogoByName === 'function')
-        ? window.R3EUtils.resolveCarClassLogoByName(className)
-        : '';
-      const classLogoHtml = classLogoUrl
-        ? `<img class="table-car-class-logo" src="${R3EUtils.escapeHtml(classLogoUrl)}" alt="${R3EUtils.escapeHtml(className)} class logo" loading="lazy" decoding="async">`
-        : '';
-      const classHeaderText = superclass
-        ? `${R3EUtils.escapeHtml(className)} (${R3EUtils.escapeHtml(superclass)})`
-        : R3EUtils.escapeHtml(className);
+      const { classLogoHtml, classHeaderText, superclassChip } = buildClassHeadingHtml(className, superclass);
 
             html += `\n<tr class="driver-group-header" data-group="${slug}" onclick="toggleGroup(this)">` +
-              `<td colspan="11"><span class="toggle-icon">▼</span> <strong class="car-class-header-text">${classLogoHtml}${classHeaderText}</strong></td></tr>`;
+              `<td colspan="11"><div class="cars-class-heading-wrap"><span class="toggle-icon">▼</span> <h3 class="cars-class-heading">${classLogoHtml}${classHeaderText}</h3>${superclassChip}</div></td></tr>`;
 
       filteredCars.forEach(car => {
         displayedCars++;
@@ -553,7 +559,7 @@
 
         html += `\n<tr class="driver-data-row ${slug}" data-link="${rowLink}">` +
                 `<td>${linkOpen}${carNameHtml}${thumbPreview}${linkClose}</td>` +
-          `<td class="car-score-cell">${scoreHtml}</td>` +
+          `<td class="rating-cell">${scoreHtml}</td>` +
                 `<td>${linkOpen}${wheelBadge(car.wheel_cat)}${linkClose}</td>` +
                 `<td>${linkOpen}${transBadge(car.transmission_cat)}${linkClose}</td>` +
                 `<td>${linkOpen}${driveBadge(car.drive)}${linkClose}</td>` +
@@ -617,16 +623,7 @@
       displayedClasses++;
 
       const superclass = cls.superclass;
-      const classLogoUrl = (window.R3EUtils && typeof window.R3EUtils.resolveCarClassLogoByName === 'function')
-        ? window.R3EUtils.resolveCarClassLogoByName(className)
-        : '';
-      const classLogoHtml = classLogoUrl
-        ? `<img class="table-car-class-logo" src="${R3EUtils.escapeHtml(classLogoUrl)}" alt="${R3EUtils.escapeHtml(className)} class logo" loading="lazy" decoding="async">`
-        : '';
-      const classHeaderText = R3EUtils.escapeHtml(className);
-      const superclassChip = superclass
-        ? `<span class="cars-class-superclass-chip">${R3EUtils.escapeHtml(superclass)} Category</span>`
-        : '';
+      const { classLogoHtml, classHeaderText, superclassChip } = buildClassHeadingHtml(className, superclass);
 
       html += `<section class="cars-class-section"><div class="cars-class-heading-wrap"><h3 class="cars-class-heading">${classLogoHtml}${classHeaderText}</h3>${superclassChip}</div><div class="cars-tiles">`;
       filteredCars.forEach(car => {

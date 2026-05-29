@@ -1,34 +1,34 @@
-﻿/* ========================================
+/* ========================================
    6. TABLES
    ======================================== */
 
 #results-container {
-    margin-top: 1.5rem;
+    margin-top: var(--space-6);
 }
 
 .loading {
     text-align: center;
-    padding: 2rem;
-    color: var(--text-secondary);
+    padding: var(--space-7);
+    color: var(--color-text-secondary);
 }
 
 .error {
-    background-color: #7f1d1d;
-    color: #fecaca;
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    border: 1px solid #991b1b;
+    background-color: var(--color-error-bg);
+    color: var(--color-error-text);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-4);
+    border: 1px solid var(--color-danger-dark);
 }
 
 .results-table {
     width: 100%;
     table-layout: auto;
     border-collapse: collapse;
-    margin-top: 1rem;
-    border-radius: 10px;
+    margin-top: var(--space-4);
+    border-radius: var(--radius-xl);
     overflow: hidden;
-    box-shadow: 0 2px 12px 0 rgba(30, 41, 59, 0.10);
+    box-shadow: 0 2px 12px 0 var(--color-surface-alpha-10);
 }
 
 .results-table th,
@@ -36,20 +36,20 @@
     padding: 0.65rem 0.6rem;
     text-align: left;
     vertical-align: middle;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--color-border);
 }
 
 .results-table th {
-    color: #fff;
+    color: var(--color-white);
     font-size: 1.05rem;
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     padding: 0.7rem 0.8rem;
     border: none;
     letter-spacing: 0.01em;
 }
 
 .results-table thead tr {
-    background: #2563eb;
+    background: var(--color-primary-hover);
 }
 
 .results-table th.sortable {
@@ -59,11 +59,11 @@
 }
 
 .results-table th.sortable:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--color-white-alpha-10);
 }
 
 .results-table th.sortable.sort-active {
-    background-color: rgba(255, 255, 255, 0.15);
+    background-color: var(--color-white-alpha-15);
 }
 
 .results-table th.sortable::after {
@@ -78,18 +78,18 @@
 }
 
 .results-table tr:hover {
-    background-color: var(--hover-bg);
+    background-color: var(--color-hover-bg);
 }
 
 .results-table td {
     padding: 0.6rem;
-    background: var(--surface);
-    color: var(--text-primary);
+    background: var(--color-surface);
+    color: var(--color-text-primary);
     transition: background 0.2s;
 }
 
 .results-table tr:hover td {
-    background: var(--hover-bg);
+    background: var(--color-hover-bg);
 }
 
 .results-table tr:last-child td {
@@ -104,26 +104,26 @@
 /* Driver name styling based on multiplayer position */
 a.driver-name-gold,
 .driver-name-gold {
-    color: #FFE10D !important;
-    text-shadow: 0 0 1px #000,
-                 0 0 2px #000,
-                 1px 1px 0 #000,
-                 -1px -1px 0 #000,
-                 1px -1px 0 #000,
-                 -1px 1px 0 #000;
-    font-weight: 700;
+    color: var(--color-podium-gold) !important;
+    text-shadow: 0 0 1px var(--color-black),
+                 0 0 2px var(--color-black),
+                 1px 1px 0 var(--color-black),
+                 -1px -1px 0 var(--color-black),
+                 1px -1px 0 var(--color-black),
+                 -1px 1px 0 var(--color-black);
+    font-weight: var(--font-weight-bold);
 }
 
 a.driver-name-silver,
 .driver-name-silver {
-    color: #AFA9A1 !important;
-    text-shadow: 0 0 1px #000,
-                 0 0 2px #000,
-                 1px 1px 0 #000,
-                 -1px -1px 0 #000,
-                 1px -1px 0 #000,
-                 -1px 1px 0 #000;
-    font-weight: 700;
+    color: var(--color-podium-silver) !important;
+    text-shadow: 0 0 1px var(--color-black),
+                 0 0 2px var(--color-black),
+                 1px 1px 0 var(--color-black),
+                 -1px -1px 0 var(--color-black),
+                 1px -1px 0 var(--color-black),
+                 -1px 1px 0 var(--color-black);
+    font-weight: var(--font-weight-bold);
 }
 
 a.driver-name-top10-glitter,
@@ -133,18 +133,7 @@ h2.driver-name-top10-glitter {
     position: relative;
     display: inline-block;
     animation: top10-glitter-pulse 3.4s ease-in-out infinite;
-    filter: drop-shadow(0 0 0.2rem rgba(255, 240, 130, 0.55));
-}
-
-a.driver-name-top10-glitter::before,
-strong.driver-name-top10-glitter::before,
-span.driver-name-top10-glitter::before,
-h2.driver-name-top10-glitter::before,
-a.driver-name-top10-glitter::after,
-strong.driver-name-top10-glitter::after,
-span.driver-name-top10-glitter::after,
-h2.driver-name-top10-glitter::after {
-    content: none;
+    filter: drop-shadow(0 0 0.2rem var(--color-glitter-glow-1));
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -159,23 +148,23 @@ h2.driver-name-top10-glitter::after {
 @keyframes top10-glitter-pulse {
     0%,
     100% {
-        text-shadow: 0 0 1px #000,
-                     0 0 2px #000,
-                     1px 1px 0 #000,
-                     -1px -1px 0 #000,
-                     1px -1px 0 #000,
-                     -1px 1px 0 #000,
-                     0 0 7px rgba(255, 225, 13, 0.28);
+        text-shadow: 0 0 1px var(--color-black),
+                     0 0 2px var(--color-black),
+                     1px 1px 0 var(--color-black),
+                     -1px -1px 0 var(--color-black),
+                     1px -1px 0 var(--color-black),
+                     -1px 1px 0 var(--color-black),
+                     0 0 7px var(--color-glitter-glow-2);
     }
     50% {
-        text-shadow: 0 0 1px #000,
-                     0 0 2px #000,
-                     1px 1px 0 #000,
-                     -1px -1px 0 #000,
-                     1px -1px 0 #000,
-                     -1px 1px 0 #000,
-                     0 0 10px rgba(255, 244, 154, 0.55),
-                     0 0 16px rgba(255, 208, 82, 0.4);
+        text-shadow: 0 0 1px var(--color-black),
+                     0 0 2px var(--color-black),
+                     1px 1px 0 var(--color-black),
+                     -1px -1px 0 var(--color-black),
+                     1px -1px 0 var(--color-black),
+                     -1px 1px 0 var(--color-black),
+                     0 0 10px var(--color-glitter-glow-3),
+                     0 0 16px var(--color-glitter-glow-4);
     }
 }
 
@@ -184,8 +173,8 @@ h2.driver-name-top10-glitter::after {
 }
 
 .highlight-row td {
-    background-color: rgba(59, 130, 246, 0.08) !important;
-    box-shadow: inset 0 0 12px rgba(59,130,246,0.05);
+    background-color: var(--color-primary-alpha-8) !important;
+    box-shadow: inset 0 0 12px var(--color-primary-alpha-5);
     font-weight: 700;
 }
 
@@ -199,7 +188,7 @@ h2.driver-name-top10-glitter::after {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
-    scrollbar-color: var(--primary-color) var(--surface);
+    scrollbar-color: var(--color-primary) var(--color-surface);
     padding: 2px; /* Prevent border/shadow clipping */
 }
 
@@ -210,13 +199,13 @@ h2.driver-name-top10-glitter::after {
 
 #track-info-table::-webkit-scrollbar-track,
 #results-container::-webkit-scrollbar-track {
-    background: var(--surface);
+    background: var(--color-surface);
 }
 
 #track-info-table::-webkit-scrollbar-thumb,
 #results-container::-webkit-scrollbar-thumb {
-    background: var(--primary-color);
-    border-radius: 4px;
+    background: var(--color-primary);
+    border-radius: var(--radius-sm);
 }
 
 /* Detail results container - no scroll */
@@ -232,7 +221,7 @@ h2.driver-name-top10-glitter::after {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
-    scrollbar-color: var(--primary-color) var(--surface);
+    scrollbar-color: var(--color-primary) var(--color-surface);
     padding: 2px; /* Prevent border/shadow clipping */
 }
 
@@ -241,12 +230,12 @@ h2.driver-name-top10-glitter::after {
 }
 
 .table-scroll-wrapper::-webkit-scrollbar-track {
-    background: var(--surface);
+    background: var(--color-surface);
 }
 
 .table-scroll-wrapper::-webkit-scrollbar-thumb {
-    background: var(--primary-color);
-    border-radius: 4px;
+    background: var(--color-primary);
+    border-radius: var(--radius-sm);
 }
 
 /* Track Info table specific styles */
@@ -450,20 +439,20 @@ h2.driver-name-top10-glitter::after {
 
 /* Driver group headers */
 .driver-group-header {
-    background-color: #3b4a6b !important;
+    background-color: var(--color-surface-selected) !important;
     cursor: pointer;
     user-select: none;
-    color: #f1f5fa;
+    color: var(--color-text-highlight);
     font-weight: 600;
     font-size: 1.08rem;
-    border-top: 1px solid #475569;
-    border-bottom: 1px solid #475569;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
     transition: background 0.2s;
     box-shadow: none;
 }
 
 .driver-group-header:hover {
-    background-color: #4b5d85 !important;
+    background-color: var(--color-surface-selected-hover) !important;
 }
 
 .driver-group-header td {
@@ -482,7 +471,7 @@ h2.driver-name-top10-glitter::after {
     margin-right: 8px;
     position: relative;
     top: -2px;
-    background: #1f232a;
+    background: var(--color-background);
 }
 
 .driver-profile-link-btn {
@@ -490,9 +479,9 @@ h2.driver-name-top10-glitter::after {
     padding: 0.2rem 0.65rem;
     font-size: 0.78rem;
     font-weight: 600;
-    color: #e0e7ff;
-    background: rgba(96, 165, 250, 0.15);
-    border: 1px solid rgba(96, 165, 250, 0.35);
+    color: var(--color-text-highlight);
+    background: var(--color-primary-light-alpha-15);
+    border: 1px solid var(--color-primary-light-alpha-30);
     border-radius: 6px;
     white-space: nowrap;
     margin-top: 0.1rem;
@@ -500,9 +489,9 @@ h2.driver-name-top10-glitter::after {
 }
 
 .driver-group-header:hover .driver-profile-link-btn {
-    background: rgba(96, 165, 250, 0.3);
-    border-color: #60a5fa;
-    color: #fff;
+    background: var(--color-primary-light-alpha-30);
+    border-color: var(--color-primary-light-solid);
+    color: var(--color-white);
 }
 
 .driver-meta {
@@ -510,7 +499,7 @@ h2.driver-name-top10-glitter::after {
     font-weight: 400;
     opacity: 0.9;
     font-size: 0.97rem;
-    color: #a5b4fc;
+    color: var(--color-text-link-subtle);
 }
 
 .driver-data-row {
@@ -523,7 +512,7 @@ h2.driver-name-top10-glitter::after {
 }
 
 .driver-data-row:hover {
-    background-color: var(--hover-bg);
+    background-color: var(--color-hover-bg);
 }
 
 /* Lap time cells */
@@ -541,36 +530,36 @@ h2.driver-name-top10-glitter::after {
 .gap-time-cell .time-delta {
     display: block;
     white-space: nowrap;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-size: 0.95rem;
 }
 
 .gap-time-cell {
     white-space: nowrap;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     text-align: left;
 }
 
 .time-delta-inline {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-size: 0.95rem;
     margin-left: 0.4rem;
 }
 
 .mp-pos-badge {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-size: 0.9rem;
     white-space: nowrap;
 }
 
 /* Inactive MP ranking — clearly dimmed vs active */
 .mp-pos-inactive {
-    color: #9a9a9a !important;
+    color: var(--color-text-muted) !important;
     opacity: 0.7;
 }
 
 .mp-pos-badge.mp-pos-inactive {
-    color: #7a7a7a !important;
+    color: var(--color-text-muted) !important;
     opacity: 0.6;
     font-size: 0.75rem;
 }
@@ -582,7 +571,7 @@ h2.driver-name-top10-glitter::after {
 /* Track layout styling */
 .track-layout {
     font-size: 0.85em;
-    color: #999;
+    color: var(--color-text-secondary);
     font-style: italic;
     font-weight: 400;
 }
@@ -614,7 +603,7 @@ h2.driver-name-top10-glitter::after {
 .date-cell {
     white-space: nowrap;
     font-size: 0.85rem;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.01em;
     font-family: "Inter", "Segoe UI", system-ui, sans-serif;
@@ -636,5 +625,152 @@ h2.driver-name-top10-glitter::after {
 /* Ensure the stars stay with the driver name */
 .rank-stars-inline::before {
     content: '\00A0'; /* Non-breaking space before stars */
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+/* Touch devices — hide hover-only elements */
+@media (hover: none), (pointer: coarse) {
+    .car-link-thumbnail {
+        display: none !important;
+    }
+
+    .info-icon {
+        display: none !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .results-table {
+        font-size: 0.7rem;
+        min-width: 600px;
+        margin-top: 0.25rem;
+    }
+
+    .results-table th,
+    .results-table td {
+        padding: 0.6rem 0.35rem;
+        font-size: 0.7rem;
+    }
+
+    .results-table th {
+        font-size: 0.75rem;
+    }
+
+    #results-container .results-table th:nth-child(1) {
+        min-width: unset;
+        width: 1px;
+        white-space: nowrap;
+        font-size: 0;
+        padding: 0.6rem 0.2rem;
+    }
+
+    #results-container .results-table th:nth-child(1)::after {
+        font-size: 0.7rem;
+    }
+
+    #results-container .results-table td:nth-child(1) {
+        min-width: unset;
+        width: 1px;
+        white-space: nowrap;
+        padding: 0.6rem 0.2rem;
+    }
+
+    #results-container .results-table th:nth-child(2),
+    #results-container .results-table td:nth-child(2) {
+        min-width: 140px !important;
+    }
+
+    .time-delta-inline,
+    .lap-time-cell .time-delta,
+    .gap-time-cell .time-delta {
+        font-size: 0.7rem;
+    }
+
+    .driver-group-header strong {
+        font-size: 0.85rem;
+    }
+
+    .driver-group-header td {
+        padding: 0.65rem !important;
+    }
+
+    .driver-profile-link-btn {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+    }
+
+    .driver-meta {
+        font-size: 0.75rem;
+    }
+
+    #cars-info-table,
+    #track-info-table,
+    .table-scroll-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+@media (max-width: 480px) {
+    .results-table {
+        font-size: 0.65rem;
+        margin-top: 0.15rem;
+    }
+
+    .results-table th,
+    .results-table td {
+        padding: 0.35rem 0.25rem;
+        font-size: 0.65rem;
+    }
+
+    .results-table th {
+        font-size: 0.7rem;
+    }
+
+    .time-delta-inline,
+    .lap-time-cell .time-delta,
+    .gap-time-cell .time-delta {
+        font-size: 0.65rem;
+    }
+
+    .driver-group-header strong {
+        font-size: 0.8rem;
+    }
+
+    .driver-profile-link-btn {
+        font-size: 0.65rem;
+        padding: 0.15rem 0.4rem;
+    }
+
+    .driver-meta {
+        font-size: 0.7rem;
+    }
+
+    #results-container .results-table th:nth-child(1) {
+        min-width: unset !important;
+        width: 1px;
+        white-space: nowrap;
+        font-size: 0;
+        padding: 0.4rem 0.15rem;
+    }
+
+    #results-container .results-table th:nth-child(1)::after {
+        font-size: 0.65rem;
+    }
+
+    #results-container .results-table td:nth-child(1) {
+        min-width: unset !important;
+        width: 1px;
+        white-space: nowrap;
+        padding: 0.4rem 0.15rem;
+    }
+
+    #results-container .results-table th:nth-child(2),
+    #results-container .results-table td:nth-child(2) {
+        min-width: 140px !important;
+    }
 }
 

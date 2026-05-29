@@ -6,7 +6,7 @@
   const classToggle = document.querySelector('#track-class-filter-ui .custom-select__toggle');
   const classMenu = document.querySelector('#track-class-filter-ui .custom-select__menu');
   const classSelect = document.getElementById('class-filter');
-  const tableContainer = document.getElementById('track-info-table');
+  const tableContainer = document.getElementById('leaderboards-table');
 
   // Pagination state (separate from leaderboards to avoid conflicts)
   let trackCurrentPage = 1;
@@ -24,7 +24,7 @@
 
   function trackTrackInfoFilter(filterName, filterValue) {
     if (typeof R3EAnalytics === 'undefined' || typeof R3EAnalytics.track !== 'function') return;
-    R3EAnalytics.track('track info filter changed', {
+    R3EAnalytics.track('leaderboards filter changed', {
       filter_name: filterName,
       filter_value: filterValue || '',
       track_filter: activeTrackId ? String(activeTrackId) : '',
@@ -37,7 +37,7 @@
   function trackTrackPageShown(displayedRows) {
     if (hasTrackedTrackPageShown) return;
     if (typeof R3EAnalytics === 'undefined' || typeof R3EAnalytics.track !== 'function') return;
-    R3EAnalytics.track('track page shown', {
+    R3EAnalytics.track('leaderboards page shown', {
       displayed_rows: Number.isFinite(displayedRows) ? displayedRows : 0,
       track_filter: activeTrackId ? String(activeTrackId) : '',
       class_filter: activeClassId || '',
@@ -530,7 +530,7 @@
       return;
     }
 
-    // For track-info we expect items as plain rows (not grouped by driver) so reuse displayResults logic lightly
+    // For leaderboards we expect items as plain rows (not grouped by driver) so reuse displayResults logic lightly
     // We'll group by driver if needed, but keep it simple: show rows directly with same column ordering
     const totalItems = trackAllResults.length;
     const totalPages = Math.ceil(totalItems / trackItemsPerPage);
@@ -704,7 +704,7 @@
   window.trackInfoGoToPage = function(page){
     trackCurrentPage = page;
     renderTable(trackAllResults);
-    const el = document.getElementById('track-info');
+    const el = document.getElementById('leaderboards');
     if (el) el.scrollIntoView({behavior:'smooth', block:'start'});
 
     if (typeof R3EAnalytics !== 'undefined' && typeof R3EAnalytics.track === 'function') {

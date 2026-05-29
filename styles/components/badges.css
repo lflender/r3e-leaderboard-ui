@@ -1,80 +1,112 @@
-﻿/* ========================================
+/* ========================================
    7. BADGES AND INDICATORS
    ======================================== */
 
 /* Car badges - Base styling */
 .car-badge {
     padding: 0.18rem 0.6rem;
-    border-radius: 4px;
-    font-weight: 700;
-    font-size: 0.85rem;
+    border-radius: var(--radius-sm);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-base);
     text-decoration: none !important;
     border: none;
-    line-height: 1.2;
+    line-height: var(--line-height-tight);
     display: inline-block;
     vertical-align: baseline;
-    background: #b3e5fc;
-    color: #222;
+    background: var(--color-badge-wheel-gt);
+    color: var(--color-badge-text-dark);
 }
 
 /* Wheel type badges */
 .car-badge.gt { 
-    background: #b3e5fc; 
-    color: #222; 
+    background: var(--color-badge-wheel-gt); 
+    color: var(--color-badge-text-dark); 
 }
 
 .car-badge.round { 
-    background: #ffe082; 
-    color: #222; 
+    background: var(--color-badge-wheel-round); 
+    color: var(--color-badge-text-dark); 
 }
 
 .car-badge[title*="flat"], 
 .car-badge.round-flat { 
-    background: #c8e6c9; 
-    color: #222; 
+    background: var(--color-badge-wheel-flat); 
+    color: var(--color-badge-text-dark); 
     white-space: nowrap; 
 }
 
 /* Transmission badges */
 .car-badge.trans { 
-    background: #1976d2; 
-    color: #fff; 
+    background: var(--color-badge-trans-auto); 
+    color: var(--color-white); 
 }
 
 .car-badge.trans.sequential { 
-    background: #7b1fa2; 
-    color: #fff; 
+    background: var(--color-badge-trans-seq); 
+    color: var(--color-white); 
 }
 
 .car-badge.trans.h { 
-    background: #c62828; 
-    color: #fff; 
+    background: var(--color-badge-trans-h); 
+    color: var(--color-white); 
 }
 
 .car-badge.unknown { 
-    background: #eee; 
-    color: #888; 
+    background: var(--color-badge-unknown-bg); 
+    color: var(--color-badge-unknown-text); 
 }
 
 /* Drive type badges */
 .car-badge.drive.rwd { 
-    background: #35cbe6; 
-    color: #1f2937; 
+    background: var(--color-badge-drive-rwd); 
+    color: var(--color-badge-text-dark-alt); 
 }
 
 .car-badge.drive.fwd { 
-    background: #c59fc0; 
-    color: #1f2937; 
+    background: var(--color-badge-drive-fwd); 
+    color: var(--color-badge-text-dark-alt); 
 }
 
 .car-badge.drive.awd { 
-    background: #af35a9; 
-    color: #1f2937; 
+    background: var(--color-badge-drive-awd); 
+    color: var(--color-badge-text-dark-alt); 
 }
 
 /* Year badge (dynamic coloring via inline style) */
 .car-badge.year-badge {
-    color: var(--year-badge-text);
+    color: var(--color-year-badge-text);
+}
+
+/* Assist badges - base styling */
+.car-tile-assist-badge {
+    padding: 0.15rem 0.35rem;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    border-radius: var(--radius-xs);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    display: inline-block;
+    vertical-align: baseline;
+}
+
+.car-tile-assist--tc {
+    background: var(--color-badge-assist-tc-bg);
+    color: var(--color-badge-assist-tc-text);
+}
+
+.car-tile-assist--abs {
+    background: var(--color-badge-assist-abs-bg);
+    color: var(--color-badge-assist-abs-text);
+}
+
+.car-tile-assist--lc {
+    background: var(--color-badge-assist-lc-bg);
+    color: var(--color-badge-assist-lc-text);
+}
+
+.car-assists-cell {
+    text-align: center;
 }
 
 /* Position badges */
@@ -83,15 +115,15 @@
 }
 
 .pos-number {
-    background: rgba(59, 130, 246, 0.15);
-    color: var(--text-primary);
+    background: var(--color-pos-badge-default);
+    color: var(--color-text-primary);
     padding: 0.18rem 0.55rem;
-    border-radius: 999px;
-    border: 1px solid rgba(59, 130, 246, 0.35);
-    font-weight: 700;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--color-primary-alpha-35);
+    font-weight: var(--font-weight-bold);
     font-size: 0.9rem;
     text-decoration: none !important;
-    line-height: 1.2;
+    line-height: var(--line-height-tight);
     display: inline-block;
     vertical-align: baseline;
     min-width: 2.4rem;
@@ -100,59 +132,59 @@
 
 /* Podium positions - Gold, Silver, Bronze */
 .pos-number.pos-1 {
-    color: #FFE10D;
-    text-shadow: 0 0 1px #000,
-                 0 0 2px #000,
-                 1px 1px 0 #000,
-                 -1px -1px 0 #000,
-                 1px -1px 0 #000,
-                 -1px 1px 0 #000,
-                 0 0 10px rgba(255, 215, 0, 0.8),
-                 0 0 20px rgba(255, 215, 0, 0.5);
+    color: var(--color-podium-gold);
+    text-shadow: 0 0 1px var(--color-black),
+                 0 0 2px var(--color-black),
+                 1px 1px 0 var(--color-black),
+                 -1px -1px 0 var(--color-black),
+                 1px -1px 0 var(--color-black),
+                 -1px 1px 0 var(--color-black),
+                 0 0 10px var(--color-gold-alpha-80),
+                 0 0 20px var(--color-gold-alpha-50);
     font-weight: 900;
 }
 
 .pos-number.pos-2 {
-    color: #AFA9A1;
-    text-shadow: 0 0 1px #000,
-                 0 0 2px #000,
-                 1px 1px 0 #000,
-                 -1px -1px 0 #000,
-                 1px -1px 0 #000,
-                 -1px 1px 0 #000,
-                 0 0 8px rgba(184, 184, 184, 0.8),
-                 0 0 16px rgba(184, 184, 184, 0.5);
+    color: var(--color-podium-silver);
+    text-shadow: 0 0 1px var(--color-black),
+                 0 0 2px var(--color-black),
+                 1px 1px 0 var(--color-black),
+                 -1px -1px 0 var(--color-black),
+                 1px -1px 0 var(--color-black),
+                 -1px 1px 0 var(--color-black),
+                 0 0 8px var(--color-silver-dark-alpha-80),
+                 0 0 16px var(--color-silver-dark-alpha-50);
     font-weight: 900;
 }
 
 .pos-number.pos-3 {
-    color: #976A28;
-    text-shadow: 0 0 1px #000,
-                 0 0 2px #000,
-                 1px 1px 0 #000,
-                 -1px -1px 0 #000,
-                 1px -1px 0 #000,
-                 -1px 1px 0 #000,
-                 0 0 8px rgba(205, 127, 50, 0.8),
-                 0 0 16px rgba(205, 127, 50, 0.5);
+    color: var(--color-podium-bronze);
+    text-shadow: 0 0 1px var(--color-black),
+                 0 0 2px var(--color-black),
+                 1px 1px 0 var(--color-black),
+                 -1px -1px 0 var(--color-black),
+                 1px -1px 0 var(--color-black),
+                 -1px 1px 0 var(--color-black),
+                 0 0 8px var(--color-bronze-alpha-80),
+                 0 0 16px var(--color-bronze-alpha-50);
     font-weight: 900;
 }
 
 .pos-total {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-size: 0.95rem;
     margin-left: 0.35rem;
     text-decoration: none !important;
 }
 
 .pos-sep {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     opacity: 0.95;
 }
 
 .absolute-pos-label {
     font-size: 0.7rem;
-    color: #94a3b8;
+    color: var(--color-text-secondary);
     font-weight: 500;
     opacity: 0.85;
     margin-right: 0.4rem;
@@ -169,5 +201,70 @@
     display: inline-flex;
     align-items: center;
     gap: 0.38rem;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+    .car-badge {
+        font-size: 0.7rem;
+        padding: 0.12rem 0.4rem;
+        line-height: 1;
+    }
+
+    .car-tile-assist-badge {
+        font-size: 0.6rem;
+        padding: 0.1rem 0.3rem;
+    }
+
+    .pos-number {
+        font-size: 0.7rem;
+        padding: 0.12rem 0.4rem;
+        min-width: 1.8rem;
+    }
+
+    .pos-total {
+        font-size: 0.7rem;
+    }
+
+    .mp-pos-badge {
+        font-size: 0.8rem;
+    }
+
+    .mp-pos-badge.mp-pos-inactive {
+        font-size: 0.67rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .car-badge {
+        font-size: 0.6rem;
+        padding: 0.1rem 0.3rem;
+    }
+
+    .car-tile-assist-badge {
+        font-size: 0.55rem;
+        padding: 0.08rem 0.22rem;
+    }
+
+    .pos-number {
+        font-size: 0.65rem;
+        padding: 0.1rem 0.35rem;
+        min-width: 1.6rem;
+    }
+
+    .pos-total {
+        font-size: 0.65rem;
+    }
+
+    .mp-pos-badge {
+        font-size: 0.65rem;
+    }
+
+    .mp-pos-badge.mp-pos-inactive {
+        font-size: 0.54rem;
+    }
 }
 

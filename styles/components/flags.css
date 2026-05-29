@@ -5,7 +5,7 @@
 /* Flag icons */
 .country-flag {
     display: inline-block;
-    margin-right: 0.6rem;
+    margin-right: var(--space-2);
     vertical-align: -1px;
     line-height: 1;
 }
@@ -20,4 +20,29 @@
     height: 1em;
     vertical-align: middle;
     display: inline-block;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+    .country-flag {
+        vertical-align: 0;
+        margin-right: 0.4rem;
+    }
+
+    .country-flag .fi {
+        font-size: 0.9em;
+    }
+}
+
+@media (max-width: 480px) {
+    .country-flag {
+        margin-right: 0.35rem;
+    }
+
+    .country-flag .fi {
+        font-size: 0.85em;
+    }
 }

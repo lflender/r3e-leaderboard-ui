@@ -146,8 +146,8 @@ describe('R3ECarUtils', () => {
         });
 
         test('returns fallback for invalid year', () => {
-            expect(window.R3ECarUtils.yearBadgeColor('')).toBe('#e0e0e0');
-            expect(window.R3ECarUtils.yearBadgeColor('abc')).toBe('#e0e0e0');
+            expect(window.R3ECarUtils.yearBadgeColor('')).toBe('var(--color-badge-unknown-bg)');
+            expect(window.R3ECarUtils.yearBadgeColor('abc')).toBe('var(--color-badge-unknown-bg)');
         });
 
         test('clamps years outside range', () => {
@@ -192,6 +192,51 @@ describe('R3ECarUtils', () => {
             expect(html).toContain('daily-race-class-logo');
             expect(html).toContain('https://example.com/gt3-logo.png');
             expect(html).toContain('Class 1703 class logo');
+        });
+    });
+
+    /* ── car class logo by car name ──────────────────────── */
+
+    describe('resolveCarClassLogoByCarName', () => {
+        beforeEach(() => {
+            window.CARS_DATA = [
+                {
+                    class: 'GT3',
+                    logo: 'https://example.com/gt3-logo.png',
+                    cars: [
+                        { car: 'BMW M4 GT3' },
+                        { car: 'Porsche 911 GT3 R' }
+                    ]
+                },
+                {
+                    class: 'TCR',
+                    logo: 'https://example.com/tcr-logo.png',
+                    cars: [
+                        { car: 'Hyundai Elantra N TCR' }
+                    ]
+                }
+            ];
+        });
+
+        test('resolves class logo from car name', () => {
+            expect(window.R3ECarUtils.resolveCarClassLogoByCarName('BMW M4 GT3')).toBe('https://example.com/gt3-logo.png');
+            expect(window.R3ECarUtils.resolveCarClassLogoByCarName('Porsche 911 GT3 R')).toBe('https://example.com/gt3-logo.png');
+            expect(window.R3ECarUtils.resolveCarClassLogoByCarName('Hyundai Elantra N TCR')).toBe('https://example.com/tcr-logo.png');
+        });
+
+        test('returns empty string for unknown car', () => {
+            expect(window.R3ECarUtils.resolveCarClassLogoByCarName('Unknown Car')).toBe('');
+        });
+
+        test('returns empty string for empty/falsy input', () => {
+            expect(window.R3ECarUtils.resolveCarClassLogoByCarName('')).toBe('');
+            expect(window.R3ECarUtils.resolveCarClassLogoByCarName(null)).toBe('');
+            expect(window.R3ECarUtils.resolveCarClassLogoByCarName(undefined)).toBe('');
+        });
+
+        test('handles class entry without cars array', () => {
+            window.CARS_DATA = [{ class: 'GT3', logo: 'https://example.com/gt3-logo.png' }];
+            expect(window.R3ECarUtils.resolveCarClassLogoByCarName('BMW M4 GT3')).toBe('');
         });
     });
 });

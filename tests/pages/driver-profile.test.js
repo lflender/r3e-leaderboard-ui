@@ -136,41 +136,6 @@ beforeAll(() => {
             return result;
         })
     };
-    window.PieChart = {
-        render: vi.fn((container, data, options) => {
-            // Render a minimal DOM structure matching real PieChart output
-            // so cross-interaction wiring can find legend items and slices
-            if (!container || !Array.isArray(data) || data.length === 0) return;
-            const slices = window.PieChart.computeSlices(data);
-            const legendHtml = slices.map((s, i) =>
-                '<li class="pie-legend-item" data-index="' + i + '">' +
-                '<span class="pie-legend-color" style="background:' + s.color + '"></span>' +
-                '<span class="pie-legend-label">' + s.label + '</span>' +
-                '<span class="pie-legend-value">' + s.value + '</span></li>'
-            ).join('');
-            const sliceHtml = slices.map((s, i) =>
-                '<circle class="pie-slice" data-index="' + i + '" data-label="' + s.label + '"></circle>'
-            ).join('');
-            container.innerHTML =
-                '<div class="pie-chart-wrapper"><div class="pie-chart-body">' +
-                '<div class="pie-chart-svg-container"><svg>' + sliceHtml + '</svg></div>' +
-                '<ul class="pie-legend">' + legendHtml + '</ul>' +
-                '</div></div>';
-        }),
-        COLORS: ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'],
-        computeSlices: vi.fn((data) => {
-            if (!Array.isArray(data) || data.length === 0) return [];
-            const total = data.reduce((s, d) => s + d.value, 0);
-            const colors = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'];
-            return data.slice().sort((a, b) => b.value - a.value).map((d, i) => ({
-                label: d.label,
-                value: d.value,
-                percentage: (d.value / total) * 100,
-                color: colors[i % colors.length],
-                midAngle: 0
-            }));
-        })
-    };
     window.DriverStatsService = {
         PROFILE_METRICS: [
             { key: 'avg_bested', label: 'Average Bested %', format: 'percent' },
@@ -199,6 +164,12 @@ beforeAll(() => {
             return String(value);
         })
     };
+    loadBrowserScript('modules/driver-profile-renderers.js');
+    loadBrowserScript('modules/driver-profile-distributions.js');
+    loadBrowserScript('modules/tooltip.js');
+    loadBrowserScript('modules/pie-chart.js');
+    vi.spyOn(window.PieChart, 'render');
+    loadBrowserScript('modules/driver-profile-chart-interaction.js');
     loadBrowserScript('modules/pages/driver-profile.js');
 });
 
@@ -349,21 +320,21 @@ describe('DriverProfile', () => {
         expect(window.PieChart.render).toHaveBeenCalledWith(
             expect.any(HTMLElement),
             mockProfileData.carClassDistribution,
-            { title: 'Car Classes' }
+            expect.objectContaining({ title: 'Car Classes' })
         );
 
         // Cars chart
         expect(window.PieChart.render).toHaveBeenCalledWith(
             expect.any(HTMLElement),
             mockProfileData.carDistribution,
-            { title: 'Cars' }
+            expect.objectContaining({ title: 'Cars' })
         );
 
         // Tracks chart
         expect(window.PieChart.render).toHaveBeenCalledWith(
             expect.any(HTMLElement),
             mockProfileData.trackDistribution,
-            { title: 'Tracks' }
+            expect.objectContaining({ title: 'Tracks' })
         );
     });
 

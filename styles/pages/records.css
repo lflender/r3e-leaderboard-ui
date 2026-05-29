@@ -19,7 +19,7 @@
 .records-tables {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: var(--space-6);
     position: relative;
 }
 
@@ -28,7 +28,7 @@
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
-    scrollbar-color: var(--primary-color) var(--surface);
+    scrollbar-color: var(--color-primary) var(--color-surface);
     padding: 2px;
     display: flex;
     flex-direction: column;
@@ -36,13 +36,13 @@
 }
 
 .records-box::-webkit-scrollbar { height: 6px; }
-.records-box::-webkit-scrollbar-track { background: var(--surface); }
-.records-box::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 4px; }
+.records-box::-webkit-scrollbar-track { background: var(--color-surface); }
+.records-box::-webkit-scrollbar-thumb { background: var(--color-primary); border-radius: var(--radius-sm); }
 
 .records-box__title {
     font-size: 1.05rem;
-    margin-bottom: 0.75rem;
-    color: var(--text-primary);
+    margin-bottom: var(--space-3);
+    color: var(--color-text-primary);
     text-align: center;
 }
 
@@ -104,7 +104,7 @@
 
 .records-driver-team {
     font-size: 0.78rem;
-    color: var(--text-secondary, #9aa5b4);
+    color: var(--color-text-secondary);
     margin-left: 0.35rem;
 }
 
@@ -131,11 +131,11 @@
     gap: 0;
     margin: 0;
     padding: 0.15rem 0.8rem;
-    background: var(--surface);
-    color: var(--text-primary);
-    border: 1px solid var(--border);
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
     border-top: none;
-    border-radius: 0 0 8px 8px;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
     font-size: 0.9rem;
     cursor: pointer;
     transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
@@ -143,9 +143,9 @@
 
 .records-expand-toggle:hover,
 .records-expand-toggle:focus-visible {
-    background: var(--primary-color);
-    color: var(--text-on-primary, #fff);
-    border-color: var(--primary-color);
+    background: var(--color-primary);
+    color: var(--color-white);
+    border-color: var(--color-primary);
     outline: none;
 }
 
@@ -166,9 +166,9 @@
 
 .records-expand-toggle--top {
     display: none;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--color-border);
     border-bottom: none;
-    border-radius: 8px 8px 0 0;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
 
 .records-expand-toggle--top.is-expanded {
@@ -181,20 +181,20 @@
     position: fixed;
     top: 50%; /* overridden by JS */
     transform: translateY(-50%);
-    z-index: 200;
+    z-index: var(--z-modal-backdrop);
     width: 2rem;
     height: 5rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--primary-color);
-    color: var(--text-on-primary, #fff);
+    background: var(--color-primary);
+    color: var(--color-white);
     border: none;
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     font-size: 1.1rem;
     cursor: pointer;
     opacity: 0.7;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--shadow-lg);
     transition: opacity 0.15s ease, background-color 0.15s ease;
 }
 

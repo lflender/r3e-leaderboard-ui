@@ -8,8 +8,9 @@
     'use strict';
 
     const TABS = [
+        { id: 'ranked',    label: 'Ranked',        href: '/' },
         { id: 'drivers',   label: 'Drivers',      href: 'drivers.html' },
-        { id: 'tracks',    label: 'Leaderboards',  href: 'tracks.html' },
+        { id: 'leaderboards', label: 'Leaderboards',  href: 'leaderboards.html' },
         { id: 'records',   label: 'Records',       href: 'records.html' },
         { id: 'challenge', label: 'Challenge',     href: 'challenge.html', badge: 'NEW!' },
         { id: 'cars',      label: 'Cars',          href: 'cars.html' },
@@ -29,14 +30,14 @@
     }
 
     function render(container) {
-        var activeId = container.dataset.active || '';
+        var activeId = container.getAttribute('data-active') || '';
         var html = '';
         for (var i = 0; i < TABS.length; i++) {
             var tab = TABS[i];
             var badgeHtml = (tab.badge && !isBadgeDismissed(tab.id))
                 ? ' <span class="tab-badge">' + tab.badge + '</span>'
                 : '';
-            if (tab.id === activeId) {
+            if (activeId && tab.id === activeId) {
                 dismissBadge(tab.id);
                 html += '<button class="tab-button active">' + tab.label + '</button>';
             } else {
@@ -50,7 +51,8 @@
         var activeBtn = container.querySelector('.tab-button.active');
         if (activeBtn) {
             var idx = Array.prototype.indexOf.call(container.children, activeBtn);
-            if (idx >= TABS.length - 3) {
+            var middleIdx = Math.floor(TABS.length / 2);
+            if (idx >= middleIdx) {
                 // Use requestAnimationFrame to ensure layout is complete
                 requestAnimationFrame(function () {
                     var btnLeft = activeBtn.offsetLeft;

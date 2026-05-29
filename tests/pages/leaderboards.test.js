@@ -7,8 +7,8 @@ function buildDom() {
         '<div id="track-class-filter-ui"><button class="custom-select__toggle" aria-expanded="false">All classes ▾</button><div class="custom-select__menu" hidden></div></div>',
         '<select id="class-filter"></select>',
         '<div id="combine-checkbox-container" style="display:none"><input id="combine-checkbox" type="checkbox" /></div>',
-        '<div id="track-info"></div>',
-        '<div id="track-info-table"></div>'
+        '<div id="leaderboards"></div>',
+        '<div id="leaderboards-table"></div>'
     ].join('');
 }
 
@@ -71,7 +71,7 @@ beforeEach(() => {
     };
 });
 
-describe('track-info integration', () => {
+describe('leaderboards integration', () => {
     it('renders rows from top combinations payload', async () => {
         global.fetch = vi.fn().mockResolvedValueOnce({
             ok: true,
@@ -83,10 +83,10 @@ describe('track-info integration', () => {
         });
 
         loadBrowserScript('modules/compressed-json-helper.js');
-        loadBrowserScript('modules/pages/track-info.js');
+        loadBrowserScript('modules/pages/leaderboards.js');
         await new Promise(resolve => setTimeout(resolve, 20));
 
-        const html = document.getElementById('track-info-table').innerHTML;
+        const html = document.getElementById('leaderboards-table').innerHTML;
         expect(html).toContain('Spa');
         expect(html).toContain('Grand Prix');
         expect(html).toContain('321');
@@ -102,11 +102,11 @@ describe('track-info integration', () => {
         });
 
         loadBrowserScript('modules/compressed-json-helper.js');
-        loadBrowserScript('modules/pages/track-info.js');
+        loadBrowserScript('modules/pages/leaderboards.js');
         await new Promise(resolve => setTimeout(resolve, 20));
 
         expect(window.TemplateHelper.showNoResults).toHaveBeenCalled();
-        expect(document.getElementById('track-info-table').innerHTML).toContain('No results found');
+        expect(document.getElementById('leaderboards-table').innerHTML).toContain('No results found');
     });
 });
 

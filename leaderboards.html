@@ -5,16 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leaderboards - RaceRoom Leaderboards Explorer</title>
     <meta name="description" content="View RaceRoom (R3E) track/class combinations with entry counts and filters.">
-    <link rel="canonical" href="https://r3e-leaderboards.info/tracks.html">
-    <link rel="alternate" hreflang="en" href="https://r3e-leaderboards.info/tracks.html">
-    <link rel="alternate" hreflang="x-default" href="https://r3e-leaderboards.info/tracks.html">
+    <link rel="canonical" href="https://r3e-leaderboards.info/leaderboards.html">
+    <link rel="alternate" hreflang="en" href="https://r3e-leaderboards.info/leaderboards.html">
+    <link rel="alternate" hreflang="x-default" href="https://r3e-leaderboards.info/leaderboards.html">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <!-- Open Graph -->
     <meta property="og:site_name" content="RaceRoom Leaderboards Explorer">
     <meta property="og:title" content="Leaderboards - RaceRoom Leaderboards Explorer">
     <meta property="og:description" content="Browse track/class combinations and entries for RaceRoom leaderboards.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://r3e-leaderboards.info/tracks.html">
+    <meta property="og:url" content="https://r3e-leaderboards.info/leaderboards.html">
     <meta property="og:image" content="https://r3e-leaderboards.info/images/rle-share.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -28,7 +28,7 @@
     <!-- Analytics (PostHog via first-party proxy) -->
     <script src="modules/analytics.js?v=8" defer></script>
     
-    <link rel="stylesheet" href="style.css?v=257">
+    <link rel="stylesheet" href="style.css?v=264">
     <!-- Site Icons -->
     <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png?v=2">
     <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png?v=2">
@@ -39,7 +39,7 @@
         "@context": "https://schema.org",
         "@type": "WebPage",
         "name": "Leaderboards",
-        "url": "https://r3e-leaderboards.info/tracks.html"
+        "url": "https://r3e-leaderboards.info/leaderboards.html"
     }
     </script>
 </head>
@@ -48,10 +48,10 @@
 
     <main>
         <h1 class="sr-only">RaceRoom Track Info and Class Leaderboard Combinations</h1>
-        <div class="tabs" id="site-tabs" data-active="tracks"></div>
+        <div class="tabs" id="site-tabs" data-active="leaderboards"></div>
 
         <div class="tab-content">
-            <div id="track-info" class="tab-panel active">
+            <div id="leaderboards" class="tab-panel active">
                 <div class="search-container" id="track-search-container">
                     <div id="track-class-filter-ui" class="custom-select" role="listbox" aria-label="Filter by class">
                         <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All classes ▾</button>
@@ -72,7 +72,7 @@
                     </select>
                 </div>
                 <div id="track-description" class="track-description" hidden></div>
-                <div id="track-info-table"></div>
+                <div id="leaderboards-table"></div>
             </div>
         </div>
   
@@ -115,7 +115,7 @@
 
     <!-- Loaders -->
     <script src="modules/loaders/template-loader.js?v=3" defer></script>
-    <script src="modules/loaders/tabs-loader.js?v=7" defer></script>
+    <script src="modules/loaders/tabs-loader.js?v=11" defer></script>
     <script src="modules/loaders/footer-loader.js?v=2" defer></script>
     <script src="modules/loaders/header-loader.js?v=2" defer></script>
 
@@ -134,8 +134,8 @@
     <script src="modules/time-helper.js?v=3" defer></script>
     <script src="modules/track-helper.js?v=2" defer></script>
     <script src="modules/url-helper.js?v=2" defer></script>
-    <script src="modules/car-helper.js?v=15" defer></script>
-    <script src="modules/utils.js?v=13" defer></script>
+    <script src="modules/car-helper.js?v=16" defer></script>
+    <script src="modules/utils.js?v=14" defer></script>
     <script src="modules/mp-pos-service.js?v=12" defer></script>
     <script src="modules/sort-service.js?v=2" defer></script>
     <script src="modules/table-renderer.js?v=45" defer></script>
@@ -151,7 +151,7 @@
     <script src="modules/data/cars.js?v=10" defer></script>
     <script src="modules/data/tracks.js?v=5" defer></script>
     <script src="modules/data/track-images.js?v=3" defer></script>
-    <script src="modules/pages/track-info.js?v=28" defer></script>
+    <script src="modules/pages/leaderboards.js?v=29" defer></script>
 
     <!-- Application script -->
     <script src="script.js?v=9" defer></script>

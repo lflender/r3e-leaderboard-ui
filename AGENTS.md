@@ -6,6 +6,16 @@
 - Apply SOLID principles where applicable (single responsibility, open/closed, Liskov substitution, interface segregation, dependency inversion).
 - Maintain a single source of truth for all data, configuration, and shared logic. Never duplicate state or derive the same value in multiple places.
 
+## Design Tokens (CSS)
+
+All visual values (colors, spacing, radii, font sizes, font weights, z-index, shadows) are centralized in `styles/tokens.css`. When writing or editing CSS:
+
+- **Always use design tokens** — never hardcode colors, spacing, font sizes, font weights, border-radii, z-index, or shadows. Reference existing `var(--token-name)` values from `styles/tokens.css`.
+- **Token naming conventions**: `--color-*` (colors), `--space-*` (spacing), `--font-size-*` (type scale), `--font-weight-*` (weights), `--radius-*` (border-radius), `--z-*` (z-index), `--shadow-*` (box-shadow), `--line-height-*` (line heights).
+- **No legacy aliases** — do not use old variable names like `--primary-color`, `--surface`, `--border`, `--text-primary`, `--text-secondary`, `--hover-bg`, `--accent`, `--shadow`. Always use the canonical `--color-*` / `--space-*` / etc. form.
+- **Before adding a new token**, check if an existing one already covers the value. Avoid near-duplicates. If a new semantic meaning is genuinely needed, add it to `styles/tokens.css` with a clear category comment.
+- **Content-specific pixel values** (e.g. image widths, fixed icon sizes) do not need tokens — only design-system values should be tokenized.
+
 ## Test Coverage
 
 - Always add test coverage for new code. Every new function, module, or behavior change must include corresponding tests.
@@ -42,8 +52,6 @@ These literal Unicode characters appear in CSS files and must never be replaced 
 
 - U+21C5 (updown arrows) used in: `tables.css` `.results-table th.sortable::after { content: ' [U+21C5]'; }`
 - U+25BC (black down-pointing triangle) used in: `tables.css` `.results-table th.sortable.sort-active::after { content: ' [U+25BC]'; }`
-- U+2726 (black four pointed star) used in: `tables.css` `.driver-name-top10-glitter::before { content: '[U+2726]'; }`
-- U+2727 (white four pointed star) used in: `tables.css` `.driver-name-top10-glitter::after { content: '[U+2727]'; }`
 - U+2192 (rightwards arrow) used in: `seo.css` `.seo-content ul li::before { content: "[U+2192]"; }` (stored as CSS escape \2192)
 - U+25BE (black down-pointing small triangle) used in: `detail.css` `.faq-item summary::after { content: '[U+25BE]'; }`
 
@@ -53,7 +61,7 @@ These literal Unicode characters appear in CSS files and must never be replaced 
 After any change to a user-facing page or a page-related module, update `sitemap.xml` `lastmod` for the affected page URL(s) in the same change.
 
 - Trigger this when editing:
-	- Root page files: `index.html`, `drivers.html`, `tracks.html`, `cars.html`, `records.html`, `faq.html`, `detail.html`
+	- Root page files: `index.html`, `drivers.html`, `leaderboards.html`, `cars.html`, `records.html`, `faq.html`, `detail.html`
 	- Page modules: `modules/pages/*.js`
 	- Shared modules that directly affect a specific page's content/behavior
 - Use the same date format already used in `sitemap.xml`: `YYYY-MM-DD`.

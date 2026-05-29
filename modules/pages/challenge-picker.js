@@ -471,7 +471,7 @@
 
         const imageUrl = escapeHtml(result.thumbnail || '');
         const carNameAttr = escapeHtml(result.carName);
-        const yearColor = CU.yearBadgeColor ? CU.yearBadgeColor(car.year) : '#e0e0e0';
+        const yearColor = CU.yearBadgeColor ? CU.yearBadgeColor(car.year) : 'var(--color-badge-unknown-bg)';
         const yearHtml = car.year
             ? `<span class="car-tile-year-overlay car-badge year-badge" style="background:${yearColor}">${escapeHtml(car.year)}</span>`
             : '';

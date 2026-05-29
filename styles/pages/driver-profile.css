@@ -5,40 +5,40 @@
 .driver-profile-container {
     max-width: var(--results-table-max-width);
     margin: 0 auto;
-    padding: 1.5rem;
+    padding: 0 var(--space-6) var(--space-6);
 }
 
 /* --- Header --- */
 
 .driver-profile-header {
-    background: var(--surface);
-    border-radius: 12px;
-    padding: 1.5rem 2rem;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 2px 8px var(--shadow);
+    background: var(--color-surface);
+    border-radius: var(--radius-xl);
+    padding: var(--space-6) var(--space-7);
+    margin-bottom: var(--space-6);
+    box-shadow: var(--shadow-md);
 }
 
 .driver-profile-identity {
     display: flex;
     align-items: flex-start;
-    gap: 1.5rem;
+    gap: var(--space-6);
 }
 
 .driver-profile-avatar {
     width: 96px;
     height: 96px;
-    border-radius: 50%;
+    border-radius: var(--radius-full);
     object-fit: cover;
-    border: 3px solid var(--border);
+    border: 3px solid var(--color-border);
     flex-shrink: 0;
 }
 
 .driver-profile-avatar-placeholder {
     width: 96px;
     height: 96px;
-    border-radius: 50%;
-    background: var(--hover-bg);
-    border: 3px solid var(--border);
+    border-radius: var(--radius-full);
+    background: var(--color-hover-bg);
+    border: 3px solid var(--color-border);
     flex-shrink: 0;
 }
 
@@ -49,8 +49,8 @@
 
 .driver-profile-name {
     font-size: 1.6rem;
-    font-weight: 800;
-    color: var(--text-primary);
+    font-weight: var(--font-weight-extrabold);
+    color: var(--color-text-primary);
     margin: 0 0 0.35rem 0;
     line-height: 1.2;
     word-break: break-word;
@@ -63,17 +63,17 @@
 }
 
 .driver-profile-name-link:hover {
-    color: var(--accent);
+    color: var(--color-accent);
 }
 
 .driver-profile-entries-link {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     text-decoration: none;
     transition: color 0.15s;
 }
 
 .driver-profile-entries-link:hover {
-    color: var(--accent);
+    color: var(--color-accent);
     text-decoration: underline;
 }
 
@@ -81,10 +81,10 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.75rem;
+    gap: var(--space-3);
     margin-bottom: 0.4rem;
     font-size: 0.9rem;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
 }
 
 .driver-profile-country {
@@ -103,13 +103,13 @@
 }
 
 .driver-profile-mp-pos {
-    font-weight: 700;
-    color: var(--primary-color);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary);
 }
 
 .driver-profile-mp-pos-inactive {
-    font-weight: 400;
-    color: #7a7a7a;
+    font-weight: var(--font-weight-normal);
+    color: var(--color-text-muted);
     opacity: 0.6;
     font-size: 0.9em;
 }
@@ -117,16 +117,16 @@
 .driver-profile-team {
     margin-bottom: 0.35rem;
     font-size: 0.9rem;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
 }
 
 .driver-profile-raceroom-link {
     display: inline-block;
     margin-bottom: 0.35rem;
-    color: var(--primary-color);
+    color: var(--color-primary);
     text-decoration: none;
     font-size: 0.85rem;
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     transition: opacity 0.15s;
 }
 
@@ -137,7 +137,7 @@
 
 .driver-profile-entries-count {
     font-size: 0.85rem;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
 }
 
 /* --- Stats Cards --- */
@@ -145,15 +145,15 @@
 .driver-stats-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
 }
 
 .driver-stat-card {
-    background: var(--surface);
-    border-radius: 10px;
-    padding: 1rem 1.25rem;
-    box-shadow: 0 2px 8px var(--shadow);
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4) var(--space-5);
+    box-shadow: var(--shadow-md);
     text-align: center;
     transition: opacity 0.3s;
     min-width: 0;
@@ -167,9 +167,9 @@
     display: inline-block;
     width: 1.2em;
     height: 1.2em;
-    border: 2.5px solid var(--border);
-    border-top-color: var(--primary-color);
-    border-radius: 50%;
+    border: 2.5px solid var(--color-border);
+    border-top-color: var(--color-primary);
+    border-radius: var(--radius-full);
     animation: stat-spin 0.7s linear infinite;
     vertical-align: middle;
 }
@@ -184,8 +184,8 @@
 
 .driver-stat-label {
     font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--text-secondary);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.04em;
     margin-bottom: 0.35rem;
@@ -193,15 +193,15 @@
 
 .driver-stat-value {
     font-size: 1.5rem;
-    font-weight: 800;
-    color: var(--text-primary);
+    font-weight: var(--font-weight-extrabold);
+    color: var(--color-text-primary);
     line-height: 1.2;
     margin-bottom: 0.25rem;
 }
 
 .driver-stat-position {
     font-size: 0.82rem;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
 }
 
 /* --- Stat Card Class Breakdown --- */
@@ -213,12 +213,13 @@
 
 .driver-stat-breakdown .stat-breakdown-list {
     max-height: 150px;
-    border-top: 1px solid var(--border);
+    overflow-y: auto;
+    border-top: 1px solid var(--color-border);
     padding-top: 0.35rem;
 }
 
 .driver-stat-breakdown .pie-legend-item {
-    padding: 0.15rem 0;
+    padding: 0.15rem 0.4rem 0.15rem 0;
     font-size: 0.75rem;
     cursor: pointer;
 }
@@ -228,29 +229,35 @@
 .driver-profile-highlights-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
 }
 
 .highlight-card {
-    background: var(--surface);
-    border-radius: 10px;
-    padding: 1rem 1.25rem;
-    box-shadow: 0 2px 8px var(--shadow);
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4) var(--space-5);
+    box-shadow: var(--shadow-md);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
-    gap: 0.5rem;
+    gap: var(--space-2);
     min-width: 0;
     overflow: hidden;
+    cursor: pointer;
+    transition: box-shadow 0.15s;
+}
+
+.highlight-card:hover {
+    box-shadow: var(--shadow-lg);
 }
 
 .highlight-card-label {
     font-size: 0.72rem;
-    font-weight: 600;
-    color: var(--text-secondary);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.04em;
 }
@@ -259,7 +266,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
+    gap: var(--space-3);
     max-width: 100%;
     min-width: 0;
 }
@@ -277,6 +284,12 @@
     max-width: 100%;
     height: auto;
     object-fit: contain;
+    transition: transform 0.5s ease-in-out;
+}
+
+.highlight-card:hover .highlight-car-image {
+    transform: scale(1.3);
+    transition: transform 2s ease-in-out;
 }
 
 .highlight-track-logo-wrap {
@@ -289,6 +302,12 @@
     height: auto;
     max-height: 60px;
     object-fit: contain;
+    transition: transform 0.5s ease-in-out;
+}
+
+.highlight-card:hover .highlight-track-logo {
+    transform: scale(1.3);
+    transition: transform 2s ease-in-out;
 }
 
 .highlight-card-info {
@@ -303,8 +322,8 @@
     align-items: center;
     gap: 0.4rem;
     font-size: 0.9rem;
-    font-weight: 700;
-    color: var(--text-primary);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
 }
 
 .highlight-brand-logo {
@@ -321,28 +340,28 @@
 }
 
 .highlight-car-text .car-brand {
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
 }
 
 .highlight-car-text .car-model {
-    font-weight: 400;
-    color: var(--text-secondary);
+    font-weight: var(--font-weight-normal);
+    color: var(--color-text-secondary);
 }
 
 .highlight-track-text {
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     font-size: 0.9rem;
 }
 
 .highlight-track-text .track-layout {
-    font-weight: 400;
-    color: var(--text-secondary);
+    font-weight: var(--font-weight-normal);
+    color: var(--color-text-secondary);
     font-size: 0.9em;
 }
 
 .highlight-card-count {
     font-size: 0.78rem;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
 }
 
 /* --- Charts --- */
@@ -350,14 +369,14 @@
 .driver-profile-charts-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
+    gap: var(--space-6);
 }
 
 .driver-profile-chart-card {
-    background: var(--surface);
-    border-radius: 12px;
-    padding: 1.25rem;
-    box-shadow: 0 2px 8px var(--shadow);
+    background: var(--color-surface);
+    border-radius: var(--radius-xl);
+    padding: var(--space-5);
+    box-shadow: var(--shadow-md);
     min-width: 0;
     overflow: visible;
 }
@@ -371,10 +390,10 @@
 }
 
 .pie-chart-title {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin: 0 0 0.75rem 0;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-3) 0;
     text-align: center;
 }
 
@@ -389,7 +408,7 @@
     position: relative;
     width: 100%;
     max-width: 220px;
-    margin-bottom: 1rem;
+    margin-bottom: var(--space-4);
 }
 
 .pie-chart-svg {
@@ -402,7 +421,7 @@
 .pie-slice {
     transition: opacity 0.2s, transform 0.2s ease-out;
     cursor: pointer;
-    stroke: rgba(0, 0, 0, 0.25);
+    stroke: var(--color-black-alpha-25);
     stroke-width: 1;
 }
 
@@ -415,18 +434,82 @@
     opacity: 0.3;
 }
 
+.pie-cross-label {
+    position: absolute;
+    transform: translateY(-50%);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    background: var(--color-inset-bg-dense);
+    padding: 0.15rem 0.4rem;
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: var(--z-tooltip);
+    opacity: 0;
+    animation: pie-label-fade-in 0.15s ease-out forwards;
+}
+
+.pie-cross-label-right {
+    transform: translateY(-50%);
+}
+
+.pie-cross-label-left {
+    transform: translate(-100%, -50%);
+}
+
+.pie-cross-label-logo {
+    width: 14px;
+    height: 14px;
+    object-fit: contain;
+    vertical-align: middle;
+    margin-right: 0.2rem;
+}
+
+.pie-connector-lines {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: calc(var(--z-tooltip) - 1);
+    overflow: visible;
+    opacity: 0;
+    animation: pie-label-fade-in 0.15s ease-out forwards;
+}
+
+.pie-connector-lines polyline {
+    fill: none;
+    stroke-width: 0.4;
+    stroke-opacity: 0.7;
+}
+
+@keyframes pie-label-fade-in {
+    to { opacity: 1; }
+}
+
 .pie-tooltip {
     position: absolute;
-    background: rgba(15, 23, 42, 0.95);
-    color: var(--text-primary);
+    background: var(--color-inset-bg-dense);
+    color: var(--color-text-primary);
     padding: 0.35rem 0.65rem;
-    border-radius: 6px;
+    border-radius: var(--radius-md);
     font-size: 0.78rem;
     white-space: nowrap;
     pointer-events: none;
-    z-index: 10;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-    border: 1px solid var(--border);
+    z-index: var(--z-tooltip);
+    box-shadow: 0 2px 6px var(--color-black-alpha-35);
+    border: 1px solid var(--color-border);
+    max-width: 90vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.pie-tooltip[hidden] {
+    display: none;
 }
 
 .pie-legend {
@@ -442,15 +525,15 @@
     display: flex;
     align-items: center;
     gap: 0.45rem;
-    padding: 0.2rem 0;
+    padding: 0.2rem 0.4rem 0.2rem 0;
     font-size: 0.78rem;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     cursor: default;
     transition: color 0.15s;
 }
 
 .pie-legend-item-active {
-    color: var(--text-primary);
+    color: var(--color-text-primary);
 }
 
 .pie-legend-item-dimmed {
@@ -469,9 +552,16 @@
 .pie-legend-color {
     width: 10px;
     height: 10px;
-    border-radius: 3px;
+    border-radius: var(--radius-xs);
     flex-shrink: 0;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 1px 3px var(--color-black-alpha-35);
+}
+
+.pie-legend-logo {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+    flex-shrink: 0;
 }
 
 .pie-legend-label {
@@ -489,8 +579,8 @@
 
 .pie-chart-empty {
     text-align: center;
-    color: var(--text-secondary);
-    padding: 2rem;
+    color: var(--color-text-secondary);
+    padding: var(--space-7);
     font-size: 0.9rem;
 }
 
@@ -498,13 +588,13 @@
 
 .driver-profile-error {
     text-align: center;
-    padding: 3rem 1.5rem;
-    color: var(--text-secondary);
-    font-size: 1rem;
+    padding: var(--space-8) var(--space-6);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-md);
 }
 
 .driver-profile-error a {
-    color: var(--primary-color);
+    color: var(--color-primary);
     text-decoration: none;
 }
 
@@ -517,8 +607,8 @@
 .driver-profile-distributions-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
 }
 
 .driver-profile-dist-card {
@@ -535,7 +625,7 @@
 }
 
 .driver-profile-dist-card .entries-dist-toggle:hover {
-    background-color: var(--surface);
+    background-color: var(--color-surface);
 }
 
 .driver-profile-dist-card .entries-dist-toggle-icon {
@@ -572,8 +662,8 @@
     position: absolute;
     right: calc(100% + 0.3rem);
     font-size: 0.7rem;
-    color: var(--text-secondary);
-    font-weight: 600;
+    color: var(--color-text-secondary);
+    font-weight: var(--font-weight-semibold);
     white-space: nowrap;
     pointer-events: none;
 }
@@ -596,7 +686,7 @@
     left: 0;
     right: 0;
     height: 0;
-    border-top: 1px dashed var(--border);
+    border-top: 1px dashed var(--color-border);
     opacity: 0.5;
     pointer-events: none;
 }
@@ -608,12 +698,159 @@
     margin-left: -3px;
     margin-top: -3px;
     border-radius: 50%;
-    background: rgba(59, 130, 246, 0.85);
+    background: var(--color-primary-alpha-80);
     transition: background 0.1s, transform 0.1s;
 }
 
 .perf-dist-point-active {
-    background: rgba(96, 165, 250, 1);
+    background: var(--color-primary-light-solid);
     transform: scale(1.8);
     z-index: 4;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 1000px) {
+    .driver-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .driver-profile-charts-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .driver-profile-charts-grid > :nth-child(3):last-child {
+        grid-column: 1 / -1;
+        justify-self: center;
+        width: calc(50% - 0.75rem);
+    }
+}
+
+@media (max-width: 768px) {
+    .driver-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+
+    .driver-stat-value {
+        font-size: 1.25rem;
+    }
+
+    .pie-cross-label {
+        font-size: 0.65rem;
+        padding: 0.1rem 0.3rem;
+    }
+
+    .pie-cross-label-logo {
+        width: 12px;
+        height: 12px;
+    }
+
+    .driver-profile-container {
+        padding: 1rem;
+    }
+
+    .driver-profile-header {
+        padding: 1rem 1.25rem;
+    }
+
+    .driver-profile-avatar,
+    .driver-profile-avatar-placeholder {
+        width: 72px;
+        height: 72px;
+    }
+
+    .driver-profile-name {
+        font-size: 1.25rem;
+    }
+
+    .driver-profile-charts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .driver-profile-charts-grid > :nth-child(3):last-child {
+        grid-column: auto;
+        width: 100%;
+    }
+
+    .driver-profile-highlights-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .driver-profile-distributions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .highlight-car-image {
+        width: 140px;
+    }
+
+    .highlight-car-text {
+        white-space: normal;
+    }
+}
+
+@media (max-width: 480px) {
+    .driver-stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+
+    .driver-stat-card {
+        padding: 0.75rem;
+    }
+
+    .driver-stat-value {
+        font-size: 1.1rem;
+    }
+
+    .driver-stat-label {
+        font-size: 0.7rem;
+    }
+
+    .driver-profile-identity {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .driver-profile-meta {
+        justify-content: center;
+    }
+
+    .driver-profile-name {
+        font-size: 1.1rem;
+    }
+
+    .pie-chart-svg-container {
+        max-width: 180px;
+    }
+
+    .pie-cross-label {
+        font-size: 0.6rem;
+        padding: 0.08rem 0.25rem;
+    }
+
+    .pie-cross-label-logo {
+        width: 10px;
+        height: 10px;
+    }
+
+    .highlight-card {
+        padding: 0.75rem 1rem;
+    }
+
+    .highlight-car-image {
+        width: 100px;
+    }
+
+    .highlight-track-logo {
+        width: 70px;
+    }
+
+    .highlight-card-body {
+        gap: 0.5rem;
+    }
 }

@@ -64,14 +64,14 @@ function renderRankStars(rank, inline = false) {
 
 function getPositionBadgeColor(position, total) {
     if (isNaN(position) || isNaN(total) || total <= 1) {
-        return 'rgba(59,130,246,0.18)';
+        return 'var(--color-pos-badge-default)';
     }
 
     if (position === 1) {
-        return '#22c55e';
+        return 'var(--color-success)';
     }
     if (position === total) {
-        return '#ef4444';
+        return 'var(--color-danger)';
     }
 
     const t = (position - 1) / (total - 1);

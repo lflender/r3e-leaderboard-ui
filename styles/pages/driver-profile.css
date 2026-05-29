@@ -731,11 +731,20 @@
 @media (max-width: 768px) {
     .driver-stats-grid {
         grid-template-columns: repeat(2, 1fr);
-        gap: 0.75rem;
+        gap: var(--space-4);
+        margin-bottom: var(--space-7);
+    }
+
+    .driver-stat-card {
+        padding: var(--space-5) var(--space-4);
     }
 
     .driver-stat-value {
         font-size: 1.25rem;
+    }
+
+    .driver-stat-breakdown .stat-breakdown-list {
+        max-height: 130px;
     }
 
     .pie-cross-label {
@@ -749,11 +758,12 @@
     }
 
     .driver-profile-container {
-        padding: 1rem;
+        padding: var(--space-5) var(--space-5);
     }
 
     .driver-profile-header {
-        padding: 1rem 1.25rem;
+        padding: var(--space-5) var(--space-6);
+        margin-bottom: var(--space-6);
     }
 
     .driver-profile-avatar,
@@ -768,6 +778,7 @@
 
     .driver-profile-charts-grid {
         grid-template-columns: 1fr;
+        gap: var(--space-5);
     }
 
     .driver-profile-charts-grid > :nth-child(3):last-child {
@@ -777,10 +788,14 @@
 
     .driver-profile-highlights-grid {
         grid-template-columns: 1fr;
+        gap: var(--space-4);
+        margin-bottom: var(--space-7);
     }
 
     .driver-profile-distributions-grid {
         grid-template-columns: 1fr;
+        gap: var(--space-4);
+        margin-bottom: var(--space-7);
     }
 
     .highlight-car-image {
@@ -795,11 +810,21 @@
 @media (max-width: 480px) {
     .driver-stats-grid {
         grid-template-columns: 1fr 1fr;
-        gap: 0.5rem;
+        gap: var(--space-3);
+        margin-bottom: var(--space-6);
+    }
+
+    .driver-profile-container {
+        padding: var(--space-2);
+    }
+
+    .driver-profile-header {
+        padding: var(--space-4) var(--space-3);
+        margin-bottom: var(--space-5);
     }
 
     .driver-stat-card {
-        padding: 0.75rem;
+        padding: var(--space-3) var(--space-2);
     }
 
     .driver-stat-value {
@@ -810,10 +835,25 @@
         font-size: 0.7rem;
     }
 
+    .driver-stat-breakdown {
+        margin-top: 0.35rem;
+    }
+
+    .driver-stat-breakdown .stat-breakdown-list {
+        max-height: 110px;
+        padding-top: 0.25rem;
+    }
+
+    .driver-stat-breakdown .pie-legend-item {
+        padding: 0.12rem 0.3rem 0.12rem 0;
+        font-size: 0.68rem;
+    }
+
     .driver-profile-identity {
         flex-direction: column;
         align-items: center;
         text-align: center;
+        gap: var(--space-3);
     }
 
     .driver-profile-meta {
@@ -822,6 +862,16 @@
 
     .driver-profile-name {
         font-size: 1.1rem;
+    }
+
+    .driver-profile-highlights-grid {
+        gap: var(--space-3);
+        margin-bottom: var(--space-6);
+    }
+
+    .driver-profile-distributions-grid {
+        gap: var(--space-3);
+        margin-bottom: var(--space-6);
     }
 
     .pie-chart-svg-container {

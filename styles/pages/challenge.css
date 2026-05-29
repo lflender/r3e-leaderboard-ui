@@ -142,6 +142,8 @@
     white-space: nowrap;
     user-select: none;
     transition: border-color 0.15s;
+    flex: 0 1 auto;
+    min-width: 0;
 }
 
 .challenge-group-category:hover {
@@ -944,5 +946,33 @@
 
     .challenge-pickers {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .challenge-filters {
+        gap: 0.4rem;
+    }
+
+    .challenge-filters .custom-select__toggle {
+        padding: 0.4rem 0.55rem;
+        font-size: 0.78rem;
+    }
+
+    .challenge-group-category {
+        padding: 0.4rem 0.55rem;
+        font-size: 0.78rem;
+        border-width: 1.5px;
+        white-space: normal;
+    }
+
+    .challenge-mode-btn {
+        padding: var(--space-2) 1rem;
+        font-size: 0.8rem;
+    }
+
+    .challenge-granularity-btn {
+        padding: 0.3rem 0.65rem;
+        font-size: 0.75rem;
     }
 }

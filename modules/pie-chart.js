@@ -232,6 +232,7 @@
             });
             legendItems.forEach((el, i) => {
                 el.classList.toggle('pie-legend-item-active', i === index);
+                el.classList.toggle('pie-legend-item-dimmed', i !== index);
                 if (i === index) scrollLegendItemIntoView(el);
             });
         }
@@ -242,7 +243,7 @@
             const parentRect = parent.getBoundingClientRect();
             const elRect = el.getBoundingClientRect();
             if (elRect.top >= parentRect.top && elRect.bottom <= parentRect.bottom) return;
-            const offset = elRect.top - parentRect.top + parent.scrollTop - 4;
+            const offset = el.offsetTop - parent.offsetTop - 4;
             parent.scrollTo({ top: offset, behavior: 'smooth' });
         }
 
@@ -253,7 +254,7 @@
                 el.style.transform = '';
             });
             legendItems.forEach(el => {
-                el.classList.remove('pie-legend-item-active');
+                el.classList.remove('pie-legend-item-active', 'pie-legend-item-dimmed');
             });
             if (tooltip) Tooltip.hide(tooltip);
         }
@@ -316,7 +317,7 @@
     const LABEL_ELLIPSE_Y = 42;   // ellipse Y radius for ideal Y
     const LABEL_MAX_CHARS = 30;
     const LABEL_MIN_GAP_PCT = 7;  // dynamic gap floor; actual gap = available space / (n-1)
-    const LABEL_MAX_PER_SIDE = 14;
+    const LABEL_MAX_PER_SIDE = 11;
 
     /**
      * Show floating labels on highlighted (active) slices in a chart.
@@ -426,6 +427,9 @@
         // Post-render: fix vertical overlaps using actual pixel measurements
         resolveVerticalOverlaps(svgContainer);
 
+        // Push labels that overflow viewport edges inward
+        clampLabelsToScreen(svgContainer);
+
         clampLabelsToViewport();
     }
 
@@ -520,49 +524,47 @@
         // Re-sort selected labels by angle order (idealY) to prevent connector crossings
         selected.sort((a, b) => a.idealY - b.idealY);
 
-        // Distribute Y: start from ideal positions, push apart only where needed
+        // Distribute Y positions starting from each label's ideal, then resolve overlaps
         const n = selected.length;
-        const totalNeeded = (n - 1) * LABEL_MIN_GAP_PCT;
 
-        // Calculate ideal center of the group and center the distribution there
-        const idealCenter = (selected[0].idealY + selected[n - 1].idealY) / 2;
-        let startY = idealCenter - totalNeeded / 2;
-
-        // Clamp start so the group fits within bounds
-        if (startY < MIN_Y) startY = MIN_Y;
-        if (startY + totalNeeded > MAX_Y) startY = MAX_Y - totalNeeded;
-
-        // Place at ideal positions, but ensure minimum is at startY
+        // Start at ideal positions
         for (let i = 0; i < n; i++) {
-            selected[i].y = Math.max(selected[i].idealY, startY + i * LABEL_MIN_GAP_PCT);
+            selected[i].y = selected[i].idealY;
         }
 
-        // Forward pass: push down if overlapping
-        for (let i = 1; i < n; i++) {
+        // Spread from center outward: find the median, then push neighbors apart bidirectionally
+        const mid = Math.floor(n / 2);
+        // Push upper half upward
+        for (let i = mid - 1; i >= 0; i--) {
+            const maxAllowed = selected[i + 1].y - LABEL_MIN_GAP_PCT;
+            if (selected[i].y > maxAllowed) {
+                selected[i].y = maxAllowed;
+            }
+        }
+        // Push lower half downward
+        for (let i = mid + 1; i < n; i++) {
             const minAllowed = selected[i - 1].y + LABEL_MIN_GAP_PCT;
             if (selected[i].y < minAllowed) {
                 selected[i].y = minAllowed;
             }
         }
 
-        // If last exceeds max, pull back
-        if (selected[n - 1].y > MAX_Y) {
-            selected[n - 1].y = MAX_Y;
-            for (let i = n - 2; i >= 0; i--) {
-                const maxAllowed = selected[i + 1].y - LABEL_MIN_GAP_PCT;
-                if (selected[i].y > maxAllowed) {
-                    selected[i].y = maxAllowed;
-                }
-            }
-        }
-
-        // If first is below min, push forward
+        // Clamp to bounds and cascade
         if (selected[0].y < MIN_Y) {
             selected[0].y = MIN_Y;
             for (let i = 1; i < n; i++) {
                 const minAllowed = selected[i - 1].y + LABEL_MIN_GAP_PCT;
                 if (selected[i].y < minAllowed) {
                     selected[i].y = minAllowed;
+                }
+            }
+        }
+        if (selected[n - 1].y > MAX_Y) {
+            selected[n - 1].y = MAX_Y;
+            for (let i = n - 2; i >= 0; i--) {
+                const maxAllowed = selected[i + 1].y - LABEL_MIN_GAP_PCT;
+                if (selected[i].y > maxAllowed) {
+                    selected[i].y = maxAllowed;
                 }
             }
         }
@@ -622,6 +624,35 @@
     function clearSliceLabels() {
         document.querySelectorAll('.pie-cross-label').forEach(el => el.remove());
         document.querySelectorAll('.pie-connector-lines').forEach(el => el.remove());
+    }
+
+    /**
+     * Push labels that overflow viewport edges inward so they stay on screen.
+     */
+    function clampLabelsToScreen(container) {
+        const labels = Array.from(container.querySelectorAll('.pie-cross-label'));
+        if (labels.length === 0) return;
+        const containerWidth = container.getBoundingClientRect().width;
+        if (!containerWidth) return;
+        const containerLeft = container.getBoundingClientRect().left;
+        const viewportWidth = window.innerWidth;
+
+        labels.forEach(el => {
+            const rect = el.getBoundingClientRect();
+            if (rect.right > viewportWidth - 2) {
+                // Overflows right edge — push left
+                const overflow = rect.right - viewportWidth + 4;
+                const shiftPct = (overflow / containerWidth) * 100;
+                const currentLeft = parseFloat(el.style.left) || 50;
+                el.style.left = (currentLeft - shiftPct).toFixed(1) + '%';
+            } else if (rect.left < 2) {
+                // Overflows left edge — push right
+                const overflow = 4 - rect.left;
+                const shiftPct = (overflow / containerWidth) * 100;
+                const currentLeft = parseFloat(el.style.left) || 50;
+                el.style.left = (currentLeft + shiftPct).toFixed(1) + '%';
+            }
+        });
     }
 
     /**

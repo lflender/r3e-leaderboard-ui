@@ -90,7 +90,7 @@ describe('DriverProfileChartInteraction', () => {
             expect(label.textContent).toBe('Circuit de Barcelona-Catalunya\u2026');
         });
 
-        it('caps labels per side at LABEL_MAX_PER_SIDE (14)', () => {
+        it('caps labels per side at LABEL_MAX_PER_SIDE (11)', () => {
             const items = Array.from({ length: 20 }, (_, i) => ({
                 label: 'Class' + i, midAngle: i * 0.3, pct: 20 - i * 0.5
             }));
@@ -103,7 +103,7 @@ describe('DriverProfileChartInteraction', () => {
 
             const labels = document.querySelectorAll('.pie-cross-label');
             expect(labels.length).toBeGreaterThan(0);
-            expect(labels.length).toBeLessThanOrEqual(28); // max 14 per side
+            expect(labels.length).toBeLessThanOrEqual(22); // max 11 per side
         });
 
         it('prioritizes bigger slices when selecting labels', () => {

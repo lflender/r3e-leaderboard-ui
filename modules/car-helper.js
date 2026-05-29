@@ -410,6 +410,30 @@ function resolveCarClassLogo(className, classId) {
     return resolveCarClassLogoById(classId);
 }
 
+let cachedCarToClassLogoMap = null;
+let cachedCarToClassLogoRef = null;
+
+function resolveCarClassLogoByCarName(carName) {
+    if (!carName) return '';
+    const carsData = Array.isArray(window.CARS_DATA) ? window.CARS_DATA : [];
+    if (carsData !== cachedCarToClassLogoRef) {
+        cachedCarToClassLogoMap = new Map();
+        for (const classEntry of carsData) {
+            const logoUrl = String(classEntry.logo || '').trim();
+            if (!logoUrl) continue;
+            const cars = Array.isArray(classEntry.cars) ? classEntry.cars : [];
+            for (const carEntry of cars) {
+                const name = String(carEntry.car || '').trim();
+                if (name && !cachedCarToClassLogoMap.has(name)) {
+                    cachedCarToClassLogoMap.set(name, logoUrl);
+                }
+            }
+        }
+        cachedCarToClassLogoRef = carsData;
+    }
+    return cachedCarToClassLogoMap.get(String(carName).trim()) || '';
+}
+
 function resolveDailyRaceClassLogos(race, resolveClassNameById, raceClassName) {
     if (!race) return [];
 
@@ -497,6 +521,7 @@ window.R3ECarUtils = {
     resolveCarClassLogoByName,
     resolveCarClassLogoById,
     resolveCarClassLogo,
+    resolveCarClassLogoByCarName,
     resolveDailyRaceClassLogos,
     getDailyRaceClassLogosHtml
 };

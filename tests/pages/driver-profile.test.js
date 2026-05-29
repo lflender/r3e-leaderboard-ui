@@ -320,21 +320,21 @@ describe('DriverProfile', () => {
         expect(window.PieChart.render).toHaveBeenCalledWith(
             expect.any(HTMLElement),
             mockProfileData.carClassDistribution,
-            { title: 'Car Classes' }
+            expect.objectContaining({ title: 'Car Classes' })
         );
 
         // Cars chart
         expect(window.PieChart.render).toHaveBeenCalledWith(
             expect.any(HTMLElement),
             mockProfileData.carDistribution,
-            { title: 'Cars' }
+            expect.objectContaining({ title: 'Cars' })
         );
 
         // Tracks chart
         expect(window.PieChart.render).toHaveBeenCalledWith(
             expect.any(HTMLElement),
             mockProfileData.trackDistribution,
-            { title: 'Tracks' }
+            expect.objectContaining({ title: 'Tracks' })
         );
     });
 

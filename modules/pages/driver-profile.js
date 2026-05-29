@@ -176,7 +176,7 @@ class DriverProfile {
         PieChart.render(
             document.getElementById('chart-car-class'),
             profile.carClassDistribution,
-            { title: 'Car Classes' }
+            { title: 'Car Classes', logoResolver: window.R3ECarUtils && R3ECarUtils.resolveCarClassLogoByName }
         );
 
         if (PieChart.computeSlices) {
@@ -187,13 +187,13 @@ class DriverProfile {
         PieChart.render(
             document.getElementById('chart-car'),
             profile.carDistribution,
-            { title: 'Cars' }
+            { title: 'Cars', logoResolver: window.R3ECarUtils && R3ECarUtils.resolveCarClassLogoByCarName }
         );
 
         PieChart.render(
             document.getElementById('chart-track'),
             profile.trackDistribution,
-            { title: 'Tracks' }
+            { title: 'Tracks', logoResolver: window.R3ETrackImages && R3ETrackImages.resolveTrackLogoByLabel }
         );
 
         DriverProfileChartInteraction.wireCarClassChartInteraction(entries);

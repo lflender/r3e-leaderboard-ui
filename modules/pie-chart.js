@@ -82,7 +82,7 @@
      * @param {number} [options.size=200] - SVG viewport size
      */
     function render(container, data, options = {}) {
-        const { title = '', size = 200 } = options;
+        const { title = '', size = 200, logoResolver } = options;
         const slices = computeSlices(data);
 
         if (slices.length === 0) {
@@ -124,13 +124,16 @@
 
         const titleHtml = title ? `<h3 class="pie-chart-title">${escapeHtml(title)}</h3>` : '';
 
-        const legendItems = slices.map((slice, i) =>
-            `<li class="pie-legend-item" data-index="${i}">` +
-            `<span class="pie-legend-color" style="background:${slice.color}"></span>` +
-            `<span class="pie-legend-label">${escapeHtml(slice.label)}</span>` +
-            `<span class="pie-legend-value">${slice.value} (${slice.percentage.toFixed(1)}%)</span>` +
-            `</li>`
-        ).join('');
+        const legendItems = slices.map((slice, i) => {
+            const logoUrl = typeof logoResolver === 'function' ? logoResolver(slice.label) : '';
+            const logoHtml = logoUrl ? `<img class="pie-legend-logo" src="${escapeAttr(logoUrl)}" alt="" aria-hidden="true">` : '';
+            return `<li class="pie-legend-item" data-index="${i}">` +
+                `<span class="pie-legend-color" style="background:${slice.color}"></span>` +
+                logoHtml +
+                `<span class="pie-legend-label">${escapeHtml(slice.label)}</span>` +
+                `<span class="pie-legend-value">${slice.value} (${slice.percentage.toFixed(1)}%)</span>` +
+                `</li>`;
+        }).join('');
 
         // SVG defs: radial gradient for glossy 3D look
         const pieUid = _pieIdCounter++;

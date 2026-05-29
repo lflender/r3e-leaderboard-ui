@@ -294,8 +294,11 @@ const DriverProfileRenderers = (() => {
                     displayValue += ' (' + item.entryCount + ')';
                 }
                 const color = colorMap.get(item.className) || fallbackColors[i % fallbackColors.length] || 'var(--color-text-muted)';
+                const logoUrl = (window.R3ECarUtils && R3ECarUtils.resolveCarClassLogoByName) ? R3ECarUtils.resolveCarClassLogoByName(item.className) : '';
+                const logoHtml = logoUrl ? '<img class="pie-legend-logo" src="' + R3EUtils.escapeHtml(logoUrl) + '" alt="" aria-hidden="true">' : '';
                 return '<li class="pie-legend-item" data-class-label="' + R3EUtils.escapeHtml(item.className) + '">' +
                     '<span class="pie-legend-color" style="background:' + color + '"></span>' +
+                    logoHtml +
                     '<span class="pie-legend-label">' + R3EUtils.escapeHtml(item.className) + '</span>' +
                     '<span class="pie-legend-value">' + displayValue + '</span>' +
                     '</li>';

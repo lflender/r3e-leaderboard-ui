@@ -520,6 +520,13 @@
     box-shadow: 0 1px 3px var(--color-black-alpha-35);
 }
 
+.pie-legend-logo {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
 .pie-legend-label {
     flex: 1;
     min-width: 0;

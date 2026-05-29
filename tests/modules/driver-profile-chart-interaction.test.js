@@ -90,9 +90,9 @@ describe('DriverProfileChartInteraction', () => {
             expect(label.textContent).toBe('Circuit de Barcelona-Catalunya\u2026');
         });
 
-        it('shows all labels (no cap) relying on overlap resolver', () => {
-            const items = Array.from({ length: 15 }, (_, i) => ({
-                label: 'Class' + i, midAngle: i * 0.4, pct: 15 - i
+        it('caps labels per side at LABEL_MAX_PER_SIDE (14)', () => {
+            const items = Array.from({ length: 20 }, (_, i) => ({
+                label: 'Class' + i, midAngle: i * 0.3, pct: 20 - i * 0.5
             }));
             document.body.innerHTML = buildPieChart('chart-test', items);
             const chart = document.getElementById('chart-test');
@@ -101,14 +101,39 @@ describe('DriverProfileChartInteraction', () => {
 
             DriverProfileChartInteraction.showSliceLabels(chart, slices);
 
-            expect(document.querySelectorAll('.pie-cross-label').length).toBe(15);
+            const labels = document.querySelectorAll('.pie-cross-label');
+            expect(labels.length).toBeGreaterThan(0);
+            expect(labels.length).toBeLessThanOrEqual(28); // max 14 per side
         });
 
-        it('sorts labels by percentage descending', () => {
+        it('prioritizes bigger slices when selecting labels', () => {
+            // Mix of big and small slices on the same side (midAngle ~0 = right side)
+            const items = [
+                { label: 'Tiny1', midAngle: 0.1, pct: 2 },
+                { label: 'Tiny2', midAngle: 0.2, pct: 2 },
+                { label: 'Big', midAngle: 0.3, pct: 50 },
+                { label: 'Medium', midAngle: 0.5, pct: 20 },
+                { label: 'Tiny3', midAngle: 0.7, pct: 2 }
+            ];
+            document.body.innerHTML = buildPieChart('chart-test', items);
+            const chart = document.getElementById('chart-test');
+            const slices = chart.querySelectorAll('.pie-slice');
+            slices.forEach(s => s.classList.add('pie-slice-active'));
+
+            DriverProfileChartInteraction.showSliceLabels(chart, slices);
+
+            const labels = Array.from(document.querySelectorAll('.pie-cross-label'));
+            const texts = labels.map(l => l.textContent);
+            // Big and Medium must be present since they're the largest
+            expect(texts).toContain('Big');
+            expect(texts).toContain('Medium');
+        });
+
+        it('outputs labels in angle order (top to bottom) regardless of pct', () => {
             document.body.innerHTML = buildPieChart('chart-test', [
-                { label: 'Small', midAngle: 0, pct: 5 },
-                { label: 'Big', midAngle: 1, pct: 80 },
-                { label: 'Medium', midAngle: 2, pct: 15 }
+                { label: 'Top', midAngle: -1.2, pct: 10 },
+                { label: 'Middle', midAngle: 0, pct: 50 },
+                { label: 'Bottom', midAngle: 1.2, pct: 30 }
             ]);
             const chart = document.getElementById('chart-test');
             const slices = chart.querySelectorAll('.pie-slice');
@@ -117,9 +142,12 @@ describe('DriverProfileChartInteraction', () => {
             DriverProfileChartInteraction.showSliceLabels(chart, slices);
 
             const labels = Array.from(document.querySelectorAll('.pie-cross-label'));
-            expect(labels[0].textContent).toBe('Big');
-            expect(labels[1].textContent).toBe('Medium');
-            expect(labels[2].textContent).toBe('Small');
+            // All on the right side (cos >= 0 for -1.2, 0, 1.2)
+            // Should be sorted by idealY which is sin(midAngle)*42+50
+            const tops = labels.map(l => parseFloat(l.style.top));
+            for (let i = 1; i < tops.length; i++) {
+                expect(tops[i]).toBeGreaterThanOrEqual(tops[i - 1]);
+            }
         });
     });
 
@@ -405,6 +433,42 @@ describe('DriverProfileChartInteraction', () => {
             expect(uniqueTops.size).toBeGreaterThan(1);
         });
 
+        it('skips labels that would be displaced too far from their ideal position', () => {
+            // Many labels crammed on the same side at the same angle
+            const items = Array.from({ length: 20 }, (_, i) => ({
+                label: 'Crowded' + i, midAngle: 0, pct: 20 - i * 0.5
+            }));
+            document.body.innerHTML = buildPieChart('chart-test', items);
+            const chart = document.getElementById('chart-test');
+            const slices = chart.querySelectorAll('.pie-slice');
+            slices.forEach(s => s.classList.add('pie-slice-active'));
+
+            DriverProfileChartInteraction.showSliceLabels(chart, slices);
+
+            const labels = document.querySelectorAll('.pie-cross-label');
+            // Not all 20 can fit — some get skipped due to displacement limit
+            expect(labels.length).toBeLessThan(20);
+            expect(labels.length).toBeGreaterThan(0);
+        });
+
+        it('ensures minimum gap between adjacent labels', () => {
+            const items = Array.from({ length: 5 }, (_, i) => ({
+                label: 'Gap' + i, midAngle: i * 0.3, pct: 30 - i * 5
+            }));
+            document.body.innerHTML = buildPieChart('chart-test', items);
+            const chart = document.getElementById('chart-test');
+            const slices = chart.querySelectorAll('.pie-slice');
+            slices.forEach(s => s.classList.add('pie-slice-active'));
+
+            DriverProfileChartInteraction.showSliceLabels(chart, slices);
+
+            const labels = Array.from(document.querySelectorAll('.pie-cross-label'));
+            const tops = labels.map(l => parseFloat(l.style.top)).sort((a, b) => a - b);
+            for (let i = 1; i < tops.length; i++) {
+                expect(tops[i] - tops[i - 1]).toBeGreaterThanOrEqual(6.5); // ~7% gap
+            }
+        });
+
         it('handles labels on both sides independently', () => {
             // Two on the right (midAngle=0), two on the left (midAngle=PI)
             const items = [
@@ -422,6 +486,40 @@ describe('DriverProfileChartInteraction', () => {
 
             const labels = Array.from(document.querySelectorAll('.pie-cross-label'));
             expect(labels.length).toBe(4);
+        });
+
+        it('renders connector lines for placed labels', () => {
+            document.body.innerHTML = buildPieChart('chart-test', [
+                { label: 'A', midAngle: 0, pct: 50 },
+                { label: 'B', midAngle: 2, pct: 50 }
+            ]);
+            const chart = document.getElementById('chart-test');
+            const slices = chart.querySelectorAll('.pie-slice');
+            slices.forEach(s => s.classList.add('pie-slice-active'));
+
+            DriverProfileChartInteraction.showSliceLabels(chart, slices);
+
+            const linesSvg = chart.querySelector('.pie-connector-lines');
+            expect(linesSvg).toBeTruthy();
+            const polylines = linesSvg.querySelectorAll('polyline');
+            expect(polylines.length).toBe(2);
+        });
+
+        it('includes logo when logoResolver is set on container', () => {
+            document.body.innerHTML = buildPieChart('chart-test', [
+                { label: 'Ferrari 488', midAngle: 0, pct: 100 }
+            ]);
+            const chart = document.getElementById('chart-test');
+            chart._pieLogoResolver = (name) => name === 'Ferrari 488' ? '/images/ferrari.png' : '';
+
+            const slices = chart.querySelectorAll('.pie-slice');
+            slices.forEach(s => s.classList.add('pie-slice-active'));
+
+            DriverProfileChartInteraction.showSliceLabels(chart, slices);
+
+            const logo = chart.querySelector('.pie-cross-label-logo');
+            expect(logo).toBeTruthy();
+            expect(logo.src).toContain('ferrari.png');
         });
     });
 

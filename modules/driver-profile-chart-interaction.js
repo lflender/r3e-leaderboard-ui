@@ -45,13 +45,34 @@ const DriverProfileChartInteraction = (() => {
      * Apply active/dimmed states to legend items based on a predicate.
      */
     function highlightLegend(items, matchFn) {
+        let firstActive = null;
         items.forEach(el => {
             if (matchFn(el)) {
                 el.classList.add('pie-legend-item-active');
+                if (!firstActive) firstActive = el;
             } else {
                 el.classList.add('pie-legend-item-dimmed');
             }
         });
+        // Scroll the first active legend item into view within its scroll container
+        if (firstActive) {
+            scrollIntoViewSmooth(firstActive);
+        }
+    }
+
+    /**
+     * Scroll an element into its scrollable parent's viewport with smooth animation.
+     */
+    function scrollIntoViewSmooth(el) {
+        const parent = el.closest('.pie-legend') || el.closest('.stat-breakdown-list');
+        if (!parent) return;
+        const parentRect = parent.getBoundingClientRect();
+        const elRect = el.getBoundingClientRect();
+        // If already visible, do nothing
+        if (elRect.top >= parentRect.top && elRect.bottom <= parentRect.bottom) return;
+        // Scroll so the element is near the top of the container
+        const offset = elRect.top - parentRect.top + parent.scrollTop - 4;
+        parent.scrollTo({ top: offset, behavior: 'smooth' });
     }
 
     /**
@@ -70,6 +91,23 @@ const DriverProfileChartInteraction = (() => {
     function clearLegend(items) {
         items.forEach(el => {
             el.classList.remove('pie-legend-item-active', 'pie-legend-item-dimmed');
+        });
+    }
+
+    /**
+     * Highlight stat breakdown items matching a predicate and scroll each container's first match into view.
+     */
+    function highlightBreakdownItems(matchFn) {
+        const scrolled = new Set();
+        document.querySelectorAll('.driver-stat-breakdown .pie-legend-item').forEach(bd => {
+            if (matchFn(bd)) {
+                bd.classList.add('pie-legend-item-active');
+                const parent = bd.closest('.stat-breakdown-list');
+                if (parent && !scrolled.has(parent)) {
+                    scrolled.add(parent);
+                    scrollIntoViewSmooth(bd);
+                }
+            }
         });
     }
 
@@ -196,11 +234,7 @@ const DriverProfileChartInteraction = (() => {
             });
 
             // Highlight class breakdowns
-            document.querySelectorAll('.driver-stat-breakdown .pie-legend-item').forEach(bd => {
-                if (bd.getAttribute('data-class-label') === cls) {
-                    bd.classList.add('pie-legend-item-active');
-                }
-            });
+            highlightBreakdownItems(bd => bd.getAttribute('data-class-label') === cls);
 
             showSliceLabels(classChart, classSlices);
             if (trackChart) showSliceLabels(trackChart, trackSlices);
@@ -239,12 +273,7 @@ const DriverProfileChartInteraction = (() => {
                 return !!(cars && cars.has(lbl));
             });
             // Highlight class breakdowns
-            document.querySelectorAll('.driver-stat-breakdown .pie-legend-item').forEach(bd => {
-                const bdClass = bd.getAttribute('data-class-label') || '';
-                if (classes.has(bdClass)) {
-                    bd.classList.add('pie-legend-item-active');
-                }
-            });
+            highlightBreakdownItems(bd => classes.has(bd.getAttribute('data-class-label') || ''));
             showSliceLabels(classChart, classSlices);
             showSliceLabels(carChart, carSlices);
             if (!fromTrackChart) showSliceLabels(trackChart, trackSlices);
@@ -554,9 +583,7 @@ const DriverProfileChartInteraction = (() => {
             const label = ((el.querySelector('.pie-legend-label') || {}).textContent || '').trim();
             if (!label) return;
             el.addEventListener('mouseenter', () => {
-                allBreakdownItems.forEach(bd => {
-                    if (bd.getAttribute('data-class-label') === label) bd.classList.add('pie-legend-item-active');
-                });
+                highlightBreakdownItems(bd => bd.getAttribute('data-class-label') === label);
             });
             el.addEventListener('mouseleave', () => {
                 allBreakdownItems.forEach(bd => bd.classList.remove('pie-legend-item-active'));
@@ -567,9 +594,7 @@ const DriverProfileChartInteraction = (() => {
             const label = el.getAttribute('data-label');
             if (!label) return;
             el.addEventListener('mouseenter', () => {
-                allBreakdownItems.forEach(bd => {
-                    if (bd.getAttribute('data-class-label') === label) bd.classList.add('pie-legend-item-active');
-                });
+                highlightBreakdownItems(bd => bd.getAttribute('data-class-label') === label);
             });
             el.addEventListener('mouseleave', () => {
                 allBreakdownItems.forEach(bd => bd.classList.remove('pie-legend-item-active'));
@@ -642,10 +667,7 @@ const DriverProfileChartInteraction = (() => {
                     return classes.has(lbl);
                 });
                 // Breakdown items
-                document.querySelectorAll('.driver-stat-breakdown .pie-legend-item').forEach(bd => {
-                    const bdClass = bd.getAttribute('data-class-label') || '';
-                    if (classes.has(bdClass)) bd.classList.add('pie-legend-item-active');
-                });
+                highlightBreakdownItems(bd => classes.has(bd.getAttribute('data-class-label') || ''));
             }
             if (cars) {
                 highlightSlices(carSlices, s => cars.has((s.getAttribute('data-label') || '').trim()));
@@ -740,9 +762,7 @@ const DriverProfileChartInteraction = (() => {
                             const lbl = ((el.querySelector('.pie-legend-label') || {}).textContent || '').trim();
                             return lbl === cls;
                         });
-                        document.querySelectorAll('.driver-stat-breakdown .pie-legend-item').forEach(bd => {
-                            if (bd.getAttribute('data-class-label') === cls) bd.classList.add('pie-legend-item-active');
-                        });
+                        highlightBreakdownItems(bd => bd.getAttribute('data-class-label') === cls);
                     }
                     if (car) {
                         highlightSlices(carSlices, s => (s.getAttribute('data-label') || '').trim() === car);

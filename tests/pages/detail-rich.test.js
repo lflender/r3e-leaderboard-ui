@@ -167,12 +167,12 @@ function setupGlobals() {
         }
     };
 
-    window.DetailCarDist = {
+    window.CarsChart = {
         generateHtml: vi.fn().mockReturnValue(''),
         getCarDistributionStats: vi.fn().mockReturnValue([])
     };
 
-    window.DetailEntriesDist = {
+    window.EntriesChart = {
         generateHtml: vi.fn().mockReturnValue(''),
         parseEntryDate: vi.fn(),
         getLocalDateKey: vi.fn(),

@@ -16,8 +16,8 @@ describe('ChallengePicker page', () => {
             resolveBrandLogoPath: (name) => name ? `brand-logo://${name}` : '',
             resolveCarClassLogoByName: (name) => name ? `class-logo://${name}` : '',
             wheelBadge: (cat) => `<span class="car-badge">${cat}</span>`,
-            transBadge: (cat) => `<span class="car-badge trans">${cat}</span>`,
-            driveBadge: (drive) => `<span class="car-badge drive">${drive}</span>`,
+            transBadge: (cat) => `<span class="car-badge car-badge--trans">${cat}</span>`,
+            driveBadge: (drive) => `<span class="car-badge car-badge--drive">${drive}</span>`,
             renderCarDisplayHtml: (name) => `<span class="cars-page-car-name">${name}</span>`,
             attachBrandLogoHandlers: () => {}
         };
@@ -45,7 +45,7 @@ describe('ChallengePicker page', () => {
             { id: 10, label: 'Monza - Grand Prix' }
         ];
 
-        const htmlPath = path.resolve(__dirname, '..', '..', 'challenge.html');
+        const htmlPath = path.resolve(__dirname, '..', '..', 'pages', 'challenge.html');
         const fullHtml = fs.readFileSync(htmlPath, 'utf8');
         const bodyMatch = fullHtml.match(/<main>([\s\S]*?)<\/main>/);
         document.body.innerHTML = `<main>${bodyMatch ? bodyMatch[1] : ''}</main>`;

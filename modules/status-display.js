@@ -121,12 +121,12 @@ class StatusDisplay {
         }
         
         // Calculate LED status - RED has HIGHEST PRIORITY
-        let ledClass = 'green';
+        let ledClass = 'status-led--green';
         let ledTitle = 'Ready';
         
         // RED: if unique tracks < expected tracks (HIGHEST PRIORITY - check first)
         if (uniqueTracks < expectedTracks) {
-            ledClass = 'red';
+            ledClass = 'status-led--red';
             ledTitle = 'Incomplete';
         }
         // YELLOW: if last update > 24 hours ago (only if not red)
@@ -134,7 +134,7 @@ class StatusDisplay {
             const now = new Date();
             const hoursSinceUpdate = (now - lastUpdateTime) / (1000 * 60 * 60);
             if (hoursSinceUpdate > 24) {
-                ledClass = 'yellow';
+                ledClass = 'status-led--yellow';
                 ledTitle = 'Stale';
             }
         }
@@ -142,9 +142,9 @@ class StatusDisplay {
         // Apply LED class and title
         this.elements.led.className = `status-led ${ledClass}`;
         if (fetchInProgress) {
-            this.elements.led.classList.add('fetching');
+            this.elements.led.classList.add('is-fetching');
         } else {
-            this.elements.led.classList.remove('fetching');
+            this.elements.led.classList.remove('is-fetching');
         }
         this.elements.led.title = ledTitle;
     }

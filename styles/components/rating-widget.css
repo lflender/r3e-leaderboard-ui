@@ -20,6 +20,18 @@
     font-size: 1rem;
 }
 
+@media (max-width: 768px) {
+    .rating-widget--table .rating-btn {
+        font-size: 0.84rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .rating-widget--table .rating-btn {
+        font-size: 0.76rem;
+    }
+}
+
 .rating-widget--table[data-rated="false"] .rating-btn:first-child {
     max-width: 1.22rem;
     padding: 0 0.02rem;

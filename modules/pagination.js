@@ -143,7 +143,7 @@ class Pagination {
         }
         
         for (let i = startPage; i <= endPage; i++) {
-            const activeClass = i === this.currentPage ? 'active' : '';
+            const activeClass = i === this.currentPage ? 'is-active' : '';
             html += `<button onclick="window.${paginationId}.goToPage(${i})" class="page-btn ${activeClass}">${i}</button>`;
         }
         
@@ -225,7 +225,7 @@ function generatePaginationHTML(options) {
     
     // Page number range
     for (let i = startPage; i <= endPage; i++) {
-        const activeClass = i === currentPage ? 'active' : '';
+        const activeClass = i === currentPage ? 'is-active' : '';
         buttons += `<button onclick="${onPageChange}(${i})" class="page-btn ${activeClass}">${i}</button>`;
     }
     

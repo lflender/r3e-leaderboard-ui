@@ -192,8 +192,8 @@
 
             pieSlices.forEach((el, i) => {
                 const isActive = i === index;
-                el.classList.toggle('pie-slice-active', isActive);
-                el.classList.toggle('pie-slice-dimmed', !isActive);
+                el.classList.toggle('pie-slice--active', isActive);
+                el.classList.toggle('pie-slice--dimmed', !isActive);
                 if (isActive) {
                     const slice = slices[i];
                     const tx = Math.cos(slice.midAngle) * POP_DISTANCE;
@@ -231,8 +231,8 @@
                 }
             });
             legendItems.forEach((el, i) => {
-                el.classList.toggle('pie-legend-item-active', i === index);
-                el.classList.toggle('pie-legend-item-dimmed', i !== index);
+                el.classList.toggle('pie-legend-item--active', i === index);
+                el.classList.toggle('pie-legend-item--dimmed', i !== index);
                 if (i === index) scrollLegendItemIntoView(el);
             });
         }
@@ -250,11 +250,11 @@
         function clearHighlight() {
             if (shadowEl) { shadowEl.remove(); shadowEl = null; }
             pieSlices.forEach(el => {
-                el.classList.remove('pie-slice-active', 'pie-slice-dimmed');
+                el.classList.remove('pie-slice--active', 'pie-slice--dimmed');
                 el.style.transform = '';
             });
             legendItems.forEach(el => {
-                el.classList.remove('pie-legend-item-active', 'pie-legend-item-dimmed');
+                el.classList.remove('pie-legend-item--active', 'pie-legend-item--dimmed');
             });
             if (tooltip) Tooltip.hide(tooltip);
         }
@@ -265,25 +265,27 @@
             if (!slice) return;
             const logoUrl = container._pieLogoResolver ? container._pieLogoResolver(slice.label) : '';
             const logoHtml = logoUrl
-                ? `<img class="pie-cross-label-logo" src="${escapeAttr(logoUrl)}" alt="" aria-hidden="true">`
+                ? `<img class="pie-cross-label__logo" src="${escapeAttr(logoUrl)}" alt="" aria-hidden="true">`
                 : '';
             tooltip.innerHTML = `${logoHtml}${escapeHtml(slice.label)}: ${slice.value} (${slice.percentage.toFixed(1)}%)`;
             Tooltip.show(tooltip);
             Tooltip.positionNearCursor(event, svgContainer, tooltip);
-            // Clamp tooltip to viewport
+            // Clamp tooltip to viewport (use clientWidth for reliable mobile measurement)
             const tipRect = tooltip.getBoundingClientRect();
             const containerRect = svgContainer.getBoundingClientRect();
-            if (tipRect.right > window.innerWidth - 4) {
+            const vw = document.documentElement.clientWidth;
+            const vh = document.documentElement.clientHeight;
+            if (tipRect.right > vw - 4) {
                 const currentLeft = parseFloat(tooltip.style.left) || 0;
-                tooltip.style.left = (currentLeft - (tipRect.right - window.innerWidth + 4)) + 'px';
+                tooltip.style.left = (currentLeft - (tipRect.right - vw + 4)) + 'px';
             }
             if (tipRect.left < 4) {
                 const currentLeft = parseFloat(tooltip.style.left) || 0;
                 tooltip.style.left = (currentLeft + (4 - tipRect.left)) + 'px';
             }
-            if (tipRect.bottom > window.innerHeight - 4) {
+            if (tipRect.bottom > vh - 4) {
                 const currentTop = parseFloat(tooltip.style.top) || 0;
-                tooltip.style.top = (currentTop - (tipRect.bottom - window.innerHeight + 4)) + 'px';
+                tooltip.style.top = (currentTop - (tipRect.bottom - vh + 4)) + 'px';
             }
         }
 
@@ -331,7 +333,7 @@
         if (!svgContainer) return;
         const active = [];
         slices.forEach(slice => {
-            if (!slice.classList.contains('pie-slice-active')) return;
+            if (!slice.classList.contains('pie-slice--active')) return;
             const label = slice.getAttribute('data-label') || '';
             if (!label) return;
             const midAngle = parseFloat(slice.getAttribute('data-mid-angle'));
@@ -406,12 +408,12 @@
 
         allPositions.forEach(({ label, originalLabel, x, y, side }) => {
             const el = document.createElement('span');
-            el.className = 'pie-cross-label' + (side >= 0 ? ' pie-cross-label-right' : ' pie-cross-label-left');
+            el.className = 'pie-cross-label' + (side >= 0 ? ' pie-cross-label--right' : ' pie-cross-label--left');
             // Add logo icon if available
             const logoUrl = logoResolver ? logoResolver(originalLabel || label) : '';
             if (logoUrl) {
                 const img = document.createElement('img');
-                img.className = 'pie-cross-label-logo';
+                img.className = 'pie-cross-label__logo';
                 img.src = logoUrl;
                 img.alt = '';
                 img.setAttribute('aria-hidden', 'true');
@@ -427,10 +429,17 @@
         // Post-render: fix vertical overlaps using actual pixel measurements
         resolveVerticalOverlaps(svgContainer);
 
-        // Push labels that overflow viewport edges inward
+        // Push labels that overflow viewport edges inward.
+        // Use double-rAF to ensure layout is computed on real mobile devices
+        // (synchronous getBoundingClientRect is unreliable on mobile after DOM insertion).
         clampLabelsToScreen(svgContainer);
-
         clampLabelsToViewport();
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                clampLabelsToScreen(svgContainer);
+                clampLabelsToViewport();
+            });
+        });
     }
 
     /**
@@ -442,8 +451,8 @@
         if (labels.length < 2) return;
 
         // Split by side
-        const leftLabels = labels.filter(el => el.classList.contains('pie-cross-label-left'));
-        const rightLabels = labels.filter(el => el.classList.contains('pie-cross-label-right'));
+        const leftLabels = labels.filter(el => el.classList.contains('pie-cross-label--left'));
+        const rightLabels = labels.filter(el => el.classList.contains('pie-cross-label--right'));
 
         fixSideOverlaps(leftLabels, container);
         fixSideOverlaps(rightLabels, container);
@@ -635,7 +644,7 @@
         const containerWidth = container.getBoundingClientRect().width;
         if (!containerWidth) return;
         const containerLeft = container.getBoundingClientRect().left;
-        const viewportWidth = window.innerWidth;
+        const viewportWidth = document.documentElement.clientWidth;
 
         labels.forEach(el => {
             const rect = el.getBoundingClientRect();

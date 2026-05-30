@@ -10,7 +10,7 @@ beforeAll(() => {
             .replace(/"/g, '&quot;')
     };
     loadBrowserScript('modules/tooltip.js');
-    loadBrowserScript('modules/pie-chart.js');
+    loadBrowserScript('modules/charts/pie-chart.js');
 });
 
 describe('PieChart.computeSlices', () => {
@@ -177,8 +177,8 @@ describe('PieChart.showSliceLabels', () => {
         chartEl.innerHTML = `
             <div class="pie-chart-svg-container" style="position:relative;width:200px;height:200px">
                 <svg>
-                    <path class="pie-slice pie-slice-active" data-label="Alpha GP" data-mid-angle="0" data-percentage="50"></path>
-                    <path class="pie-slice pie-slice-active" data-label="Beta Grand Prix" data-mid-angle="3.14" data-percentage="30"></path>
+                    <path class="pie-slice pie-slice--active" data-label="Alpha GP" data-mid-angle="0" data-percentage="50"></path>
+                    <path class="pie-slice pie-slice--active" data-label="Beta Grand Prix" data-mid-angle="3.14" data-percentage="30"></path>
                     <path class="pie-slice" data-label="Gamma" data-mid-angle="1.57" data-percentage="20"></path>
                 </svg>
             </div>`;
@@ -201,13 +201,13 @@ describe('PieChart.showSliceLabels', () => {
     it('assigns right/left class based on position', () => {
         window.PieChart.showSliceLabels(chartEl, chartEl.querySelectorAll('.pie-slice'));
         const labels = document.querySelectorAll('.pie-cross-label');
-        const hasRight = Array.from(labels).some(l => l.classList.contains('pie-cross-label-right'));
-        const hasLeft = Array.from(labels).some(l => l.classList.contains('pie-cross-label-left'));
+        const hasRight = Array.from(labels).some(l => l.classList.contains('pie-cross-label--right'));
+        const hasLeft = Array.from(labels).some(l => l.classList.contains('pie-cross-label--left'));
         expect(hasRight || hasLeft).toBe(true);
     });
 
     it('does not create labels when no slices are active', () => {
-        chartEl.querySelectorAll('.pie-slice').forEach(s => s.classList.remove('pie-slice-active'));
+        chartEl.querySelectorAll('.pie-slice').forEach(s => s.classList.remove('pie-slice--active'));
         window.PieChart.showSliceLabels(chartEl, chartEl.querySelectorAll('.pie-slice'));
         expect(document.querySelectorAll('.pie-cross-label').length).toBe(0);
     });
@@ -230,8 +230,8 @@ describe('PieChart.showSliceLabels', () => {
 
     it('places right labels with left > 50% and left labels with left < 50%', () => {
         window.PieChart.showSliceLabels(chartEl, chartEl.querySelectorAll('.pie-slice'));
-        const right = document.querySelectorAll('.pie-cross-label-right');
-        const left = document.querySelectorAll('.pie-cross-label-left');
+        const right = document.querySelectorAll('.pie-cross-label--right');
+        const left = document.querySelectorAll('.pie-cross-label--left');
         right.forEach(l => expect(parseFloat(l.style.left)).toBeGreaterThan(50));
         left.forEach(l => expect(parseFloat(l.style.left)).toBeLessThan(50));
     });
@@ -241,7 +241,7 @@ describe('PieChart.showSliceLabels', () => {
             <div class="pie-chart-svg-container" style="position:relative;width:200px;height:200px">
                 <svg>
                     ${Array.from({ length: 20 }, (_, i) =>
-                        `<path class="pie-slice pie-slice-active" data-label="Item${i}" data-mid-angle="${i * 0.1}" data-percentage="${20 - i}"></path>`
+                        `<path class="pie-slice pie-slice--active" data-label="Item${i}" data-mid-angle="${i * 0.1}" data-percentage="${20 - i}"></path>`
                     ).join('')}
                 </svg>
             </div>`;
@@ -259,12 +259,12 @@ describe('PieChart.showSliceLabels', () => {
             <div class="pie-chart-svg-container" style="position:relative;width:200px;height:200px">
                 <svg>
                     ${Array.from({ length: 6 }, (_, i) =>
-                        `<path class="pie-slice pie-slice-active" data-label="Car${i}" data-mid-angle="${i * 0.3}" data-percentage="${30 - i * 4}"></path>`
+                        `<path class="pie-slice pie-slice--active" data-label="Car${i}" data-mid-angle="${i * 0.3}" data-percentage="${30 - i * 4}"></path>`
                     ).join('')}
                 </svg>
             </div>`;
         window.PieChart.showSliceLabels(chartEl, chartEl.querySelectorAll('.pie-slice'));
-        const labels = Array.from(document.querySelectorAll('.pie-cross-label-right'));
+        const labels = Array.from(document.querySelectorAll('.pie-cross-label--right'));
         const tops = labels.map(l => parseFloat(l.style.top)).sort((a, b) => a - b);
         for (let i = 1; i < tops.length; i++) {
             expect(tops[i] - tops[i - 1]).toBeGreaterThanOrEqual(6.5);
@@ -275,7 +275,7 @@ describe('PieChart.showSliceLabels', () => {
         chartEl.innerHTML = `
             <div class="pie-chart-svg-container" style="position:relative;width:200px;height:200px">
                 <svg>
-                    <path class="pie-slice pie-slice-active" data-label="This Is A Very Long Label Name That Exceeds Thirty Characters" data-mid-angle="0" data-percentage="100"></path>
+                    <path class="pie-slice pie-slice--active" data-label="This Is A Very Long Label Name That Exceeds Thirty Characters" data-mid-angle="0" data-percentage="100"></path>
                 </svg>
             </div>`;
         window.PieChart.showSliceLabels(chartEl, chartEl.querySelectorAll('.pie-slice'));
@@ -288,13 +288,13 @@ describe('PieChart.showSliceLabels', () => {
         chartEl.innerHTML = `
             <div class="pie-chart-svg-container" style="position:relative;width:200px;height:200px">
                 <svg>
-                    <path class="pie-slice pie-slice-active" data-label="Top" data-mid-angle="-1.2" data-percentage="30"></path>
-                    <path class="pie-slice pie-slice-active" data-label="Mid" data-mid-angle="0" data-percentage="40"></path>
-                    <path class="pie-slice pie-slice-active" data-label="Bot" data-mid-angle="1.2" data-percentage="30"></path>
+                    <path class="pie-slice pie-slice--active" data-label="Top" data-mid-angle="-1.2" data-percentage="30"></path>
+                    <path class="pie-slice pie-slice--active" data-label="Mid" data-mid-angle="0" data-percentage="40"></path>
+                    <path class="pie-slice pie-slice--active" data-label="Bot" data-mid-angle="1.2" data-percentage="30"></path>
                 </svg>
             </div>`;
         window.PieChart.showSliceLabels(chartEl, chartEl.querySelectorAll('.pie-slice'));
-        const labels = Array.from(document.querySelectorAll('.pie-cross-label-right'));
+        const labels = Array.from(document.querySelectorAll('.pie-cross-label--right'));
         const tops = labels.map(l => parseFloat(l.style.top));
         for (let i = 1; i < tops.length; i++) {
             expect(tops[i]).toBeGreaterThanOrEqual(tops[i - 1]);
@@ -305,12 +305,12 @@ describe('PieChart.showSliceLabels', () => {
         chartEl.innerHTML = `
             <div class="pie-chart-svg-container" style="position:relative;width:200px;height:200px">
                 <svg>
-                    <path class="pie-slice pie-slice-active" data-label="Center" data-mid-angle="0" data-percentage="50"></path>
-                    <path class="pie-slice pie-slice-active" data-label="Edge" data-mid-angle="1.5" data-percentage="50"></path>
+                    <path class="pie-slice pie-slice--active" data-label="Center" data-mid-angle="0" data-percentage="50"></path>
+                    <path class="pie-slice pie-slice--active" data-label="Edge" data-mid-angle="1.5" data-percentage="50"></path>
                 </svg>
             </div>`;
         window.PieChart.showSliceLabels(chartEl, chartEl.querySelectorAll('.pie-slice'));
-        const labels = Array.from(document.querySelectorAll('.pie-cross-label-right'));
+        const labels = Array.from(document.querySelectorAll('.pie-cross-label--right'));
         if (labels.length === 2) {
             const centerX = parseFloat(labels.find(l => l.textContent === 'Center').style.left);
             const edgeX = parseFloat(labels.find(l => l.textContent === 'Edge').style.left);

@@ -146,7 +146,7 @@ describe('StatusDisplay.updateStatusLed – LED colour logic', () => {
         const sd = makeInstance();
         const recent = new Date(Date.now() - 60 * 60 * 1000).toISOString(); // 1 hour ago
         sd.updateStatusLed({ total_unique_tracks: 177, last_scrape_end: recent }, false);
-        expect(ledClass()).toContain('green');
+        expect(ledClass()).toContain('status-led--green');
         expect(ledTitle()).toBe('Ready');
     });
 
@@ -154,7 +154,7 @@ describe('StatusDisplay.updateStatusLed – LED colour logic', () => {
         const sd = makeInstance();
         const recent = new Date(Date.now() - 60 * 60 * 1000).toISOString();
         sd.updateStatusLed({ total_unique_tracks: 100, last_scrape_end: recent }, false);
-        expect(ledClass()).toContain('red');
+        expect(ledClass()).toContain('status-led--red');
         expect(ledTitle()).toBe('Incomplete');
     });
 
@@ -162,7 +162,7 @@ describe('StatusDisplay.updateStatusLed – LED colour logic', () => {
         const sd = makeInstance();
         const stale = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString(); // 25h ago
         sd.updateStatusLed({ total_unique_tracks: 177, last_scrape_end: stale }, false);
-        expect(ledClass()).toContain('yellow');
+        expect(ledClass()).toContain('status-led--yellow');
         expect(ledTitle()).toBe('Stale');
     });
 
@@ -170,7 +170,7 @@ describe('StatusDisplay.updateStatusLed – LED colour logic', () => {
         const sd = makeInstance();
         const stale = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
         sd.updateStatusLed({ total_unique_tracks: 50, last_scrape_end: stale }, false);
-        expect(ledClass()).toContain('red');
+        expect(ledClass()).toContain('status-led--red');
         expect(ledTitle()).toBe('Incomplete');
     });
 
@@ -181,14 +181,14 @@ describe('StatusDisplay.updateStatusLed – LED colour logic', () => {
             { total_unique_tracks: 177, last_index_update: recent },
             true
         );
-        expect(ledClass()).toContain('fetching');
+        expect(ledClass()).toContain('is-fetching');
     });
 
     it('does NOT add "fetching" class when fetch_in_progress is false', () => {
         const sd = makeInstance();
         const recent = new Date(Date.now() - 60 * 60 * 1000).toISOString();
         sd.updateStatusLed({ total_unique_tracks: 177, last_scrape_end: recent }, false);
-        expect(ledClass()).not.toContain('fetching');
+        expect(ledClass()).not.toContain('is-fetching');
     });
 
     it('uses window.TRACKS_DATA.length when available', () => {
@@ -197,7 +197,7 @@ describe('StatusDisplay.updateStatusLed – LED colour logic', () => {
         const recent = new Date(Date.now() - 60 * 60 * 1000).toISOString();
         // 177 tracks but 200 expected → should be red
         sd.updateStatusLed({ total_unique_tracks: 177, last_scrape_end: recent }, false);
-        expect(ledClass()).toContain('red');
+        expect(ledClass()).toContain('status-led--red');
         window.TRACKS_DATA = null;
     });
 });

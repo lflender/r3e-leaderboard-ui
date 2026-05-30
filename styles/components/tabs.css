@@ -31,7 +31,7 @@
     border-color: var(--color-border);
 }
 
-.tab-button.active {
+.tab-button.is-active {
     color: var(--color-primary);
     background: var(--color-primary-alpha-10);
     border-color: var(--color-primary-alpha-50);
@@ -85,7 +85,7 @@
 .tabs-chevron--right {
     right: -0.6rem;
 }
-.tabs-chevron.visible {
+.tabs-chevron.is-visible {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -124,7 +124,7 @@
     margin: 0 auto;
 }
 
-.tab-panel.active {
+.tab-panel.is-active {
     display: block;
 }
 

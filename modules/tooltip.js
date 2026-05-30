@@ -50,6 +50,13 @@
         const minLeft = -rect.left + 4;
         if (left < minLeft) left = minLeft;
 
+        // Prevent tooltip from overflowing right edge of viewport
+        const viewportWidth = document.documentElement.clientWidth;
+        if (viewportWidth > 0) {
+            const maxLeft = viewportWidth - rect.left - tipWidth - 4;
+            if (left > maxLeft) left = maxLeft;
+        }
+
         tooltip.style.left = left + 'px';
         tooltip.style.top = (y - tipHeight + offsetY) + 'px';
     }

@@ -37,10 +37,11 @@ beforeAll(() => {
     window.CARS_DATA = [
         { cars: [{ car: 'BMW M4', thumbnail: 'https://example.com/bmw-m4-image-small.png' }] }
     ];
-    window.DetailEntriesDist = {
+    window.EntriesChart = {
         parseEntryDate: vi.fn(e => e.date ? new Date(e.date) : null),
         getLocalDateKey: vi.fn(d => d ? d.toISOString().slice(0, 10) : null)
     };
+    loadBrowserScript('modules/charts/performance-chart.js');
     loadBrowserScript('modules/driver-profile-renderers.js');
 });
 
@@ -113,7 +114,7 @@ describe('DriverProfileRenderers', () => {
             const html = DriverProfileRenderers.renderStatsPlaceholders();
             expect(html).toContain('stat-avg_bested');
             expect(html).toContain('stat-bested');
-            expect(html).toContain('driver-stat-loading');
+            expect(html).toContain('driver-stat-card--loading');
         });
 
         it('returns empty string when no metrics available', () => {
@@ -164,15 +165,15 @@ describe('DriverProfileRenderers', () => {
 
     describe('generatePerformanceGraph', () => {
         it('returns empty string when no entries have valid dates', () => {
-            window.DetailEntriesDist.parseEntryDate.mockReturnValue(null);
+            window.EntriesChart.parseEntryDate.mockReturnValue(null);
             const html = DriverProfileRenderers.generatePerformanceGraph([{ position: 1, total_entries: 10 }]);
             expect(html).toBe('');
         });
 
         it('renders performance points for valid entries', () => {
             const date = new Date('2025-06-01');
-            window.DetailEntriesDist.parseEntryDate.mockReturnValue(date);
-            window.DetailEntriesDist.getLocalDateKey.mockReturnValue('2025-06-01');
+            window.EntriesChart.parseEntryDate.mockReturnValue(date);
+            window.EntriesChart.getLocalDateKey.mockReturnValue('2025-06-01');
 
             const html = DriverProfileRenderers.generatePerformanceGraph([
                 { position: 3, total_entries: 10, Car: 'BMW', Track: 'Spa', car_class: 'GT3', date: '2025-06-01' }
@@ -182,7 +183,7 @@ describe('DriverProfileRenderers', () => {
         });
 
         it('skips entries with total_entries < 2', () => {
-            window.DetailEntriesDist.parseEntryDate.mockReturnValue(new Date());
+            window.EntriesChart.parseEntryDate.mockReturnValue(new Date());
             const html = DriverProfileRenderers.generatePerformanceGraph([
                 { position: 1, total_entries: 1, Car: 'A', car_class: 'GT3' }
             ]);

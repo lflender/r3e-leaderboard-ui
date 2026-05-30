@@ -433,15 +433,14 @@ class DriverSearch {
             this.displayResults(this.allResults, searchId);
 
             // Analytics: log when a single driver result is displayed.
-            if (typeof R3EAnalytics !== 'undefined' && results.length === 1) {
+            if (typeof R3EAnalytics !== 'undefined' && typeof R3EAnalytics.track === 'function' && results.length === 1) {
                 const driverResult = results[0];
                 const driverDisplayName = driverResult.driver || driverName;
-                R3EAnalytics.track('search result viewed', {
-                    searchTerm: driverName,
-                    resultCount: results.length,
-                    driverName: driverDisplayName,
-                    trackFilter: selectedTrack,
-                    classFilter: selectedClass,
+                R3EAnalytics.track('driver search result viewed', {
+                    search_term: driverName,
+                    driver_name: driverDisplayName,
+                    track_filter: selectedTrack,
+                    class_filter: selectedClass,
                     source: this._searchSource || 'input'
                 });
             }

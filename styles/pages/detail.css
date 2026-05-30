@@ -246,6 +246,10 @@
         margin-bottom: 0.1rem;
     }
 
+    .detail-track-name {
+        font-size: 1.1rem;
+    }
+
     #detail-track {
         flex-wrap: wrap;
         justify-content: center;
@@ -279,6 +283,10 @@
         font-size: 0.9rem;
         padding-bottom: 0.15rem;
         margin-bottom: 0.05rem;
+    }
+
+    .detail-track-name {
+        font-size: 1rem;
     }
 
     #difficulty-filter-ui {

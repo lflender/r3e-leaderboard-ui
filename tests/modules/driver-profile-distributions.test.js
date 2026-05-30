@@ -7,7 +7,7 @@ beforeAll(() => {
         escapeHtml: (s) => String(s || ''),
         resolveTrackLabelForItem: vi.fn(e => e.Track || '')
     };
-    window.DetailEntriesDist = {
+    window.EntriesChart = {
         generateHtml: vi.fn(() => '<div class="entries-dist-chart"><svg></svg></div>'),
         parseEntryDate: vi.fn(e => e.date ? new Date(e.date) : null),
         getLocalDateKey: vi.fn(d => d ? d.toISOString().slice(0, 10) : ''),
@@ -32,7 +32,7 @@ describe('DriverProfileDistributions', () => {
         it('renders distributions grid with entries dist and perf graph', () => {
             const html = DriverProfileDistributions.render([{ Car: 'BMW' }]);
             expect(html).toContain('driver-profile-distributions-grid');
-            expect(window.DetailEntriesDist.generateHtml).toHaveBeenCalled();
+            expect(window.EntriesChart.generateHtml).toHaveBeenCalled();
             expect(window.DriverProfileRenderers.generatePerformanceGraph).toHaveBeenCalled();
         });
     });
@@ -43,7 +43,7 @@ describe('DriverProfileDistributions', () => {
                 '<div id="dist-container">',
                 '<div class="entries-dist-summary">',
                 '<button class="entries-dist-toggle expanded" aria-expanded="true" aria-controls="test-content">',
-                '<span class="entries-dist-toggle-icon">\u25BC</span>',
+                '<span class="entries-dist-toggle__icon">\u25BC</span>',
                 '<span class="entries-dist-toggle-text">Entries</span>',
                 '</button>',
                 '<div id="test-content" class="entries-dist-content"></div>',
@@ -68,13 +68,13 @@ describe('DriverProfileDistributions', () => {
             expect(content.style.display).toBe('');
         });
 
-        it('wires tooltips via DetailEntriesDist', () => {
+        it('wires tooltips via EntriesChart', () => {
             const container = document.getElementById('dist-container');
             const entries = [{ Car: 'A' }];
             DriverProfileDistributions.wireInteraction(container, entries);
 
-            expect(window.DetailEntriesDist.wireTooltips).toHaveBeenCalledWith(container, entries);
-            expect(window.DetailEntriesDist.wirePerfTooltips).toHaveBeenCalledWith(container);
+            expect(window.EntriesChart.wireTooltips).toHaveBeenCalledWith(container, entries);
+            expect(window.EntriesChart.wirePerfTooltips).toHaveBeenCalledWith(container);
         });
 
         it('does nothing for null container', () => {

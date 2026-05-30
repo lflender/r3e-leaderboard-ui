@@ -90,40 +90,40 @@ describe('R3ECarUtils', () => {
 
     describe('wheelBadge', () => {
         test('returns correct badge for known types', () => {
-            expect(window.R3ECarUtils.wheelBadge('gt')).toContain('class="car-badge gt"');
-            expect(window.R3ECarUtils.wheelBadge('round')).toContain('class="car-badge round"');
-            expect(window.R3ECarUtils.wheelBadge('round flat')).toContain('class="car-badge round-flat"');
-            expect(window.R3ECarUtils.wheelBadge('round (flat)')).toContain('class="car-badge round-flat"');
+            expect(window.R3ECarUtils.wheelBadge('gt')).toContain('car-badge--gt');
+            expect(window.R3ECarUtils.wheelBadge('round')).toContain('car-badge--round');
+            expect(window.R3ECarUtils.wheelBadge('round flat')).toContain('car-badge--round-flat');
+            expect(window.R3ECarUtils.wheelBadge('round (flat)')).toContain('car-badge--round-flat');
         });
 
         test('returns unknown badge for empty or unrecognized', () => {
-            expect(window.R3ECarUtils.wheelBadge('')).toContain('unknown');
-            expect(window.R3ECarUtils.wheelBadge('weird')).toContain('unknown');
+            expect(window.R3ECarUtils.wheelBadge('')).toContain('car-badge--unknown');
+            expect(window.R3ECarUtils.wheelBadge('weird')).toContain('car-badge--unknown');
         });
     });
 
     describe('transBadge', () => {
         test('returns correct badge for known types', () => {
-            expect(window.R3ECarUtils.transBadge('paddles')).toContain('class="car-badge trans"');
-            expect(window.R3ECarUtils.transBadge('sequential')).toContain('sequential');
-            expect(window.R3ECarUtils.transBadge('h')).toContain('car-badge trans h');
+            expect(window.R3ECarUtils.transBadge('paddles')).toContain('car-badge--trans');
+            expect(window.R3ECarUtils.transBadge('sequential')).toContain('car-badge--trans-sequential');
+            expect(window.R3ECarUtils.transBadge('h')).toContain('car-badge--trans-h');
         });
 
         test('returns unknown badge for empty', () => {
-            expect(window.R3ECarUtils.transBadge('')).toContain('unknown');
+            expect(window.R3ECarUtils.transBadge('')).toContain('car-badge--unknown');
         });
     });
 
     describe('driveBadge', () => {
         test('returns correct badge for known types', () => {
-            expect(window.R3ECarUtils.driveBadge('RWD')).toContain('car-badge drive rwd');
-            expect(window.R3ECarUtils.driveBadge('FWD')).toContain('car-badge drive fwd');
-            expect(window.R3ECarUtils.driveBadge('4WD')).toContain('car-badge drive awd');
-            expect(window.R3ECarUtils.driveBadge('AWD')).toContain('car-badge drive awd');
+            expect(window.R3ECarUtils.driveBadge('RWD')).toContain('car-badge--drive-rwd');
+            expect(window.R3ECarUtils.driveBadge('FWD')).toContain('car-badge--drive-fwd');
+            expect(window.R3ECarUtils.driveBadge('4WD')).toContain('car-badge--drive-awd');
+            expect(window.R3ECarUtils.driveBadge('AWD')).toContain('car-badge--drive-awd');
         });
 
         test('returns unknown badge for empty', () => {
-            expect(window.R3ECarUtils.driveBadge('')).toContain('unknown');
+            expect(window.R3ECarUtils.driveBadge('')).toContain('car-badge--unknown');
         });
     });
 

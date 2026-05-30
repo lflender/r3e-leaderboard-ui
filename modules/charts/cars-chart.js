@@ -1,6 +1,6 @@
 /**
  * Car Distribution Summary module for the Detail page.
- * Exposes window.DetailCarDist with functions:
+ * Exposes window.CarsChart with functions:
  *   - getStats(data) → sorted stats array
  *   - generateHtml(data, sortBy, sortDir, isExpanded) → HTML string
  */
@@ -64,7 +64,7 @@
 
         let html = '<div class="car-dist-summary" data-sort-by="' + sortBy + '" data-sort-dir="' + sortDir + '">';
         html += '<button type="button" class="car-dist-toggle' + (isExpanded ? ' expanded' : '') + '" aria-expanded="' + (isExpanded ? 'true' : 'false') + '" aria-controls="' + summaryId + '">';
-        html += '<span class="car-dist-toggle-icon">▼</span>';
+        html += '<span class="car-dist-toggle__icon">▼</span>';
         html += '<span class="car-dist-toggle-text">Car Distribution Summary</span>';
         html += '</button>';
 
@@ -110,7 +110,7 @@
         return html;
     }
 
-    window.DetailCarDist = {
+    window.CarsChart = {
         getStats: getCarDistributionStats,
         generateHtml: generateCarDistributionSummary
     };

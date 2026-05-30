@@ -1,10 +1,10 @@
-﻿/**
+/**
  * Driver Profile Page Module
  * Orchestrator that coordinates rendering and interaction for the driver profile page.
  * Delegates to:
  * - DriverProfileRenderers (HTML generation)
  * - DriverProfileDistributions (distribution graphs)
- * - DriverProfileChartInteraction (cross-chart highlighting)
+ * - DriverProfileInteractions (cross-chart highlighting)
  */
 class DriverProfile {
     constructor() {
@@ -105,7 +105,7 @@ class DriverProfile {
                     const card = document.getElementById('stat-' + metric.key);
                     if (!card) return;
 
-                    card.classList.remove('driver-stat-loading');
+                    card.classList.remove('driver-stat-card--loading');
 
                     const valueEl = card.querySelector('.driver-stat-value');
                     const posEl = card.querySelector('.driver-stat-position');
@@ -117,7 +117,7 @@ class DriverProfile {
                         posEl.textContent = '#' + result.position.toLocaleString() +
                             ' of ' + result.total.toLocaleString();
                     } else {
-                        card.classList.add('driver-stat-not-ranked');
+                        card.classList.add('driver-stat-card--not-ranked');
                         valueEl.textContent = '\u2014';
                         posEl.textContent = 'Not ranked';
                     }
@@ -125,8 +125,8 @@ class DriverProfile {
                 .catch(() => {
                     const card = document.getElementById('stat-' + metric.key);
                     if (!card) return;
-                    card.classList.remove('driver-stat-loading');
-                    card.classList.add('driver-stat-not-ranked');
+                    card.classList.remove('driver-stat-card--loading');
+                    card.classList.add('driver-stat-card--not-ranked');
                     const posEl = card.querySelector('.driver-stat-position');
                     if (posEl) posEl.textContent = 'Unavailable';
                 });
@@ -140,8 +140,8 @@ class DriverProfile {
         const run = () => {
             const results = DriverProfileData.computeClassBreakdown(entries);
             DriverProfileRenderers.renderClassBreakdowns(results, this._classColorMap);
-            DriverProfileChartInteraction.wireBreakdownChartInteraction();
-            DriverProfileChartInteraction.wireEntriesDistCrossHighlighting(
+            DriverProfileInteractions.wireBreakdownChartInteraction();
+            DriverProfileInteractions.wireEntriesDistCrossHighlighting(
                 this._distEntries, this.elements.distributionsContainer
             );
         };
@@ -196,12 +196,12 @@ class DriverProfile {
             { title: 'Tracks', logoResolver: window.R3ETrackImages && R3ETrackImages.resolveTrackLogoByLabel }
         );
 
-        DriverProfileChartInteraction.wireCarClassChartInteraction(entries);
-        DriverProfileChartInteraction.wirePieChartPerfHighlighting();
-        DriverProfileChartInteraction.wireEntriesDistCrossHighlighting(
+        DriverProfileInteractions.wireCarClassChartInteraction(entries);
+        DriverProfileInteractions.wirePieChartPerfHighlighting();
+        DriverProfileInteractions.wireEntriesDistCrossHighlighting(
             this._distEntries, this.elements.distributionsContainer
         );
-        DriverProfileChartInteraction.wireDistPerfToPieHighlighting(
+        DriverProfileInteractions.wireDistPerfToPieHighlighting(
             this._distEntries, this.elements.distributionsContainer
         );
     }

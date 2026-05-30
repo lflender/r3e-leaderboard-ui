@@ -39,6 +39,8 @@ This document defines the canonical front-end analytics taxonomy used by page mo
 | `records action` | Records user action (fold/unfold/next/prev) | `action`, `record_type`, `filter_value`, `filter_label`, `filter_type` |
 | `challenge page shown` | Challenge Picker page initializes | `mode`, `car_granularity`, `track_granularity`, `group_by_category`, `hardcore`, `exclusions` |
 | `challenge pick clicked` | User clicks the Pick button | `mode`, `car_granularity`, `track_granularity`, `group_by_category`, `hardcore`, `picked_class`, `picked_superclass`, `picked_track`, `picked_layout_id`, `exclusions` |
+| `faq displayed` | FAQ page loads with questions | `question_count` |
+| `faq question toggled` | User opens/closes an FAQ accordion item | `question_index`, `question`, `is_open`, `action` |
 
 ## Deprecated Event Names
 
@@ -48,5 +50,6 @@ These legacy names have been replaced by canonical events:
 - `car info view mode changed` -> `cars toggled view`
 - `track info displayed` -> `leaderboards page shown`
 - `detail page viewed` -> `detail page shown`
+- `search result viewed` -> `driver search result viewed`
 - `records displayed` -> `records page shown`
 - `records section expanded` -> `records action` with `action=unfold`

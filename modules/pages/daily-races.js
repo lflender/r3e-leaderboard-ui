@@ -343,7 +343,7 @@ class DailyRaces {
                 hour12: false
             });
             
-            return `${formatted} <span class="nowrap">(${relativeTime})</span>`;
+            return `${formatted} <span class="no-wrap">(${relativeTime})</span>`;
         } catch (error) {
             return timestamp;
         }

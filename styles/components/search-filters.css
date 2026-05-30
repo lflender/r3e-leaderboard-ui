@@ -206,6 +206,11 @@
     transition: border-color 0.15s;
 }
 
+.challenge-group-category {
+    padding: 0.78rem 0.9rem;
+    font-size: 0.98rem;
+}
+
 .combine-checkbox-label:hover {
     border-color: var(--color-primary);
 }
@@ -242,22 +247,39 @@
         min-width: 0;
     }
 
-    .custom-select__toggle {
+    .custom-select__toggle,
+    .combine-checkbox-label,
+    .challenge-group-category,
+    .challenge-hardcore-label {
         padding: 0.6rem 0.75rem;
         font-size: 0.9rem;
     }
 
-    .combine-checkbox-label {
+    #driver-search {
+        min-width: 0;
+        flex: 1 1 auto;
+        max-width: none;
         padding: 0.6rem 0.75rem;
-        font-size: 0.9rem;
+        font-size: max(0.9rem, 16px);
     }
 }
 
 @media (max-width: 768px) {
-    .custom-select__toggle {
-        white-space: normal;
+    .custom-select__toggle,
+    .combine-checkbox-label,
+    .challenge-group-category,
+    .challenge-hardcore-label {
         padding: 0.55rem 0.7rem;
         font-size: 0.85rem;
+    }
+
+    #driver-search {
+        padding: 0.55rem 0.7rem;
+        font-size: max(0.85rem, 16px);
+    }
+
+    .custom-select__toggle {
+        white-space: normal;
     }
 
     .custom-select__menu {
@@ -285,8 +307,7 @@
     .challenge-group-category,
     .challenge-hardcore-label,
     .combine-checkbox-label {
-        padding: 0.55rem 0.7rem;
-        font-size: 0.85rem;
+        white-space: normal;
     }
 
     .filters-group {
@@ -297,24 +318,21 @@
         flex: 0 1 auto;
         min-width: 0;
     }
-
-    .combine-checkbox-label {
-        white-space: normal;
-    }
 }
 
 @media (max-width: 480px) {
-    .custom-select__toggle {
-        padding: 0.4rem 0.55rem;
-        font-size: 0.78rem;
-    }
-
+    .custom-select__toggle,
+    .combine-checkbox-label,
     .challenge-group-category,
-    .challenge-hardcore-label,
-    .combine-checkbox-label {
+    .challenge-hardcore-label {
         padding: 0.4rem 0.55rem;
         font-size: 0.78rem;
         border-width: 1.5px;
+    }
+
+    #driver-search {
+        padding: 0.4rem 0.55rem;
+        font-size: max(0.78rem, 16px);
     }
 
     .search-container {

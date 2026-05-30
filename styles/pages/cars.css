@@ -477,22 +477,22 @@
 
 /* Assists badges row */
 .car-tile-assists-row {
-    position: absolute;
-    bottom: 0.5rem;
-    left: 0;
-    right: 0;
-    z-index: 5;
+    width: 100%;
     display: flex;
     justify-content: center;
     gap: 0.25rem;
+    margin-top: -0.15rem;
 }
 
 #cars-info-table .results-table .car-tile-assist-badge {
     font-size: var(--font-size-base);
 }
 
-#cars-info-table .results-table .car-assists-cell .car-tile-assist--lc {
+#cars-info-table .results-table .car-assists-cell {
     font-size: var(--font-size-xs);
+}
+#cars-info-table .results-table .car-tile-assist--lc {
+    font-size: 0.8em;
 }
 
 #cars-info .results-table td:nth-child(n+3),
@@ -587,6 +587,17 @@
     margin-top: 0.4rem;
     font-style: italic;
     line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.cars-class-section.descriptions-expanded .car-tile-description {
+    display: block;
+    -webkit-line-clamp: unset;
+    overflow: visible;
 }
 
 /* ========================================
@@ -660,6 +671,8 @@
         flex: 1 1 auto;
         min-width: 0;
         max-width: none;
+        padding: 0.6rem 0.75rem;
+        font-size: max(0.9rem, 16px);
     }
 
     #cars-view-toggle {
@@ -712,11 +725,40 @@
         grid-template-columns: repeat(2, 1fr);
     }
 
+    .car-tile {
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .car-tile-name .cars-page-car-name {
+        white-space: normal;
+    }
+
+    .car-tile-specs {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .car-tile-description {
+        -webkit-line-clamp: 2;
+    }
+
     .cars-view-toggle-row {
         margin-top: 1rem;
-        gap: 1rem;
-        padding: 0 2rem;
+        gap: 0.6rem;
+        padding: 0 1rem;
         box-sizing: border-box;
+    }
+
+    #cars-search {
+        padding: 0.45rem 0.6rem;
+        font-size: max(0.85rem, 16px);
+    }
+
+    .cars-view-btn {
+        padding: 0.35rem 0.55rem;
+        font-size: 0.8rem;
     }
 
     #cars-info-table {
@@ -819,6 +861,46 @@
 
     .car-tile-name {
         font-size: 0.8rem;
+    }
+
+    .car-tile-name .cars-page-car-name {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        white-space: normal;
+        row-gap: 0;
+        line-height: 1.2;
+    }
+
+    .car-tile-name .cars-page-car-text {
+        display: contents;
+    }
+
+    .car-tile-name .car-model {
+        flex-basis: 100%;
+        text-align: center;
+    }
+
+    .car-tile-top-row .rating-widget--tile .rating-btn {
+        font-size: 0.75rem;
+    }
+
+    #cars-search {
+        padding: 0.4rem 0.55rem;
+        font-size: max(0.78rem, 16px);
+    }
+
+    .cars-view-btn {
+        padding: 0.25rem 0.4rem;
+        font-size: 0.72rem;
+    }
+
+    .car-tile-image-wrap {
+        min-height: 100px;
+    }
+
+    .car-tile-specs {
+        font-size: 0.72rem;
     }
 
     .car-tile-meta .car-badge {

@@ -596,6 +596,18 @@
     return { displayedCars, displayedClasses };
   }
 
+  function attachDescriptionToggle(root) {
+    root.querySelectorAll('.car-tile-description').forEach(function (desc) {
+      desc.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const section = desc.closest('.cars-class-section');
+        if (!section) return;
+        section.classList.toggle('descriptions-expanded');
+      });
+    });
+  }
+
   function renderTiles() {
     let displayedClasses = 0;
     let displayedCars = 0;
@@ -660,10 +672,11 @@
         html += `<article class="car-tile">` +
                 `${open}` +
                 `<div class="car-tile-name">${carNameHtml}${warningIcon}</div>` +
-                `${imageUrl ? `<div class="car-tile-image-wrap"><div class="car-tile-top-row">${flagHtml}${ratingHtml}</div>${assistsHtml}<img class="car-tile-image car-rotating-image" data-image-list="${encodedImageList}" src="${imageUrl}" alt="${carNameAttr}" loading="lazy" decoding="async">${yearBadgeHtml}</div>` : ''}` +
+                `${imageUrl ? `<div class="car-tile-image-wrap"><div class="car-tile-top-row">${flagHtml}${ratingHtml}</div><img class="car-tile-image car-rotating-image" data-image-list="${encodedImageList}" src="${imageUrl}" alt="${carNameAttr}" loading="lazy" decoding="async">${yearBadgeHtml}</div>` : ''}` +
                 `${close}` +
                 `<div class="car-tile-meta">` +
                 `<span>${wheelBadge(car.wheel_cat)}</span><span>${transBadge(car.transmission_cat)}</span><span>${driveBadge(car.drive)}</span>` +
+                `${assistsHtml}` +
                 `<div class="car-tile-specs">${R3EUtils.escapeHtml(car.power || '—')} • ${R3EUtils.escapeHtml(weightDisplay)} • ${R3EUtils.escapeHtml(car.engine || '—')}</div>` +
                 `${description}` +
                 `</div>` +
@@ -677,6 +690,7 @@
     attachBrandLogoHandlers(tableContainer);
     attachImageCyclers(tableContainer);
     attachRatingHandlers(tableContainer);
+    attachDescriptionToggle(tableContainer);
     return { displayedCars, displayedClasses };
   }
 

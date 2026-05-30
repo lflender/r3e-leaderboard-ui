@@ -132,8 +132,6 @@
     display: flex;
     align-items: center;
     gap: 0.45rem;
-    padding: 0.78rem 0.9rem;
-    font-size: 0.98rem;
     border-radius: var(--radius-md);
     border: 2px solid var(--color-border);
     background: transparent;

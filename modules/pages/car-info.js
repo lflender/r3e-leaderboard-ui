@@ -574,8 +574,8 @@
 
     html += '\n</tbody></table>';
     tableContainer.innerHTML = '<div class="cars-table-toolbar">' +
-      '<button type="button" class="cars-table-toolbar-btn" id="cars-fold-all" title="Fold all classes">Fold all</button>' +
-      '<button type="button" class="cars-table-toolbar-btn" id="cars-unfold-all" title="Unfold all classes">Unfold all</button>' +
+      '<button type="button" class="cars-table-toolbar-btn" id="cars-fold-all" title="Collapse all classes">Collapse all</button>' +
+      '<button type="button" class="cars-table-toolbar-btn" id="cars-unfold-all" title="Expand all classes">Expand all</button>' +
       '</div>' + html;
     attachBrandLogoHandlers(tableContainer);
     attachImageCyclers(tableContainer);

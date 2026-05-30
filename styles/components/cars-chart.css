@@ -201,7 +201,8 @@
         padding: 0.5rem 0.6rem;
     }
 
-    .car-dist-toggle {
+    .car-dist-toggle,
+    .entries-dist-toggle {
         font-size: 0.9rem;
         padding: 0.65rem 0.9rem;
     }

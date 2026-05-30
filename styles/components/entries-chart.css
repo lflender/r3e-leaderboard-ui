@@ -256,7 +256,19 @@
    RESPONSIVE
    ======================================== */
 
+@media (max-width: 1000px) {
+    .entries-dist-toggle {
+        font-size: 0.9rem;
+        padding: 0.65rem 0.9rem;
+    }
+}
+
 @media (max-width: 768px) {
+    .entries-dist-toggle {
+        font-size: 0.85rem;
+        padding: 0.6rem 0.8rem;
+    }
+
     .entries-dist-chart {
         height: 7rem;
     }
@@ -281,6 +293,11 @@
 }
 
 @media (max-width: 480px) {
+    .entries-dist-toggle {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.7rem;
+    }
+
     .entries-dist-summary {
         margin: 0.75rem 0;
     }

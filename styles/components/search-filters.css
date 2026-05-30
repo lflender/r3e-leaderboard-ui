@@ -260,7 +260,7 @@
         flex: 1 1 auto;
         max-width: none;
         padding: 0.6rem 0.75rem;
-        font-size: max(0.9rem, 16px);
+        font-size: 0.9rem;
     }
 }
 
@@ -274,8 +274,8 @@
     }
 
     #driver-search {
-        padding: 0.55rem 0.7rem;
-        font-size: max(0.85rem, 16px);
+        padding: 0.4rem 0.55rem;
+        font-size: 0.85rem;
     }
 
     .custom-select__toggle {
@@ -331,8 +331,8 @@
     }
 
     #driver-search {
-        padding: 0.4rem 0.55rem;
-        font-size: max(0.78rem, 16px);
+        padding: 0.3rem 0.45rem;
+        font-size: 0.78rem;
     }
 
     .search-container {

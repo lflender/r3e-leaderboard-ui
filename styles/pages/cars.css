@@ -735,7 +735,7 @@
         min-width: 0;
         max-width: none;
         padding: 0.6rem 0.75rem;
-        font-size: max(0.9rem, 16px);
+        font-size: 0.9rem;
     }
 
     #cars-view-toggle {
@@ -815,8 +815,8 @@
     }
 
     #cars-search {
-        padding: 0.45rem 0.6rem;
-        font-size: max(0.85rem, 16px);
+        padding: 0.35rem 0.5rem;
+        font-size: 0.85rem;
     }
 
     .cars-view-btn {
@@ -954,8 +954,8 @@
     }
 
     #cars-search {
-        padding: 0.4rem 0.55rem;
-        font-size: max(0.78rem, 16px);
+        padding: 0.3rem 0.45rem;
+        font-size: 0.78rem;
     }
 
     .cars-view-btn {

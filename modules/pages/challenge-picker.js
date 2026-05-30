@@ -624,7 +624,7 @@
         }
 
         // Analytics
-        if (window.R3EAnalytics) {
+        if (typeof R3EAnalytics !== 'undefined' && typeof R3EAnalytics.track === 'function') {
             R3EAnalytics.track('challenge pick clicked', {
                 mode: currentMode,
                 car_granularity: carGranularity,
@@ -1559,7 +1559,7 @@
         }
 
         // Analytics
-        if (window.R3EAnalytics) {
+        if (typeof R3EAnalytics !== 'undefined' && typeof R3EAnalytics.track === 'function') {
             R3EAnalytics.track('challenge page shown', {
                 mode: currentMode,
                 car_granularity: carGranularity,

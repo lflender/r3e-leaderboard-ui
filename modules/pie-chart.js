@@ -270,20 +270,22 @@
             tooltip.innerHTML = `${logoHtml}${escapeHtml(slice.label)}: ${slice.value} (${slice.percentage.toFixed(1)}%)`;
             Tooltip.show(tooltip);
             Tooltip.positionNearCursor(event, svgContainer, tooltip);
-            // Clamp tooltip to viewport
+            // Clamp tooltip to viewport (use clientWidth for reliable mobile measurement)
             const tipRect = tooltip.getBoundingClientRect();
             const containerRect = svgContainer.getBoundingClientRect();
-            if (tipRect.right > window.innerWidth - 4) {
+            const vw = document.documentElement.clientWidth;
+            const vh = document.documentElement.clientHeight;
+            if (tipRect.right > vw - 4) {
                 const currentLeft = parseFloat(tooltip.style.left) || 0;
-                tooltip.style.left = (currentLeft - (tipRect.right - window.innerWidth + 4)) + 'px';
+                tooltip.style.left = (currentLeft - (tipRect.right - vw + 4)) + 'px';
             }
             if (tipRect.left < 4) {
                 const currentLeft = parseFloat(tooltip.style.left) || 0;
                 tooltip.style.left = (currentLeft + (4 - tipRect.left)) + 'px';
             }
-            if (tipRect.bottom > window.innerHeight - 4) {
+            if (tipRect.bottom > vh - 4) {
                 const currentTop = parseFloat(tooltip.style.top) || 0;
-                tooltip.style.top = (currentTop - (tipRect.bottom - window.innerHeight + 4)) + 'px';
+                tooltip.style.top = (currentTop - (tipRect.bottom - vh + 4)) + 'px';
             }
         }
 
@@ -427,10 +429,17 @@
         // Post-render: fix vertical overlaps using actual pixel measurements
         resolveVerticalOverlaps(svgContainer);
 
-        // Push labels that overflow viewport edges inward
+        // Push labels that overflow viewport edges inward.
+        // Use double-rAF to ensure layout is computed on real mobile devices
+        // (synchronous getBoundingClientRect is unreliable on mobile after DOM insertion).
         clampLabelsToScreen(svgContainer);
-
         clampLabelsToViewport();
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                clampLabelsToScreen(svgContainer);
+                clampLabelsToViewport();
+            });
+        });
     }
 
     /**
@@ -635,7 +644,7 @@
         const containerWidth = container.getBoundingClientRect().width;
         if (!containerWidth) return;
         const containerLeft = container.getBoundingClientRect().left;
-        const viewportWidth = window.innerWidth;
+        const viewportWidth = document.documentElement.clientWidth;
 
         labels.forEach(el => {
             const rect = el.getBoundingClientRect();

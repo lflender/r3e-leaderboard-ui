@@ -521,7 +521,7 @@
       const { classLogoHtml, classHeaderText, superclassChip } = buildClassHeadingHtml(className, superclass);
 
             html += `\n<tr class="driver-group-header" data-group="${slug}" onclick="toggleGroup(this)">` +
-              `<td colspan="11"><div class="cars-class-heading-wrap"><span class="toggle-icon">▼</span> <h3 class="cars-class-heading">${classLogoHtml}${classHeaderText}</h3>${superclassChip}</div></td></tr>`;
+              `<td colspan="11"><div class="cars-class-heading-wrap"><span class="toggle-icon">▼</span> <h3 class="cars-class-heading">${classLogoHtml}${classHeaderText}</h3>${superclassChip}<span class="cars-class-count">(${filteredCars.length})</span></div></td></tr>`;
 
       filteredCars.forEach(car => {
         displayedCars++;
@@ -601,9 +601,52 @@
       desc.addEventListener('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
-        const section = desc.closest('.cars-class-section');
+        var section = desc.closest('.cars-class-section');
         if (!section) return;
-        section.classList.toggle('descriptions-expanded');
+        var isExpanded = section.classList.contains('descriptions-expanded');
+        var descs = section.querySelectorAll('.car-tile-description');
+
+        if (isExpanded) {
+          // COLLAPSE: measure expanded height, then animate down
+          var expandedHeights = [];
+          descs.forEach(function(d) { expandedHeights.push(d.offsetHeight); });
+          // Lock at expanded height
+          descs.forEach(function(d, i) { d.style.maxHeight = expandedHeights[i] + 'px'; });
+          // Remove expanded class so base line-clamp:3 applies → measure target
+          section.classList.remove('descriptions-expanded');
+          var collapsedHeights = [];
+          descs.forEach(function(d) { collapsedHeights.push(d.offsetHeight); });
+          // Add animating class: line-clamp:99 + transition (text stays visible, overflow clips)
+          descs.forEach(function(d) { d.classList.add('desc-animating'); });
+          section.offsetHeight; // reflow with start value committed
+          // Trigger transition to collapsed height
+          descs.forEach(function(d, i) { d.style.maxHeight = collapsedHeights[i] + 'px'; });
+          function onCollapse(ev) {
+            if (!ev.target.classList || !ev.target.classList.contains('car-tile-description')) return;
+            descs.forEach(function(d) { d.style.maxHeight = ''; d.classList.remove('desc-animating'); });
+            section.removeEventListener('transitionend', onCollapse);
+          }
+          section.addEventListener('transitionend', onCollapse);
+          setTimeout(function() { descs.forEach(function(d) { d.style.maxHeight = ''; d.classList.remove('desc-animating'); }); }, 350);
+        } else {
+          // EXPAND: measure collapsed height, then animate up
+          var collapsedHeights = [];
+          descs.forEach(function(d) { collapsedHeights.push(d.offsetHeight); });
+          // Lock at collapsed height and enable animation
+          descs.forEach(function(d, i) { d.style.maxHeight = collapsedHeights[i] + 'px'; d.classList.add('desc-animating'); });
+          // Switch to expanded (line-clamp:99 from both class and desc-animating)
+          section.classList.add('descriptions-expanded');
+          section.offsetHeight; // reflow
+          // Measure full content height and animate to it
+          descs.forEach(function(d) { d.style.maxHeight = d.scrollHeight + 'px'; });
+          function onExpand(ev) {
+            if (!ev.target.classList || !ev.target.classList.contains('car-tile-description')) return;
+            descs.forEach(function(d) { d.style.maxHeight = ''; d.classList.remove('desc-animating'); });
+            section.removeEventListener('transitionend', onExpand);
+          }
+          section.addEventListener('transitionend', onExpand);
+          setTimeout(function() { descs.forEach(function(d) { d.style.maxHeight = ''; d.classList.remove('desc-animating'); }); }, 350);
+        }
       });
     });
   }

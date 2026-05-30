@@ -38,17 +38,42 @@ class Navigation {
         if (!group) return;
         
         const rows = document.querySelectorAll(`.${group}`);
-        const icon = headerElem ? headerElem.querySelector('.toggle-icon') : null;
+        if (!rows.length) return;
         
-        rows.forEach(row => {
-            if (row.style.display === 'none') {
-                row.style.display = '';
-                if (icon) icon.textContent = '▼';
+        const isCurrentlyHidden = rows[0].style.display === 'none';
+        
+        rows.forEach((row, i) => {
+            if (isCurrentlyHidden) {
+                const delay = i * 0.02;
+                setTimeout(function() {
+                    row.style.opacity = '0';
+                    row.style.display = '';
+                    row.classList.add('group-row-enter');
+                    row.addEventListener('animationend', function handler() {
+                        row.classList.remove('group-row-enter');
+                        row.style.opacity = '';
+                        row.removeEventListener('animationend', handler);
+                    });
+                }, delay * 1000);
             } else {
-                row.style.display = 'none';
-                if (icon) icon.textContent = '▶';
+                row.style.animationDelay = (i * 0.02) + 's';
+                row.classList.add('group-row-exit');
+                row.addEventListener('animationend', function handler() {
+                    row.classList.remove('group-row-exit');
+                    row.style.display = 'none';
+                    row.style.animationDelay = '';
+                    row.removeEventListener('animationend', handler);
+                });
             }
         });
+
+        if (headerElem) {
+            if (isCurrentlyHidden) {
+                headerElem.classList.remove('collapsed');
+            } else {
+                headerElem.classList.add('collapsed');
+            }
+        }
     }
 
     /**

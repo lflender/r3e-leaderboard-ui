@@ -343,6 +343,23 @@
     border-bottom: none;
 }
 
+#cars-info-table .driver-group-header td {
+    padding: 0.4rem 0.65rem !important;
+}
+
+.cars-class-count {
+    font-size: 0.8rem;
+    font-weight: var(--font-weight-normal);
+    color: var(--color-text-secondary);
+    margin-left: 0.3rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.driver-group-header.collapsed .cars-class-count {
+    opacity: 1;
+}
+
 .cars-tile-grid {
     display: flex;
     flex-direction: column;
@@ -594,10 +611,13 @@
     cursor: pointer;
 }
 
+.car-tile-description.desc-animating {
+    -webkit-line-clamp: 99;
+    transition: max-height 0.3s ease-out;
+}
+
 .cars-class-section.descriptions-expanded .car-tile-description {
-    display: block;
-    -webkit-line-clamp: unset;
-    overflow: visible;
+    -webkit-line-clamp: 99;
 }
 
 /* ========================================

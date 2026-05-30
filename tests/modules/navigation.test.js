@@ -18,6 +18,7 @@ describe('Navigation', () => {
     });
 
     test('toggles grouped rows and icon state', () => {
+        vi.useFakeTimers();
         const header = document.createElement('div');
         header.dataset.group = 'sample-group';
         const icon = document.createElement('span');
@@ -25,12 +26,21 @@ describe('Navigation', () => {
         header.appendChild(icon);
 
         window.toggleGroup(header);
+        vi.runAllTimers();
         expect(document.querySelectorAll('.sample-group')[0].style.display).toBe('');
-        expect(icon.textContent).toBe('▼');
+        expect(header.classList.contains('collapsed')).toBe(false);
 
         window.toggleGroup(header);
-        expect(document.querySelectorAll('.sample-group')[0].style.display).toBe('none');
-        expect(icon.textContent).toBe('▶');
+        // Collapse adds exit animation class; display:none set after animationend
+        const row = document.querySelectorAll('.sample-group')[0];
+        expect(row.classList.contains('group-row-exit')).toBe(true);
+        expect(header.classList.contains('collapsed')).toBe(true);
+
+        // Simulate animationend to complete the fold
+        row.dispatchEvent(new Event('animationend'));
+        expect(row.style.display).toBe('none');
+        expect(row.classList.contains('group-row-exit')).toBe(false);
+        vi.useRealTimers();
     });
 
     test('opens detail view with class and difficulty params', () => {

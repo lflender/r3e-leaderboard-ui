@@ -462,6 +462,45 @@ h2.driver-name-top10-glitter {
     background: none;
 }
 
+.driver-group-header .toggle-icon {
+    display: inline-block;
+    transition: transform 0.2s ease;
+}
+
+.driver-group-header.collapsed .toggle-icon {
+    transform: rotate(-90deg);
+}
+
+@keyframes group-row-enter {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.group-row-enter {
+    animation: group-row-enter 0.15s ease forwards;
+}
+
+@keyframes group-row-exit {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+}
+
+.group-row-exit {
+    animation: group-row-exit 0.15s ease forwards;
+}
+
 .driver-group-avatar {
     width: 31px;
     height: 31px;

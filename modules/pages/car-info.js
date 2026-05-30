@@ -573,10 +573,24 @@
     });
 
     html += '\n</tbody></table>';
-    tableContainer.innerHTML = html;
+    tableContainer.innerHTML = '<div class="cars-table-toolbar">' +
+      '<button type="button" class="cars-table-toolbar-btn" id="cars-fold-all" title="Fold all classes">Fold all</button>' +
+      '<button type="button" class="cars-table-toolbar-btn" id="cars-unfold-all" title="Unfold all classes">Unfold all</button>' +
+      '</div>' + html;
     attachBrandLogoHandlers(tableContainer);
     attachImageCyclers(tableContainer);
     attachRatingHandlers(tableContainer);
+
+    document.getElementById('cars-fold-all').addEventListener('click', function() {
+      tableContainer.querySelectorAll('.driver-group-header:not(.collapsed)').forEach(function(h) {
+        window.toggleGroup(h);
+      });
+    });
+    document.getElementById('cars-unfold-all').addEventListener('click', function() {
+      tableContainer.querySelectorAll('.driver-group-header.collapsed').forEach(function(h) {
+        window.toggleGroup(h);
+      });
+    });
 
     Array.from(tableContainer.querySelectorAll('tr.driver-data-row')).forEach(row => {
       const link = row.getAttribute('data-link') || '';

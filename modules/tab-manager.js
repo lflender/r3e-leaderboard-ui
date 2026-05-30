@@ -26,17 +26,17 @@ class TabManager {
      * @param {string} targetTab - The tab ID to switch to
      */
     switchTab(targetTab) {
-        this.tabButtons.forEach(btn => btn.classList.remove('active'));
-        this.tabPanels.forEach(panel => panel.classList.remove('active'));
+        this.tabButtons.forEach(btn => btn.classList.remove('is-active'));
+        this.tabPanels.forEach(panel => panel.classList.remove('is-active'));
         
         const activeButton = this.tabButtons.find(btn => btn.dataset.tab === targetTab);
         if (activeButton) {
-            activeButton.classList.add('active');
+            activeButton.classList.add('is-active');
         }
         
         const activePanel = document.getElementById(targetTab);
         if (activePanel) {
-            activePanel.classList.add('active');
+            activePanel.classList.add('is-active');
         }
     }
 }

@@ -113,7 +113,7 @@ describe('DriverProfileRenderers', () => {
             const html = DriverProfileRenderers.renderStatsPlaceholders();
             expect(html).toContain('stat-avg_bested');
             expect(html).toContain('stat-bested');
-            expect(html).toContain('driver-stat-loading');
+            expect(html).toContain('driver-stat-card--loading');
         });
 
         it('returns empty string when no metrics available', () => {

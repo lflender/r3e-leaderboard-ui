@@ -32,14 +32,14 @@ describe('TabManager.switchTab – activation', () => {
         const tm = new window.tabManager.constructor();
         tm.switchTab('tab2');
         const btn = document.querySelector('[data-tab="tab2"]');
-        expect(btn.classList.contains('active')).toBe(true);
+        expect(btn.classList.contains('is-active')).toBe(true);
     });
 
     it('adds "active" class to the panel with the matching id', () => {
         const tm = new window.tabManager.constructor();
         tm.switchTab('tab3');
         const panel = document.getElementById('tab3');
-        expect(panel.classList.contains('active')).toBe(true);
+        expect(panel.classList.contains('is-active')).toBe(true);
     });
 
     it('only one button is active at a time', () => {
@@ -47,7 +47,7 @@ describe('TabManager.switchTab – activation', () => {
         tm.switchTab('tab1');
         tm.switchTab('tab2');
 
-        const activeButtons = document.querySelectorAll('.tab-button.active');
+        const activeButtons = document.querySelectorAll('.tab-button.is-active');
         expect(activeButtons.length).toBe(1);
         expect(activeButtons[0].dataset.tab).toBe('tab2');
     });
@@ -57,7 +57,7 @@ describe('TabManager.switchTab – activation', () => {
         tm.switchTab('tab1');
         tm.switchTab('tab3');
 
-        const activePanels = document.querySelectorAll('.tab-panel.active');
+        const activePanels = document.querySelectorAll('.tab-panel.is-active');
         expect(activePanels.length).toBe(1);
         expect(activePanels[0].id).toBe('tab3');
     });
@@ -70,17 +70,17 @@ describe('TabManager.switchTab – deactivation', () => {
     it('removes "active" from a previously active button when switching', () => {
         const tm = new window.tabManager.constructor();
         tm.switchTab('tab1');
-        expect(document.querySelector('[data-tab="tab1"]').classList.contains('active')).toBe(true);
+        expect(document.querySelector('[data-tab="tab1"]').classList.contains('is-active')).toBe(true);
 
         tm.switchTab('tab2');
-        expect(document.querySelector('[data-tab="tab1"]').classList.contains('active')).toBe(false);
+        expect(document.querySelector('[data-tab="tab1"]').classList.contains('is-active')).toBe(false);
     });
 
     it('removes "active" from previously active panel when switching', () => {
         const tm = new window.tabManager.constructor();
         tm.switchTab('tab1');
         tm.switchTab('tab2');
-        expect(document.getElementById('tab1').classList.contains('active')).toBe(false);
+        expect(document.getElementById('tab1').classList.contains('is-active')).toBe(false);
     });
 });
 
@@ -94,8 +94,8 @@ describe('TabManager.switchTab – unknown tab', () => {
         expect(() => tm.switchTab('nonexistent')).not.toThrow();
 
         // All buttons and panels should be inactive
-        const activeButtons = document.querySelectorAll('.tab-button.active');
-        const activePanels = document.querySelectorAll('.tab-panel.active');
+        const activeButtons = document.querySelectorAll('.tab-button.is-active');
+        const activePanels = document.querySelectorAll('.tab-panel.is-active');
         expect(activeButtons.length).toBe(0);
         expect(activePanels.length).toBe(0);
     });
@@ -110,10 +110,10 @@ describe('TabManager – click event', () => {
         const btn2 = document.querySelector('[data-tab="tab2"]');
         btn2.click();
 
-        expect(document.querySelector('[data-tab="tab2"]').classList.contains('active')).toBe(true);
-        expect(document.getElementById('tab2').classList.contains('active')).toBe(true);
+        expect(document.querySelector('[data-tab="tab2"]').classList.contains('is-active')).toBe(true);
+        expect(document.getElementById('tab2').classList.contains('is-active')).toBe(true);
 
-        const activeButtons = document.querySelectorAll('.tab-button.active');
+        const activeButtons = document.querySelectorAll('.tab-button.is-active');
         expect(activeButtons.length).toBe(1);
     });
 

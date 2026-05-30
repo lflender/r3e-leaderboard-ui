@@ -251,29 +251,29 @@ const escHtml = (text) => R3EUtils.escapeHtml(text);
 
 function wheelBadge(cat) {
     const v = (cat || '').toLowerCase().trim();
-    if (!v) return '<span class="car-badge unknown">—</span>';
-    if (v === 'gt') return '<span class="car-badge gt">GT</span>';
-    if (v === 'round') return '<span class="car-badge round">Round</span>';
-    if (v === 'round flat' || v === 'round (flat)' || v === 'round(flat)') return '<span class="car-badge round-flat" title="Round flat">Round flat</span>';
-    return `<span class="car-badge unknown">${escHtml(cat)}</span>`;
+    if (!v) return '<span class="car-badge car-badge--unknown">—</span>';
+    if (v === 'gt') return '<span class="car-badge car-badge--gt">GT</span>';
+    if (v === 'round') return '<span class="car-badge car-badge--round">Round</span>';
+    if (v === 'round flat' || v === 'round (flat)' || v === 'round(flat)') return '<span class="car-badge car-badge--round-flat" title="Round flat">Round flat</span>';
+    return `<span class="car-badge car-badge--unknown">${escHtml(cat)}</span>`;
 }
 
 function transBadge(cat) {
     const v = (cat || '').toLowerCase().trim();
-    if (!v) return '<span class="car-badge trans unknown">—</span>';
-    if (v === 'paddles') return '<span class="car-badge trans">Paddles</span>';
-    if (v === 'sequential') return '<span class="car-badge trans sequential">Sequential</span>';
-    if (v === 'h' || v === 'other') return '<span class="car-badge trans h">H</span>';
-    return `<span class="car-badge trans unknown">${escHtml(cat)}</span>`;
+    if (!v) return '<span class="car-badge car-badge--trans car-badge--unknown">—</span>';
+    if (v === 'paddles') return '<span class="car-badge car-badge--trans">Paddles</span>';
+    if (v === 'sequential') return '<span class="car-badge car-badge--trans-sequential">Sequential</span>';
+    if (v === 'h' || v === 'other') return '<span class="car-badge car-badge--trans-h">H</span>';
+    return `<span class="car-badge car-badge--trans car-badge--unknown">${escHtml(cat)}</span>`;
 }
 
 function driveBadge(drive) {
     const v = (drive || '').toUpperCase().trim();
-    if (!v) return '<span class="car-badge drive unknown">—</span>';
-    if (v === 'RWD') return '<span class="car-badge drive rwd">RWD</span>';
-    if (v === 'FWD') return '<span class="car-badge drive fwd">FWD</span>';
-    if (v === '4WD' || v === 'AWD') return '<span class="car-badge drive awd">4WD</span>';
-    return `<span class="car-badge drive unknown">${escHtml(drive)}</span>`;
+    if (!v) return '<span class="car-badge car-badge--drive car-badge--unknown">—</span>';
+    if (v === 'RWD') return '<span class="car-badge car-badge--drive-rwd">RWD</span>';
+    if (v === 'FWD') return '<span class="car-badge car-badge--drive-fwd">FWD</span>';
+    if (v === '4WD' || v === 'AWD') return '<span class="car-badge car-badge--drive-awd">4WD</span>';
+    return `<span class="car-badge car-badge--drive car-badge--unknown">${escHtml(drive)}</span>`;
 }
 
 /* ── rating widget (delegated to rating-widget.js) ── */

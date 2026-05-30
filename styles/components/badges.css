@@ -18,56 +18,56 @@
 }
 
 /* Wheel type badges */
-.car-badge.gt { 
+.car-badge--gt { 
     background: var(--color-badge-wheel-gt); 
     color: var(--color-badge-text-dark); 
 }
 
-.car-badge.round { 
+.car-badge--round { 
     background: var(--color-badge-wheel-round); 
     color: var(--color-badge-text-dark); 
 }
 
 .car-badge[title*="flat"], 
-.car-badge.round-flat { 
+.car-badge--round-flat { 
     background: var(--color-badge-wheel-flat); 
     color: var(--color-badge-text-dark); 
     white-space: nowrap; 
 }
 
 /* Transmission badges */
-.car-badge.trans { 
+.car-badge--trans { 
     background: var(--color-badge-trans-auto); 
     color: var(--color-white); 
 }
 
-.car-badge.trans.sequential { 
+.car-badge--trans-sequential { 
     background: var(--color-badge-trans-seq); 
     color: var(--color-white); 
 }
 
-.car-badge.trans.h { 
+.car-badge--trans-h { 
     background: var(--color-badge-trans-h); 
     color: var(--color-white); 
 }
 
-.car-badge.unknown { 
+.car-badge--unknown { 
     background: var(--color-badge-unknown-bg); 
     color: var(--color-badge-unknown-text); 
 }
 
 /* Drive type badges */
-.car-badge.drive.rwd { 
+.car-badge--drive-rwd { 
     background: var(--color-badge-drive-rwd); 
     color: var(--color-badge-text-dark-alt); 
 }
 
-.car-badge.drive.fwd { 
+.car-badge--drive-fwd { 
     background: var(--color-badge-drive-fwd); 
     color: var(--color-badge-text-dark-alt); 
 }
 
-.car-badge.drive.awd { 
+.car-badge--drive-awd { 
     background: var(--color-badge-drive-awd); 
     color: var(--color-badge-text-dark-alt); 
 }

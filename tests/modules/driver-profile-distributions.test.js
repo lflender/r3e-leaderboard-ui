@@ -43,7 +43,7 @@ describe('DriverProfileDistributions', () => {
                 '<div id="dist-container">',
                 '<div class="entries-dist-summary">',
                 '<button class="entries-dist-toggle expanded" aria-expanded="true" aria-controls="test-content">',
-                '<span class="entries-dist-toggle-icon">\u25BC</span>',
+                '<span class="entries-dist-toggle__icon">\u25BC</span>',
                 '<span class="entries-dist-toggle-text">Entries</span>',
                 '</button>',
                 '<div id="test-content" class="entries-dist-content"></div>',

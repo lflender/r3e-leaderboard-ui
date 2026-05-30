@@ -54,8 +54,8 @@ describe('DriverProfileChartInteraction', () => {
         it('creates labels for active slices', () => {
             const chart = document.getElementById('chart-test');
             const slices = chart.querySelectorAll('.pie-slice');
-            slices[0].classList.add('pie-slice-active');
-            slices[2].classList.add('pie-slice-active');
+            slices[0].classList.add('pie-slice--active');
+            slices[2].classList.add('pie-slice--active');
 
             DriverProfileChartInteraction.showSliceLabels(chart, slices);
 
@@ -68,7 +68,7 @@ describe('DriverProfileChartInteraction', () => {
         it('does not create labels for dimmed slices', () => {
             const chart = document.getElementById('chart-test');
             const slices = chart.querySelectorAll('.pie-slice');
-            slices[0].classList.add('pie-slice-dimmed');
+            slices[0].classList.add('pie-slice--dimmed');
 
             DriverProfileChartInteraction.showSliceLabels(chart, slices);
 
@@ -81,7 +81,7 @@ describe('DriverProfileChartInteraction', () => {
             ]);
             const chart = document.getElementById('chart-test');
             const slices = chart.querySelectorAll('.pie-slice');
-            slices[0].classList.add('pie-slice-active');
+            slices[0].classList.add('pie-slice--active');
 
             DriverProfileChartInteraction.showSliceLabels(chart, slices);
 
@@ -97,7 +97,7 @@ describe('DriverProfileChartInteraction', () => {
             document.body.innerHTML = buildPieChart('chart-test', items);
             const chart = document.getElementById('chart-test');
             const slices = chart.querySelectorAll('.pie-slice');
-            slices.forEach(s => s.classList.add('pie-slice-active'));
+            slices.forEach(s => s.classList.add('pie-slice--active'));
 
             DriverProfileChartInteraction.showSliceLabels(chart, slices);
 
@@ -118,7 +118,7 @@ describe('DriverProfileChartInteraction', () => {
             document.body.innerHTML = buildPieChart('chart-test', items);
             const chart = document.getElementById('chart-test');
             const slices = chart.querySelectorAll('.pie-slice');
-            slices.forEach(s => s.classList.add('pie-slice-active'));
+            slices.forEach(s => s.classList.add('pie-slice--active'));
 
             DriverProfileChartInteraction.showSliceLabels(chart, slices);
 
@@ -137,7 +137,7 @@ describe('DriverProfileChartInteraction', () => {
             ]);
             const chart = document.getElementById('chart-test');
             const slices = chart.querySelectorAll('.pie-slice');
-            slices.forEach(s => s.classList.add('pie-slice-active'));
+            slices.forEach(s => s.classList.add('pie-slice--active'));
 
             DriverProfileChartInteraction.showSliceLabels(chart, slices);
 
@@ -167,11 +167,11 @@ describe('DriverProfileChartInteraction', () => {
             ]);
         });
 
-        it('adds pie-slice-active to matching slices', () => {
+        it('adds pie-slice--active to matching slices', () => {
             const slices = document.querySelectorAll('.pie-slice');
             DriverProfileChartInteraction.highlightSlices(slices, s => s.getAttribute('data-label') === 'A');
-            expect(slices[0].classList.contains('pie-slice-active')).toBe(true);
-            expect(slices[1].classList.contains('pie-slice-dimmed')).toBe(true);
+            expect(slices[0].classList.contains('pie-slice--active')).toBe(true);
+            expect(slices[1].classList.contains('pie-slice--dimmed')).toBe(true);
         });
 
         it('sets transform on active slices', () => {
@@ -193,8 +193,8 @@ describe('DriverProfileChartInteraction', () => {
                 const lbl = el.querySelector('.pie-legend-label').textContent;
                 return lbl === 'X';
             });
-            expect(items[0].classList.contains('pie-legend-item-active')).toBe(true);
-            expect(items[1].classList.contains('pie-legend-item-dimmed')).toBe(true);
+            expect(items[0].classList.contains('pie-legend-item--active')).toBe(true);
+            expect(items[1].classList.contains('pie-legend-item--dimmed')).toBe(true);
         });
     });
 
@@ -202,12 +202,12 @@ describe('DriverProfileChartInteraction', () => {
         it('removes active/dimmed classes and resets transform', () => {
             document.body.innerHTML = buildPieChart('chart-test', [{ label: 'A', midAngle: 0, pct: 100 }]);
             const slices = document.querySelectorAll('.pie-slice');
-            slices[0].classList.add('pie-slice-active');
+            slices[0].classList.add('pie-slice--active');
             slices[0].style.transform = 'translate(8px, 0px)';
 
             DriverProfileChartInteraction.clearSlices(slices);
 
-            expect(slices[0].classList.contains('pie-slice-active')).toBe(false);
+            expect(slices[0].classList.contains('pie-slice--active')).toBe(false);
             expect(slices[0].style.transform).toBe('');
         });
     });
@@ -216,11 +216,11 @@ describe('DriverProfileChartInteraction', () => {
         it('removes active/dimmed classes from legend items', () => {
             document.body.innerHTML = buildPieChart('chart-test', [{ label: 'A', midAngle: 0, pct: 100 }]);
             const items = document.querySelectorAll('.pie-legend-item');
-            items[0].classList.add('pie-legend-item-active');
+            items[0].classList.add('pie-legend-item--active');
 
             DriverProfileChartInteraction.clearLegend(items);
 
-            expect(items[0].classList.contains('pie-legend-item-active')).toBe(false);
+            expect(items[0].classList.contains('pie-legend-item--active')).toBe(false);
         });
     });
 
@@ -271,8 +271,8 @@ describe('DriverProfileChartInteraction', () => {
             classLegend.dispatchEvent(new Event('mouseenter'));
 
             const carSlices = document.querySelectorAll('#chart-car .pie-slice');
-            expect(carSlices[0].classList.contains('pie-slice-active')).toBe(true);
-            expect(carSlices[1].classList.contains('pie-slice-dimmed')).toBe(true);
+            expect(carSlices[0].classList.contains('pie-slice--active')).toBe(true);
+            expect(carSlices[1].classList.contains('pie-slice--dimmed')).toBe(true);
         });
 
         it('clears highlights on mouseleave', () => {
@@ -283,8 +283,8 @@ describe('DriverProfileChartInteraction', () => {
             classLegend.dispatchEvent(new Event('mouseleave'));
 
             const carSlices = document.querySelectorAll('#chart-car .pie-slice');
-            expect(carSlices[0].classList.contains('pie-slice-active')).toBe(false);
-            expect(carSlices[1].classList.contains('pie-slice-dimmed')).toBe(false);
+            expect(carSlices[0].classList.contains('pie-slice--active')).toBe(false);
+            expect(carSlices[1].classList.contains('pie-slice--dimmed')).toBe(false);
         });
 
         it('highlights class chart on car legend hover', () => {
@@ -294,8 +294,8 @@ describe('DriverProfileChartInteraction', () => {
             carLegend.dispatchEvent(new Event('mouseenter'));
 
             const classSlices = document.querySelectorAll('#chart-car-class .pie-slice');
-            expect(classSlices[0].classList.contains('pie-slice-active')).toBe(true);
-            expect(classSlices[1].classList.contains('pie-slice-dimmed')).toBe(true);
+            expect(classSlices[0].classList.contains('pie-slice--active')).toBe(true);
+            expect(classSlices[1].classList.contains('pie-slice--dimmed')).toBe(true);
         });
 
         it('highlights class and car charts on track legend hover', () => {
@@ -307,11 +307,11 @@ describe('DriverProfileChartInteraction', () => {
             const classSlices = document.querySelectorAll('#chart-car-class .pie-slice');
             const carSlices = document.querySelectorAll('#chart-car .pie-slice');
             // Spa has GT3 and TCR entries
-            expect(classSlices[0].classList.contains('pie-slice-active')).toBe(true);
-            expect(classSlices[1].classList.contains('pie-slice-active')).toBe(true);
+            expect(classSlices[0].classList.contains('pie-slice--active')).toBe(true);
+            expect(classSlices[1].classList.contains('pie-slice--active')).toBe(true);
             // BMW M4 and Hyundai both driven at Spa
-            expect(carSlices[0].classList.contains('pie-slice-active')).toBe(true);
-            expect(carSlices[1].classList.contains('pie-slice-active')).toBe(true);
+            expect(carSlices[0].classList.contains('pie-slice--active')).toBe(true);
+            expect(carSlices[1].classList.contains('pie-slice--active')).toBe(true);
         });
     });
 
@@ -333,8 +333,8 @@ describe('DriverProfileChartInteraction', () => {
             legend.dispatchEvent(new Event('mouseenter'));
 
             const points = document.querySelectorAll('.perf-dist-point');
-            expect(points[0].classList.contains('perf-dist-point-active')).toBe(true);
-            expect(points[1].classList.contains('perf-dist-point-active')).toBe(false);
+            expect(points[0].classList.contains('perf-dist-point--active')).toBe(true);
+            expect(points[1].classList.contains('perf-dist-point--active')).toBe(false);
         });
 
         it('clears perf dot highlights on mouseleave', () => {
@@ -345,7 +345,7 @@ describe('DriverProfileChartInteraction', () => {
             legend.dispatchEvent(new Event('mouseleave'));
 
             const points = document.querySelectorAll('.perf-dist-point');
-            expect(points[0].classList.contains('perf-dist-point-active')).toBe(false);
+            expect(points[0].classList.contains('perf-dist-point--active')).toBe(false);
         });
     });
 
@@ -373,8 +373,8 @@ describe('DriverProfileChartInteraction', () => {
             legend.dispatchEvent(new Event('mouseenter'));
 
             const bars = document.querySelectorAll('.entries-dist-bar');
-            expect(bars[0].classList.contains('entries-dist-bar-active')).toBe(true);
-            expect(bars[1].classList.contains('entries-dist-bar-active')).toBe(false);
+            expect(bars[0].classList.contains('entries-dist-bar--active')).toBe(true);
+            expect(bars[1].classList.contains('entries-dist-bar--active')).toBe(false);
         });
     });
 
@@ -398,7 +398,7 @@ describe('DriverProfileChartInteraction', () => {
             const breakdownItem = document.querySelector('.driver-stat-breakdown .pie-legend-item');
             breakdownItem.dispatchEvent(new Event('mouseenter'));
 
-            expect(breakdownItem.classList.contains('pie-legend-item-active')).toBe(true);
+            expect(breakdownItem.classList.contains('pie-legend-item--active')).toBe(true);
         });
 
         it('highlights breakdown items on pie chart legend hover', () => {
@@ -408,7 +408,7 @@ describe('DriverProfileChartInteraction', () => {
             pieLegend.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
 
             const bd = document.querySelector('.driver-stat-breakdown .pie-legend-item[data-class-label="GT3"]');
-            expect(bd.classList.contains('pie-legend-item-active')).toBe(true);
+            expect(bd.classList.contains('pie-legend-item--active')).toBe(true);
         });
     });
 
@@ -421,7 +421,7 @@ describe('DriverProfileChartInteraction', () => {
             document.body.innerHTML = buildPieChart('chart-test', items);
             const chart = document.getElementById('chart-test');
             const slices = chart.querySelectorAll('.pie-slice');
-            slices.forEach(s => s.classList.add('pie-slice-active'));
+            slices.forEach(s => s.classList.add('pie-slice--active'));
 
             DriverProfileChartInteraction.showSliceLabels(chart, slices);
 
@@ -441,7 +441,7 @@ describe('DriverProfileChartInteraction', () => {
             document.body.innerHTML = buildPieChart('chart-test', items);
             const chart = document.getElementById('chart-test');
             const slices = chart.querySelectorAll('.pie-slice');
-            slices.forEach(s => s.classList.add('pie-slice-active'));
+            slices.forEach(s => s.classList.add('pie-slice--active'));
 
             DriverProfileChartInteraction.showSliceLabels(chart, slices);
 
@@ -458,7 +458,7 @@ describe('DriverProfileChartInteraction', () => {
             document.body.innerHTML = buildPieChart('chart-test', items);
             const chart = document.getElementById('chart-test');
             const slices = chart.querySelectorAll('.pie-slice');
-            slices.forEach(s => s.classList.add('pie-slice-active'));
+            slices.forEach(s => s.classList.add('pie-slice--active'));
 
             DriverProfileChartInteraction.showSliceLabels(chart, slices);
 
@@ -480,7 +480,7 @@ describe('DriverProfileChartInteraction', () => {
             document.body.innerHTML = buildPieChart('chart-test', items);
             const chart = document.getElementById('chart-test');
             const slices = chart.querySelectorAll('.pie-slice');
-            slices.forEach(s => s.classList.add('pie-slice-active'));
+            slices.forEach(s => s.classList.add('pie-slice--active'));
 
             DriverProfileChartInteraction.showSliceLabels(chart, slices);
 
@@ -495,7 +495,7 @@ describe('DriverProfileChartInteraction', () => {
             ]);
             const chart = document.getElementById('chart-test');
             const slices = chart.querySelectorAll('.pie-slice');
-            slices.forEach(s => s.classList.add('pie-slice-active'));
+            slices.forEach(s => s.classList.add('pie-slice--active'));
 
             DriverProfileChartInteraction.showSliceLabels(chart, slices);
 
@@ -513,11 +513,11 @@ describe('DriverProfileChartInteraction', () => {
             chart._pieLogoResolver = (name) => name === 'Ferrari 488' ? '/images/ferrari.png' : '';
 
             const slices = chart.querySelectorAll('.pie-slice');
-            slices.forEach(s => s.classList.add('pie-slice-active'));
+            slices.forEach(s => s.classList.add('pie-slice--active'));
 
             DriverProfileChartInteraction.showSliceLabels(chart, slices);
 
-            const logo = chart.querySelector('.pie-cross-label-logo');
+            const logo = chart.querySelector('.pie-cross-label__logo');
             expect(logo).toBeTruthy();
             expect(logo.src).toContain('ferrari.png');
         });

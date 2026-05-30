@@ -44,7 +44,7 @@ const DriverProfileDistributions = (() => {
                 const content = document.getElementById(contentId);
                 if (!content) return;
                 toggle.setAttribute('aria-expanded', String(!expanded));
-                toggle.classList.toggle('expanded', !expanded);
+                toggle.classList.toggle('is-expanded', !expanded);
                 content.style.display = expanded ? 'none' : '';
             });
         });
@@ -75,7 +75,7 @@ const DriverProfileDistributions = (() => {
                             const c = document.getElementById(cId);
                             if (!c) return;
                             newToggle.setAttribute('aria-expanded', String(!exp));
-                            newToggle.classList.toggle('expanded', !exp);
+                            newToggle.classList.toggle('is-expanded', !exp);
                             c.style.display = exp ? 'none' : '';
                         });
                     }

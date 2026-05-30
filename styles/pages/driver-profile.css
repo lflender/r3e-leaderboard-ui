@@ -159,7 +159,7 @@
     min-width: 0;
 }
 
-.driver-stat-card.driver-stat-loading {
+.driver-stat-card.driver-stat-card--loading {
     opacity: 0.7;
 }
 
@@ -178,7 +178,7 @@
     to { transform: rotate(360deg); }
 }
 
-.driver-stat-card.driver-stat-not-ranked {
+.driver-stat-card.driver-stat-card--not-ranked {
     opacity: 0.6;
 }
 
@@ -425,12 +425,12 @@
     stroke-width: 1;
 }
 
-.pie-slice-active {
+.pie-slice--active {
     opacity: 1;
     filter: brightness(1.2);
 }
 
-.pie-slice-dimmed {
+.pie-slice--dimmed {
     opacity: 0.3;
 }
 
@@ -450,15 +450,15 @@
     animation: pie-label-fade-in 0.15s ease-out forwards;
 }
 
-.pie-cross-label-right {
+.pie-cross-label--right {
     transform: translateY(-50%);
 }
 
-.pie-cross-label-left {
+.pie-cross-label--left {
     transform: translate(-100%, -50%);
 }
 
-.pie-cross-label-logo {
+.pie-cross-label__logo {
     width: 14px;
     height: 14px;
     object-fit: contain;
@@ -532,20 +532,20 @@
     transition: color 0.15s;
 }
 
-.pie-legend-item-active {
+.pie-legend-item--active {
     color: var(--color-text-primary);
 }
 
-.pie-legend-item-dimmed {
+.pie-legend-item--dimmed {
     opacity: 0.3;
 }
 
-.pie-slice-active {
+.pie-slice--active {
     opacity: 1;
     filter: brightness(1.2);
 }
 
-.pie-slice-dimmed {
+.pie-slice--dimmed {
     opacity: 0.25;
 }
 
@@ -628,7 +628,7 @@
     background-color: var(--color-surface);
 }
 
-.driver-profile-dist-card .entries-dist-toggle-icon {
+.driver-profile-dist-card .entries-dist-toggle__icon {
     display: none;
 }
 
@@ -702,7 +702,7 @@
     transition: background 0.1s, transform 0.1s;
 }
 
-.perf-dist-point-active {
+.perf-dist-point--active {
     background: var(--color-primary-light-solid);
     transform: scale(1.8);
     z-index: 4;
@@ -752,7 +752,7 @@
         padding: 0.1rem 0.3rem;
     }
 
-    .pie-cross-label-logo {
+    .pie-cross-label__logo {
         width: 12px;
         height: 12px;
     }
@@ -883,7 +883,7 @@
         padding: 0.08rem 0.25rem;
     }
 
-    .pie-cross-label-logo {
+    .pie-cross-label__logo {
         width: 10px;
         height: 10px;
     }

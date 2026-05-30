@@ -123,7 +123,7 @@
 
         let html = '<div class="entries-dist-summary">';
         html += '<button type="button" class="entries-dist-toggle' + (isExpanded ? ' expanded' : '') + '" aria-expanded="' + (isExpanded ? 'true' : 'false') + '" aria-controls="' + summaryId + '">';
-        html += '<span class="entries-dist-toggle-icon">▼</span>';
+        html += '<span class="entries-dist-toggle__icon">▼</span>';
         html += '<span class="entries-dist-toggle-text">Entries Distribution Graph</span>';
         html += '</button>';
 
@@ -203,7 +203,7 @@
             var perfChart = container.querySelector('.perf-dist-chart');
 
             function clearPerfHighlights() {
-                highlightedPoints.forEach(p => p.classList.remove('perf-dist-point-active'));
+                highlightedPoints.forEach(p => p.classList.remove('perf-dist-point--active'));
                 highlightedPoints = [];
             }
 
@@ -211,7 +211,7 @@
                 clearPerfHighlights();
                 if (!perfChart || !date) return;
                 highlightedPoints = Array.from(perfChart.querySelectorAll('.perf-dist-point[data-date="' + date + '"]'));
-                highlightedPoints.forEach(p => p.classList.add('perf-dist-point-active'));
+                highlightedPoints.forEach(p => p.classList.add('perf-dist-point--active'));
             }
 
             svg.addEventListener('mousemove', (e) => {
@@ -238,7 +238,7 @@
 
                 if (!nearest) {
                     if (activeBar) {
-                        activeBar.classList.remove('entries-dist-bar-active');
+                        activeBar.classList.remove('entries-dist-bar--active');
                         activeBar = null;
                     }
                     clearPerfHighlights();
@@ -247,8 +247,8 @@
                 }
 
                 if (activeBar !== nearest) {
-                    if (activeBar) activeBar.classList.remove('entries-dist-bar-active');
-                    nearest.classList.add('entries-dist-bar-active');
+                    if (activeBar) activeBar.classList.remove('entries-dist-bar--active');
+                    nearest.classList.add('entries-dist-bar--active');
                     activeBar = nearest;
                     highlightPerfPoints(nearest.getAttribute('data-date'));
                 }
@@ -262,7 +262,7 @@
 
             svg.addEventListener('mouseleave', () => {
                 if (activeBar) {
-                    activeBar.classList.remove('entries-dist-bar-active');
+                    activeBar.classList.remove('entries-dist-bar--active');
 
                     activeBar = null;
                 }
@@ -350,7 +350,7 @@
                 const threshold = Math.max(2, 100 / points.length);
                 if (!nearest || minDist > threshold) {
                     if (activePoint) {
-                        activePoint.classList.remove('perf-dist-point-active');
+                        activePoint.classList.remove('perf-dist-point--active');
                         activePoint = null;
                     }
                     Tooltip.hide(tooltip);
@@ -358,8 +358,8 @@
                 }
 
                 if (activePoint !== nearest) {
-                    if (activePoint) activePoint.classList.remove('perf-dist-point-active');
-                    nearest.classList.add('perf-dist-point-active');
+                    if (activePoint) activePoint.classList.remove('perf-dist-point--active');
+                    nearest.classList.add('perf-dist-point--active');
                     activePoint = nearest;
                 }
 
@@ -381,7 +381,7 @@
 
             chart.addEventListener('mouseleave', () => {
                 if (activePoint) {
-                    activePoint.classList.remove('perf-dist-point-active');
+                    activePoint.classList.remove('perf-dist-point--active');
                     activePoint = null;
                 }
                 Tooltip.hide(tooltip);

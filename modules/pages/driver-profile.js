@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Driver Profile Page Module
  * Orchestrator that coordinates rendering and interaction for the driver profile page.
  * Delegates to:
@@ -105,7 +105,7 @@ class DriverProfile {
                     const card = document.getElementById('stat-' + metric.key);
                     if (!card) return;
 
-                    card.classList.remove('driver-stat-loading');
+                    card.classList.remove('driver-stat-card--loading');
 
                     const valueEl = card.querySelector('.driver-stat-value');
                     const posEl = card.querySelector('.driver-stat-position');
@@ -117,7 +117,7 @@ class DriverProfile {
                         posEl.textContent = '#' + result.position.toLocaleString() +
                             ' of ' + result.total.toLocaleString();
                     } else {
-                        card.classList.add('driver-stat-not-ranked');
+                        card.classList.add('driver-stat-card--not-ranked');
                         valueEl.textContent = '\u2014';
                         posEl.textContent = 'Not ranked';
                     }
@@ -125,8 +125,8 @@ class DriverProfile {
                 .catch(() => {
                     const card = document.getElementById('stat-' + metric.key);
                     if (!card) return;
-                    card.classList.remove('driver-stat-loading');
-                    card.classList.add('driver-stat-not-ranked');
+                    card.classList.remove('driver-stat-card--loading');
+                    card.classList.add('driver-stat-card--not-ranked');
                     const posEl = card.querySelector('.driver-stat-position');
                     if (posEl) posEl.textContent = 'Unavailable';
                 });

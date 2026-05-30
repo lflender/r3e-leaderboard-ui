@@ -30,23 +30,23 @@
     box-shadow: 0 0 4px var(--color-black-alpha-35);
 }
 
-.status-led.green {
+.status-led--green {
     background: var(--color-success);
     box-shadow: 0 0 8px var(--color-success-alpha-60);
 }
 
-.status-led.yellow {
+.status-led--yellow {
     background: var(--color-warning);
     box-shadow: 0 0 8px var(--color-warning-glow);
 }
 
-.status-led.red {
+.status-led--red {
     background: var(--color-danger);
     box-shadow: 0 0 8px var(--color-danger-alpha-60);
     animation: pulse-urgent 1s ease-in-out infinite;
 }
 
-.status-led.fetching {
+.status-led.is-fetching {
     animation: flicker 2.5s ease-in-out infinite;
 }
 

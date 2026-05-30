@@ -32,10 +32,10 @@ const DriverProfileChartInteraction = (() => {
     function highlightSlices(slices, matchFn) {
         slices.forEach(slice => {
             if (matchFn(slice)) {
-                slice.classList.add('pie-slice-active');
+                slice.classList.add('pie-slice--active');
                 popSlice(slice);
             } else {
-                slice.classList.add('pie-slice-dimmed');
+                slice.classList.add('pie-slice--dimmed');
                 slice.style.transform = '';
             }
         });
@@ -48,10 +48,10 @@ const DriverProfileChartInteraction = (() => {
         let firstActive = null;
         items.forEach(el => {
             if (matchFn(el)) {
-                el.classList.add('pie-legend-item-active');
+                el.classList.add('pie-legend-item--active');
                 if (!firstActive) firstActive = el;
             } else {
-                el.classList.add('pie-legend-item-dimmed');
+                el.classList.add('pie-legend-item--dimmed');
             }
         });
         // Scroll the first active legend item into view within its scroll container
@@ -79,7 +79,7 @@ const DriverProfileChartInteraction = (() => {
      */
     function clearSlices(slices) {
         slices.forEach(slice => {
-            slice.classList.remove('pie-slice-active', 'pie-slice-dimmed');
+            slice.classList.remove('pie-slice--active', 'pie-slice--dimmed');
             slice.style.transform = '';
         });
     }
@@ -89,7 +89,7 @@ const DriverProfileChartInteraction = (() => {
      */
     function clearLegend(items) {
         items.forEach(el => {
-            el.classList.remove('pie-legend-item-active', 'pie-legend-item-dimmed');
+            el.classList.remove('pie-legend-item--active', 'pie-legend-item--dimmed');
         });
     }
 
@@ -100,15 +100,15 @@ const DriverProfileChartInteraction = (() => {
         const scrolled = new Set();
         document.querySelectorAll('.driver-stat-breakdown .pie-legend-item').forEach(bd => {
             if (matchFn(bd)) {
-                bd.classList.add('pie-legend-item-active');
-                bd.classList.remove('pie-legend-item-dimmed');
+                bd.classList.add('pie-legend-item--active');
+                bd.classList.remove('pie-legend-item--dimmed');
                 const parent = bd.closest('.stat-breakdown-list');
                 if (parent && !scrolled.has(parent)) {
                     scrolled.add(parent);
                     scrollIntoViewSmooth(bd);
                 }
             } else {
-                bd.classList.add('pie-legend-item-dimmed');
+                bd.classList.add('pie-legend-item--dimmed');
             }
         });
     }
@@ -250,7 +250,7 @@ const DriverProfileChartInteraction = (() => {
             clearLegend(trackLegendItems);
             clearSlices(trackSlices);
             document.querySelectorAll('.driver-stat-breakdown .pie-legend-item').forEach(bd => {
-                bd.classList.remove('pie-legend-item-active', 'pie-legend-item-dimmed');
+                bd.classList.remove('pie-legend-item--active', 'pie-legend-item--dimmed');
             });
         }
 
@@ -385,11 +385,11 @@ const DriverProfileChartInteraction = (() => {
         function highlightPoints(matchFn) {
             clearPoints();
             highlightedPoints = perfPoints.filter(matchFn);
-            highlightedPoints.forEach(p => p.classList.add('perf-dist-point-active'));
+            highlightedPoints.forEach(p => p.classList.add('perf-dist-point--active'));
         }
 
         function clearPoints() {
-            highlightedPoints.forEach(p => p.classList.remove('perf-dist-point-active'));
+            highlightedPoints.forEach(p => p.classList.remove('perf-dist-point--active'));
             highlightedPoints = [];
         }
 
@@ -491,14 +491,14 @@ const DriverProfileChartInteraction = (() => {
             dates.forEach(d => {
                 const bar = barByDate.get(d);
                 if (bar) {
-                    bar.classList.add('entries-dist-bar-active');
+                    bar.classList.add('entries-dist-bar--active');
                     highlightedBars.push(bar);
                 }
             });
         }
 
         function clearBars() {
-            highlightedBars.forEach(b => b.classList.remove('entries-dist-bar-active'));
+            highlightedBars.forEach(b => b.classList.remove('entries-dist-bar--active'));
             highlightedBars = [];
         }
 
@@ -530,7 +530,7 @@ const DriverProfileChartInteraction = (() => {
         const perfChart = container.querySelector('.perf-dist-chart');
         if (perfChart) {
             perfChart.addEventListener('mousemove', () => {
-                const activePoint = perfChart.querySelector('.perf-dist-point-active');
+                const activePoint = perfChart.querySelector('.perf-dist-point--active');
                 if (activePoint) {
                     const date = activePoint.getAttribute('data-date');
                     if (date) highlightBars(new Set([date]));
@@ -574,18 +574,18 @@ const DriverProfileChartInteraction = (() => {
             el.addEventListener('mouseenter', () => {
                 allBreakdownItems.forEach(bd => {
                     if (bd === el) {
-                        bd.classList.add('pie-legend-item-active');
-                        bd.classList.remove('pie-legend-item-dimmed');
+                        bd.classList.add('pie-legend-item--active');
+                        bd.classList.remove('pie-legend-item--dimmed');
                     } else {
-                        bd.classList.add('pie-legend-item-dimmed');
-                        bd.classList.remove('pie-legend-item-active');
+                        bd.classList.add('pie-legend-item--dimmed');
+                        bd.classList.remove('pie-legend-item--active');
                     }
                 });
                 if (matchingLegend) matchingLegend.dispatchEvent(new Event('mouseenter'));
             });
             el.addEventListener('mouseleave', () => {
                 allBreakdownItems.forEach(bd => {
-                    bd.classList.remove('pie-legend-item-active', 'pie-legend-item-dimmed');
+                    bd.classList.remove('pie-legend-item--active', 'pie-legend-item--dimmed');
                 });
                 if (matchingLegend) matchingLegend.dispatchEvent(new Event('mouseleave'));
             });
@@ -598,7 +598,7 @@ const DriverProfileChartInteraction = (() => {
                 highlightBreakdownItems(bd => bd.getAttribute('data-class-label') === label);
             });
             el.addEventListener('mouseleave', () => {
-                allBreakdownItems.forEach(bd => bd.classList.remove('pie-legend-item-active', 'pie-legend-item-dimmed'));
+                allBreakdownItems.forEach(bd => bd.classList.remove('pie-legend-item--active', 'pie-legend-item--dimmed'));
             });
         });
 
@@ -609,7 +609,7 @@ const DriverProfileChartInteraction = (() => {
                 highlightBreakdownItems(bd => bd.getAttribute('data-class-label') === label);
             });
             el.addEventListener('mouseleave', () => {
-                allBreakdownItems.forEach(bd => bd.classList.remove('pie-legend-item-active', 'pie-legend-item-dimmed'));
+                allBreakdownItems.forEach(bd => bd.classList.remove('pie-legend-item--active', 'pie-legend-item--dimmed'));
             });
         });
     }
@@ -710,7 +710,7 @@ const DriverProfileChartInteraction = (() => {
             clearSlices(trackSlices);
             clearLegend(trackLegend);
             document.querySelectorAll('.driver-stat-breakdown .pie-legend-item').forEach(bd => {
-                bd.classList.remove('pie-legend-item-active', 'pie-legend-item-dimmed');
+                bd.classList.remove('pie-legend-item--active', 'pie-legend-item--dimmed');
             });
         }
 

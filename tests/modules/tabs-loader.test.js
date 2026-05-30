@@ -29,7 +29,7 @@ describe('TabsLoader', () => {
                 : '';
             if (tab.id === activeId) {
                 if (tab.id === 'challenge') localStorage.setItem(BADGE_STORAGE_KEY, '1');
-                html += '<button class="tab-button active">' + tab.label + '</button>';
+                html += '<button class="tab-button is-active">' + tab.label + '</button>';
             } else {
                 html += '<a class="tab-button" href="' + tab.href + '">' + tab.label + badgeHtml + '</a>';
             }
@@ -50,7 +50,7 @@ describe('TabsLoader', () => {
         const buttons = container.querySelectorAll('.tab-button');
         expect(buttons.length).toBe(7);
 
-        const active = container.querySelector('button.tab-button.active');
+        const active = container.querySelector('button.tab-button.is-active');
         expect(active).not.toBeNull();
         expect(active.textContent).toBe('Challenge');
 
@@ -62,7 +62,7 @@ describe('TabsLoader', () => {
         document.body.innerHTML = '<div class="tabs" id="site-tabs"></div>';
         loadTabs();
         const container = document.getElementById('site-tabs');
-        const active = container.querySelector('button.tab-button.active');
+        const active = container.querySelector('button.tab-button.is-active');
         expect(active).not.toBeNull();
         expect(active.textContent).toBe('Ranked');
 
@@ -73,7 +73,7 @@ describe('TabsLoader', () => {
     it('marks drivers tab active correctly', () => {
         document.body.innerHTML = '<div class="tabs" id="site-tabs" data-active="drivers"></div>';
         loadTabs();
-        const active = document.querySelector('button.tab-button.active');
+        const active = document.querySelector('button.tab-button.is-active');
         expect(active.textContent).toBe('Drivers');
     });
 

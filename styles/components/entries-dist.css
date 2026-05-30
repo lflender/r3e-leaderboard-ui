@@ -29,7 +29,7 @@
     background-color: var(--color-hover-bg);
 }
 
-.entries-dist-toggle-icon {
+.entries-dist-toggle__icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -39,11 +39,11 @@
     min-width: 1rem;
 }
 
-.entries-dist-toggle.expanded .entries-dist-toggle-icon {
+.entries-dist-toggle.is-expanded .entries-dist-toggle__icon {
     transform: rotate(0deg);
 }
 
-.entries-dist-toggle:not(.expanded) .entries-dist-toggle-icon {
+.entries-dist-toggle:not(.is-expanded) .entries-dist-toggle__icon {
     transform: rotate(-90deg);
 }
 
@@ -247,7 +247,7 @@
     transform-box: fill-box;
 }
 
-.entries-dist-bar-active {
+.entries-dist-bar--active {
     fill: var(--color-primary-light-solid);
     transform: scale(2.5, 1.3);
 }

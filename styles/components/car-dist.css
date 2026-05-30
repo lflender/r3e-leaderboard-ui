@@ -29,7 +29,7 @@
     background-color: var(--color-hover-bg);
 }
 
-.car-dist-toggle-icon {
+.car-dist-toggle__icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -39,11 +39,11 @@
     min-width: 1rem;
 }
 
-.car-dist-toggle.expanded .car-dist-toggle-icon {
+.car-dist-toggle.is-expanded .car-dist-toggle__icon {
     transform: rotate(0deg);
 }
 
-.car-dist-toggle:not(.expanded) .car-dist-toggle-icon {
+.car-dist-toggle:not(.is-expanded) .car-dist-toggle__icon {
     transform: rotate(-90deg);
 }
 

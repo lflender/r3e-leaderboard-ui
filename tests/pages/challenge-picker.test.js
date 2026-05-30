@@ -16,8 +16,8 @@ describe('ChallengePicker page', () => {
             resolveBrandLogoPath: (name) => name ? `brand-logo://${name}` : '',
             resolveCarClassLogoByName: (name) => name ? `class-logo://${name}` : '',
             wheelBadge: (cat) => `<span class="car-badge">${cat}</span>`,
-            transBadge: (cat) => `<span class="car-badge trans">${cat}</span>`,
-            driveBadge: (drive) => `<span class="car-badge drive">${drive}</span>`,
+            transBadge: (cat) => `<span class="car-badge car-badge--trans">${cat}</span>`,
+            driveBadge: (drive) => `<span class="car-badge car-badge--drive">${drive}</span>`,
             renderCarDisplayHtml: (name) => `<span class="cars-page-car-name">${name}</span>`,
             attachBrandLogoHandlers: () => {}
         };

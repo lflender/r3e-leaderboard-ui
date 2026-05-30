@@ -73,7 +73,7 @@ const DriverProfileRenderers = (() => {
         if (!metrics.length) return '';
 
         const cards = metrics.map(m =>
-            `<div class="driver-stat-card driver-stat-loading" id="stat-${m.key}">` +
+            `<div class="driver-stat-card driver-stat-card--loading" id="stat-${m.key}">` +
             `<div class="driver-stat-label">${R3EUtils.escapeHtml(m.label)}</div>` +
             '<div class="driver-stat-value"><span class="driver-stat-spinner"></span></div>' +
             '<div class="driver-stat-position">Loading\u2026</div>' +
@@ -220,7 +220,7 @@ const DriverProfileRenderers = (() => {
         let html = '<div class="driver-profile-dist-card">';
         html += '<div class="entries-dist-summary perf-dist-summary">';
         html += '<button type="button" class="entries-dist-toggle expanded" aria-expanded="true" aria-controls="' + summaryId + '">';
-        html += '<span class="entries-dist-toggle-icon">\u25BC</span>';
+        html += '<span class="entries-dist-toggle__icon">\u25BC</span>';
         html += '<span class="entries-dist-toggle-text">Performance Over Time</span>';
         html += '</button>';
 

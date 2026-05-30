@@ -1014,7 +1014,7 @@ function bindCarDistributionToggle() {
         toggleBtn.addEventListener('click', () => {
             const isCollapsed = summaryTable.style.display === 'none';
             summaryTable.style.display = isCollapsed ? '' : 'none';
-            toggleBtn.classList.toggle('expanded', isCollapsed);
+            toggleBtn.classList.toggle('is-expanded', isCollapsed);
             toggleBtn.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false');
             DetailState.carDistributionExpanded = isCollapsed;
         });
@@ -1028,7 +1028,7 @@ function bindEntriesDistributionInteractions() {
         toggleBtn.addEventListener('click', () => {
             const isCollapsed = content.style.display === 'none';
             content.style.display = isCollapsed ? '' : 'none';
-            toggleBtn.classList.toggle('expanded', isCollapsed);
+            toggleBtn.classList.toggle('is-expanded', isCollapsed);
             toggleBtn.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false');
             DetailState.entriesDistributionExpanded = isCollapsed;
         });

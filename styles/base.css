@@ -122,7 +122,7 @@ footer {
 }
 
 /* Utility classes */
-.nowrap {
+.no-wrap {
     white-space: nowrap;
 }
 

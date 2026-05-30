@@ -390,7 +390,7 @@ describe('DriverProfile', () => {
         await new Promise(r => setTimeout(r, 10));
 
         const podiumCard = document.getElementById('stat-podium');
-        expect(podiumCard.classList.contains('driver-stat-not-ranked')).toBe(true);
+        expect(podiumCard.classList.contains('driver-stat-card--not-ranked')).toBe(true);
         expect(podiumCard.querySelector('.driver-stat-position').textContent).toBe('Not ranked');
     });
 
@@ -481,22 +481,22 @@ describe('DriverProfile', () => {
 
         // avg_bested and bested should already be rendered
         const avgCard = document.getElementById('stat-avg_bested');
-        expect(avgCard.classList.contains('driver-stat-loading')).toBe(false);
+        expect(avgCard.classList.contains('driver-stat-card--loading')).toBe(false);
         expect(avgCard.querySelector('.driver-stat-value').textContent).toBe('78.5%');
 
         const bestedCard = document.getElementById('stat-bested');
-        expect(bestedCard.classList.contains('driver-stat-loading')).toBe(false);
+        expect(bestedCard.classList.contains('driver-stat-card--loading')).toBe(false);
 
         // pole should still be loading
         const poleCard = document.getElementById('stat-pole');
-        expect(poleCard.classList.contains('driver-stat-loading')).toBe(true);
+        expect(poleCard.classList.contains('driver-stat-card--loading')).toBe(true);
         expect(poleCard.querySelector('.driver-stat-position').textContent).toContain('Loading');
 
         // Now resolve pole
         resolvePole({ value: 5, position: 500, total: 10000 });
         await new Promise(r => setTimeout(r, 10));
 
-        expect(poleCard.classList.contains('driver-stat-loading')).toBe(false);
+        expect(poleCard.classList.contains('driver-stat-card--loading')).toBe(false);
         expect(poleCard.querySelector('.driver-stat-value').textContent).toBe('5');
     });
 
@@ -524,7 +524,7 @@ describe('DriverProfile', () => {
 
         // Failed stat should show Unavailable, not block others
         const bestedCard = document.getElementById('stat-bested');
-        expect(bestedCard.classList.contains('driver-stat-not-ranked')).toBe(true);
+        expect(bestedCard.classList.contains('driver-stat-card--not-ranked')).toBe(true);
         expect(bestedCard.querySelector('.driver-stat-position').textContent).toBe('Unavailable');
     });
 
@@ -650,9 +650,9 @@ describe('DriverProfile', () => {
         const bestedCard = document.getElementById('stat-bested');
         const items = bestedCard.querySelectorAll('.pie-legend-item');
         items[0].dispatchEvent(new Event('mouseenter'));
-        expect(items[0].classList.contains('pie-legend-item-active')).toBe(true);
+        expect(items[0].classList.contains('pie-legend-item--active')).toBe(true);
         items[0].dispatchEvent(new Event('mouseleave'));
-        expect(items[0].classList.contains('pie-legend-item-active')).toBe(false);
+        expect(items[0].classList.contains('pie-legend-item--active')).toBe(false);
     });
 
     it('cross-highlights pie chart when hovering breakdown item', async () => {
@@ -676,10 +676,10 @@ describe('DriverProfile', () => {
         const spy = vi.spyOn(chartLegendGT3, 'dispatchEvent');
         bdItem.dispatchEvent(new Event('mouseenter'));
         expect(spy).toHaveBeenCalled();
-        expect(bdItem.classList.contains('pie-legend-item-active')).toBe(true);
+        expect(bdItem.classList.contains('pie-legend-item--active')).toBe(true);
 
         bdItem.dispatchEvent(new Event('mouseleave'));
-        expect(bdItem.classList.contains('pie-legend-item-active')).toBe(false);
+        expect(bdItem.classList.contains('pie-legend-item--active')).toBe(false);
         spy.mockRestore();
     });
 
@@ -698,12 +698,12 @@ describe('DriverProfile', () => {
 
         const bdItems = document.querySelectorAll('.driver-stat-breakdown .pie-legend-item[data-class-label="GT3"]');
         bdItems.forEach(bd => {
-            expect(bd.classList.contains('pie-legend-item-active')).toBe(true);
+            expect(bd.classList.contains('pie-legend-item--active')).toBe(true);
         });
 
         chartLegendGT3.dispatchEvent(new Event('mouseleave'));
         bdItems.forEach(bd => {
-            expect(bd.classList.contains('pie-legend-item-active')).toBe(false);
+            expect(bd.classList.contains('pie-legend-item--active')).toBe(false);
         });
     });
 
@@ -760,13 +760,13 @@ describe('DriverProfile', () => {
         const classGT3 = classChart.querySelector('.pie-legend-item[data-index="0"]');
         classGT3.dispatchEvent(new Event('mouseenter'));
 
-        expect(bmwItem.classList.contains('pie-legend-item-active')).toBe(true);
+        expect(bmwItem.classList.contains('pie-legend-item--active')).toBe(true);
         const hyundaiItem = Array.from(carItems).find(el => el.textContent.includes('Hyundai'));
-        expect(hyundaiItem.classList.contains('pie-legend-item-dimmed')).toBe(true);
+        expect(hyundaiItem.classList.contains('pie-legend-item--dimmed')).toBe(true);
 
         classGT3.dispatchEvent(new Event('mouseleave'));
-        expect(bmwItem.classList.contains('pie-legend-item-active')).toBe(false);
-        expect(hyundaiItem.classList.contains('pie-legend-item-dimmed')).toBe(false);
+        expect(bmwItem.classList.contains('pie-legend-item--active')).toBe(false);
+        expect(hyundaiItem.classList.contains('pie-legend-item--dimmed')).toBe(false);
     });
 
     it('cross-highlights class chart when hovering car chart legend', async () => {
@@ -790,12 +790,12 @@ describe('DriverProfile', () => {
         const gt3Class = Array.from(classLegendItems).find(el => el.textContent.includes('GT3'));
         const tcrClass = Array.from(classLegendItems).find(el => el.textContent.includes('TCR'));
 
-        expect(gt3Class.classList.contains('pie-legend-item-active')).toBe(true);
-        expect(tcrClass.classList.contains('pie-legend-item-dimmed')).toBe(true);
+        expect(gt3Class.classList.contains('pie-legend-item--active')).toBe(true);
+        expect(tcrClass.classList.contains('pie-legend-item--dimmed')).toBe(true);
 
         bmwItem.dispatchEvent(new Event('mouseleave'));
-        expect(gt3Class.classList.contains('pie-legend-item-active')).toBe(false);
-        expect(tcrClass.classList.contains('pie-legend-item-dimmed')).toBe(false);
+        expect(gt3Class.classList.contains('pie-legend-item--active')).toBe(false);
+        expect(tcrClass.classList.contains('pie-legend-item--dimmed')).toBe(false);
     });
 
     it('shows entry count after avg_bested value in breakdown', async () => {
@@ -832,12 +832,12 @@ describe('DriverProfile', () => {
         expect(gt3Slice).toBeTruthy();
         gt3Slice.dispatchEvent(new Event('mouseenter'));
 
-        expect(bmwItem.classList.contains('pie-legend-item-active')).toBe(true);
-        expect(hyundaiItem.classList.contains('pie-legend-item-dimmed')).toBe(true);
+        expect(bmwItem.classList.contains('pie-legend-item--active')).toBe(true);
+        expect(hyundaiItem.classList.contains('pie-legend-item--dimmed')).toBe(true);
 
         gt3Slice.dispatchEvent(new Event('mouseleave'));
-        expect(bmwItem.classList.contains('pie-legend-item-active')).toBe(false);
-        expect(hyundaiItem.classList.contains('pie-legend-item-dimmed')).toBe(false);
+        expect(bmwItem.classList.contains('pie-legend-item--active')).toBe(false);
+        expect(hyundaiItem.classList.contains('pie-legend-item--dimmed')).toBe(false);
     });
 
     it('cross-highlights class chart when hovering car chart pie slice', async () => {
@@ -861,11 +861,11 @@ describe('DriverProfile', () => {
         const gt3Class = Array.from(classLegendItems).find(el => el.textContent.includes('GT3'));
         const tcrClass = Array.from(classLegendItems).find(el => el.textContent.includes('TCR'));
 
-        expect(gt3Class.classList.contains('pie-legend-item-active')).toBe(true);
-        expect(tcrClass.classList.contains('pie-legend-item-dimmed')).toBe(true);
+        expect(gt3Class.classList.contains('pie-legend-item--active')).toBe(true);
+        expect(tcrClass.classList.contains('pie-legend-item--dimmed')).toBe(true);
 
         bmwSlice.dispatchEvent(new Event('mouseleave'));
-        expect(gt3Class.classList.contains('pie-legend-item-active')).toBe(false);
-        expect(tcrClass.classList.contains('pie-legend-item-dimmed')).toBe(false);
+        expect(gt3Class.classList.contains('pie-legend-item--active')).toBe(false);
+        expect(tcrClass.classList.contains('pie-legend-item--dimmed')).toBe(false);
     });
 });

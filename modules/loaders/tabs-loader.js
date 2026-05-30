@@ -39,7 +39,7 @@
                 : '';
             if (activeId && tab.id === activeId) {
                 dismissBadge(tab.id);
-                html += '<button class="tab-button active">' + tab.label + '</button>';
+                html += '<button class="tab-button is-active">' + tab.label + '</button>';
             } else {
                 html += '<a class="tab-button" href="' + tab.href + '">' + tab.label + badgeHtml + '</a>';
             }
@@ -48,7 +48,7 @@
         initScrollHint(container);
 
         // On mobile, scroll the tabs container so the active tab is visible
-        var activeBtn = container.querySelector('.tab-button.active');
+        var activeBtn = container.querySelector('.tab-button.is-active');
         if (activeBtn) {
             var idx = Array.prototype.indexOf.call(container.children, activeBtn);
             var middleIdx = Math.floor(TABS.length / 2);
@@ -98,8 +98,8 @@
             var atEnd = container.scrollLeft + container.clientWidth >= container.scrollWidth - 1;
             container.classList.toggle('tabs--fade-right', overflows && !atEnd);
             container.classList.toggle('tabs--fade-left', overflows && !atStart);
-            leftChev.classList.toggle('visible', overflows && !atStart);
-            rightChev.classList.toggle('visible', overflows && !atEnd);
+            leftChev.classList.toggle('is-visible', overflows && !atStart);
+            rightChev.classList.toggle('is-visible', overflows && !atEnd);
         }
         // Check after layout settles
         update();

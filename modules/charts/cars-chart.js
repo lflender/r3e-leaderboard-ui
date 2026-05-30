@@ -1,6 +1,6 @@
 /**
  * Car Distribution Summary module for the Detail page.
- * Exposes window.DetailCarDist with functions:
+ * Exposes window.CarsChart with functions:
  *   - getStats(data) → sorted stats array
  *   - generateHtml(data, sortBy, sortDir, isExpanded) → HTML string
  */
@@ -110,7 +110,7 @@
         return html;
     }
 
-    window.DetailCarDist = {
+    window.CarsChart = {
         getStats: getCarDistributionStats,
         generateHtml: generateCarDistributionSummary
     };

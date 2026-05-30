@@ -15,8 +15,8 @@ const DriverProfileDistributions = (() => {
 
         let html = '<div class="driver-profile-distributions-grid">';
 
-        if (window.DetailEntriesDist) {
-            const entriesDistHtml = DetailEntriesDist.generateHtml(entries, true, null, null, entries, {});
+        if (window.EntriesChart) {
+            const entriesDistHtml = EntriesChart.generateHtml(entries, true, null, null, entries, {});
             if (entriesDistHtml) {
                 html += '<div class="driver-profile-dist-card">' + entriesDistHtml + '</div>';
             }
@@ -51,7 +51,7 @@ const DriverProfileDistributions = (() => {
 
         // Timeframe controls for entries distribution
         const entriesDistEl = container.querySelector('.entries-dist-summary:not(.perf-dist-summary)');
-        if (entriesDistEl && window.DetailEntriesDist) {
+        if (entriesDistEl && window.EntriesChart) {
             const startInput = entriesDistEl.querySelector('.entries-timeframe-start');
             const endInput = entriesDistEl.querySelector('.entries-timeframe-end');
             const lastWeekBtn = entriesDistEl.querySelector('.entries-timeframe-last-week');
@@ -60,8 +60,8 @@ const DriverProfileDistributions = (() => {
                 const refresh = () => {
                     const parent = entriesDistEl.closest('.driver-profile-dist-card');
                     if (!parent) return;
-                    const filtered = DetailEntriesDist.applyTimeframeFilter(entries, startInput.value, endInput.value);
-                    const newHtml = DetailEntriesDist.generateHtml(filtered, true, startInput.value, endInput.value, entries, {
+                    const filtered = EntriesChart.applyTimeframeFilter(entries, startInput.value, endInput.value);
+                    const newHtml = EntriesChart.generateHtml(filtered, true, startInput.value, endInput.value, entries, {
                         timeframeStart: startInput.value,
                         timeframeEnd: endInput.value
                     });
@@ -88,8 +88,8 @@ const DriverProfileDistributions = (() => {
                     lastWeekBtn.addEventListener('click', () => {
                         const now = new Date();
                         const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-                        startInput.value = DetailEntriesDist.toLocalDateInputValue(weekAgo);
-                        endInput.value = DetailEntriesDist.toLocalDateInputValue(now);
+                        startInput.value = EntriesChart.toLocalDateInputValue(weekAgo);
+                        endInput.value = EntriesChart.toLocalDateInputValue(now);
                         refresh();
                     });
                 }
@@ -97,9 +97,9 @@ const DriverProfileDistributions = (() => {
         }
 
         // Wire tooltips
-        if (window.DetailEntriesDist) {
-            DetailEntriesDist.wireTooltips(container, entries);
-            DetailEntriesDist.wirePerfTooltips(container);
+        if (window.EntriesChart) {
+            EntriesChart.wireTooltips(container, entries);
+            EntriesChart.wirePerfTooltips(container);
         }
     }
 

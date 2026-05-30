@@ -10,7 +10,7 @@ beforeAll(() => {
             .replace(/"/g, '&quot;')
     };
     loadBrowserScript('modules/tooltip.js');
-    loadBrowserScript('modules/pie-chart.js');
+    loadBrowserScript('modules/charts/pie-chart.js');
 });
 
 describe('PieChart.computeSlices', () => {

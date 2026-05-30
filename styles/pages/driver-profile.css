@@ -649,65 +649,6 @@
     height: 7rem;
 }
 
-/* Performance distribution graph */
-.perf-dist-chart {
-    position: relative;
-    height: 7rem;
-    width: calc(100% - 2.5rem);
-    margin-left: 2.5rem;
-    overflow: visible;
-}
-
-.perf-dist-y-label {
-    position: absolute;
-    right: calc(100% + 0.3rem);
-    font-size: 0.7rem;
-    color: var(--color-text-secondary);
-    font-weight: var(--font-weight-semibold);
-    white-space: nowrap;
-    pointer-events: none;
-}
-
-.perf-dist-y-top {
-    top: 0;
-}
-
-.perf-dist-y-mid {
-    top: 50%;
-    transform: translateY(-50%);
-}
-
-.perf-dist-y-bottom {
-    bottom: 0;
-}
-
-.perf-dist-grid-line {
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 0;
-    border-top: 1px dashed var(--color-border);
-    opacity: 0.5;
-    pointer-events: none;
-}
-
-.perf-dist-point {
-    position: absolute;
-    width: 6px;
-    height: 6px;
-    margin-left: -3px;
-    margin-top: -3px;
-    border-radius: 50%;
-    background: var(--color-primary-alpha-80);
-    transition: background 0.1s, transform 0.1s;
-}
-
-.perf-dist-point--active {
-    background: var(--color-primary-light-solid);
-    transform: scale(1.8);
-    z-index: 4;
-}
-
 /* ========================================
    RESPONSIVE
    ======================================== */

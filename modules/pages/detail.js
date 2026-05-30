@@ -746,7 +746,7 @@ async function displayResults(data) {
     preserveDistributionExpandedState();
     updateTimeframeBoundsFromResults(results);
 
-    results = DetailEntriesDist.applyTimeframeFilter(results, DetailState.timeframeStart, DetailState.timeframeEnd);
+    results = EntriesChart.applyTimeframeFilter(results, DetailState.timeframeStart, DetailState.timeframeEnd);
     
     // Sort by position - in combined view, data is already sorted by lap time with proper positions
     // For normal view, sort by the position field
@@ -848,7 +848,7 @@ async function displayResults(data) {
     
     const tableWrapperHTML = `<div class="table-scroll-wrapper">${tableHTML}</div>`;
     
-    const entriesDistHTML = DetailEntriesDist.generateHtml(
+    const entriesDistHTML = EntriesChart.generateHtml(
         results,
         DetailState.entriesDistributionExpanded,
         DetailState.timeframeStart,
@@ -865,7 +865,7 @@ async function displayResults(data) {
         if (defaultSortBy === 'median') {
             defaultSortDir = 'asc';
         }
-        const summaryHTML = DetailCarDist.generateHtml(
+        const summaryHTML = CarsChart.generateHtml(
             allResults,
             defaultSortBy,
             defaultSortBy === 'median' ? 'asc' : 'desc',
@@ -939,13 +939,13 @@ function preserveDistributionExpandedState() {    const existingCarDistContent =
 }
 
 function updateTimeframeBoundsFromResults(results) {
-    const bounds = DetailEntriesDist.getDataTimeBounds(results);
+    const bounds = EntriesChart.getDataTimeBounds(results);
     if (bounds) {
         if (!DetailState.timeframeStart) {
-            DetailState.timeframeStart = DetailEntriesDist.toLocalDateInputValue(bounds.min);
+            DetailState.timeframeStart = EntriesChart.toLocalDateInputValue(bounds.min);
         }
         if (!DetailState.timeframeEnd) {
-            DetailState.timeframeEnd = DetailEntriesDist.toLocalDateInputValue(bounds.max);
+            DetailState.timeframeEnd = EntriesChart.toLocalDateInputValue(bounds.max);
         }
     } else {
         DetailState.timeframeStart = null;
@@ -954,7 +954,7 @@ function updateTimeframeBoundsFromResults(results) {
 }
 
 function renderEmptyTimeframeState(baseResults, filteredResults) {
-    const emptyEntriesDistHTML = DetailEntriesDist.generateHtml(
+    const emptyEntriesDistHTML = EntriesChart.generateHtml(
         filteredResults,
         DetailState.entriesDistributionExpanded,
         DetailState.timeframeStart,
@@ -1066,16 +1066,16 @@ function bindEntriesDistributionInteractions() {
         lastWeekBtn.addEventListener('click', () => {
             const now = new Date();
             const weekAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
-            DetailState.timeframeStart = DetailEntriesDist.toLocalDateInputValue(weekAgo);
-            DetailState.timeframeEnd = DetailEntriesDist.toLocalDateInputValue(now);
+            DetailState.timeframeStart = EntriesChart.toLocalDateInputValue(weekAgo);
+            DetailState.timeframeEnd = EntriesChart.toLocalDateInputValue(now);
             currentPage = 1;
             displayResults(allResults);
         });
     }
 
     // Wire bar tooltips
-    if (DetailEntriesDist.wireTooltips) {
-        DetailEntriesDist.wireTooltips(resultsContainer);
+    if (EntriesChart.wireTooltips) {
+        EntriesChart.wireTooltips(resultsContainer);
     }
 }
 
@@ -1102,8 +1102,8 @@ function bindCarDistributionSortHandlers({ allResults, filteredResults, baseResu
                 newDir = currentDir === 'desc' ? 'asc' : 'desc';
             }
 
-            const newSummaryHTML = DetailCarDist.generateHtml(allResults, clickedSort, newDir, isExpanded);
-            const newEntriesHTML = DetailEntriesDist.generateHtml(
+            const newSummaryHTML = CarsChart.generateHtml(allResults, clickedSort, newDir, isExpanded);
+            const newEntriesHTML = EntriesChart.generateHtml(
                 filteredResults,
                 entriesExpanded,
                 DetailState.timeframeStart,

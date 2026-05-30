@@ -164,12 +164,13 @@ beforeAll(() => {
             return String(value);
         })
     };
+    loadBrowserScript('modules/charts/performance-chart.js');
     loadBrowserScript('modules/driver-profile-renderers.js');
     loadBrowserScript('modules/driver-profile-distributions.js');
     loadBrowserScript('modules/tooltip.js');
-    loadBrowserScript('modules/pie-chart.js');
+    loadBrowserScript('modules/charts/pie-chart.js');
     vi.spyOn(window.PieChart, 'render');
-    loadBrowserScript('modules/driver-profile-chart-interaction.js');
+    loadBrowserScript('modules/driver-profile-interactions.js');
     loadBrowserScript('modules/pages/driver-profile.js');
 });
 

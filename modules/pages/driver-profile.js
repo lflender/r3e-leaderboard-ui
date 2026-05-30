@@ -4,7 +4,7 @@
  * Delegates to:
  * - DriverProfileRenderers (HTML generation)
  * - DriverProfileDistributions (distribution graphs)
- * - DriverProfileChartInteraction (cross-chart highlighting)
+ * - DriverProfileInteractions (cross-chart highlighting)
  */
 class DriverProfile {
     constructor() {
@@ -140,8 +140,8 @@ class DriverProfile {
         const run = () => {
             const results = DriverProfileData.computeClassBreakdown(entries);
             DriverProfileRenderers.renderClassBreakdowns(results, this._classColorMap);
-            DriverProfileChartInteraction.wireBreakdownChartInteraction();
-            DriverProfileChartInteraction.wireEntriesDistCrossHighlighting(
+            DriverProfileInteractions.wireBreakdownChartInteraction();
+            DriverProfileInteractions.wireEntriesDistCrossHighlighting(
                 this._distEntries, this.elements.distributionsContainer
             );
         };
@@ -196,12 +196,12 @@ class DriverProfile {
             { title: 'Tracks', logoResolver: window.R3ETrackImages && R3ETrackImages.resolveTrackLogoByLabel }
         );
 
-        DriverProfileChartInteraction.wireCarClassChartInteraction(entries);
-        DriverProfileChartInteraction.wirePieChartPerfHighlighting();
-        DriverProfileChartInteraction.wireEntriesDistCrossHighlighting(
+        DriverProfileInteractions.wireCarClassChartInteraction(entries);
+        DriverProfileInteractions.wirePieChartPerfHighlighting();
+        DriverProfileInteractions.wireEntriesDistCrossHighlighting(
             this._distEntries, this.elements.distributionsContainer
         );
-        DriverProfileChartInteraction.wireDistPerfToPieHighlighting(
+        DriverProfileInteractions.wireDistPerfToPieHighlighting(
             this._distEntries, this.elements.distributionsContainer
         );
     }

@@ -1,6 +1,6 @@
 /**
  * Entries Distribution Graph module for the Detail page.
- * Exposes window.DetailEntriesDist with:
+ * Exposes window.EntriesChart with:
  *   - generateHtml(data, isExpanded, startValue, endValue, boundsData, timeframeState) → HTML string
  *   - parseEntryDate(entry) → Date|null
  *   - getLocalDateKey(date) → string
@@ -389,7 +389,7 @@
         });
     }
 
-    window.DetailEntriesDist = {
+    window.EntriesChart = {
         generateHtml: generateEntriesDistributionGraph,
         parseEntryDate,
         getLocalDateKey,

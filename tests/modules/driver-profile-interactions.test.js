@@ -18,13 +18,13 @@ beforeAll(() => {
             return result;
         })
     };
-    window.DetailEntriesDist = {
+    window.EntriesChart = {
         parseEntryDate: vi.fn(e => e.date ? new Date(e.date) : null),
         getLocalDateKey: vi.fn(d => d ? d.toISOString().slice(0, 10) : null)
     };
     loadBrowserScript('modules/tooltip.js');
-    loadBrowserScript('modules/pie-chart.js');
-    loadBrowserScript('modules/driver-profile-chart-interaction.js');
+    loadBrowserScript('modules/charts/pie-chart.js');
+    loadBrowserScript('modules/driver-profile-interactions.js');
 });
 
 function buildPieChart(id, items) {
@@ -41,7 +41,7 @@ function buildPieChart(id, items) {
         </div></div></div>`;
 }
 
-describe('DriverProfileChartInteraction', () => {
+describe('DriverProfileInteractions', () => {
     describe('showSliceLabels', () => {
         beforeEach(() => {
             document.body.innerHTML = buildPieChart('chart-test', [
@@ -57,7 +57,7 @@ describe('DriverProfileChartInteraction', () => {
             slices[0].classList.add('pie-slice--active');
             slices[2].classList.add('pie-slice--active');
 
-            DriverProfileChartInteraction.showSliceLabels(chart, slices);
+            DriverProfileInteractions.showSliceLabels(chart, slices);
 
             const labels = document.querySelectorAll('.pie-cross-label');
             expect(labels.length).toBe(2);
@@ -70,7 +70,7 @@ describe('DriverProfileChartInteraction', () => {
             const slices = chart.querySelectorAll('.pie-slice');
             slices[0].classList.add('pie-slice--dimmed');
 
-            DriverProfileChartInteraction.showSliceLabels(chart, slices);
+            DriverProfileInteractions.showSliceLabels(chart, slices);
 
             expect(document.querySelectorAll('.pie-cross-label').length).toBe(0);
         });
@@ -83,7 +83,7 @@ describe('DriverProfileChartInteraction', () => {
             const slices = chart.querySelectorAll('.pie-slice');
             slices[0].classList.add('pie-slice--active');
 
-            DriverProfileChartInteraction.showSliceLabels(chart, slices);
+            DriverProfileInteractions.showSliceLabels(chart, slices);
 
             const label = document.querySelector('.pie-cross-label');
             // "Grand Prix" → "GP" makes it "Circuit de Barcelona-Catalunya GP" (34 → 30 after GP but still >30? No: 'Circuit de Barcelona-Catalunya GP' = 34 chars → truncated at 30)
@@ -99,7 +99,7 @@ describe('DriverProfileChartInteraction', () => {
             const slices = chart.querySelectorAll('.pie-slice');
             slices.forEach(s => s.classList.add('pie-slice--active'));
 
-            DriverProfileChartInteraction.showSliceLabels(chart, slices);
+            DriverProfileInteractions.showSliceLabels(chart, slices);
 
             const labels = document.querySelectorAll('.pie-cross-label');
             expect(labels.length).toBeGreaterThan(0);
@@ -120,7 +120,7 @@ describe('DriverProfileChartInteraction', () => {
             const slices = chart.querySelectorAll('.pie-slice');
             slices.forEach(s => s.classList.add('pie-slice--active'));
 
-            DriverProfileChartInteraction.showSliceLabels(chart, slices);
+            DriverProfileInteractions.showSliceLabels(chart, slices);
 
             const labels = Array.from(document.querySelectorAll('.pie-cross-label'));
             const texts = labels.map(l => l.textContent);
@@ -139,7 +139,7 @@ describe('DriverProfileChartInteraction', () => {
             const slices = chart.querySelectorAll('.pie-slice');
             slices.forEach(s => s.classList.add('pie-slice--active'));
 
-            DriverProfileChartInteraction.showSliceLabels(chart, slices);
+            DriverProfileInteractions.showSliceLabels(chart, slices);
 
             const labels = Array.from(document.querySelectorAll('.pie-cross-label'));
             // All on the right side (cos >= 0 for -1.2, 0, 1.2)
@@ -154,7 +154,7 @@ describe('DriverProfileChartInteraction', () => {
     describe('clearSliceLabels', () => {
         it('removes all pie-cross-label elements', () => {
             document.body.innerHTML = '<span class="pie-cross-label">A</span><span class="pie-cross-label">B</span>';
-            DriverProfileChartInteraction.clearSliceLabels();
+            DriverProfileInteractions.clearSliceLabels();
             expect(document.querySelectorAll('.pie-cross-label').length).toBe(0);
         });
     });
@@ -169,7 +169,7 @@ describe('DriverProfileChartInteraction', () => {
 
         it('adds pie-slice--active to matching slices', () => {
             const slices = document.querySelectorAll('.pie-slice');
-            DriverProfileChartInteraction.highlightSlices(slices, s => s.getAttribute('data-label') === 'A');
+            DriverProfileInteractions.highlightSlices(slices, s => s.getAttribute('data-label') === 'A');
             expect(slices[0].classList.contains('pie-slice--active')).toBe(true);
             expect(slices[1].classList.contains('pie-slice--dimmed')).toBe(true);
         });
@@ -177,7 +177,7 @@ describe('DriverProfileChartInteraction', () => {
         it('sets transform on active slices', () => {
             const slices = document.querySelectorAll('.pie-slice');
             // midAngle=0 means cos=1, sin=0, so translate(8px, 0px)
-            DriverProfileChartInteraction.highlightSlices(slices, s => s.getAttribute('data-label') === 'A');
+            DriverProfileInteractions.highlightSlices(slices, s => s.getAttribute('data-label') === 'A');
             expect(slices[0].style.transform).toContain('translate');
         });
     });
@@ -189,7 +189,7 @@ describe('DriverProfileChartInteraction', () => {
                 { label: 'Y', midAngle: 1, pct: 50 }
             ]);
             const items = document.querySelectorAll('.pie-legend-item');
-            DriverProfileChartInteraction.highlightLegend(items, el => {
+            DriverProfileInteractions.highlightLegend(items, el => {
                 const lbl = el.querySelector('.pie-legend-label').textContent;
                 return lbl === 'X';
             });
@@ -205,7 +205,7 @@ describe('DriverProfileChartInteraction', () => {
             slices[0].classList.add('pie-slice--active');
             slices[0].style.transform = 'translate(8px, 0px)';
 
-            DriverProfileChartInteraction.clearSlices(slices);
+            DriverProfileInteractions.clearSlices(slices);
 
             expect(slices[0].classList.contains('pie-slice--active')).toBe(false);
             expect(slices[0].style.transform).toBe('');
@@ -218,7 +218,7 @@ describe('DriverProfileChartInteraction', () => {
             const items = document.querySelectorAll('.pie-legend-item');
             items[0].classList.add('pie-legend-item--active');
 
-            DriverProfileChartInteraction.clearLegend(items);
+            DriverProfileInteractions.clearLegend(items);
 
             expect(items[0].classList.contains('pie-legend-item--active')).toBe(false);
         });
@@ -249,7 +249,7 @@ describe('DriverProfileChartInteraction', () => {
         ];
 
         it('annotates car slices with data-class-label', () => {
-            DriverProfileChartInteraction.wireCarClassChartInteraction(entries);
+            DriverProfileInteractions.wireCarClassChartInteraction(entries);
 
             const carSlices = document.querySelectorAll('#chart-car .pie-slice');
             expect(carSlices[0].getAttribute('data-class-label')).toBe('GT3');
@@ -257,7 +257,7 @@ describe('DriverProfileChartInteraction', () => {
         });
 
         it('annotates track elements with data-class-labels', () => {
-            DriverProfileChartInteraction.wireCarClassChartInteraction(entries);
+            DriverProfileInteractions.wireCarClassChartInteraction(entries);
 
             const trackSlices = document.querySelectorAll('#chart-track .pie-slice');
             expect(trackSlices[0].getAttribute('data-class-labels')).toContain('GT3');
@@ -265,7 +265,7 @@ describe('DriverProfileChartInteraction', () => {
         });
 
         it('highlights car slices on class legend hover', () => {
-            DriverProfileChartInteraction.wireCarClassChartInteraction(entries);
+            DriverProfileInteractions.wireCarClassChartInteraction(entries);
 
             const classLegend = document.querySelector('#chart-car-class .pie-legend-item');
             classLegend.dispatchEvent(new Event('mouseenter'));
@@ -276,7 +276,7 @@ describe('DriverProfileChartInteraction', () => {
         });
 
         it('clears highlights on mouseleave', () => {
-            DriverProfileChartInteraction.wireCarClassChartInteraction(entries);
+            DriverProfileInteractions.wireCarClassChartInteraction(entries);
 
             const classLegend = document.querySelector('#chart-car-class .pie-legend-item');
             classLegend.dispatchEvent(new Event('mouseenter'));
@@ -288,7 +288,7 @@ describe('DriverProfileChartInteraction', () => {
         });
 
         it('highlights class chart on car legend hover', () => {
-            DriverProfileChartInteraction.wireCarClassChartInteraction(entries);
+            DriverProfileInteractions.wireCarClassChartInteraction(entries);
 
             const carLegend = document.querySelector('#chart-car .pie-legend-item');
             carLegend.dispatchEvent(new Event('mouseenter'));
@@ -299,7 +299,7 @@ describe('DriverProfileChartInteraction', () => {
         });
 
         it('highlights class and car charts on track legend hover', () => {
-            DriverProfileChartInteraction.wireCarClassChartInteraction(entries);
+            DriverProfileInteractions.wireCarClassChartInteraction(entries);
 
             const trackLegend = document.querySelector('#chart-track .pie-legend-item');
             trackLegend.dispatchEvent(new Event('mouseenter'));
@@ -327,7 +327,7 @@ describe('DriverProfileChartInteraction', () => {
         });
 
         it('highlights matching perf dots on pie legend hover', () => {
-            DriverProfileChartInteraction.wirePieChartPerfHighlighting();
+            DriverProfileInteractions.wirePieChartPerfHighlighting();
 
             const legend = document.querySelector('#chart-car-class .pie-legend-item');
             legend.dispatchEvent(new Event('mouseenter'));
@@ -338,7 +338,7 @@ describe('DriverProfileChartInteraction', () => {
         });
 
         it('clears perf dot highlights on mouseleave', () => {
-            DriverProfileChartInteraction.wirePieChartPerfHighlighting();
+            DriverProfileInteractions.wirePieChartPerfHighlighting();
 
             const legend = document.querySelector('#chart-car-class .pie-legend-item');
             legend.dispatchEvent(new Event('mouseenter'));
@@ -367,7 +367,7 @@ describe('DriverProfileChartInteraction', () => {
                 { car_class: 'GT3', Car: 'BMW', Track: 'Spa', date: '2025-01-01' }
             ];
             const container = document.getElementById('dist-container');
-            DriverProfileChartInteraction.wireEntriesDistCrossHighlighting(entries, container);
+            DriverProfileInteractions.wireEntriesDistCrossHighlighting(entries, container);
 
             const legend = document.querySelector('#chart-car-class .pie-legend-item');
             legend.dispatchEvent(new Event('mouseenter'));
@@ -393,7 +393,7 @@ describe('DriverProfileChartInteraction', () => {
         });
 
         it('highlights matching pie legend on breakdown hover', () => {
-            DriverProfileChartInteraction.wireBreakdownChartInteraction();
+            DriverProfileInteractions.wireBreakdownChartInteraction();
 
             const breakdownItem = document.querySelector('.driver-stat-breakdown .pie-legend-item');
             breakdownItem.dispatchEvent(new Event('mouseenter'));
@@ -402,7 +402,7 @@ describe('DriverProfileChartInteraction', () => {
         });
 
         it('highlights breakdown items on pie chart legend hover', () => {
-            DriverProfileChartInteraction.wireBreakdownChartInteraction();
+            DriverProfileInteractions.wireBreakdownChartInteraction();
 
             const pieLegend = document.querySelector('#chart-car-class .pie-legend-item');
             pieLegend.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
@@ -423,7 +423,7 @@ describe('DriverProfileChartInteraction', () => {
             const slices = chart.querySelectorAll('.pie-slice');
             slices.forEach(s => s.classList.add('pie-slice--active'));
 
-            DriverProfileChartInteraction.showSliceLabels(chart, slices);
+            DriverProfileInteractions.showSliceLabels(chart, slices);
 
             const labels = Array.from(document.querySelectorAll('.pie-cross-label'));
             expect(labels.length).toBe(4);
@@ -443,7 +443,7 @@ describe('DriverProfileChartInteraction', () => {
             const slices = chart.querySelectorAll('.pie-slice');
             slices.forEach(s => s.classList.add('pie-slice--active'));
 
-            DriverProfileChartInteraction.showSliceLabels(chart, slices);
+            DriverProfileInteractions.showSliceLabels(chart, slices);
 
             const labels = document.querySelectorAll('.pie-cross-label');
             // Not all 20 can fit — some get skipped due to displacement limit
@@ -460,7 +460,7 @@ describe('DriverProfileChartInteraction', () => {
             const slices = chart.querySelectorAll('.pie-slice');
             slices.forEach(s => s.classList.add('pie-slice--active'));
 
-            DriverProfileChartInteraction.showSliceLabels(chart, slices);
+            DriverProfileInteractions.showSliceLabels(chart, slices);
 
             const labels = Array.from(document.querySelectorAll('.pie-cross-label'));
             const tops = labels.map(l => parseFloat(l.style.top)).sort((a, b) => a - b);
@@ -482,7 +482,7 @@ describe('DriverProfileChartInteraction', () => {
             const slices = chart.querySelectorAll('.pie-slice');
             slices.forEach(s => s.classList.add('pie-slice--active'));
 
-            DriverProfileChartInteraction.showSliceLabels(chart, slices);
+            DriverProfileInteractions.showSliceLabels(chart, slices);
 
             const labels = Array.from(document.querySelectorAll('.pie-cross-label'));
             expect(labels.length).toBe(4);
@@ -497,7 +497,7 @@ describe('DriverProfileChartInteraction', () => {
             const slices = chart.querySelectorAll('.pie-slice');
             slices.forEach(s => s.classList.add('pie-slice--active'));
 
-            DriverProfileChartInteraction.showSliceLabels(chart, slices);
+            DriverProfileInteractions.showSliceLabels(chart, slices);
 
             const linesSvg = chart.querySelector('.pie-connector-lines');
             expect(linesSvg).toBeTruthy();
@@ -515,7 +515,7 @@ describe('DriverProfileChartInteraction', () => {
             const slices = chart.querySelectorAll('.pie-slice');
             slices.forEach(s => s.classList.add('pie-slice--active'));
 
-            DriverProfileChartInteraction.showSliceLabels(chart, slices);
+            DriverProfileInteractions.showSliceLabels(chart, slices);
 
             const logo = chart.querySelector('.pie-cross-label__logo');
             expect(logo).toBeTruthy();
@@ -561,17 +561,17 @@ describe('DriverProfileChartInteraction', () => {
         ];
 
         it('does nothing if container is null', () => {
-            expect(() => DriverProfileChartInteraction.wireDistPerfToPieHighlighting(entries, null)).not.toThrow();
+            expect(() => DriverProfileInteractions.wireDistPerfToPieHighlighting(entries, null)).not.toThrow();
         });
 
         it('does nothing if entries are empty', () => {
             const container = document.getElementById('dist-container');
-            expect(() => DriverProfileChartInteraction.wireDistPerfToPieHighlighting([], container)).not.toThrow();
+            expect(() => DriverProfileInteractions.wireDistPerfToPieHighlighting([], container)).not.toThrow();
         });
 
         it('wires without error', () => {
             const container = document.getElementById('dist-container');
-            expect(() => DriverProfileChartInteraction.wireDistPerfToPieHighlighting(entries, container)).not.toThrow();
+            expect(() => DriverProfileInteractions.wireDistPerfToPieHighlighting(entries, container)).not.toThrow();
         });
     });
 });

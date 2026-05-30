@@ -3,7 +3,7 @@
  * Handles all cross-chart highlighting between pie charts, performance dots,
  * entries-distribution bars, and stat breakdowns on the driver profile page.
  */
-const DriverProfileChartInteraction = (() => {
+const DriverProfileInteractions = (() => {
     const POP_DISTANCE = 8;
 
     function showSliceLabels(chartEl, slices) {
@@ -438,7 +438,7 @@ const DriverProfileChartInteraction = (() => {
      */
     function wireEntriesDistCrossHighlighting(entries, container) {
         if (!entries || entries.length === 0) return;
-        if (!window.DetailEntriesDist) return;
+        if (!window.EntriesChart) return;
         if (!container) return;
 
         const svg = container.querySelector('.entries-dist-chart svg');
@@ -458,9 +458,9 @@ const DriverProfileChartInteraction = (() => {
         const trackDates = new Map();
 
         entries.forEach(entry => {
-            const dt = DetailEntriesDist.parseEntryDate(entry);
+            const dt = EntriesChart.parseEntryDate(entry);
             if (!dt) return;
-            const dateKey = DetailEntriesDist.getLocalDateKey(dt);
+            const dateKey = EntriesChart.getLocalDateKey(dt);
             if (!dateKey) return;
 
             const cls = entry.car_class || entry.CarClass || entry.Class || '';
@@ -623,16 +623,16 @@ const DriverProfileChartInteraction = (() => {
     function wireDistPerfToPieHighlighting(entries, container) {
         if (!entries || entries.length === 0) return;
         if (!container) return;
-        if (!window.DetailEntriesDist) return;
+        if (!window.EntriesChart) return;
 
         // Build date → {classes, cars, tracks} lookup
         const dateToClasses = new Map();
         const dateToCars = new Map();
         const dateToTracks = new Map();
         entries.forEach(entry => {
-            const dt = DetailEntriesDist.parseEntryDate(entry);
+            const dt = EntriesChart.parseEntryDate(entry);
             if (!dt) return;
-            const dateKey = DetailEntriesDist.getLocalDateKey(dt);
+            const dateKey = EntriesChart.getLocalDateKey(dt);
             if (!dateKey) return;
 
             const cls = entry.car_class || entry.CarClass || entry.Class || '';
@@ -848,5 +848,5 @@ const DriverProfileChartInteraction = (() => {
     };
 })();
 
-if (typeof window !== 'undefined') window.DriverProfileChartInteraction = DriverProfileChartInteraction;
-if (typeof module !== 'undefined') module.exports = DriverProfileChartInteraction;
+if (typeof window !== 'undefined') window.DriverProfileInteractions = DriverProfileInteractions;
+if (typeof module !== 'undefined') module.exports = DriverProfileInteractions;

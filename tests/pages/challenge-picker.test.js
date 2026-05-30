@@ -45,7 +45,7 @@ describe('ChallengePicker page', () => {
             { id: 10, label: 'Monza - Grand Prix' }
         ];
 
-        const htmlPath = path.resolve(__dirname, '..', '..', 'challenge.html');
+        const htmlPath = path.resolve(__dirname, '..', '..', 'pages', 'challenge.html');
         const fullHtml = fs.readFileSync(htmlPath, 'utf8');
         const bodyMatch = fullHtml.match(/<main>([\s\S]*?)<\/main>/);
         document.body.innerHTML = `<main>${bodyMatch ? bodyMatch[1] : ''}</main>`;

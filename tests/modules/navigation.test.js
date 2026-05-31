@@ -79,7 +79,7 @@ describe('Navigation', () => {
 
         window.openDriverProfile(header);
         expect(window.open).toHaveBeenCalledWith(
-            'profile.html?driver=%22TestDriver%22',
+            'driver-profile.html?driver=%22TestDriver%22',
             '_blank'
         );
     });
@@ -97,7 +97,7 @@ describe('Navigation', () => {
 
         window.openDriverProfile(header);
         expect(window.open).toHaveBeenCalledWith(
-            'profile.html?driver=%22Test%20Driver%20With%20Spaces%22',
+            'driver-profile.html?driver=%22Test%20Driver%20With%20Spaces%22',
             '_blank'
         );
     });
@@ -109,7 +109,7 @@ describe('Navigation', () => {
 
         window.openDriverProfile(header);
         expect(window.open).toHaveBeenCalledWith(
-            'profile.html?driver=%22Alex%20Fernandez%22&id=12345',
+            'driver-profile.html?driver=%22Alex%20Fernandez%22&id=12345',
             '_blank'
         );
     });

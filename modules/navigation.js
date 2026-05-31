@@ -153,7 +153,7 @@ class Navigation {
 
         const pathId = headerEl?.dataset?.pathId || '';
         const encodedDriver = encodeURIComponent(`"${driverName}"`);
-        let url = `profile.html?driver=${encodedDriver}`;
+        let url = `driver-profile.html?driver=${encodedDriver}`;
         if (pathId) {
             url += `&id=${encodeURIComponent(pathId)}`;
         }

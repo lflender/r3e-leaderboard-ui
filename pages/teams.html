@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teams - RaceRoom Leaderboards Explorer</title>
+    <meta name="description" content="Browse racing teams in RaceRoom Racing Experience. Find teams, view their members, and explore team profiles on the R3E Leaderboards.">
+    <link rel="canonical" href="https://r3e-leaderboards.info/teams.html">
+    <link rel="alternate" hreflang="en" href="https://r3e-leaderboards.info/teams.html">
+    <link rel="alternate" hreflang="x-default" href="https://r3e-leaderboards.info/teams.html">
+    <meta name="author" content="Ludo R3E Tools">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="keywords" content="raceroom teams, r3e teams, raceroom racing teams, r3e team members, raceroom racing experience teams">
+    <!-- Open Graph -->
+    <meta property="og:site_name" content="RaceRoom Leaderboards">
+    <meta property="og:title" content="Teams - RaceRoom Leaderboards Explorer">
+    <meta property="og:description" content="Browse racing teams in RaceRoom Racing Experience. Find teams, view their members, and explore team profiles.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://r3e-leaderboards.info/teams.html">
+    <meta property="og:image" content="https://r3e-leaderboards.info/images/rle-share.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="RaceRoom Leaderboards - Racing Teams">
+    <meta property="og:locale" content="en_US">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Teams - RaceRoom Leaderboards Explorer">
+    <meta name="twitter:description" content="Browse racing teams in RaceRoom Racing Experience. Find teams, view members, and explore team profiles.">
+    <meta name="twitter:image" content="https://r3e-leaderboards.info/images/rle-share.png">
+    
+    <!-- Analytics (PostHog via first-party proxy) -->
+    <script src="modules/analytics.js?v=8" defer></script>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    
+    <link rel="stylesheet" href="styles/style.css?v=268">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"/>
+    <!-- Site Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png?v=3">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png?v=3">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png?v=3">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico?v=3">
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "url": "https://r3e-leaderboards.info/teams.html",
+        "name": "Racing Teams",
+        "description": "Browse racing teams in RaceRoom Racing Experience. Find teams, view their members, and explore team profiles.",
+        "isPartOf": {"@id": "https://r3e-leaderboards.info/#website"},
+        "inLanguage": "en"
+    }
+    </script>
+</head>
+<body>
+    <div id="site-header"></div>
+
+    <main>
+        <section class="hero-section" aria-label="RaceRoom Teams">
+            <h1 class="sr-only">RaceRoom Leaderboards Explorer - Teams</h1>
+        </section>
+        
+        <div class="tabs" id="site-tabs" data-active="teams"></div>
+
+        <div class="tab-content">
+            <div id="teams-panel" class="tab-panel is-active">
+                <div class="search-container">
+                    <input 
+                        type="text" 
+                        id="team-search" 
+                        class="search-input"
+                        placeholder="Search team" 
+                        autocomplete="off"
+                        autofocus
+                    >
+                </div>
+                <div id="results-container"></div>
+            </div>
+        </div>
+
+        <section class="seo-content" aria-label="About RaceRoom Teams">
+            <p class="page-intro">Browse racing teams in <strong>RaceRoom Racing Experience</strong>. Search for any team, see how many members they have, and explore their roster.</p>
+        </section>
+    </main>
+    
+    <div id="site-footer"></div>
+    <!-- Loaders -->
+    <script src="modules/loaders/template-loader.js?v=3" defer></script>
+    <script src="modules/loaders/tabs-loader.js?v=13" defer></script>
+    <script src="modules/loaders/footer-loader.js?v=2" defer></script>
+    <script src="modules/loaders/header-loader.js?v=2" defer></script>
+    
+    <!-- Core modules -->
+    <script src="modules/data/country-mappings.js?v=5" defer></script>
+    <script src="modules/compressed-json-helper.js?v=2" defer></script>
+    <script src="modules/time-helper.js?v=3" defer></script>
+    <script src="modules/track-helper.js?v=2" defer></script>
+    <script src="modules/url-helper.js?v=2" defer></script>
+    <script src="modules/car-helper.js?v=17" defer></script>
+    <script src="modules/utils.js?v=14" defer></script>
+    <script src="modules/driver-index-service.js?v=8" defer></script>
+    <script src="modules/driver-search-service.js?v=18" defer></script>
+    <script src="modules/data-service.js?v=45" defer></script>
+    <script src="modules/flag-helper.js?v=2" defer></script>
+    <script src="modules/mp-pos-service.js?v=12" defer></script>
+    <script src="modules/template-helper.js?v=3" defer></script>
+    <script src="modules/pagination.js?v=5" defer></script>
+    <script src="modules/stats-data.js?v=14" defer></script>
+    <script src="modules/driver-stats-service.js?v=11" defer></script>
+    <script src="modules/field-mappings.js?v=4" defer></script>
+    <script src="modules/column-config.js?v=5" defer></script>
+    <script src="modules/data-normalizer.js?v=4" defer></script>
+    <script src="modules/sort-service.js?v=2" defer></script>
+    <script src="modules/table-renderer.js?v=45" defer></script>
+    <script src="modules/stats-renderer.js?v=14" defer></script>
+    <script src="modules/data/car-classes.js?v=3" defer></script>
+    <script src="modules/data/cars.js?v=10" defer></script>
+    <script src="modules/data/tracks.js?v=5" defer></script>
+    <script src="modules/data/track-images.js?v=3" defer></script>
+    
+    <!-- Feature modules -->
+    <script src="modules/pages/teams.js?v=13" defer></script>
+    <script src="modules/navigation.js?v=6" defer></script>
+    <script src="modules/tab-manager.js?v=3" defer></script>
+    
+    <!-- Application script -->
+    <script src="script.js?v=9" defer></script>
+</body>
+</html>

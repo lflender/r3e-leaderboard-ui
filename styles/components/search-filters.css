@@ -164,7 +164,7 @@
     color: var(--color-text-primary);
 }
 
-#driver-search {
+.search-input {
     flex: 0 1 calc((100% - 2rem) / 3);
     min-width: 260px;
     max-width: 420px;
@@ -179,7 +179,7 @@
     font-size: max(0.98rem, 16px);
 }
 
-#driver-search:focus {
+.search-input:focus {
     outline: none;
     border-color: var(--color-primary);
     box-shadow: 0 0 0 3px var(--color-primary-hover-alpha-10);
@@ -255,7 +255,7 @@
         font-size: 0.9rem;
     }
 
-    #driver-search {
+    .search-input {
         min-width: 0;
         flex: 1 1 auto;
         max-width: none;
@@ -273,7 +273,7 @@
         font-size: 0.85rem;
     }
 
-    #driver-search {
+    .search-input {
         padding: 0.4rem 0.55rem;
         font-size: 0.85rem;
     }
@@ -330,7 +330,7 @@
         border-width: 1.5px;
     }
 
-    #driver-search {
+    .search-input {
         padding: 0.3rem 0.45rem;
         font-size: 0.78rem;
     }

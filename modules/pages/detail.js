@@ -898,6 +898,9 @@ async function displayResults(data) {
     if (posParam && !Number.isNaN(posParam)) {
         highlightPositionRow(posParam);
     }
+
+    // Wire car-based row hover highlighting
+    wireCarRowHover();
 }
 
 /**
@@ -1237,6 +1240,40 @@ function highlightPositionRow(targetPos) {
             }
         }
     }, 50);
+}
+
+/**
+ * Wire car-based row hover: hovering a row highlights all rows with the same
+ * car (normalized: DTM stripped, lowercased).
+ */
+function wireCarRowHover() {
+    const table = resultsContainer.querySelector('table.results-table');
+    if (!table) return;
+    const tbody = table.querySelector('tbody');
+    if (!tbody) return;
+
+    const normalize = window.CarRatings && window.CarRatings.normalizeCarName
+        ? window.CarRatings.normalizeCarName
+        : (s) => String(s || '').replace(/\bDTM\b/gi, '').replace(/\s+/g, ' ').trim().toLowerCase();
+
+    let highlightedCar = null;
+    tbody.addEventListener('mouseenter', (e) => {
+        const row = e.target.closest('tr[data-car]');
+        if (!row) return;
+        const car = normalize(row.getAttribute('data-car'));
+        if (!car || car === highlightedCar) return;
+        highlightedCar = car;
+        tbody.querySelectorAll('tr.car-row-highlight').forEach(r => r.classList.remove('car-row-highlight'));
+        tbody.querySelectorAll('tr[data-car]').forEach(r => {
+            if (normalize(r.getAttribute('data-car')) === car) {
+                r.classList.add('car-row-highlight');
+            }
+        });
+    }, true);
+    tbody.addEventListener('mouseleave', () => {
+        highlightedCar = null;
+        tbody.querySelectorAll('tr.car-row-highlight').forEach(r => r.classList.remove('car-row-highlight'));
+    });
 }
 
 /**

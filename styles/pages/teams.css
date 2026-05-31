@@ -79,13 +79,16 @@
     vertical-align: baseline;
     font-size: 0.7em;
     position: relative;
-    top: -0.15em;
+    top: -0.1em;
 }
 
 .team-flag .various-flag-icon {
     width: 1.4em;
     height: 1.4em;
     vertical-align: middle;
+    object-fit: contain;
+    image-rendering: auto;
+    border-radius: var(--radius-xs);
 }
 
 /* Team stats grid — 5 in a row, wraps to 2-3 on smaller screens */
@@ -191,19 +194,22 @@
     #team-entries-container {
         overflow-x: visible;
     }
-    .team-entries-table {
-        margin: 0 auto;
-    }
 }
 
 /* Team entries table */
-.team-entries-table {
-    width: 100%;
-    min-width: 700px;
+#team-entries-container .team-entries-table {
+    width: max-content;
+    margin: 0 auto;
 }
 
 .team-entries-table th {
     white-space: nowrap;
+}
+
+/* Highlight all rows from the same driver on hover */
+.team-entries-table tr.driver-row-highlight td,
+.team-profile-table tr.driver-row-highlight td {
+    background: var(--color-hover-bg);
 }
 
 #team-entries-container .car-cell-stack {
@@ -247,7 +253,6 @@
 
 #team-entries-container .results-table th:nth-child(2),
 #team-entries-container .results-table td:nth-child(2) {
-    white-space: normal;
     min-width: 180px;
 }
 

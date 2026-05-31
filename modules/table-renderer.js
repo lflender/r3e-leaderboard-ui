@@ -262,7 +262,7 @@ class TableRenderer {
             detailRowItem.CarClass = item.ClassName || item.class_name || item.CarClass || item.car_class || '';
         }
 
-        let html = `<tr data-trackid="${utils.escapeHtml(String(rowTrackId))}" data-classid="${utils.escapeHtml(String(rowClassId))}" data-name="${utils.escapeHtml(String(name))}" data-time="${utils.escapeHtml(String(lapTime))}">`;
+        let html = `<tr data-trackid="${utils.escapeHtml(String(rowTrackId))}" data-classid="${utils.escapeHtml(String(rowClassId))}" data-name="${utils.escapeHtml(String(name))}" data-car="${utils.escapeHtml(String(car))}" data-time="${utils.escapeHtml(String(lapTime))}">`;
 
         html += renderer.renderDetailPositionCell(detailRowItem, { showAbsolutePosition });
         html += renderer.renderDriverNameCell(detailRowItem, {

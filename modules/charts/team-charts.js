@@ -223,15 +223,18 @@
     /**
      * Wire tooltip and cross-highlighting for team charts.
      * Extends the standard tooltip behavior from EntriesChart with per-driver
-     * highlighting across both chart containers.
+     * highlighting across both chart containers and optional table elements.
      * @param {HTMLElement} distContainer - container with the entries dist chart
      * @param {HTMLElement} perfContainer - container with the performance chart
+     * @param {Object} [options] - additional elements to cross-highlight
+     * @param {HTMLElement[]} [options.tables] - table elements with rows having data-name
      */
-    function wireInteractions(distContainer, perfContainer) {
+    function wireInteractions(distContainer, perfContainer, options) {
         const Tooltip = window.Tooltip;
         if (!Tooltip) return;
 
         const allContainers = [distContainer, perfContainer].filter(Boolean);
+        const tables = (options && options.tables) || [];
 
         // Wire performance chart (reuses same proximity logic as EntriesChart.wirePerfTooltips)
         const perfChart = perfContainer && perfContainer.querySelector('.perf-dist-chart');
@@ -254,7 +257,7 @@
                 }
 
                 if (!nearest) {
-                    clearAllHighlights(allContainers);
+                    clearAllHighlights(allContainers, tables);
                     if (activePoint) { activePoint.classList.remove('perf-dist-point--active'); activePoint = null; }
                     Tooltip.hide(tooltip);
                     return;
@@ -264,7 +267,7 @@
                     if (activePoint) activePoint.classList.remove('perf-dist-point--active');
                     nearest.classList.add('perf-dist-point--active');
                     activePoint = nearest;
-                    highlightDriver(allContainers, nearest.getAttribute('data-name'));
+                    highlightDriver(allContainers, nearest.getAttribute('data-name'), tables);
                 }
 
                 // Tooltip format matches EntriesChart.wirePerfTooltips
@@ -287,14 +290,14 @@
             });
 
             perfChart.addEventListener('mouseleave', () => {
-                clearAllHighlights(allContainers);
+                clearAllHighlights(allContainers, tables);
                 if (activePoint) { activePoint.classList.remove('perf-dist-point--active'); activePoint = null; }
                 Tooltip.hide(tooltip);
             });
         }
 
-        // Wire entries distribution chart — sticky snap to nearest x column (date),
-        // showing ALL entries for that date (matches EntriesChart.wireTooltips behavior)
+        // Wire entries distribution chart — snap to nearest bar, highlight ALL
+        // bars + perf points for that player (cross-chart driver highlighting)
         const distChartEl = distContainer && distContainer.querySelector('.entries-dist-chart');
         if (distChartEl) {
             const svg = distChartEl.querySelector('svg');
@@ -302,72 +305,61 @@
                 const tooltip = Tooltip.getOrCreate(distChartEl, 'dist-tooltip');
                 const bars = Array.from(svg.querySelectorAll('.entries-dist-bar'));
 
-                // Pre-group bars by x position (each x = one day column)
-                const columnMap = new Map();
-                for (const bar of bars) {
-                    const x = Math.round(parseFloat(bar.getAttribute('x')));
-                    if (!columnMap.has(x)) columnMap.set(x, []);
-                    columnMap.get(x).push(bar);
-                }
-                const columns = Array.from(columnMap.entries()).sort((a, b) => a[0] - b[0]);
-
-                let activeColumn = null;
+                let activeBar = null;
 
                 svg.addEventListener('mousemove', (e) => {
                     const rect = svg.getBoundingClientRect();
-                    if (rect.width === 0) return;
+                    if (rect.width === 0 || rect.height === 0) return;
                     const viewBox = svg.viewBox.baseVal;
                     const mouseXRatio = (e.clientX - rect.left) / rect.width;
+                    const mouseYRatio = (e.clientY - rect.top) / rect.height;
                     const svgX = mouseXRatio * viewBox.width;
+                    const svgY = mouseYRatio * viewBox.height;
 
-                    // Snap to nearest column
-                    let nearestCol = null;
+                    // Find the nearest bar by 2D distance (normalized)
+                    let nearest = null;
                     let minDist = Infinity;
-                    for (const [x, colBars] of columns) {
-                        const dist = Math.abs((x + 0.45) - svgX);
-                        if (dist < minDist) { minDist = dist; nearestCol = [x, colBars]; }
+                    for (const bar of bars) {
+                        const bx = parseFloat(bar.getAttribute('x')) + 0.45;
+                        const by = parseFloat(bar.getAttribute('y')) + parseFloat(bar.getAttribute('height')) / 2;
+                        const dx = (bx - svgX) / viewBox.width;
+                        const dy = (by - svgY) / viewBox.height;
+                        const dist = dx * dx + dy * dy;
+                        if (dist < minDist) { minDist = dist; nearest = bar; }
                     }
 
-                    if (!nearestCol) {
-                        clearAllHighlights(allContainers);
-                        activeColumn = null;
+                    if (!nearest) {
+                        clearAllHighlights(allContainers, tables);
+                        activeBar = null;
                         Tooltip.hide(tooltip);
                         return;
                     }
 
-                    const [colX, colBars] = nearestCol;
-                    if (activeColumn !== colX) {
-                        clearAllHighlights(allContainers);
-                        activeColumn = colX;
-                        // Highlight all bars in this column
-                        colBars.forEach(b => b.classList.add('entries-dist-bar--active'));
+                    if (activeBar !== nearest) {
+                        activeBar = nearest;
+                        const driverName = nearest.getAttribute('data-name');
+                        highlightDriver(allContainers, driverName, tables);
                     }
 
-                    // Build tooltip showing all entries for this date
-                    // (matches EntriesChart.buildEntriesTooltip format)
-                    const date = colBars[0].getAttribute('data-date');
-                    const count = colBars.length;
-                    let tipHtml = '<strong>' + date + '</strong>: ' + count + (count === 1 ? ' entry' : ' entries');
-                    tipHtml += '<div class="dist-tooltip-entries">';
-                    for (const bar of colBars) {
-                        const name = bar.getAttribute('data-name');
-                        const car = bar.getAttribute('data-car') || '';
-                        const track = bar.getAttribute('data-track') || '';
-                        const className = bar.getAttribute('data-class') || '';
-                        const classId = bar.getAttribute('data-class-id') || '';
-                        const logoHtml = EntriesChart.buildClassLogoHtmlFromValues(className, classId);
-                        const label = car + (track ? ' \u2013 ' + track : '');
-                        tipHtml += '<div class="dist-tooltip-entry">' + logoHtml + escapeHtml(name) + (label ? ' — ' + escapeHtml(label) : '') + '</div>';
-                    }
-                    tipHtml += '</div>';
+                    // Build tooltip for the hovered bar
+                    const date = nearest.getAttribute('data-date');
+                    const name = nearest.getAttribute('data-name');
+                    const car = nearest.getAttribute('data-car') || '';
+                    const track = nearest.getAttribute('data-track') || '';
+                    const className = nearest.getAttribute('data-class') || '';
+                    const classId = nearest.getAttribute('data-class-id') || '';
+                    const logoHtml = EntriesChart.buildClassLogoHtmlFromValues(className, classId);
+                    const label = car + (track ? ' \u2013 ' + track : '');
+                    let tipHtml = '<strong>' + date + '</strong>';
+                    tipHtml += '<div class="dist-tooltip-entry">' + logoHtml + escapeHtml(name) + (label ? ' — ' + escapeHtml(label) : '') + '</div>';
                     tooltip.innerHTML = tipHtml;
                     Tooltip.show(tooltip);
                     Tooltip.positionAboveCursor(e, distChartEl, tooltip);
                 });
 
                 svg.addEventListener('mouseleave', () => {
-                    clearAllHighlights(allContainers);
-                    activeColumn = null;
+                    clearAllHighlights(allContainers, tables);
+                    activeBar = null;
                     Tooltip.hide(tooltip);
                 });
             }
@@ -382,20 +374,20 @@
                 const driverName = nameEl.textContent;
 
                 item.addEventListener('mouseenter', () => {
-                    highlightDriver(allContainers, driverName);
+                    highlightDriver(allContainers, driverName, tables);
                 });
                 item.addEventListener('mouseleave', () => {
-                    clearAllHighlights(allContainers);
+                    clearAllHighlights(allContainers, tables);
                 });
             });
         }
     }
 
     /**
-     * Highlight all points/bars from the given driver across all containers.
+     * Highlight all points/bars from the given driver across all containers and tables.
      */
-    function highlightDriver(containers, driverName) {
-        clearAllHighlights(containers);
+    function highlightDriver(containers, driverName, tables) {
+        clearAllHighlights(containers, tables);
         if (!driverName) return;
         const escaped = CSS.escape(driverName);
         for (const container of containers) {
@@ -411,14 +403,27 @@
                 }
             });
         }
+        if (tables) {
+            for (const table of tables) {
+                if (!table) continue;
+                table.querySelectorAll('tr[data-name="' + escaped + '"]')
+                    .forEach(r => r.classList.add('driver-row-highlight'));
+            }
+        }
     }
 
-    function clearAllHighlights(containers) {
+    function clearAllHighlights(containers, tables) {
         for (const container of containers) {
             if (!container) continue;
             container.querySelectorAll('.perf-dist-point--active').forEach(el => el.classList.remove('perf-dist-point--active'));
             container.querySelectorAll('.entries-dist-bar--active').forEach(el => el.classList.remove('entries-dist-bar--active'));
             container.querySelectorAll('.team-legend--active').forEach(el => el.classList.remove('team-legend--active'));
+        }
+        if (tables) {
+            for (const table of tables) {
+                if (!table) continue;
+                table.querySelectorAll('tr.driver-row-highlight').forEach(el => el.classList.remove('driver-row-highlight'));
+            }
         }
     }
 

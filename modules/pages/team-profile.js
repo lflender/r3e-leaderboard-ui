@@ -173,7 +173,7 @@ class TeamProfilePage {
             const values = statMap.get(pathId) || {};
             const statKeys = ['avg_bested', 'bested', 'pole', 'podium', 'entries'];
 
-            html += `<tr data-path-id="${R3EUtils.escapeHtml(pathId)}">`;
+            html += `<tr data-path-id="${R3EUtils.escapeHtml(pathId)}" data-name="${R3EUtils.escapeHtml(member.name)}">`;
             html += `<td class="pos-cell">${posBadge}</td>`;
             html += `<td class="stats-driver-cell">${driverCell}</td>`;
             for (const sk of statKeys) {
@@ -223,6 +223,12 @@ class TeamProfilePage {
                 this._rerenderProfileTable();
             });
         });
+
+        // Wire members table hover via TeamProfileInteractions
+        const membersTable = this.elements.profileContainer.querySelector('.team-profile-table');
+        if (membersTable && window.TeamProfileInteractions) {
+            TeamProfileInteractions.wireTableHover(this.elements.profileContainer, membersTable);
+        }
     }
 
     _rerenderProfileTable() {
@@ -387,7 +393,15 @@ class TeamProfilePage {
         }
 
         wrapper.style.display = '';
-        TeamCharts.wireInteractions(distContainer, perfContainer);
+
+        // Wire chart interactions via dedicated interactions module
+        if (window.TeamProfileInteractions) {
+            TeamProfileInteractions.wireChartInteractions(
+                this.elements.profileContainer, distContainer, perfContainer
+            );
+        } else {
+            TeamCharts.wireInteractions(distContainer, perfContainer);
+        }
     }
 
     _sortTeamEntries() {
@@ -495,6 +509,12 @@ class TeamProfilePage {
         }
 
         container.innerHTML = '<h3 class="team-section-tile-title">Entries</h3>' + html;
+
+        // Wire entries table hover via TeamProfileInteractions
+        const table = container.querySelector('.team-entries-table');
+        if (table && window.TeamProfileInteractions) {
+            TeamProfileInteractions.wireTableHover(this.elements.profileContainer, table);
+        }
 
         window.goToEntriesPage = (page) => {
             this._entriesPage = page;

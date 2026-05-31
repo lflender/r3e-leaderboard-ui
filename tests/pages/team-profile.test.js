@@ -90,12 +90,21 @@ beforeAll(() => {
         setItem: vi.fn((k, v) => { store[k] = v; }),
         removeItem: vi.fn((k) => { delete store[k]; })
     };
+    // sessionStorage mock
+    const sessionStore = {};
+    window.sessionStorage = {
+        getItem: vi.fn((k) => sessionStore[k] || null),
+        setItem: vi.fn((k, v) => { sessionStore[k] = v; }),
+        removeItem: vi.fn((k) => { delete sessionStore[k]; }),
+        clear: vi.fn(() => { for (const k in sessionStore) delete sessionStore[k]; })
+    };
 
     loadBrowserScript('modules/pages/team-profile.js');
 });
 
 beforeEach(() => {
     document.body.innerHTML = buildDom();
+    window.sessionStorage.clear();
     window.R3EUrlUtils.getUrlParam.mockReset();
     window.R3EUrlUtils.getUrlParam.mockReturnValue('Alpha Racing');
     window.dataService.loadTeams.mockReset();

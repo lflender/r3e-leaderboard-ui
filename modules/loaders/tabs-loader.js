@@ -52,7 +52,7 @@
         var activeBtn = container.querySelector('.tab-button.is-active');
         if (activeBtn) {
             var idx = Array.prototype.indexOf.call(container.children, activeBtn);
-            var middleIdx = Math.floor(TABS.length / 2);
+            var middleIdx = Math.floor(TABS.length / 2) - 1;
             if (idx >= middleIdx) {
                 // Use requestAnimationFrame to ensure layout is complete
                 requestAnimationFrame(function () {

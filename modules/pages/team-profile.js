@@ -124,6 +124,25 @@ class TeamProfilePage {
         try { localStorage.setItem(key, value); } catch (_) { /* ignored */ }
     }
 
+    // ── sessionStorage cache helpers ──────────────────
+
+    _getSessionCache(key) {
+        try {
+            const raw = sessionStorage.getItem(key);
+            if (!raw) return null;
+            const { ts, data } = JSON.parse(raw);
+            if (Date.now() - ts > 24 * 60 * 60 * 1000) {
+                sessionStorage.removeItem(key);
+                return null;
+            }
+            return data;
+        } catch (_) { return null; }
+    }
+
+    _setSessionCache(key, data) {
+        try { sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), data })); } catch (_) { /* quota exceeded — ignore */ }
+    }
+
     // ── Members table ─────────────────────────────────
 
     _renderProfileTable(members) {
@@ -255,6 +274,19 @@ class TeamProfilePage {
     _loadMemberStats(members) {
         if (!window.DriverStatsService || !window.StatsData) return Promise.resolve();
 
+        const teamName = R3EUrlUtils.getUrlParam('team') || '';
+        const cacheKey = 'teamStats_' + teamName;
+        const cached = this._getSessionCache(cacheKey);
+        if (cached) {
+            for (const [pathId, values] of Object.entries(cached)) {
+                this._memberStatMap.set(pathId, values);
+                this._updateMemberRow(pathId, values);
+            }
+            this._updateTotalCards();
+            this._rerenderProfileTable();
+            return Promise.resolve();
+        }
+
         const statKeys = ['avg_bested', 'bested', 'pole', 'podium', 'entries'];
 
         const promises = members.map(member => {
@@ -277,6 +309,7 @@ class TeamProfilePage {
         });
 
         return Promise.all(promises).then(() => {
+            this._setSessionCache(cacheKey, Object.fromEntries(this._memberStatMap));
             this._rerenderProfileTable();
         });
     }
@@ -338,6 +371,18 @@ class TeamProfilePage {
         const container = this.elements.profileContainer.querySelector('#team-entries-container');
         if (!container) return;
 
+        const teamName = R3EUrlUtils.getUrlParam('team') || '';
+        const cacheKey = 'teamEntries_' + teamName;
+        const cached = this._getSessionCache(cacheKey);
+        if (cached && cached.length) {
+            this._teamEntries = cached;
+            this._entriesPage = 1;
+            this._sortTeamEntries();
+            this._renderEntriesTable();
+            this._renderTeamCharts(cached);
+            return;
+        }
+
         container.innerHTML = '<h3 class="team-section-tile-title">Entries</h3><p class="loading-text">Loading entries...</p>';
 
         const allEntries = [];
@@ -372,6 +417,7 @@ class TeamProfilePage {
         this._sortTeamEntries();
         this._renderEntriesTable();
         this._renderTeamCharts(allEntries);
+        this._setSessionCache(cacheKey, allEntries);
     }
 
     _renderTeamCharts(entries) {

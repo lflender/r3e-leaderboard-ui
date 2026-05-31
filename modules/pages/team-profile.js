@@ -625,6 +625,8 @@ class TeamProfilePage {
         const ds = window.dataService;
         const normalize = ds._normalizeDriverLookupName.bind(ds);
         const getShardKey = ds._getShardKeyForName.bind(ds);
+        const buildCandidates = (typeof ds._buildLookupKeyCandidates === 'function')
+            ? ds._buildLookupKeyCandidates.bind(ds) : (name) => [normalize(name)];
 
         const shardKeys = new Set();
         for (const m of members) {
@@ -647,23 +649,33 @@ class TeamProfilePage {
             const normalizedName = normalize(m.name);
             const shardKey = getShardKey(normalizedName);
             const shard = shardMap.get(shardKey);
-            if (!shard) return m;
 
-            const metaEntry = shard[normalizedName];
-            if (!metaEntry) return m;
+            // Try all lookup candidates (normalized, folded ø→o, reduced)
+            let metaEntry = null;
+            if (shard) {
+                const candidates = buildCandidates(m.name);
+                for (const key of candidates) {
+                    if (shard[key]) {
+                        metaEntry = shard[key];
+                        break;
+                    }
+                }
+            }
 
-            let match;
-            if (Array.isArray(metaEntry)) {
-                match = metaEntry.find(e => String(e.path_id) === String(m.path_id)) || metaEntry[0];
-            } else {
-                match = metaEntry;
+            let match = null;
+            if (metaEntry) {
+                if (Array.isArray(metaEntry)) {
+                    match = metaEntry.find(e => String(e.path_id) === String(m.path_id)) || metaEntry[0];
+                } else {
+                    match = metaEntry;
+                }
             }
 
             return {
                 ...m,
-                country: match.country || m.country || '',
-                rank: match.rank || m.rank || '',
-                avatar: match.avatar || m.avatar || null
+                country: (match && match.country) || m.country || '',
+                rank: (match && match.rank) || m.rank || '',
+                avatar: (match && match.avatar) || m.avatar || null
             };
         });
     }

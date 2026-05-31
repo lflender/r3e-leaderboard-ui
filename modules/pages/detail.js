@@ -1256,6 +1256,15 @@ function wireCarRowHover() {
         ? window.CarRatings.normalizeCarName
         : (s) => String(s || '').replace(/\bDTM\b/gi, '').replace(/\s+/g, ' ').trim().toLowerCase();
 
+    // Skip if only one unique car on the page
+    const carRows = tbody.querySelectorAll('tr[data-car]');
+    const uniqueCars = new Set();
+    for (const row of carRows) {
+        uniqueCars.add(normalize(row.getAttribute('data-car')));
+        if (uniqueCars.size > 1) break;
+    }
+    if (uniqueCars.size <= 1) return;
+
     let highlightedCar = null;
     tbody.addEventListener('mouseenter', (e) => {
         const row = e.target.closest('tr[data-car]');

@@ -189,7 +189,7 @@ class TableRenderer {
                 data-trackid="${R3EUtils.escapeHtml(String(trackId))}" 
                 data-classid="${R3EUtils.escapeHtml(String(classId))}" 
             data-track="${R3EUtils.escapeHtml(resolvedTrackName)}" 
-                data-class="${R3EUtils.escapeHtml(firstEntry.car_class || firstEntry.CarClass || firstEntry['Car Class'] || firstEntry.Class || '')}"
+                data-class="${R3EUtils.escapeHtml(item.car_class || item.CarClass || item['Car Class'] || item.Class || '')}"
                 data-name="${R3EUtils.escapeHtml(String(driverName))}"
                 data-time="${R3EUtils.escapeHtml(String(rawLapTime))}">`;
         

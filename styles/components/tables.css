@@ -92,6 +92,10 @@
     background: var(--color-hover-bg);
 }
 
+.results-table tr.class-row-highlight td {
+    background: var(--color-hover-bg);
+}
+
 .results-table tr:last-child td {
     border-bottom: none;
 }

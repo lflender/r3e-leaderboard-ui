@@ -43,7 +43,9 @@ beforeAll(() => {
         searchDriver: vi.fn().mockResolvedValue([]),
         _loadDriverMetadataShard: vi.fn().mockResolvedValue({}),
         _normalizeDriverLookupName: (name) => name.toLowerCase(),
-        _getShardKeyForName: (name) => name.charAt(0).toLowerCase()
+        _getShardKeyForName: (name) => name.charAt(0).toLowerCase(),
+        _buildLookupKeyCandidates: (name) => [name.toLowerCase()],
+        waitForDriverIndex: vi.fn().mockResolvedValue({})
     };
     window.generatePaginationHTML = vi.fn().mockReturnValue('');
     window.StatsRenderer = {

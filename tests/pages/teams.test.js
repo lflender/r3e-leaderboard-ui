@@ -9,18 +9,27 @@ function buildDom() {
 }
 
 const MOCK_TEAMS = {
-    'Alpha Racing': [
-        { name: 'Alice Smith', path_id: '111' },
-        { name: 'Bob Jones', path_id: '222' }
-    ],
-    'Beta Motorsport': [
-        { name: 'Charlie Brown', path_id: '333' }
-    ],
-    'Gamma Speed': [
-        { name: 'Delta Fox', path_id: '444' },
-        { name: 'Echo Lima', path_id: '555' },
-        { name: 'Foxtrot Mike', path_id: '666' }
-    ]
+    'Alpha Racing': {
+        country: 'Germany',
+        drivers: [
+            { name: 'Alice Smith', path_id: '111' },
+            { name: 'Bob Jones', path_id: '222' }
+        ]
+    },
+    'Beta Motorsport': {
+        country: 'United Kingdom',
+        drivers: [
+            { name: 'Charlie Brown', path_id: '333' }
+        ]
+    },
+    'Gamma Speed': {
+        country: 'Various',
+        drivers: [
+            { name: 'Delta Fox', path_id: '444' },
+            { name: 'Echo Lima', path_id: '555' },
+            { name: 'Foxtrot Mike', path_id: '666' }
+        ]
+    }
 };
 
 beforeAll(() => {

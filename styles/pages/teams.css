@@ -67,6 +67,17 @@
     white-space: nowrap;
 }
 
+/* Team label above name */
+.team-profile-label {
+    display: block;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--space-1);
+}
+
 /* Keep member count label left-aligned */
 .team-profile-container .driver-profile-meta {
     justify-content: flex-start;
@@ -80,6 +91,10 @@
     font-size: 0.7em;
     position: relative;
     top: -0.1em;
+}
+
+.team-flag:has(.various-flag-icon) {
+    top: 0.15em;
 }
 
 .team-flag .various-flag-icon {

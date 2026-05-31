@@ -168,6 +168,15 @@
             if (svg) {
                 const tooltip = Tooltip.getOrCreate(distChartEl, 'dist-tooltip');
                 const bars = Array.from(svg.querySelectorAll('.entries-dist-bar'));
+
+                // Pre-group bars by date for column-based tooltip
+                const barsByDate = new Map();
+                for (const bar of bars) {
+                    const date = bar.getAttribute('data-date');
+                    if (!barsByDate.has(date)) barsByDate.set(date, []);
+                    barsByDate.get(date).push(bar);
+                }
+
                 let activeBar = null;
 
                 svg.addEventListener('mousemove', (e) => {
@@ -202,18 +211,27 @@
                         highlightDriver(root, nearest.getAttribute('data-name'));
                     }
 
+                    // Build tooltip showing ALL entries for this date column
                     const date = nearest.getAttribute('data-date');
-                    const name = nearest.getAttribute('data-name');
-                    const car = nearest.getAttribute('data-car') || '';
-                    const track = nearest.getAttribute('data-track') || '';
-                    const className = nearest.getAttribute('data-class') || '';
-                    const classId = nearest.getAttribute('data-class-id') || '';
-                    const logoHtml = window.EntriesChart
-                        ? EntriesChart.buildClassLogoHtmlFromValues(className, classId)
-                        : '';
-                    const label = car + (track ? ' \u2013 ' + track : '');
-                    let tipHtml = '<strong>' + date + '</strong>';
-                    tipHtml += '<div class="dist-tooltip-entry">' + logoHtml + escapeHtml(name) + (label ? ' \u2014 ' + escapeHtml(label) : '') + '</div>';
+                    const dayBars = barsByDate.get(date) || [];
+                    const count = dayBars.length;
+                    let tipHtml = '<strong>' + date + '</strong>: ' + count + (count === 1 ? ' entry' : ' entries');
+                    if (dayBars.length > 0) {
+                        tipHtml += '<div class="dist-tooltip-entries">';
+                        for (const bar of dayBars) {
+                            const name = bar.getAttribute('data-name') || '';
+                            const car = bar.getAttribute('data-car') || '';
+                            const track = bar.getAttribute('data-track') || '';
+                            const className = bar.getAttribute('data-class') || '';
+                            const classId = bar.getAttribute('data-class-id') || '';
+                            const logoHtml = window.EntriesChart
+                                ? EntriesChart.buildClassLogoHtmlFromValues(className, classId)
+                                : '';
+                            const label = name + (car ? ' \u2014 ' + car : '') + (track ? ' \u2013 ' + track : '');
+                            tipHtml += '<div class="dist-tooltip-entry">' + logoHtml + escapeHtml(label) + '</div>';
+                        }
+                        tipHtml += '</div>';
+                    }
                     tooltip.innerHTML = tipHtml;
                     Tooltip.show(tooltip);
                     Tooltip.positionAboveCursor(e, distChartEl, tooltip);

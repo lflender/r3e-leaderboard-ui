@@ -6,13 +6,19 @@ function buildDom() {
 }
 
 const MOCK_TEAMS = {
-    'Alpha Racing': [
-        { name: 'Alice Smith', path_id: '111' },
-        { name: 'Bob Jones', path_id: '222' }
-    ],
-    'Beta Motorsport': [
-        { name: 'Charlie Brown', path_id: '333' }
-    ]
+    'Alpha Racing': {
+        country: 'Germany',
+        drivers: [
+            { name: 'Alice Smith', path_id: '111' },
+            { name: 'Bob Jones', path_id: '222' }
+        ]
+    },
+    'Beta Motorsport': {
+        country: 'United Kingdom',
+        drivers: [
+            { name: 'Charlie Brown', path_id: '333' }
+        ]
+    }
 };
 
 beforeAll(() => {

@@ -36,28 +36,31 @@ class TeamProfilePage {
 
         try {
             const teams = await window.dataService.loadTeams();
-            const team = teams[teamName];
-            if (!team) {
+            const teamData = teams[teamName];
+            if (!teamData) {
                 this.elements.profileContainer.innerHTML = '<div class="error"><strong>Error:</strong> Team not found.</div>';
                 return;
             }
-            await this.showTeamProfile(teamName, team);
+            const members = teamData.drivers || teamData;
+            const country = teamData.country || null;
+            await this.showTeamProfile(teamName, members, country);
         } catch (err) {
             this.elements.profileContainer.innerHTML = '<div class="error"><strong>Error:</strong> Failed to load team data.</div>';
         }
     }
 
-    async showTeamProfile(teamName, members) {
+    async showTeamProfile(teamName, members, country) {
         const enrichedMembers = await this._enrichMembers(members);
         this._profileMembers = enrichedMembers;
         this._memberStatMap = new Map();
 
         const escapedName = R3EUtils.escapeHtml(teamName);
-        const teamFlag = this._getTeamFlag(enrichedMembers);
+        const teamFlag = this._getTeamFlag(country);
 
         // Header tile
         let html = '<div class="driver-profile-header">';
         html += '<div class="driver-profile-info">';
+        html += '<span class="team-profile-label">Team</span>';
         html += `<h2 class="driver-profile-name">${teamFlag}${escapedName}</h2>`;
         html += `<p class="driver-profile-meta">${enrichedMembers.length} member${enrichedMembers.length !== 1 ? 's' : ''}</p>`;
         html += '</div></div>';
@@ -553,26 +556,10 @@ class TeamProfilePage {
 
     // ── Team flag (majority country) ─────────────────
 
-    _getTeamFlag(enrichedMembers) {
-        const counts = {};
-        let total = 0;
-        for (const m of enrichedMembers) {
-            if (m.country) {
-                counts[m.country] = (counts[m.country] || 0) + 1;
-                total++;
-            }
-        }
-        let dominant = null;
-        let maxCount = 0;
-        for (const [country, count] of Object.entries(counts)) {
-            if (count > maxCount) {
-                maxCount = count;
-                dominant = country;
-            }
-        }
-        const flag = (dominant && maxCount / total > 0.5)
-            ? window.FlagHelper?.countryToFlag(dominant) || ''
-            : window.FlagHelper?.countryToFlag('Various') || '';
+    _getTeamFlag(country) {
+        const flag = country
+            ? window.FlagHelper?.countryToFlag(country) || ''
+            : '';
         return flag ? `<span class="team-flag">${flag}</span> ` : '';
     }
 

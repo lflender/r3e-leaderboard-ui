@@ -296,14 +296,22 @@
             });
         }
 
-        // Wire entries distribution chart — snap to nearest bar, highlight ALL
-        // bars + perf points for that player (cross-chart driver highlighting)
+        // Wire entries distribution chart — snap to nearest column (date),
+        // highlight the hovered driver, and show all entries for that day.
         const distChartEl = distContainer && distContainer.querySelector('.entries-dist-chart');
         if (distChartEl) {
             const svg = distChartEl.querySelector('svg');
             if (svg) {
                 const tooltip = Tooltip.getOrCreate(distChartEl, 'dist-tooltip');
                 const bars = Array.from(svg.querySelectorAll('.entries-dist-bar'));
+
+                // Pre-group bars by date for column-based tooltip
+                const barsByDate = new Map();
+                for (const bar of bars) {
+                    const date = bar.getAttribute('data-date');
+                    if (!barsByDate.has(date)) barsByDate.set(date, []);
+                    barsByDate.get(date).push(bar);
+                }
 
                 let activeBar = null;
 
@@ -316,7 +324,7 @@
                     const svgX = mouseXRatio * viewBox.width;
                     const svgY = mouseYRatio * viewBox.height;
 
-                    // Find the nearest bar by 2D distance (normalized)
+                    // Find nearest bar by 2D distance for driver highlighting
                     let nearest = null;
                     let minDist = Infinity;
                     for (const bar of bars) {
@@ -341,17 +349,25 @@
                         highlightDriver(allContainers, driverName, tables);
                     }
 
-                    // Build tooltip for the hovered bar
+                    // Build tooltip showing ALL entries for this date column
                     const date = nearest.getAttribute('data-date');
-                    const name = nearest.getAttribute('data-name');
-                    const car = nearest.getAttribute('data-car') || '';
-                    const track = nearest.getAttribute('data-track') || '';
-                    const className = nearest.getAttribute('data-class') || '';
-                    const classId = nearest.getAttribute('data-class-id') || '';
-                    const logoHtml = EntriesChart.buildClassLogoHtmlFromValues(className, classId);
-                    const label = car + (track ? ' \u2013 ' + track : '');
-                    let tipHtml = '<strong>' + date + '</strong>';
-                    tipHtml += '<div class="dist-tooltip-entry">' + logoHtml + escapeHtml(name) + (label ? ' — ' + escapeHtml(label) : '') + '</div>';
+                    const dayBars = barsByDate.get(date) || [];
+                    const count = dayBars.length;
+                    let tipHtml = '<strong>' + date + '</strong>: ' + count + (count === 1 ? ' entry' : ' entries');
+                    if (dayBars.length > 0) {
+                        tipHtml += '<div class="dist-tooltip-entries">';
+                        for (const bar of dayBars) {
+                            const name = bar.getAttribute('data-name') || '';
+                            const car = bar.getAttribute('data-car') || '';
+                            const track = bar.getAttribute('data-track') || '';
+                            const className = bar.getAttribute('data-class') || '';
+                            const classId = bar.getAttribute('data-class-id') || '';
+                            const logoHtml = EntriesChart.buildClassLogoHtmlFromValues(className, classId);
+                            const label = name + (car ? ' — ' + car : '') + (track ? ' \u2013 ' + track : '');
+                            tipHtml += '<div class="dist-tooltip-entry">' + logoHtml + escapeHtml(label) + '</div>';
+                        }
+                        tipHtml += '</div>';
+                    }
                     tooltip.innerHTML = tipHtml;
                     Tooltip.show(tooltip);
                     Tooltip.positionAboveCursor(e, distChartEl, tooltip);

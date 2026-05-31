@@ -195,5 +195,42 @@ describe('TeamProfileInteractions', () => {
             aliceLegend.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }));
             expect(root.querySelectorAll('tr.driver-row-highlight').length).toBe(0);
         });
+
+        it('entries dist tooltip shows all entries for the hovered date column', () => {
+            // Build an SVG with bars for the same date (2 bars on 2026-01-15)
+            root.innerHTML = `
+                <div id="dist">
+                    <div class="entries-dist-chart">
+                        <svg viewBox="0 0 2 100">
+                            <rect class="entries-dist-bar" x="0" y="50" width="0.9" height="50" data-date="2026-01-15" data-name="Alice" data-car="GT3" data-track="Spa" data-class="" data-class-id=""></rect>
+                            <rect class="entries-dist-bar" x="0" y="0" width="0.9" height="50" data-date="2026-01-15" data-name="Bob" data-car="GT4" data-track="Monza" data-class="" data-class-id=""></rect>
+                            <rect class="entries-dist-bar" x="1" y="50" width="0.9" height="50" data-date="2026-01-16" data-name="Alice" data-car="LMP2" data-track="Nords" data-class="" data-class-id=""></rect>
+                        </svg>
+                    </div>
+                </div>
+                <div id="perf"><div class="perf-dist-chart"></div></div>
+            `;
+            const dist = root.querySelector('#dist');
+            const perf = root.querySelector('#perf');
+
+            // Need a persistent tooltip element to check innerHTML
+            const tooltipEl = document.createElement('div');
+            window.Tooltip.getOrCreate = () => tooltipEl;
+
+            TeamProfileInteractions.wireChartInteractions(root, dist, perf);
+
+            const svg = dist.querySelector('svg');
+            svg.getBoundingClientRect = () => ({ left: 0, top: 0, width: 200, height: 100 });
+
+            // Hover over the first column (x=0..1 maps to first date)
+            const event = new MouseEvent('mousemove', { clientX: 10, clientY: 50, bubbles: true });
+            svg.dispatchEvent(event);
+
+            // Tooltip should show "2 entries" and both names
+            expect(tooltipEl.innerHTML).toContain('2 entries');
+            expect(tooltipEl.innerHTML).toContain('Alice');
+            expect(tooltipEl.innerHTML).toContain('Bob');
+            expect(tooltipEl.innerHTML).toContain('2026-01-15');
+        });
     });
 });

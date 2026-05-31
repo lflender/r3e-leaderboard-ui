@@ -101,14 +101,17 @@ class TeamsPage {
 
         // Sort by member count descending, then alphabetically
         filtered.sort((a, b) => {
-            const diff = teams[b].length - teams[a].length;
+            const aDrivers = teams[a].drivers || teams[a];
+            const bDrivers = teams[b].drivers || teams[b];
+            const diff = bDrivers.length - aDrivers.length;
             return diff !== 0 ? diff : a.localeCompare(b);
         });
 
         // Map to display objects
         this.filteredTeams = filtered.map(name => ({
             name,
-            members: teams[name]
+            members: teams[name].drivers || teams[name],
+            country: teams[name].country || null
         }));
 
         this.currentPage = 1;
@@ -140,8 +143,12 @@ class TeamsPage {
 
         for (const team of pageTeams) {
             const escapedName = R3EUtils.escapeHtml(team.name);
+            const flagHtml = team.country && window.FlagHelper
+                ? (window.FlagHelper.countryToFlag(team.country) || '')
+                : '';
+            const flagPrefix = flagHtml ? `<span class="country-flag">${flagHtml}</span>` : '';
             html += `<tr class="team-row" data-team="${escapedName}">`;
-            html += `<td class="team-name-cell">${escapedName}</td>`;
+            html += `<td class="team-name-cell">${flagPrefix}<strong>${escapedName}</strong></td>`;
             html += `<td class="team-members-cell">${team.members.length}</td>`;
             html += '</tr>';
         }

@@ -397,6 +397,8 @@
         toLocalDateInputValue,
         applyTimeframeFilter,
         wireTooltips,
-        wirePerfTooltips
+        wirePerfTooltips,
+        buildClassLogoHtml,
+        buildClassLogoHtmlFromValues
     };
 }());

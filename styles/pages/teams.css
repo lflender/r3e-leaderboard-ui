@@ -18,10 +18,10 @@
 }
 
 .team-section-tile-title {
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-bold);
     color: var(--color-text-primary);
-    margin: 0 0 var(--space-4);
+    margin: 0 0 var(--space-3);
     text-align: center;
 }
 
@@ -72,7 +72,23 @@
     justify-content: flex-start;
 }
 
-/* Team stats grid */
+/* Team flag in header */
+.team-flag {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: baseline;
+    font-size: 0.7em;
+    position: relative;
+    top: -0.15em;
+}
+
+.team-flag .various-flag-icon {
+    width: 1.4em;
+    height: 1.4em;
+    vertical-align: middle;
+}
+
+/* Team stats grid — 5 in a row, wraps to 2-3 on smaller screens */
 .team-stats-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -98,10 +114,10 @@
         grid-template-columns: repeat(6, 1fr);
     }
     .team-stats-grid .driver-stat-card {
-        grid-column: span 2;
+        grid-column: span 3;
     }
-    .team-stats-grid .driver-stat-card:nth-child(4) {
-        grid-column: 2 / span 2;
+    .team-stats-grid .driver-stat-card:nth-child(n+3) {
+        grid-column: span 2;
     }
     .team-section-tile-title {
         font-size: var(--font-size-base);
@@ -151,17 +167,14 @@
         border-radius: var(--radius-md);
     }
     .team-stats-grid {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(6, 1fr);
         gap: var(--space-3);
     }
     .team-stats-grid .driver-stat-card {
+        grid-column: span 3;
+    }
+    .team-stats-grid .driver-stat-card:nth-child(n+3) {
         grid-column: span 2;
-    }
-    .team-stats-grid .driver-stat-card:nth-child(4) {
-        grid-column: auto / span 2;
-    }
-    .team-stats-grid .driver-stat-card:nth-child(5) {
-        grid-column: 2 / span 2;
     }
     .team-profile-container .driver-profile-meta {
         font-size: var(--font-size-xs);
@@ -235,7 +248,7 @@
 #team-entries-container .results-table th:nth-child(2),
 #team-entries-container .results-table td:nth-child(2) {
     white-space: normal;
-    min-width: 190px;
+    min-width: 180px;
 }
 
 #team-entries-container .results-table th:nth-child(3),
@@ -262,4 +275,54 @@
 
 #team-entries-container .track-cell-text {
     min-width: 0;
+}
+
+/* ── Team Charts ────────────────────────────────── */
+
+/* Ensure chart containers allow tooltip overflow */
+#team-charts-wrapper {
+    overflow: visible;
+}
+
+#team-charts-wrapper .driver-profile-dist-card {
+    overflow: visible;
+}
+
+/* Legend */
+.team-chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+    justify-content: center;
+    padding-top: var(--space-3);
+}
+
+.team-chart-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: opacity 0.15s, color 0.15s;
+}
+
+.team-chart-legend-item:hover {
+    color: var(--color-text-primary);
+}
+
+.team-legend--active {
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-semibold);
+}
+
+.team-chart-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: var(--radius-xs);
+    flex-shrink: 0;
+}
+
+.team-chart-legend-name {
+    white-space: nowrap;
 }

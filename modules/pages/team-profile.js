@@ -53,20 +53,21 @@ class TeamProfilePage {
         this._memberStatMap = new Map();
 
         const escapedName = R3EUtils.escapeHtml(teamName);
+        const teamFlag = this._getTeamFlag(enrichedMembers);
 
         // Header tile
         let html = '<div class="driver-profile-header">';
         html += '<div class="driver-profile-info">';
-        html += `<h2 class="driver-profile-name">${escapedName}</h2>`;
+        html += `<h2 class="driver-profile-name">${teamFlag}${escapedName}</h2>`;
         html += `<p class="driver-profile-meta">${enrichedMembers.length} member${enrichedMembers.length !== 1 ? 's' : ''}</p>`;
         html += '</div></div>';
 
         // Stat cards grid (loading state)
         html += '<div class="driver-stats-grid team-stats-grid" id="team-totals">';
         const statDefs = [
-            { key: 'avg_bested', label: 'Avg Bested' },
-            { key: 'bested', label: 'Bested' },
-            { key: 'pole', label: 'Poles' },
+            { key: 'avg_bested', label: 'Average Bested %' },
+            { key: 'bested', label: 'Drivers Bested' },
+            { key: 'pole', label: 'Pole Positions' },
             { key: 'podium', label: 'Podiums' },
             { key: 'entries', label: 'Entries' }
         ];
@@ -82,6 +83,12 @@ class TeamProfilePage {
         html += '<div class="team-section-tile">';
         html += '<h3 class="team-section-tile-title">Members</h3>';
         html += this._renderProfileTable(enrichedMembers);
+        html += '</div>';
+
+        // Charts containers (populated after entries load)
+        html += '<div id="team-charts-wrapper" class="driver-profile-distributions-grid" style="display:none">';
+        html += '<div class="driver-profile-dist-card" id="team-dist-chart-container"></div>';
+        html += '<div class="driver-profile-dist-card" id="team-perf-chart-container"></div>';
         html += '</div>';
 
         // Entries container tile
@@ -349,6 +356,38 @@ class TeamProfilePage {
         this._entriesPage = 1;
         this._sortTeamEntries();
         this._renderEntriesTable();
+        this._renderTeamCharts(allEntries);
+    }
+
+    _renderTeamCharts(entries) {
+        if (!window.TeamCharts) return;
+        const wrapper = this.elements.profileContainer.querySelector('#team-charts-wrapper');
+        const distContainer = this.elements.profileContainer.querySelector('#team-dist-chart-container');
+        const perfContainer = this.elements.profileContainer.querySelector('#team-perf-chart-container');
+        if (!wrapper || !distContainer || !perfContainer) return;
+
+        const colorMap = TeamCharts.buildColorMap(entries);
+        const distHtml = TeamCharts.generateEntriesDistribution(entries, colorMap);
+        const perfHtml = TeamCharts.generatePerformanceChart(entries, colorMap);
+
+        if (!distHtml && !perfHtml) return;
+
+        if (distHtml) {
+            distContainer.innerHTML = distHtml;
+            distContainer.style.display = '';
+        } else {
+            distContainer.style.display = 'none';
+        }
+
+        if (perfHtml) {
+            perfContainer.innerHTML = perfHtml;
+            perfContainer.style.display = '';
+        } else {
+            perfContainer.style.display = 'none';
+        }
+
+        wrapper.style.display = '';
+        TeamCharts.wireInteractions(distContainer, perfContainer);
     }
 
     _sortTeamEntries() {
@@ -490,6 +529,31 @@ class TeamProfilePage {
                 this._renderEntriesTable();
             });
         });
+    }
+
+    // ── Team flag (majority country) ─────────────────
+
+    _getTeamFlag(enrichedMembers) {
+        const counts = {};
+        let total = 0;
+        for (const m of enrichedMembers) {
+            if (m.country) {
+                counts[m.country] = (counts[m.country] || 0) + 1;
+                total++;
+            }
+        }
+        let dominant = null;
+        let maxCount = 0;
+        for (const [country, count] of Object.entries(counts)) {
+            if (count > maxCount) {
+                maxCount = count;
+                dominant = country;
+            }
+        }
+        const flag = (dominant && maxCount / total > 0.5)
+            ? window.FlagHelper?.countryToFlag(dominant) || ''
+            : window.FlagHelper?.countryToFlag('Various') || '';
+        return flag ? `<span class="team-flag">${flag}</span> ` : '';
     }
 
     // ── Enrich members ────────────────────────────────

@@ -27,6 +27,12 @@ class TeamProfilePage {
         const teamName = R3EUrlUtils.getUrlParam('team');
         if (!teamName) return;
         this.loadTeamProfile(teamName);
+        this._trackPageShown(teamName);
+    }
+
+    _trackPageShown(teamName) {
+        if (typeof R3EAnalytics === 'undefined' || typeof R3EAnalytics.track !== 'function') return;
+        R3EAnalytics.track('team profile shown', { team_name: teamName });
     }
 
     async loadTeamProfile(teamName) {

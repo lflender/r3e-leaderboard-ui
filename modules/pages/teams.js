@@ -25,6 +25,12 @@ class TeamsPage {
     init() {
         this.setupEventListeners();
         this.preloadTeams();
+        this._trackPageShown();
+    }
+
+    _trackPageShown() {
+        if (typeof R3EAnalytics === 'undefined' || typeof R3EAnalytics.track !== 'function') return;
+        R3EAnalytics.track('teams page shown');
     }
 
     /**

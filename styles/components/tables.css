@@ -703,7 +703,7 @@ h2.driver-name-top10-glitter {
         font-size: 0.75rem;
     }
 
-    #results-container .results-table th:nth-child(1) {
+    #results-container .results-table:not(.teams-table) th:nth-child(1) {
         min-width: unset;
         width: 1px;
         white-space: nowrap;
@@ -711,19 +711,19 @@ h2.driver-name-top10-glitter {
         padding: 0.6rem 0.2rem;
     }
 
-    #results-container .results-table th:nth-child(1)::after {
+    #results-container .results-table:not(.teams-table) th:nth-child(1)::after {
         font-size: 0.7rem;
     }
 
-    #results-container .results-table td:nth-child(1) {
+    #results-container .results-table:not(.teams-table) td:nth-child(1) {
         min-width: unset;
         width: 1px;
         white-space: nowrap;
         padding: 0.6rem 0.2rem;
     }
 
-    #results-container .results-table th:nth-child(2),
-    #results-container .results-table td:nth-child(2) {
+    #results-container .results-table:not(.teams-table) th:nth-child(2),
+    #results-container .results-table:not(.teams-table) td:nth-child(2) {
         min-width: 140px !important;
     }
 
@@ -793,7 +793,7 @@ h2.driver-name-top10-glitter {
         font-size: 0.7rem;
     }
 
-    #results-container .results-table th:nth-child(1) {
+    #results-container .results-table:not(.teams-table) th:nth-child(1) {
         min-width: unset !important;
         width: 1px;
         white-space: nowrap;
@@ -801,19 +801,19 @@ h2.driver-name-top10-glitter {
         padding: 0.4rem 0.15rem;
     }
 
-    #results-container .results-table th:nth-child(1)::after {
+    #results-container .results-table:not(.teams-table) th:nth-child(1)::after {
         font-size: 0.65rem;
     }
 
-    #results-container .results-table td:nth-child(1) {
+    #results-container .results-table:not(.teams-table) td:nth-child(1) {
         min-width: unset !important;
         width: 1px;
         white-space: nowrap;
         padding: 0.4rem 0.15rem;
     }
 
-    #results-container .results-table th:nth-child(2),
-    #results-container .results-table td:nth-child(2) {
+    #results-container .results-table:not(.teams-table) th:nth-child(2),
+    #results-container .results-table:not(.teams-table) td:nth-child(2) {
         min-width: 140px !important;
     }
 }

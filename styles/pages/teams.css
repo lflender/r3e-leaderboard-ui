@@ -28,6 +28,15 @@
 .teams-table {
     max-width: 500px;
     margin: 0 auto;
+    min-width: 0;
+}
+
+#results-container .teams-table th,
+#results-container .teams-table td {
+    min-width: 0 !important;
+    width: auto !important;
+    white-space: normal;
+    font-size: inherit;
 }
 
 .teams-table .team-row {
@@ -45,7 +54,8 @@
 
 .teams-table .team-members-cell {
     text-align: right;
-    width: 100px;
+    width: 1% !important;
+    white-space: nowrap;
 }
 
 /* Team profile table with stats columns */
@@ -172,6 +182,19 @@
         width: 2rem;
         padding-left: 0.2rem;
         padding-right: 0.2rem;
+    }
+
+    /* Teams listing table: prevent min-width and header hiding from generic table rules */
+    .teams-table {
+        min-width: 0;
+        font-size: 0.85rem;
+    }
+    #results-container .teams-table th,
+    #results-container .teams-table td {
+        font-size: 0.85rem;
+        padding: 0.6rem 0.5rem;
+        min-width: 0;
+        width: auto;
     }
 }
 

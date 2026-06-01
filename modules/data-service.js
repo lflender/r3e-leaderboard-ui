@@ -20,6 +20,10 @@ class DataService {
         this.driverMetadataShardPromises = new Map();
         this.teamsCache = null;
         this.teamsPromise = null; // single-flight promise for teams loading
+        this.allCombinationsCache = null;
+        this.allCombinationsPromise = null; // single-flight promise
+        this.topCombinationsCache = null;
+        this.topCombinationsPromise = null; // single-flight promise
         this.statusCache = null; // last good status (fallback only)
         this.statusPromise = null; // single-flight promise for status fetch
         this.DRIVER_INDEX_CACHE_KEY = 'r3e_driver_index_cache';
@@ -121,57 +125,79 @@ class DataService {
     }
     
     /**
-     * Fetches top combinations data
+     * Fetches top combinations data.
+     * Uses single-flight promise to avoid concurrent fetches.
      * @returns {Promise<Array>} Combinations array
      */
     async fetchTopCombinations() {
-        const cacheVersion = await this._getIndexCacheVersion();
-        const response = await R3EUtils.fetchWithTimeout(`cache/combinations/top_combinations.json.gz?v=${cacheVersion}`, {}, 15000);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
+        if (this.topCombinationsCache) return this.topCombinationsCache;
+        if (this.topCombinationsPromise) return this.topCombinationsPromise;
 
-        const helper = this._getCompressedJsonHelper();
-        const data = await helper.readGzipJson(response);
-        
-        let combinations = [];
-        if (Array.isArray(data)) {
-            combinations = data;
-        } else if (data && Array.isArray(data.results)) {
-            combinations = data.results;
-        } else if (data && Array.isArray(data.data)) {
-            combinations = data.data;
-        }
-        
-        return combinations;
+        this.topCombinationsPromise = (async () => {
+            try {
+                const cacheVersion = await this._getIndexCacheVersion();
+                const response = await R3EUtils.fetchWithTimeout(`cache/combinations/top_combinations.json.gz?v=${cacheVersion}`, {}, 15000);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const helper = this._getCompressedJsonHelper();
+                const data = await helper.readGzipJson(response);
+
+                this.topCombinationsCache = this._normalizeCombinations(data);
+                return this.topCombinationsCache;
+            } catch (err) {
+                this.topCombinationsPromise = null;
+                throw err;
+            }
+        })();
+
+        return this.topCombinationsPromise;
     }
     
     /**
-     * Fetches all combinations data (every track+class pair with entries)
+     * Fetches all combinations data (every track+class pair with entries).
+     * Uses single-flight promise to avoid concurrent fetches.
      * @returns {Promise<Array>} Combinations array
      */
     async fetchAllCombinations() {
-        const cacheVersion = await this._getIndexCacheVersion();
-        const response = await R3EUtils.fetchWithTimeout(`cache/combinations/all_combinations.json.gz?v=${cacheVersion}`, {}, 15000);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
+        if (this.allCombinationsCache) return this.allCombinationsCache;
+        if (this.allCombinationsPromise) return this.allCombinationsPromise;
 
-        const helper = this._getCompressedJsonHelper();
-        const data = await helper.readGzipJson(response);
-        
-        let combinations = [];
-        if (Array.isArray(data)) {
-            combinations = data;
-        } else if (data && Array.isArray(data.results)) {
-            combinations = data.results;
-        } else if (data && Array.isArray(data.data)) {
-            combinations = data.data;
-        }
-        
-        return combinations;
+        this.allCombinationsPromise = (async () => {
+            try {
+                const cacheVersion = await this._getIndexCacheVersion();
+                const response = await R3EUtils.fetchWithTimeout(`cache/combinations/all_combinations.json.gz?v=${cacheVersion}`, {}, 15000);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const helper = this._getCompressedJsonHelper();
+                const data = await helper.readGzipJson(response);
+
+                this.allCombinationsCache = this._normalizeCombinations(data);
+                return this.allCombinationsCache;
+            } catch (err) {
+                this.allCombinationsPromise = null;
+                throw err;
+            }
+        })();
+
+        return this.allCombinationsPromise;
+    }
+
+    /**
+     * Normalize combinations payload to a flat array.
+     * @param {*} data - Raw parsed JSON
+     * @returns {Array}
+     */
+    _normalizeCombinations(data) {
+        if (Array.isArray(data)) return data;
+        if (data && Array.isArray(data.results)) return data.results;
+        if (data && Array.isArray(data.data)) return data.data;
+        return [];
     }
 
     /**

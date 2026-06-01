@@ -44,7 +44,9 @@ beforeEach(() => {
         showNoResults: vi.fn(async (container) => { container.innerHTML = '<div>No results found</div>'; })
     };
     window.dataService = {
-        waitForDriverIndex: vi.fn().mockResolvedValue({})
+        waitForDriverIndex: vi.fn().mockResolvedValue({}),
+        fetchTopCombinations: vi.fn().mockResolvedValue([]),
+        fetchAllCombinations: vi.fn().mockResolvedValue([])
     };
     window.FilterOptionsService = {
         getSuperclassOptions: vi.fn().mockReturnValue([]),
@@ -73,6 +75,10 @@ beforeEach(() => {
 
 describe('leaderboards integration', () => {
     it('renders rows from top combinations payload', async () => {
+        window.dataService.fetchTopCombinations = vi.fn().mockResolvedValueOnce([
+            { track_id: 10, class_name: 'GT3', entry_count: 321 }
+        ]);
+
         global.fetch = vi.fn().mockResolvedValueOnce({
             ok: true,
             body: {

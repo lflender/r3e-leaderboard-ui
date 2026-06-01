@@ -76,18 +76,19 @@ describe('DataService core behavior', () => {
         window.CompressedJsonHelper.readGzipJson
             .mockResolvedValueOnce({ leaderboard: [{ id: 1 }] })
             .mockResolvedValueOnce({ results: [{ track_id: 10 }] })
-            .mockResolvedValueOnce({ data: [{ track_id: 20 }] })
-            .mockResolvedValueOnce([{ track_id: 30 }]);
+            .mockResolvedValueOnce({ data: [{ track_id: 20 }] });
         global.fetch
-            .mockResolvedValueOnce({ ok: true, status: 200, statusText: 'OK' })
             .mockResolvedValueOnce({ ok: true, status: 200, statusText: 'OK' })
             .mockResolvedValueOnce({ ok: true, status: 200, statusText: 'OK' })
             .mockResolvedValueOnce({ ok: true, status: 200, statusText: 'OK' });
 
         await expect(service.fetchLeaderboardDetails(10, 5)).resolves.toEqual({ leaderboard: [{ id: 1 }] });
+        // fetchTopCombinations is now cached after first call (single-flight)
         await expect(service.fetchTopCombinations()).resolves.toEqual([{ track_id: 10 }]);
-        await expect(service.fetchTopCombinations()).resolves.toEqual([{ track_id: 20 }]);
-        await expect(service.fetchTopCombinations()).resolves.toEqual([{ track_id: 30 }]);
+        // Second call returns cached result
+        await expect(service.fetchTopCombinations()).resolves.toEqual([{ track_id: 10 }]);
+        // fetchAllCombinations uses its own cache
+        await expect(service.fetchAllCombinations()).resolves.toEqual([{ track_id: 20 }]);
         expect(global.fetch.mock.calls[0][0]).toContain('cache/tracks/track_10/class_5.json.gz');
     });
 

@@ -1,6 +1,7 @@
 (function () {
     const TOP_ROWS_DEFAULT = 100;
     let statsIndexCache = null;
+    let statsIndexPromise = null;
 
     // Single source of truth for all 4 record types.
     // direction: 'desc' = higher value is better; 'asc' = lower value is better.
@@ -16,6 +17,7 @@
     // so the browser can serve stats files from HTTP cache on subsequent visits.
     let _cacheVersion = null;
     let _cacheVersionPromise = null;
+    // Reuse dataService's cache version (single source of truth)
     async function getCacheVersion() {
         if (_cacheVersion) return _cacheVersion;
         if (_cacheVersionPromise) return _cacheVersionPromise;
@@ -23,10 +25,12 @@
             try {
                 if (window.dataService && typeof window.dataService._getIndexCacheVersion === 'function') {
                     _cacheVersion = await window.dataService._getIndexCacheVersion();
-                    return _cacheVersion;
+                } else {
+                    _cacheVersion = String(Date.now());
                 }
-            } catch (_) { /* fall through */ }
-            _cacheVersion = String(Date.now());
+            } catch (_) {
+                _cacheVersion = String(Date.now());
+            }
             return _cacheVersion;
         })();
         return _cacheVersionPromise;
@@ -57,8 +61,20 @@
 
     async function loadStatsIndex() {
         if (statsIndexCache) return statsIndexCache;
-        statsIndexCache = await fetchJson('cache/stats/index.json');
-        return statsIndexCache;
+        if (statsIndexPromise) return statsIndexPromise;
+
+        statsIndexPromise = (async () => {
+            try {
+                const data = await fetchJson('cache/stats/index.json');
+                statsIndexCache = data;
+                return data;
+            } catch (err) {
+                statsIndexPromise = null;
+                throw err;
+            }
+        })();
+
+        return statsIndexPromise;
     }
 
     function getFilesEntryForFilter(index, filterValue) {

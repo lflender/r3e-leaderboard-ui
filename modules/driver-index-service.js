@@ -297,13 +297,10 @@
 
             for (let attempt = 1; attempt <= maxAttempts; attempt++) {
                 try {
-                    const controller = new AbortController();
-                    const timeout = setTimeout(() => controller.abort(), 8000);
                     const cacheVersion = await this._getIndexCacheVersion();
-                    const response = await fetch(`${this.driverShardBasePath}/${shardKey}.json.gz?v=${cacheVersion}`, {
-                        signal: controller.signal
-                    });
-                    clearTimeout(timeout);
+                    const response = await R3EUtils.fetchWithTimeout(
+                        `${this.driverShardBasePath}/${shardKey}.json.gz?v=${cacheVersion}`, {}, 8000
+                    );
 
                     if (!response.ok) {
                         throw new Error(`Failed to load shard ${shardKey}: ${response.status} ${response.statusText}`);
@@ -365,13 +362,10 @@
 
             for (let attempt = 1; attempt <= maxAttempts; attempt++) {
                 try {
-                    const controller = new AbortController();
-                    const timeout = setTimeout(() => controller.abort(), 8000);
                     const cacheVersion = await this._getIndexCacheVersion();
-                    const response = await fetch(`${this.driverMetadataBasePath}/${shardKey}.json.gz?v=${cacheVersion}`, {
-                        signal: controller.signal
-                    });
-                    clearTimeout(timeout);
+                    const response = await R3EUtils.fetchWithTimeout(
+                        `${this.driverMetadataBasePath}/${shardKey}.json.gz?v=${cacheVersion}`, {}, 8000
+                    );
 
                     if (!response.ok) {
                         throw new Error(`Failed to load metadata shard ${shardKey}: ${response.status} ${response.statusText}`);
@@ -417,13 +411,10 @@
         },
 
         async _fetchDriverMirrorData() {
-            const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 8000);
             const cacheVersion = await this._getIndexCacheVersion();
-            const response = await fetch(`${this.driverMirrorPath}?v=${cacheVersion}`, {
-                signal: controller.signal
-            });
-            clearTimeout(timeout);
+            const response = await R3EUtils.fetchWithTimeout(
+                `${this.driverMirrorPath}?v=${cacheVersion}`, {}, 8000
+            );
 
             if (!response.ok) {
                 throw new Error(`Failed to load driver index: ${response.status} ${response.statusText}`);

@@ -6,15 +6,16 @@ describe('TabsLoader', () => {
         localStorage.clear();
     });
 
-    const BADGE_STORAGE_KEY = 'challenge-visited';
+    const BADGE_STORAGE_KEY = 'teams-visited';
 
     function loadTabs() {
         const TABS = [
             { id: 'ranked',    label: 'Ranked',        href: '/' },
             { id: 'drivers',   label: 'Drivers',      href: 'drivers.html' },
+            { id: 'teams',     label: 'Teams',        href: 'teams.html', badge: 'NEW!' },
             { id: 'leaderboards', label: 'Leaderboards',  href: 'leaderboards.html' },
             { id: 'records',   label: 'Records',       href: 'records.html' },
-            { id: 'challenge', label: 'Challenge',     href: 'challenge.html', badge: 'NEW!' },
+            { id: 'challenge', label: 'Challenge',     href: 'challenge.html' },
             { id: 'cars',      label: 'Cars',          href: 'cars.html' },
             { id: 'faq',       label: 'FAQ',           href: 'faq.html' },
         ];
@@ -23,12 +24,12 @@ describe('TabsLoader', () => {
         const activeId = container.dataset.active || 'ranked';
         let html = '';
         for (const tab of TABS) {
-            const dismissed = tab.id === 'challenge' && localStorage.getItem(BADGE_STORAGE_KEY) === '1';
+            const dismissed = tab.id === 'teams' && localStorage.getItem(BADGE_STORAGE_KEY) === '1';
             const badgeHtml = (tab.badge && !dismissed)
                 ? ' <span class="tab-badge">' + tab.badge + '</span>'
                 : '';
             if (tab.id === activeId) {
-                if (tab.id === 'challenge') localStorage.setItem(BADGE_STORAGE_KEY, '1');
+                if (tab.id === 'teams') localStorage.setItem(BADGE_STORAGE_KEY, '1');
                 html += '<button class="tab-button is-active">' + tab.label + '</button>';
             } else {
                 html += '<a class="tab-button" href="' + tab.href + '">' + tab.label + badgeHtml + '</a>';
@@ -48,14 +49,14 @@ describe('TabsLoader', () => {
         loadTabs();
         const container = document.getElementById('site-tabs');
         const buttons = container.querySelectorAll('.tab-button');
-        expect(buttons.length).toBe(7);
+        expect(buttons.length).toBe(8);
 
         const active = container.querySelector('button.tab-button.is-active');
         expect(active).not.toBeNull();
         expect(active.textContent).toBe('Challenge');
 
         const links = container.querySelectorAll('a.tab-button');
-        expect(links.length).toBe(6);
+        expect(links.length).toBe(7);
     });
 
     it('renders Ranked tab active when data-active is missing', () => {
@@ -67,7 +68,7 @@ describe('TabsLoader', () => {
         expect(active.textContent).toBe('Ranked');
 
         const links = container.querySelectorAll('a.tab-button');
-        expect(links.length).toBe(6);
+        expect(links.length).toBe(7);
     });
 
     it('marks drivers tab active correctly', () => {
@@ -81,7 +82,7 @@ describe('TabsLoader', () => {
         document.body.innerHTML = '<div class="tabs" id="site-tabs" data-active="faq"></div>';
         loadTabs();
         const labels = Array.from(document.querySelectorAll('.tab-button')).map(b => b.textContent.replace(/\s*NEW!$/, ''));
-        expect(labels).toEqual(['Ranked', 'Drivers', 'Leaderboards', 'Records', 'Challenge', 'Cars', 'FAQ']);
+        expect(labels).toEqual(['Ranked', 'Drivers', 'Teams', 'Leaderboards', 'Records', 'Challenge', 'Cars', 'FAQ']);
     });
 
     it('active tab is a button, others are links with correct hrefs', () => {
@@ -91,6 +92,7 @@ describe('TabsLoader', () => {
         const hrefs = Array.from(links).map(a => a.getAttribute('href'));
         expect(hrefs).toContain('/');
         expect(hrefs).toContain('drivers.html');
+        expect(hrefs).toContain('teams.html');
         expect(hrefs).toContain('cars.html');
         expect(hrefs).toContain('records.html');
         expect(hrefs).toContain('challenge.html');
@@ -104,26 +106,26 @@ describe('TabsLoader', () => {
         expect(document.querySelector('.tab-button')).toBeNull();
     });
 
-    it('shows NEW badge on Challenge tab when not yet visited', () => {
+    it('shows NEW badge on Teams tab when not yet visited', () => {
         document.body.innerHTML = '<div class="tabs" id="site-tabs" data-active="drivers"></div>';
         loadTabs();
-        const challengeLink = Array.from(document.querySelectorAll('a.tab-button'))
-            .find(a => a.getAttribute('href') === 'challenge.html');
-        expect(challengeLink.querySelector('.tab-badge')).not.toBeNull();
-        expect(challengeLink.querySelector('.tab-badge').textContent).toBe('NEW!');
+        const teamsLink = Array.from(document.querySelectorAll('a.tab-button'))
+            .find(a => a.getAttribute('href') === 'teams.html');
+        expect(teamsLink.querySelector('.tab-badge')).not.toBeNull();
+        expect(teamsLink.querySelector('.tab-badge').textContent).toBe('NEW!');
     });
 
-    it('hides NEW badge after Challenge page has been visited', () => {
-        // First visit: render with challenge active → dismisses badge
-        document.body.innerHTML = '<div class="tabs" id="site-tabs" data-active="challenge"></div>';
+    it('hides NEW badge after Teams page has been visited', () => {
+        // First visit: render with teams active → dismisses badge
+        document.body.innerHTML = '<div class="tabs" id="site-tabs" data-active="teams"></div>';
         loadTabs();
 
         // Now render another page — badge should be gone
         document.body.innerHTML = '<div class="tabs" id="site-tabs" data-active="drivers"></div>';
         loadTabs();
-        const challengeLink = Array.from(document.querySelectorAll('a.tab-button'))
-            .find(a => a.getAttribute('href') === 'challenge.html');
-        expect(challengeLink.querySelector('.tab-badge')).toBeNull();
+        const teamsLink = Array.from(document.querySelectorAll('a.tab-button'))
+            .find(a => a.getAttribute('href') === 'teams.html');
+        expect(teamsLink.querySelector('.tab-badge')).toBeNull();
     });
 });
 

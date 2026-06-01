@@ -529,6 +529,49 @@ class DriverSearch {
         }
         
         this.elements.resultsContainer.innerHTML = tableHTML + paginationHTML;
+        this._wireClassHighlight();
+    }
+
+    /**
+     * Wire hover highlighting for rows sharing the same car class
+     */
+    _wireClassHighlight() {
+        const table = this.elements.resultsContainer.querySelector('table');
+        if (!table) return;
+        const tbody = table.querySelector('tbody');
+        if (!tbody) return;
+
+        // Skip if only 1 unique class
+        const classes = new Set();
+        for (const row of tbody.querySelectorAll('tr[data-class]')) {
+            const c = row.getAttribute('data-class');
+            if (c) classes.add(c);
+            if (classes.size > 1) break;
+        }
+        if (classes.size <= 1) return;
+
+        let highlightedClass = null;
+
+        const clearHighlight = () => {
+            if (!highlightedClass) return;
+            highlightedClass = null;
+            tbody.querySelectorAll('tr.class-row-highlight')
+                .forEach(r => r.classList.remove('class-row-highlight'));
+        };
+
+        tbody.addEventListener('mouseenter', (e) => {
+            const row = e.target.closest('tr[data-class]');
+            if (!row) return;
+            const cls = row.getAttribute('data-class');
+            if (!cls || cls === highlightedClass) return;
+            clearHighlight();
+            highlightedClass = cls;
+            const escapedCls = CSS.escape(cls);
+            tbody.querySelectorAll(`tr[data-class="${escapedCls}"]`)
+                .forEach(r => r.classList.add('class-row-highlight'));
+        }, true);
+
+        tbody.addEventListener('mouseleave', clearHighlight);
     }
 
     /**

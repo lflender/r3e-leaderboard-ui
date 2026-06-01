@@ -120,6 +120,17 @@
     color: var(--color-text-secondary);
 }
 
+.driver-profile-team-link {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: color 0.15s;
+}
+
+.driver-profile-team-link:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
 .driver-profile-raceroom-link {
     display: inline-block;
     margin-bottom: 0.35rem;

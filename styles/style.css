@@ -3,8 +3,8 @@
 @import url("./base.css?v=8");
 @import url("./components/tabs.css?v=12");
 @import url("./components/support.css?v=2");
-@import url("./components/search-filters.css?v=37");
-@import url("./components/tables.css?v=38");
+@import url("./components/search-filters.css?v=38");
+@import url("./components/tables.css?v=41");
 @import url("./components/pagination.css?v=3");
 @import url("./components/badges.css?v=16");
 @import url("./components/flags.css?v=3");
@@ -24,6 +24,7 @@
 @import url("./pages/records.css?v=35");
 @import url("./pages/daily-races.css?v=25");
 @import url("./pages/detail.css?v=21");
-@import url("./pages/driver-profile.css?v=53");
+@import url("./pages/driver-profile.css?v=54");
 @import url("./pages/challenge.css?v=58");
+@import url("./pages/teams.css?v=56");
 @import url("./pages/leaderboards.css?v=8");

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Profile - RaceRoom Leaderboards Explorer</title>
+    <meta name="description" content="View team roster, member stats, and leaderboard entries for a RaceRoom Racing Experience team.">
+    <link rel="canonical" href="https://r3e-leaderboards.info/team-profile.html">
+    <meta name="author" content="Ludo R3E Tools">
+    <meta name="robots" content="noindex, follow">
+    <!-- Open Graph -->
+    <meta property="og:site_name" content="RaceRoom Leaderboards">
+    <meta property="og:title" content="Team Profile - RaceRoom Leaderboards Explorer">
+    <meta property="og:description" content="View team roster, member stats, and leaderboard entries for a RaceRoom Racing Experience team.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://r3e-leaderboards.info/team-profile.html">
+    <meta property="og:image" content="https://r3e-leaderboards.info/images/rle-share.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="en_US">
+
+    <!-- Analytics (PostHog via first-party proxy) -->
+    <script src="modules/analytics.js?v=8" defer></script>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+
+    <link rel="stylesheet" href="styles/style.css?v=287">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"/>
+    <!-- Site Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png?v=3">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png?v=3">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png?v=3">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico?v=3">
+</head>
+<body>
+    <div id="site-header"></div>
+
+    <main>
+        <h1 class="sr-only">RaceRoom Team Profile</h1>
+        <div class="tabs" id="site-tabs"></div>
+        <div id="team-profile-container" class="team-profile-container">
+        </div>
+    </main>
+
+    <div id="site-footer"></div>
+
+    <!-- Loaders -->
+    <script src="modules/loaders/template-loader.js?v=3" defer></script>
+    <script src="modules/loaders/tabs-loader.js?v=14" defer></script>
+    <script src="modules/loaders/footer-loader.js?v=2" defer></script>
+    <script src="modules/loaders/header-loader.js?v=2" defer></script>
+
+    <!-- Core modules -->
+    <script src="modules/data/country-mappings.js?v=5" defer></script>
+    <script src="modules/compressed-json-helper.js?v=2" defer></script>
+    <script src="modules/time-helper.js?v=3" defer></script>
+    <script src="modules/track-helper.js?v=2" defer></script>
+    <script src="modules/url-helper.js?v=2" defer></script>
+    <script src="modules/car-helper.js?v=17" defer></script>
+    <script src="modules/utils.js?v=14" defer></script>
+    <script src="modules/driver-index-service.js?v=8" defer></script>
+    <script src="modules/driver-search-service.js?v=18" defer></script>
+    <script src="modules/data-service.js?v=45" defer></script>
+    <script src="modules/flag-helper.js?v=2" defer></script>
+    <script src="modules/mp-pos-service.js?v=12" defer></script>
+    <script src="modules/template-helper.js?v=3" defer></script>
+    <script src="modules/pagination.js?v=5" defer></script>
+    <script src="modules/stats-data.js?v=14" defer></script>
+    <script src="modules/driver-stats-service.js?v=11" defer></script>
+    <script src="modules/field-mappings.js?v=4" defer></script>
+    <script src="modules/column-config.js?v=5" defer></script>
+    <script src="modules/data-normalizer.js?v=4" defer></script>
+    <script src="modules/sort-service.js?v=2" defer></script>
+    <script src="modules/table-renderer.js?v=47" defer></script>
+    <script src="modules/stats-renderer.js?v=14" defer></script>
+    <script src="modules/data/car-classes.js?v=3" defer></script>
+    <script src="modules/data/cars.js?v=10" defer></script>
+    <script src="modules/data/tracks.js?v=5" defer></script>
+    <script src="modules/data/track-images.js?v=3" defer></script>
+
+    <!-- Feature modules -->
+    <script src="modules/tooltip.js?v=3" defer></script>
+    <script src="modules/charts/entries-chart.js?v=2" defer></script>
+    <script src="modules/charts/team-charts.js?v=10" defer></script>
+    <script src="modules/team-profile-interactions.js?v=2" defer></script>
+    <script src="modules/pages/team-profile.js?v=25" defer></script>
+    <script src="modules/navigation.js?v=7" defer></script>
+    <script src="modules/tab-manager.js?v=3" defer></script>
+
+    <!-- Application script -->
+    <script src="script.js?v=9" defer></script>
+</body>
+</html>

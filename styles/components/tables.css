@@ -92,6 +92,10 @@
     background: var(--color-hover-bg);
 }
 
+.results-table tr.class-row-highlight td {
+    background: var(--color-hover-bg);
+}
+
 .results-table tr:last-child td {
     border-bottom: none;
 }
@@ -180,6 +184,11 @@ h2.driver-name-top10-glitter {
 
 .highlight-row {
     transition: background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* Car-based row hover highlight (detail page) */
+.car-row-highlight td {
+    background: var(--color-hover-bg);
 }
 
 /* Table scrollbar styling */
@@ -698,7 +707,7 @@ h2.driver-name-top10-glitter {
         font-size: 0.75rem;
     }
 
-    #results-container .results-table th:nth-child(1) {
+    #results-container .results-table:not(.teams-table) th:nth-child(1) {
         min-width: unset;
         width: 1px;
         white-space: nowrap;
@@ -706,19 +715,19 @@ h2.driver-name-top10-glitter {
         padding: 0.6rem 0.2rem;
     }
 
-    #results-container .results-table th:nth-child(1)::after {
+    #results-container .results-table:not(.teams-table) th:nth-child(1)::after {
         font-size: 0.7rem;
     }
 
-    #results-container .results-table td:nth-child(1) {
+    #results-container .results-table:not(.teams-table) td:nth-child(1) {
         min-width: unset;
         width: 1px;
         white-space: nowrap;
         padding: 0.6rem 0.2rem;
     }
 
-    #results-container .results-table th:nth-child(2),
-    #results-container .results-table td:nth-child(2) {
+    #results-container .results-table:not(.teams-table) th:nth-child(2),
+    #results-container .results-table:not(.teams-table) td:nth-child(2) {
         min-width: 140px !important;
     }
 
@@ -788,7 +797,7 @@ h2.driver-name-top10-glitter {
         font-size: 0.7rem;
     }
 
-    #results-container .results-table th:nth-child(1) {
+    #results-container .results-table:not(.teams-table) th:nth-child(1) {
         min-width: unset !important;
         width: 1px;
         white-space: nowrap;
@@ -796,19 +805,19 @@ h2.driver-name-top10-glitter {
         padding: 0.4rem 0.15rem;
     }
 
-    #results-container .results-table th:nth-child(1)::after {
+    #results-container .results-table:not(.teams-table) th:nth-child(1)::after {
         font-size: 0.65rem;
     }
 
-    #results-container .results-table td:nth-child(1) {
+    #results-container .results-table:not(.teams-table) td:nth-child(1) {
         min-width: unset !important;
         width: 1px;
         white-space: nowrap;
         padding: 0.4rem 0.15rem;
     }
 
-    #results-container .results-table th:nth-child(2),
-    #results-container .results-table td:nth-child(2) {
+    #results-container .results-table:not(.teams-table) th:nth-child(2),
+    #results-container .results-table:not(.teams-table) td:nth-child(2) {
         min-width: 140px !important;
     }
 }

@@ -34,7 +34,7 @@ const DriverProfileRenderers = (() => {
 
         const teamPrefix = profile.team && !String(profile.team).toLowerCase().includes('team') ? 'Team ' : '';
         const teamHtml = profile.team
-            ? `<div class="driver-profile-team">\uD83C\uDFC1 ${teamPrefix}${escape(profile.team)}</div>`
+            ? `<div class="driver-profile-team">\uD83C\uDFC1 <a href="team-profile.html?team=${encodeURIComponent(profile.team)}" class="driver-profile-team-link">${teamPrefix}${escape(profile.team)}</a></div>`
             : '';
 
         const raceRoomUrl = DriverProfileData.getRaceRoomProfileUrl(profile.pathId);

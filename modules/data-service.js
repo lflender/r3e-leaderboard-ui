@@ -18,6 +18,8 @@ class DataService {
         this.driverMetadataBasePath = 'cache/index/metadata';
         this.driverMetadataShardCache = new Map();
         this.driverMetadataShardPromises = new Map();
+        this.teamsCache = null;
+        this.teamsPromise = null; // single-flight promise for teams loading
         this.statusCache = null; // last good status (fallback only)
         this.statusPromise = null; // single-flight promise for status fetch
         this.DRIVER_INDEX_CACHE_KEY = 'r3e_driver_index_cache';
@@ -170,6 +172,38 @@ class DataService {
         }
         
         return combinations;
+    }
+
+    /**
+     * Loads the teams index (cache/index/teams.gz).
+     * Uses a single-flight promise to avoid concurrent fetches.
+     * @returns {Promise<Object>} Teams data keyed by team name
+     */
+    async loadTeams() {
+        if (this.teamsCache) return this.teamsCache;
+        if (this.teamsPromise) return this.teamsPromise;
+
+        this.teamsPromise = (async () => {
+            try {
+                const cacheVersion = await this._getIndexCacheVersion();
+                const response = await R3EUtils.fetchWithTimeout(
+                    `cache/index/teams.json.gz?v=${cacheVersion}`, {}, 15000
+                );
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                const helper = this._getCompressedJsonHelper();
+                const data = await helper.readGzipJson(response);
+                this.teamsCache = data;
+                return data;
+            } catch (err) {
+                // Allow retry on next call
+                this.teamsPromise = null;
+                throw err;
+            }
+        })();
+
+        return this.teamsPromise;
     }
 
     /**

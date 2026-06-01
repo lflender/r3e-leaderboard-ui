@@ -189,7 +189,7 @@ class TableRenderer {
                 data-trackid="${R3EUtils.escapeHtml(String(trackId))}" 
                 data-classid="${R3EUtils.escapeHtml(String(classId))}" 
             data-track="${R3EUtils.escapeHtml(resolvedTrackName)}" 
-                data-class="${R3EUtils.escapeHtml(firstEntry.car_class || firstEntry.CarClass || firstEntry['Car Class'] || firstEntry.Class || '')}"
+                data-class="${R3EUtils.escapeHtml(item.car_class || item.CarClass || item['Car Class'] || item.Class || '')}"
                 data-name="${R3EUtils.escapeHtml(String(driverName))}"
                 data-time="${R3EUtils.escapeHtml(String(rawLapTime))}">`;
         
@@ -262,7 +262,7 @@ class TableRenderer {
             detailRowItem.CarClass = item.ClassName || item.class_name || item.CarClass || item.car_class || '';
         }
 
-        let html = `<tr data-trackid="${utils.escapeHtml(String(rowTrackId))}" data-classid="${utils.escapeHtml(String(rowClassId))}" data-name="${utils.escapeHtml(String(name))}" data-time="${utils.escapeHtml(String(lapTime))}">`;
+        let html = `<tr data-trackid="${utils.escapeHtml(String(rowTrackId))}" data-classid="${utils.escapeHtml(String(rowClassId))}" data-name="${utils.escapeHtml(String(name))}" data-car="${utils.escapeHtml(String(car))}" data-time="${utils.escapeHtml(String(lapTime))}">`;
 
         html += renderer.renderDetailPositionCell(detailRowItem, { showAbsolutePosition });
         html += renderer.renderDriverNameCell(detailRowItem, {

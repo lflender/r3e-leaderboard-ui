@@ -10,22 +10,23 @@
     const TABS = [
         { id: 'ranked',    label: 'Ranked',        href: '/' },
         { id: 'drivers',   label: 'Drivers',      href: 'drivers.html' },
+        { id: 'teams',     label: 'Teams',        href: 'teams.html', badge: 'NEW!' },
         { id: 'leaderboards', label: 'Leaderboards',  href: 'leaderboards.html' },
         { id: 'records',   label: 'Records',       href: 'records.html' },
-        { id: 'challenge', label: 'Challenge',     href: 'challenge.html', badge: 'NEW!' },
+        { id: 'challenge', label: 'Challenge',     href: 'challenge.html' },
         { id: 'cars',      label: 'Cars',          href: 'cars.html' },
         { id: 'faq',       label: 'FAQ',           href: 'faq.html' },
     ];
 
-    var BADGE_STORAGE_KEY = 'challenge-visited';
+    var BADGE_STORAGE_KEY = 'teams-visited';
 
     function isBadgeDismissed(tabId) {
-        if (tabId !== 'challenge') return false;
+        if (tabId !== 'teams') return false;
         try { return localStorage.getItem(BADGE_STORAGE_KEY) === '1'; } catch (_) { return false; }
     }
 
     function dismissBadge(tabId) {
-        if (tabId !== 'challenge') return;
+        if (tabId !== 'teams') return;
         try { localStorage.setItem(BADGE_STORAGE_KEY, '1'); } catch (_) { /* ignored */ }
     }
 
@@ -51,7 +52,7 @@
         var activeBtn = container.querySelector('.tab-button.is-active');
         if (activeBtn) {
             var idx = Array.prototype.indexOf.call(container.children, activeBtn);
-            var middleIdx = Math.floor(TABS.length / 2);
+            var middleIdx = Math.floor(TABS.length / 2) - 1;
             if (idx >= middleIdx) {
                 // Use requestAnimationFrame to ensure layout is complete
                 requestAnimationFrame(function () {

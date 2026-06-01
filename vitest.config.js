@@ -7,7 +7,14 @@ module.exports = defineConfig({
         coverage: {
             provider: 'v8',
             reporter: ['text', 'html'],
-            reportsDirectory: 'coverage'
+            reportsDirectory: 'coverage',
+            exclude: [
+                'modules/lib/**',
+                'node_modules/**',
+                'tests/**',
+                'cache/**',
+                'vitest.config.js'
+            ]
         }
     }
 });

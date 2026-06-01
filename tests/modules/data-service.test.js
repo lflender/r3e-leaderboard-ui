@@ -198,4 +198,63 @@ describe('DataService core behavior', () => {
         expect(result).toEqual([{ name: 'A', LapTime: '1:22.000', ClassName: 'GT3' }]);
         expect(warnSpy).toHaveBeenCalled();
     });
+
+    it('loadTeams fetches, decompresses, and caches teams data', async () => {
+        service._indexCacheVersion = 'v1';
+        const teamsData = { 'TeamA': { members: ['Alice'] } };
+        window.CompressedJsonHelper.readGzipJson.mockResolvedValueOnce(teamsData);
+        global.fetch.mockResolvedValueOnce({ ok: true, status: 200 });
+
+        const result = await service.loadTeams();
+        expect(result).toEqual(teamsData);
+        expect(global.fetch.mock.calls[0][0]).toContain('cache/index/teams.json.gz');
+
+        // Second call returns cached
+        const cached = await service.loadTeams();
+        expect(cached).toEqual(teamsData);
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('loadTeams resets promise on failure for retry', async () => {
+        service._indexCacheVersion = 'v1';
+        global.fetch.mockResolvedValueOnce({ ok: false, status: 500, statusText: 'Server Error' });
+
+        await expect(service.loadTeams()).rejects.toThrow('HTTP 500');
+        // Promise is reset, so next call retries
+        expect(service.teamsPromise).toBeNull();
+    });
+
+    it('fetchLeaderboardDetails throws on HTTP error', async () => {
+        service._indexCacheVersion = 'v1';
+        global.fetch.mockResolvedValueOnce({ ok: false, status: 404, statusText: 'Not Found' });
+
+        await expect(service.fetchLeaderboardDetails(10, 5)).rejects.toThrow();
+    });
+
+    it('fetchTopCombinations resets promise on failure', async () => {
+        service._indexCacheVersion = 'v1';
+        global.fetch.mockResolvedValueOnce({ ok: false, status: 503, statusText: 'Unavailable' });
+
+        await expect(service.fetchTopCombinations()).rejects.toThrow();
+        expect(service.topCombinationsPromise).toBeNull();
+    });
+
+    it('fetchAllCombinations resets promise on failure', async () => {
+        service._indexCacheVersion = 'v1';
+        global.fetch.mockResolvedValueOnce({ ok: false, status: 503, statusText: 'Unavailable' });
+
+        await expect(service.fetchAllCombinations()).rejects.toThrow();
+        expect(service.allCombinationsPromise).toBeNull();
+    });
+
+    it('calculateStatus returns null when fetch fails with no cache', async () => {
+        global.fetch.mockRejectedValueOnce(new Error('Network failure'));
+        const result = await service.calculateStatus();
+        expect(result).toBeNull();
+    });
+
+    it('_normalizeLeaderboardEntriesForDetail handles non-array input', () => {
+        const result = service._normalizeLeaderboardEntriesForDetail('not-an-array', {});
+        expect(result).toEqual([]);
+    });
 });

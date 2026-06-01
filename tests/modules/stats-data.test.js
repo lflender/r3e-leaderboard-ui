@@ -208,4 +208,91 @@ describe('StatsData', () => {
         expect(rows[0].value).toBe(1.5);
     });
 
+    test('normalizeRows uses pre-sorted fast path when payload metadata indicates sorted', () => {
+        const payload = {
+            sort_by: 'pole_positions',
+            sort_direction: 'desc',
+            results: [
+                { name: 'A', pole_positions: 20 },
+                { name: 'B', pole_positions: 15 },
+                { name: 'C', pole_positions: 10 },
+                { name: 'D', pole_positions: 5 }
+            ]
+        };
+        const rows = window.StatsData.normalizeRows(payload, 'pole_positions', 2);
+        expect(rows.length).toBe(2);
+        expect(rows[0].name).toBe('A');
+        expect(rows[1].name).toBe('B');
+    });
+
+    test('normalizeRows pre-sorted path respects preFilter option', () => {
+        const payload = {
+            sort_by: 'entries',
+            sort_direction: 'desc',
+            results: [
+                { name: 'A', entries: 100, country: 'DE' },
+                { name: 'B', entries: 80, country: 'FR' },
+                { name: 'C', entries: 60, country: 'DE' },
+                { name: 'D', entries: 40, country: 'DE' }
+            ]
+        };
+        const rows = window.StatsData.normalizeRows(payload, 'entries', 2, {
+            preFilter: (row) => row.country === 'DE'
+        });
+        expect(rows.length).toBe(2);
+        expect(rows[0].name).toBe('A');
+        expect(rows[1].name).toBe('C');
+    });
+
+    test('normalizeRows with preFilter on unsorted payload', () => {
+        const rows = window.StatsData.normalizeRows([
+            { name: 'A', score: 5, country: 'DE' },
+            { name: 'B', score: 10, country: 'FR' },
+            { name: 'C', score: 8, country: 'DE' }
+        ], 'score', 10, { preFilter: (row) => row.country === 'DE' });
+        expect(rows.length).toBe(2);
+        expect(rows[0].name).toBe('C'); // 8 > 5
+        expect(rows[1].name).toBe('A');
+    });
+
+    test('getFilesEntryForFilter returns null for unknown superclass', () => {
+        const index = {
+            superclasses: [{ name: 'GT3', files: { pole_file: 'gt3.gz' } }]
+        };
+        expect(window.StatsData.getFilesEntryForFilter(index, 'superclass:Unknown')).toBeNull();
+    });
+
+    test('getFilesEntryForFilter returns null when getCarClassId returns null', () => {
+        window.getCarClassId = vi.fn(() => null);
+        const index = { classes: [{ id: '5', files: { pole_file: 'c5.gz' } }] };
+        expect(window.StatsData.getFilesEntryForFilter(index, 'NonExistentClass')).toBeNull();
+    });
+
+    test('getFilesEntryForFilter returns null when class not found in index', () => {
+        window.getCarClassId = vi.fn(() => '999');
+        const index = { classes: [{ id: '5', files: { pole_file: 'c5.gz' } }] };
+        expect(window.StatsData.getFilesEntryForFilter(index, 'SomeClass')).toBeNull();
+    });
+
+    test('getAllPathsForFilter returns null when getFilesEntryForFilter returns null', () => {
+        window.getCarClassId = vi.fn(() => null);
+        const index = { classes: [] };
+        expect(window.StatsData.getAllPathsForFilter(index, 'NonExistent')).toBeNull();
+    });
+
+    test('loadStatsIndex resets promise on failure for retry', async () => {
+        fetch.mockResolvedValueOnce({ ok: false, status: 500, statusText: 'Error' });
+        await expect(window.StatsData.loadStatsIndex()).rejects.toThrow();
+        // Second call should retry (not return cached rejected promise)
+        fetch.mockResolvedValueOnce({ ok: true, json: async () => ({ overall: {} }) });
+        const result = await window.StatsData.loadStatsIndex();
+        expect(result).toEqual({ overall: {} });
+    });
+
+    test('extractRows handles various shapes', () => {
+        expect(window.StatsData.extractRows([1, 2])).toEqual([1, 2]);
+        expect(window.StatsData.extractRows({ results: [3, 4] })).toEqual([3, 4]);
+        expect(window.StatsData.extractRows(null)).toEqual([]);
+        expect(window.StatsData.extractRows({})).toEqual([]);
+    });
 });

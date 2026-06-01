@@ -121,6 +121,94 @@ describe('table-renderer track resolution', () => {
         expect(html).toContain('assets/user-avatars/helmets/helmet-8.png');
         expect(html).toContain('Kostya Guzyuk avatar');
     });
+
+    test('resolveTrackLabel falls back to item fields when R3EUtils helper is absent', () => {
+        const savedFn = window.R3EUtils.resolveTrackLabelForItem;
+        delete window.R3EUtils.resolveTrackLabelForItem;
+
+        const label = window.tableRenderer.resolveTrackLabel({ track: 'Fallback Track' });
+        expect(label).toBe('Fallback Track');
+
+        const labelFromTrackName = window.tableRenderer.resolveTrackLabel({ track_name: 'Alt Name' });
+        expect(labelFromTrackName).toBe('Alt Name');
+
+        const labelFromFallback = window.tableRenderer.resolveTrackLabel({ track_id: '99' }, 'My Fallback');
+        expect(labelFromFallback).toBe('My Fallback');
+
+        window.R3EUtils.resolveTrackLabelForItem = savedFn;
+    });
+
+    test('renders raceroom-specific brand logo class for RaceRoom cars', () => {
+        const savedResolve = window.R3EUtils.resolveBrandLogoPath;
+        window.R3EUtils.resolveBrandLogoPath = () => 'images/brands/logo-raceroom.png';
+
+        const html = window.tableRenderer.renderDriverGroupedTable([
+            {
+                driver: 'Test Driver',
+                country: 'SE',
+                team: '',
+                entries: [{ position: '1', lap_time: '1:30.000', car: 'RaceRoom P1' }]
+            }
+        ], ['car'], 'gap');
+
+        expect(html).toContain('table-brand-logo-raceroom');
+        window.R3EUtils.resolveBrandLogoPath = savedResolve;
+    });
+
+    test('renders MP position name classes on non-highlighted driver links', () => {
+        window.resolveMpPosWithInactive = (name) => ({ position: 5, inactive: false });
+        window.getMpPosNameClasses = (pos, opts) => pos <= 10 ? 'mp-gold' : '';
+
+        const html = window.tableRenderer.renderDriverGroupedTable([
+            {
+                driver: 'Gold Driver',
+                country: 'SE',
+                team: '',
+                entries: [{ position: '1', lap_time: '1:30.000', car: 'BMW M4' }]
+            }
+        ], ['car'], 'gap');
+
+        expect(html).toContain('mp-gold');
+        expect(html).toContain('#5');
+
+        window.resolveMpPosWithInactive = undefined;
+        window.getMpPosNameClasses = undefined;
+    });
+
+    test('renders inactive MP position badge with inactive class', () => {
+        window.resolveMpPosWithInactive = () => ({ position: 42, inactive: true });
+        window.getMpPosNameClasses = () => '';
+
+        const html = window.tableRenderer.renderDriverGroupedTable([
+            {
+                driver: 'Inactive Driver',
+                country: 'DE',
+                team: '',
+                entries: [{ position: '1', lap_time: '1:25.000', car: 'Porsche 911' }]
+            }
+        ], ['car'], 'gap');
+
+        expect(html).toContain('mp-pos-inactive');
+        expect(html).toContain('#42');
+
+        window.resolveMpPosWithInactive = undefined;
+        window.getMpPosNameClasses = undefined;
+    });
+
+    test('renders car cell with only brand when model is empty', () => {
+        const html = window.tableRenderer.renderDriverGroupedTable([
+            {
+                driver: 'X',
+                country: '',
+                team: '',
+                entries: [{ position: '1', lap_time: '1:30.000', car: 'Ferrari' }]
+            }
+        ], ['car'], 'gap');
+
+        expect(html).toContain('car-brand');
+        // No car-model-line when there's no model part
+        expect(html).not.toContain('car-model-line');
+    });
 });
 
 

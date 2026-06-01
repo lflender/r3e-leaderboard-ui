@@ -169,4 +169,63 @@ describe('TeamCharts', () => {
             expect(window.Tooltip.hide).toHaveBeenCalled();
         });
     });
+
+    describe('generatePerformanceChart', () => {
+        it('returns empty string for empty entries', () => {
+            const colorMap = new Map();
+            expect(window.TeamCharts.generatePerformanceChart([], colorMap)).toBe('');
+        });
+
+        it('returns empty string for non-array entries', () => {
+            const colorMap = new Map();
+            expect(window.TeamCharts.generatePerformanceChart(null, colorMap)).toBe('');
+            expect(window.TeamCharts.generatePerformanceChart(undefined, colorMap)).toBe('');
+        });
+
+        it('returns empty string when all entries lack position/total data', () => {
+            const entries = [
+                { name: 'Alice', date_time: '2026-01-15T10:00:00Z', Car: 'GT3', Track: 'Spa' }
+            ];
+            const colorMap = window.TeamCharts.buildColorMap(entries);
+            // No position/total_entries fields
+            expect(window.TeamCharts.generatePerformanceChart(entries, colorMap)).toBe('');
+        });
+
+        it('generates performance chart with valid entries', () => {
+            const entries = [
+                { name: 'Alice', date_time: '2026-01-15T10:00:00Z', Car: 'GT3', Track: 'Spa', position: 2, total_entries: 10, car_class: 'GT3', class_id: '5' },
+                { name: 'Bob', date_time: '2026-01-16T10:00:00Z', Car: 'GT4', Track: 'Monza', Position: 1, TotalEntries: 5, CarClass: 'GT4' }
+            ];
+            const colorMap = window.TeamCharts.buildColorMap(entries);
+            const html = window.TeamCharts.generatePerformanceChart(entries, colorMap);
+
+            expect(html).toContain('perf-dist-chart');
+            expect(html).toContain('perf-dist-point');
+            expect(html).toContain('Performance Over Time');
+            expect(html).toContain('data-name="Alice"');
+            expect(html).toContain('data-name="Bob"');
+        });
+
+        it('skips entries with total < 2', () => {
+            const entries = [
+                { name: 'Alice', date_time: '2026-01-15T10:00:00Z', position: 1, total_entries: 1 },
+                { name: 'Bob', date_time: '2026-01-16T10:00:00Z', position: 2, total_entries: 5, Car: 'GT3' }
+            ];
+            const colorMap = window.TeamCharts.buildColorMap(entries);
+            const html = window.TeamCharts.generatePerformanceChart(entries, colorMap);
+
+            // Should only have one point (Bob), Alice has total=1
+            expect(html).toContain('data-name="Bob"');
+            expect(html).not.toContain('data-name="Alice"');
+        });
+
+        it('includes legend in output', () => {
+            const entries = [
+                { name: 'Alice', date_time: '2026-01-15T10:00:00Z', position: 3, total_entries: 10, Car: 'GT3' }
+            ];
+            const colorMap = window.TeamCharts.buildColorMap(entries);
+            const html = window.TeamCharts.generatePerformanceChart(entries, colorMap);
+            expect(html).toContain('team-chart-legend');
+        });
+    });
 });

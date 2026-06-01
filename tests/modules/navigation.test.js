@@ -113,4 +113,83 @@ describe('Navigation', () => {
             '_blank'
         );
     });
+
+    test('toggleGroup works with string group ID', () => {
+        vi.useFakeTimers();
+        window.toggleGroup('sample-group');
+        vi.runAllTimers();
+        expect(document.querySelectorAll('.sample-group')[0].style.display).toBe('');
+        vi.useRealTimers();
+    });
+
+    test('toggleGroup returns early for invalid target', () => {
+        expect(() => window.toggleGroup(null)).not.toThrow();
+        expect(() => window.toggleGroup(123)).not.toThrow();
+        expect(() => window.toggleGroup(undefined)).not.toThrow();
+    });
+
+    test('toggleGroup returns early when group has no rows', () => {
+        const header = document.createElement('div');
+        header.dataset.group = 'nonexistent-group';
+        expect(() => window.toggleGroup(header)).not.toThrow();
+    });
+
+    test('toggleGroup returns early when target has no group name', () => {
+        const header = document.createElement('div');
+        header.dataset.group = '';
+        expect(() => window.toggleGroup(header)).not.toThrow();
+    });
+
+    test('opens detail view with superclass param instead of classId', () => {
+        const row = document.createElement('tr');
+        row.dataset.trackid = '100';
+        row.dataset.superclass = 'GT';
+        row.dataset.position = '2';
+
+        window.openDetailView({ target: document.createElement('div') }, row);
+
+        expect(window.open).toHaveBeenCalledWith(
+            expect.stringContaining('detail.html?track=100&superclass=GT'),
+            '_blank'
+        );
+        // Should not contain class= when superclass is used
+        expect(window.open.mock.calls[0][0]).not.toContain('&class=');
+    });
+
+    test('opens detail view with track and class (non-id) params', () => {
+        const row = document.createElement('tr');
+        row.dataset.track = 'Spa';
+        row.dataset.class = 'GT3';
+
+        window.openDetailView({ target: document.createElement('div') }, row);
+
+        expect(window.open).toHaveBeenCalledWith(
+            expect.stringContaining('detail.html?track=Spa&class=GT3'),
+            '_blank'
+        );
+    });
+
+    test('opens detail view without difficulty param when All difficulties is selected', () => {
+        document.body.innerHTML = [
+            '<div id="difficulty-filter-ui"><button class="custom-select__toggle">All difficulties ▾</button></div>',
+            '<div class="group-row sample-group" style="display:none"></div>'
+        ].join('');
+
+        const row = document.createElement('tr');
+        row.dataset.trackid = '10';
+        row.dataset.classid = '5';
+
+        window.openDetailView({ target: document.createElement('div') }, row);
+
+        const url = window.open.mock.calls[0][0];
+        expect(url).not.toContain('difficulty=');
+    });
+
+    test('openDetailView does nothing when no track identifiers present', () => {
+        const row = document.createElement('tr');
+        // No trackid, track, or class data
+
+        window.openDetailView({ target: document.createElement('div') }, row);
+        expect(window.open).not.toHaveBeenCalled();
+    });
 });

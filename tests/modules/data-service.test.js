@@ -257,4 +257,32 @@ describe('DataService core behavior', () => {
         const result = service._normalizeLeaderboardEntriesForDetail('not-an-array', {});
         expect(result).toEqual([]);
     });
+
+    it('fetchLeaderboardDetails rejects empty IDs after sanitization', async () => {
+        service._indexCacheVersion = 'v1';
+        await expect(service.fetchLeaderboardDetails('', '5')).rejects.toThrow('Invalid track or class ID');
+        await expect(service.fetchLeaderboardDetails('10', '')).rejects.toThrow('Invalid track or class ID');
+        await expect(service.fetchLeaderboardDetails('.../', '...')).rejects.toThrow('Invalid track or class ID');
+    });
+
+    it('fetchLeaderboardDetails strips path traversal characters from IDs', async () => {
+        service._indexCacheVersion = 'v1';
+        global.fetch.mockResolvedValueOnce({ ok: true, status: 200 });
+        window.CompressedJsonHelper.readGzipJson.mockResolvedValueOnce({ data: [] });
+
+        // ../../etc -> "etc" after sanitization (dots/slashes stripped)
+        await service.fetchLeaderboardDetails('../../10258', '5');
+        expect(global.fetch.mock.calls[0][0]).toContain('cache/tracks/track_10258/class_5.json.gz');
+    });
+
+    it('buildCombinedLeaderboard caps classSpecs at 20', async () => {
+        service._indexCacheVersion = 'v1';
+        const manySpecs = Array.from({ length: 50 }, (_, i) => ({ classId: String(i + 1), className: `Class${i}` }));
+        const fetchSpy = vi.spyOn(service, 'fetchLeaderboardDetails').mockResolvedValue({ leaderboard: [] });
+        vi.spyOn(service, 'extractLeaderboardArray').mockReturnValue([]);
+
+        await service.buildCombinedLeaderboard(10, manySpecs);
+        // Should only have fetched 20, not 50
+        expect(fetchSpy).toHaveBeenCalledTimes(20);
+    });
 });

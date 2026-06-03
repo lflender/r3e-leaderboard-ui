@@ -111,7 +111,13 @@ class DataService {
      * @returns {Promise<Object>} Leaderboard data
      */
     async fetchLeaderboardDetails(trackId, classId) {
-        const filePath = `cache/tracks/track_${trackId}/class_${classId}.json.gz`;
+        // Validate inputs are safe path segments (numeric IDs only)
+        const safeTrackId = String(trackId || '').replace(/[^a-zA-Z0-9_-]/g, '');
+        const safeClassId = String(classId || '').replace(/[^a-zA-Z0-9_-]/g, '');
+        if (!safeTrackId || !safeClassId) {
+            throw new Error('Invalid track or class ID');
+        }
+        const filePath = `cache/tracks/track_${safeTrackId}/class_${safeClassId}.json.gz`;
         
         const cacheVersion = await this._getIndexCacheVersion();
         const response = await R3EUtils.fetchWithTimeout(`${filePath}?v=${cacheVersion}`, {}, 15000);
@@ -443,7 +449,7 @@ class DataService {
     async buildCombinedLeaderboard(trackId, classSpecs = []) {
         const validSpecs = (Array.isArray(classSpecs) ? classSpecs : []).filter(spec => {
             return spec && spec.classId !== null && spec.classId !== undefined && String(spec.classId).trim() !== '';
-        });
+        }).slice(0, 20); // Cap to prevent DoS via crafted URLs
 
         if (validSpecs.length === 0) {
             return [];

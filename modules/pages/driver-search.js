@@ -587,9 +587,10 @@ class DriverSearch {
      * @param {string} message - Error message
      */
     displayError(message) {
+        const escaped = String(message || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         this.elements.resultsContainer.innerHTML = `
             <div class="error">
-                <strong>Error:</strong> ${message}
+                <strong>Error:</strong> ${escaped}
             </div>
         `;
     }

@@ -318,8 +318,8 @@ async function fetchSpecificClassesDetails() {
         // Update lastActionTime to prevent premature "no results" display
         lastActionTime = Date.now();
         
-        // Parse comma-separated class IDs
-        const specificClassIds = classesParam.split(',').map(id => id.trim()).filter(id => id);
+        // Parse comma-separated class IDs (cap at 15 to prevent DoS via crafted URLs)
+        const specificClassIds = classesParam.split(',').map(id => id.trim()).filter(id => id).slice(0, 15);
         
         if (specificClassIds.length === 0) {
             throw new Error('No valid class IDs provided');

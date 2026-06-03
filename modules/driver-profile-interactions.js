@@ -68,8 +68,11 @@ const DriverProfileInteractions = (() => {
         const parent = el.closest('.pie-legend') || el.closest('.stat-breakdown-list');
         if (!parent) return;
         const parentRect = parent.getBoundingClientRect();
+        // Only scroll if the item is completely outside the visible area.
+        // Partially-visible items (hoverable) must not trigger scroll.
+        if (parentRect.height === 0) return;
         const elRect = el.getBoundingClientRect();
-        if (elRect.top >= parentRect.top && elRect.bottom <= parentRect.bottom) return;
+        if (elRect.bottom > parentRect.top && elRect.top < parentRect.bottom) return;
         const offset = el.offsetTop - parent.offsetTop - 4;
         parent.scrollTo({ top: offset, behavior: 'smooth' });
     }

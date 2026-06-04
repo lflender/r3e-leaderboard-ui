@@ -376,6 +376,57 @@ describe('DriverProfileInteractions', () => {
             expect(bars[0].classList.contains('entries-dist-bar--active')).toBe(true);
             expect(bars[1].classList.contains('entries-dist-bar--active')).toBe(false);
         });
+
+        it('clears bar highlights on pie legend mouseleave', () => {
+            const entries = [
+                { car_class: 'GT3', Car: 'BMW', Track: 'Spa', date: '2025-01-01' }
+            ];
+            const container = document.getElementById('dist-container');
+            DriverProfileInteractions.wireEntriesDistCrossHighlighting(entries, container);
+
+            const legend = document.querySelector('#chart-car-class .pie-legend-item');
+            legend.dispatchEvent(new Event('mouseenter'));
+            legend.dispatchEvent(new Event('mouseleave'));
+
+            const bars = document.querySelectorAll('.entries-dist-bar');
+            bars.forEach(bar => expect(bar.classList.contains('entries-dist-bar--active')).toBe(false));
+        });
+
+        it('highlights bars on car chart legend hover', () => {
+            const entries = [
+                { car_class: 'GT3', Car: 'BMW', Track: 'Spa', date: '2025-01-01' }
+            ];
+            document.body.insertAdjacentHTML('beforeend',
+                buildPieChart('chart-car', [{ label: 'BMW', midAngle: 0, pct: 100 }])
+            );
+            const container = document.getElementById('dist-container');
+            DriverProfileInteractions.wireEntriesDistCrossHighlighting(entries, container);
+
+            const carLegend = document.querySelector('#chart-car .pie-legend-item');
+            carLegend.dispatchEvent(new Event('mouseenter'));
+
+            const bars = document.querySelectorAll('.entries-dist-bar');
+            expect(bars[0].classList.contains('entries-dist-bar--active')).toBe(true);
+            expect(bars[1].classList.contains('entries-dist-bar--active')).toBe(false);
+        });
+
+        it('highlights bars on stat breakdown hover', () => {
+            const entries = [
+                { car_class: 'GT3', Car: 'BMW', Track: 'Spa', date: '2025-01-01' }
+            ];
+            document.body.insertAdjacentHTML('beforeend',
+                '<div class="driver-stat-breakdown"><li class="pie-legend-item" data-class-label="GT3"><span class="pie-legend-label">GT3</span></li></div>'
+            );
+            const container = document.getElementById('dist-container');
+            DriverProfileInteractions.wireEntriesDistCrossHighlighting(entries, container);
+
+            const breakdownItem = document.querySelector('.driver-stat-breakdown .pie-legend-item');
+            breakdownItem.dispatchEvent(new Event('mouseenter'));
+
+            const bars = document.querySelectorAll('.entries-dist-bar');
+            expect(bars[0].classList.contains('entries-dist-bar--active')).toBe(true);
+            expect(bars[1].classList.contains('entries-dist-bar--active')).toBe(false);
+        });
     });
 
     describe('wireBreakdownChartInteraction', () => {
@@ -409,6 +460,35 @@ describe('DriverProfileInteractions', () => {
 
             const bd = document.querySelector('.driver-stat-breakdown .pie-legend-item[data-class-label="GT3"]');
             expect(bd.classList.contains('pie-legend-item--active')).toBe(true);
+        });
+
+        it('clears breakdown highlights on breakdown item mouseleave', () => {
+            DriverProfileInteractions.wireBreakdownChartInteraction();
+
+            const breakdownItems = document.querySelectorAll('.driver-stat-breakdown .pie-legend-item');
+            breakdownItems[0].dispatchEvent(new Event('mouseenter'));
+            expect(breakdownItems[0].classList.contains('pie-legend-item--active')).toBe(true);
+            expect(breakdownItems[1].classList.contains('pie-legend-item--dimmed')).toBe(true);
+
+            breakdownItems[0].dispatchEvent(new Event('mouseleave'));
+            breakdownItems.forEach(bd => {
+                expect(bd.classList.contains('pie-legend-item--active')).toBe(false);
+                expect(bd.classList.contains('pie-legend-item--dimmed')).toBe(false);
+            });
+        });
+
+        it('clears breakdown highlights on pie chart legend mouseleave', () => {
+            DriverProfileInteractions.wireBreakdownChartInteraction();
+
+            const pieLegend = document.querySelector('#chart-car-class .pie-legend-item');
+            pieLegend.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+            pieLegend.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }));
+
+            const breakdownItems = document.querySelectorAll('.driver-stat-breakdown .pie-legend-item');
+            breakdownItems.forEach(bd => {
+                expect(bd.classList.contains('pie-legend-item--active')).toBe(false);
+                expect(bd.classList.contains('pie-legend-item--dimmed')).toBe(false);
+            });
         });
     });
 
@@ -572,6 +652,69 @@ describe('DriverProfileInteractions', () => {
         it('wires without error', () => {
             const container = document.getElementById('dist-container');
             expect(() => DriverProfileInteractions.wireDistPerfToPieHighlighting(entries, container)).not.toThrow();
+        });
+
+        it('highlights class pie slices when hovering over entries-dist bar', () => {
+            const container = document.getElementById('dist-container');
+            DriverProfileInteractions.wireDistPerfToPieHighlighting(entries, container);
+
+            const svg = container.querySelector('.entries-dist-chart svg');
+            svg.getBoundingClientRect = () => ({ left: 0, top: 0, width: 200, height: 100 });
+
+            // clientX=9 → svgX = (9/200)*10 = 0.45 → nearest bar at x=0 (centre 0.45), date '2025-01-01'
+            svg.dispatchEvent(new MouseEvent('mousemove', { clientX: 9, clientY: 50, bubbles: true }));
+
+            const classSlices = document.querySelectorAll('#chart-car-class .pie-slice');
+            expect(classSlices[0].classList.contains('pie-slice--active')).toBe(true);  // GT3
+            expect(classSlices[1].classList.contains('pie-slice--dimmed')).toBe(true);  // TCR
+        });
+
+        it('clears pie highlights when mouse leaves entries-dist chart', () => {
+            const container = document.getElementById('dist-container');
+            DriverProfileInteractions.wireDistPerfToPieHighlighting(entries, container);
+
+            const svg = container.querySelector('.entries-dist-chart svg');
+            svg.getBoundingClientRect = () => ({ left: 0, top: 0, width: 200, height: 100 });
+
+            svg.dispatchEvent(new MouseEvent('mousemove', { clientX: 9, clientY: 50, bubbles: true }));
+            svg.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }));
+
+            const classSlices = document.querySelectorAll('#chart-car-class .pie-slice');
+            classSlices.forEach(s => {
+                expect(s.classList.contains('pie-slice--active')).toBe(false);
+                expect(s.classList.contains('pie-slice--dimmed')).toBe(false);
+            });
+        });
+
+        it('highlights class pie slices when hovering near perf point', () => {
+            const container = document.getElementById('dist-container');
+            DriverProfileInteractions.wireDistPerfToPieHighlighting(entries, container);
+
+            const perfChart = container.querySelector('.perf-dist-chart');
+            perfChart.getBoundingClientRect = () => ({ left: 0, top: 0, width: 100, height: 50 });
+
+            // clientX=10 → mouseXPct=10 → nearest point at left:10% (GT3, date 2025-01-01)
+            perfChart.dispatchEvent(new MouseEvent('mousemove', { clientX: 10, clientY: 25, bubbles: true }));
+
+            const classSlices = document.querySelectorAll('#chart-car-class .pie-slice');
+            expect(classSlices[0].classList.contains('pie-slice--active')).toBe(true);  // GT3
+        });
+
+        it('clears pie highlights when mouse leaves perf chart', () => {
+            const container = document.getElementById('dist-container');
+            DriverProfileInteractions.wireDistPerfToPieHighlighting(entries, container);
+
+            const perfChart = container.querySelector('.perf-dist-chart');
+            perfChart.getBoundingClientRect = () => ({ left: 0, top: 0, width: 100, height: 50 });
+
+            perfChart.dispatchEvent(new MouseEvent('mousemove', { clientX: 10, clientY: 25, bubbles: true }));
+            perfChart.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }));
+
+            const classSlices = document.querySelectorAll('#chart-car-class .pie-slice');
+            classSlices.forEach(s => {
+                expect(s.classList.contains('pie-slice--active')).toBe(false);
+                expect(s.classList.contains('pie-slice--dimmed')).toBe(false);
+            });
         });
     });
 });

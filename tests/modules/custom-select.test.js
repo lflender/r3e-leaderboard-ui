@@ -73,4 +73,26 @@ describe('CustomSelect', () => {
 
         expect(select.isOpen()).toBe(false);
     });
+
+    test('preserves search text and scroll position when reopened', () => {
+        const select = new window.CustomSelect('test-select', [
+            { value: '', label: 'All classes' },
+            { value: 'gt3', label: 'GT3' },
+            { value: 'gt4', label: 'GT4' },
+            { value: 'tcr', label: 'TCR' }
+        ]);
+
+        select.open();
+        select.searchInput.value = 'gt';
+        select.searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+        select.optionsList.scrollTop = 44;
+        select.optionsList.dispatchEvent(new Event('scroll'));
+
+        select.close();
+        select.open();
+
+        expect(select.searchInput.value).toBe('gt');
+        expect(select.optionsList.scrollTop).toBe(44);
+        expect(select.menu.querySelector('[data-value="tcr"]').hidden).toBe(true);
+    });
 });

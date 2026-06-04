@@ -26,6 +26,10 @@ class CustomSelect {
         this.onChange = onChange;
         this.searchable = opts.searchable !== false;
         this.currentValue = '';
+        this.uiState = {
+            searchQuery: '',
+            optionsScrollTop: 0
+        };
         
         this.init();
     }
@@ -117,7 +121,12 @@ class CustomSelect {
         // Live search filter
         this.menu.addEventListener('input', (e) => {
             if (e.target !== this.searchInput) return;
+            this.uiState.searchQuery = e.target.value;
             this._filterOptions(e.target.value);
+        });
+
+        this.optionsList.addEventListener('scroll', () => {
+            this.uiState.optionsScrollTop = this.optionsList.scrollTop;
         });
         
         // Close when clicking outside
@@ -149,14 +158,16 @@ class CustomSelect {
         // Keep menu inside viewport: shift left first, then clamp width
         this.menu.style.maxWidth = '';
         this._clampToViewport();
-        // Reset search and focus input
         if (this.searchInput) {
-            this.searchInput.value = '';
-            this._filterOptions('');
+            this.searchInput.value = this.uiState.searchQuery;
+            this._filterOptions(this.uiState.searchQuery);
+            this.optionsList.scrollTop = this.uiState.optionsScrollTop;
             // Only auto-focus on desktop to avoid mobile keyboard popping up
             if (window.matchMedia('(min-width: 1001px)').matches) {
                 requestAnimationFrame(() => this.searchInput.focus());
             }
+        } else {
+            this.optionsList.scrollTop = this.uiState.optionsScrollTop;
         }
     }
 
@@ -194,17 +205,18 @@ class CustomSelect {
      * Closes the dropdown
      */
     close() {
+        // Only capture state when actually open; otherwise scrollTop is already 0
+        if (this.isOpen()) {
+            if (this.optionsList) this.uiState.optionsScrollTop = this.optionsList.scrollTop;
+            if (this.searchInput) this.uiState.searchQuery = this.searchInput.value;
+        }
+
         this.menu.hidden = true;
         this.menu.style.left = '';
         this.menu.style.right = '';
         this.menu.style.maxWidth = '';
         this.toggle.setAttribute('aria-expanded', 'false');
         this.root.classList.remove('is-open');
-        // Reset search state
-        if (this.searchInput) {
-            this.searchInput.value = '';
-            this._filterOptions('');
-        }
     }
     
     /**
@@ -299,6 +311,13 @@ class CustomSelect {
     setOptions(newOptions) {
         this.options = newOptions;
         this.buildMenu();
+        if (this.searchInput) {
+            this.searchInput.value = this.uiState.searchQuery;
+            this._filterOptions(this.uiState.searchQuery);
+        }
+        if (this.optionsList) {
+            this.optionsList.scrollTop = this.uiState.optionsScrollTop;
+        }
         this.updateSelectedState();
     }
 }

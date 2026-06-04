@@ -901,6 +901,7 @@ async function displayResults(data) {
 
     // Wire car-based row hover highlighting
     wireCarRowHover();
+    wireEntriesChartTableHover();
 }
 
 /**
@@ -1127,6 +1128,8 @@ function bindCarDistributionSortHandlers({ allResults, filteredResults, baseResu
                 paginationHTML,
                 tableWrapperHTML
             });
+            wireCarRowHover();
+            wireEntriesChartTableHover();
         });
     });
 }
@@ -1243,46 +1246,142 @@ function highlightPositionRow(targetPos) {
 }
 
 /**
+ * Wire date-based cross-highlighting between entries chart bars and table rows.
+ * Bar hover  → highlights all table rows for that date.
+ * Table hover → highlights only the bar for the specific hovered row's date
+ *               (not all rows sharing the same car).
+ */
+function wireEntriesChartTableHover() {
+    const table = resultsContainer.querySelector('table.results-table');
+    const chart = resultsContainer.querySelector('.entries-dist-chart');
+    if (!table || !chart) return;
+
+    const tbody = table.querySelector('tbody');
+    if (!tbody) return;
+
+    const bars = Array.from(chart.querySelectorAll('.entries-dist-bar[data-date]'));
+    if (bars.length === 0) return;
+
+    const rows = Array.from(tbody.querySelectorAll('tr[data-date]'));
+    if (rows.length === 0) return;
+
+    const toDayKey = (rawValue) => {
+        const raw = String(rawValue || '').trim();
+        if (!raw) return '';
+        if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+        return raw.slice(0, 10);
+    };
+
+    const clearBarHighlights = () => {
+        bars.forEach(bar => bar.classList.remove('entries-dist-bar--active'));
+    };
+
+    const clearRowDateHighlights = () => {
+        rows.forEach(row => row.classList.remove('car-row-highlight'));
+    };
+
+    // Chart bar hover → highlight all matching table rows for that date
+    bars.forEach(bar => {
+        bar.addEventListener('mouseenter', () => {
+            const dayKey = bar.getAttribute('data-date');
+            clearRowDateHighlights();
+            rows.forEach(row => {
+                if (toDayKey(row.getAttribute('data-date')) === dayKey) {
+                    row.classList.add('car-row-highlight');
+                }
+            });
+        });
+    });
+
+    chart.addEventListener('mouseleave', () => {
+        clearRowDateHighlights();
+    });
+
+    // Table row hover → highlight only the bar matching the hovered row's date
+    tbody.addEventListener('mouseover', (event) => {
+        const hoveredRow = event.target.closest('tr[data-date]');
+        clearBarHighlights();
+        if (!hoveredRow) return;
+        const dayKey = toDayKey(hoveredRow.getAttribute('data-date'));
+        if (!dayKey) return;
+        bars.forEach(bar => {
+            if (bar.getAttribute('data-date') === dayKey) {
+                bar.classList.add('entries-dist-bar--active');
+            }
+        });
+    });
+
+    tbody.addEventListener('mouseleave', () => {
+        clearBarHighlights();
+    });
+}
+
+/**
  * Wire car-based row hover: hovering a row highlights all rows with the same
  * car (normalized: DTM stripped, lowercased).
  */
 function wireCarRowHover() {
     const table = resultsContainer.querySelector('table.results-table');
+    const summaryTable = resultsContainer.querySelector('.car-dist-table');
     if (!table) return;
-    const tbody = table.querySelector('tbody');
-    if (!tbody) return;
+
+    const tableBody = table.querySelector('tbody');
+    if (!tableBody) return;
+
+    const summaryBody = summaryTable ? summaryTable.querySelector('tbody') : null;
 
     const normalize = window.CarRatings && window.CarRatings.normalizeCarName
         ? window.CarRatings.normalizeCarName
         : (s) => String(s || '').replace(/\bDTM\b/gi, '').replace(/\s+/g, ' ').trim().toLowerCase();
 
-    // Skip if only one unique car on the page
-    const carRows = tbody.querySelectorAll('tr[data-car]');
+    const tableRows = tableBody.querySelectorAll('tr[data-car]');
+    const summaryRows = summaryBody ? summaryBody.querySelectorAll('tr[data-car]') : [];
     const uniqueCars = new Set();
-    for (const row of carRows) {
-        uniqueCars.add(normalize(row.getAttribute('data-car')));
-        if (uniqueCars.size > 1) break;
-    }
+    tableRows.forEach(row => uniqueCars.add(normalize(row.getAttribute('data-car'))));
+    summaryRows.forEach(row => uniqueCars.add(normalize(row.getAttribute('data-car'))));
     if (uniqueCars.size <= 1) return;
 
-    let highlightedCar = null;
-    tbody.addEventListener('mouseenter', (e) => {
-        const row = e.target.closest('tr[data-car]');
-        if (!row) return;
-        const car = normalize(row.getAttribute('data-car'));
-        if (!car || car === highlightedCar) return;
-        highlightedCar = car;
-        tbody.querySelectorAll('tr.car-row-highlight').forEach(r => r.classList.remove('car-row-highlight'));
-        tbody.querySelectorAll('tr[data-car]').forEach(r => {
-            if (normalize(r.getAttribute('data-car')) === car) {
-                r.classList.add('car-row-highlight');
+    const clearHighlights = () => {
+        tableBody.querySelectorAll('tr.car-row-highlight').forEach(row => row.classList.remove('car-row-highlight'));
+        if (summaryBody) {
+            summaryBody.querySelectorAll('tr.car-dist-row-highlight').forEach(row => row.classList.remove('car-dist-row-highlight'));
+        }
+    };
+
+    const applyHighlightsForCar = (carName) => {
+        const normalizedCar = normalize(carName);
+        if (!normalizedCar) return;
+
+        clearHighlights();
+
+        tableRows.forEach(row => {
+            if (normalize(row.getAttribute('data-car')) === normalizedCar) {
+                row.classList.add('car-row-highlight');
             }
         });
-    }, true);
-    tbody.addEventListener('mouseleave', () => {
-        highlightedCar = null;
-        tbody.querySelectorAll('tr.car-row-highlight').forEach(r => r.classList.remove('car-row-highlight'));
-    });
+
+        if (summaryBody) {
+            summaryRows.forEach(row => {
+                if (normalize(row.getAttribute('data-car')) === normalizedCar) {
+                    row.classList.add('car-dist-row-highlight');
+                }
+            });
+        }
+    };
+
+    const handleRowHover = (event) => {
+        const hoveredRow = event.target.closest('tr[data-car]');
+        if (!hoveredRow) return;
+        applyHighlightsForCar(hoveredRow.getAttribute('data-car'));
+    };
+
+    tableBody.addEventListener('mouseover', handleRowHover);
+    tableBody.addEventListener('mouseleave', clearHighlights);
+
+    if (summaryBody) {
+        summaryBody.addEventListener('mouseover', handleRowHover);
+        summaryBody.addEventListener('mouseleave', clearHighlights);
+    }
 }
 
 /**

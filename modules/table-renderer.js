@@ -262,7 +262,8 @@ class TableRenderer {
             detailRowItem.CarClass = item.ClassName || item.class_name || item.CarClass || item.car_class || '';
         }
 
-        let html = `<tr data-trackid="${utils.escapeHtml(String(rowTrackId))}" data-classid="${utils.escapeHtml(String(rowClassId))}" data-name="${utils.escapeHtml(String(name))}" data-car="${utils.escapeHtml(String(car))}" data-time="${utils.escapeHtml(String(lapTime))}">`;
+        const rowDate = item.date_time || item.dateTime || item.Date || '';
+        let html = `<tr data-trackid="${utils.escapeHtml(String(rowTrackId))}" data-classid="${utils.escapeHtml(String(rowClassId))}" data-name="${utils.escapeHtml(String(name))}" data-car="${utils.escapeHtml(String(car))}" data-time="${utils.escapeHtml(String(lapTime))}" data-date="${utils.escapeHtml(String(rowDate))}">`;
 
         html += renderer.renderDetailPositionCell(detailRowItem, { showAbsolutePosition });
         html += renderer.renderDriverNameCell(detailRowItem, {

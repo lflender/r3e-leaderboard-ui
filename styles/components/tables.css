@@ -186,7 +186,7 @@ h2.driver-name-top10-glitter {
     transition: background-color 0.25s ease, box-shadow 0.25s ease;
 }
 
-/* Car-based row hover highlight (detail page) */
+/* Car- and date-based row hover highlight (detail page) */
 .car-row-highlight td {
     background: var(--color-hover-bg);
 }

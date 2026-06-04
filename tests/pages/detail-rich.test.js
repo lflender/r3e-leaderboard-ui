@@ -149,8 +149,10 @@ function setupGlobals() {
             if (isCombinedView) {
                 rowItem.CarClass = item.ClassName || item.class_name || item.CarClass || item.car_class || '';
             }
+            const car = String(item.Car || item.car || '');
 
-            let html = `<tr data-trackid="${rowTrackId}" data-classid="${rowClassId}" data-name="${name}" data-time="${lapTime}">`;
+            const rowDate = String(item.date_time || item.dateTime || item.Date || '');
+            let html = `<tr data-trackid="${rowTrackId}" data-classid="${rowClassId}" data-name="${name}" data-time="${lapTime}" data-car="${car}" data-date="${rowDate}">`;
             html += window.tableRenderer.renderDetailPositionCell(rowItem, { showAbsolutePosition: !!options.showAbsolutePosition });
             html += window.tableRenderer.renderDriverNameCell(rowItem, { driverLinkClass: 'detail-driver-link', driverLinkBase: 'drivers.html?driver=' });
             html += window.tableRenderer.renderLapTimeCell(lapTime, { includeDelta: false });
@@ -168,12 +170,52 @@ function setupGlobals() {
     };
 
     window.CarsChart = {
-        generateHtml: vi.fn().mockReturnValue(''),
+        generateHtml: vi.fn((data) => {
+            const counts = data.reduce((acc, entry) => {
+                const carName = String(entry.Car || entry.car || 'Unknown');
+                acc[carName] = (acc[carName] || 0) + 1;
+                return acc;
+            }, {});
+            const rows = Object.entries(counts)
+                .map(([carName, count]) => `<tr data-car="${carName}"><td class="car-dist-car">${carName}</td><td class="car-dist-entries">${count}</td></tr>`)
+                .join('');
+            return [
+                '<div class="car-dist-summary" data-sort-by="entries" data-sort-dir="desc">',
+                '<button type="button" class="car-dist-toggle is-expanded" aria-expanded="true" aria-controls="test-car-dist">',
+                '<span class="car-dist-toggle__icon">▼</span>',
+                '<span class="car-dist-toggle-text">Car Distribution Summary</span>',
+                '</button>',
+                '<div id="test-car-dist" class="car-dist-content" style="display: ;">',
+                `<table class="car-dist-table"><tbody>${rows}</tbody></table>`,
+                '</div>',
+                '</div>'
+            ].join('');
+        }),
         getCarDistributionStats: vi.fn().mockReturnValue([])
     };
 
     window.EntriesChart = {
-        generateHtml: vi.fn().mockReturnValue(''),
+        generateHtml: vi.fn((data) => {
+            const dayCounts = data.reduce((acc, entry) => {
+                const dayKey = String(entry.date_time || entry.dateTime || entry.Date || '').slice(0, 10);
+                if (!dayKey) return acc;
+                acc[dayKey] = (acc[dayKey] || 0) + 1;
+                return acc;
+            }, {});
+            const bars = Object.entries(dayCounts)
+                .map(([dayKey, count], idx) => `<rect class="entries-dist-bar" x="${idx}" y="10" width="0.9" height="80" data-date="${dayKey}" data-count="${count}"></rect>`)
+                .join('');
+            return [
+                '<div class="entries-dist-summary">',
+                '<button type="button" class="entries-dist-toggle is-expanded" aria-expanded="true" aria-controls="test-entries">Entries</button>',
+                '<div id="test-entries" class="entries-dist-content" style="">',
+                '<div class="entries-dist-chart">',
+                `<svg viewBox="0 0 10 100" preserveAspectRatio="none">${bars}</svg>`,
+                '</div>',
+                '</div>',
+                '</div>'
+            ].join('');
+        }),
         parseEntryDate: vi.fn(),
         getLocalDateKey: vi.fn(),
         getDataTimeBounds: vi.fn().mockReturnValue({ min: null, max: null }),
@@ -345,6 +387,140 @@ describe('detail page rich integration', () => {
             'https://game.raceroom.com/leaderboard/?track=10&car_class=class-5',
             '_blank'
         );
+    });
+
+    it('cross-highlights matching car rows between leaderboard and car distribution summary', async () => {
+        const mainRows = document.querySelectorAll('#detail-results-container table.results-table tbody tr[data-car]');
+        const summaryRows = document.querySelectorAll('#detail-results-container .car-dist-table tbody tr[data-car]');
+        const audiMainRow = Array.from(mainRows).find(row => row.getAttribute('data-car') === 'Audi R8');
+        const bmwMainRow = Array.from(mainRows).find(row => row.getAttribute('data-car') === 'BMW M4');
+        const audiSummaryRow = Array.from(summaryRows).find(row => row.getAttribute('data-car') === 'Audi R8');
+        const bmwSummaryRow = Array.from(summaryRows).find(row => row.getAttribute('data-car') === 'BMW M4');
+
+        audiMainRow.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+
+        const highlightedMainAudiRows = document.querySelectorAll('#detail-results-container table.results-table tbody tr.car-row-highlight[data-car="Audi R8"]');
+        expect(highlightedMainAudiRows.length).toBe(2);
+        expect(audiSummaryRow.classList.contains('car-dist-row-highlight')).toBe(true);
+        expect(bmwSummaryRow.classList.contains('car-dist-row-highlight')).toBe(false);
+
+        bmwSummaryRow.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+
+        expect(bmwMainRow.classList.contains('car-row-highlight')).toBe(true);
+        expect(audiMainRow.classList.contains('car-row-highlight')).toBe(false);
+        expect(bmwSummaryRow.classList.contains('car-dist-row-highlight')).toBe(true);
+    });
+
+    it('clears car highlights when mouse leaves the main table body', async () => {
+        const mainRows = document.querySelectorAll('#detail-results-container table.results-table tbody tr[data-car]');
+        const summaryRows = document.querySelectorAll('#detail-results-container .car-dist-table tbody tr[data-car]');
+        const tbody = document.querySelector('#detail-results-container table.results-table tbody');
+        const audiMainRow = Array.from(mainRows).find(row => row.getAttribute('data-car') === 'Audi R8');
+        const audiSummaryRow = Array.from(summaryRows).find(row => row.getAttribute('data-car') === 'Audi R8');
+
+        audiMainRow.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+        expect(audiMainRow.classList.contains('car-row-highlight')).toBe(true);
+        expect(audiSummaryRow.classList.contains('car-dist-row-highlight')).toBe(true);
+
+        tbody.dispatchEvent(new MouseEvent('mouseleave', { bubbles: false }));
+        expect(audiMainRow.classList.contains('car-row-highlight')).toBe(false);
+        expect(audiSummaryRow.classList.contains('car-dist-row-highlight')).toBe(false);
+    });
+
+    it('clears car highlights when mouse leaves the car distribution summary', async () => {
+        const mainRows = document.querySelectorAll('#detail-results-container table.results-table tbody tr[data-car]');
+        const summaryRows = document.querySelectorAll('#detail-results-container .car-dist-table tbody tr[data-car]');
+        const summaryTbody = document.querySelector('#detail-results-container .car-dist-table tbody');
+        const bmwMainRow = Array.from(mainRows).find(row => row.getAttribute('data-car') === 'BMW M4');
+        const bmwSummaryRow = Array.from(summaryRows).find(row => row.getAttribute('data-car') === 'BMW M4');
+
+        bmwSummaryRow.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+        expect(bmwMainRow.classList.contains('car-row-highlight')).toBe(true);
+        expect(bmwSummaryRow.classList.contains('car-dist-row-highlight')).toBe(true);
+
+        summaryTbody.dispatchEvent(new MouseEvent('mouseleave', { bubbles: false }));
+        expect(bmwMainRow.classList.contains('car-row-highlight')).toBe(false);
+        expect(bmwSummaryRow.classList.contains('car-dist-row-highlight')).toBe(false);
+    });
+
+    it('cross-highlights between entries chart bars and result table rows', async () => {
+        const bars = document.querySelectorAll('#detail-results-container .entries-dist-bar[data-date]');
+        const tableRows = document.querySelectorAll('#detail-results-container table.results-table tbody tr[data-date]');
+
+        // Chart bar hover → all rows for that date highlighted
+        const aliceDate = '2026-04-03';
+        const aliceBar = Array.from(bars).find(b => b.getAttribute('data-date') === aliceDate);
+        const aliceRow = Array.from(tableRows).find(r => String(r.getAttribute('data-date')).startsWith(aliceDate));
+
+        aliceBar.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+        expect(aliceRow.classList.contains('car-row-highlight')).toBe(true);
+
+        // Table row hover → only that row's date bar is activated (not neighbour bars)
+        aliceRow.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+        expect(aliceBar.classList.contains('entries-dist-bar--active')).toBe(true);
+        const otherBars = Array.from(bars).filter(b => b.getAttribute('data-date') !== aliceDate);
+        otherBars.forEach(b => expect(b.classList.contains('entries-dist-bar--active')).toBe(false));
+    });
+
+    it('clears table row highlights when mouse leaves the entries chart', async () => {
+        const bars = document.querySelectorAll('#detail-results-container .entries-dist-bar[data-date]');
+        const tableRows = document.querySelectorAll('#detail-results-container table.results-table tbody tr[data-date]');
+        const chart = document.querySelector('#detail-results-container .entries-dist-chart');
+        const charlieBar = Array.from(bars).find(b => b.getAttribute('data-date') === '2026-04-02');
+        const charlieRow = Array.from(tableRows).find(r => String(r.getAttribute('data-date')).startsWith('2026-04-02'));
+
+        charlieBar.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+        expect(charlieRow.classList.contains('car-row-highlight')).toBe(true);
+
+        chart.dispatchEvent(new MouseEvent('mouseleave', { bubbles: false }));
+        expect(charlieRow.classList.contains('car-row-highlight')).toBe(false);
+    });
+
+    it('clears bar highlight when mouse leaves the table body', async () => {
+        const bars = document.querySelectorAll('#detail-results-container .entries-dist-bar[data-date]');
+        const tbody = document.querySelector('#detail-results-container table.results-table tbody');
+        const bobRow = Array.from(tbody.querySelectorAll('tr[data-date]')).find(r => String(r.getAttribute('data-date')).startsWith('2026-04-04'));
+        const bobBar = Array.from(bars).find(b => b.getAttribute('data-date') === '2026-04-04');
+
+        bobRow.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+        expect(bobBar.classList.contains('entries-dist-bar--active')).toBe(true);
+
+        tbody.dispatchEvent(new MouseEvent('mouseleave', { bubbles: false }));
+        expect(bobBar.classList.contains('entries-dist-bar--active')).toBe(false);
+    });
+
+    it('switches row highlights when hovering from one bar to another', async () => {
+        const bars = document.querySelectorAll('#detail-results-container .entries-dist-bar[data-date]');
+        const tableRows = document.querySelectorAll('#detail-results-container table.results-table tbody tr[data-date]');
+        const charlieBar = Array.from(bars).find(b => b.getAttribute('data-date') === '2026-04-02');
+        const aliceBar = Array.from(bars).find(b => b.getAttribute('data-date') === '2026-04-03');
+        const charlieRow = Array.from(tableRows).find(r => String(r.getAttribute('data-date')).startsWith('2026-04-02'));
+        const aliceRow = Array.from(tableRows).find(r => String(r.getAttribute('data-date')).startsWith('2026-04-03'));
+
+        charlieBar.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+        expect(charlieRow.classList.contains('car-row-highlight')).toBe(true);
+        expect(aliceRow.classList.contains('car-row-highlight')).toBe(false);
+
+        aliceBar.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+        expect(aliceRow.classList.contains('car-row-highlight')).toBe(true);
+        expect(charlieRow.classList.contains('car-row-highlight')).toBe(false);
+    });
+
+    it('switches bar highlight when hovering different table rows sequentially', async () => {
+        const bars = document.querySelectorAll('#detail-results-container .entries-dist-bar[data-date]');
+        const tableRows = document.querySelectorAll('#detail-results-container table.results-table tbody tr[data-date]');
+        const charlieRow = Array.from(tableRows).find(r => String(r.getAttribute('data-date')).startsWith('2026-04-02'));
+        const bobRow = Array.from(tableRows).find(r => String(r.getAttribute('data-date')).startsWith('2026-04-04'));
+        const charlieBar = Array.from(bars).find(b => b.getAttribute('data-date') === '2026-04-02');
+        const bobBar = Array.from(bars).find(b => b.getAttribute('data-date') === '2026-04-04');
+
+        charlieRow.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+        expect(charlieBar.classList.contains('entries-dist-bar--active')).toBe(true);
+        expect(bobBar.classList.contains('entries-dist-bar--active')).toBe(false);
+
+        bobRow.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+        expect(bobBar.classList.contains('entries-dist-bar--active')).toBe(true);
+        expect(charlieBar.classList.contains('entries-dist-bar--active')).toBe(false);
     });
 });
 

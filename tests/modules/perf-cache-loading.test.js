@@ -43,6 +43,9 @@ describe('Performance: cache loading', () => {
             extractName: vi.fn(entry => entry.name || entry.Name || '')
         };
         window.CARS_DATA = [];
+        window.R3EUtils = {
+            fetchWithTimeout: vi.fn((url, options = {}) => fetch(url, options))
+        };
         global.fetch = vi.fn().mockResolvedValue({
             ok: false, status: 503, statusText: 'Test default', text: async () => ''
         });

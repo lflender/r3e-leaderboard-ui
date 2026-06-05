@@ -38,6 +38,21 @@ describe('R3EAnalytics.track', () => {
         expect(() => window.R3EAnalytics.track('test event')).not.toThrow();
         expect(() => window.R3EAnalytics.track()).not.toThrow();
     });
+
+    it('calls posthog.capture when _ready is true', () => {
+        window.R3EAnalytics.track('checkout', { item: 'car' });
+        expect(captureSpy).toHaveBeenCalledWith('checkout', { item: 'car' });
+    });
+
+    it('passes empty object when no properties given', () => {
+        window.R3EAnalytics.track('page_viewed');
+        expect(captureSpy).toHaveBeenCalledWith('page_viewed', {});
+    });
+
+    it('does not throw when posthog.capture throws', () => {
+        captureSpy.mockImplementationOnce(() => { throw new Error('SDK fail'); });
+        expect(() => window.R3EAnalytics.track('broken', {})).not.toThrow();
+    });
 });
 
 describe('R3EAnalytics public API shape', () => {

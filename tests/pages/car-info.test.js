@@ -53,12 +53,13 @@ beforeEach(() => {
         escapeHtml: s => String(s),
         splitCarName: vi.fn((name) => {
             const value = String(name || '');
-            if (value === 'BMW M4 GT3') {
-                return { brand: 'BMW', model: 'M4 GT3' };
+            const idx = value.indexOf(' ');
+            if (idx > 0) {
+                return { brand: value.slice(0, idx), model: value.slice(idx + 1) };
             }
             return { brand: '', model: value };
         }),
-        resolveBrandLogoPath: vi.fn(() => 'images/brands/logo-bmw.png')
+        resolveBrandLogoPath: vi.fn((brand) => `images/brands/logo-${(brand || 'unknown').toLowerCase()}.png`)
     };
 
     window.CustomSelect = class {
@@ -250,3 +251,238 @@ describe('car-info integration', () => {
     });
 });
 
+describe('car-info tile view (renderTiles)', () => {
+    it('renders car tiles with class sections in tile mode', async () => {
+        localStorage.setItem('carInfoViewMode', 'tiles');
+
+        loadBrowserScript('modules/pages/car-info.js');
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        const html = document.getElementById('cars-info-table').innerHTML;
+        expect(html).toContain('cars-tile-grid');
+        expect(html).toContain('cars-class-section');
+        expect(html).toContain('car-tile');
+        expect(html).toContain('car-brand');
+        expect(html).toContain('BMW');
+        expect(html).toContain('M4 GT3');
+    });
+
+    it('renders car image with link and year badge when thumbnail exists', async () => {
+        window.CARS_DATA[0].cars[0].thumbnail = 'https://cdn/car.png';
+        localStorage.setItem('carInfoViewMode', 'tiles');
+
+        loadBrowserScript('modules/pages/car-info.js');
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        const html = document.getElementById('cars-info-table').innerHTML;
+        expect(html).toContain('car-tile-image');
+        expect(html).toContain('year-badge');
+        expect(html).toContain('2022');
+        expect(html).toContain('href="https://example.com/bmw"');
+    });
+
+    it('renders car specs (power, weight, engine)', async () => {
+        localStorage.setItem('carInfoViewMode', 'tiles');
+
+        loadBrowserScript('modules/pages/car-info.js');
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        const html = document.getElementById('cars-info-table').innerHTML;
+        expect(html).toContain('car-tile-specs');
+        expect(html).toContain('590hp');
+        expect(html).toContain('1300kg');
+        expect(html).toContain('6 cyl');
+    });
+
+    it('renders description when present', async () => {
+        localStorage.setItem('carInfoViewMode', 'tiles');
+
+        loadBrowserScript('modules/pages/car-info.js');
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        const html = document.getElementById('cars-info-table').innerHTML;
+        expect(html).toContain('car-tile-description');
+        expect(html).toContain('Factory car');
+    });
+
+    it('renders country flag overlay when thumbnail exists', async () => {
+        window.CARS_DATA[0].cars[0].thumbnail = 'https://cdn/car.png';
+        localStorage.setItem('carInfoViewMode', 'tiles');
+
+        loadBrowserScript('modules/pages/car-info.js');
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        const html = document.getElementById('cars-info-table').innerHTML;
+        expect(html).toContain('car-tile-flag-overlay');
+        expect(window.FlagHelper.countryToFlag).toHaveBeenCalledWith('DE');
+    });
+
+    it('renders class heading with class name', async () => {
+        localStorage.setItem('carInfoViewMode', 'tiles');
+
+        loadBrowserScript('modules/pages/car-info.js');
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        const html = document.getElementById('cars-info-table').innerHTML;
+        expect(html).toContain('cars-class-heading');
+        expect(html).toContain('GT3');
+    });
+
+    it('renders assist badges when present', async () => {
+        window.CARS_DATA = [
+            {
+                class: 'GT3',
+                superclass: 'GT',
+                cars: [
+                    {
+                        car: 'BMW M4 GT3',
+                        wheel_cat: 'GT',
+                        transmission_cat: 'Paddles',
+                        drive: 'RWD',
+                        year: '2022',
+                        power: '590hp',
+                        weight: '1300kg',
+                        engine: '6 cyl',
+                        country: 'DE',
+                        link: '',
+                        TC: 'true',
+                        ABS: 'true',
+                        LC: 'true'
+                    }
+                ]
+            }
+        ];
+        localStorage.setItem('carInfoViewMode', 'tiles');
+
+        loadBrowserScript('modules/pages/car-info.js');
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        const html = document.getElementById('cars-info-table').innerHTML;
+        expect(html).toContain('car-tile-assist--tc');
+        expect(html).toContain('car-tile-assist--abs');
+        expect(html).toContain('car-tile-assist--lc');
+        expect(html).toContain('TC');
+        expect(html).toContain('ABS');
+        expect(html).toContain('Launch Control');
+    });
+
+    it('renders div wrapper instead of link when car has no link', async () => {
+        window.CARS_DATA = [
+            {
+                class: 'GT3',
+                superclass: 'GT',
+                cars: [
+                    {
+                        car: 'Generic Car',
+                        wheel_cat: 'GT',
+                        transmission_cat: 'Paddles',
+                        drive: 'RWD',
+                        year: '2023',
+                        power: '500hp',
+                        weight: '1200kg',
+                        engine: '4 cyl',
+                        country: '',
+                        link: ''
+                    }
+                ]
+            }
+        ];
+        localStorage.setItem('carInfoViewMode', 'tiles');
+
+        loadBrowserScript('modules/pages/car-info.js');
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        const tile = document.querySelector('.car-tile');
+        expect(tile).not.toBeNull();
+        // Should use div instead of anchor
+        expect(tile.querySelector('a.car-tile-link')).toBeNull();
+        expect(tile.querySelector('div.car-tile-link')).not.toBeNull();
+    });
+
+    it('renders weight with driver notation when kg* present', async () => {
+        window.CARS_DATA = [
+            {
+                class: 'GT3',
+                superclass: 'GT',
+                cars: [
+                    {
+                        car: 'Heavy Car',
+                        wheel_cat: 'GT',
+                        transmission_cat: 'Paddles',
+                        drive: 'RWD',
+                        year: '2022',
+                        power: '600hp',
+                        weight: '1400kg*',
+                        engine: 'V8',
+                        country: '',
+                        link: ''
+                    }
+                ]
+            }
+        ];
+        localStorage.setItem('carInfoViewMode', 'tiles');
+
+        loadBrowserScript('modules/pages/car-info.js');
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        const html = document.getElementById('cars-info-table').innerHTML;
+        expect(html).toContain('1400kg with driver');
+    });
+
+    it('filters tiles by superclass correctly', async () => {
+        window.CARS_DATA = [
+            { class: 'GT3', superclass: 'GT', cars: [
+                { car: 'BMW M4 GT3', wheel_cat: 'GT', transmission_cat: 'Paddles', drive: 'RWD', year: '2022', power: '590hp', weight: '1300kg', engine: '6 cyl', country: 'DE', link: '' }
+            ]},
+            { class: 'WTCR', superclass: 'Touring', cars: [
+                { car: 'Hyundai Elantra N', wheel_cat: 'Round', transmission_cat: 'Sequential', drive: 'FWD', year: '2021', power: '350hp', weight: '1270kg', engine: '4 cyl', country: 'KR', link: '' }
+            ]}
+        ];
+
+        let classOnChange;
+        window.CustomSelect = class {
+            constructor(id, _options, onChange) {
+                if (id === 'class-filter-ui-cars') classOnChange = onChange;
+            }
+        };
+        localStorage.setItem('carInfoViewMode', 'tiles');
+
+        loadBrowserScript('modules/pages/car-info.js');
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        // Verify both classes rendered initially
+        let html = document.getElementById('cars-info-table').innerHTML;
+        expect(html).toContain('BMW');
+        expect(html).toContain('Hyundai');
+
+        // Filter by superclass:GT
+        classOnChange('superclass:GT', { source: 'user' });
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        html = document.getElementById('cars-info-table').innerHTML;
+        expect(html).toContain('BMW');
+        expect(html).not.toContain('Hyundai');
+    });
+
+    it('switches from table to tiles via view toggle click', async () => {
+        // Start in table mode (default) — ensure no stored preference
+        localStorage.removeItem('carInfoViewMode');
+        document.body.innerHTML = buildDom();
+
+        loadBrowserScript('modules/pages/car-info.js');
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        let html = document.getElementById('cars-info-table').innerHTML;
+        expect(html).not.toContain('cars-tile-grid');
+
+        // Click tiles button
+        const tilesBtn = document.querySelector('button[data-view="tiles"]');
+        tilesBtn.click();
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        html = document.getElementById('cars-info-table').innerHTML;
+        expect(html).toContain('cars-tile-grid');
+        expect(html).toContain('car-tile');
+        expect(localStorage.getItem('carInfoViewMode')).toBe('tiles');
+    });
+});

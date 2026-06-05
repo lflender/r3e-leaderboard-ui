@@ -144,6 +144,10 @@
     background-color: var(--color-primary-alpha-8);
 }
 
+.car-dist-table tbody tr.car-dist-row-highlight {
+    background-color: var(--color-primary-alpha-8);
+}
+
 .car-dist-table tbody tr:last-child td {
     border-bottom: none;
 }

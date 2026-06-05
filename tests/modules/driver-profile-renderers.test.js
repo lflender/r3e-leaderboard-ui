@@ -223,5 +223,52 @@ describe('DriverProfileRenderers', () => {
             const card = document.getElementById('stat-avg_bested');
             expect(card.querySelector('.driver-stat-breakdown').innerHTML).toContain('(5)');
         });
+
+        it('does nothing when results is null', () => {
+            expect(() => DriverProfileRenderers.renderClassBreakdowns(null, new Map())).not.toThrow();
+        });
+
+        it('skips metrics with empty items array', () => {
+            const results = { avg_bested: [], bested: [] };
+            DriverProfileRenderers.renderClassBreakdowns(results, new Map());
+
+            const card = document.getElementById('stat-avg_bested');
+            expect(card.querySelector('.driver-stat-breakdown').innerHTML).toBe('');
+        });
+    });
+
+    describe('renderHeader – edge cases', () => {
+        it('renders without MP position when resolveMpPosWithInactive is not a function', () => {
+            const saved = window.resolveMpPosWithInactive;
+            delete window.resolveMpPosWithInactive;
+            const html = DriverProfileRenderers.renderHeader({
+                name: 'Test', country: 'US', pathId: 'test-1', totalEntries: 5
+            });
+            expect(html).not.toContain('Multiplayer');
+            window.resolveMpPosWithInactive = saved;
+        });
+
+        it('renders inactive MP badge when inactive is true', () => {
+            window.resolveMpPosWithInactive.mockReturnValueOnce({ position: 10, inactive: true });
+            const html = DriverProfileRenderers.renderHeader({
+                name: 'Test', country: 'US', pathId: 'test-1', totalEntries: 5
+            });
+            expect(html).toContain('inactive');
+        });
+
+        it('renders without RaceRoom link when pathId is empty', () => {
+            window.DriverProfileData.getRaceRoomProfileUrl.mockReturnValueOnce('');
+            const html = DriverProfileRenderers.renderHeader({
+                name: 'Test', country: 'US', pathId: '', totalEntries: 5
+            });
+            expect(html).not.toContain('game.raceroom.com');
+        });
+
+        it('renders without team section when team is empty', () => {
+            const html = DriverProfileRenderers.renderHeader({
+                name: 'Test', country: 'US', pathId: 'test-1', totalEntries: 5, team: ''
+            });
+            expect(html).not.toContain('Team');
+        });
     });
 });

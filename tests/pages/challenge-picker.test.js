@@ -577,4 +577,89 @@ describe('ChallengePicker page', () => {
             expect.objectContaining({ mode: 'both', hardcore: false })
         );
     });
+
+    /* ── hardcore lockout ─────────────────────────────────── */
+
+    test('hardcore mode checkbox enables lockout after pick', () => {
+        const hardcoreCb = document.getElementById('challenge-hardcore-cb');
+        if (!hardcoreCb) return; // skip if HTML doesn't have it
+        hardcoreCb.checked = true;
+        hardcoreCb.dispatchEvent(new Event('change', { bubbles: true }));
+
+        vi.spyOn(Math, 'random').mockReturnValue(0);
+        document.getElementById('challenge-pick-btn').click();
+        Math.random.mockRestore();
+
+        const pickBtn = document.getElementById('challenge-pick-btn');
+        expect(pickBtn.classList.contains('challenge-pick-btn--locked')).toBe(true);
+        expect(sessionStorage.getItem('challenge-hardcore-until')).toBeTruthy();
+    });
+
+    test('hardcore lock restores saved pick result on re-init', () => {
+        const hardcoreCb = document.getElementById('challenge-hardcore-cb');
+        if (!hardcoreCb) return;
+        hardcoreCb.checked = true;
+        hardcoreCb.dispatchEvent(new Event('change', { bubbles: true }));
+
+        vi.spyOn(Math, 'random').mockReturnValue(0);
+        document.getElementById('challenge-pick-btn').click();
+        Math.random.mockRestore();
+
+        const savedCarHtml = document.getElementById('challenge-car-result').innerHTML;
+        expect(savedCarHtml).not.toBe('');
+
+        // Re-init should restore the locked state
+        window.ChallengePicker.init();
+
+        const restoredCarHtml = document.getElementById('challenge-car-result').innerHTML;
+        expect(restoredCarHtml).toBe(savedCarHtml);
+        expect(document.getElementById('challenge-pick-btn').classList.contains('challenge-pick-btn--locked')).toBe(true);
+    });
+
+    test('expired hardcore lock does not restore pick on fresh init', () => {
+        // Simulate an expired lock in sessionStorage
+        sessionStorage.setItem('challenge-hardcore-until', String(Date.now() - 1000));
+        sessionStorage.setItem('challenge-hardcore-car-html', '<div>Old pick</div>');
+        sessionStorage.setItem('challenge-hardcore-track-html', '<div>Old track</div>');
+        sessionStorage.setItem('challenge-hardcore-mode', 'both');
+
+        window.ChallengePicker.init();
+
+        // The expired lock should not restore the saved result
+        const carHtml = document.getElementById('challenge-car-result').innerHTML;
+        expect(carHtml).not.toContain('Old pick');
+    });
+
+    /* ── granularity refinement ───────────────────────────── */
+
+    test('switching car granularity after pick refines displayed result', () => {
+        // Pick with class granularity first
+        vi.spyOn(Math, 'random').mockReturnValue(0);
+        document.getElementById('challenge-pick-btn').click();
+        Math.random.mockRestore();
+
+        const resultBefore = document.getElementById('challenge-car-result').innerHTML;
+        expect(resultBefore).toContain('GT3');
+
+        // Switch to car granularity — result should update to a specific car
+        const carGranBtn = document.querySelector('#challenge-car-picker [data-granularity="car"]');
+        carGranBtn.click();
+
+        const resultAfter = document.getElementById('challenge-car-result').innerHTML;
+        expect(resultAfter).toContain('car-tile-image');
+    });
+
+    test('switching track granularity after pick refines displayed result', () => {
+        // Pick with track granularity first
+        vi.spyOn(Math, 'random').mockReturnValue(0);
+        document.getElementById('challenge-pick-btn').click();
+        Math.random.mockRestore();
+
+        // Switch to layout granularity
+        const layoutGranBtn = document.querySelector('#challenge-track-picker [data-granularity="layout"]');
+        layoutGranBtn.click();
+
+        const trackHtml = document.getElementById('challenge-track-result').innerHTML;
+        expect(trackHtml).toContain('challenge-result-layout');
+    });
 });

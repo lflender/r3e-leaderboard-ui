@@ -232,5 +232,117 @@ describe('TeamProfileInteractions', () => {
             expect(tooltipEl.innerHTML).toContain('Bob');
             expect(tooltipEl.innerHTML).toContain('2026-01-15');
         });
+
+        it('cross-highlights driver when hovering over entries-dist bar', () => {
+            root.innerHTML = `
+                <div id="dist">
+                    <div class="entries-dist-chart">
+                        <svg viewBox="0 0 2 100">
+                            <rect class="entries-dist-bar" x="0" y="0" width="0.9" height="100" data-date="2026-03-01" data-name="Alice" data-car="" data-track="" data-class="" data-class-id=""></rect>
+                            <rect class="entries-dist-bar" x="1" y="0" width="0.9" height="100" data-date="2026-03-02" data-name="Bob" data-car="" data-track="" data-class="" data-class-id=""></rect>
+                        </svg>
+                    </div>
+                </div>
+                <div id="perf"><div class="perf-dist-chart"></div></div>
+                <table><tbody>
+                    <tr data-name="Alice"><td>Alice</td></tr>
+                    <tr data-name="Bob"><td>Bob</td></tr>
+                </tbody></table>
+            `;
+            const dist = root.querySelector('#dist');
+            const perf = root.querySelector('#perf');
+            TeamProfileInteractions.wireChartInteractions(root, dist, perf);
+
+            const svg = dist.querySelector('svg');
+            svg.getBoundingClientRect = () => ({ left: 0, top: 0, width: 200, height: 100 });
+
+            // clientX=45 → svgX=(45/200)*2=0.45 → nearest Alice bar (x=0, centre=0.45)
+            svg.dispatchEvent(new MouseEvent('mousemove', { clientX: 45, clientY: 50, bubbles: true }));
+
+            expect(root.querySelector('tr[data-name="Alice"]').classList.contains('driver-row-highlight')).toBe(true);
+            expect(root.querySelector('tr[data-name="Bob"]').classList.contains('driver-row-highlight')).toBe(false);
+        });
+
+        it('clears highlights when mouse leaves entries-dist chart', () => {
+            root.innerHTML = `
+                <div id="dist">
+                    <div class="entries-dist-chart">
+                        <svg viewBox="0 0 2 100">
+                            <rect class="entries-dist-bar" x="0" y="0" width="0.9" height="100" data-date="2026-03-01" data-name="Alice" data-car="" data-track="" data-class="" data-class-id=""></rect>
+                        </svg>
+                    </div>
+                </div>
+                <div id="perf"><div class="perf-dist-chart"></div></div>
+                <table><tbody>
+                    <tr data-name="Alice"><td>Alice</td></tr>
+                </tbody></table>
+            `;
+            const dist = root.querySelector('#dist');
+            const perf = root.querySelector('#perf');
+            TeamProfileInteractions.wireChartInteractions(root, dist, perf);
+
+            const svg = dist.querySelector('svg');
+            svg.getBoundingClientRect = () => ({ left: 0, top: 0, width: 200, height: 100 });
+
+            svg.dispatchEvent(new MouseEvent('mousemove', { clientX: 45, clientY: 50, bubbles: true }));
+            expect(root.querySelector('tr[data-name="Alice"]').classList.contains('driver-row-highlight')).toBe(true);
+
+            svg.dispatchEvent(new MouseEvent('mouseleave', { bubbles: false }));
+            expect(root.querySelector('tr[data-name="Alice"]').classList.contains('driver-row-highlight')).toBe(false);
+        });
+
+        it('cross-highlights driver when hovering near perf point', () => {
+            root.innerHTML = `
+                <div id="dist"><div class="entries-dist-chart"><svg viewBox="0 0 1 100"></svg></div></div>
+                <div id="perf">
+                    <div class="perf-dist-chart" style="position:relative">
+                        <span class="perf-dist-point" style="left:20%" data-date="2026-03-01" data-name="Alice" data-pct="80" data-pos="2" data-total="10" data-info="Spa" data-class="GT3" data-class-id=""></span>
+                        <span class="perf-dist-point" style="left:80%" data-date="2026-03-02" data-name="Bob" data-pct="60" data-pos="4" data-total="10" data-info="Monza" data-class="GT3" data-class-id=""></span>
+                    </div>
+                </div>
+                <table><tbody>
+                    <tr data-name="Alice"><td>Alice</td></tr>
+                    <tr data-name="Bob"><td>Bob</td></tr>
+                </tbody></table>
+            `;
+            const dist = root.querySelector('#dist');
+            const perf = root.querySelector('#perf');
+            TeamProfileInteractions.wireChartInteractions(root, dist, perf);
+
+            const perfChart = perf.querySelector('.perf-dist-chart');
+            perfChart.getBoundingClientRect = () => ({ left: 0, top: 0, width: 100, height: 50 });
+
+            // clientX=20 → mouseXPct=20 → nearest point at left:20% (Alice)
+            perfChart.dispatchEvent(new MouseEvent('mousemove', { clientX: 20, clientY: 25, bubbles: true }));
+
+            expect(root.querySelector('tr[data-name="Alice"]').classList.contains('driver-row-highlight')).toBe(true);
+            expect(root.querySelector('tr[data-name="Bob"]').classList.contains('driver-row-highlight')).toBe(false);
+        });
+
+        it('clears highlights when mouse leaves perf chart', () => {
+            root.innerHTML = `
+                <div id="dist"><div class="entries-dist-chart"><svg viewBox="0 0 1 100"></svg></div></div>
+                <div id="perf">
+                    <div class="perf-dist-chart" style="position:relative">
+                        <span class="perf-dist-point" style="left:20%" data-date="2026-03-01" data-name="Alice" data-pct="80" data-pos="2" data-total="10" data-info="Spa" data-class="GT3" data-class-id=""></span>
+                    </div>
+                </div>
+                <table><tbody>
+                    <tr data-name="Alice"><td>Alice</td></tr>
+                </tbody></table>
+            `;
+            const dist = root.querySelector('#dist');
+            const perf = root.querySelector('#perf');
+            TeamProfileInteractions.wireChartInteractions(root, dist, perf);
+
+            const perfChart = perf.querySelector('.perf-dist-chart');
+            perfChart.getBoundingClientRect = () => ({ left: 0, top: 0, width: 100, height: 50 });
+
+            perfChart.dispatchEvent(new MouseEvent('mousemove', { clientX: 20, clientY: 25, bubbles: true }));
+            expect(root.querySelector('tr[data-name="Alice"]').classList.contains('driver-row-highlight')).toBe(true);
+
+            perfChart.dispatchEvent(new MouseEvent('mouseleave', { bubbles: false }));
+            expect(root.querySelector('tr[data-name="Alice"]').classList.contains('driver-row-highlight')).toBe(false);
+        });
     });
 });

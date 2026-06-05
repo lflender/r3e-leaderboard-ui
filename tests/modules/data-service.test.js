@@ -76,18 +76,19 @@ describe('DataService core behavior', () => {
         window.CompressedJsonHelper.readGzipJson
             .mockResolvedValueOnce({ leaderboard: [{ id: 1 }] })
             .mockResolvedValueOnce({ results: [{ track_id: 10 }] })
-            .mockResolvedValueOnce({ data: [{ track_id: 20 }] })
-            .mockResolvedValueOnce([{ track_id: 30 }]);
+            .mockResolvedValueOnce({ data: [{ track_id: 20 }] });
         global.fetch
-            .mockResolvedValueOnce({ ok: true, status: 200, statusText: 'OK' })
             .mockResolvedValueOnce({ ok: true, status: 200, statusText: 'OK' })
             .mockResolvedValueOnce({ ok: true, status: 200, statusText: 'OK' })
             .mockResolvedValueOnce({ ok: true, status: 200, statusText: 'OK' });
 
         await expect(service.fetchLeaderboardDetails(10, 5)).resolves.toEqual({ leaderboard: [{ id: 1 }] });
+        // fetchTopCombinations is now cached after first call (single-flight)
         await expect(service.fetchTopCombinations()).resolves.toEqual([{ track_id: 10 }]);
-        await expect(service.fetchTopCombinations()).resolves.toEqual([{ track_id: 20 }]);
-        await expect(service.fetchTopCombinations()).resolves.toEqual([{ track_id: 30 }]);
+        // Second call returns cached result
+        await expect(service.fetchTopCombinations()).resolves.toEqual([{ track_id: 10 }]);
+        // fetchAllCombinations uses its own cache
+        await expect(service.fetchAllCombinations()).resolves.toEqual([{ track_id: 20 }]);
         expect(global.fetch.mock.calls[0][0]).toContain('cache/tracks/track_10/class_5.json.gz');
     });
 
@@ -196,5 +197,92 @@ describe('DataService core behavior', () => {
         expect(service.fetchLeaderboardDetails).toHaveBeenCalledTimes(2);
         expect(result).toEqual([{ name: 'A', LapTime: '1:22.000', ClassName: 'GT3' }]);
         expect(warnSpy).toHaveBeenCalled();
+    });
+
+    it('loadTeams fetches, decompresses, and caches teams data', async () => {
+        service._indexCacheVersion = 'v1';
+        const teamsData = { 'TeamA': { members: ['Alice'] } };
+        window.CompressedJsonHelper.readGzipJson.mockResolvedValueOnce(teamsData);
+        global.fetch.mockResolvedValueOnce({ ok: true, status: 200 });
+
+        const result = await service.loadTeams();
+        expect(result).toEqual(teamsData);
+        expect(global.fetch.mock.calls[0][0]).toContain('cache/index/teams.json.gz');
+
+        // Second call returns cached
+        const cached = await service.loadTeams();
+        expect(cached).toEqual(teamsData);
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('loadTeams resets promise on failure for retry', async () => {
+        service._indexCacheVersion = 'v1';
+        global.fetch.mockResolvedValueOnce({ ok: false, status: 500, statusText: 'Server Error' });
+
+        await expect(service.loadTeams()).rejects.toThrow('HTTP 500');
+        // Promise is reset, so next call retries
+        expect(service.teamsPromise).toBeNull();
+    });
+
+    it('fetchLeaderboardDetails throws on HTTP error', async () => {
+        service._indexCacheVersion = 'v1';
+        global.fetch.mockResolvedValueOnce({ ok: false, status: 404, statusText: 'Not Found' });
+
+        await expect(service.fetchLeaderboardDetails(10, 5)).rejects.toThrow();
+    });
+
+    it('fetchTopCombinations resets promise on failure', async () => {
+        service._indexCacheVersion = 'v1';
+        global.fetch.mockResolvedValueOnce({ ok: false, status: 503, statusText: 'Unavailable' });
+
+        await expect(service.fetchTopCombinations()).rejects.toThrow();
+        expect(service.topCombinationsPromise).toBeNull();
+    });
+
+    it('fetchAllCombinations resets promise on failure', async () => {
+        service._indexCacheVersion = 'v1';
+        global.fetch.mockResolvedValueOnce({ ok: false, status: 503, statusText: 'Unavailable' });
+
+        await expect(service.fetchAllCombinations()).rejects.toThrow();
+        expect(service.allCombinationsPromise).toBeNull();
+    });
+
+    it('calculateStatus returns null when fetch fails with no cache', async () => {
+        global.fetch.mockRejectedValueOnce(new Error('Network failure'));
+        const result = await service.calculateStatus();
+        expect(result).toBeNull();
+    });
+
+    it('_normalizeLeaderboardEntriesForDetail handles non-array input', () => {
+        const result = service._normalizeLeaderboardEntriesForDetail('not-an-array', {});
+        expect(result).toEqual([]);
+    });
+
+    it('fetchLeaderboardDetails rejects empty IDs after sanitization', async () => {
+        service._indexCacheVersion = 'v1';
+        await expect(service.fetchLeaderboardDetails('', '5')).rejects.toThrow('Invalid track or class ID');
+        await expect(service.fetchLeaderboardDetails('10', '')).rejects.toThrow('Invalid track or class ID');
+        await expect(service.fetchLeaderboardDetails('.../', '...')).rejects.toThrow('Invalid track or class ID');
+    });
+
+    it('fetchLeaderboardDetails strips path traversal characters from IDs', async () => {
+        service._indexCacheVersion = 'v1';
+        global.fetch.mockResolvedValueOnce({ ok: true, status: 200 });
+        window.CompressedJsonHelper.readGzipJson.mockResolvedValueOnce({ data: [] });
+
+        // ../../etc -> "etc" after sanitization (dots/slashes stripped)
+        await service.fetchLeaderboardDetails('../../10258', '5');
+        expect(global.fetch.mock.calls[0][0]).toContain('cache/tracks/track_10258/class_5.json.gz');
+    });
+
+    it('buildCombinedLeaderboard caps classSpecs at 20', async () => {
+        service._indexCacheVersion = 'v1';
+        const manySpecs = Array.from({ length: 50 }, (_, i) => ({ classId: String(i + 1), className: `Class${i}` }));
+        const fetchSpy = vi.spyOn(service, 'fetchLeaderboardDetails').mockResolvedValue({ leaderboard: [] });
+        vi.spyOn(service, 'extractLeaderboardArray').mockReturnValue([]);
+
+        await service.buildCombinedLeaderboard(10, manySpecs);
+        // Should only have fetched 20, not 50
+        expect(fetchSpy).toHaveBeenCalledTimes(20);
     });
 });

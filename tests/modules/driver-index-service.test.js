@@ -28,6 +28,9 @@ describe('Driver index service', () => {
             statusText: 'Test default',
             text: async () => ''
         });
+        window.R3EUtils = {
+            fetchWithTimeout: vi.fn((url, options = {}) => fetch(url, options))
+        };
         localStorage.clear();
     });
 

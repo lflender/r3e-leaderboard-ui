@@ -73,7 +73,10 @@ const COUNTRY_NAME_MAP = {
     'macedonia': 'MK',
     'macedonia, republic of': 'MK',
     'republic of macedonia': 'MK',
-    'north macedonia': 'MK'
+    'north macedonia': 'MK',
+    "côte d'ivoire": 'CI',
+    "cote d'ivoire": 'CI',
+    'ivory coast': 'CI'
 };
 
 /**

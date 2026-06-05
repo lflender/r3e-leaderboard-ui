@@ -41,6 +41,31 @@ describe('TemplateLoader', () => {
         it('returns template unchanged when no data provided', () => {
             expect(window.TemplateLoader.processTemplate('No vars here')).toBe('No vars here');
         });
+
+        it('escapes HTML in {{double-brace}} variables by default', () => {
+            const result = window.TemplateLoader.processTemplate(
+                '<p>{{message}}</p>',
+                { message: '<script>alert("xss")</script>' }
+            );
+            expect(result).toBe('<p>&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;</p>');
+            expect(result).not.toContain('<script>');
+        });
+
+        it('does NOT escape HTML in {{{triple-brace}}} variables', () => {
+            const result = window.TemplateLoader.processTemplate(
+                '<div>{{{content}}}</div>',
+                { content: '<strong>Bold</strong>' }
+            );
+            expect(result).toBe('<div><strong>Bold</strong></div>');
+        });
+
+        it('escapes ampersands and quotes in variables', () => {
+            const result = window.TemplateLoader.processTemplate(
+                '{{text}}',
+                { text: 'A & B "quoted"' }
+            );
+            expect(result).toBe('A &amp; B &quot;quoted&quot;');
+        });
     });
 
     // ── processTemplate: {{#if}} conditionals ───────────────────────

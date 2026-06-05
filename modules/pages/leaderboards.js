@@ -122,12 +122,6 @@
     return null;
   }
 
-  async function decompressGzipToJson(resp) {
-    if (!window.CompressedJsonHelper || typeof window.CompressedJsonHelper.readGzipJson !== 'function') {
-      throw new Error('CompressedJsonHelper is not loaded.');
-    }
-    return window.CompressedJsonHelper.readGzipJson(resp);
-  }
   function resolveTrackLabel(trackId, fallback = '') {
     if (window.R3EUtils && typeof window.R3EUtils.resolveTrackLabel === 'function') {
       return window.R3EUtils.resolveTrackLabel(trackId, fallback);
@@ -378,59 +372,16 @@
     return result;
   }
 
-  // Stable cache version for HTTP caching (same pattern as driver index)
-  let _trackCacheVersion = null;
-  let _trackCacheVersionPromise = null;
-  async function getTrackCacheVersion() {
-      if (_trackCacheVersion) return _trackCacheVersion;
-      if (_trackCacheVersionPromise) return _trackCacheVersionPromise;
-      _trackCacheVersionPromise = (async () => {
-          try {
-              if (window.dataService && typeof window.dataService._getIndexCacheVersion === 'function') {
-                  _trackCacheVersion = await window.dataService._getIndexCacheVersion();
-                  return _trackCacheVersion;
-              }
-          } catch (_) { /* fall through */ }
-          _trackCacheVersion = String(Date.now());
-          return _trackCacheVersion;
-      })();
-      return _trackCacheVersionPromise;
-  }
-
-  // Single-flight cache for all_combinations.json.gz to handle concurrent requests
-  let allCombinationsPromise = null;
-  let allCombinations = null;
-
-  // Fetch all combinations (full list, for use when filters are applied)
+  // Delegate to centralized data-service for all_combinations (single-flight + cached)
   async function loadAllCombinations() {
-    if (allCombinations) return allCombinations;
-    if (allCombinationsPromise) return allCombinationsPromise;
-
-    allCombinationsPromise = (async () => {
-      const cacheVersion = await getTrackCacheVersion();
-      try {
-        const resp = await R3EUtils.fetchWithTimeout(`cache/combinations/all_combinations.json.gz?v=${cacheVersion}`, {}, 15000);
-        if (!resp.ok) throw new Error('HTTP ' + resp.status);
-        const data = await decompressGzipToJson(resp);
-        let combinations = [];
-        if (Array.isArray(data)) {
-          combinations = data;
-        } else if (data && Array.isArray(data.results)) {
-          combinations = data.results;
-        } else if (data && Array.isArray(data.data)) {
-          combinations = data.data;
-        }
-        allCombinations = combinations;
-        return combinations;
-      } catch (e) {
-        console.error('Failed to load all_combinations.json.gz:', e);
-        return [];
-      } finally {
-        allCombinationsPromise = null;
+    try {
+      if (window.dataService && typeof window.dataService.fetchAllCombinations === 'function') {
+        return await window.dataService.fetchAllCombinations();
       }
-    })();
-
-    return allCombinationsPromise;
+    } catch (e) {
+      console.error('Failed to load all_combinations.json.gz:', e);
+    }
+    return [];
   }
 
   // Fetch data from local cache
@@ -446,17 +397,9 @@
       if (activeTrackId || activeClassId) {
         combinations = await loadAllCombinations();
       } else {
-        // No filters: use legacy top_combinations.json.gz for speed (1000 cap is intentional for default view)
-        const cacheVersion = await getTrackCacheVersion();
-        const resp = await R3EUtils.fetchWithTimeout(`cache/combinations/top_combinations.json.gz?v=${cacheVersion}`, {}, 15000);
-        if (!resp.ok) throw new Error('HTTP ' + resp.status);
-        const data = await decompressGzipToJson(resp);
-        if (Array.isArray(data)) {
-          combinations = data;
-        } else if (data && Array.isArray(data.results)) {
-          combinations = data.results;
-        } else if (data && Array.isArray(data.data)) {
-          combinations = data.data;
+        // No filters: use top_combinations (1000 cap is intentional for default view)
+        if (window.dataService && typeof window.dataService.fetchTopCombinations === 'function') {
+          combinations = await window.dataService.fetchTopCombinations();
         }
       }
 

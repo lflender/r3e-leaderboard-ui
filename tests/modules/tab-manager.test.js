@@ -140,5 +140,13 @@ describe('TabManager – edge cases', () => {
         const tm = new window.tabManager.constructor();
         expect(() => tm.switchTab('x')).not.toThrow();
     });
+
+    it('switchTab is callable on a fresh instance with current DOM', () => {
+        document.body.innerHTML = buildTabDOM();
+        const tm = new window.tabManager.constructor();
+        tm.switchTab('tab1');
+        const btn = document.querySelector('[data-tab="tab1"]');
+        expect(btn.classList.contains('is-active')).toBe(true);
+    });
 });
 

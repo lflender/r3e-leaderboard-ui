@@ -27,7 +27,6 @@ class TeamProfilePage {
         const teamName = R3EUrlUtils.getUrlParam('team');
         if (!teamName) return;
         this.loadTeamProfile(teamName);
-        this._trackPageShown(teamName);
     }
 
     _trackPageShown(teamName) {
@@ -50,6 +49,7 @@ class TeamProfilePage {
             const members = teamData.drivers || teamData;
             const country = teamData.country || null;
             await this.showTeamProfile(teamName, members, country);
+            this._trackPageShown(teamName);
         } catch (err) {
             this.elements.profileContainer.innerHTML = '<div class="error"><strong>Error:</strong> Failed to load team data.</div>';
         }

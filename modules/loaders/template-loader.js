@@ -40,9 +40,14 @@
             return array.map(item => processTemplate(itemTemplate, item)).join('');
         });
 
-        result = result.replace(/\{\{(\w+)\}\}/g, (match, variable) => {
+        result = result.replace(/\{\{\{(\w+)\}\}\}|\{\{(\w+)\}\}/g, (match, rawVar, escapedVar) => {
+            const variable = rawVar || escapedVar;
             const value = data[variable];
-            return value !== undefined && value !== null ? String(value) : '';
+            if (value === undefined || value === null) return '';
+            const str = String(value);
+            // {{{var}}} = raw/unescaped, {{var}} = HTML-escaped
+            if (rawVar) return str;
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
         });
 
         return result;

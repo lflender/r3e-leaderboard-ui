@@ -123,4 +123,186 @@ describe('R3EUtils', () => {
             vi.useRealTimers();
         });
     });
+
+    describe('formatValue', () => {
+        test('returns dash for null', () => {
+            expect(window.R3EUtils.formatValue(null)).toBe('-');
+        });
+
+        test('returns dash for undefined', () => {
+            expect(window.R3EUtils.formatValue(undefined)).toBe('-');
+        });
+
+        test('returns escaped string for regular values', () => {
+            expect(window.R3EUtils.formatValue('hello')).toBe('hello');
+        });
+
+        test('escapes HTML in values', () => {
+            expect(window.R3EUtils.formatValue('<b>bold</b>')).toBe('&lt;b&gt;bold&lt;/b&gt;');
+        });
+
+        test('converts numbers to string', () => {
+            expect(window.R3EUtils.formatValue(42)).toBe('42');
+        });
+
+        test('converts zero to string', () => {
+            expect(window.R3EUtils.formatValue(0)).toBe('0');
+        });
+    });
+
+    describe('getTotalEntriesCount', () => {
+        test('extracts from total_entries field', () => {
+            expect(window.R3EUtils.getTotalEntriesCount({ total_entries: '50' })).toBe(50);
+        });
+
+        test('extracts from TotalEntries field', () => {
+            expect(window.R3EUtils.getTotalEntriesCount({ TotalEntries: 100 })).toBe(100);
+        });
+
+        test('extracts from Total Entries field', () => {
+            expect(window.R3EUtils.getTotalEntriesCount({ 'Total Entries': '25' })).toBe(25);
+        });
+
+        test('extracts from TotalRacers field', () => {
+            expect(window.R3EUtils.getTotalEntriesCount({ TotalRacers: '75' })).toBe(75);
+        });
+
+        test('extracts from total_racers field', () => {
+            expect(window.R3EUtils.getTotalEntriesCount({ total_racers: 30 })).toBe(30);
+        });
+
+        test('strips non-numeric characters', () => {
+            expect(window.R3EUtils.getTotalEntriesCount({ total_entries: '50 racers' })).toBe(50);
+        });
+
+        test('returns 0 when no field present', () => {
+            expect(window.R3EUtils.getTotalEntriesCount({})).toBe(0);
+        });
+
+        test('returns 0 for empty string', () => {
+            expect(window.R3EUtils.getTotalEntriesCount({ total_entries: '' })).toBe(0);
+        });
+
+        test('returns 0 for non-numeric value', () => {
+            expect(window.R3EUtils.getTotalEntriesCount({ total_entries: 'abc' })).toBe(0);
+        });
+    });
+
+    describe('renderRankStars', () => {
+        test('returns empty string for falsy rank', () => {
+            expect(window.R3EUtils.renderRankStars('')).toBe('');
+            expect(window.R3EUtils.renderRankStars(null)).toBe('');
+            expect(window.R3EUtils.renderRankStars(undefined)).toBe('');
+        });
+
+        test('renders 4 stars for rank A in inline mode', () => {
+            const result = window.R3EUtils.renderRankStars('A', true);
+            expect(result).toContain('rank-stars-inline');
+            expect(result).toContain('⭐⭐⭐⭐');
+        });
+
+        test('renders 3 stars for rank B in inline mode', () => {
+            const result = window.R3EUtils.renderRankStars('B', true);
+            expect(result).toContain('⭐⭐⭐');
+            expect(result).not.toContain('⭐⭐⭐⭐');
+        });
+
+        test('renders 2 stars for rank C in inline mode', () => {
+            const result = window.R3EUtils.renderRankStars('C', true);
+            expect(result).toContain('⭐⭐');
+            expect(result).not.toContain('⭐⭐⭐');
+        });
+
+        test('renders 1 star for rank D in inline mode', () => {
+            const result = window.R3EUtils.renderRankStars('D', true);
+            expect(result).toContain('⭐');
+            expect(result).not.toContain('⭐⭐');
+        });
+
+        test('returns empty string for unknown rank in inline mode', () => {
+            expect(window.R3EUtils.renderRankStars('X', true)).toBe('');
+        });
+
+        test('renders block mode with pipe separator for rank A', () => {
+            const result = window.R3EUtils.renderRankStars('A', false);
+            expect(result).toContain(' | ');
+            expect(result).toContain('⭐⭐⭐⭐');
+            expect(result).toContain('Rank A');
+        });
+
+        test('renders block mode with rank label for unknown rank', () => {
+            const result = window.R3EUtils.renderRankStars('X', false);
+            expect(result).toContain(' | ⭐ Rank X');
+        });
+
+        test('is case-insensitive', () => {
+            const result = window.R3EUtils.renderRankStars('a', true);
+            expect(result).toContain('⭐⭐⭐⭐');
+        });
+
+        test('trims whitespace from rank', () => {
+            const result = window.R3EUtils.renderRankStars('  B  ', true);
+            expect(result).toContain('⭐⭐⭐');
+        });
+    });
+
+    describe('getPositionBadgeColor', () => {
+        test('returns default color for NaN position', () => {
+            expect(window.R3EUtils.getPositionBadgeColor(NaN, 10)).toBe('var(--color-pos-badge-default)');
+        });
+
+        test('returns default color for NaN total', () => {
+            expect(window.R3EUtils.getPositionBadgeColor(1, NaN)).toBe('var(--color-pos-badge-default)');
+        });
+
+        test('returns default color when total <= 1', () => {
+            expect(window.R3EUtils.getPositionBadgeColor(1, 1)).toBe('var(--color-pos-badge-default)');
+            expect(window.R3EUtils.getPositionBadgeColor(1, 0)).toBe('var(--color-pos-badge-default)');
+        });
+
+        test('returns success color for position 1', () => {
+            expect(window.R3EUtils.getPositionBadgeColor(1, 10)).toBe('var(--color-success)');
+        });
+
+        test('returns danger color for last position', () => {
+            expect(window.R3EUtils.getPositionBadgeColor(10, 10)).toBe('var(--color-danger)');
+        });
+
+        test('returns rgb gradient for middle positions', () => {
+            const color = window.R3EUtils.getPositionBadgeColor(5, 10);
+            expect(color).toMatch(/^rgb\(\d+,\d+,\d+\)$/);
+        });
+    });
+
+    describe('isDriverSearchActive', () => {
+        test('returns false when no search input and no URL params', () => {
+            document.body.innerHTML = '';
+            window.history.replaceState({}, '', '/');
+            expect(window.R3EUtils.isDriverSearchActive()).toBe(false);
+        });
+
+        test('returns true when search input has value', () => {
+            document.body.innerHTML = '<input id="driver-search" value="Alice" />';
+            window.history.replaceState({}, '', '/');
+            expect(window.R3EUtils.isDriverSearchActive()).toBe(true);
+        });
+
+        test('returns false when search input is empty/whitespace', () => {
+            document.body.innerHTML = '<input id="driver-search" value="   " />';
+            window.history.replaceState({}, '', '/');
+            expect(window.R3EUtils.isDriverSearchActive()).toBe(false);
+        });
+
+        test('returns true when URL has driver param', () => {
+            document.body.innerHTML = '';
+            window.history.replaceState({}, '', '/?driver=Bob');
+            expect(window.R3EUtils.isDriverSearchActive()).toBe(true);
+        });
+
+        test('returns true when URL has query param', () => {
+            document.body.innerHTML = '';
+            window.history.replaceState({}, '', '/?query=test');
+            expect(window.R3EUtils.isDriverSearchActive()).toBe(true);
+        });
+    });
 });

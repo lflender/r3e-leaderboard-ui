@@ -98,7 +98,7 @@
             let carHtml = '<span class="car-brand">' + utils.escapeHtml(carBrand) + '</span>';
             if (carModel) { carHtml += ' <span class="car-model">' + utils.escapeHtml(carModel) + '</span>'; }
 
-            html += '<tr>';
+            html += '<tr data-car="' + utils.escapeHtml(stat.car) + '">';
             html += '<td class="car-dist-car"><span class="car-dist-car-cell">' + brandLogoHtml + '<span>' + carHtml + '</span></span></td>';
             html += '<td class="car-dist-entries">' + stat.entries + '</td>';
             html += '<td class="car-dist-percentage">' + stat.percentage + '%</td>';

@@ -79,6 +79,47 @@ After any change to a user-facing page or a page-related module, update `sitemap
 - Load secondary/optional data (e.g. inactive MP rankings) asynchronously with concurrent-free (single-flight) promises and display it lazily when ready. Never block the main render path for non-critical data.
 - Use the single-flight (concurrent-free) promise pattern for any shared async data fetch: store the in-flight promise and return it on subsequent calls so only one network request is made, regardless of how many callers trigger it concurrently.
 
+## Data Fetching & I/O
+
+All JSON/gzip file reads must follow these rules:
+
+### Centralized fetch — no raw `fetch()` calls
+
+- **Always use `R3EUtils.fetchWithTimeout(url, options, timeoutMs)`** for all network I/O. Never use raw `fetch()` with a manual `AbortController`/`setTimeout` — the centralized helper already handles timeouts.
+- For gzip-compressed JSON, use `window.CompressedJsonHelper.readGzipJson(response)` or `readGzipText(response)` after the fetch.
+
+### Single-flight (concurrent-safe) promises
+
+- Every cached async loader **must** implement the single-flight pattern:
+  ```js
+  if (this.cache) return this.cache;
+  if (this.promise) return this.promise;
+  this.promise = (async () => { /* fetch, cache, return */ })();
+  return this.promise;
+  ```
+- On success, store the result in a cache variable so subsequent calls skip the network entirely.
+- On failure, reset the promise (`this.promise = null`) so future callers can retry — never leave a rejected promise cached permanently.
+- When a function is exported or callable from multiple modules/pages, assume it **will** be called concurrently and design for it.
+
+### Delegate to `DataService` — no per-page duplicates
+
+- `DataService` (instantiated as `window.dataService`) is the **single source of truth** for all shared data fetches: status, combinations, teams, driver index, shards, metadata.
+- Page modules must call `window.dataService.fetchTopCombinations()`, `window.dataService.fetchAllCombinations()`, `window.dataService.loadTeams()`, etc. — never re-implement the same fetch+decompress+normalize logic locally.
+- If a page needs a new shared data source, add the method to `DataService` with single-flight caching, then call it from the page.
+- Module-local helpers like `decompressGzipToJson()` or `getTrackCacheVersion()` that duplicate DataService logic are **banned** — delete them and delegate.
+
+### Cache-busting version strings
+
+- Use `dataService._getIndexCacheVersion()` (derived from `status.json`) as the stable cache-buster for all index/shard/stats/combination fetches. This lets the browser HTTP-cache files across navigations within the same data epoch.
+- Only use `Date.now()` cache-busting for data that **must never** be stale (e.g. `status.json` itself, daily races).
+- Never duplicate the cache-version derivation logic — always delegate to DataService.
+
+### Security
+
+- Never interpolate user-controlled values into fetch URLs without validation/sanitization.
+- Always check `response.ok` before consuming the body.
+- Use `JSON.parse(text)` with try/catch for untrusted payloads rather than assuming valid JSON.
+
 ## Testing
 
 - Always add test coverage for new code (see also Test Coverage above).

@@ -532,10 +532,16 @@
       keys.sort((a,b)=>{ let ia = columnOrder.indexOf(a); let ib = columnOrder.indexOf(b); if (ia===-1) ia=999; if (ib===-1) ib=999; return ia-ib; });
     }
 
+    // Determine if pole column should be shown (not in combine mode)
+    const showPoleColumn = !combineMode;
+
     let html = '<table class="results-table"><thead><tr>';
     keys.forEach(k => {
       const displayName = window.ColumnConfig ? window.ColumnConfig.getDisplayName(k) : R3EUtils.formatHeader(k);
       const isEntriesColumn = window.ColumnConfig && window.ColumnConfig.isColumnType(k, 'TOTAL_ENTRIES');
+      if (isEntriesColumn && showPoleColumn) {
+        html += '<th class="pole-cell">Pole</th>';
+      }
       let headerClass = '';
       if (isEntriesColumn) headerClass = ' class="entries-cell"';
       html += `<th${headerClass}>${displayName}</th>`;
@@ -611,6 +617,10 @@
           const formattedDate = value ? R3EUtils.formatDate(value) : '';
           html += `<td class="date-cell">${R3EUtils.escapeHtml(formattedDate)}</td>`;
         } else if (window.ColumnConfig && window.ColumnConfig.isColumnType(key, 'TOTAL_ENTRIES')) {
+          // Insert pole cell before entries column
+          if (showPoleColumn) {
+            html += `<td class="pole-cell" data-pole-track="${R3EUtils.escapeHtml(String(trackIdVal))}" data-pole-class="${R3EUtils.escapeHtml(String(classIdVal))}"><span class="pole-placeholder">—</span></td>`;
+          }
           // Entries column: use specific class for right-alignment
           html += `<td class="entries-cell">${formatValue(value)}</td>`;
         } else {
@@ -641,6 +651,63 @@
     }
 
     tableContainer.innerHTML = paginationHTML + html + paginationHTML;
+
+    // Lazily load pole times for visible rows (non-blocking)
+    if (showPoleColumn) {
+      loadPoleTimesForPage(pageItems);
+    }
+  }
+
+  /**
+   * Lazily fetches pole position data for visible rows and updates DOM.
+   * Uses throttled concurrent requests to avoid overwhelming the network.
+   * @param {Array} pageItems - Items currently displayed on the page
+   */
+  async function loadPoleTimesForPage(pageItems) {
+    if (!window.dataService || typeof window.dataService.fetchPoleTime !== 'function') return;
+
+    const CONCURRENCY = 5;
+    const items = pageItems.filter(item => {
+      const trackId = item.track_id || item.TrackID || item.trackId || '';
+      const classId = item.class_id || item.ClassID || item.classId || '';
+      return trackId && classId;
+    });
+
+    for (let i = 0; i < items.length; i += CONCURRENCY) {
+      const batch = items.slice(i, i + CONCURRENCY);
+      const promises = batch.map(async (item) => {
+        const trackId = item.track_id || item.TrackID || item.trackId;
+        const classId = item.class_id || item.ClassID || item.classId;
+        try {
+          const pole = await window.dataService.fetchPoleTime(trackId, classId);
+          updatePoleCellInDOM(trackId, classId, pole);
+        } catch (e) {
+          // Silently skip failed fetches - cell keeps placeholder
+        }
+      });
+      await Promise.all(promises);
+    }
+  }
+
+  /**
+   * Updates a pole cell in the DOM with fetched data.
+   */
+  function updatePoleCellInDOM(trackId, classId, pole) {
+    const cell = tableContainer.querySelector(
+      `td[data-pole-track="${trackId}"][data-pole-class="${classId}"]`
+    );
+    if (!cell) return;
+    if (!pole || !pole.name) {
+      cell.innerHTML = '<span class="pole-no-data">—</span>';
+      return;
+    }
+    const buildDriverCell = window.StatsRenderer && window.StatsRenderer.buildDriverCell;
+    if (buildDriverCell) {
+      cell.innerHTML = buildDriverCell(pole);
+    } else {
+      cell.innerHTML = `<span class="pole-driver">${R3EUtils.escapeHtml(pole.name)}</span>`;
+    }
+    cell.classList.add('pole-loaded');
   }
 
   // Expose a global function for pagination buttons to call

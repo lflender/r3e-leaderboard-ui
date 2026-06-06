@@ -37,7 +37,10 @@ beforeEach(() => {
     window.ColumnConfig = {
         getOrderedColumns: keys => keys,
         getDisplayName: k => String(k),
-        isColumnType: () => false
+        isColumnType: (k, type) => {
+            if (type === 'TOTAL_ENTRIES') return k === 'entry_count';
+            return false;
+        }
     };
     window.TemplateHelper = {
         showLoading: vi.fn(async (container) => { container.innerHTML = '<div>Loading</div>'; }),
@@ -526,6 +529,105 @@ describe('leaderboards fetchTopCombinations pipeline', () => {
         expect(html).toContain('pos-cell');
         expect(html).toContain('pos-number');
         expect(html).toContain('3');
+    });
+
+    it('renders pole column header and placeholder cells', async () => {
+        window.dataService.fetchTopCombinations = vi.fn().mockResolvedValueOnce([
+            { track_id: 10, class_id: 5, class_name: 'GT3', entry_count: 100 }
+        ]);
+
+        loadLeaderboards();
+        await new Promise(resolve => setTimeout(resolve, 20));
+
+        const html = document.getElementById('leaderboards-table').innerHTML;
+        expect(html).toContain('Pole');
+        expect(html).toContain('pole-cell');
+        expect(html).toContain('data-pole-track="10"');
+        expect(html).toContain('data-pole-class="5"');
+        expect(html).toContain('pole-placeholder');
+    });
+
+    it('lazily populates pole cells with driver data via buildDriverCell', async () => {
+        window.StatsRenderer = {
+            buildDriverCell: vi.fn((row) => `<a>${row.name}</a>`)
+        };
+        window.dataService.fetchTopCombinations = vi.fn().mockResolvedValueOnce([
+            { track_id: 10, class_id: 5, class_name: 'GT3', entry_count: 100 }
+        ]);
+        window.dataService.fetchPoleTime = vi.fn().mockResolvedValueOnce({
+            name: 'Max Speed',
+            country: 'de',
+            rank: 'A',
+            avatar: 'https://img/max.png',
+            path_id: '12345',
+            laptime: '1:45.200s'
+        });
+
+        loadLeaderboards();
+        await new Promise(resolve => setTimeout(resolve, 50));
+
+        const cell = document.querySelector('td[data-pole-track="10"][data-pole-class="5"]');
+        expect(cell).not.toBeNull();
+        expect(cell.innerHTML).toContain('Max Speed');
+        expect(cell.classList.contains('pole-loaded')).toBe(true);
+        expect(window.StatsRenderer.buildDriverCell).toHaveBeenCalledWith(expect.objectContaining({
+            name: 'Max Speed',
+            country: 'de',
+            rank: 'A'
+        }));
+    });
+
+    it('shows dash in pole cell when fetch returns null', async () => {
+        window.dataService.fetchTopCombinations = vi.fn().mockResolvedValueOnce([
+            { track_id: 99, class_id: 99, class_name: 'GT4', entry_count: 10 }
+        ]);
+        window.dataService.fetchPoleTime = vi.fn().mockResolvedValueOnce(null);
+
+        loadLeaderboards();
+        await new Promise(resolve => setTimeout(resolve, 50));
+
+        const cell = document.querySelector('td[data-pole-track="99"][data-pole-class="99"]');
+        expect(cell).not.toBeNull();
+        expect(cell.innerHTML).toContain('pole-no-data');
+    });
+
+    it('does not render pole column in combine mode', async () => {
+        window.CARS_DATA = [
+            { superclass: 'GT', class: 'GT3' },
+            { superclass: 'GT', class: 'GT4' }
+        ];
+
+        let classFilterOnChange;
+        window.CustomSelect = class {
+            constructor(id, _options, onChange) {
+                if (id === 'track-class-filter-ui') classFilterOnChange = onChange;
+            }
+        };
+
+        window.dataService.fetchTopCombinations = vi.fn().mockResolvedValue([]);
+        window.dataService.fetchAllCombinations = vi.fn().mockResolvedValue([
+            { track_id: 10, class_name: 'GT3', entry_count: 200 },
+            { track_id: 10, class_name: 'GT4', entry_count: 80 }
+        ]);
+
+        loadLeaderboards();
+        await new Promise(resolve => setTimeout(resolve, 20));
+
+        // Select superclass and enable combine mode
+        classFilterOnChange('superclass:GT', { source: 'user' });
+        await new Promise(resolve => setTimeout(resolve, 20));
+
+        const combineCheckbox = document.getElementById('combine-checkbox');
+        combineCheckbox.checked = true;
+        combineCheckbox.dispatchEvent(new Event('change'));
+        await new Promise(resolve => setTimeout(resolve, 20));
+
+        const html = document.getElementById('leaderboards-table').innerHTML;
+        expect(html).not.toContain('data-pole-track');
+        // The header should not have Pole column in combine mode
+        const headers = document.querySelectorAll('#leaderboards-table th');
+        const poleHeader = Array.from(headers).find(th => th.textContent === 'Pole');
+        expect(poleHeader).toBeUndefined();
     });
 });
 

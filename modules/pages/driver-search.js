@@ -34,6 +34,7 @@ class DriverSearch {
         // Filter values
         this.selectedTrack = ''; // Store selected track filter
         this.selectedClass = ''; // Store selected class/superclass filter
+        this.selectedWheel = ''; // Store selected wheel filter
         
         // Debounce timer for live search
         this.searchDebounceTimer = null;
@@ -253,6 +254,30 @@ class DriverSearch {
                 }
             });
         }
+
+        // Wheel filter custom select
+        const wheelFilterEl = document.getElementById('driver-wheel-filter-ui');
+        if (wheelFilterEl) {
+            const wheelBadge = R3ECarUtils.wheelBadge;
+            const wheelOptions = [
+                { value: '', label: 'All wheels' },
+                { value: 'gt', label: 'GT', labelHtml: wheelBadge('gt') },
+                { value: 'round', label: 'Round', labelHtml: wheelBadge('round') },
+                { value: 'round flat', label: 'Round flat', labelHtml: wheelBadge('round flat') },
+                { value: 'round_and_roundflat', label: 'Round & Round flat', labelHtml: `${wheelBadge('round')} + ${wheelBadge('round flat')}` }
+            ];
+
+            new CustomSelect('driver-wheel-filter-ui', wheelOptions, async (value, opts) => {
+                this.selectedWheel = value;
+                if (this.lastSearchTerm) {
+                    this._searchSource = 'filter';
+                    await this.searchDriver(this.lastSearchTerm);
+                    if (opts?.source === 'user') {
+                        this.trackDriverFilterUsage('wheel', value || '', this.allResults.length);
+                    }
+                }
+            }, { searchable: false });
+        }
     }
 
     /**
@@ -354,6 +379,7 @@ class DriverSearch {
             filter_value: filterValue || '',
             track_filter: this.selectedTrack || '',
             class_filter: this.selectedClass || '',
+            wheel_filter: this.selectedWheel || '',
             search_term: this.lastSearchTerm || '',
             result_count: resultCount || 0,
             has_search_term: !!this.lastSearchTerm
@@ -420,15 +446,20 @@ class DriverSearch {
             
             // Sort results by MP position (ascending) when multiple drivers have the same name
             this.sortResultsByMpPosition(results);
+
+            // Apply wheel filter client-side (entries have car_class, we match against CARS_DATA)
+            const wheelFiltered = this.selectedWheel
+                ? this._applyWheelFilter(results, this.selectedWheel)
+                : results;
             
             // Filter to a specific pathId when navigating from detail page
             const filteredResults = this._urlPathId
-                ? results.filter(g => String(g.pathId || '') === this._urlPathId) 
-                : results;
+                ? wheelFiltered.filter(g => String(g.pathId || '') === this._urlPathId) 
+                : wheelFiltered;
             // Clear the URL pathId after first use so subsequent searches are unfiltered
             this._urlPathId = '';
 
-            this.allResults = filteredResults.length > 0 ? filteredResults : results;
+            this.allResults = filteredResults.length > 0 ? filteredResults : wheelFiltered;
             this.currentPage = 1;
             this.displayResults(this.allResults, searchId);
 
@@ -535,6 +566,62 @@ class DriverSearch {
     /**
      * Wire hover highlighting for rows sharing the same car class
      */
+    /**
+     * Build a map from car_class name (lowercase) to wheel_cat from CARS_DATA.
+     * Cached per CARS_DATA reference.
+     */
+    _getClassToWheelMap() {
+        const carsData = Array.isArray(window.CARS_DATA) ? window.CARS_DATA : [];
+        if (this._classWheelMapRef === carsData && this._classWheelMap) {
+            return this._classWheelMap;
+        }
+        const map = new Map();
+        for (const classEntry of carsData) {
+            const cars = Array.isArray(classEntry.cars) ? classEntry.cars : [];
+            for (const car of cars) {
+                const cls = String(car.car_class || '').trim().toLowerCase();
+                if (cls && !map.has(cls)) {
+                    map.set(cls, (car.wheel_cat || '').toLowerCase().trim());
+                }
+            }
+        }
+        this._classWheelMap = map;
+        this._classWheelMapRef = carsData;
+        return map;
+    }
+
+    /**
+     * Apply wheel filter to driver search results (client-side).
+     * Filters entries within each driver group and removes groups with no remaining entries.
+     * @param {Array} results - Array of driver result groups
+     * @param {string} wheelFilter - Selected wheel filter value
+     * @returns {Array} Filtered results
+     */
+    _applyWheelFilter(results, wheelFilter) {
+        if (!wheelFilter || !Array.isArray(results)) return results;
+        const classToWheel = this._getClassToWheelMap();
+
+        const filtered = [];
+        for (const group of results) {
+            if (!Array.isArray(group.entries)) {
+                filtered.push(group);
+                continue;
+            }
+            const matchingEntries = group.entries.filter(entry => {
+                const entryClass = String(entry.car_class || entry.CarClass || entry['Car Class'] || entry.Class || entry.class || '').trim().toLowerCase();
+                const w = classToWheel.get(entryClass) || '';
+                if (wheelFilter === 'round_and_roundflat') {
+                    return w === 'round' || w === 'round flat' || w === 'round (flat)';
+                }
+                return w === wheelFilter;
+            });
+            if (matchingEntries.length > 0) {
+                filtered.push({ ...group, entries: matchingEntries });
+            }
+        }
+        return filtered;
+    }
+
     _wireClassHighlight() {
         const table = this.elements.resultsContainer.querySelector('table');
         if (!table) return;

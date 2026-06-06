@@ -8,6 +8,7 @@ function buildDom() {
         '<div id="track-filter-ui"></div>',
         '<select id="class-filter"></select>',
         '<div id="track-class-filter-ui"></div>',
+        '<div id="driver-wheel-filter-ui"></div>',
         '<div id="results-container"></div>'
     ].join('');
 }
@@ -15,6 +16,14 @@ function buildDom() {
 beforeAll(() => {
     document.body.innerHTML = buildDom();
     window.TRACKS_DATA = [{ id: 1, label: 'Spa' }];
+    window.CARS_DATA = [
+        { class: 'GT3 Class', superclass: 'GT3', cars: [{ car_class: 'GT3 Class', car: 'Car A', wheel_cat: 'round flat' }] },
+        { class: 'Touring', superclass: 'Touring', cars: [{ car_class: 'Touring', car: 'Car B', wheel_cat: 'gt' }] },
+        { class: 'Open Wheel', superclass: 'Open', cars: [{ car_class: 'Open Wheel', car: 'Car C', wheel_cat: 'round' }] }
+    ];
+    window.R3ECarUtils = {
+        wheelBadge: (cat) => `<span class="car-badge">${cat}</span>`
+    };
     window.resolveMpPos = vi.fn().mockReturnValue(null);
     window.CustomSelect = class {
         constructor(_id, _options, _cb) {}
@@ -323,5 +332,98 @@ describe('driver-search integration', () => {
             'driver pagination changed',
             expect.objectContaining({ page_number: 2 })
         );
+    });
+
+    it('wheel filter removes entries that do not match the selected wheel type', async () => {
+        window.R3EUtils.getUrlParam.mockReturnValue('');
+        const ds = new window.driverSearch.constructor();
+        ds.selectedWheel = 'gt';
+
+        window.dataService.searchDriver.mockResolvedValueOnce([
+            {
+                driver: 'Alice',
+                entries: [
+                    { position: '1', lap_time: '1:30.000', car_class: 'GT3 Class' },
+                    { position: '2', lap_time: '1:31.000', car_class: 'Touring' }
+                ]
+            }
+        ]);
+
+        const input = document.getElementById('driver-search');
+        input.value = 'Alice';
+        input.dispatchEvent(new KeyboardEvent('keypress', { key: 'Enter', bubbles: true }));
+        await new Promise(r => setTimeout(r, 50));
+
+        // Only the Touring entry (wheel_cat: 'gt') should remain
+        expect(ds.allResults).toHaveLength(1);
+        expect(ds.allResults[0].entries).toHaveLength(1);
+        expect(ds.allResults[0].entries[0].car_class).toBe('Touring');
+    });
+
+    it('wheel filter removes entire driver group when no entries match', async () => {
+        window.R3EUtils.getUrlParam.mockReturnValue('');
+        const ds = new window.driverSearch.constructor();
+        ds.selectedWheel = 'round';
+
+        window.dataService.searchDriver.mockResolvedValueOnce([
+            { driver: 'Bob', entries: [{ position: '1', lap_time: '1:28.000', car_class: 'Touring' }] }
+        ]);
+
+        const input = document.getElementById('driver-search');
+        input.value = 'Bob';
+        input.dispatchEvent(new KeyboardEvent('keypress', { key: 'Enter', bubbles: true }));
+        await new Promise(r => setTimeout(r, 50));
+
+        // Touring is 'gt', doesn't match 'round' — group is removed
+        expect(ds.allResults).toHaveLength(0);
+    });
+
+    it('wheel filter round_and_roundflat matches both round and round flat', async () => {
+        window.R3EUtils.getUrlParam.mockReturnValue('');
+        const ds = new window.driverSearch.constructor();
+        ds.selectedWheel = 'round_and_roundflat';
+
+        window.dataService.searchDriver.mockResolvedValueOnce([
+            {
+                driver: 'Carol',
+                entries: [
+                    { position: '1', lap_time: '1:30.000', car_class: 'GT3 Class' },
+                    { position: '2', lap_time: '1:31.000', car_class: 'Open Wheel' },
+                    { position: '3', lap_time: '1:32.000', car_class: 'Touring' }
+                ]
+            }
+        ]);
+
+        const input = document.getElementById('driver-search');
+        input.value = 'Carol';
+        input.dispatchEvent(new KeyboardEvent('keypress', { key: 'Enter', bubbles: true }));
+        await new Promise(r => setTimeout(r, 50));
+
+        // GT3 Class = round flat, Open Wheel = round — both match; Touring = gt — excluded
+        expect(ds.allResults[0].entries).toHaveLength(2);
+        expect(ds.allResults[0].entries.map(e => e.car_class)).toEqual(['GT3 Class', 'Open Wheel']);
+    });
+
+    it('no wheel filter returns all entries unfiltered', async () => {
+        window.R3EUtils.getUrlParam.mockReturnValue('');
+        const ds = new window.driverSearch.constructor();
+        ds.selectedWheel = '';
+
+        window.dataService.searchDriver.mockResolvedValueOnce([
+            {
+                driver: 'Dave',
+                entries: [
+                    { position: '1', lap_time: '1:30.000', car_class: 'GT3 Class' },
+                    { position: '2', lap_time: '1:31.000', car_class: 'Touring' }
+                ]
+            }
+        ]);
+
+        const input = document.getElementById('driver-search');
+        input.value = 'Dave';
+        input.dispatchEvent(new KeyboardEvent('keypress', { key: 'Enter', bubbles: true }));
+        await new Promise(r => setTimeout(r, 50));
+
+        expect(ds.allResults[0].entries).toHaveLength(2);
     });
 });

@@ -24,6 +24,8 @@ class DataService {
         this.allCombinationsPromise = null; // single-flight promise
         this.topCombinationsCache = null;
         this.topCombinationsPromise = null; // single-flight promise
+        this.poleTimeCache = new Map(); // per-combination pole time cache
+        this.poleTimePromises = new Map(); // single-flight promises for pole fetches
         this.statusCache = null; // last good status (fallback only)
         this.statusPromise = null; // single-flight promise for status fetch
         this.DRIVER_INDEX_CACHE_KEY = 'r3e_driver_index_cache';
@@ -129,7 +131,54 @@ class DataService {
         const helper = this._getCompressedJsonHelper();
         return helper.readGzipJson(response);
     }
-    
+
+    /**
+     * Fetches pole position (P1) data for a track/class combination.
+     * Returns driver info suitable for StatsRenderer.buildDriverCell().
+     * Uses per-combination single-flight caching.
+     * @param {string|number} trackId
+     * @param {string|number} classId
+     * @returns {Promise<{name: string, country: string, rank: string, avatar: string, path_id: string, laptime: string}|null>}
+     */
+    async fetchPoleTime(trackId, classId) {
+        const key = `${trackId}_${classId}`;
+        if (this.poleTimeCache.has(key)) return this.poleTimeCache.get(key);
+        if (this.poleTimePromises.has(key)) return this.poleTimePromises.get(key);
+
+        const promise = (async () => {
+            try {
+                const data = await this.fetchLeaderboardDetails(trackId, classId);
+                const entries = data?.track_info?.Data;
+                if (!Array.isArray(entries) || entries.length === 0) {
+                    this.poleTimeCache.set(key, null);
+                    return null;
+                }
+                const p1 = entries[0];
+                let pathId = '';
+                if (p1.driver?.path) {
+                    const pathMatch = String(p1.driver.path).match(/\/(\d+)\/?$/);
+                    if (pathMatch) pathId = pathMatch[1];
+                }
+                const result = {
+                    name: p1.driver?.name || '',
+                    country: p1.country?.code || '',
+                    rank: p1.driver?.rank || p1.rank || '',
+                    avatar: p1.driver?.avatar || '',
+                    path_id: pathId,
+                    laptime: p1.laptime || ''
+                };
+                this.poleTimeCache.set(key, result);
+                return result;
+            } catch (err) {
+                this.poleTimePromises.delete(key);
+                return null;
+            }
+        })();
+
+        this.poleTimePromises.set(key, promise);
+        return promise;
+    }
+
     /**
      * Fetches top combinations data.
      * Uses single-flight promise to avoid concurrent fetches.

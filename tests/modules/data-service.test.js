@@ -285,4 +285,73 @@ describe('DataService core behavior', () => {
         // Should only have fetched 20, not 50
         expect(fetchSpy).toHaveBeenCalledTimes(20);
     });
+
+    it('fetchPoleTime returns P1 entry data with single-flight caching', async () => {
+        service._indexCacheVersion = 'v1';
+        const shardData = {
+            track_info: {
+                Data: [
+                    { laptime: '1:30.500s', driver: { name: 'Alice', rank: 'A', avatar: 'https://img/alice.png', path: '/users/info/12345/' }, country: { code: 'de' }, date_time: '2026-01-01T10:00:00' },
+                    { laptime: '1:31.200s', driver: { name: 'Bob', rank: 'B', avatar: '', path: '/users/info/67890/' }, country: { code: 'uk' }, date_time: '2026-01-02T10:00:00' }
+                ]
+            }
+        };
+        global.fetch.mockResolvedValue({ ok: true, status: 200 });
+        window.CompressedJsonHelper.readGzipJson.mockResolvedValue(shardData);
+
+        const result = await service.fetchPoleTime(10, 5);
+        expect(result).toEqual({
+            name: 'Alice',
+            country: 'de',
+            rank: 'A',
+            avatar: 'https://img/alice.png',
+            path_id: '12345',
+            laptime: '1:30.500s'
+        });
+
+        // Second call returns cached result without additional fetch
+        const cachedResult = await service.fetchPoleTime(10, 5);
+        expect(cachedResult).toEqual(result);
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('fetchPoleTime returns null for empty leaderboard data', async () => {
+        service._indexCacheVersion = 'v1';
+        global.fetch.mockResolvedValue({ ok: true, status: 200 });
+        window.CompressedJsonHelper.readGzipJson.mockResolvedValue({
+            track_info: { Data: [] }
+        });
+
+        const result = await service.fetchPoleTime(10, 5);
+        expect(result).toBeNull();
+    });
+
+    it('fetchPoleTime returns null on fetch error without caching failure', async () => {
+        service._indexCacheVersion = 'v1';
+        global.fetch.mockResolvedValue({ ok: false, status: 404, statusText: 'Not Found' });
+
+        const result = await service.fetchPoleTime(99, 99);
+        expect(result).toBeNull();
+
+        // Promise should be cleared so retry is possible
+        expect(service.poleTimePromises.has('99_99')).toBe(false);
+    });
+
+    it('fetchPoleTime single-flight: concurrent calls share the same promise', async () => {
+        service._indexCacheVersion = 'v1';
+        const shardData = {
+            track_info: {
+                Data: [{ laptime: '2:00.000s', driver: { name: 'Eve', rank: 'B', avatar: '', path: '/users/info/111/' }, country: { code: 'se' }, date_time: '2026-06-01' }]
+            }
+        };
+        global.fetch.mockResolvedValue({ ok: true, status: 200 });
+        window.CompressedJsonHelper.readGzipJson.mockResolvedValue(shardData);
+
+        const [r1, r2] = await Promise.all([
+            service.fetchPoleTime(10, 5),
+            service.fetchPoleTime(10, 5)
+        ]);
+        expect(r1).toEqual(r2);
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+    });
 });

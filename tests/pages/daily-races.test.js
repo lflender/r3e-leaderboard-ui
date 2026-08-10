@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { loadBrowserScript } from '../helpers/script-loader.js';
 
@@ -96,8 +98,8 @@ describe('daily-races integration', () => {
         const links = Array.from(document.querySelectorAll('.daily-race-card-link'));
 
         expect(html).toContain('This Week in Ranked Multiplayer');
-        expect(html).toContain('Daily Sprint Races');
-        expect(html).toContain('Daily Feature Races');
+        expect(html).toContain('Daily Races');
+        expect(html).toContain('Feature Races');
         expect(links[0].getAttribute('href')).toContain('track=10');
         expect(links[0].getAttribute('href')).toContain('class=5');
         expect(links[1].getAttribute('href')).toContain('track=20');
@@ -185,6 +187,14 @@ describe('daily-races integration', () => {
         const featureGrid = featureSection.querySelector('.daily-races-grid');
         expect(featureSection.classList.contains('daily-races-feature--sprint-layout')).toBe(true);
         expect(featureGrid.classList.contains('daily-races-grid--sprint-layout')).toBe(true);
+    });
+
+    it('keeps the feature-race grid width consistent with the daily-race grid on desktop', () => {
+        const cssPath = path.join(process.cwd(), 'styles/pages/daily-races.css');
+        const css = fs.readFileSync(cssPath, 'utf8');
+
+        expect(css).not.toContain('.daily-races-feature .daily-races-grid {\n    max-width: 750px;');
+        expect(css).toContain('.daily-races-feature .daily-races-grid');
     });
 });
 

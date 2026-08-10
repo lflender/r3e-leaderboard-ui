@@ -893,10 +893,10 @@ window.CAR_IMAGES_BY_LINK = {
     "https://prod.r3eassets.com/assets/content/carlivery/hrt-ford-racing-36-13593-image-big.png",
     "https://prod.r3eassets.com/assets/content/carlivery/hrt-ford-racing-64-13626-image-big.png"
   ],
-  "https://prod.r3eassets.com/assets/content/carmanufactor/lamborghini-9930-image-small.png": [
+  "https://game.raceroom.com/store/cars/dtm-2026/lamborghini/lamborghini-temerario-gt3-dtm": [
     "https://prod.r3eassets.com/assets/content/carlivery/red-bull-team-abt-130-13596-image-big.png",
-    "https://prod.r3eassets.com/assets/content/carlivery/tgi-team-by-grt-19-13614-image-big.png",
     "https://prod.r3eassets.com/assets/content/carlivery/red-bull-team-abt-10-13609-image-big.png",
+    "https://prod.r3eassets.com/assets/content/carlivery/tgi-team-by-grt-19-13614-image-big.png",
     "https://prod.r3eassets.com/assets/content/carlivery/tgi-team-by-grt-63-13615-image-big.png"
   ],
   "https://game.raceroom.com/store/cars/dtm-2026/mclaren/mclaren-720s-gt3-evo-dtm": [

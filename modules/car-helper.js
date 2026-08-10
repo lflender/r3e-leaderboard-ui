@@ -14,7 +14,7 @@ const CAR_BRANDS = [
     'KTM', 'Gumpert',
     'Koenigsegg', 'Praga', 'Tatuus', 'Aquila', 'Canhard', 'Cougar', 'Crosslé', 'Crossle',
     'DMD', 'Fabcar', 'Mistral', 'RaceRoom', 'Formula', 'Carlsson', 'Zakspeed',
-    'Abt-Audi', 'S.C.', 'P4-5'
+    'Abt-Audi', 'S.C.', 'P4-5', 'Aston Martin'
 ];
 
 const CAR_SPECIAL_CASES = {
@@ -30,6 +30,7 @@ const MODEL_LOGO_OVERRIDES = [
 
 const BRAND_LOGO_OVERRIDES = {
     'alfa romeo': 'alfaromeo',
+    'aston martin': 'astonmartin',
     'abt-audi': 'audi',
     'bmw alpina': 'alpina',
     'callaway': 'chevrolet',
@@ -45,7 +46,7 @@ const BRAND_LOGO_OVERRIDES = {
 };
 
 const AVAILABLE_BRAND_LOGO_KEYS = new Set([
-    'alfaromeo', 'alpina', 'alpine', 'aquila', 'audi', 'bentley', 'bmw', 'cadillac',
+    'alfaromeo', 'alpina', 'alpine', 'aquila', 'astonmartin', 'audi', 'bentley', 'bmw', 'cadillac',
     'carlsson', 'chevrolet', 'citroen', 'corvette', 'crossle', 'cupra', 'fabcar', 'ferrari', 'ford',
     'georg-plasa', 'gumpert', 'honda', 'hyundai', 'judd', 'koenigsegg', 'ktm', 'lada', 'lamborghini', 'lotus',
     'lrt', 'lynk-co', 'mazda', 'mclaren', 'mercedes', 'nissan', 'nsu', 'opel', 'p45', 'pagani',

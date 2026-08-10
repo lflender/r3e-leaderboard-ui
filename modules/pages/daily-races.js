@@ -258,6 +258,7 @@ class DailyRaces {
         
         // Define mappings for combo strings to their display names
         const comboMappings = {
+            'PCCA + PCCNA': 'Porsche Cup',
             'PCCD + PCCNA': 'Porsche Cup',
             'PCCNA + PCCD': 'Porsche Cup',
             // Add more mappings as needed
@@ -474,7 +475,7 @@ class DailyRaces {
 
 
         html += '<div class="daily-races-section-header">';
-        html += '<h3 class="daily-races-section-title">Daily Sprint Races (15 min)</h3>';
+        html += '<h3 class="daily-races-section-title">Daily Races</h3>';
         if (this.hasScheduleParsingError(racesData.races)) {
             html += this.getScheduleParsingErrorBannerHtml();
         }
@@ -492,7 +493,7 @@ class DailyRaces {
 
             html += `<div class="${featureWrapperClass}">`;
             html += '<div class="daily-races-section-header">';
-            html += '<h3 class="daily-races-section-title">Daily Feature Races (30 min)</h3>';
+            html += '<h3 class="daily-races-section-title">Feature Races</h3>';
             if (this.hasScheduleParsingError(featureRaces)) {
                 html += this.getScheduleParsingErrorBannerHtml();
             }

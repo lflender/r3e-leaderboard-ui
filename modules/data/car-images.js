@@ -881,6 +881,39 @@ window.CAR_IMAGES_BY_LINK = {
     "https://prod.r3eassets.com/assets/content/carlivery/manthey-ema-91-13153-image-big.png",
     "https://prod.r3eassets.com/assets/content/carlivery/manthey-junior-team-92-13158-image-big.png"
   ],
+  "https://game.raceroom.com/store/cars/dtm-2026/aston-martin/aston-martin-vantage-amr-gt3-evo-dtm": [
+    "https://prod.r3eassets.com/assets/content/carlivery/comtoyou-racing-007-13605-image-big.png",
+    "https://prod.r3eassets.com/assets/content/carlivery/comtoyou-racing-008-13624-image-big.png"
+  ],
+  "https://game.raceroom.com/store/cars/dtm-2026/bmw/bmw-m4-gt3-evo-dtm": [
+    "https://prod.r3eassets.com/assets/content/carlivery/schubert-motorsport-11-13619-image-big.png",
+    "https://prod.r3eassets.com/assets/content/carlivery/schubert-motorsport-3-13623-image-big.png"
+  ],
+  "https://game.raceroom.com/store/cars/dtm-2026/ford/ford-mustang-gt3-evo-dtm": [
+    "https://prod.r3eassets.com/assets/content/carlivery/hrt-ford-racing-36-13593-image-big.png",
+    "https://prod.r3eassets.com/assets/content/carlivery/hrt-ford-racing-64-13626-image-big.png"
+  ],
+  "https://prod.r3eassets.com/assets/content/carmanufactor/lamborghini-9930-image-small.png": [
+    "https://prod.r3eassets.com/assets/content/carlivery/red-bull-team-abt-130-13596-image-big.png",
+    "https://prod.r3eassets.com/assets/content/carlivery/tgi-team-by-grt-19-13614-image-big.png",
+    "https://prod.r3eassets.com/assets/content/carlivery/red-bull-team-abt-10-13609-image-big.png",
+    "https://prod.r3eassets.com/assets/content/carlivery/tgi-team-by-grt-63-13615-image-big.png"
+  ],
+  "https://game.raceroom.com/store/cars/dtm-2026/mclaren/mclaren-720s-gt3-evo-dtm": [
+    "https://prod.r3eassets.com/assets/content/carlivery/dorr-motorsport-16-13622-image-big.png",
+    "https://prod.r3eassets.com/assets/content/carlivery/dorr-motorsport-25-13627-image-big.png"
+  ],
+  "https://game.raceroom.com/store/cars/dtm-2026/mercedes/mercedes-amg-gt3-2020-dtm": [
+    "https://prod.r3eassets.com/assets/content/carlivery/mercedes-amg-team-landgraf-22-13616-image-big.png",
+    "https://prod.r3eassets.com/assets/content/carlivery/mercedes-amg-team-mann-filter-48-13608-image-big.png",
+    "https://prod.r3eassets.com/assets/content/carlivery/mercedes-amg-team-ravenol-80-13599-image-big.png",
+    "https://prod.r3eassets.com/assets/content/carlivery/mercedes-amg-team-landgraf-84-13612-image-big.png"
+  ],
+  "https://game.raceroom.com/store/cars/dtm-2026/porsche/porsche-911-gt3-r-9922-dtm": [
+    "https://prod.r3eassets.com/assets/content/carlivery/land-motorsport-29-13574-image-big.png",
+    "https://prod.r3eassets.com/assets/content/carlivery/manthey-91-13602-image-big.png",
+    "https://prod.r3eassets.com/assets/content/carlivery/manthey-90-13601-image-big.png"
+  ],
   "https://game.raceroom.com/en/store/cars/ford-mustang-mach-e/ford/ford-mustang-mach-e-1400": [
     "https://prod.r3eassets.com/assets/content/carlivery/ford-1-10265-image-big.png"
   ],

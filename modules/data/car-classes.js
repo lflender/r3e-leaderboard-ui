@@ -48,6 +48,7 @@ window.CAR_CLASSES_DATA = {
     "12196": "DTM 2023",
     "12770": "DTM 2024",
     "13136": "DTM 2025",
+    "13571": "DTM 2026",
 
     // Formula
     "5383": "FR US Cup",

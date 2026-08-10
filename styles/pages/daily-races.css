@@ -71,8 +71,8 @@
 }
 
 .daily-races-feature .daily-races-grid {
-    max-width: 750px;
-    margin: 0 auto;
+    max-width: 100%;
+    margin: 0 auto 2rem;
 }
 
 .daily-races-feature--sprint-layout .daily-races-grid,

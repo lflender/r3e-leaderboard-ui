@@ -90,8 +90,12 @@ function splitCarName(carName) {
     if (!carName) return { brand: '', model: '' };
 
     const name = String(carName).trim();
-    if (CAR_SPECIAL_CASES[name]) {
-        return CAR_SPECIAL_CASES[name];
+    const canonicalName = name.replace(/^BMW\s+/i, '').trim();
+
+    const directSpecialCase = CAR_SPECIAL_CASES[name]
+        || CAR_SPECIAL_CASES[canonicalName];
+    if (directSpecialCase) {
+        return directSpecialCase;
     }
 
     // Normalize known DTM-prefixed Mercedes naming so brand/logo resolve correctly.

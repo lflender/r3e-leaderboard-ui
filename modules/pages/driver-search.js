@@ -193,12 +193,12 @@ class DriverSearch {
     populateTrackFilter() {
         if (!this.elements.trackFilter) return;
 
-        const tracks = Array.isArray(window.TRACKS_DATA) ? window.TRACKS_DATA : [];
-        if (tracks.length === 0) return;
+        const trackOptions = FilterOptionsService.getTrackOptions();
+        if (trackOptions.length === 0) return;
 
         const allOption = '<option value="">All tracks</option>';
-        const optionsHtml = tracks.map(t =>
-            `<option value="${R3EUtils.escapeHtml(String(t.id))}">${R3EUtils.escapeHtml(t.label)}</option>`
+        const optionsHtml = trackOptions.slice(1).map(option =>
+            `<option value="${R3EUtils.escapeHtml(String(option.value))}">${R3EUtils.escapeHtml(option.label)}</option>`
         ).join('');
 
         this.elements.trackFilter.innerHTML = allOption + optionsHtml;

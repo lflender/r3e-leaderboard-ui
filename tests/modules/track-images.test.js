@@ -32,6 +32,9 @@ describe('R3ETrackImages', () => {
         expect(window.R3ETrackImages.resolveTrackLogoByLabel('Brands Hatch - Indy')).toBe(
             'images/tracks/brands-hatch-grand-prix-9472-logo-original.png'
         );
+        expect(window.R3ETrackImages.resolveTrackLogoByLabel('Brands Hatch')).toBe(
+            'images/tracks/brands-hatch-grand-prix-9472-logo-original.png'
+        );
     });
 
     test('builds and resolves logos by track id using TRACKS_DATA labels', () => {

@@ -152,6 +152,28 @@ describe('PieChart.render', () => {
         expect(tooltip.hidden).toBe(true);
     });
 
+    it('renders grouped track details as separate tooltip lines', () => {
+        window.PieChart.render(container, [{
+            label: 'Donington Park',
+            value: 2,
+            details: [
+                { label: 'National', value: 1 },
+                { label: 'Grand Prix', value: 1 }
+            ]
+        }]);
+
+        container.querySelector('.pie-slice').dispatchEvent(new MouseEvent('mouseenter', {
+            clientX: 10,
+            clientY: 10
+        }));
+
+        const detailLines = container.querySelectorAll('.pie-tooltip-details > span');
+        expect(Array.from(detailLines, line => line.textContent)).toEqual([
+            'National: 1',
+            'Grand Prix: 1'
+        ]);
+    });
+
     it('renders a full circle for 100% single item', () => {
         window.PieChart.render(container, [{ label: 'Only', value: 100 }]);
         const circle = container.querySelector('circle.pie-slice');

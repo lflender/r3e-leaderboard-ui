@@ -1,9 +1,14 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { loadBrowserScript } from '../helpers/script-loader.js';
+
+beforeAll(() => {
+    loadBrowserScript('modules/track-helper.js');
+});
 
 function buildDom() {
     return [
         '<div id="track-filter-ui"><button class="custom-select__toggle" aria-expanded="false">All tracks ▾</button><div class="custom-select__menu" hidden></div></div>',
+        '<div id="track-layout-filter-ui" hidden><button class="custom-select__toggle" aria-expanded="false">All layouts ▾</button><div class="custom-select__menu" hidden></div></div>',
         '<div id="track-class-filter-ui"><button class="custom-select__toggle" aria-expanded="false">All classes ▾</button><div class="custom-select__menu" hidden></div></div>',
         '<select id="class-filter"></select>',
         '<div id="combine-checkbox-container" style="display:none"><input id="combine-checkbox" type="checkbox" /></div>',
@@ -125,14 +130,19 @@ describe('leaderboards fetchTopCombinations pipeline', () => {
         loadBrowserScript('modules/pages/leaderboards.js');
     }
 
-    it('uses fetchAllCombinations when a track filter is selected', async () => {
+    it('uses fetchAllCombinations when a track filter is selected and includes all layouts for that base track', async () => {
+        window.TRACKS_DATA = [
+            { id: 10, label: 'Spa - Grand Prix' },
+            { id: 11, label: 'Spa - Indy' },
+            { id: 20, label: 'Monza - GP' }
+        ];
         window.dataService.fetchAllCombinations = vi.fn().mockResolvedValueOnce([
             { track_id: 10, class_name: 'GT3', entry_count: 100 },
+            { track_id: 11, class_name: 'GT3', entry_count: 75 },
             { track_id: 20, class_name: 'GT3', entry_count: 50 }
         ]);
         window.dataService.fetchTopCombinations = vi.fn().mockResolvedValueOnce([]);
 
-        // Capture the CustomSelect onChange for track filter
         let trackFilterOnChange;
         window.CustomSelect = class {
             constructor(id, _options, onChange) {
@@ -143,9 +153,9 @@ describe('leaderboards fetchTopCombinations pipeline', () => {
         loadLeaderboards();
         await new Promise(resolve => setTimeout(resolve, 20));
 
-        // Now trigger a track filter change
         window.dataService.fetchAllCombinations = vi.fn().mockResolvedValueOnce([
             { track_id: 10, class_name: 'GT3', entry_count: 100 },
+            { track_id: 11, class_name: 'GT3', entry_count: 75 },
             { track_id: 20, class_name: 'GT4', entry_count: 50 }
         ]);
         trackFilterOnChange('10', { source: 'user' });
@@ -153,9 +163,73 @@ describe('leaderboards fetchTopCombinations pipeline', () => {
 
         expect(window.dataService.fetchAllCombinations).toHaveBeenCalled();
         const html = document.getElementById('leaderboards-table').innerHTML;
-        // Only track 10 rows should appear
         expect(html).toContain('100');
+        expect(html).toContain('75');
         expect(html).not.toContain('50');
+    });
+
+    it('shows layout options and filters to one selected layout', async () => {
+        window.TRACKS_DATA = [
+            { id: 10, label: 'Donington Park - National' },
+            { id: 11, label: 'Donington Park - Grand Prix' }
+        ];
+        window.dataService.fetchAllCombinations = vi.fn().mockResolvedValue([
+            { track_id: 10, class_name: 'GT3', entry_count: 100 },
+            { track_id: 11, class_name: 'GT3', entry_count: 75 }
+        ]);
+
+        let trackFilterOnChange;
+        let layoutFilterOnChange;
+        let layoutOptions = [];
+        window.CustomSelect = class {
+            constructor(id, options, onChange) {
+                if (id === 'track-filter-ui') trackFilterOnChange = onChange;
+                if (id === 'track-layout-filter-ui') {
+                    layoutOptions = options;
+                    layoutFilterOnChange = onChange;
+                }
+            }
+
+            setOptions(options) {
+                layoutOptions = options;
+            }
+
+            setValue() {}
+        };
+
+        loadLeaderboards();
+        await new Promise(resolve => setTimeout(resolve, 20));
+
+        trackFilterOnChange('10', { source: 'user' });
+        await new Promise(resolve => setTimeout(resolve, 20));
+
+        const layoutFilter = document.getElementById('track-layout-filter-ui');
+        expect(layoutFilter.hidden).toBe(false);
+        expect(layoutOptions.map(option => option.label)).toEqual(['All layouts', 'National', 'Grand Prix']);
+
+        layoutFilterOnChange('11', { source: 'user' });
+        await new Promise(resolve => setTimeout(resolve, 20));
+
+        const html = document.getElementById('leaderboards-table').innerHTML;
+        expect(html).toContain('75');
+        expect(html).not.toContain('100');
+    });
+
+    it('keeps the layout selector hidden for a single-layout track', async () => {
+        let trackFilterOnChange;
+        window.CustomSelect = class {
+            constructor(id, _options, onChange) {
+                if (id === 'track-filter-ui') trackFilterOnChange = onChange;
+            }
+        };
+
+        loadLeaderboards();
+        await new Promise(resolve => setTimeout(resolve, 20));
+
+        trackFilterOnChange('10', { source: 'user' });
+        await new Promise(resolve => setTimeout(resolve, 20));
+
+        expect(document.getElementById('track-layout-filter-ui').hidden).toBe(true);
     });
 
     it('filters by class name when a regular class is selected', async () => {

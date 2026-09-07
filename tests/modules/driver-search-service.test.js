@@ -87,6 +87,29 @@ describe('DataService driver-search module', () => {
         expect(filtered).toEqual([{ track_id: 10, Class: 5, difficulty: 'Get Real' }]);
     });
 
+    it('matches all layouts for a selected base track when the filter value points at one layout', () => {
+        window.TRACKS_DATA = [
+            { id: 10, label: 'Spa - Grand Prix' },
+            { id: 11, label: 'Spa - Indy' },
+            { id: 20, label: 'Monza - GP' }
+        ];
+
+        const filtered = service._filterDriverEntries([
+            { track_id: 10, Class: 5, difficulty: 'Get Real' },
+            { track_id: 11, Class: 5, difficulty: 'Get Real' },
+            { track_id: 20, Class: 5, difficulty: 'Get Real' }
+        ], {
+            trackId: 10,
+            classId: 5,
+            difficulty: 'Get Real'
+        });
+
+        expect(filtered).toEqual([
+            { track_id: 10, Class: 5, difficulty: 'Get Real' },
+            { track_id: 11, Class: 5, difficulty: 'Get Real' }
+        ]);
+    });
+
     it('filters entries by superclass', () => {
         window.CARS_DATA = [
             { superclass: 'GT3', class: 'GT3' },

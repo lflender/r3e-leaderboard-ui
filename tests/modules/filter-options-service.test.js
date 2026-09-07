@@ -1,5 +1,9 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { loadBrowserScript } from '../helpers/script-loader.js';
+
+beforeAll(() => {
+    loadBrowserScript('modules/track-helper.js');
+});
 
 describe('FilterOptionsService', () => {
     beforeEach(() => {
@@ -110,6 +114,35 @@ describe('FilterOptionsService', () => {
             expect(result[0]).toEqual({ value: '', label: 'All tracks' });
             expect(result[1]).toEqual({ value: '10', label: 'Spa', logoUrl: 'spa.png' });
             expect(result[2]).toEqual({ value: '20', label: 'Monza', logoUrl: '' });
+        });
+
+        test('deduplicates layouts into one option per base track and keeps the first layout ID', () => {
+            window.TRACKS_DATA = [
+                { id: 10, label: 'Spa - Grand Prix' },
+                { id: 11, label: 'Spa - Indy' },
+                { id: 20, label: 'Monza - GP' },
+                { id: 21, label: 'Monza - Junior' }
+            ];
+
+            const result = window.FilterOptionsService.getTrackOptions();
+            expect(result).toEqual([
+                { value: '', label: 'All tracks' },
+                { value: '10', label: 'Spa', logoUrl: '' },
+                { value: '20', label: 'Monza', logoUrl: '' }
+            ]);
+        });
+
+        test('groups Adria International Raceway 2003 and 2021 into one option', () => {
+            window.TRACKS_DATA = [
+                { id: 13352, label: 'Adria International Raceway 2003 - Full Circuit' },
+                { id: 13425, label: 'Adria International Raceway 2021 - Full Circuit' }
+            ];
+
+            const result = window.FilterOptionsService.getTrackOptions();
+            expect(result).toEqual([
+                { value: '', label: 'All tracks' },
+                { value: '13352', label: 'Adria International Raceway', logoUrl: '' }
+            ]);
         });
     });
 

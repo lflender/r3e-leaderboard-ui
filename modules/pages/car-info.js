@@ -52,7 +52,7 @@
   const CAR_VIEW_MODE_KEY = 'carInfoViewMode';
   let hasTrackedCarInfoDisplay = false;
   let searchDebounceTimer = null;
-  const minSearchLength = 3;
+  const minSearchLength = 2;
   
   // Build class options from data
   const superclassOptions = FilterOptionsService.getSuperclassOptions();

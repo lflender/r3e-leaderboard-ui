@@ -650,7 +650,15 @@
       paginationHTML += '</div></div>';
     }
 
-    tableContainer.innerHTML = paginationHTML + html + paginationHTML;
+    const tableScrollWrapper = document.createElement('div');
+    tableScrollWrapper.className = 'table-scroll-wrapper leaderboards-table-scroll';
+    tableScrollWrapper.innerHTML = html;
+
+    tableContainer.innerHTML = paginationHTML;
+    tableContainer.appendChild(tableScrollWrapper);
+    if (paginationHTML) {
+      tableContainer.insertAdjacentHTML('beforeend', paginationHTML);
+    }
 
     // Lazily load pole times for visible rows (non-blocking)
     if (showPoleColumn) {

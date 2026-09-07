@@ -126,6 +126,7 @@
 @media (max-width: 768px) {
     #track-search-container .custom-select:nth-of-type(1) { z-index: var(--z-dropdown-stacked-2); }
     #track-search-container .custom-select:nth-of-type(2) { z-index: var(--z-dropdown-stacked-3); }
+    #track-search-container .custom-select:nth-of-type(3) { z-index: var(--z-dropdown-stacked-4); }
 
     #leaderboards-table .leaderboards-table-scroll {
         overflow-x: auto !important;

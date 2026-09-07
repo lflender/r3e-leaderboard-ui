@@ -40,7 +40,7 @@ function getTrackBaseLabel(fullTrack) {
     return normalizeTrackBaseLabel(trackName || safeTrack);
 }
 
-function getTrackIdsForFilterValue(filterValue) {
+function getTrackIdsForFilterValue(filterValue, layoutId = '') {
     const rawValue = String(filterValue ?? '').trim();
     if (!rawValue) {
         return [];
@@ -61,7 +61,36 @@ function getTrackIdsForFilterValue(filterValue) {
         .filter(track => getTrackBaseLabel(track?.label || track?.name || '') === selectedBaseLabel)
         .map(track => String(track.id));
 
+    if (layoutId && ids.includes(String(layoutId))) {
+        return [String(layoutId)];
+    }
+
     return ids.length > 0 ? ids : [String(selectedTrack.id)];
+}
+
+function getTrackLayoutOptionsForFilterValue(filterValue) {
+    const rawValue = String(filterValue ?? '').trim();
+    if (!rawValue) {
+        return [];
+    }
+
+    const tracks = Array.isArray(window.TRACKS_DATA) ? window.TRACKS_DATA : [];
+    const selectedTrack = tracks.find(track => String(track?.id) === rawValue);
+    if (!selectedTrack) {
+        return [];
+    }
+
+    const selectedBaseLabel = getTrackBaseLabel(selectedTrack.label || selectedTrack.name || '');
+    return tracks
+        .filter(track => getTrackBaseLabel(track?.label || track?.name || '') === selectedBaseLabel)
+        .map(track => {
+            const fullLabel = String(track?.label || track?.name || track?.id || '');
+            const { layoutName } = splitTrackAndLayout(fullLabel);
+            return {
+                value: String(track.id),
+                label: layoutName || fullLabel
+            };
+        });
 }
 
 function getTrackLabelMap() {
@@ -100,6 +129,7 @@ window.R3ETrackUtils = {
     splitTrackAndLayout,
     getTrackBaseLabel,
     getTrackIdsForFilterValue,
+    getTrackLayoutOptionsForFilterValue,
     getTrackLabelMap,
     resolveTrackLabel,
     resolveTrackLabelForItem

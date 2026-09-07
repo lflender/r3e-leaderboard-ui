@@ -56,6 +56,10 @@
     z-index: var(--z-dropdown);
 }
 
+.custom-select[hidden] {
+    display: none;
+}
+
 .custom-select.is-open {
     z-index: var(--z-tooltip);
 }

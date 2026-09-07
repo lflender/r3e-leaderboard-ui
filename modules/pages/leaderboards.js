@@ -6,6 +6,7 @@
   const classToggle = document.querySelector('#track-class-filter-ui .custom-select__toggle');
   const classMenu = document.querySelector('#track-class-filter-ui .custom-select__menu');
   const classSelect = document.getElementById('class-filter');
+  const layoutFilterRoot = document.getElementById('track-layout-filter-ui');
   const tableContainer = document.getElementById('leaderboards-table');
 
   // Pagination state (separate from leaderboards to avoid conflicts)
@@ -13,6 +14,7 @@
   const trackItemsPerPage = 100;
   let trackAllResults = [];
   let activeTrackId = null; // null => All tracks
+  let activeLayoutId = null; // null => All layouts for the selected track
   let activeClassId = null; // null => All classes
   let activeClassLabel = null; // human-readable label for selected class
   let combineMode = false; // When true, combine all classes in superclass by track
@@ -28,6 +30,7 @@
       filter_name: filterName,
       filter_value: filterValue || '',
       track_filter: activeTrackId ? String(activeTrackId) : '',
+      layout_filter: activeLayoutId ? String(activeLayoutId) : '',
       class_filter: activeClassId || '',
       combine_mode: !!combineMode,
       is_superclass_filter: !!(activeClassId && activeClassId.startsWith('superclass:'))
@@ -40,6 +43,7 @@
     R3EAnalytics.track('leaderboards page shown', {
       displayed_rows: Number.isFinite(displayedRows) ? displayedRows : 0,
       track_filter: activeTrackId ? String(activeTrackId) : '',
+      layout_filter: activeLayoutId ? String(activeLayoutId) : '',
       class_filter: activeClassId || '',
       combine_mode: !!combineMode,
       is_superclass_filter: !!(activeClassId && activeClassId.startsWith('superclass:'))
@@ -54,9 +58,44 @@
     classMenu.innerHTML = opts.map(opt => `<div class="custom-select__option" data-value="${R3EUtils.escapeHtml(opt.value)}">${R3EUtils.escapeHtml(opt.label)}</div>`).join('');
   }
 
+  function getTrackLayoutOptions(trackId) {
+    if (window.R3ETrackUtils && typeof window.R3ETrackUtils.getTrackLayoutOptionsForFilterValue === 'function') {
+      return window.R3ETrackUtils.getTrackLayoutOptionsForFilterValue(trackId);
+    }
+    return [];
+  }
+
+  let layoutSelect;
+
+  function updateLayoutFilter(trackId) {
+    if (!layoutFilterRoot || !layoutSelect) return;
+
+    const layouts = getTrackLayoutOptions(trackId);
+    const options = [{ value: '', label: 'All layouts' }].concat(layouts);
+    if (typeof layoutSelect.setOptions === 'function') {
+      layoutSelect.setOptions(options);
+    }
+    if (typeof layoutSelect.setValue === 'function') {
+      layoutSelect.setValue('', { notify: false, source: 'programmatic' });
+    }
+    activeLayoutId = null;
+    layoutFilterRoot.hidden = layouts.length < 2;
+  }
+
+  // Layout filter — only visible when the selected base track has multiple layouts.
+  layoutSelect = new CustomSelect('track-layout-filter-ui', [{ value: '', label: 'All layouts' }], (value, opts) => {
+    activeLayoutId = value || null;
+    trackCurrentPage = 1;
+    if (opts?.source === 'user') {
+      trackTrackInfoFilter('layout', value || '');
+    }
+    fetchAndRender();
+  }, { searchable: false });
+
   // Track filter — CustomSelect handles open/close/logo rendering
   new CustomSelect('track-filter-ui', FilterOptionsService.getTrackOptions(), (value, opts) => {
     activeTrackId = value ? Number(value) : null;
+    updateLayoutFilter(activeTrackId);
     trackCurrentPage = 1;
     if (opts?.source === 'user') {
       trackTrackInfoFilter('track', value || '');
@@ -138,13 +177,13 @@
     return resolveTrackLabel(tid, fallback || item?.track || item?.Track || item?.track_name || item?.TrackName || '');
   }
 
-  function getTrackIdsForSelection(trackId) {
+  function getTrackIdsForSelection(trackId, layoutId = '') {
     if (trackId === undefined || trackId === null || String(trackId).trim() === '') {
       return [];
     }
 
     if (window.R3ETrackUtils && typeof window.R3ETrackUtils.getTrackIdsForFilterValue === 'function') {
-      return window.R3ETrackUtils.getTrackIdsForFilterValue(trackId);
+      return window.R3ETrackUtils.getTrackIdsForFilterValue(trackId, layoutId);
     }
 
     const rawValue = String(trackId).trim();
@@ -167,6 +206,10 @@
         return labelBase === baseName;
       })
       .map(track => String(track.id));
+
+    if (layoutId && ids.includes(String(layoutId))) {
+      return [String(layoutId)];
+    }
 
     return ids.length > 0 ? ids : [rawValue];
   }
@@ -442,7 +485,7 @@
       // Filter by track if selected. We keep the dropdown value aligned to a single base track,
       // but include every layout variant for that track when matching results.
       if (activeTrackId) {
-        const selectedTrackIds = getTrackIdsForSelection(activeTrackId);
+        const selectedTrackIds = getTrackIdsForSelection(activeTrackId, activeLayoutId);
         filtered = filtered.filter(item => {
           const tid = item.track_id || item.TrackID || item.trackId;
           return selectedTrackIds.includes(String(tid));

@@ -22,6 +22,21 @@ describe('R3ETrackUtils', () => {
         expect(window.R3ETrackUtils.resolveTrackLabel(999, 'Fallback Track')).toBe('Fallback Track');
     });
 
+    test('returns layouts and filters IDs for a selected layout', () => {
+        window.TRACKS_DATA = [
+            { id: 10, label: 'Donington Park - National' },
+            { id: 11, label: 'Donington Park - Grand Prix' },
+            { id: 20, label: 'Monza - Grand Prix' }
+        ];
+
+        expect(window.R3ETrackUtils.getTrackLayoutOptionsForFilterValue('10')).toEqual([
+            { value: '10', label: 'National' },
+            { value: '11', label: 'Grand Prix' }
+        ]);
+        expect(window.R3ETrackUtils.getTrackIdsForFilterValue('10')).toEqual(['10', '11']);
+        expect(window.R3ETrackUtils.getTrackIdsForFilterValue('10', '11')).toEqual(['11']);
+    });
+
     test('groups Adria International Raceway 2003 and 2021 by the shared base label', () => {
         window.TRACKS_DATA = [
             { id: 13352, label: 'Adria International Raceway 2003 - Full Circuit' },

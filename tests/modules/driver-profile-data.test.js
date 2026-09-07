@@ -2,12 +2,23 @@ import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { loadBrowserScript } from '../helpers/script-loader.js';
 
 beforeAll(() => {
+    window.TRACKS_DATA = [
+        { id: 301, label: 'Donington Park - National' },
+        { id: 302, label: 'Donington Park - Grand Prix' }
+    ];
     window.R3EUtils = {
         resolveTrackLabel: vi.fn((id, fallback) => {
-            const map = { '100': 'Spa', '200': 'Monza', '300': 'Nurburgring' };
+            const map = {
+                '100': 'Spa',
+                '200': 'Monza',
+                '300': 'Nurburgring',
+                '301': 'Donington Park - National',
+                '302': 'Donington Park - Grand Prix'
+            };
             return map[String(id)] || fallback || String(id);
         })
     };
+    loadBrowserScript('modules/track-helper.js');
     loadBrowserScript('modules/driver-profile-data.js');
 });
 
@@ -112,6 +123,22 @@ describe('DriverProfileData.getTrackDistribution', () => {
         // Track name fallback when track_id is empty
         const result = window.DriverProfileData.getTrackDistribution(entries);
         expect(result).toHaveLength(1);
+    });
+
+    it('groups layouts under one track with layout details', () => {
+        const result = window.DriverProfileData.getTrackDistribution([
+            { track_id: 301 },
+            { track_id: 302 }
+        ]);
+
+        expect(result).toEqual([{
+            label: 'Donington Park',
+            value: 2,
+            details: [
+                { label: 'National', value: 1 },
+                { label: 'Grand Prix', value: 1 }
+            ]
+        }]);
     });
 });
 

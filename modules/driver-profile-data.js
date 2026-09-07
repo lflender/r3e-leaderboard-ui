@@ -60,6 +60,18 @@
         ]);
     }
 
+    function getTrackBaseLabel(trackLabel) {
+        const safeLabel = String(trackLabel || '').trim();
+        if (!safeLabel) return '';
+
+        return window.R3ETrackUtils?.getTrackBaseLabel?.(safeLabel) || safeLabel;
+    }
+
+    function getTrackLayoutLabel(trackLabel) {
+        const parts = window.R3ETrackUtils?.splitTrackAndLayout?.(trackLabel);
+        return parts?.layoutName || trackLabel;
+    }
+
     /**
      * Build track distribution from driver entries, resolving track IDs to labels
      * @param {Array} entries - Driver leaderboard entries
@@ -81,11 +93,25 @@
 
             if (!label) return;
 
-            counts.set(label, (counts.get(label) || 0) + 1);
+            const baseLabel = getTrackBaseLabel(label);
+            if (!counts.has(baseLabel)) {
+                counts.set(baseLabel, { value: 0, details: new Map() });
+            }
+
+            const group = counts.get(baseLabel);
+            group.value++;
+            const layoutLabel = getTrackLayoutLabel(label);
+            group.details.set(layoutLabel, (group.details.get(layoutLabel) || 0) + 1);
         });
 
         return Array.from(counts.entries())
-            .map(([label, value]) => ({ label, value }))
+            .map(([label, group]) => ({
+                label,
+                value: group.value,
+                ...(group.details.size > 1
+                    ? { details: Array.from(group.details.entries()).map(([detailLabel, value]) => ({ label: detailLabel, value })) }
+                    : {})
+            }))
             .sort((a, b) => b.value - a.value);
     }
 

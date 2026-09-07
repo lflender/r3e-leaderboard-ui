@@ -154,6 +154,8 @@ const DriverProfileInteractions = (() => {
         const classToTracks = new Map();
         const carToTracks = new Map();
         const trackToCars = new Map();
+        const getTrackBaseLabel = (trackLabel) =>
+            window.R3ETrackUtils?.getTrackBaseLabel?.(trackLabel) || trackLabel;
         if (entries && entries.length > 0) {
             entries.forEach(entry => {
                 const cls = entry.car_class || entry.CarClass || entry.Class || '';
@@ -161,17 +163,18 @@ const DriverProfileInteractions = (() => {
                 const track = (window.R3EUtils && typeof window.R3EUtils.resolveTrackLabelForItem === 'function')
                     ? window.R3EUtils.resolveTrackLabelForItem(entry)
                     : (entry.Track || entry.track || entry.TrackName || entry.track_name || '');
-                if (cls && track) {
-                    if (!trackToClasses.has(track)) trackToClasses.set(track, new Set());
-                    trackToClasses.get(track).add(cls);
+                const trackBase = getTrackBaseLabel(track);
+                if (cls && trackBase) {
+                    if (!trackToClasses.has(trackBase)) trackToClasses.set(trackBase, new Set());
+                    trackToClasses.get(trackBase).add(cls);
                     if (!classToTracks.has(cls)) classToTracks.set(cls, new Set());
-                    classToTracks.get(cls).add(track);
+                    classToTracks.get(cls).add(trackBase);
                 }
-                if (car && track) {
+                if (car && trackBase) {
                     if (!carToTracks.has(car)) carToTracks.set(car, new Set());
-                    carToTracks.get(car).add(track);
-                    if (!trackToCars.has(track)) trackToCars.set(track, new Set());
-                    trackToCars.get(track).add(car);
+                    carToTracks.get(car).add(trackBase);
+                    if (!trackToCars.has(trackBase)) trackToCars.set(trackBase, new Set());
+                    trackToCars.get(trackBase).add(car);
                 }
             });
         }
@@ -468,9 +471,10 @@ const DriverProfileInteractions = (() => {
 
             const cls = entry.car_class || entry.CarClass || entry.Class || '';
             const car = entry.Car || entry.car || entry.CarName || entry.car_name || '';
-            const track = (window.R3EUtils && typeof window.R3EUtils.resolveTrackLabelForItem === 'function')
+            const trackLabel = (window.R3EUtils && typeof window.R3EUtils.resolveTrackLabelForItem === 'function')
                 ? window.R3EUtils.resolveTrackLabelForItem(entry)
                 : (entry.Track || entry.track || entry.TrackName || entry.track_name || '');
+            const track = window.R3ETrackUtils?.getTrackBaseLabel?.(trackLabel) || trackLabel;
 
             if (cls) {
                 if (!classDates.has(cls)) classDates.set(cls, new Set());

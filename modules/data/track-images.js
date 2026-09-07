@@ -84,6 +84,7 @@
         'avus': 'avus',
         'bathurst circuit': 'bathurst-circuit',
         'bilster berg': 'bilster-berg',
+        'brands hatch': 'brands-hatch-grand-prix',
         'brands hatch - grand prix': 'brands-hatch-grand-prix',
         'brands hatch - indy': 'brands-hatch-indy',
         'brno': 'brno',

@@ -523,6 +523,12 @@
     display: none;
 }
 
+.pie-tooltip-details {
+    display: flex;
+    flex-direction: column;
+    white-space: normal;
+}
+
 .pie-legend {
     list-style: none;
     padding: 0;

@@ -42,6 +42,7 @@
             return {
                 label: item.label,
                 value: item.value,
+                details: Array.isArray(item.details) ? item.details : [],
                 percentage: pct,
                 color: COLORS[i % COLORS.length],
                 midAngle
@@ -270,7 +271,12 @@
             const logoHtml = logoUrl
                 ? `<img class="pie-cross-label__logo" src="${escapeAttr(logoUrl)}" alt="" aria-hidden="true">`
                 : '';
-            tooltip.innerHTML = `${logoHtml}${escapeHtml(slice.label)}: ${slice.value} (${slice.percentage.toFixed(1)}%)`;
+            const detailsHtml = slice.details.length > 0
+                ? '<span class="pie-tooltip-details">' + slice.details.map(detail =>
+                    `<span>${escapeHtml(detail.label)}: ${detail.value}</span>`
+                ).join('') + '</span>'
+                : '';
+            tooltip.innerHTML = `${logoHtml}<span>${escapeHtml(slice.label)}: ${slice.value} (${slice.percentage.toFixed(1)}%)</span>${detailsHtml}`;
             Tooltip.show(tooltip);
             Tooltip.positionNearCursor(event, svgContainer, tooltip);
             // Clamp tooltip to viewport (use clientWidth for reliable mobile measurement)

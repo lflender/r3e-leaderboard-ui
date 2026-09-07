@@ -125,14 +125,19 @@ describe('leaderboards fetchTopCombinations pipeline', () => {
         loadBrowserScript('modules/pages/leaderboards.js');
     }
 
-    it('uses fetchAllCombinations when a track filter is selected', async () => {
+    it('uses fetchAllCombinations when a track filter is selected and includes all layouts for that base track', async () => {
+        window.TRACKS_DATA = [
+            { id: 10, label: 'Spa - Grand Prix' },
+            { id: 11, label: 'Spa - Indy' },
+            { id: 20, label: 'Monza - GP' }
+        ];
         window.dataService.fetchAllCombinations = vi.fn().mockResolvedValueOnce([
             { track_id: 10, class_name: 'GT3', entry_count: 100 },
+            { track_id: 11, class_name: 'GT3', entry_count: 75 },
             { track_id: 20, class_name: 'GT3', entry_count: 50 }
         ]);
         window.dataService.fetchTopCombinations = vi.fn().mockResolvedValueOnce([]);
 
-        // Capture the CustomSelect onChange for track filter
         let trackFilterOnChange;
         window.CustomSelect = class {
             constructor(id, _options, onChange) {
@@ -143,9 +148,9 @@ describe('leaderboards fetchTopCombinations pipeline', () => {
         loadLeaderboards();
         await new Promise(resolve => setTimeout(resolve, 20));
 
-        // Now trigger a track filter change
         window.dataService.fetchAllCombinations = vi.fn().mockResolvedValueOnce([
             { track_id: 10, class_name: 'GT3', entry_count: 100 },
+            { track_id: 11, class_name: 'GT3', entry_count: 75 },
             { track_id: 20, class_name: 'GT4', entry_count: 50 }
         ]);
         trackFilterOnChange('10', { source: 'user' });
@@ -153,8 +158,8 @@ describe('leaderboards fetchTopCombinations pipeline', () => {
 
         expect(window.dataService.fetchAllCombinations).toHaveBeenCalled();
         const html = document.getElementById('leaderboards-table').innerHTML;
-        // Only track 10 rows should appear
         expect(html).toContain('100');
+        expect(html).toContain('75');
         expect(html).not.toContain('50');
     });
 

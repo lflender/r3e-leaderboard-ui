@@ -138,6 +138,39 @@
     return resolveTrackLabel(tid, fallback || item?.track || item?.Track || item?.track_name || item?.TrackName || '');
   }
 
+  function getTrackIdsForSelection(trackId) {
+    if (trackId === undefined || trackId === null || String(trackId).trim() === '') {
+      return [];
+    }
+
+    if (window.R3ETrackUtils && typeof window.R3ETrackUtils.getTrackIdsForFilterValue === 'function') {
+      return window.R3ETrackUtils.getTrackIdsForFilterValue(trackId);
+    }
+
+    const rawValue = String(trackId).trim();
+    const tracks = Array.isArray(window.TRACKS_DATA) ? window.TRACKS_DATA : [];
+    const selectedTrack = tracks.find(track => String(track?.id) === rawValue);
+    if (!selectedTrack) {
+      return [rawValue];
+    }
+
+    const selectedBase = String(selectedTrack.label || selectedTrack.name || '').trim();
+    const baseName = selectedBase.match(/^(.+)(?:\s+[-–—]\s+)(.+)$/)
+      ? selectedBase.match(/^(.+)(?:\s+[-–—]\s+)(.+)$/)[1].trim()
+      : selectedBase;
+
+    const ids = tracks
+      .filter(track => {
+        const label = String(track?.label || track?.name || '').trim();
+        const match = label.match(/^(.+)(?:\s+[-–—]\s+)(.+)$/);
+        const labelBase = match ? match[1].trim() : label;
+        return labelBase === baseName;
+      })
+      .map(track => String(track.id));
+
+    return ids.length > 0 ? ids : [rawValue];
+  }
+
   async function aggregatePerTrackForClass(selectedClassId, classNameFallback){
     const idx = await loadDriverIndexLocal();
     if (!idx) return [];
@@ -406,11 +439,13 @@
       // Apply filters
       let filtered = combinations;
 
-      // Filter by track if selected
+      // Filter by track if selected. We keep the dropdown value aligned to a single base track,
+      // but include every layout variant for that track when matching results.
       if (activeTrackId) {
+        const selectedTrackIds = getTrackIdsForSelection(activeTrackId);
         filtered = filtered.filter(item => {
           const tid = item.track_id || item.TrackID || item.trackId;
-          return Number(tid) === Number(activeTrackId);
+          return selectedTrackIds.includes(String(tid));
         });
       }
 

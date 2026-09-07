@@ -44,12 +44,32 @@
      */
     function getTrackOptions() {
         const tracks = Array.isArray(window.TRACKS_DATA) ? window.TRACKS_DATA : [];
+        const seen = new Set();
+        const uniqueTracks = [];
+
+        tracks.forEach(track => {
+            const rawLabel = track?.label || track?.name || '';
+            const baseLabel = window.R3ETrackUtils?.getTrackBaseLabel?.(rawLabel) || '';
+
+            if (!baseLabel || seen.has(baseLabel.toLowerCase())) {
+                return;
+            }
+
+            seen.add(baseLabel.toLowerCase());
+            uniqueTracks.push({
+                id: track?.id,
+                label: baseLabel,
+                fullLabel: rawLabel
+            });
+        });
+
         return [{ value: '', label: 'All tracks' }].concat(
-            tracks.map(t => {
+            uniqueTracks.map(track => {
+                const resultLabel = String(track.label || '');
                 const logoUrl = (window.R3ETrackImages && typeof window.R3ETrackImages.resolveTrackLogoByLabel === 'function')
-                    ? window.R3ETrackImages.resolveTrackLogoByLabel(t.label) || ''
+                    ? window.R3ETrackImages.resolveTrackLogoByLabel(track.fullLabel || resultLabel) || ''
                     : '';
-                return { value: String(t.id), label: t.label, logoUrl };
+                return { value: String(track.id), label: resultLabel, logoUrl };
             })
         );
     }

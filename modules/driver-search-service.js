@@ -181,14 +181,36 @@
             let filteredEntries = Array.isArray(entries) ? entries : [];
 
             if (filters.trackId !== undefined && filters.trackId !== null && String(filters.trackId).trim() !== '') {
-                const selectedTrackId = Number(filters.trackId);
+                const selectedTrackIds = (window.R3ETrackUtils && typeof window.R3ETrackUtils.getTrackIdsForFilterValue === 'function')
+                    ? window.R3ETrackUtils.getTrackIdsForFilterValue(filters.trackId)
+                    : (() => {
+                        const rawValue = String(filters.trackId).trim();
+                        const tracks = Array.isArray(window.TRACKS_DATA) ? window.TRACKS_DATA : [];
+                        const selectedTrack = tracks.find(track => String(track?.id) === rawValue);
+                        if (!selectedTrack) return [rawValue];
+
+                        const selectedBase = String(selectedTrack.label || selectedTrack.name || '').trim();
+                        const baseName = selectedBase.match(/^(.+)(?:\s+[-–—]\s+)(.+)$/)
+                            ? selectedBase.match(/^(.+)(?:\s+[-–—]\s+)(.+)$/)[1].trim()
+                            : selectedBase;
+
+                        return tracks
+                            .filter(track => {
+                                const label = String(track?.label || track?.name || '').trim();
+                                const match = label.match(/^(.+)(?:\s+[-–—]\s+)(.+)$/);
+                                const labelBase = match ? match[1].trim() : label;
+                                return labelBase === baseName;
+                            })
+                            .map(track => String(track.id));
+                    })();
+
                 filteredEntries = filteredEntries.filter(entry => {
                     const entryTrackId = entry.track_id || entry.TrackID || entry.trackId ||
                         (entry.track && (entry.track.id || entry.track.Id || entry.track.track_id));
                     if (entryTrackId === undefined || entryTrackId === null) {
                         return false;
                     }
-                    return Number(entryTrackId) === selectedTrackId;
+                    return selectedTrackIds.includes(String(entryTrackId));
                 });
             }
 

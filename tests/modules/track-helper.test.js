@@ -21,4 +21,18 @@ describe('R3ETrackUtils', () => {
         expect(window.R3ETrackUtils.resolveTrackLabelForItem({ track_id: 10 })).toBe('Spa - Grand Prix');
         expect(window.R3ETrackUtils.resolveTrackLabel(999, 'Fallback Track')).toBe('Fallback Track');
     });
+
+    test('groups Adria International Raceway 2003 and 2021 by the shared base label', () => {
+        window.TRACKS_DATA = [
+            { id: 13352, label: 'Adria International Raceway 2003 - Full Circuit' },
+            { id: 13425, label: 'Adria International Raceway 2021 - Full Circuit' }
+        ];
+
+        expect(window.R3ETrackUtils.getTrackBaseLabel(window.TRACKS_DATA[0].label))
+            .toBe('Adria International Raceway');
+        expect(window.R3ETrackUtils.getTrackBaseLabel(window.TRACKS_DATA[1].label))
+            .toBe('Adria International Raceway');
+        expect(window.R3ETrackUtils.getTrackIdsForFilterValue('13352'))
+            .toEqual(['13352', '13425']);
+    });
 });

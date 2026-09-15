@@ -82,6 +82,14 @@ beforeEach(() => {
 });
 
 describe('leaderboards integration', () => {
+    it('keeps the layout filter hidden until a track has multiple layouts', async () => {
+        loadBrowserScript('modules/compressed-json-helper.js');
+        loadBrowserScript('modules/pages/leaderboards.js');
+        await new Promise(resolve => setTimeout(resolve, 20));
+
+        expect(document.getElementById('track-layout-filter-ui').hidden).toBe(true);
+    });
+
     it('renders rows from top combinations payload', async () => {
         window.dataService.fetchTopCombinations = vi.fn().mockResolvedValueOnce([
             { track_id: 10, class_name: 'GT3', entry_count: 321 }

@@ -102,6 +102,8 @@
     }
     fetchAndRender();
   });
+
+  updateLayoutFilter(activeTrackId);
   
   // Initialize class menu with superclass categories
   const superclassOptions = FilterOptionsService.getSuperclassOptions();

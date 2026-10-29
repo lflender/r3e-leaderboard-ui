@@ -14,6 +14,8 @@ function buildDom() {
 }
 
 beforeAll(() => {
+    loadBrowserScript('modules/time-helper.js');
+    loadBrowserScript('modules/sort-service.js');
     document.body.innerHTML = buildDom();
     window.TRACKS_DATA = [{ id: 1, label: 'Spa' }];
     window.CARS_DATA = [
@@ -41,12 +43,14 @@ beforeAll(() => {
         })
     };
     window.R3EUtils = {
+        ...window.R3ETimeUtils,
         escapeHtml: s => String(s),
         updateUrlParam: vi.fn(),
         getUrlParam: vi.fn().mockReturnValue('')
     };
     window.dataService = {
-        searchDriver: vi.fn().mockResolvedValue([])
+        searchDriver: vi.fn().mockResolvedValue([]),
+        enrichLapTimeGaps: vi.fn().mockResolvedValue([])
     };
     window.FilterOptionsService = {
         getClassOptionsFromCarsData: vi.fn().mockReturnValue([]),
@@ -66,6 +70,12 @@ beforeEach(() => {
     window.R3EUtils.updateUrlParam.mockClear();
     window.dataService.searchDriver.mockReset();
     window.dataService.searchDriver.mockResolvedValue([]);
+    window.dataService.enrichLapTimeGaps.mockReset();
+    window.dataService.enrichLapTimeGaps.mockResolvedValue([]);
+    delete window.dataService.fetchPoleTime;
+    delete window.R3EUtils.parseLapTimeToMillis;
+    delete window.tableRenderer.renderLapTimeCell;
+    delete window.tableRenderer.renderGapPercentCell;
     window.tableRenderer.filterAndSortKeys.mockClear();
     window.tableRenderer.renderDriverGroupedTable.mockClear();
     delete window.ColumnConfig;
@@ -167,6 +177,116 @@ describe('driver-search integration', () => {
             ['position', 'lap_time', 'track_id', 'car_class', 'track'],
             { addSynthetic: true }
         );
+    });
+
+    it('keeps the difficulty column in driver results alongside the new-format fields', async () => {
+        window.ColumnConfig = {
+            getOrderedColumns: vi.fn(keys => keys),
+            isColumnType: vi.fn((key, type) => type === 'DIFFICULTY' && ['Difficulty', 'difficulty', 'driving_model', 'DrivingModel'].includes(key))
+        };
+
+        const ds = new window.driverSearch.constructor();
+        ds.currentSearchId = 4;
+        ds.allResults = [{
+            driver: 'Alice',
+            entries: [{
+                position: 1,
+                laptime: '1m 17.522s, +08.643s',
+                car: 'Formula RaceRoom Junior',
+                car_class: 'FRJ Cup',
+                difficulty: 'Amateur',
+                track_id: '7976'
+            }]
+        }];
+
+        await ds.displayResults(ds.allResults);
+
+        expect(window.tableRenderer.renderDriverGroupedTable).toHaveBeenCalledWith(
+            ds.allResults,
+            ['position', 'laptime', 'car', 'car_class', 'difficulty', 'track_id', 'track'],
+            'gap'
+        );
+    });
+
+    it('delegates lap-time enrichment to DataService and updates rendered cells', async () => {
+        window.tableRenderer.renderLapTimeCell = vi.fn(value => `<td class="lap-time-cell">${value}</td>`);
+        window.tableRenderer.renderGapPercentCell = vi.fn(entry => `<td class="gap-percent-cell">${entry.laptime}</td>`);
+        window.dataService.enrichLapTimeGaps.mockImplementation(async entries => {
+            const entry = entries[0];
+            const originalLapTime = entry.laptime;
+            entry.laptime = `${originalLapTime}, +1.250s`;
+            return [{ entry, originalLapTime }];
+        });
+
+        const ds = new window.driverSearch.constructor();
+        ds.currentSearchId = 4;
+        const results = [{
+            driver: 'Alice',
+            entries: [{
+                position: 2,
+                laptime: '1:21.250',
+                track_id: '10',
+                class_id: '5'
+            }, {
+                position: 1,
+                laptime: '1:20.000',
+                track_id: '10',
+                class_id: '5'
+            }]
+        }];
+        ds.allResults = results;
+
+        window.tableRenderer.renderDriverGroupedTable.mockReturnValue(`
+            <table><tbody><tr class="driver-data-row" data-trackid="10" data-classid="5" data-time="1:21.250">
+                <td class="lap-time-cell">1:21.250</td><td class="gap-percent-cell">-</td>
+            </tr></tbody></table>`);
+        await ds.displayResults(results);
+
+        expect(window.dataService.enrichLapTimeGaps).toHaveBeenCalledWith(results[0].entries);
+        await vi.waitFor(() => {
+            expect(results[0].entries[0].laptime).toBe('1:21.250, +1.250s');
+            expect(window.tableRenderer.renderLapTimeCell).toHaveBeenCalledWith('1:21.250, +1.250s');
+            expect(window.tableRenderer.renderGapPercentCell).toHaveBeenCalledWith(results[0].entries[0]);
+            expect(window.tableRenderer.renderDriverGroupedTable).toHaveBeenCalledTimes(1);
+            expect(document.querySelector('.driver-data-row').getAttribute('data-time')).toBe('1:21.250, +1.250s');
+        });
+    });
+
+    it('re-sorts by Lap % after asynchronously enriching new backend entries', async () => {
+        window.tableRenderer.renderLapTimeCell = vi.fn(value => `<td class="lap-time-cell">${value}</td>`);
+        window.tableRenderer.renderGapPercentCell = vi.fn(() => '<td class="gap-percent-cell">-</td>');
+        window.dataService.enrichLapTimeGaps.mockImplementation(async entries => {
+            const entry = entries[0];
+            if (entry.laptime.includes(',')) return [];
+            const originalLapTime = entry.laptime;
+            entry.laptime = `${originalLapTime}, +1.250s`;
+            return [{ entry, originalLapTime }];
+        });
+
+        const ds = new window.driverSearch.constructor();
+        ds.currentSearchId = 8;
+        ds.currentSortBy = 'gapPercent';
+        const results = [{
+            driver: 'Alice',
+            entries: [{
+                position: 2,
+                laptime: '1:21.250',
+                track_id: '10',
+                class_id: '5'
+            }]
+        }];
+        ds.allResults = results;
+        window.tableRenderer.renderDriverGroupedTable.mockReturnValue(`
+            <table><tbody><tr class="driver-data-row" data-trackid="10" data-classid="5" data-time="1:21.250">
+                <td class="lap-time-cell">1:21.250</td><td class="gap-percent-cell">-</td>
+            </tr></tbody></table>`);
+
+        await ds.displayResults(results);
+
+        await vi.waitFor(() => {
+            expect(results[0].entries[0].laptime).toBe('1:21.250, +1.250s');
+            expect(window.tableRenderer.renderDriverGroupedTable).toHaveBeenCalledTimes(2);
+        });
     });
 
     it('filters results by pathId from URL id param', async () => {
@@ -289,13 +409,20 @@ describe('driver-search integration', () => {
         // Default sort is gap
         expect(ds.currentSortBy).toBe('gap');
 
-        // Toggle lapTime
+        // First click switches from gap to lap time.
         await ds.sortDriverGroups('lapTimeToggle');
         expect(ds.currentSortBy).toBe('lapTime');
 
-        // Toggle back to gap
+        // Second click switches from lap time back to gap.
         await ds.sortDriverGroups('lapTimeToggle');
         expect(ds.currentSortBy).toBe('gap');
+
+        // Other active sorts return to gap before toggling to lap time.
+        ds.currentSortBy = 'gapPercent';
+        await ds.sortDriverGroups('lapTimeToggle');
+        expect(ds.currentSortBy).toBe('gap');
+        await ds.sortDriverGroups('lapTimeToggle');
+        expect(ds.currentSortBy).toBe('lapTime');
     });
 
     it('tracks analytics on sort change', async () => {

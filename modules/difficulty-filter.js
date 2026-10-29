@@ -6,11 +6,10 @@
     const DIFFICULTIES = ['Get Real', 'Amateur', 'Novice'];
 
     function normalizeDifficultyName(value) {
-        const key = String(value || '').trim().toLowerCase();
-        if (key === 'get real') return 'Get Real';
-        if (key === 'amateur') return 'Amateur';
-        if (key === 'novice') return 'Novice';
-        return '';
+        const normalized = window.DataNormalizer?.normalizeDifficulty
+            ? window.DataNormalizer.normalizeDifficulty(value)
+            : String(value ?? '').trim();
+        return DIFFICULTIES.includes(normalized) ? normalized : '';
     }
 
     function getDifficultyBadgeClass(diffName) {

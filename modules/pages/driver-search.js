@@ -13,7 +13,6 @@ class DriverSearch {
             classFilterUI: document.getElementById('track-class-filter-ui') || document.getElementById('class-filter-ui'),
             resultsContainer: document.getElementById('results-container')
         };
-
         // Check if we're on the driver search page
         this.isDriverSearchPage = this.elements.driverSearch !== null;
         
@@ -481,6 +480,30 @@ class DriverSearch {
         }
     }
 
+    updateLapTimeCells(changedEntries) {
+        const rows = this.elements.resultsContainer.querySelectorAll('tr.driver-data-row');
+        changedEntries.forEach(({ entry, originalLapTime }) => {
+            const trackId = String(entry.track_id || entry.TrackID || entry.trackId || entry['Track ID'] || '');
+            const classId = String(entry.class_id || entry.ClassID || entry.classId || entry['Class ID'] || '');
+            const lapTime = entry.LapTime || entry['Lap Time'] || entry.lap_time || entry.laptime || entry.Time || '';
+            rows.forEach(row => {
+                if (row.getAttribute('data-trackid') !== trackId ||
+                    row.getAttribute('data-classid') !== classId ||
+                    row.getAttribute('data-time') !== originalLapTime) return;
+
+                const lapCell = row.querySelector('.lap-time-cell');
+                if (lapCell) {
+                    lapCell.outerHTML = tableRenderer.renderLapTimeCell(lapTime);
+                }
+                const percentageCell = row.querySelector('.gap-percent-cell');
+                if (percentageCell) {
+                    percentageCell.outerHTML = tableRenderer.renderGapPercentCell(entry);
+                }
+                row.setAttribute('data-time', lapTime);
+            });
+        });
+    }
+
     /**
      * Display search results
      * @param {Array} data - Search results
@@ -522,6 +545,23 @@ class DriverSearch {
         const startIndex = (this.currentPage - 1) * this.itemsPerPage;
         const endIndex = Math.min(startIndex + this.itemsPerPage, totalDrivers);
         const paginatedDrivers = data.slice(startIndex, endIndex);
+        const renderedPage = this.currentPage;
+        if (typeof window.dataService?.enrichLapTimeGaps === 'function') {
+            const visibleEntries = paginatedDrivers.flatMap(group => group.entries || []);
+            window.dataService.enrichLapTimeGaps(visibleEntries)
+                .then(changedEntries => {
+                    if (changedEntries.length === 0 ||
+                        activeSearchId !== this.currentSearchId ||
+                        this.allResults !== data ||
+                        this.currentPage !== renderedPage) return;
+
+                    this.updateLapTimeCells(changedEntries);
+                    if (this.currentSortBy === 'gapPercent') {
+                        this.displayResults(this.allResults, activeSearchId);
+                    }
+                })
+                .catch(error => console.error('Unable to enrich driver lap times:', error));
+        }
         
         // Calculate total entries shown
         let totalEntriesShown = 0;
@@ -711,13 +751,7 @@ class DriverSearch {
     sortDriverGroups(sortBy) {
         const previousSortBy = this.currentSortBy;
         if (sortBy === 'lapTimeToggle') {
-            if (this.currentSortBy === 'gap') {
-                sortBy = 'lapTime';
-            } else if (this.currentSortBy === 'lapTime') {
-                sortBy = 'gap';
-            } else {
-                sortBy = 'gap';
-            }
+            sortBy = window.TableSortService.getNextLapTimeSort(this.currentSortBy);
         }
         if (this.currentSortBy === sortBy) return; // Already sorted by this
         this.currentSortBy = sortBy;

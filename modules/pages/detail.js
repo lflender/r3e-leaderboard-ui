@@ -811,6 +811,7 @@ async function displayResults(data) {
     const baseColumns = ['Position', 'Name', 'LapTime', 'GapTime', 'GapPercent', 'Car', 'Difficulty', 'date_time'];
     const columnsWithClass = ['Position', 'Name', 'LapTime', 'GapTime', 'GapPercent', 'CarClass', 'Car', 'Difficulty', 'date_time'];
     const columnKeys = DetailState.isCombinedView ? columnsWithClass : baseColumns;
+    const referenceTime = R3EUtils.getFastestLapTime(unfilteredResults);
     
     // Get display names from ColumnConfig
     const headers = columnKeys.map(key => {
@@ -825,6 +826,7 @@ async function displayResults(data) {
             showAbsolutePosition: isCarFilterActive,
             isCombinedView: DetailState.isCombinedView,
             allResultsLength: allResults.length,
+            referenceTime,
             trackParam,
             DataNormalizer,
             R3EUtils,
@@ -1534,10 +1536,13 @@ function getSelectedFilter(selector, defaultValue) {
 }
 
 function normalizeDifficultyForPreference(value) {
+    const normalizedValue = window.DataNormalizer?.normalizeDifficulty
+        ? window.DataNormalizer.normalizeDifficulty(value)
+        : value;
     if (window.R3EDetailDifficultyFilter && typeof window.R3EDetailDifficultyFilter.normalizeDifficultyName === 'function') {
-        return window.R3EDetailDifficultyFilter.normalizeDifficultyName(value);
+        return window.R3EDetailDifficultyFilter.normalizeDifficultyName(normalizedValue);
     }
-    return String(value || '').trim();
+    return String(normalizedValue || '').trim();
 }
 
 function matchesDifficultyPreference(entry, selectedDifficultyLabel) {
@@ -1571,7 +1576,7 @@ function applyInitialDifficultyFilter(entries) {
 function matchesDifficultyFilter(entry, selectedDifficulties) {
     if (!selectedDifficulties || difficultyFilter.isAllActive()) return true;
     const diff = getField(entry, FIELD_NAMES.DIFFICULTY);
-    return difficultyFilter.isDifficultyActive(diff);
+    return difficultyFilter.isDifficultyActive(normalizeDifficultyForPreference(diff));
 }
 
 /**
@@ -1657,4 +1662,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Make functions globally accessible
 window.goToPage = goToPage;
-

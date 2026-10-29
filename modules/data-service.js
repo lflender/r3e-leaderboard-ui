@@ -179,6 +179,59 @@ class DataService {
         return promise;
     }
 
+    async enrichLapTimeGaps(entries) {
+        if (!Array.isArray(entries) || entries.length === 0) return [];
+
+        const combinations = new Map();
+        entries.forEach(entry => {
+            if (!entry || typeof entry !== 'object') return;
+
+            const lapKey = ['LapTime', 'Lap Time', 'lap_time', 'laptime', 'Time', 'time']
+                .find(key => typeof entry[key] === 'string' && !entry[key].includes(','));
+            const trackId = entry.track_id || entry.TrackID || entry.trackId || entry['Track ID'];
+            const classId = entry.class_id || entry.ClassID || entry.classId || entry['Class ID'];
+            if (!lapKey || !trackId || !classId) return;
+
+            const key = `${trackId}_${classId}`;
+            if (!combinations.has(key)) {
+                combinations.set(key, { trackId, classId, entries: [] });
+            }
+            combinations.get(key).entries.push({ entry, lapKey, originalLapTime: entry[lapKey] });
+        });
+
+        const requests = Array.from(combinations.values());
+        const changedEntries = [];
+        for (let start = 0; start < requests.length; start += 24) {
+            const batch = requests.slice(start, start + 24);
+            let nextRequest = 0;
+            const enrichNext = async () => {
+                while (nextRequest < batch.length) {
+                    const combination = batch[nextRequest++];
+                    try {
+                        const pole = await this.fetchPoleTime(combination.trackId, combination.classId);
+                        if (!pole?.laptime) {
+                            console.warn(`Unable to calculate lap-time gaps for track ${combination.trackId}, class ${combination.classId}`);
+                            continue;
+                        }
+
+                        combination.entries.forEach(({ entry, lapKey, originalLapTime }) => {
+                            const gap = R3EUtils.calculateLapTimeGap(originalLapTime, pole.laptime);
+                            if (!gap) return;
+
+                            entry[lapKey] = `${originalLapTime}, ${gap}`;
+                            changedEntries.push({ entry, originalLapTime });
+                        });
+                    } catch (error) {
+                        console.warn(`Unable to enrich lap times for track ${combination.trackId}, class ${combination.classId}:`, error);
+                    }
+                }
+            };
+            await Promise.all(Array.from({ length: Math.min(6, batch.length) }, enrichNext));
+        }
+
+        return changedEntries;
+    }
+
     /**
      * Fetches top combinations data.
      * Uses single-flight promise to avoid concurrent fetches.
@@ -460,6 +513,7 @@ class DataService {
 
         entries.sort((a, b) => a.__lapSortMs - b.__lapSortMs);
 
+        const fastestLapTime = entries[0].__rawLapForSort;
         entries.forEach((entry, index) => {
             const newPos = index + 1;
             entry.Position = newPos;
@@ -469,9 +523,7 @@ class DataService {
             delete entry.total_entries;
         });
 
-        const fastestMs = entries[0].__lapSortMs;
         entries.forEach((entry, index) => {
-            const entryMs = entry.__lapSortMs;
             const lapTimePart = String(entry.__rawLapForSort || '').split(',')[0].trim();
 
             if (index === 0) {
@@ -479,10 +531,8 @@ class DataService {
                 entry['Lap Time'] = lapTimePart;
                 entry.lap_time = lapTimePart;
             } else {
-                const gapMs = entryMs - fastestMs;
-                const gapSeconds = (gapMs / 1000).toFixed(3);
-                const gapFormatted = `+${gapSeconds}s`;
-                const newLapTime = `${lapTimePart}, ${gapFormatted}`;
+                const gap = R3EUtils.calculateLapTimeGap(lapTimePart, fastestLapTime);
+                const newLapTime = gap ? `${lapTimePart}, ${gap}` : lapTimePart;
                 entry.LapTime = newLapTime;
                 entry['Lap Time'] = newLapTime;
                 entry.lap_time = newLapTime;

@@ -29,6 +29,10 @@ beforeAll(() => {
     window.DataNormalizer = {
         normalizeLeaderboardEntry: x => x,
         normalizeTrackName: s => s,
+        normalizeDifficulty: value => {
+            const raw = String(value ?? '').trim();
+            return ({ 0: 'Novice', 1: 'Amateur', 2: 'Get Real' }[raw] || raw);
+        },
         extractLapTime: () => ''
     };
     window.ColumnConfig = {
@@ -171,6 +175,12 @@ describe('matchesDifficultyPreference', () => {
     it('returns true when entry difficulty matches the label', () => {
         const entry = { Difficulty: 'Get Real' };
         expect(window.matchesDifficultyPreference(entry, 'Get Real')).toBe(true);
+    });
+
+    it('matches numeric backend difficulty codes to their labels', () => {
+        expect(window.matchesDifficultyPreference({ Difficulty: 2 }, 'Get Real')).toBe(true);
+        expect(window.matchesDifficultyPreference({ Difficulty: 1 }, 'Amateur')).toBe(true);
+        expect(window.matchesDifficultyPreference({ Difficulty: 0 }, 'Novice')).toBe(true);
     });
 
     it('returns false when entry difficulty does not match', () => {

@@ -2,6 +2,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vite
 import { loadBrowserScript } from '../helpers/script-loader.js';
 
 beforeAll(() => {
+    loadBrowserScript('modules/time-helper.js');
     loadBrowserScript('modules/driver-index-service.js');
     loadBrowserScript('modules/driver-search-service.js');
     loadBrowserScript('modules/data-service.js');
@@ -24,6 +25,8 @@ describe('DataService core behavior', () => {
             extractLapTime: vi.fn(entry => entry.LapTime || entry['Lap Time'] || entry.lap_time || '')
         };
         window.R3EUtils = {
+            calculateLapTimeGap: window.R3ETimeUtils.calculateLapTimeGap,
+            formatGapMillis: window.R3ETimeUtils.formatGapMillis,
             // Mirror the real parseLapTimeToMillis WITHOUT pre-stripping comma-separated gaps.
             // Entries with embedded gaps like "2m 00.392s, +01.533s" must return 0 here so that
             // _rebuildCombinedLapTimes is required to strip the suffix before calling this function.
@@ -353,5 +356,26 @@ describe('DataService core behavior', () => {
         ]);
         expect(r1).toEqual(r2);
         expect(global.fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('enriches backend lap times through the shared gap helper', async () => {
+        vi.spyOn(service, 'fetchPoleTime').mockResolvedValue({ laptime: '1:20.000' });
+        const calculateGap = vi.spyOn(window.R3EUtils, 'calculateLapTimeGap');
+        const entries = [
+            { laptime: '1:21.250', track_id: '10', class_id: '5' },
+            { LapTime: '1:20.000', track_id: '10', class_id: '5' },
+            { lap_time: '1:22.500', track_id: '10', class_id: '6' }
+        ];
+
+        const changed = await service.enrichLapTimeGaps(entries);
+
+        expect(service.fetchPoleTime).toHaveBeenCalledTimes(2);
+        expect(service.fetchPoleTime).toHaveBeenCalledWith('10', '5');
+        expect(calculateGap).toHaveBeenCalledWith('1:21.250', '1:20.000');
+        expect(calculateGap).toHaveBeenCalledWith('1:22.500', '1:20.000');
+        expect(entries[0].laptime).toBe('1:21.250, +1.250s');
+        expect(entries[1].LapTime).toBe('1:20.000');
+        expect(entries[2].lap_time).toBe('1:22.500, +2.500s');
+        expect(changed.map(({ originalLapTime }) => originalLapTime)).toEqual(['1:21.250', '1:22.500']);
     });
 });

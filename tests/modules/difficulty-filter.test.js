@@ -3,6 +3,7 @@ import { loadBrowserScript } from '../helpers/script-loader.js';
 
 beforeAll(() => {
     window.R3EUtils = { escapeHtml: (v) => String(v ?? '') };
+    loadBrowserScript('modules/data-normalizer.js');
     loadBrowserScript('modules/difficulty-filter.js');
 });
 
@@ -19,6 +20,9 @@ describe('normalizeDifficultyName', () => {
         expect(n('GET REAL')).toBe('Get Real');
         expect(n('Amateur')).toBe('Amateur');
         expect(n('novice')).toBe('Novice');
+        expect(n(2)).toBe('Get Real');
+        expect(n(1)).toBe('Amateur');
+        expect(n(0)).toBe('Novice');
     });
 
     it('returns empty string for unknown values', () => {
@@ -195,5 +199,4 @@ describe('toggleDifficulty (via click)', () => {
         expect(updated.has('Get Real')).toBe(true);
     });
 });
-
 

@@ -41,6 +41,8 @@ beforeAll(() => {
     window.dataService = {
         loadTeams: vi.fn().mockResolvedValue(MOCK_TEAMS),
         searchDriver: vi.fn().mockResolvedValue([]),
+        fetchPoleTime: vi.fn().mockResolvedValue({ laptime: '1:29.000' }),
+        enrichLapTimeGaps: vi.fn().mockResolvedValue([]),
         _loadDriverMetadataShard: vi.fn().mockResolvedValue({}),
         _normalizeDriverLookupName: (name) => name.toLowerCase(),
         _getShardKeyForName: (name) => name.charAt(0).toLowerCase(),
@@ -101,6 +103,7 @@ beforeAll(() => {
         clear: vi.fn(() => { for (const k in sessionStore) delete sessionStore[k]; })
     };
 
+    loadBrowserScript('modules/sort-service.js');
     loadBrowserScript('modules/pages/team-profile.js');
 });
 
@@ -113,6 +116,10 @@ beforeEach(() => {
     window.dataService.loadTeams.mockResolvedValue(MOCK_TEAMS);
     window.dataService.searchDriver.mockReset();
     window.dataService.searchDriver.mockResolvedValue([]);
+    window.dataService.fetchPoleTime.mockReset();
+    window.dataService.fetchPoleTime.mockResolvedValue({ laptime: '1:29.000' });
+    window.dataService.enrichLapTimeGaps.mockReset();
+    window.dataService.enrichLapTimeGaps.mockResolvedValue([]);
     window.DriverStatsService.lookupSingleStat.mockReset();
     window.DriverStatsService.lookupSingleStat.mockResolvedValue({ value: 42, position: 8, total: 100 });
     window.generatePaginationHTML.mockClear();
@@ -234,5 +241,57 @@ describe('team profile page', () => {
         expect(container.innerHTML).toContain('Bob Jones');
         const rows = container.querySelectorAll('.driver-data-row');
         expect(rows.length).toBe(2);
+    });
+
+    it('delegates Lap % enrichment to DataService and re-sorts after enrichment', async () => {
+        const page = new TeamProfilePage();
+        page._entriesSortBy = 'gapPercent';
+        page._teamEntries = [];
+        page._sortTeamEntries = vi.fn();
+        page._renderEntriesTable = vi.fn();
+        const container = document.getElementById('team-profile-container');
+        container.innerHTML = '<div id="team-entries-container"><table><tr data-trackid="100" data-classid="1703" data-time="1:30.000"><td class="gap-percent-cell">-</td></tr></table></div>';
+        const table = container.querySelector('table');
+        const entry = {
+            track_id: '100',
+            class_id: '1703',
+            lap_time: '1:30.000'
+        };
+        window.dataService.enrichLapTimeGaps.mockImplementation(async entries => {
+            const originalLapTime = entries[0].lap_time;
+            entries[0].lap_time = `${originalLapTime}, +1.000s`;
+            return [{ entry: entries[0], originalLapTime }];
+        });
+        window.tableRenderer.renderGapPercentCell = vi.fn((item, referenceTime) =>
+            `<td class="gap-percent-cell">${item.lap_time}</td>`
+        );
+
+        await page._populateGapPercentages([entry], table, container);
+
+        expect(window.dataService.enrichLapTimeGaps).toHaveBeenCalledWith([entry]);
+        expect(window.tableRenderer.renderGapPercentCell).toHaveBeenCalledWith(entry);
+        expect(table.querySelector('.gap-percent-cell').textContent).toBe('1:30.000, +1.000s');
+        expect(page._sortTeamEntries).toHaveBeenCalledOnce();
+        expect(page._renderEntriesTable).toHaveBeenCalledOnce();
+    });
+
+    it('uses the shared gap/lap-time toggle on team entries', () => {
+        const page = Object.create(TeamProfilePage.prototype);
+        page.elements = { profileContainer: document.getElementById('team-profile-container') };
+        page._entriesSortBy = 'gapPercent';
+        page._teamEntries = [];
+        page._entriesPage = 1;
+        page._saveSortPref = vi.fn();
+        page._sortTeamEntries = vi.fn();
+        page._renderEntriesTable = vi.fn();
+        page.elements.profileContainer.innerHTML =
+            '<div id="team-entries-container"><table><thead><tr><th data-sort-key="lapTimeToggle"></th></tr></thead></table></div>';
+
+        page._bindEntriesSortHandlers();
+        const header = page.elements.profileContainer.querySelector('th');
+        header.click();
+        expect(page._entriesSortBy).toBe('gap');
+        header.click();
+        expect(page._entriesSortBy).toBe('lapTime');
     });
 });

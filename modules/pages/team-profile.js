@@ -570,6 +570,9 @@ class TeamProfilePage {
         if (table && window.TeamProfileInteractions) {
             TeamProfileInteractions.wireTableHover(this.elements.profileContainer, table);
         }
+        if (table) {
+            this._populateGapPercentages(pageEntries, table, container);
+        }
 
         window.goToEntriesPage = (page) => {
             this._entriesPage = page;
@@ -580,6 +583,36 @@ class TeamProfilePage {
         this._bindEntriesSortHandlers();
     }
 
+    async _populateGapPercentages(entries, table, container) {
+        if (typeof window.dataService?.enrichLapTimeGaps !== 'function') return;
+
+        try {
+            const changedEntries = await window.dataService.enrichLapTimeGaps(entries);
+            if (!container.contains(table)) return;
+
+            changedEntries.forEach(({ entry, originalLapTime }) => {
+                const trackId = String(entry.track_id || entry.TrackID || '');
+                const classId = String(entry.class_id || entry.ClassID || '');
+                const row = Array.from(table.querySelectorAll('tr[data-trackid]')).find(candidate =>
+                    candidate.getAttribute('data-trackid') === trackId &&
+                    candidate.getAttribute('data-classid') === classId &&
+                    candidate.getAttribute('data-time') === originalLapTime
+                );
+                const cell = row?.querySelector('.gap-percent-cell');
+                if (cell) {
+                    cell.outerHTML = window.tableRenderer.renderGapPercentCell(entry);
+                }
+            });
+
+            if (changedEntries.length > 0 && this._entriesSortBy === 'gapPercent') {
+                this._sortTeamEntries();
+                this._renderEntriesTable();
+            }
+        } catch (error) {
+            console.warn('Unable to enrich team entry lap times:', error);
+        }
+    }
+
     _bindEntriesSortHandlers() {
         const container = this.elements.profileContainer.querySelector('#team-entries-container');
         if (!container) return;
@@ -588,13 +621,7 @@ class TeamProfilePage {
             th.addEventListener('click', () => {
                 let sortBy = th.getAttribute('data-sort-key');
                 if (sortBy === 'lapTimeToggle') {
-                    if (this._entriesSortBy === 'gap') {
-                        sortBy = 'lapTime';
-                    } else if (this._entriesSortBy === 'lapTime') {
-                        sortBy = 'gap';
-                    } else {
-                        sortBy = 'gap';
-                    }
+                    sortBy = window.TableSortService.getNextLapTimeSort(this._entriesSortBy);
                 }
                 if (this._entriesSortBy === sortBy) return;
                 this._entriesSortBy = sortBy;

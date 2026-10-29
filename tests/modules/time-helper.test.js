@@ -15,6 +15,11 @@ describe('R3ETimeUtils', () => {
         expect(window.R3ETimeUtils.formatClassicLapTime('+1.782s')).toBe('+1:782s');
     });
 
+    test('formats the backend lap-time notation', () => {
+        expect(window.R3ETimeUtils.formatClassicLapTime('0:39.045')).toBe('0:39:045s');
+        expect(window.R3ETimeUtils.formatClassicLapTime('1:46.525')).toBe('1:46:525s');
+    });
+
     test('parses lap and gap times', () => {
         expect(window.R3ETimeUtils.parseLapTimeToMillis('1:23.456s')).toBe(83456);
         expect(window.R3ETimeUtils.parseLapTimeToMillis('2m 03.404s')).toBe(123404);
@@ -25,6 +30,35 @@ describe('R3ETimeUtils', () => {
     test('calculates gap percentage', () => {
         expect(window.R3ETimeUtils.calculateGapPercentage({ LapTime: '1:24.631s, +1.175s' })).toBe('101.4%');
         expect(window.R3ETimeUtils.calculateGapPercentage({ LapTime: '1:23.456s' })).toBe('-');
+    });
+
+    test('calculates gap percentage from the backend lap-time notation', () => {
+        expect(window.R3ETimeUtils.calculateGapPercentage({ laptime: '1:21.250, +1.250s' })).toBe('101.6%');
+    });
+
+    test('calculates gaps and percentages from standalone backend lap times', () => {
+        expect(window.R3ETimeUtils.getFastestLapTime([
+            { LapTime: '1:17.197' },
+            { LapTime: '1:17.155' },
+            { LapTime: '1:17.300' }
+        ])).toBe('1:17.155');
+        expect(window.R3ETimeUtils.calculateLapTimeGap('1:17.197', '1:17.155')).toBe('+0.042s');
+        expect(window.R3ETimeUtils.calculateLapTimeGap(
+            '1:17.197',
+            '1:17.155, +0.250s'
+        )).toBe('+0.042s');
+        expect(window.R3ETimeUtils.calculateGapPercentage(
+            { LapTime: '1:17.197' },
+            '1:17.155'
+        )).toBe('100.1%');
+        expect(window.R3ETimeUtils.calculateGapPercentage(
+            { LapTime: '1:17.155', position: 2 },
+            '1:17.155'
+        )).toBe('100.0%');
+        expect(window.R3ETimeUtils.calculateGapPercentage(
+            { LapTime: '1:17.155', position: 1 },
+            '1:17.155'
+        )).toBe('-');
     });
 
     test('formats ISO dates for display', () => {
@@ -143,8 +177,14 @@ describe('R3ETimeUtils', () => {
             expect(window.R3ETimeUtils.calculateGapPercentage({ LapTime: 'invalid, +1.000s' })).toBe('-');
         });
 
-        test('returns dash when gap is zero (leader entry)', () => {
-            expect(window.R3ETimeUtils.calculateGapPercentage({ LapTime: '1:30.000s, +0.000s' })).toBe('-');
+        test('returns dash for a leader entry without an explicit reference', () => {
+            expect(window.R3ETimeUtils.calculateGapPercentage({
+                LapTime: '1:30.000s',
+                class_position: 1
+            })).toBe('-');
+            expect(window.R3ETimeUtils.calculateGapPercentage({
+                LapTime: '1:30.000s, +0.000s'
+            })).toBe('-');
         });
 
         test('returns dash when gap parse fails', () => {

@@ -67,7 +67,7 @@ function normalizeLeaderboardEntry(entry, data = {}, index = 0, totalEntries = 0
         LapTime: getField(entry, FIELD_NAMES.LAP_TIME),
         Rank: entry.rank?.Name || entry.rank?.name || getField(entry, FIELD_NAMES.RANK),
         Team: entry.team?.Name || entry.team?.name || getField(entry, FIELD_NAMES.TEAM),
-        Difficulty: getField(entry, FIELD_NAMES.DIFFICULTY),
+        Difficulty: normalizeDifficulty(getField(entry, FIELD_NAMES.DIFFICULTY)),
         Track: trackName,
         TotalEntries: totalEntries || getField(entry, FIELD_NAMES.TOTAL_ENTRIES, 0),
         ClassID: classId || undefined,
@@ -121,7 +121,20 @@ function extractLapTime(item) {
  * @returns {string} Difficulty value
  */
 function extractDifficulty(item) {
-    return getField(item, FIELD_NAMES.DIFFICULTY, '-');
+    return normalizeDifficulty(getField(item, FIELD_NAMES.DIFFICULTY, '-'));
+}
+
+function normalizeDifficulty(value) {
+    const raw = String(value ?? '').trim();
+    const labels = {
+        '0': 'Novice',
+        '1': 'Amateur',
+        '2': 'Get Real',
+        'get real': 'Get Real',
+        amateur: 'Amateur',
+        novice: 'Novice'
+    };
+    return labels[raw.toLowerCase()] || raw;
 }
 
 /**
@@ -203,6 +216,7 @@ if (typeof window !== 'undefined') {
         extractCar,
         extractLapTime,
         extractDifficulty,
+        normalizeDifficulty,
         extractCountry,
         extractRank,
         extractTrackId,

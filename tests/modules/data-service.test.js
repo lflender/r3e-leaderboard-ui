@@ -318,6 +318,52 @@ describe('DataService core behavior', () => {
         expect(global.fetch).toHaveBeenCalledTimes(1);
     });
 
+    it('reuses pole-time cache after reload only when the index version matches', async () => {
+        window.localStorage.clear();
+        service._indexCacheVersion = 'v1';
+        global.fetch.mockResolvedValue({ ok: true, status: 200 });
+        window.CompressedJsonHelper.readGzipJson.mockResolvedValue({
+            track_info: {
+                Data: [{ laptime: '1:30.500s', driver: { name: 'Alice' }, country: { code: 'de' } }]
+            }
+        });
+
+        const result = await service.fetchPoleTime(10, 5);
+        expect(result.laptime).toBe('1:30.500s');
+        expect(JSON.parse(window.localStorage.getItem('r3e_pole_time_cache'))).toEqual({
+            version: 'v1',
+            entries: {
+                '10_5': {
+                    name: 'Alice',
+                    country: 'de',
+                    rank: '',
+                    avatar: '',
+                    path_id: '',
+                    laptime: '1:30.500s'
+                }
+            }
+        });
+
+        const reloadedService = new window.DataService();
+        reloadedService._indexCacheVersion = 'v1';
+        await expect(reloadedService.fetchPoleTime(10, 5)).resolves.toEqual(result);
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+
+        const updatedService = new window.DataService();
+        updatedService._indexCacheVersion = 'v2';
+        window.CompressedJsonHelper.readGzipJson.mockResolvedValueOnce({
+            track_info: {
+                Data: [{ laptime: '1:30.000s', driver: { name: 'Bob' }, country: { code: 'uk' } }]
+            }
+        });
+
+        await expect(updatedService.fetchPoleTime(10, 5)).resolves.toMatchObject({
+            name: 'Bob',
+            laptime: '1:30.000s'
+        });
+        expect(global.fetch).toHaveBeenCalledTimes(2);
+    });
+
     it('fetchPoleTime returns null for empty leaderboard data', async () => {
         service._indexCacheVersion = 'v1';
         global.fetch.mockResolvedValue({ ok: true, status: 200 });

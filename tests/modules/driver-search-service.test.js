@@ -5,6 +5,7 @@ beforeAll(() => {
     loadBrowserScript('modules/driver-index-service.js');
     loadBrowserScript('modules/driver-search-service.js');
     loadBrowserScript('modules/data-service.js');
+    loadBrowserScript('modules/filter-options-service.js');
 });
 
 describe('DataService driver-search module', () => {
@@ -13,6 +14,10 @@ describe('DataService driver-search module', () => {
     beforeEach(() => {
         service = new window.DataService();
         window.CARS_DATA = [];
+        window.CAR_CLASSES_DATA = { '5': 'GT3', '6': 'GT4' };
+        window.getCarClassName = id => window.CAR_CLASSES_DATA[String(id)] || String(id);
+        window.getCarClassId = name => ({ gt3: '5', gt4: '6' }[String(name).trim().toLowerCase()] || null);
+        window.R3EUtils = { resolveCarClassLogo: () => '', resolveCarClassLogoByName: () => '' };
     });
 
     it('exposes the dedicated driver-search module and service wrappers', () => {
@@ -126,6 +131,20 @@ describe('DataService driver-search module', () => {
         });
 
         expect(filtered).toEqual([{ car_class: 'GT3' }, { car_class: 'GTR3' }]);
+    });
+
+    it('filters backend entries by class ID when class names are empty', () => {
+        window.CARS_DATA = [
+            { superclass: 'GT', class: 'GT3' },
+            { superclass: 'Touring', class: 'GT4' }
+        ];
+        const entries = [
+            { class_id: '5', car_class: '', track_id: 10 },
+            { class_id: '6', car_class: '', track_id: 10 }
+        ];
+
+        expect(service._filterDriverEntries(entries, { className: 'GT3' })).toEqual([entries[0]]);
+        expect(service._filterDriverEntries(entries, { className: 'superclass:GT' })).toEqual([entries[0]]);
     });
 
     it('builds metadata and legacy search result groups', () => {

@@ -40,6 +40,19 @@ describe('CARS_DATA', () => {
         }
     });
 
+    test('uses current Hillclimb power and driver-weight values', () => {
+        const cars = window.CARS_DATA.flatMap(cls => cls.cars);
+        const carlsson = cars.find(car => car.car === 'Carlsson SLK 340 JUDD');
+        const judd = cars.find(car => car.car === 'BMW 134 Judd V8');
+
+        expect(carlsson.power).toBe('581hp');
+        expect(carlsson.weight).toBe('870kg*');
+        expect(judd.power).toBe('542hp');
+        expect(judd.weight).toBe('870kg*');
+        expect(judd.link).toBe('https://game.raceroomracing.com/store/cars/hillclimb-icons/bmw-134-judd-v8/258');
+        expect(cars.find(car => car.car === 'BMW E36 V8 JUDD')).toBeDefined();
+    });
+
     test('car links are mostly unique (at most 1 known duplicate)', () => {
         const links = window.CARS_DATA.flatMap(cls => cls.cars.map(c => c.link));
         const uniqueLinks = new Set(links);

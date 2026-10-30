@@ -282,6 +282,7 @@ beforeAll(async () => {
     loadBrowserScript('modules/time-helper.js');
     setupGlobals();
 
+    loadBrowserScript('modules/filter-state.js');
     loadBrowserScript('modules/difficulty-filter.js');
     loadBrowserScript('modules/pages/detail.js');
     document.dispatchEvent(new Event('DOMContentLoaded'));
@@ -335,6 +336,7 @@ describe('detail page rich integration', () => {
 
         rows = document.querySelectorAll('#detail-results-container table.results-table tbody tr');
         expect(rows.length).toBe(1);
+        expect(window.PageFilterState.read('detail', '10|5||').car).toBe('BMW M4');
 
         expect(window.R3EAnalytics.track).toHaveBeenCalledWith(
             'detail filter changed',

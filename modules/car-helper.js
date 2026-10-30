@@ -14,12 +14,10 @@ const CAR_BRANDS = [
     'KTM', 'Gumpert',
     'Koenigsegg', 'Praga', 'Tatuus', 'Aquila', 'Canhard', 'Cougar', 'Crosslé', 'Crossle',
     'DMD', 'Fabcar', 'Mistral', 'RaceRoom', 'Formula', 'Carlsson', 'Zakspeed',
-    'Abt-Audi', 'S.C.', 'P4-5', 'Aston Martin'
+    'Abt-Audi', 'S.C.', 'P4-5', 'Aston Martin', 'Mini', 'Abarth'
 ];
 
 const CAR_SPECIAL_CASES = {
-    'E36 V8 JUDD': { brand: 'Georg Plasa', model: 'BMW E36 V8' },
-    '134 Judd V8': { brand: 'Georg Plasa', model: 'BMW 134 V8' },
     'Carlsson SLK 340 JUDD': { brand: 'Carlsson', model: 'Mercedes SLK 340' },
     'BMW Alpina B6 GT3': { brand: 'BMW Alpina', model: 'B6 GT3' }
 };
@@ -36,7 +34,6 @@ const BRAND_LOGO_OVERRIDES = {
     'callaway': 'chevrolet',
     'citroen': 'citroen',
     'crossle': 'crossle',
-    'georg plasa': 'georg-plasa',
     'lynk & co': 'lynk-co',
     'mclaren-mercedes': 'mclaren',
     'amg-mercedes': 'mercedes',
@@ -48,10 +45,10 @@ const BRAND_LOGO_OVERRIDES = {
 const AVAILABLE_BRAND_LOGO_KEYS = new Set([
     'alfaromeo', 'alpina', 'alpine', 'aquila', 'astonmartin', 'audi', 'bentley', 'bmw', 'cadillac',
     'carlsson', 'chevrolet', 'citroen', 'corvette', 'crossle', 'cupra', 'fabcar', 'ferrari', 'ford',
-    'georg-plasa', 'gumpert', 'honda', 'hyundai', 'judd', 'koenigsegg', 'ktm', 'lada', 'lamborghini', 'lotus',
+    'gumpert', 'honda', 'hyundai', 'judd', 'koenigsegg', 'ktm', 'lada', 'lamborghini', 'lotus',
     'lrt', 'lynk-co', 'mazda', 'mclaren', 'mercedes', 'nissan', 'nsu', 'opel', 'p45', 'pagani',
     'peugeot', 'porsche', 'praga', 'raceroom', 'radical', 'renault', 'ruf', 'saleen',
-    'seat', 'tatuus', 'volkswagen', 'volvo', 'zakspeed'
+    'seat', 'tatuus', 'volkswagen', 'volvo', 'zakspeed', 'mini', 'abarth'
 ]);
 
 function normalizeBrandForLogoLookup(brand) {
@@ -86,10 +83,43 @@ function resolveBrandLogoPath(carNameOrBrand) {
     return `images/brands/logo-${fileKey}.png`;
 }
 
+let cachedCarNameAliasData = null;
+let cachedCarNameAliases = new Map();
+
+function resolveCanonicalCarName(carName) {
+    const name = String(carName || '').trim();
+    const carsData = Array.isArray(window.CARS_DATA) ? window.CARS_DATA : null;
+    if (!carsData) return name;
+
+    if (carsData !== cachedCarNameAliasData) {
+        cachedCarNameAliases = new Map();
+        for (const classEntry of carsData) {
+            for (const carEntry of (Array.isArray(classEntry.cars) ? classEntry.cars : [])) {
+                const canonicalName = String(carEntry.car || '').trim();
+                for (const brand of CAR_BRANDS) {
+                    const prefix = `${brand} `;
+                    if (!canonicalName.toLowerCase().startsWith(prefix.toLowerCase())) continue;
+
+                    const legacyName = canonicalName.slice(prefix.length).trim().toLowerCase();
+                    if (cachedCarNameAliases.has(legacyName) && cachedCarNameAliases.get(legacyName) !== canonicalName) {
+                        cachedCarNameAliases.set(legacyName, null);
+                    } else if (!cachedCarNameAliases.has(legacyName)) {
+                        cachedCarNameAliases.set(legacyName, canonicalName);
+                    }
+                    break;
+                }
+            }
+        }
+        cachedCarNameAliasData = carsData;
+    }
+
+    return cachedCarNameAliases.get(name.toLowerCase()) || name;
+}
+
 function splitCarName(carName) {
     if (!carName) return { brand: '', model: '' };
 
-    const name = String(carName).trim();
+    const name = resolveCanonicalCarName(carName);
     const canonicalName = name.replace(/^BMW\s+/i, '').trim();
 
     const directSpecialCase = CAR_SPECIAL_CASES[name]
@@ -264,11 +294,15 @@ function wheelBadge(cat) {
 }
 
 function transBadge(cat) {
-    const v = (cat || '').toLowerCase().trim();
+    const rawValue = String(cat || '').trim();
+    const v = rawValue.toLowerCase();
     if (!v) return '<span class="car-badge car-badge--trans car-badge--unknown">—</span>';
+    if (v === 'automatic' || v === 'fixed gear' || v === 'fixed' || v === '-') {
+        return '<span class="car-badge car-badge--trans car-badge--unknown">—</span>';
+    }
     if (v === 'paddles') return '<span class="car-badge car-badge--trans">Paddles</span>';
     if (v === 'sequential') return '<span class="car-badge car-badge--trans-sequential">Sequential</span>';
-    if (v === 'h' || v === 'other') return '<span class="car-badge car-badge--trans-h">H</span>';
+    if (v === 'manual' || v === 'h' || v === 'other') return '<span class="car-badge car-badge--trans-h">H</span>';
     return `<span class="car-badge car-badge--trans car-badge--unknown">${escHtml(cat)}</span>`;
 }
 

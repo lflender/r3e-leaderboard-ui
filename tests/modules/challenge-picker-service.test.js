@@ -387,7 +387,7 @@ describe('ChallengePickerService', () => {
         const makeCar = (name, opts = {}) => ({
             car: name,
             wheel_cat: opts.wheel || 'round',
-            transmission_cat: opts.trans || 'paddles',
+            transmission_cat: 'trans' in opts ? opts.trans : 'paddles',
             year: 'year' in opts ? opts.year : '2020',
             thumbnail: ''
         });
@@ -465,11 +465,17 @@ describe('ChallengePickerService', () => {
             const data = [makeClass('GT3', [
                 makeCar('A', { trans: 'paddles' }),
                 makeCar('B', { trans: 'sequential' }),
-                makeCar('C', { trans: 'h' })
+                makeCar('C', { trans: 'h' }),
+                makeCar('D', { trans: 'manual' }),
+                makeCar('E', { trans: 'Automatic' }),
+                makeCar('F', { trans: 'Fixed gear' })
             ])];
             const result = window.ChallengePickerService.filterCarsData(data, { trans: 'sequential' });
             expect(result[0].cars).toHaveLength(1);
             expect(result[0].cars[0].car).toBe('B');
+
+            const h = window.ChallengePickerService.filterCarsData(data, { trans: 'h' });
+            expect(h[0].cars.map(car => car.car)).toEqual(['C', 'D']);
         });
 
         test('combines multiple filters', () => {

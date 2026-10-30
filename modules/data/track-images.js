@@ -15,6 +15,7 @@
         'circuit-de-charade': 'images/tracks/circuit-de-charade-10903-logo-original.png',
         'circuit-de-pau-ville': 'images/tracks/circuit-de-pau-ville-11904-logo-original.png',
         'circuit-de-spa-francorchamps': 'images/tracks/circuit-de-spa-francorchamps-13255-logo-original.png',
+        'circuit-de-spa-francorchamps-1995': 'images/tracks/circuit-de-spa-francorchamps-13255-logo-original.png',
         'circuit-zandvoort': 'images/tracks/circuit-zandvoort-10781-logo-original.png',
         'circuit-zandvoort-2019': 'images/tracks/circuit-zandvoort-10781-logo-original.png',
         'circuit-zolder': 'images/tracks/circuit-zolder-1683-logo-original.png',
@@ -25,8 +26,10 @@
         'estoril-circuit': 'images/tracks/estoril-circuit-2018-logo-original.png',
         'falkenberg-motorbana': 'images/tracks/falkenberg-motorbana-6139-logo-original.png',
         'fliegerhorst-diepholz': 'images/tracks/fliegerhorst-diepholz-12394-logo-original.png',
+        'fliegerhorst-wunstorf': 'images/tracks/VenueLogo_13821_on_dark_small.webp',
         'gellerasen-arena': 'images/tracks/gellerasen-arena-5924-logo-original.png',
         'genting-highlands-highway': 'images/tracks/genting-highlands-highway-9320-logo-original.png',
+        'glasbachrennen': 'images/tracks/VenueLogo_13742_on_dark_small.webp',
         'hockenheimring': 'images/tracks/hockenheimring-1692-logo-original.png',
         'hockenheimring-classic': 'images/tracks/hockenheimring-classic-12111-logo-original.png',
         'hungaroring': 'images/tracks/hungaroring-1865-logo-original.png',
@@ -71,6 +74,7 @@
         'vallelunga': 'images/tracks/vallelunga-13186-logo-original.png',
         'watkins-glen-international': 'images/tracks/watkins-glen-international-9176-logo-original.png',
         'weathertech-raceway-laguna-seca': 'images/tracks/weathertech-raceway-laguna-seca-1855-logo-original.png',
+        'weathertech-raceway-laguna-seca-1987': 'images/tracks/weathertech-raceway-laguna-seca-1855-logo-original.png',
         'zhejiang-circuit': 'images/tracks/zhejiang-circuit-8074-logo-original.png',
         'zhuhai-circuit': 'images/tracks/zhuhai-circuit-3463-logo-original.png'
     });
@@ -92,6 +96,7 @@
         'circuit de charade': 'circuit-de-charade',
         'circuit de pau-ville': 'circuit-de-pau-ville',
         'circuit de spa-francorchamps': 'circuit-de-spa-francorchamps',
+        'circuit de spa-francorchamps 1995': 'circuit-de-spa-francorchamps-1995',
         'circuit zandvoort': 'circuit-zandvoort',
         'circuit zandvoort 2019': 'circuit-zandvoort-2019',
         'circuit zolder': 'circuit-zolder',
@@ -102,8 +107,10 @@
         'estoril circuit': 'estoril-circuit',
         'falkenberg motorbana': 'falkenberg-motorbana',
         'fliegerhorst diepholz': 'fliegerhorst-diepholz',
+        'fliegerhorst wunstorf': 'fliegerhorst-wunstorf',
         'gellerasen arena': 'gellerasen-arena',
         'genting highlands highway': 'genting-highlands-highway',
+        'glasbachrennen': 'glasbachrennen',
         'hockenheimring': 'hockenheimring',
         'hockenheimring classic': 'hockenheimring-classic',
         'hockenheimring dmec': 'hockenheimring',
@@ -149,6 +156,7 @@
         'vallelunga': 'vallelunga',
         'watkins glen international': 'watkins-glen-international',
         'weathertech raceway laguna seca': 'weathertech-raceway-laguna-seca',
+        'weathertech raceway laguna seca 1987': 'weathertech-raceway-laguna-seca-1987',
         'zhejiang circuit': 'zhejiang-circuit',
         'zhuhai circuit': 'zhuhai-circuit'
     });

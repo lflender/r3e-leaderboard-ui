@@ -6,6 +6,9 @@
  * they share this DataService's state — caches, single-flight promises, etc.).
  */
 
+const POLE_TIME_CACHE_KEY = 'r3e_pole_time_cache';
+const POLE_TIME_CACHE_LIMIT = 250;
+
 class DataService {
     constructor() {
         this.driverIndex = null;
@@ -25,6 +28,7 @@ class DataService {
         this.topCombinationsCache = null;
         this.topCombinationsPromise = null; // single-flight promise
         this.poleTimeCache = new Map(); // per-combination pole time cache
+        this.poleTimeCacheVersion = null;
         this.poleTimePromises = new Map(); // single-flight promises for pole fetches
         this.statusCache = null; // last good status (fallback only)
         this.statusPromise = null; // single-flight promise for status fetch
@@ -147,6 +151,10 @@ class DataService {
 
         const promise = (async () => {
             try {
+                const cacheVersion = await this._getIndexCacheVersion();
+                this._loadPoleTimeCache(cacheVersion);
+                if (this.poleTimeCache.has(key)) return this.poleTimeCache.get(key);
+
                 const data = await this.fetchLeaderboardDetails(trackId, classId);
                 const entries = data?.track_info?.Data;
                 if (!Array.isArray(entries) || entries.length === 0) {
@@ -168,6 +176,10 @@ class DataService {
                     laptime: p1.laptime || ''
                 };
                 this.poleTimeCache.set(key, result);
+                while (this.poleTimeCache.size > POLE_TIME_CACHE_LIMIT) {
+                    this.poleTimeCache.delete(this.poleTimeCache.keys().next().value);
+                }
+                this._persistPoleTimeCache(cacheVersion);
                 return result;
             } catch (err) {
                 this.poleTimePromises.delete(key);
@@ -177,6 +189,52 @@ class DataService {
 
         this.poleTimePromises.set(key, promise);
         return promise;
+    }
+
+    _loadPoleTimeCache(cacheVersion) {
+        if (this.poleTimeCacheVersion === cacheVersion) return;
+
+        this.poleTimeCache.clear();
+        this.poleTimeCacheVersion = cacheVersion;
+
+        try {
+            const raw = window.localStorage.getItem(POLE_TIME_CACHE_KEY);
+            if (!raw) return;
+
+            const cached = JSON.parse(raw);
+            if (cached?.version !== cacheVersion || !cached.entries || typeof cached.entries !== 'object') return;
+
+            Object.entries(cached.entries).slice(-POLE_TIME_CACHE_LIMIT).forEach(([key, value]) => {
+                if (!value || typeof value !== 'object' || typeof value.laptime !== 'string' || !value.laptime) return;
+                this.poleTimeCache.set(key, {
+                    name: typeof value.name === 'string' ? value.name : '',
+                    country: typeof value.country === 'string' ? value.country : '',
+                    rank: typeof value.rank === 'string' ? value.rank : '',
+                    avatar: typeof value.avatar === 'string' ? value.avatar : '',
+                    path_id: typeof value.path_id === 'string' ? value.path_id : '',
+                    laptime: value.laptime
+                });
+            });
+        } catch (error) {
+            console.warn('Could not load persisted pole-time cache:', error);
+        }
+    }
+
+    _persistPoleTimeCache(cacheVersion) {
+        const entries = Object.fromEntries(
+            Array.from(this.poleTimeCache.entries())
+                .filter(([, value]) => value && typeof value.laptime === 'string' && value.laptime)
+                .slice(-POLE_TIME_CACHE_LIMIT)
+        );
+
+        try {
+            window.localStorage.setItem(POLE_TIME_CACHE_KEY, JSON.stringify({
+                version: cacheVersion,
+                entries
+            }));
+        } catch (error) {
+            console.warn('Could not save persisted pole-time cache:', error);
+        }
     }
 
     async enrichLapTimeGaps(entries) {

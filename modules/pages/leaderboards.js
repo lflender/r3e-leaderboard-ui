@@ -8,16 +8,22 @@
   const classSelect = document.getElementById('class-filter');
   const layoutFilterRoot = document.getElementById('track-layout-filter-ui');
   const tableContainer = document.getElementById('leaderboards-table');
+  const savedFilters = PageFilterState.read('leaderboards');
+  const trackOptions = FilterOptionsService.getTrackOptions();
+  const savedTrack = trackOptions.some(option => String(option.value) === String(savedFilters.track || ''))
+    ? String(savedFilters.track || '')
+    : '';
+  const savedClass = String(savedFilters.class || '');
 
   // Pagination state (separate from leaderboards to avoid conflicts)
   let trackCurrentPage = 1;
   const trackItemsPerPage = 100;
   let trackAllResults = [];
-  let activeTrackId = null; // null => All tracks
+  let activeTrackId = savedTrack ? Number(savedTrack) : null; // null => All tracks
   let activeLayoutId = null; // null => All layouts for the selected track
-  let activeClassId = null; // null => All classes
-  let activeClassLabel = null; // human-readable label for selected class
-  let combineMode = false; // When true, combine all classes in superclass by track
+  let activeClassId = savedClass || null; // null => All classes
+  let activeClassLabel = savedClass || null; // human-readable label for selected class
+  let combineMode = !!savedFilters.combine && !!savedClass && savedClass.startsWith('superclass:'); // When true, combine all classes in superclass by track
   let hasTrackedTrackPageShown = false;
 
   // DOM refs for combine checkbox
@@ -67,7 +73,7 @@
 
   let layoutSelect;
 
-  function updateLayoutFilter(trackId) {
+  function updateLayoutFilter(trackId, restoreSavedLayout = false) {
     if (!layoutFilterRoot || !layoutSelect) return;
 
     const layouts = getTrackLayoutOptions(trackId);
@@ -75,10 +81,14 @@
     if (typeof layoutSelect.setOptions === 'function') {
       layoutSelect.setOptions(options);
     }
+    const savedLayout = String(savedFilters.layout || '');
+    const selectedLayout = restoreSavedLayout && layouts.some(layout => String(layout.value) === savedLayout)
+      ? savedLayout
+      : '';
     if (typeof layoutSelect.setValue === 'function') {
-      layoutSelect.setValue('', { notify: false, source: 'programmatic' });
+      layoutSelect.setValue(selectedLayout, { notify: false, source: 'restore' });
     }
-    activeLayoutId = null;
+    activeLayoutId = selectedLayout || null;
     layoutFilterRoot.hidden = layouts.length < 2;
   }
 
@@ -86,6 +96,7 @@
   layoutSelect = new CustomSelect('track-layout-filter-ui', [{ value: '', label: 'All layouts' }], (value, opts) => {
     activeLayoutId = value || null;
     trackCurrentPage = 1;
+    PageFilterState.write('leaderboards', 'layout', value || '');
     if (opts?.source === 'user') {
       trackTrackInfoFilter('layout', value || '');
     }
@@ -93,17 +104,20 @@
   }, { searchable: false });
 
   // Track filter — CustomSelect handles open/close/logo rendering
-  new CustomSelect('track-filter-ui', FilterOptionsService.getTrackOptions(), (value, opts) => {
+  const trackSelect = new CustomSelect('track-filter-ui', trackOptions, (value, opts) => {
     activeTrackId = value ? Number(value) : null;
     updateLayoutFilter(activeTrackId);
     trackCurrentPage = 1;
+    PageFilterState.write('leaderboards', 'track', value || '');
+    PageFilterState.write('leaderboards', 'layout', '');
     if (opts?.source === 'user') {
       trackTrackInfoFilter('track', value || '');
     }
     fetchAndRender();
   });
 
-  updateLayoutFilter(activeTrackId);
+  if (savedTrack) trackSelect.setValue(savedTrack, { notify: false, source: 'restore' });
+  updateLayoutFilter(activeTrackId, true);
   
   // Initialize class menu with superclass categories
   const superclassOptions = FilterOptionsService.getSuperclassOptions();
@@ -112,11 +126,18 @@
   const classOptions = [{ value: '', label: 'All classes' }]
     .concat(superclassOptions)
     .concat(regularClassOptions);
+
+  if (!classOptions.some(option => String(option.value) === savedClass)) {
+    activeClassId = null;
+    activeClassLabel = null;
+    combineMode = false;
+  }
   
-  new CustomSelect('track-class-filter-ui', classOptions, async (value, opts) => {
+  const classSelectInstance = new CustomSelect('track-class-filter-ui', classOptions, async (value, opts) => {
     activeClassId = value || null;
     activeClassLabel = value || null;
     trackCurrentPage = 1;
+    PageFilterState.write('leaderboards', 'class', value || '');
     if (classSelect) {
       try { classSelect.value = value; } catch (e) {}
     }
@@ -139,10 +160,18 @@
     fetchAndRender();
   });
 
+  if (activeClassId) classSelectInstance.setValue(activeClassId, { notify: false, source: 'restore' });
+  if (classSelect) classSelect.value = activeClassId || '';
+  if (combineContainer) {
+    combineContainer.style.display = activeClassId && activeClassId.startsWith('superclass:') ? 'flex' : 'none';
+  }
+  if (combineCheckbox) combineCheckbox.checked = combineMode;
+
   // Handle combine checkbox changes
   if (combineCheckbox) {
     combineCheckbox.addEventListener('change', () => {
       combineMode = combineCheckbox.checked;
+      PageFilterState.write('leaderboards', 'combine', combineMode);
       trackCurrentPage = 1;
       trackTrackInfoFilter('combine', combineMode ? 'on' : 'off');
       fetchAndRender();

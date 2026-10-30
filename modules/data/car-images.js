@@ -1,10 +1,12 @@
 window.CAR_IMAGES_BY_LINK = {
-  "https://game.raceroom.com/en/store/cars/adac-gt-masters-2014/audi/audi-r8-lms-ultra": [
-    "https://prod.r3eassets.com/assets/content/carlivery/prosperia-c-abt-racing-10-3504-image-big.png",
-    "https://prod.r3eassets.com/assets/content/carlivery/prosperia-c-abt-racing-11-3505-image-big.png",
-    "https://prod.r3eassets.com/assets/content/carlivery/prosperia-c-abt-racing-12-3569-image-big.png",
-    "https://prod.r3eassets.com/assets/content/carlivery/yaco-racing-16-3506-image-big.png",
-    "https://prod.r3eassets.com/assets/content/carlivery/kfzteile24-apr-motorsport-100-3507-image-big.png"
+  "https://game.raceroomracing.com/store/cars/adac-gt-masters-2013/audi-r8-lms-ultra": [
+    "https://game.raceroomracing.com/cdn/apex-production/Livery:2939:full.webp",
+    "https://game.raceroomracing.com/cdn/apex-production/Livery:2566:full.webp",
+    "https://game.raceroomracing.com/cdn/apex-production/Livery:2646:full.webp",
+    "https://game.raceroomracing.com/cdn/apex-production/Livery:2647:full.webp",
+    "https://game.raceroomracing.com/cdn/apex-production/Livery:2649:full.webp",
+    "https://game.raceroomracing.com/cdn/apex-production/Livery:2668:full.webp",
+    "https://game.raceroomracing.com/cdn/apex-production/Livery:2702:full.webp"
   ],
   "https://game.raceroom.com/en/store/cars/adac-gt-masters-2013/bmw/bmw-z4-gt3": [
     "https://prod.r3eassets.com/assets/content/carlivery/db-motorsport-12-2667-image-big.png",
@@ -34,6 +36,13 @@ window.CAR_IMAGES_BY_LINK = {
     "https://prod.r3eassets.com/assets/content/carlivery/jrm-24-2697-image-big.png",
     "https://prod.r3eassets.com/assets/content/carlivery/jrm-25-adac-jrm-2698-image-big.png",
     "https://prod.r3eassets.com/assets/content/carlivery/schulze-motorsport-45-2572-image-big.png"
+  ],
+  "https://game.raceroom.com/en/store/cars/adac-gt-masters-2014/audi/audi-r8-lms-ultra": [
+    "https://prod.r3eassets.com/assets/content/carlivery/prosperia-c-abt-racing-10-3504-image-big.png",
+    "https://prod.r3eassets.com/assets/content/carlivery/prosperia-c-abt-racing-11-3505-image-big.png",
+    "https://prod.r3eassets.com/assets/content/carlivery/prosperia-c-abt-racing-12-3569-image-big.png",
+    "https://prod.r3eassets.com/assets/content/carlivery/yaco-racing-16-3506-image-big.png",
+    "https://prod.r3eassets.com/assets/content/carlivery/kfzteile24-apr-motorsport-100-3507-image-big.png"
   ],
   "https://game.raceroom.com/en/store/cars/adac-gt-masters-2014/bmw/bmw-z4-gt3": [
     "https://prod.r3eassets.com/assets/content/carlivery/pixum-team-schubert-19-3532-image-big.png",
@@ -1182,7 +1191,7 @@ window.CAR_IMAGES_BY_LINK = {
     "https://game.raceroomracing.com/cdn/apex-production/Livery:14020:full.webp",
     "https://game.raceroomracing.com/cdn/apex-production/Livery:14021:full.webp",
   ],
-  "https://game.raceroom.com/en/store/cars/nsu-tts-cup/nsu/nsu-tts": [
+  "https://game.raceroomracing.com/store/cars/group-2/nsu-tts/4810": [
     "https://prod.r3eassets.com/assets/content/carlivery/jagerbomb-motor-71-4948-image-big.png",
     "https://prod.r3eassets.com/assets/content/carlivery/diggleton-racing-15-4966-image-big.png",
     "https://prod.r3eassets.com/assets/content/carlivery/diggleton-racing-24-4946-image-big.png",
@@ -1205,7 +1214,7 @@ window.CAR_IMAGES_BY_LINK = {
     "https://prod.r3eassets.com/assets/content/carlivery/revell-team-519-4964-image-big.png",
     "https://prod.r3eassets.com/assets/content/carlivery/bartolome-racing-520-4965-image-big.png"
   ],
-  "https://game.raceroom.com/en/store/cars/group-2/volkswagen/volkswagen-scirocco-gr2": [
+  "https://game.raceroomracing.com/store/cars/group-2/volkswagen-scirocco-gr2/8498": [
     "https://prod.r3eassets.com/assets/content/carlivery/klaus-liegensa-57-8541-image-big.png",
     "https://prod.r3eassets.com/assets/content/carlivery/valvoline-team-16-8535-image-big.png",
     "https://prod.r3eassets.com/assets/content/carlivery/bill-scott-racing-31-8536-image-big.png",
@@ -2318,7 +2327,7 @@ window.CAR_IMAGES_BY_LINK = {
     "https://prod.r3eassets.com/assets/content/carlivery/pit-lane-181-6831-image-big.png",
     "https://prod.r3eassets.com/assets/content/carlivery/porsche-motorsport-222-6788-image-big.png"
   ],
-  "https://game.raceroom.com/en/store/cars/hillclimb-icons/georg-plasa/134-judd-v8": [
+  "https://game.raceroomracing.com/store/cars/hillclimb-icons/bmw-134-judd-v8/258": [
     "https://prod.r3eassets.com/assets/content/carlivery/team-judd-134-09-2054-image-big.png"
   ],
   "https://game.raceroom.com/en/store/cars/hillclimb-icons/carlsson/carlsson-slk-340-judd": [
@@ -2956,6 +2965,13 @@ window.CAR_IMAGES_BY_LINK = {
     "https://prod.r3eassets.com/assets/content/carlivery/am-holzer-motorsport-31-12630-image-big.png",
     "https://prod.r3eassets.com/assets/content/carlivery/bmw-motorsport-australia-83-12631-image-big.png"
   ],
+  "https://game.raceroomracing.com/store/cars/super-touring/ford-mondeo-super-touring": [
+    "https://game.raceroomracing.com/cdn/apex-production/Livery:13550:full.webp",
+    "https://game.raceroomracing.com/cdn/apex-production/Livery:13659:full.webp",
+    "https://game.raceroomracing.com/cdn/apex-production/Livery:13660:full.webp",
+    "https://game.raceroomracing.com/cdn/apex-production/Livery:13661:full.webp",
+    "https://game.raceroomracing.com/cdn/apex-production/Livery:13662:full.webp",
+  ],
   "https://game.raceroom.com/en/store/cars/super-touring/honda/honda-accord-super-touring": [
     "https://prod.r3eassets.com/assets/content/carlivery/kw-rennteam-21-9848-image-big.png",
     "https://prod.r3eassets.com/assets/content/carlivery/mugen-honda-1-11541-image-big.png",
@@ -2985,6 +3001,15 @@ window.CAR_IMAGES_BY_LINK = {
     "https://prod.r3eassets.com/assets/content/carlivery/nh-car-sport-team-26-13117-image-big.png",
     "https://prod.r3eassets.com/assets/content/carlivery/nordic-miltronic-motorsport-026-13135-image-big.png",
     "https://prod.r3eassets.com/assets/content/carlivery/hildenbrandt-motorsport-31-13149-image-big.png"
+  ],
+  "https://game.raceroomracing.com/store/cars/super-touring/peugeot-406-super-touring-1998": [
+    "https://game.raceroomracing.com/cdn/apex-production/Livery:13672:full.webp",
+    "https://game.raceroomracing.com/cdn/apex-production/Livery:13541:full.webp",
+    "https://game.raceroomracing.com/cdn/apex-production/Livery:13666:full.webp",
+    "https://game.raceroomracing.com/cdn/apex-production/Livery:13667:full.webp",
+    "https://game.raceroomracing.com/cdn/apex-production/Livery:13668:full.webp",
+    "https://game.raceroomracing.com/cdn/apex-production/Livery:13671:full.webp",
+    "https://game.raceroomracing.com/cdn/apex-production/Livery:13674:full.webp",
   ],
   "https://game.raceroom.com/en/store/cars/super-touring/renault/renault-laguna-super-touring": [
     "https://prod.r3eassets.com/assets/content/carlivery/williams-renault-dealer-racing-2-13235-image-big.png",

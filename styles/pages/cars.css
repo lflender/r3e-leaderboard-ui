@@ -209,6 +209,15 @@
     transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
+#cars-info-table .results-table {
+    overflow: visible;
+}
+
+#cars-info-table .results-table .row-link:hover,
+#cars-info-table .results-table .row-link:focus-visible {
+    z-index: var(--z-dropdown);
+}
+
 .car-link-thumbnail img {
     display: block;
     width: 100%;

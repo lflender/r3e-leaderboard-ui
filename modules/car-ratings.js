@@ -26,38 +26,54 @@ const CarRatings = (() => {
   // Normalize a car name for sibling matching: remove "DTM", lowercase, collapse spaces.
   function normalizeCarName(name) {
     if (!name) return '';
-    return String(name)
+    const normalizedName = String(name)
       .replace(/\bDTM\b/gi, '')
       .replace(/\s+/g, ' ')
       .trim()
       .toLowerCase();
+    const legacyNameAliases = {
+      '134 judd v8': 'bmw 134 judd v8',
+      'e36 v8 judd': 'bmw e36 v8 judd'
+    };
+    return legacyNameAliases[normalizedName] || normalizedName;
   }
 
-  // Find all structured car IDs in CARS_DATA that share the same normalized name + year.
-  function findSiblingIds(carId) {
+  // Match stored IDs by name and year so class/link changes do not orphan ratings.
+  function findSiblingIds(carId, ratings = load()) {
     const normalizedId = buildCarId(carId);
     if (!isStructuredCarId(normalizedId)) return [normalizedId];
-    if (!Array.isArray(window.CARS_DATA)) return [normalizedId];
 
     const parts = normalizedId.split('||');
     const targetName = normalizeCarName(parts[1]);
     const targetYear = String(parts[2] || '').trim().toLowerCase();
 
     const siblings = [];
-    window.CARS_DATA.forEach(cls => {
-      (cls.cars || []).forEach(car => {
-        const name = normalizeCarName(String(car.car || ''));
-        const year = String(car.year || '').trim().toLowerCase();
-        if (name === targetName && year === targetYear) {
-          const id = buildCarId(car);
-          if (isStructuredCarId(id)) siblings.push(id);
-        }
+    if (Array.isArray(window.CARS_DATA)) {
+      window.CARS_DATA.forEach(cls => {
+        (cls.cars || []).forEach(car => {
+          const name = normalizeCarName(String(car.car || ''));
+          const year = String(car.year || '').trim().toLowerCase();
+          if (name === targetName && year === targetYear) {
+            const id = buildCarId(car);
+            if (isStructuredCarId(id)) siblings.push(id);
+          }
+        });
       });
+    }
+
+    Object.keys(ratings).forEach(id => {
+      if (!isStructuredCarId(id)) return;
+      const storedParts = id.split('||');
+      const storedName = normalizeCarName(storedParts[1]);
+      const storedYear = String(storedParts[2] || '').trim().toLowerCase();
+      if (storedName === targetName && storedYear === targetYear) {
+        siblings.push(id);
+      }
     });
 
     // Always include the original ID even if not found in CARS_DATA
     if (!siblings.includes(normalizedId)) siblings.push(normalizedId);
-    return siblings;
+    return [...new Set(siblings)];
   }
 
   function load() {
@@ -141,7 +157,7 @@ const CarRatings = (() => {
     if (isValidScore(score)) return score;
 
     // Check sibling cars (same name+year, ignoring DTM/casing/spacing)
-    const siblings = findSiblingIds(normalizedId);
+    const siblings = findSiblingIds(normalizedId, data);
     for (const siblingId of siblings) {
       if (siblingId === normalizedId) continue;
       const siblingScore = data[siblingId];
@@ -159,7 +175,7 @@ const CarRatings = (() => {
     const normalizedId = buildCarId(carId);
     if (!normalizedId) return;
     const data = load();
-    const siblings = findSiblingIds(normalizedId);
+    const siblings = findSiblingIds(normalizedId, data);
     for (const id of siblings) {
       if (score === 0) {
         delete data[id];

@@ -19,6 +19,9 @@ function buildDom() {
 
 beforeEach(() => {
     document.body.innerHTML = buildDom();
+    sessionStorage.clear();
+    window.customSelects = {};
+    loadBrowserScript('modules/filter-state.js');
     window.TRACKS_DATA = [{ id: 10, label: 'Spa - Grand Prix' }];
     window.CARS_DATA = [{ superclass: 'GT3', class: 'GT3' }];
     window.getCarClassId = vi.fn().mockReturnValue(5);
@@ -63,7 +66,24 @@ beforeEach(() => {
     };
 
     window.CustomSelect = class {
-        constructor(_id, _options, _onChange) {}
+        constructor(id, options, onChange) {
+            this.options = options;
+            this.onChange = onChange;
+            this.currentValue = '';
+            window.customSelects = window.customSelects || {};
+            window.customSelects[id] = this;
+        }
+
+        setValue(value, options = {}) {
+            this.currentValue = value;
+            if (options.notify !== false && this.onChange) {
+                this.onChange(value, { source: options.source || 'programmatic' });
+            }
+        }
+
+        setOptions(options) {
+            this.options = options;
+        }
     };
 
     global.Response = class Response {
@@ -82,6 +102,28 @@ beforeEach(() => {
 });
 
 describe('leaderboards integration', () => {
+    it('restores saved track, category, and combine filters', async () => {
+        window.FilterOptionsService.getTrackOptions.mockReturnValue([
+            { value: '', label: 'All tracks' },
+            { value: '10', label: 'Spa - Grand Prix' }
+        ]);
+        window.FilterOptionsService.getSuperclassOptions.mockReturnValue([
+            { value: 'superclass:GT3', label: 'Category: GT3' }
+        ]);
+        window.PageFilterState.write('leaderboards', 'track', '10');
+        window.PageFilterState.write('leaderboards', 'class', 'superclass:GT3');
+        window.PageFilterState.write('leaderboards', 'combine', true);
+
+        loadBrowserScript('modules/compressed-json-helper.js');
+        loadBrowserScript('modules/pages/leaderboards.js');
+        await new Promise(resolve => setTimeout(resolve, 20));
+
+        expect(window.customSelects['track-filter-ui'].currentValue).toBe('10');
+        expect(window.customSelects['track-class-filter-ui'].currentValue).toBe('superclass:GT3');
+        expect(document.getElementById('combine-checkbox').checked).toBe(true);
+        expect(document.getElementById('combine-checkbox-container').style.display).toBe('flex');
+    });
+
     it('keeps the layout filter hidden until a track has multiple layouts', async () => {
         loadBrowserScript('modules/compressed-json-helper.js');
         loadBrowserScript('modules/pages/leaderboards.js');
@@ -712,4 +754,3 @@ describe('leaderboards fetchTopCombinations pipeline', () => {
         expect(poleHeader).toBeUndefined();
     });
 });
-

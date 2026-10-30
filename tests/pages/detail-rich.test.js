@@ -48,6 +48,7 @@ function setupGlobals() {
         formatDate: value => String(value ?? ''),
         getPositionBadgeColor: () => '#abcdef',
         getTotalEntriesCount: (entry) => Number(entry.TotalEntries || 0),
+        getFastestLapTime: window.R3ETimeUtils.getFastestLapTime,
         resolveCarClassLogo: vi.fn(() => '/images/gt3.webp'),
         splitCarName: (carName) => {
             const raw = String(carName || '');
@@ -132,6 +133,7 @@ function setupGlobals() {
             resultsContainer.innerHTML = html;
         },
         renderDetailRow: (item, options = {}) => {
+            window.__detailRowOptions = options;
             const isCombinedView = !!options.isCombinedView;
             const totalEntries = isCombinedView ? (options.allResultsLength || 0) : Number(item.TotalEntries || 0);
             const name = String(item.Name || item.name || '');
@@ -156,8 +158,8 @@ function setupGlobals() {
             html += window.tableRenderer.renderDetailPositionCell(rowItem, { showAbsolutePosition: !!options.showAbsolutePosition });
             html += window.tableRenderer.renderDriverNameCell(rowItem, { driverLinkClass: 'detail-driver-link', driverLinkBase: 'drivers.html?driver=' });
             html += window.tableRenderer.renderLapTimeCell(lapTime, { includeDelta: false });
-            html += window.tableRenderer.renderGapTimeCell(lapTime);
-            html += window.tableRenderer.renderGapPercentCell(rowItem, null);
+            html += window.tableRenderer.renderGapTimeCell(lapTime, options.referenceTime);
+            html += window.tableRenderer.renderGapPercentCell(rowItem, options.referenceTime);
             if (isCombinedView) {
                 html += window.tableRenderer.renderCell(rowItem, 'CarClass');
             }
@@ -277,8 +279,10 @@ function setupGlobals() {
 
 beforeAll(async () => {
     document.body.innerHTML = buildDom();
+    loadBrowserScript('modules/time-helper.js');
     setupGlobals();
 
+    loadBrowserScript('modules/filter-state.js');
     loadBrowserScript('modules/difficulty-filter.js');
     loadBrowserScript('modules/pages/detail.js');
     document.dispatchEvent(new Event('DOMContentLoaded'));
@@ -296,6 +300,10 @@ describe('detail page rich integration', () => {
         expect(trackHtml).toContain('New Spa');
         expect(classHtml).toContain('/images/gt3.webp');
         expect(tableRows.length).toBe(3);
+        const headers = window.TemplateHelper.generateTable.mock.calls.at(-1)[0];
+        expect(headers).toContain('Difficulty');
+        expect(window.__detailRowOptions.referenceTime).toBe('1:19.100');
+        expect(window.__detailRowOptions.referenceTime).toBeTruthy();
     });
 
     it('tracks detail view analytics once from URL parameters', () => {
@@ -328,6 +336,7 @@ describe('detail page rich integration', () => {
 
         rows = document.querySelectorAll('#detail-results-container table.results-table tbody tr');
         expect(rows.length).toBe(1);
+        expect(window.PageFilterState.read('detail', '10|5||').car).toBe('BMW M4');
 
         expect(window.R3EAnalytics.track).toHaveBeenCalledWith(
             'detail filter changed',
@@ -523,4 +532,3 @@ describe('detail page rich integration', () => {
         expect(charlieBar.classList.contains('entries-dist-bar--active')).toBe(false);
     });
 });
-

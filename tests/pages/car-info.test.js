@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { loadBrowserScript } from '../helpers/script-loader.js';
 
 function buildDom() {
@@ -12,8 +12,25 @@ function buildDom() {
     ].join('');
 }
 
+beforeAll(() => {
+    document.body.innerHTML = buildDom();
+    window.toggleGroup = target => {
+        const group = typeof target === 'string' ? target : target?.dataset?.group;
+        if (!group) return;
+        const header = document.querySelector(`.driver-group-header[data-group="${group}"]`);
+        const rows = document.querySelectorAll(`tr.${group}`);
+        const collapsed = !header.classList.contains('collapsed');
+        header.classList.toggle('collapsed', collapsed);
+        rows.forEach(row => {
+            row.style.display = collapsed ? 'none' : '';
+        });
+    };
+});
+
 beforeEach(() => {
     document.body.innerHTML = buildDom();
+    sessionStorage.clear();
+    loadBrowserScript('modules/filter-state.js');
     window.CARS_DATA = [
         {
             class: 'GT3',
@@ -35,6 +52,7 @@ beforeEach(() => {
             ]
         }
     ];
+    window.CAR_IMAGES_BY_LINK = {};
 
     window.FlagHelper = {
         countryToFlag: vi.fn().mockReturnValue('<span class="fi fi-de"></span>')
@@ -63,8 +81,22 @@ beforeEach(() => {
     };
 
     window.CustomSelect = class {
-        constructor(_id, _options, _onChange) {}
+        constructor(id, options, onChange) {
+            window.customSelects = window.customSelects || {};
+            this.options = options;
+            this.onChange = onChange;
+            this.currentValue = '';
+            window.customSelects[id] = this;
+        }
+
+        setValue(value, options = {}) {
+            this.currentValue = value;
+            if (options.notify !== false && this.onChange) {
+                this.onChange(value, { source: options.source || 'programmatic' });
+            }
+        }
     };
+    window.customSelects = {};
 
     // car-info.js references R3ECarUtils badge helpers
     if (!window.R3ECarUtils) {
@@ -73,6 +105,144 @@ beforeEach(() => {
 });
 
 describe('car-info integration', () => {
+    it('matches image maps across old and new store URL formats', async () => {
+        const images = ['https://cdn.example.com/car-large-1.png', 'https://cdn.example.com/car-large-2.png'];
+        window.CARS_DATA[0].cars[0].link =
+            'https://game.raceroomracing.com/store/cars/gtr-3/chevrolet-corvette-z06.r-gt3/1234';
+        window.CAR_IMAGES_BY_LINK = {
+            'https://game.raceroom.com/en/store/cars/gtr-3/chevrolet/chevrolet-corvette-z06r-gt3': images
+        };
+
+        loadBrowserScript('modules/pages/car-info.js');
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        const image = document.querySelector('.car-link-thumbnail .car-rotating-image');
+        expect(image).not.toBeNull();
+        expect(image.src).toBe(images[0]);
+        expect(JSON.parse(decodeURIComponent(image.dataset.imageList))).toEqual(images);
+    });
+
+    it('starts with class groups collapsed and keeps expand controls working', async () => {
+        localStorage.removeItem('carInfoViewMode');
+        loadBrowserScript('modules/pages/car-info.js');
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        const header = document.querySelector('.driver-group-header');
+        const row = document.querySelector(`tr.${header.dataset.group}`);
+        expect(header.classList.contains('collapsed')).toBe(true);
+        expect(row.style.display).toBe('none');
+
+        document.getElementById('cars-unfold-all').click();
+        await new Promise(resolve => setTimeout(resolve, 10));
+
+        expect(header.classList.contains('collapsed')).toBe(false);
+        expect(row.style.display).toBe('');
+    });
+
+    it('restores expanded class groups after page reload', async () => {
+        window.CARS_DATA = [
+            {
+                class: 'GT3',
+                cars: [{ car: 'BMW M4 GT3', car_class: 'GT3', wheel_cat: 'GT', transmission_cat: 'Paddles' }]
+            },
+            {
+                class: 'GT4',
+                cars: [{ car: 'Audi R8 LMS GT4', car_class: 'GT4', wheel_cat: 'GT', transmission_cat: 'Paddles' }]
+            }
+        ];
+        window.PageFilterState.write('cars', 'expandedClassGroups', ['class-gt3']);
+        loadBrowserScript('modules/pages/car-info.js');
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        const gt3Header = document.querySelector('.driver-group-header[data-group="class-gt3"]');
+        const gt4Header = document.querySelector('.driver-group-header[data-group="class-gt4"]');
+        expect(gt3Header.classList.contains('collapsed')).toBe(false);
+        expect(document.querySelector(`tr.${gt3Header.dataset.group}`).style.display).toBe('');
+        expect(gt4Header.classList.contains('collapsed')).toBe(true);
+        expect(document.querySelector(`tr.${gt4Header.dataset.group}`).style.display).toBe('none');
+    });
+
+    it('saves class group changes made with the group header and expand controls', async () => {
+        window.CARS_DATA = [
+            {
+                class: 'GT3',
+                cars: [{ car: 'BMW M4 GT3', car_class: 'GT3', wheel_cat: 'GT', transmission_cat: 'Paddles' }]
+            },
+            {
+                class: 'GT4',
+                cars: [{ car: 'Audi R8 LMS GT4', car_class: 'GT4', wheel_cat: 'GT', transmission_cat: 'Paddles' }]
+            }
+        ];
+        loadBrowserScript('modules/pages/car-info.js');
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        const gt3Header = document.querySelector('.driver-group-header[data-group="class-gt3"]');
+        gt3Header.removeAttribute('onclick');
+        window.toggleGroup(gt3Header);
+        gt3Header.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        expect(window.PageFilterState.read('cars').expandedClassGroups).toEqual(['class-gt3']);
+
+        document.getElementById('cars-unfold-all').click();
+        expect(window.PageFilterState.read('cars').expandedClassGroups.sort()).toEqual(['class-gt3', 'class-gt4']);
+
+        document.getElementById('cars-fold-all').click();
+        expect(window.PageFilterState.read('cars').expandedClassGroups).toEqual([]);
+    });
+
+    it('preserves expanded class groups across filter rerenders', async () => {
+        window.CARS_DATA = [
+            {
+                class: 'GT3',
+                cars: [{ car: 'BMW M4 GT3', car_class: 'GT3', wheel_cat: 'GT', transmission_cat: 'Paddles' }]
+            },
+            {
+                class: 'GT4',
+                cars: [{ car: 'Audi R8 LMS GT4', car_class: 'GT4', wheel_cat: 'GT', transmission_cat: 'Paddles' }]
+            }
+        ];
+
+        loadBrowserScript('modules/pages/car-info.js');
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        const gt3Header = Array.from(document.querySelectorAll('.driver-group-header'))
+            .find(header => header.dataset.group === 'class-gt3');
+        gt3Header.classList.remove('collapsed');
+        document.querySelector(`tr.${gt3Header.dataset.group}`).style.display = '';
+
+        window.customSelects['class-filter-ui-cars'].onChange('gt4');
+        expect(document.querySelectorAll('.driver-group-header')).toHaveLength(1);
+
+        window.customSelects['class-filter-ui-cars'].onChange('');
+        const restoredGt3Header = document.querySelector('.driver-group-header[data-group="class-gt3"]');
+        const restoredGt4Header = document.querySelector('.driver-group-header[data-group="class-gt4"]');
+        expect(restoredGt3Header.classList.contains('collapsed')).toBe(false);
+        expect(document.querySelector(`tr.${restoredGt3Header.dataset.group}`).style.display).toBe('');
+        expect(restoredGt4Header.classList.contains('collapsed')).toBe(true);
+        expect(document.querySelector(`tr.${restoredGt4Header.dataset.group}`).style.display).toBe('none');
+    });
+
+    it('restores saved filters and applies them on page load', async () => {
+        window.CARS_DATA[0].cars[0].car_class = 'GT3';
+        window.FilterOptionsService.getClassOptionsFromCarsData.mockReturnValue([
+            { value: 'GT3', label: 'GT3' }
+        ]);
+        window.PageFilterState.write('cars', 'wheel', 'gt');
+        window.PageFilterState.write('cars', 'transmission', 'paddles');
+        window.PageFilterState.write('cars', 'class', 'GT3');
+        window.PageFilterState.write('cars', 'rating', '0');
+        window.PageFilterState.write('cars', 'search', 'BMW');
+
+        loadBrowserScript('modules/pages/car-info.js');
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        expect(window.customSelects['wheel-filter-ui'].currentValue).toBe('gt');
+        expect(window.customSelects['trans-filter-ui'].currentValue).toBe('paddles');
+        expect(window.customSelects['class-filter-ui-cars'].currentValue).toBe('GT3');
+        expect(window.customSelects['rating-filter-ui'].currentValue).toBe('0');
+        expect(document.getElementById('cars-search').value).toBe('BMW');
+        expect(document.querySelectorAll('#cars-info-table tr.driver-data-row')).toHaveLength(1);
+    });
+
     it('renders grouped table from CARS_DATA without fetch', async () => {
         const fetchSpy = vi.spyOn(global, 'fetch');
 
@@ -88,6 +258,25 @@ describe('car-info integration', () => {
         expect(html).toContain('590hp');
         expect(fetchSpy).not.toHaveBeenCalled();
         fetchSpy.mockRestore();
+    });
+
+    it('matches manual transmission data when the H filter is selected', async () => {
+        window.CARS_DATA = [{
+            class: 'Mixed',
+            cars: [
+                { car: 'Manual Car', wheel_cat: 'round', transmission_cat: 'manual' },
+                { car: 'Paddles Car', wheel_cat: 'round', transmission_cat: 'paddles' }
+            ]
+        }];
+
+        loadBrowserScript('modules/pages/car-info.js');
+        await new Promise(resolve => setTimeout(resolve, 0));
+        window.customSelects['trans-filter-ui'].onChange('h');
+
+        const rows = document.querySelectorAll('#cars-info-table tr.driver-data-row');
+        expect(rows).toHaveLength(1);
+        expect(rows[0].querySelector('.car-badge--trans-h').textContent).toBe('H');
+        expect(rows[0].textContent).not.toContain('Paddles Car');
     });
 
     it('shows placeholder when dataset is empty', async () => {
@@ -157,7 +346,7 @@ describe('car-info integration', () => {
             escapeHtml: s => String(s),
             splitCarName: vi.fn((name) => {
                 const value = String(name || '');
-                if (value === 'E36 V8 JUDD') return { brand: 'Georg Plasa', model: 'BMW E36 V8' };
+                if (value === 'BMW E36 V8 JUDD') return { brand: 'BMW', model: 'E36 V8 JUDD' };
                 if (value === 'BMW M4 GT3') return { brand: 'BMW', model: 'M4 GT3' };
                 if (value === 'Porsche 991 GT2 RS CS') return { brand: 'Porsche', model: '991 GT2 RS CS' };
                 return { brand: '', model: value };
@@ -184,7 +373,7 @@ describe('car-info integration', () => {
                         link: 'https://example.com/bmw'
                     },
                     {
-                        car: 'E36 V8 JUDD',
+                        car: 'BMW E36 V8 JUDD',
                         car_class: 'ADAC GT Masters',
                         wheel_cat: 'Touring',
                         transmission_cat: 'Manual',
@@ -236,16 +425,17 @@ describe('car-info integration', () => {
         expect(html).toContain('M4 GT3');
         expect(html).not.toContain('Porsche');
 
-        // Search by brand display name: "georg" should match Georg Plasa (E36 V8 JUDD)
-        searchInput.value = 'georg';
+        // Search by brand display name: BMW should match both BMW cars.
+        searchInput.value = 'bmw';
         searchInput.dispatchEvent(new Event('input', { bubbles: true }));
         vi.advanceTimersByTime(300);
         await Promise.resolve();
 
         html = document.getElementById('cars-info-table').innerHTML;
-        expect(html).toContain('Georg Plasa');
+        expect(html).toContain('BMW');
+        expect(html).toContain('E36 V8 JUDD');
         expect(html).not.toContain('Porsche');
-        expect(html).not.toContain('M4 GT3');
+        expect(html).toContain('M4 GT3');
 
         vi.useRealTimers();
     });
@@ -443,6 +633,15 @@ describe('car-info tile view (renderTiles)', () => {
         window.CustomSelect = class {
             constructor(id, _options, onChange) {
                 if (id === 'class-filter-ui-cars') classOnChange = onChange;
+                this.onChange = onChange;
+                this.currentValue = '';
+            }
+
+            setValue(value, options = {}) {
+                this.currentValue = value;
+                if (options.notify !== false && this.onChange) {
+                    this.onChange(value, { source: options.source || 'programmatic' });
+                }
             }
         };
         localStorage.setItem('carInfoViewMode', 'tiles');

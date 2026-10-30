@@ -8,6 +8,10 @@ class TableSortService {
         this.resolveTrackLabel = options.resolveTrackLabel || ((item) => String(item?.track || item?.Track || item?.track_name || item?.TrackName || ''));
     }
 
+    static getNextLapTimeSort(sortBy) {
+        return sortBy === 'gap' ? 'lapTime' : 'gap';
+    }
+
     sortDriverEntries(entries, sortBy = 'gap') {
         if (!Array.isArray(entries) || entries.length === 0) return;
 
@@ -88,10 +92,9 @@ class TableSortService {
     }
 
     _sortByGapPercent(entries) {
-        const referenceTime = this.extractReferenceTime(entries);
         entries.sort((a, b) => {
-            const percentA = this.calculateGapPercentValue(a, referenceTime);
-            const percentB = this.calculateGapPercentValue(b, referenceTime);
+            const percentA = this.calculateGapPercentValue(a);
+            const percentB = this.calculateGapPercentValue(b);
             if (percentA !== percentB) return percentA - percentB;
             return R3EUtils.getTotalEntriesCount(b) - R3EUtils.getTotalEntriesCount(a);
         });
@@ -122,6 +125,25 @@ class TableSortService {
     getFieldValueForSort(item, sortBy) {
         if (sortBy === 'track') {
             return this.resolveTrackLabel(item);
+        }
+
+        if (sortBy === 'car_class') {
+            const classFields = window.FIELD_NAMES?.CAR_CLASS || [
+                'CarClass', 'Car Class', 'car_class', 'Class', 'class',
+                'ClassName', 'className', 'class_name'
+            ];
+            const className = window.getField
+                ? window.getField(item, classFields, '')
+                : classFields.map(field => item[field]).find(value => value !== undefined && value !== null) || '';
+            if (className) {
+                if (typeof className === 'object') {
+                    return className.Name || className.name || className['class-name'] || className.class_name || '';
+                }
+                return className;
+            }
+
+            const classId = item.class_id || item.ClassID || item['Class ID'] || item.classId || '';
+            return window.CAR_CLASSES_DATA?.[String(classId)] || '';
         }
 
         const fieldNames = this.getSortFieldNames(sortBy);
@@ -162,27 +184,8 @@ class TableSortService {
     }
 
     calculateGapPercentValue(item, referenceTime) {
-        if (!item) return 100;
-
-        const raw = item.LapTime || item['Lap Time'] || item.lap_time || item.laptime || item.Time || '';
-        const s = String(raw || '');
-        if (!s) return 100;
-
-        const parts = s.split(/,\s*/);
-        const lapTime = parts[0] || '';
-
-        if (parts.length < 2) return 100;
-
-        const lapMillis = R3EUtils.parseLapTimeToMillis(lapTime);
-        if (lapMillis === 0) return 100;
-
-        const gapMillis = R3EUtils.parseGapMillisFromItem(item);
-        if (gapMillis === 0 || gapMillis === Number.MAX_VALUE) return 100;
-
-        const refMillis = lapMillis - gapMillis;
-        if (refMillis <= 0) return 100;
-
-        return (lapMillis / refMillis) * 100;
+        const percentage = R3EUtils.calculateGapPercentage(item, referenceTime);
+        return percentage === '-' ? Number.NEGATIVE_INFINITY : parseFloat(percentage);
     }
 }
 

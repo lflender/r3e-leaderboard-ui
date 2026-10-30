@@ -74,6 +74,7 @@ beforeAll(async () => {
         applyTimeframeFilter: vi.fn(data => data)
     };
 
+    loadBrowserScript('modules/filter-state.js');
     loadBrowserScript('modules/difficulty-filter.js');
     loadBrowserScript('modules/pages/detail.js');
     await new Promise(resolve => setTimeout(resolve, 0));
@@ -94,4 +95,3 @@ describe('detail page integration', () => {
         expect(typeof window.goToPage).toBe('function');
     });
 });
-

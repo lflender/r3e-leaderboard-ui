@@ -6,6 +6,9 @@
  * they share this DataService's state — caches, single-flight promises, etc.).
  */
 
+const POLE_TIME_CACHE_KEY = 'r3e_pole_time_cache';
+const POLE_TIME_CACHE_LIMIT = 250;
+
 class DataService {
     constructor() {
         this.driverIndex = null;
@@ -25,6 +28,7 @@ class DataService {
         this.topCombinationsCache = null;
         this.topCombinationsPromise = null; // single-flight promise
         this.poleTimeCache = new Map(); // per-combination pole time cache
+        this.poleTimeCacheVersion = null;
         this.poleTimePromises = new Map(); // single-flight promises for pole fetches
         this.statusCache = null; // last good status (fallback only)
         this.statusPromise = null; // single-flight promise for status fetch
@@ -147,6 +151,10 @@ class DataService {
 
         const promise = (async () => {
             try {
+                const cacheVersion = await this._getIndexCacheVersion();
+                this._loadPoleTimeCache(cacheVersion);
+                if (this.poleTimeCache.has(key)) return this.poleTimeCache.get(key);
+
                 const data = await this.fetchLeaderboardDetails(trackId, classId);
                 const entries = data?.track_info?.Data;
                 if (!Array.isArray(entries) || entries.length === 0) {
@@ -168,6 +176,10 @@ class DataService {
                     laptime: p1.laptime || ''
                 };
                 this.poleTimeCache.set(key, result);
+                while (this.poleTimeCache.size > POLE_TIME_CACHE_LIMIT) {
+                    this.poleTimeCache.delete(this.poleTimeCache.keys().next().value);
+                }
+                this._persistPoleTimeCache(cacheVersion);
                 return result;
             } catch (err) {
                 this.poleTimePromises.delete(key);
@@ -177,6 +189,105 @@ class DataService {
 
         this.poleTimePromises.set(key, promise);
         return promise;
+    }
+
+    _loadPoleTimeCache(cacheVersion) {
+        if (this.poleTimeCacheVersion === cacheVersion) return;
+
+        this.poleTimeCache.clear();
+        this.poleTimeCacheVersion = cacheVersion;
+
+        try {
+            const raw = window.localStorage.getItem(POLE_TIME_CACHE_KEY);
+            if (!raw) return;
+
+            const cached = JSON.parse(raw);
+            if (cached?.version !== cacheVersion || !cached.entries || typeof cached.entries !== 'object') return;
+
+            Object.entries(cached.entries).slice(-POLE_TIME_CACHE_LIMIT).forEach(([key, value]) => {
+                if (!value || typeof value !== 'object' || typeof value.laptime !== 'string' || !value.laptime) return;
+                this.poleTimeCache.set(key, {
+                    name: typeof value.name === 'string' ? value.name : '',
+                    country: typeof value.country === 'string' ? value.country : '',
+                    rank: typeof value.rank === 'string' ? value.rank : '',
+                    avatar: typeof value.avatar === 'string' ? value.avatar : '',
+                    path_id: typeof value.path_id === 'string' ? value.path_id : '',
+                    laptime: value.laptime
+                });
+            });
+        } catch (error) {
+            console.warn('Could not load persisted pole-time cache:', error);
+        }
+    }
+
+    _persistPoleTimeCache(cacheVersion) {
+        const entries = Object.fromEntries(
+            Array.from(this.poleTimeCache.entries())
+                .filter(([, value]) => value && typeof value.laptime === 'string' && value.laptime)
+                .slice(-POLE_TIME_CACHE_LIMIT)
+        );
+
+        try {
+            window.localStorage.setItem(POLE_TIME_CACHE_KEY, JSON.stringify({
+                version: cacheVersion,
+                entries
+            }));
+        } catch (error) {
+            console.warn('Could not save persisted pole-time cache:', error);
+        }
+    }
+
+    async enrichLapTimeGaps(entries) {
+        if (!Array.isArray(entries) || entries.length === 0) return [];
+
+        const combinations = new Map();
+        entries.forEach(entry => {
+            if (!entry || typeof entry !== 'object') return;
+
+            const lapKey = ['LapTime', 'Lap Time', 'lap_time', 'laptime', 'Time', 'time']
+                .find(key => typeof entry[key] === 'string' && !entry[key].includes(','));
+            const trackId = entry.track_id || entry.TrackID || entry.trackId || entry['Track ID'];
+            const classId = entry.class_id || entry.ClassID || entry.classId || entry['Class ID'];
+            if (!lapKey || !trackId || !classId) return;
+
+            const key = `${trackId}_${classId}`;
+            if (!combinations.has(key)) {
+                combinations.set(key, { trackId, classId, entries: [] });
+            }
+            combinations.get(key).entries.push({ entry, lapKey, originalLapTime: entry[lapKey] });
+        });
+
+        const requests = Array.from(combinations.values());
+        const changedEntries = [];
+        for (let start = 0; start < requests.length; start += 24) {
+            const batch = requests.slice(start, start + 24);
+            let nextRequest = 0;
+            const enrichNext = async () => {
+                while (nextRequest < batch.length) {
+                    const combination = batch[nextRequest++];
+                    try {
+                        const pole = await this.fetchPoleTime(combination.trackId, combination.classId);
+                        if (!pole?.laptime) {
+                            console.warn(`Unable to calculate lap-time gaps for track ${combination.trackId}, class ${combination.classId}`);
+                            continue;
+                        }
+
+                        combination.entries.forEach(({ entry, lapKey, originalLapTime }) => {
+                            const gap = R3EUtils.calculateLapTimeGap(originalLapTime, pole.laptime);
+                            if (!gap) return;
+
+                            entry[lapKey] = `${originalLapTime}, ${gap}`;
+                            changedEntries.push({ entry, originalLapTime });
+                        });
+                    } catch (error) {
+                        console.warn(`Unable to enrich lap times for track ${combination.trackId}, class ${combination.classId}:`, error);
+                    }
+                }
+            };
+            await Promise.all(Array.from({ length: Math.min(6, batch.length) }, enrichNext));
+        }
+
+        return changedEntries;
     }
 
     /**
@@ -460,6 +571,7 @@ class DataService {
 
         entries.sort((a, b) => a.__lapSortMs - b.__lapSortMs);
 
+        const fastestLapTime = entries[0].__rawLapForSort;
         entries.forEach((entry, index) => {
             const newPos = index + 1;
             entry.Position = newPos;
@@ -469,9 +581,7 @@ class DataService {
             delete entry.total_entries;
         });
 
-        const fastestMs = entries[0].__lapSortMs;
         entries.forEach((entry, index) => {
-            const entryMs = entry.__lapSortMs;
             const lapTimePart = String(entry.__rawLapForSort || '').split(',')[0].trim();
 
             if (index === 0) {
@@ -479,10 +589,8 @@ class DataService {
                 entry['Lap Time'] = lapTimePart;
                 entry.lap_time = lapTimePart;
             } else {
-                const gapMs = entryMs - fastestMs;
-                const gapSeconds = (gapMs / 1000).toFixed(3);
-                const gapFormatted = `+${gapSeconds}s`;
-                const newLapTime = `${lapTimePart}, ${gapFormatted}`;
+                const gap = R3EUtils.calculateLapTimeGap(lapTimePart, fastestLapTime);
+                const newLapTime = gap ? `${lapTimePart}, ${gap}` : lapTimePart;
                 entry.LapTime = newLapTime;
                 entry['Lap Time'] = newLapTime;
                 entry.lap_time = newLapTime;

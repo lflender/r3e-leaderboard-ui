@@ -5,6 +5,7 @@ describe('R3ECarUtils', () => {
     beforeAll(() => {
         loadBrowserScript('modules/utils.js');
         loadBrowserScript('modules/car-helper.js');
+        loadBrowserScript('modules/data/cars.js');
     });
 
     beforeEach(() => {
@@ -13,10 +14,10 @@ describe('R3ECarUtils', () => {
 
     test('splits car names including special cases', () => {
         expect(window.R3ECarUtils.splitCarName('Audi R8 LMS')).toEqual({ brand: 'Audi', model: 'R8 LMS' });
-        expect(window.R3ECarUtils.splitCarName('E36 V8 JUDD')).toEqual({ brand: 'Georg Plasa', model: 'BMW E36 V8' });
-        expect(window.R3ECarUtils.splitCarName('BMW E36 V8 JUDD')).toEqual({ brand: 'Georg Plasa', model: 'BMW E36 V8' });
-        expect(window.R3ECarUtils.splitCarName('134 Judd V8')).toEqual({ brand: 'Georg Plasa', model: 'BMW 134 V8' });
-        expect(window.R3ECarUtils.splitCarName('BMW 134 Judd V8')).toEqual({ brand: 'Georg Plasa', model: 'BMW 134 V8' });
+        expect(window.R3ECarUtils.splitCarName('E36 V8 JUDD')).toEqual({ brand: 'BMW', model: 'E36 V8 JUDD' });
+        expect(window.R3ECarUtils.splitCarName('BMW E36 V8 JUDD')).toEqual({ brand: 'BMW', model: 'E36 V8 JUDD' });
+        expect(window.R3ECarUtils.splitCarName('134 Judd V8')).toEqual({ brand: 'BMW', model: '134 Judd V8' });
+        expect(window.R3ECarUtils.splitCarName('BMW 134 Judd V8')).toEqual({ brand: 'BMW', model: '134 Judd V8' });
         expect(window.R3ECarUtils.splitCarName('Carlsson SLK 340 JUDD')).toEqual({ brand: 'Carlsson', model: 'Mercedes SLK 340' });
         expect(window.R3ECarUtils.splitCarName('BMW Alpina B6 GT3')).toEqual({ brand: 'BMW Alpina', model: 'B6 GT3' });
         expect(window.R3ECarUtils.splitCarName('DTM Mercedes AMG C-Coupé')).toEqual({ brand: 'Mercedes-AMG', model: 'C-Coupé' });
@@ -28,10 +29,10 @@ describe('R3ECarUtils', () => {
         expect(window.R3ECarUtils.resolveBrandLogoPath('Alfa Romeo 155 V6 TI')).toBe('images/brands/logo-alfaromeo.png');
         expect(window.R3ECarUtils.resolveBrandLogoPath('McLaren 720S GT3')).toBe('images/brands/logo-mclaren.png');
         expect(window.R3ECarUtils.resolveBrandLogoPath('Lynk & Co 03 TCR')).toBe('images/brands/logo-lynk-co.png');
-        expect(window.R3ECarUtils.resolveBrandLogoPath('134 Judd V8')).toBe('images/brands/logo-georg-plasa.png');
-        expect(window.R3ECarUtils.resolveBrandLogoPath('BMW 134 Judd V8')).toBe('images/brands/logo-georg-plasa.png');
-        expect(window.R3ECarUtils.resolveBrandLogoPath('E36 V8 JUDD')).toBe('images/brands/logo-georg-plasa.png');
-        expect(window.R3ECarUtils.resolveBrandLogoPath('BMW E36 V8 JUDD')).toBe('images/brands/logo-georg-plasa.png');
+        expect(window.R3ECarUtils.resolveBrandLogoPath('134 Judd V8')).toBe('images/brands/logo-bmw.png');
+        expect(window.R3ECarUtils.resolveBrandLogoPath('BMW 134 Judd V8')).toBe('images/brands/logo-bmw.png');
+        expect(window.R3ECarUtils.resolveBrandLogoPath('E36 V8 JUDD')).toBe('images/brands/logo-bmw.png');
+        expect(window.R3ECarUtils.resolveBrandLogoPath('BMW E36 V8 JUDD')).toBe('images/brands/logo-bmw.png');
         expect(window.R3ECarUtils.resolveBrandLogoPath('BMW Alpina B6 GT3')).toBe('images/brands/logo-alpina.png');
         expect(window.R3ECarUtils.resolveBrandLogoPath('DTM Mercedes AMG C-Coupé')).toBe('images/brands/logo-mercedes.png');
         expect(window.R3ECarUtils.resolveBrandLogoPath('')).toBe('images/brands/logo-raceroom.png');
@@ -110,7 +111,11 @@ describe('R3ECarUtils', () => {
         test('returns correct badge for known types', () => {
             expect(window.R3ECarUtils.transBadge('paddles')).toContain('car-badge--trans');
             expect(window.R3ECarUtils.transBadge('sequential')).toContain('car-badge--trans-sequential');
+            expect(window.R3ECarUtils.transBadge('manual')).toContain('car-badge--trans-h');
             expect(window.R3ECarUtils.transBadge('h')).toContain('car-badge--trans-h');
+            expect(window.R3ECarUtils.transBadge('Automatic')).toContain('car-badge--unknown');
+            expect(window.R3ECarUtils.transBadge('Fixed gear')).toContain('car-badge--unknown');
+            expect(window.R3ECarUtils.transBadge('-')).toContain('car-badge--unknown');
         });
 
         test('returns unknown badge for empty', () => {

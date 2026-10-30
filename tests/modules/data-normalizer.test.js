@@ -158,5 +158,16 @@ describe('DataNormalizer extract helpers', () => {
         expect(window.DataNormalizer.extractDifficulty({ driving_model: 'Casual' })).toBe('Casual');
         expect(window.DataNormalizer.extractDifficulty({})).toBe('-');
     });
-});
 
+    it.each([
+        [2, 'Get Real'],
+        [1, 'Amateur'],
+        [0, 'Novice'],
+        ['Get Real', 'Get Real'],
+        ['amateur', 'Amateur'],
+        ['Novice', 'Novice']
+    ])('normalizes difficulty value %s to %s', (value, label) => {
+        expect(window.DataNormalizer.normalizeDifficulty(value)).toBe(label);
+        expect(window.DataNormalizer.extractDifficulty({ driving_model: value })).toBe(label);
+    });
+});

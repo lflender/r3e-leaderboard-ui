@@ -66,6 +66,17 @@ const DetailState = {
     timeframeStart: null,
     timeframeEnd: null
 };
+const detailFilterContext = [
+    DetailState.trackParam || '',
+    DetailState.classParam || '',
+    DetailState.superclassParam || '',
+    DetailState.classesParam || ''
+].join('|');
+const savedDetailFilters = PageFilterState.read('detail', detailFilterContext);
+const isStoredDate = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
+DetailState.timeframeStart = isStoredDate(savedDetailFilters.timeframeStart) ? savedDetailFilters.timeframeStart : null;
+DetailState.timeframeEnd = isStoredDate(savedDetailFilters.timeframeEnd) ? savedDetailFilters.timeframeEnd : null;
+let hasRestoredDetailCarFilter = false;
 
 // Backward compatibility - keep old variable names pointing to DetailState
 const trackParam = DetailState.trackParam;
@@ -705,19 +716,13 @@ function setDetailTitles(data, trackParam, classParam) {
         }
     }
     
-    if (!carClassName) carClassName = classParam || '';
-    
-    if (layoutName) {
-        let layoutElem = document.getElementById('detail-layout');
-        if (!layoutElem) {
-            layoutElem = document.createElement('div');
-            layoutElem.id = 'detail-layout';
-            document.getElementById('detail-track').after(layoutElem);
-        }
-        layoutElem.innerHTML = `<span class="detail-label">Layout:</span> ${R3EUtils.escapeHtml(layoutName)}`;
-    } else {
-        const layoutElem = document.getElementById('detail-layout');
-        if (layoutElem) layoutElem.remove();
+    const trackMetadata = resolveTrackAndLayoutFromTracksData(trackParam, trackName);
+    trackName = trackMetadata.trackName || trackName;
+    layoutName = layoutName || trackMetadata.layoutName;
+
+    carClassName = carClassName || carClassId || classParam || '';
+    if (/^\d+$/.test(String(carClassName)) && typeof window.getCarClassName === 'function') {
+        carClassName = window.getCarClassName(carClassName);
     }
     
     const classLogoUrl = (window.R3EUtils && typeof window.R3EUtils.resolveCarClassLogo === 'function')
@@ -811,6 +816,7 @@ async function displayResults(data) {
     const baseColumns = ['Position', 'Name', 'LapTime', 'GapTime', 'GapPercent', 'Car', 'Difficulty', 'date_time'];
     const columnsWithClass = ['Position', 'Name', 'LapTime', 'GapTime', 'GapPercent', 'CarClass', 'Car', 'Difficulty', 'date_time'];
     const columnKeys = DetailState.isCombinedView ? columnsWithClass : baseColumns;
+    const referenceTime = R3EUtils.getFastestLapTime(unfilteredResults);
     
     // Get display names from ColumnConfig
     const headers = columnKeys.map(key => {
@@ -825,6 +831,7 @@ async function displayResults(data) {
             showAbsolutePosition: isCarFilterActive,
             isCombinedView: DetailState.isCombinedView,
             allResultsLength: allResults.length,
+            referenceTime,
             trackParam,
             DataNormalizer,
             R3EUtils,
@@ -1049,6 +1056,8 @@ function bindEntriesDistributionInteractions() {
             if (DetailState.timeframeEnd && startInput.value > DetailState.timeframeEnd) {
                 DetailState.timeframeEnd = startInput.value;
             }
+            PageFilterState.write('detail', 'timeframeStart', DetailState.timeframeStart, detailFilterContext);
+            PageFilterState.write('detail', 'timeframeEnd', DetailState.timeframeEnd, detailFilterContext);
             currentPage = 1;
             displayResults(allResults);
         });
@@ -1061,6 +1070,8 @@ function bindEntriesDistributionInteractions() {
             if (DetailState.timeframeStart && endInput.value < DetailState.timeframeStart) {
                 DetailState.timeframeStart = endInput.value;
             }
+            PageFilterState.write('detail', 'timeframeStart', DetailState.timeframeStart, detailFilterContext);
+            PageFilterState.write('detail', 'timeframeEnd', DetailState.timeframeEnd, detailFilterContext);
             currentPage = 1;
             displayResults(allResults);
         });
@@ -1072,6 +1083,8 @@ function bindEntriesDistributionInteractions() {
             const weekAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
             DetailState.timeframeStart = EntriesChart.toLocalDateInputValue(weekAgo);
             DetailState.timeframeEnd = EntriesChart.toLocalDateInputValue(now);
+            PageFilterState.write('detail', 'timeframeStart', DetailState.timeframeStart, detailFilterContext);
+            PageFilterState.write('detail', 'timeframeEnd', DetailState.timeframeEnd, detailFilterContext);
             currentPage = 1;
             displayResults(allResults);
         });
@@ -1479,6 +1492,14 @@ function buildCarFilter(data) {
         });
         
         carFilterSelect.setOptions(carOptions);
+        if (!hasRestoredDetailCarFilter) {
+            const requestedCar = String(DetailState.carParam || savedDetailFilters.car || '');
+            const requestedCarIsAvailable = requestedCar && carOptions.some(option => option.value === requestedCar);
+            if (requestedCarIsAvailable) {
+                carFilterSelect.setValue(requestedCar, { notify: false, source: 'restore' });
+            }
+            hasRestoredDetailCarFilter = !requestedCar || requestedCarIsAvailable;
+        }
         
         const carFilterContainer = document.getElementById('car-filter-ui');
         if (carFilterContainer) {
@@ -1534,10 +1555,13 @@ function getSelectedFilter(selector, defaultValue) {
 }
 
 function normalizeDifficultyForPreference(value) {
+    const normalizedValue = window.DataNormalizer?.normalizeDifficulty
+        ? window.DataNormalizer.normalizeDifficulty(value)
+        : value;
     if (window.R3EDetailDifficultyFilter && typeof window.R3EDetailDifficultyFilter.normalizeDifficultyName === 'function') {
-        return window.R3EDetailDifficultyFilter.normalizeDifficultyName(value);
+        return window.R3EDetailDifficultyFilter.normalizeDifficultyName(normalizedValue);
     }
-    return String(value || '').trim();
+    return String(normalizedValue || '').trim();
 }
 
 function matchesDifficultyPreference(entry, selectedDifficultyLabel) {
@@ -1559,7 +1583,11 @@ function matchesDifficultyPreference(entry, selectedDifficultyLabel) {
 
 function applyInitialDifficultyFilter(entries) {
     const list = Array.isArray(entries) ? entries : [];
-    return list.filter(entry => matchesDifficultyPreference(entry, difficultyParam));
+    const selectedCar = getSelectedFilter('#car-filter-ui', 'All cars');
+    return list.filter(entry =>
+        matchesDifficultyPreference(entry, difficultyParam) &&
+        matchesCarFilter(entry, selectedCar)
+    );
 }
 
 /**
@@ -1571,7 +1599,7 @@ function applyInitialDifficultyFilter(entries) {
 function matchesDifficultyFilter(entry, selectedDifficulties) {
     if (!selectedDifficulties || difficultyFilter.isAllActive()) return true;
     const diff = getField(entry, FIELD_NAMES.DIFFICULTY);
-    return difficultyFilter.isDifficultyActive(diff);
+    return difficultyFilter.isDifficultyActive(normalizeDifficultyForPreference(diff));
 }
 
 /**
@@ -1636,7 +1664,8 @@ function filterAndDisplayResults(source = 'system') {
 document.addEventListener('DOMContentLoaded', () => {
     // Car filter - will be populated dynamically when data loads
     const carOptions = [{ value: '', label: 'All cars' }];
-    carFilterSelect = new CustomSelect('car-filter-ui', carOptions, () => {
+    carFilterSelect = new CustomSelect('car-filter-ui', carOptions, (value) => {
+        PageFilterState.write('detail', 'car', value || '', detailFilterContext);
         filterAndDisplayResults('user');
     });
     DetailState.carFilterSelect = carFilterSelect;
@@ -1657,4 +1686,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Make functions globally accessible
 window.goToPage = goToPage;
-

@@ -43,6 +43,23 @@ describe('table-renderer track resolution', () => {
         expect(html).toContain('data-trackid="10"');
     });
 
+    test('calculates grouped lap percentages from each entry gap, not another track entry', () => {
+        const html = window.tableRenderer.renderDriverGroupedTable([
+            {
+                driver: 'Alice',
+                country: 'SE',
+                team: '',
+                entries: [
+                    { position: 1, LapTime: '1:30.000', track_id: '10' },
+                    { position: 2, LapTime: '1:31.000, +1.000s', track_id: '20' }
+                ]
+            }
+        ], ['GapPercent'], 'gap');
+
+        expect(html).toContain('>-</td>');
+        expect(html).toContain('>101.1%</td>');
+    });
+
     test('renders a track logo before the resolved track label when a mapping exists', () => {
         window.TRACKS_DATA = [
             { id: 1852, label: 'Indianapolis 2012 - Grand Prix' }
@@ -71,6 +88,50 @@ describe('table-renderer track resolution', () => {
         window.tableRenderer.sortDriverEntries(entries, 'track');
 
         expect(entries.map(entry => entry.track_id)).toEqual(['10', '20']);
+    });
+
+    test('renders new backend lap times in actual ascending order', () => {
+        const html = window.tableRenderer.renderDriverGroupedTable([{
+            driver: 'Alice',
+            entries: [
+                { position: 1, laptime: '0:56.543', track_id: '10' },
+                { position: 1, laptime: '1:05.103', track_id: '20' },
+                { position: 1, laptime: '0:31.738', track_id: '30' }
+            ]
+        }], ['laptime'], 'lapTime');
+        const table = document.createElement('table');
+        table.innerHTML = html;
+
+        expect(Array.from(table.querySelectorAll('tr.driver-data-row'), row =>
+            row.getAttribute('data-time')
+        )).toEqual(['0:31.738', '0:56.543', '1:05.103']);
+    });
+
+    test('sorts Lap % numerically and places unavailable percentages last', () => {
+        const html = window.tableRenderer.renderDriverGroupedTable([{
+            driver: 'Alice',
+            entries: [
+                { position: 2, laptime: '1:31.000, +1.000s', track_id: '10' },
+                { position: 3, laptime: '1:30.500, +0.500s', track_id: '20' },
+                { position: 1, laptime: '1:30.000', track_id: '30' }
+            ]
+        }], ['GapPercent'], 'gapPercent');
+        const table = document.createElement('table');
+        table.innerHTML = html;
+
+        expect(Array.from(table.querySelectorAll('tr.driver-data-row'), row =>
+            row.getAttribute('data-time')
+        )).toEqual(['1:30.000', '1:30.500, +0.500s', '1:31.000, +1.000s']);
+    });
+
+    test('shows the next gap/lap-time sort action in the header tooltip', () => {
+        const gapHeader = window.tableRenderer.renderHeaderCell('laptime', 'gap');
+        const lapHeader = window.tableRenderer.renderHeaderCell('laptime', 'lapTime');
+        const percentHeader = window.tableRenderer.renderHeaderCell('laptime', 'gapPercent');
+
+        expect(gapHeader).toContain('title="Click to sort by lap time"');
+        expect(lapHeader).toContain('title="Click to sort by gap time"');
+        expect(percentHeader).toContain('title="Click to sort by gap time"');
     });
 
     test('renders car class logo in car class cells when logo mapping exists', () => {
@@ -210,5 +271,3 @@ describe('table-renderer track resolution', () => {
         expect(html).not.toContain('car-model-line');
     });
 });
-
-

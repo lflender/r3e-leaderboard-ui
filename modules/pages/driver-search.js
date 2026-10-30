@@ -13,7 +13,6 @@ class DriverSearch {
             classFilterUI: document.getElementById('track-class-filter-ui') || document.getElementById('class-filter-ui'),
             resultsContainer: document.getElementById('results-container')
         };
-
         // Check if we're on the driver search page
         this.isDriverSearchPage = this.elements.driverSearch !== null;
         
@@ -35,6 +34,7 @@ class DriverSearch {
         this.selectedTrack = ''; // Store selected track filter
         this.selectedClass = ''; // Store selected class/superclass filter
         this.selectedWheel = ''; // Store selected wheel filter
+        this.savedFilters = PageFilterState.read('drivers');
         
         // Debounce timer for live search
         this.searchDebounceTimer = null;
@@ -185,6 +185,11 @@ class DriverSearch {
         ).join('');
         
         this.elements.classFilter.innerHTML = allOption + optionsHtml;
+        const savedClass = String(this.savedFilters.class || '');
+        if (classOptions.some(option => String(option.value) === savedClass)) {
+            this.selectedClass = savedClass;
+            this.elements.classFilter.value = savedClass;
+        }
     }
 
     /**
@@ -202,6 +207,11 @@ class DriverSearch {
         ).join('');
 
         this.elements.trackFilter.innerHTML = allOption + optionsHtml;
+        const savedTrack = String(this.savedFilters.track || '');
+        if (trackOptions.some(option => String(option.value) === savedTrack)) {
+            this.selectedTrack = savedTrack;
+            this.elements.trackFilter.value = savedTrack;
+        }
     }
 
     /**
@@ -210,8 +220,10 @@ class DriverSearch {
     setupCustomSelects() {
         // Track filter custom select
         if (this.elements.trackFilterUI) {
-            new CustomSelect('track-filter-ui', FilterOptionsService.getTrackOptions(), async (value, opts) => {
+            const trackOptions = FilterOptionsService.getTrackOptions();
+            const trackSelect = new CustomSelect('track-filter-ui', trackOptions, async (value, opts) => {
                 this.selectedTrack = value;
+                PageFilterState.write('drivers', 'track', value);
                 if (this.elements.trackFilter) {
                     this.elements.trackFilter.value = value;
                 }
@@ -223,6 +235,9 @@ class DriverSearch {
                     }
                 }
             });
+            if (this.selectedTrack && trackSelect) {
+                trackSelect.setValue(this.selectedTrack, { notify: false, source: 'restore' });
+            }
         }
 
         // Class filter custom select
@@ -242,8 +257,9 @@ class DriverSearch {
                 ? 'track-class-filter-ui'
                 : 'class-filter-ui';
 
-            new CustomSelect(classFilterElementId, allOptions, async (value, opts) => {
+            const classSelect = new CustomSelect(classFilterElementId, allOptions, async (value, opts) => {
                 this.selectedClass = value; // Store directly in the class property
+                PageFilterState.write('drivers', 'class', value);
                 // Re-search with the last search term if we have one
                 if (this.lastSearchTerm) {
                     this._searchSource = 'filter';
@@ -253,6 +269,9 @@ class DriverSearch {
                     }
                 }
             });
+            if (this.selectedClass && classSelect) {
+                classSelect.setValue(this.selectedClass, { notify: false, source: 'restore' });
+            }
         }
 
         // Wheel filter custom select
@@ -267,8 +286,9 @@ class DriverSearch {
                 { value: 'round_and_roundflat', label: 'Round & Round flat', labelHtml: `${wheelBadge('round')} + ${wheelBadge('round flat')}` }
             ];
 
-            new CustomSelect('driver-wheel-filter-ui', wheelOptions, async (value, opts) => {
+            const wheelSelect = new CustomSelect('driver-wheel-filter-ui', wheelOptions, async (value, opts) => {
                 this.selectedWheel = value;
+                PageFilterState.write('drivers', 'wheel', value);
                 if (this.lastSearchTerm) {
                     this._searchSource = 'filter';
                     await this.searchDriver(this.lastSearchTerm);
@@ -277,6 +297,13 @@ class DriverSearch {
                     }
                 }
             }, { searchable: false });
+            const savedWheel = String(this.savedFilters.wheel || '');
+            if (wheelOptions.some(option => option.value === savedWheel)) {
+                this.selectedWheel = savedWheel;
+                if (savedWheel && wheelSelect) {
+                    wheelSelect.setValue(savedWheel, { notify: false, source: 'restore' });
+                }
+            }
         }
     }
 
@@ -481,6 +508,30 @@ class DriverSearch {
         }
     }
 
+    updateLapTimeCells(changedEntries) {
+        const rows = this.elements.resultsContainer.querySelectorAll('tr.driver-data-row');
+        changedEntries.forEach(({ entry, originalLapTime }) => {
+            const trackId = String(entry.track_id || entry.TrackID || entry.trackId || entry['Track ID'] || '');
+            const classId = String(entry.class_id || entry.ClassID || entry.classId || entry['Class ID'] || '');
+            const lapTime = entry.LapTime || entry['Lap Time'] || entry.lap_time || entry.laptime || entry.Time || '';
+            rows.forEach(row => {
+                if (row.getAttribute('data-trackid') !== trackId ||
+                    row.getAttribute('data-classid') !== classId ||
+                    row.getAttribute('data-time') !== originalLapTime) return;
+
+                const lapCell = row.querySelector('.lap-time-cell');
+                if (lapCell) {
+                    lapCell.outerHTML = tableRenderer.renderLapTimeCell(lapTime);
+                }
+                const percentageCell = row.querySelector('.gap-percent-cell');
+                if (percentageCell) {
+                    percentageCell.outerHTML = tableRenderer.renderGapPercentCell(entry);
+                }
+                row.setAttribute('data-time', lapTime);
+            });
+        });
+    }
+
     /**
      * Display search results
      * @param {Array} data - Search results
@@ -522,6 +573,23 @@ class DriverSearch {
         const startIndex = (this.currentPage - 1) * this.itemsPerPage;
         const endIndex = Math.min(startIndex + this.itemsPerPage, totalDrivers);
         const paginatedDrivers = data.slice(startIndex, endIndex);
+        const renderedPage = this.currentPage;
+        if (typeof window.dataService?.enrichLapTimeGaps === 'function') {
+            const visibleEntries = paginatedDrivers.flatMap(group => group.entries || []);
+            window.dataService.enrichLapTimeGaps(visibleEntries)
+                .then(changedEntries => {
+                    if (changedEntries.length === 0 ||
+                        activeSearchId !== this.currentSearchId ||
+                        this.allResults !== data ||
+                        this.currentPage !== renderedPage) return;
+
+                    this.updateLapTimeCells(changedEntries);
+                    if (this.currentSortBy === 'gapPercent') {
+                        this.displayResults(this.allResults, activeSearchId);
+                    }
+                })
+                .catch(error => console.error('Unable to enrich driver lap times:', error));
+        }
         
         // Calculate total entries shown
         let totalEntriesShown = 0;
@@ -567,30 +635,6 @@ class DriverSearch {
      * Wire hover highlighting for rows sharing the same car class
      */
     /**
-     * Build a map from car_class name (lowercase) to wheel_cat from CARS_DATA.
-     * Cached per CARS_DATA reference.
-     */
-    _getClassToWheelMap() {
-        const carsData = Array.isArray(window.CARS_DATA) ? window.CARS_DATA : [];
-        if (this._classWheelMapRef === carsData && this._classWheelMap) {
-            return this._classWheelMap;
-        }
-        const map = new Map();
-        for (const classEntry of carsData) {
-            const cars = Array.isArray(classEntry.cars) ? classEntry.cars : [];
-            for (const car of cars) {
-                const cls = String(car.car_class || '').trim().toLowerCase();
-                if (cls && !map.has(cls)) {
-                    map.set(cls, (car.wheel_cat || '').toLowerCase().trim());
-                }
-            }
-        }
-        this._classWheelMap = map;
-        this._classWheelMapRef = carsData;
-        return map;
-    }
-
-    /**
      * Apply wheel filter to driver search results (client-side).
      * Filters entries within each driver group and removes groups with no remaining entries.
      * @param {Array} results - Array of driver result groups
@@ -599,7 +643,6 @@ class DriverSearch {
      */
     _applyWheelFilter(results, wheelFilter) {
         if (!wheelFilter || !Array.isArray(results)) return results;
-        const classToWheel = this._getClassToWheelMap();
 
         const filtered = [];
         for (const group of results) {
@@ -608,12 +651,7 @@ class DriverSearch {
                 continue;
             }
             const matchingEntries = group.entries.filter(entry => {
-                const entryClass = String(entry.car_class || entry.CarClass || entry['Car Class'] || entry.Class || entry.class || '').trim().toLowerCase();
-                const w = classToWheel.get(entryClass) || '';
-                if (wheelFilter === 'round_and_roundflat') {
-                    return w === 'round' || w === 'round flat' || w === 'round (flat)';
-                }
-                return w === wheelFilter;
+                return FilterOptionsService.matchesWheelFilter(entry, wheelFilter);
             });
             if (matchingEntries.length > 0) {
                 filtered.push({ ...group, entries: matchingEntries });
@@ -711,13 +749,7 @@ class DriverSearch {
     sortDriverGroups(sortBy) {
         const previousSortBy = this.currentSortBy;
         if (sortBy === 'lapTimeToggle') {
-            if (this.currentSortBy === 'gap') {
-                sortBy = 'lapTime';
-            } else if (this.currentSortBy === 'lapTime') {
-                sortBy = 'gap';
-            } else {
-                sortBy = 'gap';
-            }
+            sortBy = window.TableSortService.getNextLapTimeSort(this.currentSortBy);
         }
         if (this.currentSortBy === sortBy) return; // Already sorted by this
         this.currentSortBy = sortBy;

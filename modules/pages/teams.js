@@ -23,6 +23,8 @@ class TeamsPage {
     }
 
     init() {
+        const initialSearch = String(R3EUrlUtils.getUrlParam('team') || '').trim();
+        this.elements.teamSearch.value = initialSearch;
         this.setupEventListeners();
         this.preloadTeams();
         this._trackPageShown();
@@ -41,7 +43,9 @@ class TeamsPage {
             window.dataService.loadTeams().then(teams => {
                 this.allTeams = teams;
                 const searchTerm = (this.elements.teamSearch.value || '').trim();
-                if (searchTerm.length === 0) {
+                if (searchTerm.length > 0) {
+                    this.searchTeams(searchTerm);
+                } else {
                     this.showAllTeams();
                 }
             }).catch(() => {});

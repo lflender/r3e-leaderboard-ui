@@ -99,6 +99,47 @@ describe('CarRatings', () => {
             // Querying by structured ID with matching link should find legacy score
             expect(window.CarRatings.get('GT3||BMW M4||2022||/car/1')).toBe(4);
         });
+
+        test('preserves ratings when class and store link change', () => {
+            window.CARS_DATA = [
+                { cars: [{ car_class: 'Adac Gt Masters 2013', car: 'Audi R8 LMS Ultra', year: '2008', link: '/new-store-link/2923' }] }
+            ];
+            localStorage.setItem(window.CarRatings.STORAGE_KEY, JSON.stringify({
+                'GTR 3||Audi R8 LMS Ultra||2008||/old-store-link': 5
+            }));
+
+            expect(window.CarRatings.get(window.CARS_DATA[0].cars[0])).toBe(5);
+            expect(JSON.parse(localStorage.getItem(window.CarRatings.STORAGE_KEY))[
+                'GTR 3||Audi R8 LMS Ultra||2008||/old-store-link'
+            ]).toBe(5);
+        });
+
+        test('preserves ratings when Georg Plasa cars are rebranded as BMW', () => {
+            const cars = [
+                { car_class: 'Hillclimb Icons', car: 'BMW 134 Judd V8', year: '2011', link: '/new-134-link' },
+                { car_class: 'Hillclimb Icons', car: 'BMW E36 V8 JUDD', year: '2009', link: '/new-e36-link' }
+            ];
+            window.CARS_DATA = [{ cars }];
+            localStorage.setItem(window.CarRatings.STORAGE_KEY, JSON.stringify({
+                'Hillclimb Icons||134 Judd V8||2011||/old-134-link': 4,
+                'Hillclimb Icons||E36 V8 JUDD||2009||/old-e36-link': 6
+            }));
+
+            expect(window.CarRatings.get(cars[0])).toBe(4);
+            expect(window.CarRatings.get(cars[1])).toBe(6);
+        });
+
+        test('clearing a rating also clears its prior structured key', () => {
+            const car = { car_class: 'Adac Gt Masters 2013', car: 'Audi R8 LMS Ultra', year: '2008', link: '/new-store-link' };
+            const oldId = 'GTR 3||Audi R8 LMS Ultra||2008||/old-store-link';
+            window.CARS_DATA = [{ cars: [car] }];
+            localStorage.setItem(window.CarRatings.STORAGE_KEY, JSON.stringify({ [oldId]: 5 }));
+
+            window.CarRatings.set(car, 0);
+
+            expect(window.CarRatings.get(car)).toBe(0);
+            expect(JSON.parse(localStorage.getItem(window.CarRatings.STORAGE_KEY))[oldId]).toBeUndefined();
+        });
     });
 
     // ── getAll ───────────────────────────────────────────────────────

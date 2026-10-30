@@ -7,6 +7,53 @@
 (function () {
     'use strict';
 
+    let cachedWheelMapCarsData = null;
+    let cachedWheelMap = null;
+
+    function getEntryClassName(entry) {
+        const rawName = entry?.car_class || entry?.CarClass || entry?.['Car Class'] ||
+            entry?.class_name || entry?.ClassName || entry?.class || entry?.Class;
+        const name = typeof rawName === 'object'
+            ? rawName.class?.Name || rawName.class?.name || rawName.Name || rawName.name || ''
+            : rawName;
+        if (name && !/^\d+$/.test(String(name).trim())) return String(name).trim();
+
+        const classId = entry?.class_id ?? entry?.ClassID ?? entry?.classId ?? entry?.['Class ID'] ?? name;
+        return classId ? String(window.getCarClassName?.(classId) || classId) : '';
+    }
+
+    function getEntryClassId(entry) {
+        const classId = entry?.class_id ?? entry?.ClassID ?? entry?.classId ?? entry?.['Class ID'];
+        if (classId !== undefined && classId !== null && String(classId).trim()) return String(classId).trim();
+
+        const className = getEntryClassName(entry);
+        return String(window.getCarClassId?.(className) || (/^\d+$/.test(className) ? className : ''));
+    }
+
+    function getWheelMap() {
+        const carsData = Array.isArray(window.CARS_DATA) ? window.CARS_DATA : [];
+        if (cachedWheelMapCarsData === carsData && cachedWheelMap) return cachedWheelMap;
+
+        const wheelMap = new Map();
+        carsData.forEach(classEntry => {
+            (Array.isArray(classEntry.cars) ? classEntry.cars : []).forEach(car => {
+                const className = car.car_class || classEntry.class || classEntry.car_class || classEntry.CarClass || '';
+                const classId = window.getCarClassId?.(className);
+                const wheel = String(car.wheel_cat || '').trim().toLowerCase();
+                if (!wheel) return;
+
+                const keys = [classId, String(className).trim().toLowerCase()].filter(Boolean);
+                keys.forEach(key => {
+                    if (!wheelMap.has(String(key))) wheelMap.set(String(key), wheel);
+                });
+            });
+        });
+
+        cachedWheelMapCarsData = carsData;
+        cachedWheelMap = wheelMap;
+        return wheelMap;
+    }
+
     /**
      * Populates class filter from cars data, filtered to only classes with leaderboard data.
      * @returns {Array<{value: string, label: string, logoUrl: string}>} Class options
@@ -35,6 +82,40 @@
         });
 
         return options.sort((a, b) => a.label.localeCompare(b.label));
+    }
+
+    function matchesClassFilter(entry, filterValue) {
+        const value = String(filterValue || '').trim();
+        if (!value) return true;
+
+        const classId = getEntryClassId(entry);
+        const className = getEntryClassName(entry).toLowerCase();
+        if (value.startsWith('superclass:')) {
+            const superclass = value.slice('superclass:'.length);
+            return (Array.isArray(window.CARS_DATA) ? window.CARS_DATA : []).some(classEntry => {
+                if (classEntry.superclass !== superclass) return false;
+                const name = classEntry.class || classEntry.car_class || classEntry.CarClass || '';
+                const id = window.getCarClassId?.(name);
+                return (id && String(id) === classId) || String(name).trim().toLowerCase() === className;
+            });
+        }
+
+        const filterClassId = window.getCarClassId?.(value) || (/^\d+$/.test(value) ? value : '');
+        if (classId && filterClassId) return classId === String(filterClassId);
+        return className === value.toLowerCase();
+    }
+
+    function matchesWheelFilter(entry, wheelFilter) {
+        if (!wheelFilter) return true;
+
+        const className = getEntryClassName(entry);
+        const classId = getEntryClassId(entry);
+        const wheelMap = getWheelMap();
+        const wheel = wheelMap.get(classId) || wheelMap.get(className.toLowerCase()) || '';
+        if (wheelFilter === 'round_and_roundflat') {
+            return wheel === 'round' || wheel === 'round flat' || wheel === 'round (flat)';
+        }
+        return wheel === wheelFilter;
     }
 
     /**
@@ -182,6 +263,8 @@
 
     window.FilterOptionsService = {
         getClassOptionsFromCarsData,
+        matchesClassFilter,
+        matchesWheelFilter,
         getTrackOptions,
         getSuperclassOptions,
         getCategoryOptionsForClassIds

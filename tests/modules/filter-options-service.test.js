@@ -19,7 +19,7 @@ describe('FilterOptionsService', () => {
         window.CARS_DATA = [];
         window.TRACKS_DATA = [];
         window.getCarClassId = vi.fn().mockReturnValue(null);
-        window.getCarClassName = vi.fn(id => id);
+        window.getCarClassName = vi.fn(id => window.CAR_CLASSES_DATA?.[String(id)] || id);
         loadBrowserScript('modules/filter-options-service.js');
     });
 
@@ -82,6 +82,30 @@ describe('FilterOptionsService', () => {
 
             const result = window.FilterOptionsService.getClassOptionsFromCarsData();
             expect(result[0].logoUrl).toBe('https://example.com/gt3.png');
+        });
+    });
+
+    describe('backend class ID resolution', () => {
+        beforeEach(() => {
+            window.CAR_CLASSES_DATA = { '5': 'GT3', '6': 'TCR' };
+            window.getCarClassId = vi.fn(name => ({ gt3: '5', tcr: '6' }[String(name).trim().toLowerCase()] || null));
+            window.CARS_DATA = [
+                { superclass: 'GT', class: 'GT3', cars: [{ car_class: 'GT3', wheel_cat: 'round flat' }] },
+                { superclass: 'Touring', class: 'TCR', cars: [{ car_class: 'TCR', wheel_cat: 'gt' }] }
+            ];
+        });
+
+        test('matches class and superclass filters when backend entries only contain class IDs', () => {
+            expect(window.FilterOptionsService.matchesClassFilter({ class_id: '5', car_class: '' }, 'GT3')).toBe(true);
+            expect(window.FilterOptionsService.matchesClassFilter({ class_id: '6', car_class: '' }, 'GT3')).toBe(false);
+            expect(window.FilterOptionsService.matchesClassFilter({ class_id: '5', car_class: '' }, 'superclass:GT')).toBe(true);
+            expect(window.FilterOptionsService.matchesClassFilter({ class_id: '6', car_class: '' }, 'superclass:GT')).toBe(false);
+        });
+
+        test('matches wheel filters using the backend class ID', () => {
+            expect(window.FilterOptionsService.matchesWheelFilter({ class_id: '5', car_class: '' }, 'round flat')).toBe(true);
+            expect(window.FilterOptionsService.matchesWheelFilter({ class_id: '6', car_class: '' }, 'round flat')).toBe(false);
+            expect(window.FilterOptionsService.matchesWheelFilter({ class_id: '5', car_class: '' }, 'round_and_roundflat')).toBe(true);
         });
     });
 

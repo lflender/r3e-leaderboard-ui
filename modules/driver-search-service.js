@@ -157,26 +157,6 @@
             return phraseRegex.test(normalizedTarget);
         },
 
-        _getSuperclassClasses(superclassName) {
-            const superclassClasses = new Set();
-            if (!window.CARS_DATA || !Array.isArray(window.CARS_DATA)) {
-                return superclassClasses;
-            }
-
-            window.CARS_DATA.forEach(entry => {
-                if (entry.superclass !== superclassName) {
-                    return;
-                }
-
-                const cls = entry.class || entry.car_class || entry.CarClass || '';
-                if (cls) {
-                    superclassClasses.add(String(cls));
-                }
-            });
-
-            return superclassClasses;
-        },
-
         _filterDriverEntries(entries, filters = {}) {
             let filteredEntries = Array.isArray(entries) ? entries : [];
 
@@ -217,19 +197,9 @@
             const rawClassFilterValue = filters.classId ?? filters.className ?? '';
             const classFilterValue = rawClassFilterValue === '' ? '' : String(rawClassFilterValue).trim();
             if (classFilterValue) {
-                if (classFilterValue.startsWith('superclass:')) {
-                    const superclassName = classFilterValue.replace('superclass:', '');
-                    const superclassClasses = this._getSuperclassClasses(superclassName);
-                    filteredEntries = filteredEntries.filter(entry => {
-                        const entryClass = entry.car_class || entry.CarClass || entry['Car Class'] || entry.Class || entry.class || '';
-                        return superclassClasses.has(String(entryClass || ''));
-                    });
-                } else {
-                    filteredEntries = filteredEntries.filter(entry => {
-                        const entryClass = entry.car_class || entry.CarClass || entry['Car Class'] || entry.Class || entry.class || '';
-                        return String(entryClass || '') === classFilterValue;
-                    });
-                }
+                filteredEntries = filteredEntries.filter(entry =>
+                    window.FilterOptionsService.matchesClassFilter(entry, classFilterValue)
+                );
             }
 
             if (filters.difficulty && filters.difficulty !== 'All difficulties') {

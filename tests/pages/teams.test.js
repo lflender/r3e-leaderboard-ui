@@ -114,6 +114,17 @@ beforeEach(() => {
 });
 
 describe('teams page', () => {
+    it('restores and applies the team search from the page URL', async () => {
+        window.R3EUrlUtils.getUrlParam.mockImplementation(name => name === 'team' ? 'Beta' : '');
+
+        const page = new TeamsPage();
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        expect(page.elements.teamSearch.value).toBe('Beta');
+        expect(document.querySelectorAll('.team-row')).toHaveLength(1);
+        expect(document.querySelector('.team-row').getAttribute('data-team')).toBe('Beta Motorsport');
+    });
+
     it('initializes and preloads teams data', async () => {
         const page = new TeamsPage();
         // Wait for async preload

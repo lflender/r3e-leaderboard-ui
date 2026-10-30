@@ -14,6 +14,8 @@ function buildDom() {
 }
 
 beforeAll(() => {
+    loadBrowserScript('modules/time-helper.js');
+    loadBrowserScript('modules/sort-service.js');
     document.body.innerHTML = buildDom();
     window.TRACKS_DATA = [{ id: 1, label: 'Spa' }];
     window.CARS_DATA = [
@@ -21,12 +23,26 @@ beforeAll(() => {
         { class: 'Touring', superclass: 'Touring', cars: [{ car_class: 'Touring', car: 'Car B', wheel_cat: 'gt' }] },
         { class: 'Open Wheel', superclass: 'Open', cars: [{ car_class: 'Open Wheel', car: 'Car C', wheel_cat: 'round' }] }
     ];
+    window.getCarClassName = id => ({ '1': 'GT3 Class', '2': 'Touring', '3': 'Open Wheel' }[String(id)] || String(id));
     window.R3ECarUtils = {
         wheelBadge: (cat) => `<span class="car-badge">${cat}</span>`
     };
     window.resolveMpPos = vi.fn().mockReturnValue(null);
     window.CustomSelect = class {
-        constructor(_id, _options, _cb) {}
+        constructor(id, options, onChange) {
+            this.options = options;
+            this.onChange = onChange;
+            this.currentValue = '';
+            window.customSelects = window.customSelects || {};
+            window.customSelects[id] = this;
+        }
+
+        setValue(value, options = {}) {
+            this.currentValue = value;
+            if (options.notify !== false && this.onChange) {
+                this.onChange(value, { source: options.source || 'programmatic' });
+            }
+        }
     };
     window.tableRenderer = {
         filterAndSortKeys: vi.fn(keys => keys),
@@ -41,37 +57,86 @@ beforeAll(() => {
         })
     };
     window.R3EUtils = {
+        ...window.R3ETimeUtils,
         escapeHtml: s => String(s),
         updateUrlParam: vi.fn(),
         getUrlParam: vi.fn().mockReturnValue('')
     };
     window.dataService = {
-        searchDriver: vi.fn().mockResolvedValue([])
+        searchDriver: vi.fn().mockResolvedValue([]),
+        enrichLapTimeGaps: vi.fn().mockResolvedValue([])
     };
     window.FilterOptionsService = {
         getClassOptionsFromCarsData: vi.fn().mockReturnValue([]),
         getSuperclassOptions: vi.fn().mockReturnValue([]),
-        getTrackOptions: vi.fn().mockReturnValue([{ value: '', label: 'All tracks' }])
+        getTrackOptions: vi.fn().mockReturnValue([{ value: '', label: 'All tracks' }]),
+        matchesWheelFilter: vi.fn((entry, wheelFilter) => {
+            const className = entry.car_class || entry.CarClass || entry['Car Class'] || entry.Class || entry.class ||
+                window.getCarClassName(entry.class_id || entry.ClassID || entry.classId);
+            const classEntry = window.CARS_DATA.find(item =>
+                String(item.class || '').toLowerCase() === String(className).toLowerCase()
+            );
+            const car = classEntry?.cars?.[0];
+            const wheel = String(car?.wheel_cat || '').toLowerCase().trim();
+            return wheelFilter === 'round_and_roundflat'
+                ? ['round', 'round flat', 'round (flat)'].includes(wheel)
+                : wheel === wheelFilter;
+        })
     };
     window.R3EAnalytics = { track: vi.fn() };
 
     window.generatePaginationHTML = vi.fn().mockReturnValue('');
 
+    loadBrowserScript('modules/filter-state.js');
     loadBrowserScript('modules/pages/driver-search.js');
 });
 
 beforeEach(() => {
     document.body.innerHTML = buildDom();
     window.localStorage.clear();
+    window.sessionStorage.clear();
+    window.customSelects = {};
+    window.FilterOptionsService.getTrackOptions.mockReturnValue([{ value: '', label: 'All tracks' }]);
+    window.FilterOptionsService.getClassOptionsFromCarsData.mockReturnValue([]);
+    window.FilterOptionsService.getSuperclassOptions.mockReturnValue([]);
     window.R3EUtils.updateUrlParam.mockClear();
     window.dataService.searchDriver.mockReset();
     window.dataService.searchDriver.mockResolvedValue([]);
+    window.dataService.enrichLapTimeGaps.mockReset();
+    window.dataService.enrichLapTimeGaps.mockResolvedValue([]);
+    delete window.dataService.fetchPoleTime;
+    delete window.R3EUtils.parseLapTimeToMillis;
+    delete window.tableRenderer.renderLapTimeCell;
+    delete window.tableRenderer.renderGapPercentCell;
     window.tableRenderer.filterAndSortKeys.mockClear();
     window.tableRenderer.renderDriverGroupedTable.mockClear();
     delete window.ColumnConfig;
 });
 
 describe('driver-search integration', () => {
+    it('restores saved track, class, and wheel filters', () => {
+        window.FilterOptionsService.getTrackOptions.mockReturnValue([
+            { value: '', label: 'All tracks' },
+            { value: '1', label: 'Spa' }
+        ]);
+        window.FilterOptionsService.getClassOptionsFromCarsData.mockReturnValue([
+            { value: 'GT3 Class', label: 'GT3 Class' }
+        ]);
+        window.PageFilterState.write('drivers', 'track', '1');
+        window.PageFilterState.write('drivers', 'class', 'GT3 Class');
+        window.PageFilterState.write('drivers', 'wheel', 'round');
+
+        const ds = new window.driverSearch.constructor();
+
+        expect(ds.selectedTrack).toBe('1');
+        expect(ds.selectedClass).toBe('GT3 Class');
+        expect(ds.selectedWheel).toBe('round');
+        expect(document.getElementById('track-filter').value).toBe('1');
+        expect(window.customSelects['track-filter-ui'].currentValue).toBe('1');
+        expect(window.customSelects['track-class-filter-ui'].currentValue).toBe('GT3 Class');
+        expect(window.customSelects['driver-wheel-filter-ui'].currentValue).toBe('round');
+    });
+
     it('auto-initializes and exposes pagination/sort handlers', () => {
         expect(window.driverSearch).toBeTruthy();
         const ds = new window.driverSearch.constructor();
@@ -128,6 +193,35 @@ describe('driver-search integration', () => {
         );
     });
 
+    it('restores the saved Laptime sort before rendering refreshed results', async () => {
+        const results = [{
+            driver: 'Alice',
+            entries: [
+                { position: 2, laptime: '1:31.000' },
+                { position: 1, laptime: '1:29.500' }
+            ]
+        }];
+        const beforeRefresh = new window.driverSearch.constructor();
+        beforeRefresh.currentSearchId = 1;
+        beforeRefresh.allResults = results;
+        await beforeRefresh.sortDriverGroups('lapTimeToggle');
+
+        expect(window.localStorage.getItem('driverInfoSortPreference')).toBe('lapTime');
+        window.tableRenderer.renderDriverGroupedTable.mockClear();
+
+        const afterRefresh = new window.driverSearch.constructor();
+        afterRefresh.currentSearchId = 2;
+        afterRefresh.allResults = results;
+        await afterRefresh.displayResults(results);
+
+        expect(afterRefresh.currentSortBy).toBe('lapTime');
+        expect(window.tableRenderer.renderDriverGroupedTable).toHaveBeenCalledWith(
+            results,
+            ['position', 'laptime'],
+            'lapTime'
+        );
+    });
+
     it('re-renders current results when pagination changes', async () => {
         const ds = new window.driverSearch.constructor();
         ds.currentSearchId = 2;
@@ -167,6 +261,116 @@ describe('driver-search integration', () => {
             ['position', 'lap_time', 'track_id', 'car_class', 'track'],
             { addSynthetic: true }
         );
+    });
+
+    it('keeps the difficulty column in driver results alongside the new-format fields', async () => {
+        window.ColumnConfig = {
+            getOrderedColumns: vi.fn(keys => keys),
+            isColumnType: vi.fn((key, type) => type === 'DIFFICULTY' && ['Difficulty', 'difficulty', 'driving_model', 'DrivingModel'].includes(key))
+        };
+
+        const ds = new window.driverSearch.constructor();
+        ds.currentSearchId = 4;
+        ds.allResults = [{
+            driver: 'Alice',
+            entries: [{
+                position: 1,
+                laptime: '1m 17.522s, +08.643s',
+                car: 'Formula RaceRoom Junior',
+                car_class: 'FRJ Cup',
+                difficulty: 'Amateur',
+                track_id: '7976'
+            }]
+        }];
+
+        await ds.displayResults(ds.allResults);
+
+        expect(window.tableRenderer.renderDriverGroupedTable).toHaveBeenCalledWith(
+            ds.allResults,
+            ['position', 'laptime', 'car', 'car_class', 'difficulty', 'track_id', 'track'],
+            'gap'
+        );
+    });
+
+    it('delegates lap-time enrichment to DataService and updates rendered cells', async () => {
+        window.tableRenderer.renderLapTimeCell = vi.fn(value => `<td class="lap-time-cell">${value}</td>`);
+        window.tableRenderer.renderGapPercentCell = vi.fn(entry => `<td class="gap-percent-cell">${entry.laptime}</td>`);
+        window.dataService.enrichLapTimeGaps.mockImplementation(async entries => {
+            const entry = entries[0];
+            const originalLapTime = entry.laptime;
+            entry.laptime = `${originalLapTime}, +1.250s`;
+            return [{ entry, originalLapTime }];
+        });
+
+        const ds = new window.driverSearch.constructor();
+        ds.currentSearchId = 4;
+        const results = [{
+            driver: 'Alice',
+            entries: [{
+                position: 2,
+                laptime: '1:21.250',
+                track_id: '10',
+                class_id: '5'
+            }, {
+                position: 1,
+                laptime: '1:20.000',
+                track_id: '10',
+                class_id: '5'
+            }]
+        }];
+        ds.allResults = results;
+
+        window.tableRenderer.renderDriverGroupedTable.mockReturnValue(`
+            <table><tbody><tr class="driver-data-row" data-trackid="10" data-classid="5" data-time="1:21.250">
+                <td class="lap-time-cell">1:21.250</td><td class="gap-percent-cell">-</td>
+            </tr></tbody></table>`);
+        await ds.displayResults(results);
+
+        expect(window.dataService.enrichLapTimeGaps).toHaveBeenCalledWith(results[0].entries);
+        await vi.waitFor(() => {
+            expect(results[0].entries[0].laptime).toBe('1:21.250, +1.250s');
+            expect(window.tableRenderer.renderLapTimeCell).toHaveBeenCalledWith('1:21.250, +1.250s');
+            expect(window.tableRenderer.renderGapPercentCell).toHaveBeenCalledWith(results[0].entries[0]);
+            expect(window.tableRenderer.renderDriverGroupedTable).toHaveBeenCalledTimes(1);
+            expect(document.querySelector('.driver-data-row').getAttribute('data-time')).toBe('1:21.250, +1.250s');
+        });
+    });
+
+    it('re-sorts by Lap % after asynchronously enriching new backend entries', async () => {
+        window.tableRenderer.renderLapTimeCell = vi.fn(value => `<td class="lap-time-cell">${value}</td>`);
+        window.tableRenderer.renderGapPercentCell = vi.fn(() => '<td class="gap-percent-cell">-</td>');
+        window.dataService.enrichLapTimeGaps.mockImplementation(async entries => {
+            const entry = entries[0];
+            if (entry.laptime.includes(',')) return [];
+            const originalLapTime = entry.laptime;
+            entry.laptime = `${originalLapTime}, +1.250s`;
+            return [{ entry, originalLapTime }];
+        });
+
+        const ds = new window.driverSearch.constructor();
+        ds.currentSearchId = 8;
+        ds.currentSortBy = 'gapPercent';
+        const results = [{
+            driver: 'Alice',
+            entries: [{
+                position: 2,
+                laptime: '1:21.250',
+                track_id: '10',
+                class_id: '5'
+            }]
+        }];
+        ds.allResults = results;
+        window.tableRenderer.renderDriverGroupedTable.mockReturnValue(`
+            <table><tbody><tr class="driver-data-row" data-trackid="10" data-classid="5" data-time="1:21.250">
+                <td class="lap-time-cell">1:21.250</td><td class="gap-percent-cell">-</td>
+            </tr></tbody></table>`);
+
+        await ds.displayResults(results);
+
+        await vi.waitFor(() => {
+            expect(results[0].entries[0].laptime).toBe('1:21.250, +1.250s');
+            expect(window.tableRenderer.renderDriverGroupedTable).toHaveBeenCalledTimes(2);
+        });
     });
 
     it('filters results by pathId from URL id param', async () => {
@@ -289,13 +493,20 @@ describe('driver-search integration', () => {
         // Default sort is gap
         expect(ds.currentSortBy).toBe('gap');
 
-        // Toggle lapTime
+        // First click switches from gap to lap time.
         await ds.sortDriverGroups('lapTimeToggle');
         expect(ds.currentSortBy).toBe('lapTime');
 
-        // Toggle back to gap
+        // Second click switches from lap time back to gap.
         await ds.sortDriverGroups('lapTimeToggle');
         expect(ds.currentSortBy).toBe('gap');
+
+        // Other active sorts return to gap before toggling to lap time.
+        ds.currentSortBy = 'gapPercent';
+        await ds.sortDriverGroups('lapTimeToggle');
+        expect(ds.currentSortBy).toBe('gap');
+        await ds.sortDriverGroups('lapTimeToggle');
+        expect(ds.currentSortBy).toBe('lapTime');
     });
 
     it('tracks analytics on sort change', async () => {
@@ -402,6 +613,22 @@ describe('driver-search integration', () => {
         // GT3 Class = round flat, Open Wheel = round — both match; Touring = gt — excluded
         expect(ds.allResults[0].entries).toHaveLength(2);
         expect(ds.allResults[0].entries.map(e => e.car_class)).toEqual(['GT3 Class', 'Open Wheel']);
+    });
+
+    it('wheel filter matches backend entries that provide only class IDs', () => {
+        const ds = new window.driverSearch.constructor();
+        const results = [{
+            driver: 'Alice',
+            entries: [
+                { class_id: '1', car_class: '', laptime: '1:30.000' },
+                { class_id: '2', car_class: '', laptime: '1:31.000' }
+            ]
+        }];
+
+        expect(ds._applyWheelFilter(results, 'round flat')).toEqual([{
+            driver: 'Alice',
+            entries: [results[0].entries[0]]
+        }]);
     });
 
     it('no wheel filter returns all entries unfiltered', async () => {

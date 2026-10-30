@@ -61,6 +61,32 @@ describe('table-sort-service', () => {
         expect(entries.map(e => e.LapTime)).toEqual(['1:29.500', '1:30.000, +0.100', '1:31.000, +0.500']);
     });
 
+    test('sorts new backend lap-time notation by actual time', () => {
+        const service = new window.TableSortService();
+        const entries = [
+            { laptime: '0:56.543' },
+            { laptime: '1:05.103' },
+            { laptime: '0:31.738' }
+        ];
+
+        service.sortDriverEntries(entries, 'lapTime');
+
+        expect(entries.map(entry => entry.laptime)).toEqual(['0:31.738', '0:56.543', '1:05.103']);
+    });
+
+    test('sorts car classes by display name when the new index only has class IDs', () => {
+        const service = new window.TableSortService();
+        window.CAR_CLASSES_DATA = { 2: 'GT4', 1: 'GT3' };
+        const entries = [
+            { car_class: '', class_id: '2' },
+            { car_class: '', class_id: '1' }
+        ];
+
+        service.sortDriverEntries(entries, 'car_class');
+
+        expect(entries.map(entry => entry.class_id)).toEqual(['1', '2']);
+    });
+
     test('sorts by date_time with newest first', () => {
         const service = new window.TableSortService();
         const entries = [
@@ -103,6 +129,26 @@ describe('table-sort-service', () => {
         service.sortDriverEntries(entries, 'gapPercent');
 
         expect(entries.map(e => Number(e.TotalEntries))).toEqual([100, 50, 20]);
+    });
+
+    test('places entries without a Lap % before calculated percentages', () => {
+        const service = new window.TableSortService();
+        const entries = [
+            { position: 2, laptime: '1:31.000, +1.000s', total_entries: 30 },
+            { position: 1, laptime: '1:30.000', total_entries: 100 },
+            { position: 3, laptime: '1:30.500, +0.500s', total_entries: 20 }
+        ];
+
+        service.sortDriverEntries(entries, 'gapPercent');
+
+        expect(entries.map(entry => entry.position)).toEqual([1, 3, 2]);
+    });
+
+    test('toggles from gap to lap time and back, using gap for other active sorts', () => {
+        expect(window.TableSortService.getNextLapTimeSort('gap')).toBe('lapTime');
+        expect(window.TableSortService.getNextLapTimeSort('lapTime')).toBe('gap');
+        expect(window.TableSortService.getNextLapTimeSort('gapPercent')).toBe('gap');
+        expect(window.TableSortService.getNextLapTimeSort('position')).toBe('gap');
     });
 
     test('sorts by gap (default) with total entries tiebreaker', () => {
@@ -237,29 +283,35 @@ describe('table-sort-service', () => {
         expect(service.extractReferenceTime([])).toBe('');
     });
 
-    test('calculateGapPercentValue returns 100 for entries without gap', () => {
+    test('calculateGapPercentValue places entries without a percentage first', () => {
         const service = new window.TableSortService();
-        const item = makeEntry({ lap: '1:30.000' });
-        expect(service.calculateGapPercentValue(item, '1:30.000')).toBe(100);
+        const item = makeEntry({ pos: 2, lap: '1:30.000' });
+        expect(service.calculateGapPercentValue(item)).toBe(Number.NEGATIVE_INFINITY);
+    });
+
+    test('calculateGapPercentValue uses shared percentage calculation for new lap data', () => {
+        const service = new window.TableSortService();
+        const item = makeEntry({ pos: 2, lap: '1:31.000' });
+        expect(service.calculateGapPercentValue(item, '1:30.000')).toBeCloseTo(101.11, 1);
     });
 
     test('calculateGapPercentValue returns correct percent for valid gap', () => {
         const service = new window.TableSortService();
-        const item = makeEntry({ lap: '1:31.000, +1.000s' });
+        const item = makeEntry({ pos: 2, lap: '1:31.000, +1.000s' });
         const result = service.calculateGapPercentValue(item, '1:30.000');
         // 91000 / (91000 - 1000) * 100 = 91000/90000 * 100 = 101.11...
         expect(result).toBeCloseTo(101.11, 1);
     });
 
-    test('calculateGapPercentValue returns 100 for null item', () => {
+    test('calculateGapPercentValue places null items first', () => {
         const service = new window.TableSortService();
-        expect(service.calculateGapPercentValue(null, '1:30.000')).toBe(100);
+        expect(service.calculateGapPercentValue(null, '1:30.000')).toBe(Number.NEGATIVE_INFINITY);
     });
 
-    test('calculateGapPercentValue returns 100 when lap is unparseable', () => {
+    test('calculateGapPercentValue places unparseable laps first', () => {
         const service = new window.TableSortService();
         const item = { LapTime: 'invalid, +1.000s' };
-        expect(service.calculateGapPercentValue(item, '1:30.000')).toBe(100);
+        expect(service.calculateGapPercentValue(item, '1:30.000')).toBe(Number.NEGATIVE_INFINITY);
     });
 
     test('getFieldValueForSort uses resolveTrackLabel for track', () => {
@@ -340,4 +392,3 @@ describe('table-sort-service', () => {
         expect(Number(entries[0].TotalEntries)).toBe(200);
     });
 });
-

@@ -49,17 +49,12 @@ class TableRenderer {
             // Sort entries within group based on sortBy parameter
             this.sortDriverEntries(driverResults, sortBy);
             
-            // Get reference time from the first (leader) entry for percentage calculation
-            const referenceTime = this.sortService
-                ? this.sortService.extractReferenceTime(driverResults)
-                : '';
-            
             // Render driver header
             html += this.renderDriverHeader(driverObj, firstEntry, keys.length);
             
             // Render data rows for this driver
             driverResults.forEach(item => {
-                html += this.renderDataRow(item, keys, firstEntry, referenceTime);
+                html += this.renderDataRow(item, keys, firstEntry);
             });
         });
         
@@ -146,12 +141,8 @@ class TableRenderer {
         if (sortConfig) {
             if (isLapTimeKey) {
                 const activeClass = (sortBy === 'gap' || sortBy === 'lapTime') ? ' sort-active' : '';
-                let title = 'Click to sort by gap time';
-                if (sortBy === 'gap') {
-                    title = 'Click to sort by lap time';
-                } else if (sortBy === 'lapTime') {
-                    title = 'Click to sort by gap time';
-                }
+                const nextSort = window.TableSortService.getNextLapTimeSort(sortBy);
+                const title = `Click to sort by ${nextSort === 'gap' ? 'gap time' : 'lap time'}`;
                 return `<th class="sortable${activeClass}" data-sort-key="lapTimeToggle" title="${title}">${displayName}</th>`;
             }
             const sortKey = sortConfig.sortKey;
@@ -215,6 +206,7 @@ class TableRenderer {
         const isCombinedView = !!options.isCombinedView;
         const allResultsLength = Number(options.allResultsLength || 0);
         const trackParam = options.trackParam || '';
+        const referenceTime = options.referenceTime || '';
         const DataNormalizerRef = options.DataNormalizer || window.DataNormalizer;
         const utils = options.R3EUtils || window.R3EUtils;
         const renderer = options.tableRenderer || this;
@@ -226,7 +218,6 @@ class TableRenderer {
         const name = DataNormalizerRef.extractName(item);
         const country = DataNormalizerRef.extractCountry(item);
         const car = DataNormalizerRef.extractCar(item);
-        const difficulty = DataNormalizerRef.extractDifficulty(item);
         const lapTime = DataNormalizerRef.extractLapTime(item);
 
         const totalEntries = isCombinedView
@@ -247,8 +238,7 @@ class TableRenderer {
             country: country,
             Car: car,
             car: car,
-            Difficulty: difficulty,
-            difficulty: difficulty,
+            Difficulty: DataNormalizerRef.extractDifficulty(item),
             LapTime: lapTime,
             'Lap Time': lapTime,
             lap_time: lapTime,
@@ -271,8 +261,8 @@ class TableRenderer {
             driverLinkBase: 'drivers.html?driver='
         });
         html += renderer.renderLapTimeCell(detailRowItem.LapTime, { includeDelta: false });
-        html += renderer.renderGapTimeCell(detailRowItem.LapTime);
-        html += renderer.renderGapPercentCell(detailRowItem, null);
+        html += renderer.renderGapTimeCell(detailRowItem.LapTime, referenceTime);
+        html += renderer.renderGapPercentCell(detailRowItem, referenceTime);
 
         if (isCombinedView) {
             html += renderer.renderCell(detailRowItem, 'CarClass');
@@ -316,9 +306,10 @@ class TableRenderer {
         } else if (isPositionKey) {
             return this.renderPositionCell(item);
         } else if (isCarClassKey) {
-            const classNameRaw = value || item.CarClass || item['Car Class'] || item.car_class || item.Class || item.class || '';
-            const className = String(classNameRaw || '').trim();
             const classId = item.class_id || item.ClassID || item['Class ID'] || item.classId || '';
+            const classNameRaw = value || item.CarClass || item['Car Class'] || item.car_class || item.Class || item.class ||
+                (window.CAR_CLASSES_DATA && window.CAR_CLASSES_DATA[String(classId)]) || '';
+            const className = String(classNameRaw || '').trim();
             const classLogoUrl = (window.R3EUtils && typeof window.R3EUtils.resolveCarClassLogo === 'function')
                 ? window.R3EUtils.resolveCarClassLogo(className, classId)
                 : '';
@@ -468,9 +459,9 @@ class TableRenderer {
         }
     }
 
-    renderGapTimeCell(value) {
-        const parts = this.extractLapAndGapParts(value);
-        const deltaClassic = parts.gap;
+    renderGapTimeCell(value, referenceTime = '') {
+        const gap = R3EUtils.calculateLapTimeGap(value, referenceTime);
+        const deltaClassic = gap ? R3EUtils.formatClassicLapTime(gap) : '';
         const escDelta = R3EUtils.escapeHtml(String(deltaClassic));
         if (!escDelta) {
             return '<td class="gap-time-cell"></td>';
@@ -577,7 +568,10 @@ class TableRenderer {
      * @returns {string} HTML string
      */
     renderDifficultyCell(value) {
-        const diffStr = String(value || '').trim().toLowerCase();
+        const normalizedValue = window.DataNormalizer?.normalizeDifficulty
+            ? window.DataNormalizer.normalizeDifficulty(value)
+            : String(value || '').trim();
+        const diffStr = normalizedValue.toLowerCase();
         let diffClass = '';
         
         if (diffStr === 'get real') diffClass = 'difficulty-get-real';
@@ -590,7 +584,7 @@ class TableRenderer {
             'novice': 'Lowest realism (bronze)'
         };
         const titleText = titleMap[diffStr] || 'Difficulty';
-        const escVal = R3EUtils.escapeHtml(String(value || ''));
+        const escVal = R3EUtils.escapeHtml(normalizedValue);
         
         return `<td class="difficulty-cell"><span class="difficulty-pill ${diffClass}" title="${titleText}" aria-label="${titleText}">${escVal}</span></td>`;
     }

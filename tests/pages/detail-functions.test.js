@@ -29,6 +29,10 @@ beforeAll(() => {
     window.DataNormalizer = {
         normalizeLeaderboardEntry: x => x,
         normalizeTrackName: s => s,
+        normalizeDifficulty: value => {
+            const raw = String(value ?? '').trim();
+            return ({ 0: 'Novice', 1: 'Amateur', 2: 'Get Real' }[raw] || raw);
+        },
         extractLapTime: () => ''
     };
     window.ColumnConfig = {
@@ -77,6 +81,7 @@ beforeAll(() => {
         '<div id="detail-results-container"></div>'
     ].join('');
 
+    loadBrowserScript('modules/filter-state.js');
     loadBrowserScript('modules/difficulty-filter.js');
     loadBrowserScript('modules/pages/detail.js');
 });
@@ -109,6 +114,20 @@ describe('splitTrackAndLayout', () => {
 
         const emDash = window.splitTrackAndLayout('Hockenheim \u2014 GP');
         expect(emDash).toEqual({ trackName: 'Hockenheim', layoutName: 'GP' });
+    });
+});
+
+describe('detail title formatting', () => {
+    it('resolves track layout and class name from existing metadata', () => {
+        window.TRACKS_DATA = [{ id: 6140, label: 'Falkenberg Motorbana - Grand Prix' }];
+        window.getCarClassName = id => ({ '5726': 'Audi Sport TT Cup 2016' }[String(id)] || String(id));
+
+        window.setDetailTitles({}, '6140', '5726');
+
+        expect(document.getElementById('detail-track').textContent).toContain('Falkenberg Motorbana');
+        expect(document.querySelector('#detail-track .detail-track-layout').textContent).toBe('Grand Prix');
+        expect(document.querySelector('#detail-class .detail-class-name').textContent).toBe('Audi Sport TT Cup 2016');
+        expect(document.getElementById('detail-layout')).toBeNull();
     });
 });
 
@@ -171,6 +190,12 @@ describe('matchesDifficultyPreference', () => {
     it('returns true when entry difficulty matches the label', () => {
         const entry = { Difficulty: 'Get Real' };
         expect(window.matchesDifficultyPreference(entry, 'Get Real')).toBe(true);
+    });
+
+    it('matches numeric backend difficulty codes to their labels', () => {
+        expect(window.matchesDifficultyPreference({ Difficulty: 2 }, 'Get Real')).toBe(true);
+        expect(window.matchesDifficultyPreference({ Difficulty: 1 }, 'Amateur')).toBe(true);
+        expect(window.matchesDifficultyPreference({ Difficulty: 0 }, 'Novice')).toBe(true);
     });
 
     it('returns false when entry difficulty does not match', () => {

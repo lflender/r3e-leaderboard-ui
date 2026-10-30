@@ -6,6 +6,12 @@ function formatClassicLapTime(raw) {
     if (raw === null || raw === undefined) return '';
     const s = String(raw).trim();
     if (!s) return '';
+    const colonFormat = s.match(/^([+-])?(\d+):(\d{2})\.(\d{1,3})$/);
+    if (colonFormat) {
+        const sign = colonFormat[1] || '';
+        const millis = colonFormat[4].padEnd(3, '0');
+        return `${sign}${colonFormat[2]}:${colonFormat[3]}:${millis}s`;
+    }
     const m = s.match(/^([+-])?(?:(\d+)m\s*)?(\d+)(?:\.(\d{1,3}))?s$/);
     if (!m) return String(raw);
     const sign = m[1] || '';
@@ -75,6 +81,42 @@ function parseLapTimeToMillis(timeStr) {
     return 0;
 }
 
+function formatGapMillis(gapMillis) {
+    if (!Number.isFinite(gapMillis)) return '';
+    const sign = gapMillis < 0 ? '-' : '+';
+    const absoluteGap = Math.abs(gapMillis);
+    const minutes = Math.floor(absoluteGap / 60000);
+    const seconds = ((absoluteGap % 60000) / 1000).toFixed(3);
+    return `${sign}${minutes ? `${minutes}m ${seconds.padStart(6, '0')}` : seconds}s`;
+}
+
+function calculateLapTimeGap(rawLapTime, referenceTime) {
+    const parts = String(rawLapTime || '').split(/,\s*/);
+    if (parts.length > 1) return parts.slice(1).join(', ');
+
+    const lapMillis = parseLapTimeToMillis(parts[0]);
+    const referenceLapTime = String(referenceTime || '').split(/,\s*/)[0];
+    const referenceMillis = parseLapTimeToMillis(referenceLapTime);
+    if (!lapMillis || !referenceMillis || lapMillis === referenceMillis) return '';
+    return formatGapMillis(lapMillis - referenceMillis);
+}
+
+function getFastestLapTime(entries) {
+    if (!Array.isArray(entries)) return '';
+    let fastestTime = '';
+    let fastestMillis = Number.POSITIVE_INFINITY;
+    entries.forEach(entry => {
+        const raw = entry && (entry.LapTime || entry['Lap Time'] || entry.lap_time || entry.laptime || entry.Time || '');
+        const lapTime = String(raw || '').split(/,\s*/)[0];
+        const lapMillis = parseLapTimeToMillis(lapTime);
+        if (lapMillis > 0 && lapMillis < fastestMillis) {
+            fastestMillis = lapMillis;
+            fastestTime = lapTime;
+        }
+    });
+    return fastestTime;
+}
+
 function calculateGapPercentage(item, referenceTime) {
     if (!item) return '-';
 
@@ -82,24 +124,23 @@ function calculateGapPercentage(item, referenceTime) {
     const s = String(raw || '');
     if (!s) return '-';
 
-    const parts = s.split(/,\s*/);
-    const lapTime = parts[0] || '';
-    if (parts.length < 2) return '-';
-
+    const lapTime = s.split(/,\s*/)[0] || '';
     const lapMillis = parseLapTimeToMillis(lapTime);
-    if (lapMillis === 0) {
-        return '-';
+    if (lapMillis === 0) return '-';
+    const position = parseInt(item.class_position || item.position || item.Position, 10);
+    if (position === 1) return '-';
+
+    const referenceMillis = parseLapTimeToMillis(referenceTime);
+    if (referenceMillis > 0) {
+        return ((lapMillis / referenceMillis) * 100).toFixed(1) + '%';
     }
 
     const gapMillis = parseGapMillisFromItem(item);
-    if (gapMillis === 0 || gapMillis === Number.MAX_VALUE) {
-        return '-';
-    }
+    if (gapMillis === Number.MAX_VALUE) return '-';
+    if (gapMillis === 0) return '-';
 
     const refMillis = lapMillis - gapMillis;
-    if (refMillis <= 0) {
-        return '-';
-    }
+    if (refMillis <= 0) return '-';
 
     const percentage = (lapMillis / refMillis) * 100;
     return percentage.toFixed(1) + '%';
@@ -128,6 +169,9 @@ window.R3ETimeUtils = {
     formatClassicLapTime,
     parseGapMillisFromItem,
     parseLapTimeToMillis,
+    formatGapMillis,
+    calculateLapTimeGap,
+    getFastestLapTime,
     calculateGapPercentage,
     formatDate
 };

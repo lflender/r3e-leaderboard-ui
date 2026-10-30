@@ -60,6 +60,16 @@ describe('TableRenderer — cell rendering', () => {
             expect(html).toContain('Get Real');
         });
 
+        test.each([
+            [2, 'Get Real', 'difficulty-get-real'],
+            [1, 'Amateur', 'difficulty-amateur'],
+            [0, 'Novice', 'difficulty-novice']
+        ])('formats backend difficulty code %s as %s', (code, label, cssClass) => {
+            const html = renderer.renderCell({ difficulty: code }, 'difficulty');
+            expect(html).toContain(label);
+            expect(html).toContain(cssClass);
+        });
+
         test('dispatches lap time column to renderLapTimeCell', () => {
             const html = renderer.renderCell({ 'Lap Time': '1m 30.500s' }, 'Lap Time');
             expect(html).toContain('lap-time-cell');
@@ -76,6 +86,38 @@ describe('TableRenderer — cell rendering', () => {
             expect(html).toContain('car-class-cell');
             expect(html).toContain('GT3');
             expect(html).toContain('table-car-class-logo');
+        });
+
+        test('resolves a missing car class label from the cached class ID mapping', () => {
+            window.CAR_CLASSES_DATA = { '13397': 'Alpine A110 Cup' };
+
+            const html = renderer.renderCell({ car_class: '', class_id: '13397' }, 'car_class');
+
+            expect(html).toContain('Alpine A110 Cup');
+        });
+
+        test('renders car class and lap-time gaps from the refreshed driver index format', () => {
+            window.CARS_DATA = [{ class: 'FRJ Cup', logo: 'https://cdn/frj-cup.png' }];
+            const entry = {
+                position: 23,
+                laptime: '1m 17.522s, +08.643s',
+                car: 'Formula RaceRoom Junior',
+                car_class: 'FRJ Cup',
+                difficulty: 'Amateur',
+                track_id: '7976',
+                class_id: '253'
+            };
+            const keys = window.ColumnConfig.getOrderedColumns(Object.keys(entry), { addSynthetic: true });
+            const html = renderer.renderDriverGroupedTable([
+                { driver: 'Alice', country: 'FR', entries: [entry] }
+            ], keys, 'gap');
+
+            expect(html).toContain('FRJ Cup');
+            expect(html).toContain('Formula');
+            expect(html).toContain('RaceRoom Junior');
+            expect(html).toContain('lap-time-cell');
+            expect(html).toContain('+8:643s');
+            expect(html).toContain('112.5%');
         });
 
         test('renders generic value when no type matches', () => {
@@ -285,6 +327,43 @@ describe('TableRenderer — cell rendering', () => {
             expect(html).toContain('gap-time-cell');
             expect(html).not.toContain('time-delta');
         });
+
+        test('calculates a gap from a standalone lap time and reference', () => {
+            const html = renderer.renderGapTimeCell('1:17.197', '1:17.155');
+            expect(html).toContain('+0:042s');
+        });
+    });
+
+    test('renders detail rows with Difficulty and derives gap values from the leader', () => {
+        const html = renderer.renderDetailRow({
+            Position: 2,
+            Name: 'Driver',
+            Country: 'SE',
+            Car: 'Car A',
+            Difficulty: 'Get Real',
+            LapTime: '1:17.197',
+            TotalEntries: 10
+        }, {
+            referenceTime: '1:17.155',
+            DataNormalizer: {
+                extractPosition: item => item.Position,
+                extractName: item => item.Name,
+                extractCountry: item => item.Country,
+                extractCar: item => item.Car,
+                extractDifficulty: item => item.Difficulty,
+                extractLapTime: item => item.LapTime,
+                extractTrackId: item => item.track_id,
+                extractClassId: item => item.class_id
+            },
+            R3EUtils: window.R3EUtils,
+            tableRenderer: renderer
+        });
+
+        expect(html).toContain('1:17:197s');
+        expect(html).toContain('+0:042s');
+        expect(html).toContain('100.1%');
+        expect(html).toContain('Get Real');
+        expect(html.match(/<td/g)).toHaveLength(8);
     });
 
     // -------------------------------------------------------

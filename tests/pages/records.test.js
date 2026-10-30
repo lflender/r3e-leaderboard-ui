@@ -86,6 +86,16 @@ function setupGlobals() {
     window.CustomSelect = class {
         constructor(_rootId, _options, onChange) {
             window.__recordsFilterOnChange = onChange;
+            this.onChange = onChange;
+            this.currentValue = '';
+            window.__recordsFilterSelect = this;
+        }
+
+        setValue(value, options = {}) {
+            this.currentValue = value;
+            if (options.notify !== false && this.onChange) {
+                this.onChange(value, { source: options.source || 'programmatic' });
+            }
         }
     };
 
@@ -132,6 +142,8 @@ function setupGlobals() {
 beforeEach(() => {
     document.body.innerHTML = buildDom();
     setupGlobals();
+    sessionStorage.clear();
+    loadBrowserScript('modules/filter-state.js');
     loadBrowserScript('modules/stats-renderer.js');
 });
 
@@ -143,6 +155,21 @@ async function loadAndWait() {
 }
 
 describe('records page integration', () => {
+    it('restores a saved class filter before loading record sections', async () => {
+        window.FilterOptionsService.getClassOptionsFromCarsData.mockReturnValue([
+            { value: 'GT3', label: 'GT3' }
+        ]);
+        window.PageFilterState.write('records', 'class', 'GT3');
+
+        await loadAndWait();
+
+        expect(window.__recordsFilterSelect.currentValue).toBe('GT3');
+        expect(window.StatsData.getAllPathsForFilter).toHaveBeenCalledWith(
+            { index: true },
+            'GT3'
+        );
+    });
+
     it('renders all 4 sections with top 3 rows by default', async () => {
         await loadAndWait();
 

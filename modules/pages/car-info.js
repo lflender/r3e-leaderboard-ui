@@ -49,6 +49,7 @@
   let wheelFilter = '', transFilter = '', classFilter = '', ratingFilter = '';
   let searchFilter = '';
   let viewMode = 'table';
+  const expandedClassGroups = new Set();
   const CAR_VIEW_MODE_KEY = 'carInfoViewMode';
   let hasTrackedCarInfoDisplay = false;
   let searchDebounceTimer = null;
@@ -81,6 +82,36 @@
     { value: '5', label: '5 stars', labelHtml: buildRatingFilterLabel('★★★★★+') },
     { value: '6', label: 'Favorites', labelHtml: buildRatingFilterLabel('★★★★★', { heart: true }) }
   ];
+
+  const savedFilters = PageFilterState.read('cars');
+  if (Array.isArray(savedFilters.expandedClassGroups)) {
+    savedFilters.expandedClassGroups.forEach(group => {
+      if (typeof group === 'string') expandedClassGroups.add(group);
+    });
+  }
+
+  function saveExpandedClassGroups() {
+    tableContainer.querySelectorAll('.driver-group-header').forEach(header => {
+      if (header.classList.contains('collapsed')) {
+        expandedClassGroups.delete(header.dataset.group);
+      } else {
+        expandedClassGroups.add(header.dataset.group);
+      }
+    });
+    PageFilterState.write('cars', 'expandedClassGroups', Array.from(expandedClassGroups));
+  }
+
+  tableContainer.addEventListener('click', event => {
+    const header = event.target.closest && event.target.closest('.driver-group-header');
+    if (header && tableContainer.contains(header)) saveExpandedClassGroups();
+  });
+
+  const getSavedOption = (options, value) =>
+    typeof value === 'string' && options.some(option => option.value === value) ? value : '';
+  wheelFilter = getSavedOption(wheelOptions, savedFilters.wheel);
+  transFilter = getSavedOption(transOptions, savedFilters.transmission);
+  classFilter = getSavedOption(classOptions, savedFilters.class);
+  ratingFilter = getSavedOption(ratingOptions, savedFilters.rating);
   
   // Use the new CustomSelect component
   function trackCarInfoFilter(filterName, filterValue, stats) {
@@ -154,8 +185,17 @@
     const searchInput = document.getElementById('cars-search');
     if (!searchInput) return;
 
+    if (typeof savedFilters.search === 'string') {
+      const savedSearch = savedFilters.search.trim();
+      if (savedSearch.length >= minSearchLength) {
+        searchInput.value = savedSearch;
+        searchFilter = savedSearch.toLowerCase();
+      }
+    }
+
     searchInput.addEventListener('input', () => {
       const nextValue = searchInput.value.trim();
+      PageFilterState.write('cars', 'search', nextValue);
 
       if (searchDebounceTimer) {
         clearTimeout(searchDebounceTimer);
@@ -269,34 +309,43 @@
     updateViewToggleUI();
   }
 
-  new CustomSelect('wheel-filter-ui', wheelOptions, (v, opts) => {
+  const wheelSelect = new CustomSelect('wheel-filter-ui', wheelOptions, (v, opts) => {
     wheelFilter = v;
+    PageFilterState.write('cars', 'wheel', v);
     const stats = renderResults();
     if (opts?.source === 'user') {
       trackCarInfoFilter('wheel', v, stats);
     }
   }, { searchable: false });
-  new CustomSelect('trans-filter-ui', transOptions, (v, opts) => {
+  const transmissionSelect = new CustomSelect('trans-filter-ui', transOptions, (v, opts) => {
     transFilter = v;
+    PageFilterState.write('cars', 'transmission', v);
     const stats = renderResults();
     if (opts?.source === 'user') {
       trackCarInfoFilter('transmission', v, stats);
     }
   }, { searchable: false });
-  new CustomSelect('class-filter-ui-cars', classOptions, (v, opts) => {
+  const classSelect = new CustomSelect('class-filter-ui-cars', classOptions, (v, opts) => {
     classFilter = v;
+    PageFilterState.write('cars', 'class', v);
     const stats = renderResults();
     if (opts?.source === 'user') {
       trackCarInfoFilter('class', v, stats);
     }
   });
-  new CustomSelect('rating-filter-ui', ratingOptions, (v, opts) => {
+  const ratingSelect = new CustomSelect('rating-filter-ui', ratingOptions, (v, opts) => {
     ratingFilter = v;
+    PageFilterState.write('cars', 'rating', v);
     const stats = renderResults();
     if (opts?.source === 'user') {
       trackCarInfoFilter('rating', v, stats);
     }
   }, { searchable: false });
+
+  wheelSelect.setValue(wheelFilter, { notify: false, source: 'restore' });
+  transmissionSelect.setValue(transFilter, { notify: false, source: 'restore' });
+  classSelect.setValue(classFilter, { notify: false, source: 'restore' });
+  ratingSelect.setValue(ratingFilter, { notify: false, source: 'restore' });
 
   initViewMode();
   setupSearchInput();
@@ -304,7 +353,7 @@
 
   function carMatchesFilters(car) {
     const w = (car.wheel_cat || '').toLowerCase();
-    const t = (car.transmission_cat || '').toLowerCase();
+    const t = String(car.transmission_cat || '').trim().toLowerCase();
     const c = (car.car_class || car.class || '').toLowerCase();
     const carName = String(car.car || '').toLowerCase();
     
@@ -318,7 +367,7 @@
       }
     }
     
-    const transOk = !transFilter || t === transFilter;
+    const transOk = !transFilter || t === transFilter || (transFilter === 'h' && ['manual', 'other'].includes(t));
     
     // Handle class filter - check if it's a superclass filter
     let classOk = true;
@@ -361,13 +410,57 @@
     return wheelOk && transOk && classOk && searchOk && ratingOk;
   }
 
+  let normalizedImageMapSource = null;
+  let normalizedImageMap = new Map();
+
+  function getStoreCarIdentity(link) {
+    try {
+      const pathSegments = new URL(link).pathname.split('/').filter(Boolean);
+      const carsIndex = pathSegments.lastIndexOf('cars');
+      if (carsIndex < 0 || pathSegments.length <= carsIndex + 2) return '';
+
+      const classSlug = pathSegments[carsIndex + 1];
+      const productSlug = pathSegments
+        .slice(carsIndex + 2)
+        .filter(segment => !/^\d+$/.test(segment))
+        .pop();
+      const normalizeSlug = segment => segment.toLowerCase().replace(/[^a-z0-9]/g, '');
+      return classSlug && productSlug
+        ? `${normalizeSlug(classSlug)}/${normalizeSlug(productSlug)}`
+        : '';
+    } catch (err) {
+      return '';
+    }
+  }
+
+  function getNormalizedImageMap(imageMap) {
+    if (normalizedImageMapSource === imageMap) return normalizedImageMap;
+
+    normalizedImageMapSource = imageMap;
+    normalizedImageMap = new Map();
+    Object.entries(imageMap).forEach(([link, images]) => {
+      const identity = getStoreCarIdentity(link);
+      if (!identity || !Array.isArray(images)) return;
+      if (normalizedImageMap.has(identity)) {
+        normalizedImageMap.set(identity, null);
+      } else {
+        normalizedImageMap.set(identity, images);
+      }
+    });
+    return normalizedImageMap;
+  }
+
   function getImageListForCar(car, rawLink) {
     const imageMap = (window.CAR_IMAGES_BY_LINK && typeof window.CAR_IMAGES_BY_LINK === 'object')
       ? window.CAR_IMAGES_BY_LINK
       : null;
-    const mappedList = (imageMap && rawLink && Array.isArray(imageMap[rawLink]))
+    let mappedList = (imageMap && rawLink && Array.isArray(imageMap[rawLink]))
       ? imageMap[rawLink]
       : null;
+    if (!mappedList && imageMap && rawLink) {
+      const identity = getStoreCarIdentity(rawLink);
+      mappedList = identity ? getNormalizedImageMap(imageMap).get(identity) : null;
+    }
     return mappedList || (Array.isArray(car.image)
       ? car.image
       : (car.image ? [car.image] : []));
@@ -577,6 +670,14 @@
       '<button type="button" class="cars-table-toolbar-btn" id="cars-fold-all" title="Collapse all classes">Collapse all</button>' +
       '<button type="button" class="cars-table-toolbar-btn" id="cars-unfold-all" title="Expand all classes">Expand all</button>' +
       '</div>' + html;
+    tableContainer.querySelectorAll('.driver-group-header').forEach(function(header) {
+      if (!expandedClassGroups.has(header.dataset.group)) {
+        header.classList.add('collapsed');
+        tableContainer.querySelectorAll(`tr.${header.dataset.group}`).forEach(function(row) {
+          row.style.display = 'none';
+        });
+      }
+    });
     attachBrandLogoHandlers(tableContainer);
     attachImageCyclers(tableContainer);
     attachRatingHandlers(tableContainer);
@@ -585,11 +686,13 @@
       tableContainer.querySelectorAll('.driver-group-header:not(.collapsed)').forEach(function(h) {
         window.toggleGroup(h);
       });
+      saveExpandedClassGroups();
     });
     document.getElementById('cars-unfold-all').addEventListener('click', function() {
       tableContainer.querySelectorAll('.driver-group-header.collapsed').forEach(function(h) {
         window.toggleGroup(h);
       });
+      saveExpandedClassGroups();
     });
 
     Array.from(tableContainer.querySelectorAll('tr.driver-data-row')).forEach(row => {
@@ -752,6 +855,7 @@
   }
 
   function renderResults() {
+    saveExpandedClassGroups();
     return viewMode === 'tiles' ? renderTiles() : renderTable();
   }
 

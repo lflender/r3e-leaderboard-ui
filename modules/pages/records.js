@@ -658,8 +658,12 @@
             .concat(superclassOptions)
             .concat(regularClassOptions);
 
-        new window.CustomSelect(FILTER_ROOT_ID, classOptions, (value, opts) => {
+        const savedFilter = String(PageFilterState.read('records').class || '');
+        currentFilter = classOptions.some(option => String(option.value) === savedFilter) ? savedFilter : '';
+
+        const classSelect = new window.CustomSelect(FILTER_ROOT_ID, classOptions, (value, opts) => {
             currentFilter = value || '';
+            PageFilterState.write('records', 'class', currentFilter);
             // Reset expand state when filter changes.
             expandedKey = null;
             if (opts?.source === 'user') {
@@ -667,6 +671,7 @@
             }
             fetchAndRender();
         });
+        if (currentFilter) classSelect.setValue(currentFilter, { notify: false, source: 'restore' });
     }
 
     async function init() {

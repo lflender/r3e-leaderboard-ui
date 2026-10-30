@@ -120,8 +120,12 @@
 
     function matchesTrans(car, transFilter) {
         if (!transFilter) return true;
-        const t = (car.transmission_cat || '').toLowerCase().trim();
-        const effective = t || 'paddles';
+        const rawValue = String(car.transmission_cat || '').trim();
+        const t = rawValue.toLowerCase();
+
+        const isLegacyMissing = ['automatic', 'fixed gear', 'fixed', '-'].includes(t);
+        const isManual = ['manual', 'h', 'other'].includes(t);
+        const effective = isManual ? 'h' : (isLegacyMissing ? '' : (t || 'paddles'));
         return effective === transFilter;
     }
 

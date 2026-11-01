@@ -72,6 +72,17 @@ describe('DataNormalizer.normalizeLeaderboardEntry', () => {
         expect(result.Name).toBe('Charlie');
     });
 
+    it('preserves driver avatar URLs from the leaderboard entry', () => {
+        const entry = {
+            driver: {
+                Name: 'Charlie',
+                avatar: 'https://game.raceroom.com/storage/user-avatars/avatar.jpg'
+            }
+        };
+        expect(window.DataNormalizer.normalizeLeaderboardEntry(entry).avatar)
+            .toBe('https://game.raceroom.com/storage/user-avatars/avatar.jpg');
+    });
+
     it('extracts car class and car name from nested car_class', () => {
         const entry = {
             driver: { Name: 'Dana' },

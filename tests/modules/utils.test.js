@@ -20,6 +20,18 @@ describe('R3EUtils', () => {
         expect(window.R3EUtils.escapeHtml('<script>alert(1)</script>')).toBe('&lt;script&gt;alert(1)&lt;/script&gt;');
     });
 
+    test('resolves legacy driver avatar URLs through the current RaceRoom endpoint', () => {
+        expect(window.R3EUtils.resolveDriverAvatarUrl(
+            'https://game.raceroom.com/storage/user-avatars/old-avatar.jpg',
+            '7547992'
+        )).toBe('https://game.raceroomracing.com/game/user_avatar/7547992');
+    });
+
+    test('preserves non-legacy driver avatar URLs', () => {
+        expect(window.R3EUtils.resolveDriverAvatarUrl('https://example.com/avatar.webp', '7547992'))
+            .toBe('https://example.com/avatar.webp');
+    });
+
     test('formats headers with generic snake_case conversion when ColumnConfig is absent', () => {
         expect(window.R3EUtils.formatHeader('class_name')).toBe('Class name');
         expect(window.R3EUtils.formatHeader('date_time')).toBe('Date time');

@@ -225,8 +225,8 @@ async function fetchLeaderboardDetails() {
         
         displayResults(allResults);
 
-        // Background enrichment: adds rank/team from metadata shards for
-        // entries that don't already have them. Refreshes table on completion.
+        // Background enrichment adds missing rank/team/avatar metadata and then
+        // refreshes the table without delaying the initial render.
         dataService.enrichEntriesWithDriverMetadata(transformedData).then(() => {
             allResults = applyInitialDifficultyFilter(transformedData);
             displayResults(allResults);

@@ -14,6 +14,7 @@ describe('StatsRenderer', () => {
                 .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;').replace(/'/g, '&#39;')
         };
+        loadBrowserScript('modules/utils.js');
         document.body.innerHTML = '<div id="container"></div>';
         loadBrowserScript('modules/stats-renderer.js');
     });

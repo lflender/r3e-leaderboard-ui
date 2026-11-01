@@ -61,6 +61,7 @@ function normalizeLeaderboardEntry(entry, data = {}, index = 0, totalEntries = 0
     return {
         Position: position,
         Name: entry.driver?.Name || entry.driver?.name || getField(entry, FIELD_NAMES.NAME, 'Unknown'),
+        avatar: entry.driver?.avatar || entry.driver?.Avatar || entry.avatar || entry.Avatar || '',
         Country: entry.country?.Name || entry.country?.name || getField(entry, FIELD_NAMES.COUNTRY),
         CarClass: carClass,
         Car: carName,

@@ -278,6 +278,18 @@ describe('TableRenderer — cell rendering', () => {
             const html = renderer.renderDriverNameCell(item);
             expect(html).toContain('id=12345');
         });
+
+        test('renders driver avatar with the resolved current RaceRoom URL', () => {
+            const item = {
+                name: 'Alexander Loos',
+                path_id: '7547992',
+                avatar: 'https://game.raceroom.com/storage/user-avatars/old-avatar.jpg'
+            };
+            const html = renderer.renderDriverNameCell(item);
+            expect(html).toContain('class="driver-group-avatar"');
+            expect(html).toContain('src="https://game.raceroomracing.com/game/user_avatar/7547992"');
+            expect(html).toContain('referrerpolicy="no-referrer"');
+        });
     });
 
     // -------------------------------------------------------

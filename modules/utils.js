@@ -47,6 +47,18 @@ function getTotalEntriesCount(item) {
     return isNaN(n) ? 0 : n;
 }
 
+function resolveDriverAvatarUrl(avatar, pathId) {
+    const source = String(avatar || '');
+    const driverId = String(pathId || '').trim();
+    const isLegacyAvatarUrl = /^https:\/\/game\.raceroom\.com\/storage\/user-avatars\/[^/?#]+(?:[?#].*)?$/i.test(source);
+
+    if (isLegacyAvatarUrl && /^\d+$/.test(driverId)) {
+        return `https://game.raceroomracing.com/game/user_avatar/${encodeURIComponent(driverId)}`;
+    }
+
+    return source;
+}
+
 function renderRankStars(rank, inline = false) {
     if (!rank) return '';
     const normalizedRank = String(rank).trim().toUpperCase();
@@ -104,6 +116,7 @@ window.R3EUtils = {
     formatHeader,
     formatValue,
     getTotalEntriesCount,
+    resolveDriverAvatarUrl,
     renderRankStars,
     getPositionBadgeColor,
     isDriverSearchActive,

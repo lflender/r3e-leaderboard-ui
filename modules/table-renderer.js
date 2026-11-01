@@ -406,9 +406,17 @@ class TableRenderer {
             ? window.DataNormalizer.extractRank(item)
             : (item.rank || item.Rank || '');
         const pathId = item.path_id || item.pathId || item.PathID || item['Path ID'] || '';
+        const avatar = item.avatar || item.Avatar || '';
+        const avatarResolver = window.R3EUtils.resolveDriverAvatarUrl;
+        const avatarUrl = typeof avatarResolver === 'function'
+            ? avatarResolver(avatar, pathId)
+            : avatar;
         const highlisted = item.highlisted || item.Highlisted || false;
         const flag = FlagHelper.countryToFlag(country);
         const flagHtml = flag ? `<span class="country-flag">${flag}</span>` : '';
+        const avatarHtml = avatarUrl
+            ? `<img class="driver-group-avatar" src="${R3EUtils.escapeHtml(String(avatarUrl))}" alt="${R3EUtils.escapeHtml(`${name} avatar`)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`
+            : '';
         const rankStarsHtml = rank ? R3EUtils.renderRankStars(rank, true) : '';
         const mpResult = typeof resolveMpPosWithInactive === 'function' ? resolveMpPosWithInactive(name, pathId) : { position: null, inactive: false };
         const mpPos = mpResult.position;
@@ -428,7 +436,7 @@ class TableRenderer {
                     linkClasses += ` ${nameClasses}`;
                 }
             }
-            return `<td><a class="${linkClasses}" href="${driverHref}">${flagHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}${mpPosHtml}</a></td>`;
+            return `<td><a class="${linkClasses}" href="${driverHref}">${flagHtml}${avatarHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}${mpPosHtml}</a></td>`;
         }
 
         const highlightThresholds = options.highlightedMpPosThresholds || { gold: 10, silver: 100, glitter: 10 };
@@ -436,7 +444,7 @@ class TableRenderer {
             ? getMpPosNameClasses(mpPos, { ...highlightThresholds, inactive: mpPosInactive })
             : '';
         const classAttr = highlightedClasses ? ` class="${highlightedClasses}"` : '';
-        return `<td><span${classAttr}>${flagHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}${mpPosHtml}</span></td>`;
+        return `<td><span${classAttr}>${flagHtml}${avatarHtml}${R3EUtils.escapeHtml(String(name))}${rankStarsHtml}${mpPosHtml}</span></td>`;
     }
     
     /**

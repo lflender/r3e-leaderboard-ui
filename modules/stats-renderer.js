@@ -1,15 +1,5 @@
 (function () {
     const escapeHtml = (v) => window.R3EUtils.escapeHtml(v);
-    const LEGACY_AVATAR_URL_PATTERN = /^https:\/\/game\.raceroom\.com\/storage\/user-avatars\/[^/?#]+(?:[?#].*)?$/i;
-
-    function resolveAvatarUrl(avatar, pathId) {
-        const source = String(avatar || '');
-        const driverId = String(pathId || '').trim();
-        if (LEGACY_AVATAR_URL_PATTERN.test(source) && /^\d+$/.test(driverId)) {
-            return `https://game.raceroomracing.com/game/user_avatar/${encodeURIComponent(driverId)}`;
-        }
-        return source;
-    }
 
     function buildPositionBadge(position) {
         const posClass = position === 1 ? ' pos-1'
@@ -44,7 +34,10 @@
         const mpPosBadgeClass = mpResult.inactive ? 'mp-pos-badge mp-pos-inactive' : 'mp-pos-badge';
         const mpPosHtml = effectiveMpPos ? ` <span class="${mpPosBadgeClass}">#${effectiveMpPos}</span>` : '';
 
-        const avatarUrl = resolveAvatarUrl(row.avatar, pathId);
+        const resolveAvatarUrl = window.R3EUtils.resolveDriverAvatarUrl;
+        const avatarUrl = typeof resolveAvatarUrl === 'function'
+            ? resolveAvatarUrl(row.avatar, pathId)
+            : row.avatar;
         const avatarHtml = avatarUrl
             ? `<img class="records-driver-avatar" src="${escapeHtml(avatarUrl)}" alt="" aria-hidden="true" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : '';
 
@@ -66,9 +59,12 @@
             const row = avatarsByKey.get(anchor.dataset.driverKey);
             if (!row || anchor.querySelector('.records-driver-avatar')) return;
 
+            const resolveAvatarUrl = window.R3EUtils.resolveDriverAvatarUrl;
             const image = document.createElement('img');
             image.className = 'records-driver-avatar';
-            image.src = resolveAvatarUrl(row.avatar, row.path_id || row.pathId || row.driver_key);
+            image.src = typeof resolveAvatarUrl === 'function'
+                ? resolveAvatarUrl(row.avatar, row.path_id || row.pathId || row.driver_key)
+                : row.avatar;
             image.alt = '';
             image.setAttribute('aria-hidden', 'true');
             image.loading = 'lazy';

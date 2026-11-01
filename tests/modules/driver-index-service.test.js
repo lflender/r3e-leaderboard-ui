@@ -209,6 +209,29 @@ describe('Driver index service', () => {
         expect(service._loadDriverMetadataShard).toHaveBeenCalledWith('_');
     });
 
+    it('adds avatars to fully populated leaderboard entries using their driver path ID', async () => {
+        service.driverIndex = { 'alice smith': 'alice smith' };
+        service.driverMetadataShardCache.set('a', {
+            'alice smith': [
+                { name: 'Alice Smith', path_id: '12345', avatar: 'https://img/alice-12345.png' },
+                { name: 'Alice Smith', path_id: '67890', avatar: 'https://img/alice-67890.png' }
+            ]
+        });
+        service.driverMetadataShardCache.set('_', {});
+        vi.spyOn(service, 'waitForDriverIndex').mockResolvedValue(service.driverIndex);
+
+        const entries = [{
+            Name: 'Alice Smith',
+            path_id: '67890',
+            Country: 'SE',
+            Rank: 'A',
+            Team: 'Blue'
+        }];
+        await service.enrichEntriesWithDriverMetadata(entries);
+
+        expect(entries[0].avatar).toBe('https://img/alice-67890.png');
+    });
+
     it('falls back to _ shard for diacritical names via search_name alias', async () => {
         // Mirror has normalized name
         service.driverIndex = { 'oscar domingo': 'oscar domingo' };

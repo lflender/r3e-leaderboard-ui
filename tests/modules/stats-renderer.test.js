@@ -52,6 +52,49 @@ describe('StatsRenderer', () => {
         expect(container.innerHTML).toContain('12.50');
     });
 
+    test('renders driver avatars without a referrer', () => {
+        const container = document.getElementById('container');
+        window.StatsRenderer.renderTable(container, [
+            { name: 'Alice', avatar: 'https://example.com/avatar.png', value: 1 }
+        ], 'Poles');
+
+        const avatar = container.querySelector('.records-driver-avatar');
+        expect(avatar).not.toBeNull();
+        expect(avatar.getAttribute('referrerpolicy')).toBe('no-referrer');
+    });
+
+    test('uses the current RaceRoom avatar endpoint for legacy URLs with a driver ID', () => {
+        const container = document.getElementById('container');
+        window.StatsRenderer.renderTable(container, [
+            {
+                name: 'Alexander Loos',
+                path_id: '7547992',
+                avatar: 'https://game.raceroom.com/storage/user-avatars/old-avatar.jpg',
+                value: 1
+            }
+        ], 'Poles');
+
+        const avatar = container.querySelector('.records-driver-avatar');
+        expect(avatar.getAttribute('src'))
+            .toBe('https://game.raceroomracing.com/game/user_avatar/7547992');
+    });
+
+    test('uses the current RaceRoom avatar endpoint for asynchronously added legacy URLs', () => {
+        const container = document.getElementById('container');
+        container.innerHTML = '<a data-driver-key="7547992">Alexander Loos</a>';
+
+        window.StatsRenderer.updateDriverAvatars(container, [{
+            name: 'Alexander Loos',
+            path_id: '7547992',
+            avatar: 'https://game.raceroom.com/storage/user-avatars/old-avatar.jpg'
+        }]);
+
+        const avatar = container.querySelector('.records-driver-avatar');
+        expect(avatar.getAttribute('src'))
+            .toBe('https://game.raceroomracing.com/game/user_avatar/7547992');
+        expect(avatar.referrerPolicy).toBe('no-referrer');
+    });
+
     test('escapes HTML in value title and driver name', () => {
         const container = document.getElementById('container');
         window.StatsRenderer.renderTable(container, [

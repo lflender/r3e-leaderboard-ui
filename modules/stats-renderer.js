@@ -1,5 +1,15 @@
 (function () {
     const escapeHtml = (v) => window.R3EUtils.escapeHtml(v);
+    const LEGACY_AVATAR_URL_PATTERN = /^https:\/\/game\.raceroom\.com\/storage\/user-avatars\/[^/?#]+(?:[?#].*)?$/i;
+
+    function resolveAvatarUrl(avatar, pathId) {
+        const source = String(avatar || '');
+        const driverId = String(pathId || '').trim();
+        if (LEGACY_AVATAR_URL_PATTERN.test(source) && /^\d+$/.test(driverId)) {
+            return `https://game.raceroomracing.com/game/user_avatar/${encodeURIComponent(driverId)}`;
+        }
+        return source;
+    }
 
     function buildPositionBadge(position) {
         const posClass = position === 1 ? ' pos-1'
@@ -16,6 +26,7 @@
         const pathId = row.path_id || '';
         const idSuffix = pathId ? `&id=${encodeURIComponent(pathId)}` : '';
         const searchUrl = `drivers.html?driver=${encodeURIComponent(`"${name}"`)}${idSuffix}`;
+        const driverKey = encodeURIComponent(String(pathId || name));
 
         const mpResult = (typeof window.resolveMpPosWithInactive === 'function')
             ? window.resolveMpPosWithInactive(name) : { position: null, inactive: false };
@@ -33,13 +44,43 @@
         const mpPosBadgeClass = mpResult.inactive ? 'mp-pos-badge mp-pos-inactive' : 'mp-pos-badge';
         const mpPosHtml = effectiveMpPos ? ` <span class="${mpPosBadgeClass}">#${effectiveMpPos}</span>` : '';
 
-        const avatarHtml = row.avatar
-            ? `<img class="records-driver-avatar" src="${escapeHtml(row.avatar)}" alt="" aria-hidden="true" loading="lazy" decoding="async">` : '';
+        const avatarUrl = resolveAvatarUrl(row.avatar, pathId);
+        const avatarHtml = avatarUrl
+            ? `<img class="records-driver-avatar" src="${escapeHtml(avatarUrl)}" alt="" aria-hidden="true" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : '';
 
         const linkClass = nameClasses ? ` class="${nameClasses}"` : '';
         const teamHtml = row.team
             ? ` <span class="records-driver-team">${escapeHtml(row.team)}</span>` : '';
-        return `<a href="${escapeHtml(searchUrl)}"${linkClass}>${flagHtml}${avatarHtml}${escapeHtml(name)}${rankStarsHtml}${mpPosHtml}</a>${teamHtml}`;
+        return `<a href="${escapeHtml(searchUrl)}" data-driver-key="${escapeHtml(driverKey)}"${linkClass}>${flagHtml}${avatarHtml}${escapeHtml(name)}${rankStarsHtml}${mpPosHtml}</a>${teamHtml}`;
+    }
+
+    function updateDriverAvatars(container, rows) {
+        if (!container || !Array.isArray(rows)) return;
+
+        const avatarsByKey = new Map(rows
+            .filter(row => row?.avatar)
+            .map(row => [encodeURIComponent(String(row.path_id || row.name || '')), row]));
+        if (avatarsByKey.size === 0) return;
+
+        container.querySelectorAll('a[data-driver-key]').forEach(anchor => {
+            const row = avatarsByKey.get(anchor.dataset.driverKey);
+            if (!row || anchor.querySelector('.records-driver-avatar')) return;
+
+            const image = document.createElement('img');
+            image.className = 'records-driver-avatar';
+            image.src = resolveAvatarUrl(row.avatar, row.path_id || row.pathId || row.driver_key);
+            image.alt = '';
+            image.setAttribute('aria-hidden', 'true');
+            image.loading = 'lazy';
+            image.decoding = 'async';
+            image.referrerPolicy = 'no-referrer';
+            const flag = anchor.querySelector('.country-flag');
+            if (flag) {
+                flag.after(image);
+            } else {
+                anchor.insertBefore(image, anchor.firstChild);
+            }
+        });
     }
 
     function defaultValueFormatter(value) {
@@ -80,6 +121,7 @@
     window.StatsRenderer = {
         buildPositionBadge,
         buildDriverCell,
+        updateDriverAvatars,
         renderTable,
         defaultValueFormatter
     };

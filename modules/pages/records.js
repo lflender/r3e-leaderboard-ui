@@ -188,6 +188,16 @@
             valueFormatter: section.valueFormatter,
             startRank
         });
+
+        if (typeof window.dataService?.enrichRowsWithDriverAvatars === 'function') {
+            window.dataService.enrichRowsWithDriverAvatars(rows).then(() => {
+                if (el.isConnected) {
+                    getStatsRenderer().updateDriverAvatars(el, rows);
+                }
+            }).catch(error => {
+                console.warn('Failed to load driver avatars for records:', error);
+            });
+        }
     }
 
     function renderSection(section, expanded) {

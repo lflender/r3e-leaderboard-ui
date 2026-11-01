@@ -183,6 +183,85 @@
             };
         },
 
+        async enrichRowsWithDriverAvatars(rows) {
+            if (!Array.isArray(rows) || rows.length === 0) return rows;
+
+            const rowsNeedingAvatars = rows.filter(row => {
+                const name = String(row?.name || row?.driver_name || '').trim();
+                return name && !row.avatar;
+            });
+            if (rowsNeedingAvatars.length === 0) return rows;
+
+            const getLookupKeys = (name) => {
+                const normalizedName = this._normalizeDriverLookupName(name);
+                const candidates = typeof this._buildLookupKeyCandidates === 'function'
+                    ? this._buildLookupKeyCandidates(name)
+                    : [normalizedName];
+                return [...new Set([normalizedName, ...candidates].filter(Boolean))];
+            };
+            const findMetadata = (name, shards) => {
+                for (const key of getLookupKeys(name)) {
+                    for (const shard of shards) {
+                        const entry = shard && shard[key];
+                        if (entry) return entry;
+                    }
+                }
+                return null;
+            };
+            const chooseMetadata = (entry, row) => {
+                const candidates = Array.isArray(entry)
+                    ? entry.filter(candidate => candidate && typeof candidate === 'object')
+                    : entry && typeof entry === 'object' ? [entry] : [];
+                if (candidates.length === 0) return null;
+
+                const pathId = String(row.path_id || row.pathId || row.driver_key || '').trim();
+                if (pathId) {
+                    const match = candidates.find(candidate =>
+                        String(candidate.path_id || candidate.pathId || candidate.pathID || '').trim() === pathId
+                    );
+                    if (match) return match;
+                    if (candidates.length > 1) return null;
+                }
+                return candidates[0];
+            };
+            const shardKeys = new Set(rowsNeedingAvatars.map(row =>
+                this._getShardKeyForName(this._normalizeDriverLookupName(row.name || row.driver_name))
+            ));
+            const shardsByKey = new Map();
+            await Promise.all([...shardKeys].map(async shardKey => {
+                try {
+                    shardsByKey.set(shardKey, await this._loadDriverMetadataShard(shardKey));
+                } catch (error) {
+                    console.warn(`Failed to load driver avatar metadata shard ${shardKey}:`, error);
+                }
+            }));
+
+            const unresolvedRows = rowsNeedingAvatars.filter(row =>
+                !findMetadata(row.name || row.driver_name, [shardsByKey.get(
+                    this._getShardKeyForName(this._normalizeDriverLookupName(row.name || row.driver_name))
+                )])
+            );
+            if (unresolvedRows.length > 0 && !shardsByKey.has('_')) {
+                try {
+                    shardsByKey.set('_', await this._loadDriverMetadataShard('_'));
+                } catch (error) {
+                    console.warn('Failed to load fallback driver avatar metadata shard:', error);
+                }
+            }
+
+            rowsNeedingAvatars.forEach(row => {
+                const name = row.name || row.driver_name;
+                const shardKey = this._getShardKeyForName(this._normalizeDriverLookupName(name));
+                const entry = findMetadata(name, [shardsByKey.get(shardKey), shardsByKey.get('_')]);
+                const metadata = chooseMetadata(entry, row);
+                if (metadata && typeof metadata.avatar === 'string') {
+                    row.avatar = metadata.avatar;
+                }
+            });
+
+            return rows;
+        },
+
         async enrichEntriesWithDriverMetadata(entries) {
             if (!Array.isArray(entries) || entries.length === 0) {
                 return entries;

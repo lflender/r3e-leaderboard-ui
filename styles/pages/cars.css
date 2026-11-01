@@ -2,6 +2,22 @@
    CARS PAGE STYLES
    ======================================== */
 
+.cars-page-main {
+    max-width: 1800px;
+}
+
+.cars-tab-content .tab-panel {
+    max-width: 1700px;
+}
+
+.cars-tab-content .tab-panel > .search-container,
+.cars-tab-content .tab-panel > #cars-info-table {
+    width: 100%;
+    max-width: 1700px;
+    box-sizing: border-box;
+    margin-inline: auto;
+}
+
 .cars-view-toggle {
     display: inline-flex;
     align-items: center;
@@ -303,9 +319,18 @@
 
 #cars-info-table {
     position: relative;
-    overflow: visible;
+    width: 100%;
+    max-width: 1700px;
+    overflow-x: auto;
+    overflow-y: visible;
     z-index: 100;
     padding: 2px;
+    box-sizing: border-box;
+}
+
+#cars-info-table .results-table {
+    width: max-content;
+    margin-inline: auto;
 }
 
 .tab-panel > #cars-info-table {
@@ -332,6 +357,26 @@
     font-weight: 500;
     letter-spacing: 0.01em;
     opacity: 0.93;
+}
+
+#cars-info-table .results-table td.carinfo-meta.carinfo-downforce--low,
+#cars-info-table .results-table td.carinfo-meta.carinfo-difficulty--very-easy,
+#cars-info-table .results-table td.carinfo-meta.carinfo-difficulty--easy {
+    color: var(--color-success-light);
+}
+
+#cars-info-table .results-table td.carinfo-meta.carinfo-downforce--medium,
+#cars-info-table .results-table td.carinfo-meta.carinfo-difficulty--moderate {
+    color: var(--color-warning);
+}
+
+#cars-info-table .results-table td.carinfo-meta.carinfo-downforce--high {
+    color: var(--color-primary-light-solid);
+}
+
+#cars-info-table .results-table td.carinfo-meta.carinfo-difficulty--hard,
+#cars-info-table .results-table td.carinfo-meta.carinfo-difficulty--very-hard {
+    color: var(--color-danger-lighter);
 }
 
 #cars-info-table .results-table th {
@@ -559,6 +604,24 @@
 #cars-info-table .results-table .car-assists-cell {
     font-size: var(--font-size-xs);
 }
+
+#cars-info-table .car-assists-list,
+#cars-info-table .car-assists-primary,
+#cars-info-table .car-assists-launch {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#cars-info-table .car-assists-list {
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+#cars-info-table .car-assists-primary {
+    gap: 0.2rem;
+}
+
 #cars-info-table .results-table .car-tile-assist--lc {
     font-size: 0.8em;
 }
@@ -646,6 +709,56 @@
     font-size: 0.84rem;
     color: var(--color-text-secondary);
     margin-top: 0.3rem;
+}
+
+.car-tile-driving-specs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    column-gap: var(--space-3);
+    margin-top: 0.25rem;
+    font-size: var(--font-size-xs);
+}
+
+.car-tile-driving-spec {
+    display: flex;
+    justify-content: flex-start;
+    align-items: baseline;
+    gap: var(--space-2);
+    min-width: 0;
+}
+
+.car-tile-driving-spec > span,
+.car-tile-driving-spec .car-tile-value {
+    white-space: nowrap;
+}
+
+.car-tile-driving-spec > span {
+    color: var(--color-text-secondary);
+}
+
+.car-tile-driving-spec .car-tile-value {
+    font-weight: var(--font-weight-semibold);
+}
+
+#cars-info-table .car-tile .carinfo-meta.carinfo-downforce--low,
+#cars-info-table .car-tile .carinfo-meta.carinfo-difficulty--very-easy,
+#cars-info-table .car-tile .carinfo-meta.carinfo-difficulty--easy {
+    color: var(--color-success-light);
+}
+
+#cars-info-table .car-tile .carinfo-meta.carinfo-downforce--medium,
+#cars-info-table .car-tile .carinfo-meta.carinfo-difficulty--moderate {
+    color: var(--color-warning);
+}
+
+#cars-info-table .car-tile .carinfo-meta.carinfo-downforce--high {
+    color: var(--color-primary-light-solid);
+}
+
+#cars-info-table .car-tile .carinfo-meta.carinfo-difficulty--hard,
+#cars-info-table .car-tile .carinfo-meta.carinfo-difficulty--very-hard {
+    color: var(--color-danger-lighter);
 }
 
 .car-tile-description {

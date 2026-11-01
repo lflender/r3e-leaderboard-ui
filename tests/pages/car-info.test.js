@@ -245,16 +245,32 @@ describe('car-info integration', () => {
 
     it('renders grouped table from CARS_DATA without fetch', async () => {
         const fetchSpy = vi.spyOn(global, 'fetch');
+        window.CARS_DATA[0].cars[0].difficulty = 'very hard';
+        window.CARS_DATA[0].cars[0].downforce = 'High';
 
         loadBrowserScript('modules/pages/car-info.js');
         await new Promise(resolve => setTimeout(resolve, 0));
 
         const html = document.getElementById('cars-info-table').innerHTML;
+        const headers = Array.from(document.querySelectorAll('#cars-info-table thead th'))
+            .map(header => header.textContent.trim());
         expect(html).toContain('cars-page-car-name');
         expect(html).toContain('table-brand-logo-slot');
         expect(html).toContain('BMW');
         expect(html).toContain('M4 GT3');
         expect(html).toContain('GT3');
+        expect(headers).toEqual([
+            'Car', 'Rating', 'Wheel', 'Transmission', 'Drive', 'Assists',
+            'Year', 'Downforce', 'Power', 'Weight*with driver', 'Engine', 'Difficulty'
+        ]);
+        const carRow = document.querySelector('#cars-info-table tr.driver-data-row');
+        expect(carRow.cells).toHaveLength(12);
+        expect(carRow.cells[7].textContent).toBe('High');
+        expect(carRow.cells[11].textContent).toBe('Very Hard');
+        expect(carRow.cells[7].classList).toContain('carinfo-downforce--high');
+        expect(carRow.cells[11].classList).toContain('carinfo-difficulty--very-hard');
+        expect(document.querySelector('#cars-info-table .driver-group-header td').colSpan).toBe(12);
+        expect(html).not.toContain('Get Real');
         expect(html).toContain('590hp');
         expect(fetchSpy).not.toHaveBeenCalled();
         fetchSpy.mockRestore();
@@ -277,6 +293,17 @@ describe('car-info integration', () => {
         expect(rows).toHaveLength(1);
         expect(rows[0].querySelector('.car-badge--trans-h').textContent).toBe('H');
         expect(rows[0].textContent).not.toContain('Paddles Car');
+    });
+
+    it('formats the Very Easy car difficulty label', async () => {
+        window.CARS_DATA[0].cars[0].difficulty = 'very easy';
+
+        loadBrowserScript('modules/pages/car-info.js');
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        const carRow = document.querySelector('#cars-info-table tr.driver-data-row');
+        expect(carRow.cells[11].textContent).toBe('Very Easy');
+        expect(carRow.cells[11].classList).toContain('carinfo-difficulty--very-easy');
     });
 
     it('shows placeholder when dataset is empty', async () => {
@@ -472,6 +499,8 @@ describe('car-info tile view (renderTiles)', () => {
     });
 
     it('renders car specs (power, weight, engine)', async () => {
+        window.CARS_DATA[0].cars[0].downforce = 'High';
+        window.CARS_DATA[0].cars[0].difficulty = 'very hard';
         localStorage.setItem('carInfoViewMode', 'tiles');
 
         loadBrowserScript('modules/pages/car-info.js');
@@ -482,6 +511,14 @@ describe('car-info tile view (renderTiles)', () => {
         expect(html).toContain('590hp');
         expect(html).toContain('1300kg');
         expect(html).toContain('6 cyl');
+        expect(html).toContain('Downforce');
+        expect(html).toContain('Difficulty');
+        expect(html).toContain('carinfo-downforce--high');
+        expect(html).toContain('carinfo-difficulty--very-hard');
+        const tile = document.querySelector('.car-tile');
+        expect(tile.querySelector('.car-tile-driving-specs').children).toHaveLength(2);
+        expect(tile.querySelector('.car-tile-driving-spec:nth-child(1) .car-tile-value').textContent).toBe('High');
+        expect(tile.querySelector('.car-tile-driving-spec:nth-child(2) .car-tile-value').textContent).toBe('Very Hard');
     });
 
     it('renders description when present', async () => {
@@ -518,7 +555,7 @@ describe('car-info tile view (renderTiles)', () => {
         expect(html).toContain('GT3');
     });
 
-    it('renders assist badges when present', async () => {
+    it('stacks launch control below TC and ABS in table view', async () => {
         window.CARS_DATA = [
             {
                 class: 'GT3',
@@ -554,6 +591,15 @@ describe('car-info tile view (renderTiles)', () => {
         expect(html).toContain('TC');
         expect(html).toContain('ABS');
         expect(html).toContain('Launch Control');
+
+        document.querySelector('#cars-view-toggle [data-view="table"]').click();
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        const primaryAssistBadges = document.querySelector('#cars-info-table .car-assists-primary');
+        const launchControlBadge = document.querySelector('#cars-info-table .car-assists-launch');
+        expect(primaryAssistBadges.textContent).toBe('TCABS');
+        expect(launchControlBadge.textContent).toBe('Launch Control');
+        expect(primaryAssistBadges.compareDocumentPosition(launchControlBadge) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     });
 
     it('renders div wrapper instead of link when car has no link', async () => {

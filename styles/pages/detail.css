@@ -232,6 +232,10 @@
         margin-top: 0;
     }
 
+    #detail-results-container .driver-group-avatar {
+        top: 0;
+    }
+
     #detail-results-container .results-table {
         min-width: 0;
     }
@@ -301,4 +305,3 @@
         max-width: none;
     }
 }
-

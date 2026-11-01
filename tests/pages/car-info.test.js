@@ -269,6 +269,8 @@ describe('car-info integration', () => {
         ]);
         const carRow = document.querySelector('#cars-info-table tr.driver-data-row');
         expect(carRow.cells).toHaveLength(12);
+        expect(document.querySelector('#cars-info-table .car-engine-header')).not.toBeNull();
+        expect(carRow.cells[10].classList).toContain('car-engine-cell');
         expect(carRow.cells[7].textContent).toBe('High');
         expect(carRow.cells[11].textContent).toBe('Very Hard');
         expect(carRow.cells[7].classList).toContain('carinfo-downforce--high');

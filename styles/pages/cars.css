@@ -331,7 +331,7 @@
     width: 100%;
     max-width: 1700px;
     overflow-x: auto;
-    overflow-y: visible;
+    overflow-y: hidden;
     z-index: 100;
     padding: 2px;
     box-sizing: border-box;
@@ -918,6 +918,23 @@
         grid-template-columns: repeat(2, 1fr);
     }
 
+    .car-tile-driving-specs {
+        column-gap: var(--space-2);
+        font-size: 0.72rem;
+    }
+
+    .car-tile-driving-spec {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0;
+        line-height: 1.2;
+    }
+
+    .car-tile-driving-spec > span,
+    .car-tile-driving-spec .car-tile-value {
+        white-space: normal;
+    }
+
     .car-tile {
         min-width: 0;
         overflow: hidden;
@@ -956,7 +973,6 @@
 
     #cars-info-table {
         overflow-x: auto;
-        overflow-y: visible;
         -webkit-overflow-scrolling: touch;
     }
 
@@ -1037,6 +1053,13 @@
         font-size: 0.75rem;
     }
 
+    #cars-info-table .results-table th.car-engine-header,
+    #cars-info-table .results-table td.car-engine-cell {
+        width: 9rem;
+        min-width: 9rem;
+        white-space: nowrap;
+    }
+
     #cars-info-table .results-table th:nth-child(1),
     #cars-info-table .results-table td:nth-child(1) {
         width: 35%;
@@ -1048,6 +1071,10 @@
 }
 
 @media (max-width: 480px) {
+    .car-tile-driving-specs {
+        font-size: 0.68rem;
+    }
+
     .cars-tiles {
         grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
         gap: 0.5rem;

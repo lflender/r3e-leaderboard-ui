@@ -142,11 +142,11 @@
 }
 
 .records-driver-avatar {
-    width: 1.5rem;
-    height: 1.5rem;
-    border-radius: 50%;
+    width: var(--driver-avatar-size);
+    height: var(--driver-avatar-size);
+    border-radius: var(--radius-full);
     object-fit: cover;
-    margin-right: 0.4rem;
+    margin-right: var(--driver-avatar-gap);
     vertical-align: middle;
     flex-shrink: 0;
 }

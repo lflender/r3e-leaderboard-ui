@@ -609,7 +609,7 @@
     const yearColor = createYearColorFn();
 
     let html = '<table class="results-table"><thead><tr>' +
-      '<th>Car</th><th>Rating</th><th>Wheel</th><th>Transmission</th><th>Drive</th><th>Assists</th><th>Year</th><th>Downforce</th><th>Power</th><th>Weight<br><span class="th-sub-label">*with driver</span></th><th>Engine</th><th>Difficulty</th>' +
+      '<th>Car</th><th>Rating</th><th>Wheel</th><th>Transmission</th><th>Drive</th><th>Assists</th><th>Year</th><th>Downforce</th><th>Power</th><th>Weight<br><span class="th-sub-label">*with driver</span></th><th class="car-engine-header">Engine</th><th>Difficulty</th>' +
       '</tr></thead><tbody>';
 
     const isSuperclassFilter = classFilter && classFilter.startsWith('superclass:');
@@ -692,7 +692,7 @@
                 `<td class="carinfo-meta ${getCarValueClass('downforce', car.downforce)}">${linkOpen}${R3EUtils.escapeHtml(car.downforce || '')}${linkClose}</td>` +
                 `<td class="carinfo-meta">${linkOpen}${R3EUtils.escapeHtml(car.power || '')}${linkClose}</td>` +
                 `<td class="carinfo-meta">${linkOpen}${R3EUtils.escapeHtml(car.weight || '')}${linkClose}</td>` +
-                `<td class="carinfo-meta">${linkOpen}${R3EUtils.escapeHtml(car.engine || '')}${linkClose}</td>` +
+                `<td class="carinfo-meta car-engine-cell">${linkOpen}${R3EUtils.escapeHtml(car.engine || '')}${linkClose}</td>` +
                 `<td class="carinfo-meta ${getCarValueClass('difficulty', car.difficulty)}">${R3EUtils.escapeHtml(formatCarDifficulty(car.difficulty))}</td>` +
                 `</tr>`;
       });

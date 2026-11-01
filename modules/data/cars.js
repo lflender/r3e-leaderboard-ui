@@ -4382,7 +4382,7 @@
         "year": "2011",
         "power": "542hp",
         "weight": "870kg*",
-        "engine": "3.4L V8",
+        "engine": "3.4L V8 · front-mounted",
         "TC": "true",
         "ABS": "true",
         "LC": "true",
@@ -4391,7 +4391,8 @@
         "link": "https://game.raceroomracing.com/store/cars/hillclimb-icons/bmw-134-judd-v8/258",
         "description": "Georg Plasa’s 134 Judd was built for the 2011 European HillClimb Championship. The car is powered by a 3.4-liter V8 engine delivering around 470+ horsepower. Low weight and raw power combination makes it ideal for the HillClimb discipline.",
         "thumbnail": "https://prod.r3eassets.com/assets/content/carlivery/team-judd-134-09-2054-image-small.png",
-        "difficulty": "very hard"
+        "difficulty": "very hard",
+        "downforce": "Medium"
       },
       {
         "car_class": "Hillclimb Icons",

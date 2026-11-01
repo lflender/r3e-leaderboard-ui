@@ -64,7 +64,8 @@ const DetailState = {
     carDistributionExpanded: false,
     entriesDistributionExpanded: false,
     timeframeStart: null,
-    timeframeEnd: null
+    timeframeEnd: null,
+    timeframeMode: 'all'
 };
 const detailFilterContext = [
     DetailState.trackParam || '',
@@ -73,9 +74,6 @@ const detailFilterContext = [
     DetailState.classesParam || ''
 ].join('|');
 const savedDetailFilters = PageFilterState.read('detail', detailFilterContext);
-const isStoredDate = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
-DetailState.timeframeStart = isStoredDate(savedDetailFilters.timeframeStart) ? savedDetailFilters.timeframeStart : null;
-DetailState.timeframeEnd = isStoredDate(savedDetailFilters.timeframeEnd) ? savedDetailFilters.timeframeEnd : null;
 let hasRestoredDetailCarFilter = false;
 
 // Backward compatibility - keep old variable names pointing to DetailState
@@ -1052,12 +1050,11 @@ function bindEntriesDistributionInteractions() {
     if (startInput) {
         startInput.addEventListener('input', () => {
             if (!startInput.value) return;
+            DetailState.timeframeMode = 'all';
             DetailState.timeframeStart = startInput.value;
             if (DetailState.timeframeEnd && startInput.value > DetailState.timeframeEnd) {
                 DetailState.timeframeEnd = startInput.value;
             }
-            PageFilterState.write('detail', 'timeframeStart', DetailState.timeframeStart, detailFilterContext);
-            PageFilterState.write('detail', 'timeframeEnd', DetailState.timeframeEnd, detailFilterContext);
             currentPage = 1;
             displayResults(allResults);
         });
@@ -1066,12 +1063,11 @@ function bindEntriesDistributionInteractions() {
     if (endInput) {
         endInput.addEventListener('input', () => {
             if (!endInput.value) return;
+            DetailState.timeframeMode = 'all';
             DetailState.timeframeEnd = endInput.value;
             if (DetailState.timeframeStart && endInput.value < DetailState.timeframeStart) {
                 DetailState.timeframeStart = endInput.value;
             }
-            PageFilterState.write('detail', 'timeframeStart', DetailState.timeframeStart, detailFilterContext);
-            PageFilterState.write('detail', 'timeframeEnd', DetailState.timeframeEnd, detailFilterContext);
             currentPage = 1;
             displayResults(allResults);
         });
@@ -1079,12 +1075,18 @@ function bindEntriesDistributionInteractions() {
 
     if (lastWeekBtn) {
         lastWeekBtn.addEventListener('click', () => {
-            const now = new Date();
-            const weekAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
-            DetailState.timeframeStart = EntriesChart.toLocalDateInputValue(weekAgo);
-            DetailState.timeframeEnd = EntriesChart.toLocalDateInputValue(now);
-            PageFilterState.write('detail', 'timeframeStart', DetailState.timeframeStart, detailFilterContext);
-            PageFilterState.write('detail', 'timeframeEnd', DetailState.timeframeEnd, detailFilterContext);
+            if (DetailState.timeframeMode === 'last-week') {
+                const bounds = EntriesChart.getDataTimeBounds(allResults);
+                DetailState.timeframeStart = bounds ? EntriesChart.toLocalDateInputValue(bounds.min) : null;
+                DetailState.timeframeEnd = bounds ? EntriesChart.toLocalDateInputValue(bounds.max) : null;
+                DetailState.timeframeMode = 'all';
+            } else {
+                const now = new Date();
+                const weekAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
+                DetailState.timeframeStart = EntriesChart.toLocalDateInputValue(weekAgo);
+                DetailState.timeframeEnd = EntriesChart.toLocalDateInputValue(now);
+                DetailState.timeframeMode = 'last-week';
+            }
             currentPage = 1;
             displayResults(allResults);
         });

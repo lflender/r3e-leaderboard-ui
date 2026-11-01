@@ -6,6 +6,10 @@
     max-width: 1800px;
 }
 
+.cars-page-main > .seo-content {
+    max-width: none;
+}
+
 .cars-tab-content .tab-panel {
     max-width: 1700px;
 }

@@ -197,7 +197,7 @@ function setupGlobals() {
     };
 
     window.EntriesChart = {
-        generateHtml: vi.fn((data) => {
+        generateHtml: vi.fn((data, isExpanded, start, end, bounds, timeframeState = {}) => {
             const dayCounts = data.reduce((acc, entry) => {
                 const dayKey = String(entry.date_time || entry.dateTime || entry.Date || '').slice(0, 10);
                 if (!dayKey) return acc;
@@ -214,14 +214,22 @@ function setupGlobals() {
                 '<div class="entries-dist-chart">',
                 `<svg viewBox="0 0 10 100" preserveAspectRatio="none">${bars}</svg>`,
                 '</div>',
+                '<div class="entries-timeframe-controls">',
+                `<input type="date" class="entries-timeframe-start" value="${start || ''}">`,
+                `<button type="button" class="entries-timeframe-last-week" data-timeframe-mode="${timeframeState.timeframeMode || 'all'}">${timeframeState.timeframeMode === 'last-week' ? 'All' : 'Last week'}</button>`,
+                `<input type="date" class="entries-timeframe-end" value="${end || ''}">`,
+                '</div>',
                 '</div>',
                 '</div>'
             ].join('');
         }),
         parseEntryDate: vi.fn(),
         getLocalDateKey: vi.fn(),
-        getDataTimeBounds: vi.fn().mockReturnValue({ min: null, max: null }),
-        toLocalDateInputValue: vi.fn().mockReturnValue(''),
+        getDataTimeBounds: vi.fn().mockReturnValue({
+            min: new Date('2026-04-02T12:00:00Z'),
+            max: new Date('2026-04-04T12:00:00Z')
+        }),
+        toLocalDateInputValue: vi.fn(date => date.toISOString().slice(0, 10)),
         applyTimeframeFilter: vi.fn(data => data)
     };
 
@@ -283,6 +291,9 @@ beforeAll(async () => {
     setupGlobals();
 
     loadBrowserScript('modules/filter-state.js');
+    window.PageFilterState.write('detail', 'timeframeStart', '2020-01-01', '10|5||');
+    window.PageFilterState.write('detail', 'timeframeEnd', '2020-01-07', '10|5||');
+    window.PageFilterState.write('detail', 'timeframeMode', 'last-week', '10|5||');
     loadBrowserScript('modules/difficulty-filter.js');
     loadBrowserScript('modules/pages/detail.js');
     document.dispatchEvent(new Event('DOMContentLoaded'));
@@ -291,6 +302,24 @@ beforeAll(async () => {
 });
 
 describe('detail page rich integration', () => {
+    it('toggles the entries timeframe between last week and all', () => {
+        let button = document.querySelector('.entries-timeframe-last-week');
+        expect(button.textContent).toBe('Last week');
+        expect(button.dataset.timeframeMode).toBe('all');
+        expect(document.querySelector('.entries-timeframe-start').value).toBe('2026-04-02');
+        expect(document.querySelector('.entries-timeframe-end').value).toBe('2026-04-04');
+
+        button.click();
+        button = document.querySelector('.entries-timeframe-last-week');
+        expect(button.textContent).toBe('All');
+        expect(button.dataset.timeframeMode).toBe('last-week');
+
+        button.click();
+        button = document.querySelector('.entries-timeframe-last-week');
+        expect(button.textContent).toBe('Last week');
+        expect(button.dataset.timeframeMode).toBe('all');
+    });
+
     it('renders normalized titles, class logo, and initial table rows', () => {
         const trackHtml = document.getElementById('detail-track').innerHTML;
         const classHtml = document.getElementById('detail-class').innerHTML;

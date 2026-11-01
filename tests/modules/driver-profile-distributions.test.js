@@ -12,6 +12,10 @@ beforeAll(() => {
         parseEntryDate: vi.fn(e => e.date ? new Date(e.date) : null),
         getLocalDateKey: vi.fn(d => d ? d.toISOString().slice(0, 10) : ''),
         applyTimeframeFilter: vi.fn((entries) => entries),
+        getDataTimeBounds: vi.fn(() => ({
+            min: new Date('2025-01-01T00:00:00Z'),
+            max: new Date('2026-01-01T00:00:00Z')
+        })),
         toLocalDateInputValue: vi.fn((d) => d.toISOString().slice(0, 10)),
         wireTooltips: vi.fn(),
         wirePerfTooltips: vi.fn()
@@ -23,6 +27,20 @@ beforeAll(() => {
 });
 
 describe('DriverProfileDistributions', () => {
+    function graphHtml(timeframeMode = 'all', start = '', end = '') {
+        const buttonLabel = timeframeMode === 'last-week' ? 'All' : 'Last week';
+        return [
+            '<div class="entries-dist-summary">',
+            '<button class="entries-dist-toggle" aria-expanded="true" aria-controls="test-content"></button>',
+            '<div id="test-content" class="entries-dist-content">',
+            '<label><input type="date" class="entries-timeframe-start" value="' + start + '"></label>',
+            '<button type="button" class="entries-timeframe-last-week" data-timeframe-mode="' + timeframeMode + '">' + buttonLabel + '</button>',
+            '<label><input type="date" class="entries-timeframe-end" value="' + end + '"></label>',
+            '</div>',
+            '</div>'
+        ].join('');
+    }
+
     describe('render', () => {
         it('returns empty string for empty entries', () => {
             expect(DriverProfileDistributions.render([])).toBe('');
@@ -75,6 +93,42 @@ describe('DriverProfileDistributions', () => {
 
             expect(window.EntriesChart.wireTooltips).toHaveBeenCalledWith(container, entries);
             expect(window.EntriesChart.wirePerfTooltips).toHaveBeenCalledWith(container);
+        });
+
+        it('toggles between last week and all entries', () => {
+            const entries = [{ date: '2025-01-01' }];
+            const container = document.getElementById('dist-container');
+            const card = document.createElement('div');
+            card.className = 'driver-profile-dist-card';
+            card.innerHTML = graphHtml();
+            container.replaceChildren(card);
+            window.EntriesChart.generateHtml.mockImplementation((filtered, expanded, start, end, bounds, state) =>
+                graphHtml(state.timeframeMode, start, end)
+            );
+
+            DriverProfileDistributions.wireInteraction(container, entries);
+
+            card.querySelector('.entries-timeframe-last-week').click();
+            expect(window.EntriesChart.generateHtml).toHaveBeenLastCalledWith(
+                entries,
+                true,
+                expect.any(String),
+                expect.any(String),
+                entries,
+                expect.objectContaining({ timeframeMode: 'last-week' })
+            );
+            expect(card.querySelector('.entries-timeframe-last-week').textContent).toBe('All');
+
+            card.querySelector('.entries-timeframe-last-week').click();
+            expect(window.EntriesChart.generateHtml).toHaveBeenLastCalledWith(
+                entries,
+                true,
+                '2025-01-01',
+                '2026-01-01',
+                entries,
+                expect.objectContaining({ timeframeMode: 'all' })
+            );
+            expect(card.querySelector('.entries-timeframe-last-week').textContent).toBe('Last week');
         });
 
         it('does nothing for null container', () => {

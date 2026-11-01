@@ -189,6 +189,16 @@ describe('EntriesChart.generateHtml', () => {
         expect(html).toContain('type="date"');
     });
 
+    it('offers Last week by default and switches the action to All in last-week mode', () => {
+        const defaultHtml = window.EntriesChart.generateHtml(data);
+        const lastWeekHtml = window.EntriesChart.generateHtml(data, false, null, null, data, {
+            timeframeMode: 'last-week'
+        });
+
+        expect(defaultHtml).toContain('data-timeframe-mode="all">Last week</button>');
+        expect(lastWeekHtml).toContain('data-timeframe-mode="last-week">All</button>');
+    });
+
     it('is collapsed by default', () => {
         const html = window.EntriesChart.generateHtml(data);
         expect(html).toContain('aria-expanded="false"');

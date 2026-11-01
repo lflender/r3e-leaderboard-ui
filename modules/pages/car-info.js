@@ -699,10 +699,10 @@
     });
 
     html += '\n</tbody></table>';
-    tableContainer.innerHTML = '<div class="cars-table-toolbar">' +
+    tableContainer.innerHTML = '<div class="cars-table-width-wrap"><div class="cars-table-toolbar">' +
       '<button type="button" class="cars-table-toolbar-btn" id="cars-fold-all" title="Collapse all classes">Collapse all</button>' +
       '<button type="button" class="cars-table-toolbar-btn" id="cars-unfold-all" title="Expand all classes">Expand all</button>' +
-      '</div>' + html;
+      '</div>' + html + '</div>';
     tableContainer.querySelectorAll('.driver-group-header').forEach(function(header) {
       if (!expandedClassGroups.has(header.dataset.group)) {
         header.classList.add('collapsed');

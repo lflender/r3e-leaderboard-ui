@@ -129,6 +129,10 @@ describe('car-info integration', () => {
 
         const header = document.querySelector('.driver-group-header');
         const row = document.querySelector(`tr.${header.dataset.group}`);
+        const toolbar = document.querySelector('.cars-table-toolbar');
+        const table = document.querySelector('#cars-info-table .results-table');
+        expect(toolbar.parentElement).toBe(table.parentElement);
+        expect(toolbar.parentElement.classList.contains('cars-table-width-wrap')).toBe(true);
         expect(header.classList.contains('collapsed')).toBe(true);
         expect(row.style.display).toBe('none');
 

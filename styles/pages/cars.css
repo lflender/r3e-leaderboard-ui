@@ -107,11 +107,16 @@
     outline: none;
 }
 
+.cars-table-width-wrap {
+    width: max-content;
+    margin-inline: auto;
+}
+
 .cars-table-toolbar {
     display: flex;
     gap: 0;
     margin-bottom: -1rem;
-    margin-left: 1rem;
+    margin-left: 0;
 }
 
 .cars-table-toolbar-btn {
@@ -952,7 +957,7 @@
     }
 
     .cars-table-toolbar {
-        margin-left: 0.5rem;
+        margin-left: 0;
         margin-bottom: -0.2rem;
     }
 

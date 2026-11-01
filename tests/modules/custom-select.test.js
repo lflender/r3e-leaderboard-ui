@@ -74,6 +74,24 @@ describe('CustomSelect', () => {
         expect(select.isOpen()).toBe(false);
     });
 
+    test('adds PNG fallback only to WebP brand logos', () => {
+        window.R3EUtils.getBrandLogoFallbackAttributes = (url) => url === 'images/brands/logo-audi.webp'
+            ? 'data-fallback-src="images/brands/logo-audi.png" onerror="window.R3ECarUtils.handleBrandLogoError(this)"'
+            : '';
+
+        const html = window.CustomSelect.buildLogosHtml({
+            logoUrl: 'images/brands/logo-audi.webp'
+        });
+        const nonBrandHtml = window.CustomSelect.buildLogosHtml({
+            logoUrl: 'images/classes/gt3.png'
+        });
+
+        expect(html).toContain('data-fallback-src="images/brands/logo-audi.png"');
+        expect(nonBrandHtml).not.toContain('data-fallback-src');
+        expect(nonBrandHtml).not.toContain('onerror=');
+        delete window.R3EUtils.getBrandLogoFallbackAttributes;
+    });
+
     test('preserves search text and scroll position when reopened', () => {
         const select = new window.CustomSelect('test-select', [
             { value: '', label: 'All classes' },

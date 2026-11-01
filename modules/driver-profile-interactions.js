@@ -96,6 +96,32 @@ const DriverProfileInteractions = (() => {
         });
     }
 
+    function getEntryCarClass(entry) {
+        return window.DriverProfileData?.getEntryCarClass?.(entry) ||
+            entry.car_class || entry.CarClass || entry['Car Class'] || entry.Class || entry.class_name || entry.ClassName || '';
+    }
+
+    function getEntryCar(entry) {
+        return window.DriverProfileData?.getEntryCar?.(entry) ||
+            entry.Car || entry.car || entry.CarName || entry.car_name || '';
+    }
+
+    function getEntryTrackLabel(entry) {
+        if (window.DriverProfileData?.getEntryTrackLabel) {
+            return window.DriverProfileData.getEntryTrackLabel(entry);
+        }
+        const resolver = window.R3EUtils?.resolveTrackLabelForItem;
+        if (typeof resolver === 'function') return resolver(entry);
+        return entry.Track || entry.track || entry.TrackName || entry.track_name || '';
+    }
+
+    function getEntryTrackBaseLabel(entry) {
+        const trackLabel = getEntryTrackLabel(entry);
+        return window.DriverProfileData?.getEntryTrackBaseLabel?.(entry) ||
+            window.R3ETrackUtils?.getTrackBaseLabel?.(trackLabel) ||
+            trackLabel;
+    }
+
     /**
      * Highlight stat breakdown items matching a predicate and scroll each container's first match into view.
      */
@@ -154,16 +180,11 @@ const DriverProfileInteractions = (() => {
         const classToTracks = new Map();
         const carToTracks = new Map();
         const trackToCars = new Map();
-        const getTrackBaseLabel = (trackLabel) =>
-            window.R3ETrackUtils?.getTrackBaseLabel?.(trackLabel) || trackLabel;
         if (entries && entries.length > 0) {
             entries.forEach(entry => {
-                const cls = entry.car_class || entry.CarClass || entry.Class || '';
-                const car = entry.Car || entry.car || entry.CarName || entry.car_name || '';
-                const track = (window.R3EUtils && typeof window.R3EUtils.resolveTrackLabelForItem === 'function')
-                    ? window.R3EUtils.resolveTrackLabelForItem(entry)
-                    : (entry.Track || entry.track || entry.TrackName || entry.track_name || '');
-                const trackBase = getTrackBaseLabel(track);
+                const cls = getEntryCarClass(entry);
+                const car = getEntryCar(entry);
+                const trackBase = getEntryTrackBaseLabel(entry);
                 if (cls && trackBase) {
                     if (!trackToClasses.has(trackBase)) trackToClasses.set(trackBase, new Set());
                     trackToClasses.get(trackBase).add(cls);
@@ -432,7 +453,10 @@ const DriverProfileInteractions = (() => {
         wireChart('chart-track', (point, label) => {
             const info = point.getAttribute('data-info') || '';
             const parts = info.split(' \u2013 ');
-            return parts.length > 1 && parts[1] === label;
+            const track = parts.length > 1
+                ? (window.R3ETrackUtils?.getTrackBaseLabel?.(parts[1]) || parts[1])
+                : '';
+            return track === label;
         });
     }
 
@@ -469,12 +493,9 @@ const DriverProfileInteractions = (() => {
             const dateKey = EntriesChart.getLocalDateKey(dt);
             if (!dateKey) return;
 
-            const cls = entry.car_class || entry.CarClass || entry.Class || '';
-            const car = entry.Car || entry.car || entry.CarName || entry.car_name || '';
-            const trackLabel = (window.R3EUtils && typeof window.R3EUtils.resolveTrackLabelForItem === 'function')
-                ? window.R3EUtils.resolveTrackLabelForItem(entry)
-                : (entry.Track || entry.track || entry.TrackName || entry.track_name || '');
-            const track = window.R3ETrackUtils?.getTrackBaseLabel?.(trackLabel) || trackLabel;
+            const cls = getEntryCarClass(entry);
+            const car = getEntryCar(entry);
+            const track = getEntryTrackBaseLabel(entry);
 
             if (cls) {
                 if (!classDates.has(cls)) classDates.set(cls, new Set());
@@ -642,11 +663,9 @@ const DriverProfileInteractions = (() => {
             const dateKey = EntriesChart.getLocalDateKey(dt);
             if (!dateKey) return;
 
-            const cls = entry.car_class || entry.CarClass || entry.Class || '';
-            const car = entry.Car || entry.car || entry.CarName || entry.car_name || '';
-            const track = (window.R3EUtils && typeof window.R3EUtils.resolveTrackLabelForItem === 'function')
-                ? window.R3EUtils.resolveTrackLabelForItem(entry)
-                : (entry.Track || entry.track || entry.TrackName || entry.track_name || '');
+            const cls = getEntryCarClass(entry);
+            const car = getEntryCar(entry);
+            const track = getEntryTrackBaseLabel(entry);
 
             if (cls) {
                 if (!dateToClasses.has(dateKey)) dateToClasses.set(dateKey, new Set());
@@ -773,7 +792,9 @@ const DriverProfileInteractions = (() => {
                     const info = point.getAttribute('data-info') || '';
                     const parts = info.split(' \u2013 ');
                     const car = parts[0] || '';
-                    const track = parts.length > 1 ? parts[1] : '';
+                    const track = parts.length > 1
+                        ? (window.R3ETrackUtils?.getTrackBaseLabel?.(parts[1]) || parts[1])
+                        : '';
 
                     if (cls) {
                         highlightSlices(classSlices, s => (s.getAttribute('data-label') || '').trim() === cls);

@@ -36,7 +36,7 @@ describe('TabsLoader (real module)', () => {
         const links = document.querySelectorAll('a.tab-button');
         const hrefs = Array.from(links).map(a => a.getAttribute('href'));
         expect(hrefs).toContain('/');
-        expect(hrefs).toContain('drivers.html');
+        expect(hrefs).toContain('drivers.html?v=20261101');
         expect(hrefs).toContain('teams.html');
         expect(hrefs).toContain('cars.html');
         expect(hrefs).toContain('records.html');
@@ -101,4 +101,3 @@ describe('TabsLoader (real module)', () => {
         expect(window.requestAnimationFrame).not.toHaveBeenCalled();
     });
 });
-

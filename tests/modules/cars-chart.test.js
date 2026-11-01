@@ -105,6 +105,20 @@ describe('CarsChart.generateHtml', () => {
         expect(html).toContain('BMW');
     });
 
+    it('renders brand logos with the configured PNG fallback', () => {
+        const originalLogoResolver = window.R3EUtils.resolveBrandLogoPath;
+        const originalFallbackAttributes = window.R3EUtils.getBrandLogoFallbackAttributes;
+        window.R3EUtils.resolveBrandLogoPath = () => 'images/brands/logo-audi.webp';
+        window.R3EUtils.getBrandLogoFallbackAttributes = () => 'data-fallback-src="images/brands/logo-audi.png"';
+
+        const html = window.CarsChart.generateHtml(SAMPLE_DATA);
+
+        expect(html).toContain('src="images/brands/logo-audi.webp"');
+        expect(html).toContain('data-fallback-src="images/brands/logo-audi.png"');
+        window.R3EUtils.resolveBrandLogoPath = originalLogoResolver;
+        window.R3EUtils.getBrandLogoFallbackAttributes = originalFallbackAttributes;
+    });
+
     it('renders correct entry counts', () => {
         const html = window.CarsChart.generateHtml(SAMPLE_DATA);
         // Audi has 3 entries, should appear as table cell

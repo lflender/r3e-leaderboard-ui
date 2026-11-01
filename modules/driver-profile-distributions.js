@@ -57,13 +57,14 @@ const DriverProfileDistributions = (() => {
             const lastWeekBtn = entriesDistEl.querySelector('.entries-timeframe-last-week');
 
             if (startInput && endInput) {
-                const refresh = () => {
+                const refresh = (timeframeMode = 'all') => {
                     const parent = entriesDistEl.closest('.driver-profile-dist-card');
                     if (!parent) return;
                     const filtered = EntriesChart.applyTimeframeFilter(entries, startInput.value, endInput.value);
                     const newHtml = EntriesChart.generateHtml(filtered, true, startInput.value, endInput.value, entries, {
                         timeframeStart: startInput.value,
-                        timeframeEnd: endInput.value
+                        timeframeEnd: endInput.value,
+                        timeframeMode
                     });
                     parent.innerHTML = newHtml;
                     // Re-wire toggle
@@ -82,15 +83,22 @@ const DriverProfileDistributions = (() => {
                     // Re-wire interactions recursively
                     wireInteraction(container, entries);
                 };
-                startInput.addEventListener('change', refresh);
-                endInput.addEventListener('change', refresh);
+                startInput.addEventListener('change', () => refresh());
+                endInput.addEventListener('change', () => refresh());
                 if (lastWeekBtn) {
                     lastWeekBtn.addEventListener('click', () => {
-                        const now = new Date();
-                        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-                        startInput.value = EntriesChart.toLocalDateInputValue(weekAgo);
-                        endInput.value = EntriesChart.toLocalDateInputValue(now);
-                        refresh();
+                        const timeframeMode = lastWeekBtn.dataset.timeframeMode === 'last-week' ? 'all' : 'last-week';
+                        if (timeframeMode === 'all') {
+                            const bounds = EntriesChart.getDataTimeBounds(entries);
+                            startInput.value = bounds ? EntriesChart.toLocalDateInputValue(bounds.min) : '';
+                            endInput.value = bounds ? EntriesChart.toLocalDateInputValue(bounds.max) : '';
+                        } else {
+                            const now = new Date();
+                            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                            startInput.value = EntriesChart.toLocalDateInputValue(weekAgo);
+                            endInput.value = EntriesChart.toLocalDateInputValue(now);
+                        }
+                        refresh(timeframeMode);
                     });
                 }
             }

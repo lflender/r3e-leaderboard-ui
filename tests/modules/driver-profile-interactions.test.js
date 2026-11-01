@@ -7,6 +7,9 @@ beforeAll(() => {
         escapeHtml: (s) => String(s || ''),
         resolveTrackLabelForItem: vi.fn(e => e.Track || e.track || '')
     };
+    window.R3ETrackUtils = {
+        getTrackBaseLabel: vi.fn(label => String(label || '').split(/\s+[-–—]\s+/)[0])
+    };
     window.DriverProfileData = {
         getCarToClassMap: vi.fn((entries) => {
             const result = new Map();
@@ -698,6 +701,32 @@ describe('DriverProfileInteractions', () => {
 
             const classSlices = document.querySelectorAll('#chart-car-class .pie-slice');
             expect(classSlices[0].classList.contains('pie-slice--active')).toBe(true);  // GT3
+        });
+
+        it('matches track pie slices to entry-distribution dates across layouts', () => {
+            const container = document.getElementById('dist-container');
+            const layoutEntries = [
+                { car_class: 'GT3', Car: 'BMW M4', Track: 'Spa - Grand Prix', date: '2025-01-01' }
+            ];
+            DriverProfileInteractions.wireDistPerfToPieHighlighting(layoutEntries, container);
+
+            const svg = container.querySelector('.entries-dist-chart svg');
+            svg.getBoundingClientRect = () => ({ left: 0, top: 0, width: 200, height: 100 });
+            svg.dispatchEvent(new MouseEvent('mousemove', { clientX: 9, clientY: 50, bubbles: true }));
+
+            const spaSlice = document.querySelector('#chart-track .pie-slice[data-label="Spa"]');
+            expect(spaSlice.classList.contains('pie-slice--active')).toBe(true);
+        });
+
+        it('matches track pie slices to performance points across layouts', () => {
+            const point = document.querySelector('.perf-dist-point');
+            point.setAttribute('data-info', 'BMW M4 \u2013 Spa - Grand Prix');
+            DriverProfileInteractions.wirePieChartPerfHighlighting();
+
+            const spaLegendItem = document.querySelector('#chart-track .pie-legend-item');
+            spaLegendItem.dispatchEvent(new Event('mouseenter'));
+
+            expect(point.classList.contains('perf-dist-point--active')).toBe(true);
         });
 
         it('clears pie highlights when mouse leaves perf chart', () => {

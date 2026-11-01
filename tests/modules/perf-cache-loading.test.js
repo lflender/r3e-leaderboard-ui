@@ -303,7 +303,7 @@ describe('Performance: cache loading', () => {
             expect(loadedShards.size).toBeGreaterThan(0);
         });
 
-        it('skips entries that already have country+rank+team', async () => {
+        it('skips entries that already have country+rank+team+avatar', async () => {
             if (!mirrorData) return;
 
             const nameIndex = service._transformMirrorToNameIndex(mirrorData);
@@ -316,7 +316,8 @@ describe('Performance: cache loading', () => {
                 name, position: 1,
                 country: 'Sweden', Country: 'Sweden',
                 rank: 'A', Rank: 'A',
-                team: 'Team X', Team: 'Team X'
+                team: 'Team X', Team: 'Team X',
+                avatar: 'https://example.com/avatar.webp'
             }));
 
             const loadedShards = new Set();

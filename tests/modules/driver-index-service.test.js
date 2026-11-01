@@ -175,6 +175,63 @@ describe('Driver index service', () => {
         expect(rows[0]).toMatchObject({ Country: 'SE', Team: 'Blue', Rank: 'Pro' });
     });
 
+    it('enriches records rows with driver avatars from metadata shards', async () => {
+        const metadataByShard = {
+            a: {
+                'alice smith': { name: 'Alice Smith', avatar: 'https://img/alice.png' }
+            },
+            b: {
+                'bob jones': [
+                    { name: 'Bob Jones', path_id: 'bob-1', avatar: 'https://img/bob-1.png' },
+                    { name: 'Bob Jones', path_id: 'bob-2', avatar: 'https://img/bob-2.png' }
+                ]
+            },
+            _: {}
+        };
+        vi.spyOn(service, '_loadDriverMetadataShard').mockImplementation(async key => metadataByShard[key] || {});
+        const rows = [
+            { name: 'Alice Smith', path_id: 'alice-1', avatar: '' },
+            { name: 'Bob Jones', path_id: 'bob-2', avatar: '' },
+            { name: 'Unknown Driver', avatar: '' },
+            { name: 'Existing Avatar', avatar: 'https://img/existing.png' }
+        ];
+
+        await service.enrichRowsWithDriverAvatars(rows);
+
+        expect(rows.map(row => row.avatar)).toEqual([
+            'https://img/alice.png',
+            'https://img/bob-2.png',
+            '',
+            'https://img/existing.png'
+        ]);
+        expect(service._loadDriverMetadataShard).toHaveBeenCalledWith('a');
+        expect(service._loadDriverMetadataShard).toHaveBeenCalledWith('b');
+        expect(service._loadDriverMetadataShard).toHaveBeenCalledWith('_');
+    });
+
+    it('adds avatars to fully populated leaderboard entries using their driver path ID', async () => {
+        service.driverIndex = { 'alice smith': 'alice smith' };
+        service.driverMetadataShardCache.set('a', {
+            'alice smith': [
+                { name: 'Alice Smith', path_id: '12345', avatar: 'https://img/alice-12345.png' },
+                { name: 'Alice Smith', path_id: '67890', avatar: 'https://img/alice-67890.png' }
+            ]
+        });
+        service.driverMetadataShardCache.set('_', {});
+        vi.spyOn(service, 'waitForDriverIndex').mockResolvedValue(service.driverIndex);
+
+        const entries = [{
+            Name: 'Alice Smith',
+            path_id: '67890',
+            Country: 'SE',
+            Rank: 'A',
+            Team: 'Blue'
+        }];
+        await service.enrichEntriesWithDriverMetadata(entries);
+
+        expect(entries[0].avatar).toBe('https://img/alice-67890.png');
+    });
+
     it('falls back to _ shard for diacritical names via search_name alias', async () => {
         // Mirror has normalized name
         service.driverIndex = { 'oscar domingo': 'oscar domingo' };
@@ -242,4 +299,3 @@ describe('Driver index service', () => {
         expect(refreshSpy).toHaveBeenCalledTimes(1);
     });
 });
-

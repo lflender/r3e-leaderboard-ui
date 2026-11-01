@@ -6,6 +6,7 @@ beforeAll(() => {
         { id: 301, label: 'Donington Park - National' },
         { id: 302, label: 'Donington Park - Grand Prix' }
     ];
+    window.CAR_CLASSES_DATA = { '1703': 'GTR 3' };
     window.R3EUtils = {
         resolveTrackLabel: vi.fn((id, fallback) => {
             const map = {
@@ -88,6 +89,16 @@ describe('DriverProfileData.getCarClassDistribution', () => {
         const result = window.DriverProfileData.getCarClassDistribution(entries);
         expect(result.find(r => r.label === 'GT3').value).toBe(2);
         expect(result.find(r => r.label === 'TCR').value).toBe(1);
+    });
+
+    it('resolves class names and IDs from the current index fields', () => {
+        const result = window.DriverProfileData.getCarClassDistribution([
+            { class_name: 'GTR 3' },
+            { class_id: 1703 },
+            { car_class: { class: { Id: 1703 } } }
+        ]);
+
+        expect(result).toEqual([{ label: 'GTR 3', value: 3 }]);
     });
 });
 
@@ -210,6 +221,14 @@ describe('DriverProfileData.getRaceRoomProfileUrl', () => {
 });
 
 describe('DriverProfileData.computeClassBreakdown', () => {
+    it('uses mapped class IDs for stat breakdowns', () => {
+        const result = window.DriverProfileData.computeClassBreakdown([
+            { class_id: 1703, position: 1, total_entries: 100 }
+        ]);
+
+        expect(result.pole).toEqual([{ className: 'GTR 3', value: 1 }]);
+    });
+
     it('exposes pole and podium threshold constants', () => {
         expect(window.DriverProfileData.MIN_ENTRIES_FOR_POLE).toBe(2);
         expect(window.DriverProfileData.MIN_ENTRIES_FOR_PODIUM).toBe(4);
@@ -318,5 +337,13 @@ describe('DriverProfileData.getCarToClassMap', () => {
     it('returns empty map for empty entries', () => {
         const map = window.DriverProfileData.getCarToClassMap([]);
         expect(map.size).toBe(0);
+    });
+
+    it('maps cars to classes when entries only include class IDs', () => {
+        const map = window.DriverProfileData.getCarToClassMap([
+            { Car: 'BMW M4', class_id: 1703 }
+        ]);
+
+        expect(map.get('BMW M4')).toBe('GTR 3');
     });
 });

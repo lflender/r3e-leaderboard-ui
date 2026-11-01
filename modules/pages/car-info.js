@@ -566,6 +566,29 @@
   const buildRatingHtml = R3ECarUtils.buildRatingHtml;
   const attachRatingHandlers = R3ECarUtils.attachRatingHandlers;
 
+  function formatCarDifficulty(difficulty) {
+    return String(difficulty || '')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .map(word => `${word.charAt(0).toUpperCase()}${word.slice(1).toLowerCase()}`)
+      .join(' ');
+  }
+
+  const carValueClassValues = {
+    downforce: new Set(['low', 'medium', 'high']),
+    difficulty: new Set(['very-easy', 'easy', 'moderate', 'hard', 'very-hard'])
+  };
+
+  function getCarValueClass(prefix, value) {
+    const normalizedValue = String(value || '').trim().toLowerCase().replace(/\s+/g, '-');
+    const validValues = carValueClassValues[prefix];
+
+    return validValues?.has(normalizedValue)
+      ? `carinfo-${prefix}--${normalizedValue}`
+      : '';
+  }
+
   function buildClassHeadingHtml(className, superclass) {
     const classLogoUrl = (window.R3ECarUtils && typeof window.R3ECarUtils.resolveCarClassLogoByName === 'function')
       ? window.R3ECarUtils.resolveCarClassLogoByName(className)
@@ -586,7 +609,7 @@
     const yearColor = createYearColorFn();
 
     let html = '<table class="results-table"><thead><tr>' +
-      '<th>Car</th><th>Rating</th><th>Wheel</th><th>Transmission</th><th>Drive</th><th>Assists</th><th>Year</th><th>Power</th><th>Weight<br><span class="th-sub-label">*with driver</span></th><th>Engine</th>' +
+      '<th>Car</th><th>Rating</th><th>Wheel</th><th>Transmission</th><th>Drive</th><th>Assists</th><th>Year</th><th>Downforce</th><th>Power</th><th>Weight<br><span class="th-sub-label">*with driver</span></th><th>Engine</th><th>Difficulty</th>' +
       '</tr></thead><tbody>';
 
     const isSuperclassFilter = classFilter && classFilter.startsWith('superclass:');
@@ -614,7 +637,7 @@
       const { classLogoHtml, classHeaderText, superclassChip } = buildClassHeadingHtml(className, superclass);
 
             html += `\n<tr class="driver-group-header" data-group="${slug}" onclick="toggleGroup(this)">` +
-              `<td colspan="11"><div class="cars-class-heading-wrap"><span class="toggle-icon">▼</span> <h3 class="cars-class-heading">${classLogoHtml}${classHeaderText}</h3>${superclassChip}<span class="cars-class-count">(${filteredCars.length})</span></div></td></tr>`;
+              `<td colspan="12"><div class="cars-class-heading-wrap"><span class="toggle-icon">▼</span> <h3 class="cars-class-heading">${classLogoHtml}${classHeaderText}</h3>${superclassChip}<span class="cars-class-count">(${filteredCars.length})</span></div></td></tr>`;
 
       filteredCars.forEach(car => {
         displayedCars++;
@@ -649,6 +672,14 @@
           metaHtml: metaIcons,
           className: 'cars-page-car-name'
         });
+        const primaryAssistBadges = [
+          car.TC === 'true' ? '<span class="car-tile-assist-badge car-tile-assist--tc">TC</span>' : '',
+          car.ABS === 'true' ? '<span class="car-tile-assist-badge car-tile-assist--abs">ABS</span>' : ''
+        ].filter(Boolean).join('');
+        const launchControlBadge = car.LC === 'true'
+          ? '<span class="car-tile-assist-badge car-tile-assist--lc">Launch Control</span>'
+          : '';
+        const assistBadgesHtml = `<div class="car-assists-list">${primaryAssistBadges ? `<div class="car-assists-primary">${primaryAssistBadges}</div>` : ''}${launchControlBadge ? `<div class="car-assists-launch">${launchControlBadge}</div>` : ''}</div>`;
 
         html += `\n<tr class="driver-data-row ${slug}" data-link="${rowLink}">` +
                 `<td>${linkOpen}${carNameHtml}${thumbPreview}${linkClose}</td>` +
@@ -656,20 +687,22 @@
                 `<td>${linkOpen}${wheelBadge(car.wheel_cat)}${linkClose}</td>` +
                 `<td>${linkOpen}${transBadge(car.transmission_cat)}${linkClose}</td>` +
                 `<td>${linkOpen}${driveBadge(car.drive)}${linkClose}</td>` +
-                `<td class="car-assists-cell">${[car.TC === 'true' ? '<span class="car-tile-assist-badge car-tile-assist--tc">TC</span>' : '', car.ABS === 'true' ? '<span class="car-tile-assist-badge car-tile-assist--abs">ABS</span>' : '', car.LC === 'true' ? '<span class="car-tile-assist-badge car-tile-assist--lc">Launch Control</span>' : ''].filter(Boolean).join(' ')}</td>` +
+                `<td class="car-assists-cell">${assistBadgesHtml}</td>` +
                 `<td>${linkOpen}<span class="car-badge year-badge" data-year="${car.year}" style="background:${yearColor(car.year)}">${R3EUtils.escapeHtml(car.year || '')}</span>${linkClose}</td>` +
+                `<td class="carinfo-meta ${getCarValueClass('downforce', car.downforce)}">${linkOpen}${R3EUtils.escapeHtml(car.downforce || '')}${linkClose}</td>` +
                 `<td class="carinfo-meta">${linkOpen}${R3EUtils.escapeHtml(car.power || '')}${linkClose}</td>` +
                 `<td class="carinfo-meta">${linkOpen}${R3EUtils.escapeHtml(car.weight || '')}${linkClose}</td>` +
                 `<td class="carinfo-meta">${linkOpen}${R3EUtils.escapeHtml(car.engine || '')}${linkClose}</td>` +
+                `<td class="carinfo-meta ${getCarValueClass('difficulty', car.difficulty)}">${R3EUtils.escapeHtml(formatCarDifficulty(car.difficulty))}</td>` +
                 `</tr>`;
       });
     });
 
     html += '\n</tbody></table>';
-    tableContainer.innerHTML = '<div class="cars-table-toolbar">' +
+    tableContainer.innerHTML = '<div class="cars-table-width-wrap"><div class="cars-table-toolbar">' +
       '<button type="button" class="cars-table-toolbar-btn" id="cars-fold-all" title="Collapse all classes">Collapse all</button>' +
       '<button type="button" class="cars-table-toolbar-btn" id="cars-unfold-all" title="Expand all classes">Expand all</button>' +
-      '</div>' + html;
+      '</div>' + html + '</div>';
     tableContainer.querySelectorAll('.driver-group-header').forEach(function(header) {
       if (!expandedClassGroups.has(header.dataset.group)) {
         header.classList.add('collapsed');
@@ -819,6 +852,12 @@
         const description = car.description ? `<div class="car-tile-description">${R3EUtils.escapeHtml(car.description)}</div>` : '';
         const yearBadgeHtml = `<span class="car-tile-year-overlay car-badge year-badge" data-year="${car.year}" style="background:${yearColor(car.year)}">${R3EUtils.escapeHtml(car.year || '')}</span>`;
         const weightDisplay = (car.weight || '—').replace(/kg\*$/, 'kg with driver');
+        const downforceDisplay = R3EUtils.escapeHtml(car.downforce || '—');
+        const difficultyDisplay = R3EUtils.escapeHtml(formatCarDifficulty(car.difficulty) || '—');
+        const drivingSpecsHtml = `<div class="car-tile-driving-specs">` +
+          `<div class="car-tile-driving-spec"><span>Downforce</span><strong class="carinfo-meta car-tile-value ${getCarValueClass('downforce', car.downforce)}">${downforceDisplay}</strong></div>` +
+          `<div class="car-tile-driving-spec"><span>Difficulty</span><strong class="carinfo-meta car-tile-value ${getCarValueClass('difficulty', car.difficulty)}">${difficultyDisplay}</strong></div>` +
+          `</div>`;
         const carId = CarRatings.buildCarId(car);
         const currentRating = (typeof CarRatings !== 'undefined') ? CarRatings.get(carId) : 0;
         const ratingHtml = buildRatingHtml(carId, currentRating, 'tile');
@@ -838,6 +877,7 @@
                 `<span>${wheelBadge(car.wheel_cat)}</span><span>${transBadge(car.transmission_cat)}</span><span>${driveBadge(car.drive)}</span>` +
                 `${assistsHtml}` +
                 `<div class="car-tile-specs">${R3EUtils.escapeHtml(car.power || '—')} • ${R3EUtils.escapeHtml(weightDisplay)} • ${R3EUtils.escapeHtml(car.engine || '—')}</div>` +
+                `${drivingSpecsHtml}` +
                 `${description}` +
                 `</div>` +
                 `</article>`;

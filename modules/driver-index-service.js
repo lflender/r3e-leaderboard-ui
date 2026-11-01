@@ -92,6 +92,30 @@
                 .toLowerCase();
         },
 
+        _chooseDriverMetadataCandidate(entry, row) {
+            const candidates = Array.isArray(entry)
+                ? entry.filter(candidate => candidate && typeof candidate === 'object')
+                : entry && typeof entry === 'object' ? [entry] : [];
+            if (candidates.length === 0) return null;
+
+            let pathId = String(
+                row.path_id || row.pathId || row.PathID || row['Path ID'] || row.driver_key || ''
+            ).trim();
+            if (!pathId && row.driver?.path) {
+                pathId = String(row.driver.path).match(/\/(\d+)\/?$/)?.[1] || '';
+            }
+
+            if (pathId) {
+                const match = candidates.find(candidate =>
+                    String(candidate.path_id || candidate.pathId || candidate.pathID || '').trim() === pathId
+                );
+                if (match) return match;
+                if (candidates.length > 1) return null;
+            }
+
+            return candidates[0];
+        },
+
         _extractDriverMirrorMetadata(mirrorKey, mirrorEntry) {
             if (mirrorEntry && typeof mirrorEntry === 'object' && !Array.isArray(mirrorEntry)) {
                 const lookupKey = this._normalizeDriverLookupName(
@@ -183,6 +207,70 @@
             };
         },
 
+        async enrichRowsWithDriverAvatars(rows) {
+            if (!Array.isArray(rows) || rows.length === 0) return rows;
+
+            const rowsNeedingAvatars = rows.filter(row => {
+                const name = String(row?.name || row?.Name || row?.driver_name || row?.DriverName || '').trim();
+                return name && !row.avatar;
+            });
+            if (rowsNeedingAvatars.length === 0) return rows;
+
+            const getLookupKeys = (name) => {
+                const normalizedName = this._normalizeDriverLookupName(name);
+                const candidates = typeof this._buildLookupKeyCandidates === 'function'
+                    ? this._buildLookupKeyCandidates(name)
+                    : [normalizedName];
+                return [...new Set([normalizedName, ...candidates].filter(Boolean))];
+            };
+            const findMetadata = (name, shards) => {
+                for (const key of getLookupKeys(name)) {
+                    for (const shard of shards) {
+                        const entry = shard && shard[key];
+                        if (entry) return entry;
+                    }
+                }
+                return null;
+            };
+            const getRowName = row => row.name || row.Name || row.driver_name || row.DriverName;
+            const shardKeys = new Set(rowsNeedingAvatars.map(row =>
+                this._getShardKeyForName(this._normalizeDriverLookupName(getRowName(row)))
+            ));
+            const shardsByKey = new Map();
+            await Promise.all([...shardKeys].map(async shardKey => {
+                try {
+                    shardsByKey.set(shardKey, await this._loadDriverMetadataShard(shardKey));
+                } catch (error) {
+                    console.warn(`Failed to load driver avatar metadata shard ${shardKey}:`, error);
+                }
+            }));
+
+            const unresolvedRows = rowsNeedingAvatars.filter(row =>
+                !findMetadata(getRowName(row), [shardsByKey.get(
+                    this._getShardKeyForName(this._normalizeDriverLookupName(getRowName(row)))
+                )])
+            );
+            if (unresolvedRows.length > 0 && !shardsByKey.has('_')) {
+                try {
+                    shardsByKey.set('_', await this._loadDriverMetadataShard('_'));
+                } catch (error) {
+                    console.warn('Failed to load fallback driver avatar metadata shard:', error);
+                }
+            }
+
+            rowsNeedingAvatars.forEach(row => {
+                const name = getRowName(row);
+                const shardKey = this._getShardKeyForName(this._normalizeDriverLookupName(name));
+                const entry = findMetadata(name, [shardsByKey.get(shardKey), shardsByKey.get('_')]);
+                const metadata = this._chooseDriverMetadataCandidate(entry, row);
+                if (metadata && typeof metadata.avatar === 'string') {
+                    row.avatar = metadata.avatar;
+                }
+            });
+
+            return rows;
+        },
+
         async enrichEntriesWithDriverMetadata(entries) {
             if (!Array.isArray(entries) || entries.length === 0) {
                 return entries;
@@ -194,7 +282,7 @@
             }
 
             // Collect unique shard keys needed for metadata lookup.
-            // Skip entries that already have all metadata (country+rank+team)
+            // Skip entries that already have metadata and an avatar
             // to avoid fetching shards unnecessarily.
             const shardKeysNeeded = new Set();
             const entriesToEnrich = [];
@@ -203,7 +291,8 @@
                 const hasCountry = !!(entry.country || entry.Country);
                 const hasRank = !!(entry.rank || entry.Rank);
                 const hasTeam = !!(entry.team || entry.Team);
-                if (hasCountry && hasRank && hasTeam) return;
+                const hasAvatar = !!(entry.avatar || entry.Avatar || entry.driver?.avatar || entry.driver?.Avatar);
+                if (hasCountry && hasRank && hasTeam && hasAvatar) return;
 
                 const driverName = window.DataNormalizer && typeof window.DataNormalizer.extractName === 'function'
                     ? window.DataNormalizer.extractName(entry)
@@ -247,19 +336,23 @@
                     metaEntry = metadataShard && metadataShard[normalizedName];
                 }
 
-                if (!metaEntry || typeof metaEntry !== 'object') return;
+                const metadata = this._chooseDriverMetadataCandidate(metaEntry, entry);
+                if (!metadata) return;
 
-                if (metaEntry.country) {
-                    entry.country = metaEntry.country;
-                    entry.Country = metaEntry.country;
+                if (metadata.country) {
+                    entry.country = metadata.country;
+                    entry.Country = metadata.country;
                 }
-                if (metaEntry.team) {
-                    entry.team = metaEntry.team;
-                    entry.Team = metaEntry.team;
+                if (metadata.team) {
+                    entry.team = metadata.team;
+                    entry.Team = metadata.team;
                 }
-                if (metaEntry.rank) {
-                    entry.rank = metaEntry.rank;
-                    entry.Rank = metaEntry.rank;
+                if (metadata.rank) {
+                    entry.rank = metadata.rank;
+                    entry.Rank = metadata.rank;
+                }
+                if (!(entry.avatar || entry.Avatar) && metadata.avatar) {
+                    entry.avatar = metadata.avatar;
                 }
             });
 

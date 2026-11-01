@@ -984,7 +984,7 @@
         "description": "With the impressive performance figures, the BMW M235i Racing - a production-based coupé - meets all the basic requirements of a successful entry-level racing car. The car is used in series and events such as the VLN Endurance Championship and the Nürburgring 24 Hours on the Nürburgring-Nordschleife. The sleek bodywork is propelled by the most powerful petrol engine developed so far for a BMW M Performance Automobile: a six-cylinder in-line engine with M Performance TwinPower Turbo technology. With a capacity of 2,979ccm, the racing version is capable of generating 333hp (245kW). Motorsport-specific driving aids such as ABS, DSC and traction control provide the required support motorsport newcomers will benefit from. The car comes with mechanical limited-slip differential, ABS, DSC and traction control to help tame the power, and it is fitted with features such as the FIA-certified safety cell and the modern safety tank.",
         "thumbnail": "https://prod.r3eassets.com/assets/content/carlivery/qsr-racing-team-148-6352-image-small.png",
         "gears": "6",
-        "difficulty": "very hard",
+        "difficulty": "very easy",
         "downforce": "Low"
       }
     ]
@@ -1065,7 +1065,7 @@
         "description": "The Crosslé 90F is a single-seater racing car designed and built by the Northern Irish manufacturer Crosslé Car Company, as a special order from the Classic Racing School at Charade. With its sleek, aerodynamic design and powerful engine, the 90F is capable of reaching high speeds and delivering an exhilarating driving experience. Whether you're taking it for a spin on a virtual racetrack in RaceRoom or hitting the Circuit de Charade in real life, the Crosslé 90F is sure to provide an unforgettable driving experience.",
         "thumbnail": "https://prod.r3eassets.com/assets/content/carlivery/classic-racing-school-23a-11800-image-small.png",
         "gears": "4",
-        "difficulty": "very hard",
+        "difficulty": "very easy",
         "downforce": "Low"
       }
     ]
@@ -2726,7 +2726,7 @@
         "description": "The Formula RR Jr is an entry-level single seater and a great way to step into the world of open-wheelers. Its very distinctive look is defined by the lack of any aerodynamic devices such as front- and rear wings. This may look like a Rookie car but that does not make it old fashioned or slow, we believe it makes for the perfect car to learn proper racing technique. What you learn here will scale up to the higher classes.",
         "thumbnail": "https://prod.r3eassets.com/assets/content/carlivery/motorcats-racing-3-5029-image-small.png",
         "gears": "4",
-        "difficulty": "very hard",
+        "difficulty": "very easy",
         "downforce": "Low"
       }
     ]
@@ -2801,7 +2801,7 @@
         "description": "A Fiat 600 shell with a one-litre engine hung out behind the rear axle, the radiator moved to the nose and the engine lid propped open for air. The TCR is the Abarth 1000 with the Radiale cylinder head. In RaceRoom it makes 116 bhp at 7,750 rpm and weighs 663 kg with the driver aboard. With 58 per cent of that weight over the rear wheels, the front is light and needs weight on it before it turns in. The steering runs through the Fiat 600's worm-and-roller box with no assistance, the most old-fashioned steering in RaceRoom. Many of its liveries are cars racing today in the Abarth Coppa Mille class of Kampf der Zwerge, the German historic series for small touring cars, with teams such as Scuderia Topolino, Tessaro Team and Classic Racing Altena. In RaceRoom it joins Group 2 with the Mini Cooper S, NSU TTS and VW Scirocco.",
         "thumbnail": "https://game.raceroomracing.com/cdn/apex-production/Livery:13704:small.webp",
         "gears": "5",
-        "difficulty": "very hard",
+        "difficulty": "very easy",
         "downforce": "Low"
       },
       {
@@ -2822,7 +2822,7 @@
         "description": "The last of the Cooper S line, built until 1971. Engine across the front, front-wheel drive, a four-speed gearbox and 700 kg with the driver. In RaceRoom it makes 128 bhp at 6,500 rpm. It is the Abarth's opposite. The Abarth carries its weight over the rear wheels; the Mini puts 55 per cent of it on the front tyres, which also have to steer the car and put the power down. Its liveries are cars that race today in the British Car Trophy class of Kampf der Zwerge, where Minis and Abarths still share the grid. Teams include the Swiss Mini Racing Team, MiniNerds International Race Team and MadHatter Racing Flanders. In RaceRoom it joins Group 2 with the Abarth 1000 TCR, NSU TTS and VW Scirocco.",
         "thumbnail": "https://game.raceroomracing.com/cdn/apex-production/Livery:13982:small.webp",
         "gears": "4",
-        "difficulty": "very hard",
+        "difficulty": "very easy",
         "downforce": "Low"
       },
       {
@@ -2843,7 +2843,7 @@
         "description": "Advertised by NSU as “The car that leaps – yet hugs the ground”, this was a natural choice as a race or rally car in the late 60's and already by the early 70's the racing Prinz had earned a cult following. Sporting a twin carburetor air cooled power plant, the racing spec TTS gives you 120 Hp at your right foot. With 60'es drum brakes fitted to stop you again, that is more than enough to keep life quite interesting on a full attack lap. This historic gem will reward smooth driving with focus on maintaining the momentum and nailing the perfect lines. But it has enough power to go sideways if that's your style.",
         "thumbnail": "https://prod.r3eassets.com/assets/content/carlivery/diggleton-racing-15-4966-image-small.png",
         "gears": "4",
-        "difficulty": "very hard",
+        "difficulty": "very easy",
         "downforce": "Low"
       },
       {
@@ -4390,7 +4390,8 @@
         "country": "Germany",
         "link": "https://game.raceroomracing.com/store/cars/hillclimb-icons/bmw-134-judd-v8/258",
         "description": "Georg Plasa’s 134 Judd was built for the 2011 European HillClimb Championship. The car is powered by a 3.4-liter V8 engine delivering around 470+ horsepower. Low weight and raw power combination makes it ideal for the HillClimb discipline.",
-        "thumbnail": "https://prod.r3eassets.com/assets/content/carlivery/team-judd-134-09-2054-image-small.png"
+        "thumbnail": "https://prod.r3eassets.com/assets/content/carlivery/team-judd-134-09-2054-image-small.png",
+        "difficulty": "very hard"
       },
       {
         "car_class": "Hillclimb Icons",
@@ -4605,7 +4606,7 @@
         "description": "The Mazda MX-5 Cup car is a high-performance race car designed for competition in the Mazda MX-5 Cup racing series. Built on the iconic Mazda MX-5 roadster platform, the Cup car features a range of modifications and enhancements that make it a formidable competitor on the track. With its lightweight design, powerful engine, and sharp handling, the MX-5 Cup car delivers an exhilarating driving experience that is sure to thrill any racing enthusiast.",
         "thumbnail": "https://prod.r3eassets.com/assets/content/carlivery/mazda-motorsports-0-11611-image-small.png",
         "gears": "6",
-        "difficulty": "very hard",
+        "difficulty": "very easy",
         "downforce": "Low"
       }
     ]
@@ -4632,7 +4633,7 @@
         "description": "The Lestrup Racing Team (LRT) NXT1 is a 100% electric touring car developed with junior racing and talent discovery in mind. A unique Push-to-Pass system adds strategy: drivers must load the boost for five seconds before activating a short boost window, making timing critical for overtaking.",
         "thumbnail": "https://prod.r3eassets.com/assets/content/carlivery/lestrup-racing-team-02-13486-image-small.png",
         "gears": "1",
-        "difficulty": "very hard",
+        "difficulty": "very easy",
         "downforce": "Low"
       }
     ]
@@ -5307,7 +5308,7 @@
         "weight": "1055kg*",
         "engine": "2.0L Inline-6 · front-mounted",
         "TC": "",
-        "ABS": "true",
+        "ABS": "",
         "LC": "",
         "drive": "FWD",
         "country": "Germany",

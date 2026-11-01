@@ -120,6 +120,7 @@
         const summaryId = 'entries-dist-summary-' + Date.now();
         const startInputValue = startValue || timeframeState.timeframeStart || toLocalDateInputValue(start);
         const endInputValue = endValue || timeframeState.timeframeEnd || toLocalDateInputValue(end);
+        const timeframeMode = timeframeState.timeframeMode === 'last-week' ? 'last-week' : 'all';
 
         let html = '<div class="entries-dist-summary">';
         html += '<button type="button" class="entries-dist-toggle' + (isExpanded ? ' expanded' : '') + '" aria-expanded="' + (isExpanded ? 'true' : 'false') + '" aria-controls="' + summaryId + '">';
@@ -153,7 +154,8 @@
         }
         html += '<div class="entries-timeframe-controls">';
         html += '<label class="entries-timeframe-field"><span>Start</span><input type="date" class="entries-timeframe-input entries-timeframe-start" value="' + utils.escapeHtml(startInputValue) + '"></label>';
-        html += '<button type="button" class="entries-timeframe-last-week">Last week</button>';
+        html += '<button type="button" class="entries-timeframe-last-week" data-timeframe-mode="' + timeframeMode + '">' +
+            (timeframeMode === 'last-week' ? 'All' : 'Last week') + '</button>';
         html += '<label class="entries-timeframe-field"><span>End</span><input type="date" class="entries-timeframe-input entries-timeframe-end" value="' + utils.escapeHtml(endInputValue) + '"></label>';
         html += '</div>';
         html += '</div>';

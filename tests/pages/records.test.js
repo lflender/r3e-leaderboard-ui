@@ -77,7 +77,9 @@ function setupGlobals() {
     window.getInactiveMpPos = vi.fn(() => null);
     window.getCarClassId = vi.fn(() => '');
 
-    window.dataService = {};
+    window.dataService = {
+        enrichRowsWithDriverAvatars: vi.fn().mockResolvedValue([])
+    };
     window.FilterOptionsService = {
         getSuperclassOptions: vi.fn().mockReturnValue([]),
         getClassOptionsFromCarsData: vi.fn().mockReturnValue([])
@@ -180,6 +182,21 @@ describe('records page integration', () => {
             // 1 header row + 3 data rows = 4
             expect(rowCount, `${key} should render 3 data rows`).toBe(4);
         }
+    });
+
+    it('adds avatars to records rows after driver metadata loads', async () => {
+        window.dataService.enrichRowsWithDriverAvatars.mockImplementation(async rows => {
+            rows[0].avatar = 'https://img.example.com/driver.png';
+            return rows;
+        });
+
+        await loadAndWait();
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        const avatar = document.querySelector('#records-avg-bested-table .records-driver-avatar');
+        expect(avatar).not.toBeNull();
+        expect(avatar.getAttribute('src')).toBe('https://img.example.com/driver.png');
+        expect(avatar.referrerPolicy).toBe('no-referrer');
     });
 
     it('expands a section to top 50 when its toggle is clicked', async () => {

@@ -38,15 +38,58 @@
             .sort((a, b) => b.value - a.value);
     }
 
+    function getEntryCarClass(entry) {
+        const carClass = entry?.car_class;
+        const classObject = carClass && typeof carClass === 'object'
+            ? (carClass.class || carClass)
+            : null;
+        const classValue = entry?.CarClass || entry?.['Car Class'] ||
+            entry?.class_name || entry?.ClassName || entry?.className ||
+            (typeof entry?.Class === 'object' ? entry.Class.Name || entry.Class.name : entry?.Class) ||
+            (typeof entry?.class === 'object' ? entry.class.Name || entry.class.name : entry?.class) ||
+            classObject?.Name || classObject?.name || carClass;
+
+        if (classValue !== undefined && classValue !== null && typeof classValue !== 'object') {
+            const label = String(classValue).trim();
+            if (label) {
+                const mappedName = window.CAR_CLASSES_DATA?.[label];
+                if (mappedName) return mappedName;
+                return label;
+            }
+        }
+
+        const classId = entry?.class_id || entry?.ClassID || entry?.classId || entry?.['Class ID'] ||
+            classObject?.Id || classObject?.ID || classObject?.id;
+        if (!classId) return '';
+
+        if (typeof window.getCarClassName === 'function') {
+            return window.getCarClassName(classId);
+        }
+        return window.CAR_CLASSES_DATA?.[String(classId)] || String(classId);
+    }
+
+    function getEntryCar(entry) {
+        const car = entry?.Car || entry?.car || entry?.CarName || entry?.car_name || entry?.vehicle;
+        if (car && typeof car === 'object') {
+            return String(car.Name || car.name || car.car?.Name || car.car?.name || '').trim();
+        }
+        return String(car || '').trim();
+    }
+
     /**
      * Build car class distribution from driver entries
      * @param {Array} entries - Driver leaderboard entries
      * @returns {Array<{label: string, value: number}>}
      */
     function getCarClassDistribution(entries) {
-        return countByField(entries, [
-            'car_class', 'CarClass', 'Car Class', 'Class', 'class'
-        ]);
+        const counts = new Map();
+        (entries || []).forEach(entry => {
+            const label = getEntryCarClass(entry);
+            if (label) counts.set(label, (counts.get(label) || 0) + 1);
+        });
+        return Array.from(counts.entries())
+            .map(([label, value]) => ({ label, value }))
+            .sort((a, b) => b.value - a.value);
     }
 
     /**
@@ -55,9 +98,14 @@
      * @returns {Array<{label: string, value: number}>}
      */
     function getCarDistribution(entries) {
-        return countByField(entries, [
-            'Car', 'car', 'CarName', 'car_name', 'vehicle'
-        ]);
+        const counts = new Map();
+        (entries || []).forEach(entry => {
+            const label = getEntryCar(entry);
+            if (label) counts.set(label, (counts.get(label) || 0) + 1);
+        });
+        return Array.from(counts.entries())
+            .map(([label, value]) => ({ label, value }))
+            .sort((a, b) => b.value - a.value);
     }
 
     function getTrackBaseLabel(trackLabel) {
@@ -72,6 +120,25 @@
         return parts?.layoutName || trackLabel;
     }
 
+    function getEntryTrackLabel(entry) {
+        const trackId = entry?.track_id || entry?.TrackID || entry?.trackId || entry?.['Track ID'] || '';
+        const trackName = entry?.Track || entry?.track || entry?.TrackName || entry?.track_name || '';
+        if (typeof window.R3EUtils?.resolveTrackLabelForItem === 'function') {
+            return window.R3EUtils.resolveTrackLabelForItem(entry);
+        }
+        if (trackId && typeof window.R3EUtils?.resolveTrackLabel === 'function') {
+            return window.R3EUtils.resolveTrackLabel(trackId, trackName);
+        }
+        if (typeof window.R3ETrackUtils?.resolveTrackLabelForItem === 'function') {
+            return window.R3ETrackUtils.resolveTrackLabelForItem(entry);
+        }
+        return trackName || String(trackId);
+    }
+
+    function getEntryTrackBaseLabel(entry) {
+        return getTrackBaseLabel(getEntryTrackLabel(entry));
+    }
+
     /**
      * Build track distribution from driver entries, resolving track IDs to labels
      * @param {Array} entries - Driver leaderboard entries
@@ -81,15 +148,7 @@
         const counts = new Map();
 
         entries.forEach(entry => {
-            const trackId = entry.track_id || entry.TrackID || entry.trackId || entry['Track ID'] || '';
-            const trackName = entry.Track || entry.track || entry.TrackName || entry.track_name || '';
-
-            let label = '';
-            if (trackId && window.R3EUtils && typeof window.R3EUtils.resolveTrackLabel === 'function') {
-                label = window.R3EUtils.resolveTrackLabel(trackId, trackName);
-            } else {
-                label = trackName || String(trackId);
-            }
+            const label = getEntryTrackLabel(entry);
 
             if (!label) return;
 
@@ -161,7 +220,7 @@
         const classMap = new Map(); // className → { bested, pole, podium, bestedPcts[], entryCount }
 
         (entries || []).forEach(entry => {
-            const cls = entry.car_class || entry.CarClass || entry.Class || '';
+            const cls = getEntryCarClass(entry);
             if (!cls) return;
             const position = Number(entry.position) || 0;
             const total = Number(entry.total_entries) || 0;
@@ -206,8 +265,8 @@
     function getCarToClassMap(entries) {
         const carClassCounts = new Map(); // car → Map<class, count>
         (entries || []).forEach(entry => {
-            const car = (entry.Car || entry.car || entry.CarName || entry.car_name || entry.vehicle || '').trim();
-            const cls = (entry.car_class || entry.CarClass || entry.Class || '').trim();
+            const car = getEntryCar(entry);
+            const cls = getEntryCarClass(entry);
             if (!car || !cls) return;
             if (!carClassCounts.has(car)) carClassCounts.set(car, new Map());
             const clsMap = carClassCounts.get(car);
@@ -226,6 +285,10 @@
         MIN_ENTRIES_FOR_POLE,
         MIN_ENTRIES_FOR_PODIUM,
         countByField,
+        getEntryCarClass,
+        getEntryCar,
+        getEntryTrackLabel,
+        getEntryTrackBaseLabel,
         getCarClassDistribution,
         getCarDistribution,
         getTrackDistribution,

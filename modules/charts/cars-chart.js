@@ -93,7 +93,7 @@
                 ? utils.resolveBrandLogoPath(stat.car)
                 : '';
             const brandLogoHtml = brandLogoUrl
-                ? `<img class="car-dist-brand-logo" src="${utils.escapeHtml(brandLogoUrl)}" alt="${utils.escapeHtml(carBrand)} logo" loading="lazy" decoding="async" />`
+                ? `<img class="car-dist-brand-logo" src="${utils.escapeHtml(brandLogoUrl)}" alt="${utils.escapeHtml(carBrand)} logo" loading="lazy" decoding="async" ${utils.getBrandLogoFallbackAttributes?.(brandLogoUrl) || ''} />`
                 : '';
             let carHtml = '<span class="car-brand">' + utils.escapeHtml(carBrand) + '</span>';
             if (carModel) { carHtml += ' <span class="car-model">' + utils.escapeHtml(carModel) + '</span>'; }

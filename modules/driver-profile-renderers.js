@@ -125,7 +125,7 @@ const DriverProfileRenderers = (() => {
                 : { brand: carName, model: '' };
             const isDefault = brandLogoUrl.includes('logo-raceroom');
             const brandLogoHtml = brandLogoUrl
-                ? `<img class="highlight-brand-logo${isDefault ? ' table-brand-logo-raceroom' : ''}" src="${escape(brandLogoUrl)}" alt="${escape(brand)} logo" loading="lazy" decoding="async" />`
+                ? `<img class="highlight-brand-logo${isDefault ? ' table-brand-logo-raceroom' : ''}" src="${escape(brandLogoUrl)}" alt="${escape(brand)} logo" loading="lazy" decoding="async" ${R3EUtils.getBrandLogoFallbackAttributes?.(brandLogoUrl) || ''} />`
                 : '';
 
             const imgHtml = thumbnailUrl

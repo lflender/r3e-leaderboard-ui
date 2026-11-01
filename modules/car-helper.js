@@ -61,17 +61,17 @@ function normalizeBrandForLogoLookup(brand) {
 
 function resolveBrandLogoPath(carNameOrBrand) {
     const source = String(carNameOrBrand || '').trim();
-    if (!source) return 'images/brands/logo-raceroom.png';
+    if (!source) return 'images/brands/logo-raceroom.webp';
 
     const sourceLower = source.toLowerCase();
     for (const { pattern, logoKey } of MODEL_LOGO_OVERRIDES) {
-        if (sourceLower.includes(pattern)) return `images/brands/logo-${logoKey}.png`;
+        if (sourceLower.includes(pattern)) return `images/brands/logo-${logoKey}.webp`;
     }
 
     const split = splitCarName(source);
     const baseBrand = split.brand || source;
     const normalizedBrand = normalizeBrandForLogoLookup(baseBrand);
-    if (!normalizedBrand) return 'images/brands/logo-raceroom.png';
+    if (!normalizedBrand) return 'images/brands/logo-raceroom.webp';
 
     const requestedFileKey = BRAND_LOGO_OVERRIDES[normalizedBrand]
         || normalizedBrand.replace(/[^a-z0-9&]+/g, '');
@@ -80,7 +80,35 @@ function resolveBrandLogoPath(carNameOrBrand) {
         ? requestedFileKey
         : 'raceroom';
 
-    return `images/brands/logo-${fileKey}.png`;
+    return `images/brands/logo-${fileKey}.webp`;
+}
+
+function getBrandLogoFallbackPath(logoPath) {
+    const match = /^images\/brands\/(logo-[a-z0-9-]+)\.webp$/i.exec(String(logoPath || ''));
+    return match ? `images/brands/${match[1]}.png` : '';
+}
+
+function getBrandLogoFallbackAttributes(logoPath) {
+    const fallbackPath = getBrandLogoFallbackPath(logoPath);
+    return fallbackPath
+        ? `data-fallback-src="${fallbackPath}" onerror="window.R3ECarUtils.handleBrandLogoError(this)"`
+        : '';
+}
+
+function handleBrandLogoError(img) {
+    const fallbackPath = img.getAttribute('data-fallback-src');
+    if (fallbackPath) {
+        img.removeAttribute('data-fallback-src');
+        img.src = fallbackPath;
+        return;
+    }
+
+    if (img.parentElement?.classList.contains('table-brand-logo-slot')
+        || img.parentElement?.classList.contains('cars-page-car-logo-slot')) {
+        img.parentElement.remove();
+    } else {
+        img.remove();
+    }
 }
 
 let cachedCarNameAliasData = null;
@@ -359,11 +387,11 @@ function renderCarDisplayHtml(rawCarName, options) {
     var escModel = esc(model);
     var escName = esc(safeName);
     var brandLogoUrl = resolveBrandLogoPath(safeName);
-    var brandLogoClass = brandLogoUrl.includes('logo-raceroom.png')
+    var brandLogoClass = brandLogoUrl.includes('logo-raceroom.')
         ? 'table-brand-logo table-brand-logo-raceroom'
         : 'table-brand-logo';
     var brandLogoHtml = brandLogoUrl
-        ? '<span class="table-brand-logo-slot cars-page-car-logo-slot"><img class="' + brandLogoClass + '" src="' + esc(brandLogoUrl) + '" alt="' + (escBrand || 'Car brand') + ' logo" loading="lazy" decoding="async" data-center-logo="true" /></span>'
+        ? '<span class="table-brand-logo-slot cars-page-car-logo-slot"><img class="' + brandLogoClass + '" src="' + esc(brandLogoUrl) + '" alt="' + (escBrand || 'Car brand') + ' logo" loading="lazy" decoding="async" data-center-logo="true" ' + getBrandLogoFallbackAttributes(brandLogoUrl) + ' /></span>'
         : '';
 
     if (!brand) {
@@ -382,9 +410,6 @@ function attachBrandLogoHandlers(rootEl) {
             var slotWidth = (this.parentElement && this.parentElement.getBoundingClientRect().width) || 22;
             var offsetX = (slotWidth - renderedWidth) / 2;
             this.style.marginLeft = offsetX + 'px';
-        });
-        img.addEventListener('error', function () {
-            if (this.parentElement) { this.parentElement.remove(); } else { this.remove(); }
         });
     });
 }
@@ -543,6 +568,9 @@ function getDailyRaceClassLogosHtml(race, resolveClassNameById, raceClassName) {
 window.R3ECarUtils = {
     splitCarName,
     resolveBrandLogoPath,
+    getBrandLogoFallbackPath,
+    getBrandLogoFallbackAttributes,
+    handleBrandLogoError,
     detectYearSuffix,
     detectDTMSuffix,
     findCarCombinations,

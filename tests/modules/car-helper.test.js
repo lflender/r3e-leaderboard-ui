@@ -25,23 +25,51 @@ describe('R3ECarUtils', () => {
     });
 
     test('resolves local brand logo paths from car names', () => {
-        expect(window.R3ECarUtils.resolveBrandLogoPath('Audi R8 LMS')).toBe('images/brands/logo-audi.png');
-        expect(window.R3ECarUtils.resolveBrandLogoPath('Alfa Romeo 155 V6 TI')).toBe('images/brands/logo-alfaromeo.png');
-        expect(window.R3ECarUtils.resolveBrandLogoPath('McLaren 720S GT3')).toBe('images/brands/logo-mclaren.png');
-        expect(window.R3ECarUtils.resolveBrandLogoPath('Lynk & Co 03 TCR')).toBe('images/brands/logo-lynk-co.png');
-        expect(window.R3ECarUtils.resolveBrandLogoPath('134 Judd V8')).toBe('images/brands/logo-bmw.png');
-        expect(window.R3ECarUtils.resolveBrandLogoPath('BMW 134 Judd V8')).toBe('images/brands/logo-bmw.png');
-        expect(window.R3ECarUtils.resolveBrandLogoPath('E36 V8 JUDD')).toBe('images/brands/logo-bmw.png');
-        expect(window.R3ECarUtils.resolveBrandLogoPath('BMW E36 V8 JUDD')).toBe('images/brands/logo-bmw.png');
-        expect(window.R3ECarUtils.resolveBrandLogoPath('BMW Alpina B6 GT3')).toBe('images/brands/logo-alpina.png');
-        expect(window.R3ECarUtils.resolveBrandLogoPath('DTM Mercedes AMG C-Coupé')).toBe('images/brands/logo-mercedes.png');
-        expect(window.R3ECarUtils.resolveBrandLogoPath('')).toBe('images/brands/logo-raceroom.png');
-        expect(window.R3ECarUtils.resolveBrandLogoPath('Some Unknown Brand Prototype')).toBe('images/brands/logo-raceroom.png');
+        expect(window.R3ECarUtils.resolveBrandLogoPath('Audi R8 LMS')).toBe('images/brands/logo-audi.webp');
+        expect(window.R3ECarUtils.resolveBrandLogoPath('Alfa Romeo 155 V6 TI')).toBe('images/brands/logo-alfaromeo.webp');
+        expect(window.R3ECarUtils.resolveBrandLogoPath('McLaren 720S GT3')).toBe('images/brands/logo-mclaren.webp');
+        expect(window.R3ECarUtils.resolveBrandLogoPath('Lynk & Co 03 TCR')).toBe('images/brands/logo-lynk-co.webp');
+        expect(window.R3ECarUtils.resolveBrandLogoPath('134 Judd V8')).toBe('images/brands/logo-bmw.webp');
+        expect(window.R3ECarUtils.resolveBrandLogoPath('BMW 134 Judd V8')).toBe('images/brands/logo-bmw.webp');
+        expect(window.R3ECarUtils.resolveBrandLogoPath('E36 V8 JUDD')).toBe('images/brands/logo-bmw.webp');
+        expect(window.R3ECarUtils.resolveBrandLogoPath('BMW E36 V8 JUDD')).toBe('images/brands/logo-bmw.webp');
+        expect(window.R3ECarUtils.resolveBrandLogoPath('BMW Alpina B6 GT3')).toBe('images/brands/logo-alpina.webp');
+        expect(window.R3ECarUtils.resolveBrandLogoPath('DTM Mercedes AMG C-Coupé')).toBe('images/brands/logo-mercedes.webp');
+        expect(window.R3ECarUtils.resolveBrandLogoPath('')).toBe('images/brands/logo-raceroom.webp');
+        expect(window.R3ECarUtils.resolveBrandLogoPath('Some Unknown Brand Prototype')).toBe('images/brands/logo-raceroom.webp');
     });
 
     test('resolves Corvette model override regardless of brand', () => {
-        expect(window.R3ECarUtils.resolveBrandLogoPath('Chevrolet Corvette C6.R GT2')).toBe('images/brands/logo-corvette.png');
-        expect(window.R3ECarUtils.resolveBrandLogoPath('Callaway Corvette C7 GT3-R')).toBe('images/brands/logo-corvette.png');
+        expect(window.R3ECarUtils.resolveBrandLogoPath('Chevrolet Corvette C6.R GT2')).toBe('images/brands/logo-corvette.webp');
+        expect(window.R3ECarUtils.resolveBrandLogoPath('Callaway Corvette C7 GT3-R')).toBe('images/brands/logo-corvette.webp');
+    });
+
+    test('resolves a PNG fallback only for local WebP brand logos', () => {
+        expect(window.R3ECarUtils.getBrandLogoFallbackPath('images/brands/logo-audi.webp'))
+            .toBe('images/brands/logo-audi.png');
+        expect(window.R3ECarUtils.getBrandLogoFallbackPath('images/tracks/logo-audi.webp')).toBe('');
+        expect(window.R3ECarUtils.getBrandLogoFallbackPath('https://example.com/logo-audi.webp')).toBe('');
+        expect(window.R3ECarUtils.getBrandLogoFallbackPath('images/brands/logo-audi.png')).toBe('');
+    });
+
+    test('switches to the PNG fallback once and removes the image if it also fails', () => {
+        const img = document.createElement('img');
+        img.setAttribute('data-fallback-src', 'images/brands/logo-audi.png');
+        document.body.appendChild(img);
+
+        window.R3ECarUtils.handleBrandLogoError(img);
+        expect(img.getAttribute('src')).toContain('images/brands/logo-audi.png');
+        expect(img.hasAttribute('data-fallback-src')).toBe(false);
+
+        window.R3ECarUtils.handleBrandLogoError(img);
+        expect(document.body.contains(img)).toBe(false);
+    });
+
+    test('renders WebP brand logos with a PNG fallback handler', () => {
+        const html = window.R3ECarUtils.renderCarDisplayHtml('Audi R8 LMS');
+        expect(html).toContain('src="images/brands/logo-audi.webp"');
+        expect(html).toContain('data-fallback-src="images/brands/logo-audi.png"');
+        expect(html).toContain('window.R3ECarUtils.handleBrandLogoError(this)');
     });
 
     test('detects year and DTM suffixes', () => {

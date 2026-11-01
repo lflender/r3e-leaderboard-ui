@@ -54,12 +54,12 @@ class CustomSelect {
     static buildLogosHtml(opt) {
         if (opt.logos && opt.logos.length > 0) {
             const imgs = opt.logos.map(url =>
-                `<img class="custom-select__option-logo" src="${R3EUtils.escapeHtml(url)}" alt="" aria-hidden="true" loading="lazy" decoding="async">`
+                `<img class="custom-select__option-logo" src="${R3EUtils.escapeHtml(url)}" alt="" aria-hidden="true" loading="lazy" decoding="async" ${R3EUtils.getBrandLogoFallbackAttributes?.(url) || ''}>`
             ).join('');
             return `<span class="custom-select__logos-group">${imgs}</span>`;
         }
         if (opt.logoUrl) {
-            return `<img class="custom-select__option-logo" src="${R3EUtils.escapeHtml(opt.logoUrl)}" alt="" aria-hidden="true" loading="lazy" decoding="async">`;
+            return `<img class="custom-select__option-logo" src="${R3EUtils.escapeHtml(opt.logoUrl)}" alt="" aria-hidden="true" loading="lazy" decoding="async" ${R3EUtils.getBrandLogoFallbackAttributes?.(opt.logoUrl) || ''}>`;
         }
         return '';
     }

@@ -405,7 +405,8 @@ describe('TableRenderer — cell rendering', () => {
         test('renders brand logo when available', () => {
             const html = renderer.renderCarCell('Audi R8 LMS');
             expect(html).toContain('table-brand-logo');
-            expect(html).toContain('images/brands/logo-audi.png');
+            expect(html).toContain('images/brands/logo-audi.webp');
+            expect(html).toContain('data-fallback-src="images/brands/logo-audi.png"');
         });
 
         test('renders dash for empty value', () => {

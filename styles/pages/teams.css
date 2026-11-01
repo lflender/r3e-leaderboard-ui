@@ -260,7 +260,6 @@
     align-self: center;
     margin-right: 0;
     justify-content: center;
-    overflow: hidden;
     width: 24px;
     flex: 0 0 24px;
 }

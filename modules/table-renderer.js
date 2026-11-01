@@ -512,11 +512,11 @@ class TableRenderer {
         const brandLogoUrl = (window.R3EUtils && typeof window.R3EUtils.resolveBrandLogoPath === 'function')
             ? window.R3EUtils.resolveBrandLogoPath(value)
             : '';
-        const brandLogoClass = brandLogoUrl.includes('logo-raceroom.png')
+        const brandLogoClass = brandLogoUrl.includes('logo-raceroom.')
             ? 'table-brand-logo table-brand-logo-raceroom'
             : 'table-brand-logo';
         const brandLogoHtml = brandLogoUrl
-            ? `<span class="table-brand-logo-slot"><img class="${brandLogoClass}" src="${R3EUtils.escapeHtml(brandLogoUrl)}" alt="${escBrand || 'Car brand'} logo" loading="lazy" decoding="async" onload='const renderedWidth = this.getBoundingClientRect().width || this.width || 22; const slotWidth = (this.parentElement && this.parentElement.getBoundingClientRect().width) || 22; const offsetX = (slotWidth - renderedWidth) / 2; this.style.marginLeft = offsetX + "px";' onerror='if (this.parentElement) { this.parentElement.remove(); } else { this.remove(); }' /></span>`
+            ? `<span class="table-brand-logo-slot"><img class="${brandLogoClass}" src="${R3EUtils.escapeHtml(brandLogoUrl)}" alt="${escBrand || 'Car brand'} logo" loading="lazy" decoding="async" ${R3EUtils.getBrandLogoFallbackAttributes?.(brandLogoUrl) || ''} onload='const renderedWidth = this.getBoundingClientRect().width || this.width || 22; const slotWidth = (this.parentElement && this.parentElement.getBoundingClientRect().width) || 22; const offsetX = (slotWidth - renderedWidth) / 2; this.style.marginLeft = offsetX + "px";' /></span>`
             : '';
         
         if (model) {

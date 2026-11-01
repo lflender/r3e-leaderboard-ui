@@ -164,7 +164,8 @@ describe('table-renderer track resolution', () => {
         ], ['car'], 'gap');
 
         expect(html).toContain('table-brand-logo');
-        expect(html).toContain('images/brands/logo-audi.png');
+        expect(html).toContain('images/brands/logo-audi.webp');
+        expect(html).toContain('data-fallback-src="images/brands/logo-audi.png"');
         expect(html).toContain('Audi');
     });
 

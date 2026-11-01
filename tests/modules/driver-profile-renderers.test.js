@@ -137,6 +137,23 @@ describe('DriverProfileRenderers', () => {
             expect(html).toContain('10 leaderboard entries');
         });
 
+        it('renders WebP brand logos with the configured PNG fallback', () => {
+            const originalLogoResolver = window.R3EUtils.resolveBrandLogoPath;
+            const originalFallbackAttributes = window.R3EUtils.getBrandLogoFallbackAttributes;
+            window.R3EUtils.resolveBrandLogoPath = () => 'images/brands/logo-bmw.webp';
+            window.R3EUtils.getBrandLogoFallbackAttributes = () => 'data-fallback-src="images/brands/logo-bmw.png"';
+
+            const html = DriverProfileRenderers.renderHighlights({
+                carDistribution: [{ label: 'BMW M4', value: 10 }],
+                trackDistribution: []
+            });
+
+            expect(html).toContain('src="images/brands/logo-bmw.webp"');
+            expect(html).toContain('data-fallback-src="images/brands/logo-bmw.png"');
+            window.R3EUtils.resolveBrandLogoPath = originalLogoResolver;
+            window.R3EUtils.getBrandLogoFallbackAttributes = originalFallbackAttributes;
+        });
+
         it('renders most used track card', () => {
             const html = DriverProfileRenderers.renderHighlights({
                 carDistribution: [],

@@ -337,7 +337,6 @@ h2.driver-name-top10-glitter {
     align-self: center;
     justify-content: center;
     margin-right: 0;
-    overflow: hidden;
 }
 
 #detail-results-container .car-cell-stack .table-brand-logo {
@@ -387,7 +386,6 @@ h2.driver-name-top10-glitter {
     align-self: center;
     margin-right: 0;
     justify-content: center;
-    overflow: hidden;
     width: 24px;
     flex: 0 0 24px;
 }
@@ -821,4 +819,3 @@ h2.driver-name-top10-glitter {
         min-width: 140px !important;
     }
 }
-

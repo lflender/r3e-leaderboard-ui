@@ -22,11 +22,14 @@ const PerformanceChart = (() => {
             const total = entry.total_entries;
             if (!pos || !total || total < 2) return;
             const bestedPct = ((total - pos) / (total - 1)) * 100;
-            const car = entry.Car || entry.car || entry.CarName || entry.car_name || '';
-            const track = (window.R3EUtils && typeof window.R3EUtils.resolveTrackLabelForItem === 'function')
-                ? window.R3EUtils.resolveTrackLabelForItem(entry)
-                : (entry.Track || entry.track || entry.TrackName || entry.track_name || '');
-            const carClass = entry.car_class || entry.CarClass || entry.Class || '';
+            const car = window.DriverProfileData?.getEntryCar?.(entry) ||
+                entry.Car || entry.car || entry.CarName || entry.car_name || '';
+            const track = window.DriverProfileData?.getEntryTrackLabel?.(entry) ||
+                (window.R3EUtils && typeof window.R3EUtils.resolveTrackLabelForItem === 'function'
+                    ? window.R3EUtils.resolveTrackLabelForItem(entry)
+                    : (entry.Track || entry.track || entry.TrackName || entry.track_name || ''));
+            const carClass = window.DriverProfileData?.getEntryCarClass?.(entry) ||
+                entry.car_class || entry.CarClass || entry.Class || entry.class_name || entry.ClassName || '';
             const classId = entry.class_id || entry.ClassID || entry.classId || '';
             points.push({ date: dt, bestedPct, car, track, carClass, classId, position: pos, total });
         });

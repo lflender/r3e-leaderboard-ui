@@ -157,6 +157,7 @@ class Navigation {
         if (pathId) {
             url += `&id=${encodeURIComponent(pathId)}`;
         }
+        url += '&v=20261101';
         window.open(url, '_blank');
     }
 }

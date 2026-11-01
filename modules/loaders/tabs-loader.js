@@ -9,7 +9,7 @@
 
     const TABS = [
         { id: 'ranked',    label: 'Ranked',        href: '/' },
-        { id: 'drivers',   label: 'Drivers',      href: 'drivers.html' },
+        { id: 'drivers',   label: 'Drivers',      href: 'drivers.html?v=20261101' },
         { id: 'teams',     label: 'Teams',        href: 'teams.html', badge: 'NEW!' },
         { id: 'leaderboards', label: 'Leaderboards',  href: 'leaderboards.html' },
         { id: 'records',   label: 'Records',       href: 'records.html' },

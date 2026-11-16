@@ -507,6 +507,33 @@ describe('leaderboards fetchTopCombinations pipeline', () => {
         expect(descEl.innerHTML).toContain('Famous Belgian circuit');
     });
 
+    it('shows the description for WeatherTech Raceway Laguna Seca 1987', async () => {
+        document.body.innerHTML = buildDom() + '<div id="track-description" hidden></div>';
+        loadBrowserScript('modules/data/tracks.js');
+
+        let trackFilterOnChange;
+        window.CustomSelect = class {
+            constructor(id, _options, onChange) {
+                if (id === 'track-filter-ui') trackFilterOnChange = onChange;
+            }
+        };
+
+        window.dataService.fetchTopCombinations = vi.fn().mockResolvedValue([]);
+        window.dataService.fetchAllCombinations = vi.fn().mockResolvedValue([
+            { track_id: 13533, class_name: 'GT3', entry_count: 50 }
+        ]);
+
+        loadLeaderboards();
+        await new Promise(resolve => setTimeout(resolve, 20));
+
+        trackFilterOnChange('13533', { source: 'user' });
+        await new Promise(resolve => setTimeout(resolve, 20));
+
+        const descEl = document.getElementById('track-description');
+        expect(descEl.hidden).toBe(false);
+        expect(descEl.textContent).toContain('Laguna Seca as it was until 1988');
+    });
+
     it('hides track description when no track filter is active', async () => {
         document.body.innerHTML = buildDom() + '<div id="track-description" hidden></div>';
         window.TRACKS_META = { 'Spa': { description: 'Famous Belgian circuit' } };

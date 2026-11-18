@@ -218,14 +218,15 @@
 }
 
 .car-link-thumbnail {
-    position: absolute;
-    left: calc(100% + 0.65rem);
-    top: 50%;
+    position: fixed;
+    left: var(--car-preview-left, 0px);
+    top: var(--car-preview-top, 0px);
     transform: translateY(-50%) scale(0.98);
     opacity: 0;
     pointer-events: none;
     z-index: var(--z-dropdown);
-    width: 250px;
+    width: min(250px, calc((100vw - 16px) / 2));
+    max-height: calc((100vh - 16px) / 2);
     padding: var(--space-1);
     border-radius: var(--radius-lg);
     border: 1px solid var(--color-border);
@@ -247,6 +248,8 @@
     display: block;
     width: 100%;
     height: auto;
+    max-height: calc((100vh - 26px) / 2);
+    object-fit: contain;
     border-radius: var(--radius-md);
 }
 
@@ -450,6 +453,11 @@
 
 #cars-info-table .driver-group-header td {
     padding: 0.4rem 0.65rem !important;
+    background-color: var(--color-surface-selected);
+}
+
+#cars-info-table .driver-group-header:hover td {
+    background-color: var(--color-hover-bg);
 }
 
 .cars-class-count {

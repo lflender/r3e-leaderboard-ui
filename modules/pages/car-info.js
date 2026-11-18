@@ -53,7 +53,56 @@
   const CAR_VIEW_MODE_KEY = 'carInfoViewMode';
   let hasTrackedCarInfoDisplay = false;
   let searchDebounceTimer = null;
+  const activePreviewLinks = new Set();
   const minSearchLength = 2;
+
+  function positionCarPreview(link) {
+    const preview = link.querySelector('.car-link-thumbnail');
+    if (!preview) return;
+
+    const bounds = link.getBoundingClientRect();
+    const width = preview.offsetWidth * 2;
+    const height = preview.offsetHeight * 2;
+    const margin = 8;
+    const gap = parseFloat(getComputedStyle(document.documentElement).fontSize) * 0.65;
+    const left = Math.max(margin, Math.min(bounds.right - width / 4 + gap, window.innerWidth - width - margin));
+    const top = Math.max(margin + height / 2, Math.min(
+      bounds.top + bounds.height / 2, window.innerHeight - margin - height / 2
+    ));
+    preview.style.setProperty('--car-preview-left', `${left + preview.offsetWidth / 2}px`);
+    preview.style.setProperty('--car-preview-top', `${top}px`);
+  }
+
+  function updateActiveCarPreview() {
+    activePreviewLinks.forEach(link => {
+      if (link.isConnected) positionCarPreview(link);
+      else activePreviewLinks.delete(link);
+    });
+  }
+
+  window.addEventListener('scroll', updateActiveCarPreview, true);
+  window.addEventListener('resize', updateActiveCarPreview);
+
+  function attachCarPreviewPositioning(rootEl) {
+    rootEl.querySelectorAll('.row-link .car-link-thumbnail').forEach(preview => {
+      const link = preview.closest('.row-link');
+      const show = () => {
+        activePreviewLinks.add(link);
+        positionCarPreview(link);
+      };
+      link.addEventListener('mouseenter', show);
+      link.addEventListener('focus', show);
+      link.addEventListener('mouseleave', () => {
+        if (document.activeElement !== link) activePreviewLinks.delete(link);
+      });
+      link.addEventListener('blur', () => {
+        if (!link.matches(':hover')) activePreviewLinks.delete(link);
+      });
+      preview.querySelector('img').addEventListener('load', () => {
+        if (activePreviewLinks.has(link)) positionCarPreview(link);
+      });
+    });
+  }
   
   // Build class options from data
   const superclassOptions = FilterOptionsService.getSuperclassOptions();
@@ -713,6 +762,7 @@
     });
     attachBrandLogoHandlers(tableContainer);
     attachImageCyclers(tableContainer);
+    attachCarPreviewPositioning(tableContainer);
     attachRatingHandlers(tableContainer);
 
     document.getElementById('cars-fold-all').addEventListener('click', function() {

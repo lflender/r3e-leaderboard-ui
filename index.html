@@ -33,7 +33,7 @@
     <script src="modules/analytics.js?v=8" defer></script>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     
-    <link rel="stylesheet" href="styles/style.css?v=275">
+    <link rel="stylesheet" href="styles/style.css?v=280">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"/>
     <!-- Site Icons -->
     <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png?v=3">
@@ -117,10 +117,12 @@
             </div>
         </div>
 
+        <section id="status-container" class="status-section" aria-label="Leaderboard Database Statistics" data-status-component></section>
+
         <section class="seo-content" aria-label="About RaceRoom Leaderboards">
             <h2>About RaceRoom Leaderboards Explorer</h2>
-            <p>RaceRoom Leaderboards Explorer allows you to track your results from Leaderboards Challenges of <strong>RaceRoom Racing Experience</strong>, the popular simracing title from KW Studios.</p>
-            <p>Check your rankings in <strong>RaceRoom leaderboards</strong> or the ones from other drivers, explore tracks statistics, or visualize <a href="cars.html" class="internal-link">car data</a>, all in the same place.</p>
+            <p>Find this week's leaderboard-qualifying ranked series and race schedules for <strong>RaceRoom Racing Experience</strong>.</p>
+            <p>Browse leaderboard results and driver records, look up teams, compare <a href="cars.html" class="internal-link">car data</a>, or pick a random car and track for your next session.</p>
             <p>If you like it, please consider supporting, as it is really appreciated and helps with infrastructure costs!</p>
         </section>
         
@@ -141,6 +143,7 @@
     <script src="modules/url-helper.js?v=2" defer></script>
     <script src="modules/car-helper.js?v=21" defer></script>
     <script src="modules/utils.js?v=15" defer></script>
+    <script src="modules/data-service.js?v=48" defer></script>
     
     <!-- Data files - must load before feature modules that depend on them -->
     <script src="modules/data/car-classes.js?v=4" defer></script>
@@ -149,7 +152,8 @@
     <script src="modules/data/track-images.js?v=4" defer></script>
     
     <!-- Feature modules -->
-    <script src="modules/pages/ranked-series.js?v=6" defer></script>
+    <script src="modules/status-display.js?v=7" defer></script>
+    <script src="modules/pages/ranked-series.js?v=8" defer></script>
     <script>
     (function(){
         var K='records_new_badge_dismissed';

@@ -5,6 +5,39 @@
 
 class StatusDisplay {
     constructor() {
+        const container = document.getElementById('status-container');
+        if (container && container.hasAttribute('data-status-component')) {
+            const headingTag = container.dataset.headingLevel === '3' ? 'h3' : 'h2';
+            container.innerHTML = `
+                <${headingTag}>Database Status <span id="status-led" class="status-led" title="Status indicator"></span></${headingTag}>
+                <div class="status-grid">
+                    <div class="status-item">
+                        <span id="status-timestamp-label" class="status-label">Last Updated:</span>
+                        <span id="status-timestamp" class="status-value">-</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Unique Tracks:</span>
+                        <span id="status-tracks" class="status-value">-</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Track/Class Combinations:</span>
+                        <span id="status-combinations" class="status-value">-</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Total Combinations:</span>
+                        <span id="status-total-combinations" class="status-value">-</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Total Drivers:</span>
+                        <span id="status-drivers" class="status-value">-</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Total Entries:</span>
+                        <span id="status-entries" class="status-value">-</span>
+                    </div>
+                </div>
+            `;
+        }
         this.elements = {
             timestamp: document.getElementById('status-timestamp'),
             timestampLabel: document.getElementById('status-timestamp-label'),
@@ -15,7 +48,7 @@ class StatusDisplay {
             drivers: document.getElementById('status-drivers'),
             led: document.getElementById('status-led')
         };
-        this.init();
+        this.ready = this.init();
     }
 
     /**

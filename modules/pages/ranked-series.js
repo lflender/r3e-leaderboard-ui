@@ -184,6 +184,13 @@
     class RankedSeriesPage {
         constructor() {
             this.resultsContainer = document.getElementById('results-container');
+            if (this.resultsContainer) {
+                document.addEventListener('click', event => {
+                    this.resultsContainer.querySelectorAll('.ranked-series-rounds[open]').forEach(schedule => {
+                        if (!schedule.contains(event.target)) schedule.open = false;
+                    });
+                });
+            }
             this.ready = this.init();
         }
 
@@ -338,7 +345,7 @@
                 `;
                 return `
                     <li class="ranked-series-round ${stateClass}">
-                        ${isPrevious && detailUrl
+                        ${detailUrl
                             ? `<a class="ranked-series-round-link" href="${escapeHtml(detailUrl)}" target="_blank" rel="noopener noreferrer">${content}</a>`
                             : `<div class="ranked-series-round-link">${content}</div>`}
                     </li>

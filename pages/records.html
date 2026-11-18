@@ -117,35 +117,7 @@
             <p class="page-intro">Browse top <strong>RaceRoom leaderboards</strong> drivers across five record categories: average bested %, bested drivers, pole positions, podiums and number of entries &mdash; overall or per class.<br/>Or go back to this week's <a href="/" class="internal-link">ranked multiplayer races</a>.</p>
         </section>
 
-        <div id="status-container" class="status-section">
-            <h3>Database Status <span id="status-led" class="status-led" title="Status indicator"></span></h3>
-            <div class="status-grid">
-                <div class="status-item">
-                    <span id="status-timestamp-label" class="status-label">Last Updated:</span>
-                    <span id="status-timestamp" class="status-value">-</span>
-                </div>
-                <div class="status-item">
-                    <span class="status-label">Unique Tracks:</span>
-                    <span id="status-tracks" class="status-value">-</span>
-                </div>
-                <div class="status-item">
-                    <span class="status-label">Track/Class Combinations:</span>
-                    <span id="status-combinations" class="status-value">-</span>
-                </div>
-                <div class="status-item">
-                    <span class="status-label">Total Combinations:</span>
-                    <span id="status-total-combinations" class="status-value">-</span>
-                </div>
-                <div class="status-item">
-                    <span class="status-label">Total Drivers:</span>
-                    <span id="status-drivers" class="status-value">-</span>
-                </div>
-                <div class="status-item">
-                    <span class="status-label">Total Entries:</span>
-                    <span id="status-entries" class="status-value">-</span>
-                </div>
-            </div>
-        </div>
+        <section id="status-container" class="status-section" aria-label="Leaderboard Database Statistics" data-status-component data-heading-level="3"></section>
     </main>
 
     <div id="site-footer"></div>
@@ -170,7 +142,7 @@
     <script src="modules/car-helper.js?v=21" defer></script>
     <script src="modules/utils.js?v=15" defer></script>
     <script src="modules/mp-pos-service.js?v=12" defer></script>
-    <script src="modules/status-display.js?v=6" defer></script>
+    <script src="modules/status-display.js?v=7" defer></script>
 
     <script src="modules/data/car-classes.js?v=4" defer></script>
     <script src="modules/data/cars.js?v=15" defer></script>

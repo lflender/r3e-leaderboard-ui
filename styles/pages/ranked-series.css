@@ -306,7 +306,7 @@
     color: var(--color-text-secondary);
 }
 
-.ranked-series-round--previous a.ranked-series-round-link:hover {
+.ranked-series-round a.ranked-series-round-link:hover {
     color: var(--color-text-primary);
     background: var(--color-secondary-alpha-15);
 }

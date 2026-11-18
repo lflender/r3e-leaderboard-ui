@@ -224,14 +224,32 @@ describe('ranked series page', () => {
             .toBe('Previous Circuit');
         expect(previousRound.querySelector('.ranked-series-round-layout').textContent).toBe('Short');
         expect(currentRound.textContent).toContain('Current');
-        expect(currentRound.querySelector('a')).toBeNull();
-        expect(document.querySelector('.ranked-series-round--upcoming a')).toBeNull();
 
-        const previousLink = previousRound.querySelector('a');
-        const previousUrl = new URL(previousLink.href);
-        expect(previousLink.target).toBe('_blank');
-        expect(previousUrl.searchParams.get('track')).toBe('layout-previous');
-        expect(previousUrl.searchParams.get('class')).toBe('class-old');
+        for (const [selector, track, classId] of [
+            ['.ranked-series-round--previous', 'layout-previous', 'class-old'],
+            ['.ranked-series-round--current', 'layout-current', 'class-1'],
+            ['.ranked-series-round--upcoming', 'layout-upcoming', 'class-1']
+        ]) {
+            const link = document.querySelector(`${selector} a`);
+            const url = new URL(link.href);
+            expect(link.target).toBe('_blank');
+            expect(link.rel).toBe('noopener noreferrer');
+            expect(url.searchParams.get('track')).toBe(track);
+            expect(url.searchParams.get('class')).toBe(classId);
+        }
+    });
+
+    it('does not link rounds without a track or eligible class', async () => {
+        const series = makeSeries();
+        series.eligible_classes = [];
+        series.rounds[1].track = {};
+        series.rounds[2].eligible_classes = [];
+        const page = setup({ series: [series] });
+        await page.ready;
+
+        expect(document.querySelector('.ranked-series-round--previous a')).not.toBeNull();
+        expect(document.querySelector('.ranked-series-round--current a')).toBeNull();
+        expect(document.querySelector('.ranked-series-round--upcoming a')).toBeNull();
     });
 
     it('opens the season schedule independently of the series link', async () => {
@@ -252,6 +270,25 @@ describe('ranked series page', () => {
         expect(schedule.open).toBe(false);
     });
 
+    it('closes schedules on outside clicks but not on clicks inside them', async () => {
+        const page = setup({ series: [makeSeries(), makeSeries()] });
+        await page.ready;
+
+        const [first, second] = document.querySelectorAll('.ranked-series-rounds');
+        first.querySelector('summary').click();
+        const link = first.querySelector('.ranked-series-round-link');
+        link.addEventListener('click', event => event.preventDefault());
+        link.querySelector('strong').click();
+        expect(first.open).toBe(true);
+
+        second.querySelector('summary').click();
+        expect(first.open).toBe(false);
+        expect(second.open).toBe(true);
+
+        document.body.click();
+        expect(second.open).toBe(false);
+    });
+
     it('uses the combined classes detail route for multi-class rounds', async () => {
         const series = makeSeries();
         series.rounds[1].eligible_classes = [
@@ -264,6 +301,10 @@ describe('ranked series page', () => {
         const currentUrl = new URL(document.querySelector('.ranked-series-card-link').href);
         expect(currentUrl.searchParams.get('class')).toBeNull();
         expect(currentUrl.searchParams.get('classes')).toBe('class-1,class-2');
+        const roundUrl = new URL(document.querySelector('.ranked-series-round--current a').href);
+        expect(roundUrl.searchParams.get('track')).toBe('layout-current');
+        expect(roundUrl.searchParams.get('class')).toBeNull();
+        expect(roundUrl.searchParams.get('classes')).toBe('class-1,class-2');
     });
 
     it('escapes series and track labels before inserting them into the page', async () => {

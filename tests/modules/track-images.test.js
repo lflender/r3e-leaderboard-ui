@@ -12,28 +12,28 @@ describe('R3ETrackImages', () => {
 
     test('stores extracted logos by store slug', () => {
         expect(window.TRACK_LOGOS_BY_SLUG['adria-international-raceway-2003']).toBe(
-            'images/tracks/adria-international-raceway-2003-13350-logo-original.png'
+            'images/tracks/VenueLogo_13748_on_dark_small.webp'
         );
         expect(window.TRACK_LOGOS_BY_SLUG['indianapolis-2012']).toBe(
-            'images/tracks/indianapolis-2012-1851-logo-original.png'
+            'images/tracks/VenueLogo_13746_on_dark_small.webp'
         );
     });
 
     test('resolves logos by local track labels including accented and alias cases', () => {
         expect(window.R3ETrackImages.resolveTrackLogoByLabel('Geller\u00e5sen Arena - Short Circuit')).toBe(
-            'images/tracks/gellerasen-arena-5924-logo-original.png'
+            'images/tracks/VenueLogo_13786_on_dark_small.webp'
         );
         expect(window.R3ETrackImages.resolveTrackLogoByLabel('V\u00e5lerbanen - Full Circuit')).toBe(
-            'images/tracks/valerbanen-9464-logo-original.png'
+            'images/tracks/VenueLogo_13804_on_dark_small.webp'
         );
         expect(window.R3ETrackImages.resolveTrackLogoByLabel('Hockenheimring DMEC - DMEC')).toBe(
-            'images/tracks/hockenheimring-1692-logo-original.png'
+            'images/tracks/VenueLogo_13741_on_dark_small.webp'
         );
         expect(window.R3ETrackImages.resolveTrackLogoByLabel('Brands Hatch - Indy')).toBe(
-            'images/tracks/brands-hatch-grand-prix-9472-logo-original.png'
+            'images/tracks/VenueLogo_13743_on_dark_small.webp'
         );
         expect(window.R3ETrackImages.resolveTrackLogoByLabel('Brands Hatch')).toBe(
-            'images/tracks/brands-hatch-grand-prix-9472-logo-original.png'
+            'images/tracks/VenueLogo_13743_on_dark_small.webp'
         );
     });
 
@@ -44,11 +44,11 @@ describe('R3ETrackImages', () => {
         ];
 
         expect(window.R3ETrackImages.resolveTrackLogoById(10274)).toBe(
-            'images/tracks/hockenheimring-1692-logo-original.png'
+            'images/tracks/VenueLogo_13741_on_dark_small.webp'
         );
         expect(window.R3ETrackImages.buildTrackLogosById()).toEqual({
-            '10274': 'images/tracks/hockenheimring-1692-logo-original.png',
-            '9465': 'images/tracks/valerbanen-9464-logo-original.png'
+            '10274': 'images/tracks/VenueLogo_13741_on_dark_small.webp',
+            '9465': 'images/tracks/VenueLogo_13804_on_dark_small.webp'
         });
     });
 });

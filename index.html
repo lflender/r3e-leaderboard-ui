@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RaceRoom Leaderboards Explorer</title>
-    <meta name="description" content="The #1 RaceRoom leaderboards database. Search driver lap times, track records, car performance data and rankings for RaceRoom Racing Experience. Updated daily with official leaderboard data.">
+    <title>RaceRoom Ranked Series &amp; Leaderboards</title>
+    <meta name="description" content="Explore RaceRoom ranked multiplayer series, current rounds, race formats, schedules and eligible car classes.">
     <link rel="canonical" href="https://r3e-leaderboards.info/">
     <link rel="alternate" hreflang="en" href="https://r3e-leaderboards.info/">
     <link rel="alternate" hreflang="x-default" href="https://r3e-leaderboards.info/">
@@ -13,8 +13,8 @@
     <meta name="keywords" content="raceroom leaderboards, r3e leaderboards, raceroom lap times, raceroom racing experience leaderboards, r3e lap times, raceroom driver rankings, raceroom track records, r3e rankings">
     <!-- Open Graph -->
     <meta property="og:site_name" content="RaceRoom Leaderboards">
-    <meta property="og:title" content="RaceRoom Leaderboards Explorer - RaceRoom Lap Times & Driver Rankings">
-    <meta property="og:description" content="The #1 RaceRoom leaderboards database. Search driver lap times, track records and rankings for RaceRoom Racing Experience. Updated daily.">
+    <meta property="og:title" content="RaceRoom Ranked Series &amp; Leaderboards">
+    <meta property="og:description" content="Explore RaceRoom ranked multiplayer series, current rounds, race formats and schedules.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://r3e-leaderboards.info/">
     <meta property="og:image" content="https://r3e-leaderboards.info/images/rle-share.png">
@@ -25,15 +25,15 @@
     
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="RaceRoom Leaderboards Explorer - RaceRoom Lap Times & Rankings">
-    <meta name="twitter:description" content="The #1 RaceRoom leaderboards database. Search driver lap times, track records and rankings for RaceRoom Racing Experience.">
+    <meta name="twitter:title" content="RaceRoom Ranked Series &amp; Leaderboards">
+    <meta name="twitter:description" content="Explore RaceRoom ranked multiplayer series, current rounds, race formats and schedules.">
     <meta name="twitter:image" content="https://r3e-leaderboards.info/images/rle-share.png">
     
     <!-- Analytics (PostHog via first-party proxy) -->
     <script src="modules/analytics.js?v=8" defer></script>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     
-    <link rel="stylesheet" href="styles/style.css?v=265">
+    <link rel="stylesheet" href="styles/style.css?v=275">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"/>
     <!-- Site Icons -->
     <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png?v=3">
@@ -109,10 +109,6 @@
     <div id="site-header"></div>
 
     <main>
-        <section class="hero-section" aria-label="RaceRoom Ranked Multiplayer Schedule">
-            <h1 class="sr-only">RaceRoom Leaderboards Explorer - This Week in Ranked Multiplayer</h1>
-        </section>
-
         <div class="tabs" id="site-tabs" data-active="ranked"></div>
 
         <div class="tab-content">
@@ -153,7 +149,7 @@
     <script src="modules/data/track-images.js?v=4" defer></script>
     
     <!-- Feature modules -->
-    <script src="modules/pages/daily-races.js?v=45" defer></script>
+    <script src="modules/pages/ranked-series.js?v=6" defer></script>
     <script>
     (function(){
         var K='records_new_badge_dismissed';

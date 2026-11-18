@@ -75,7 +75,7 @@ describe('table-renderer track resolution', () => {
         ], ['track'], 'track');
 
         expect(html).toContain('table-track-logo');
-        expect(html).toContain('images/tracks/indianapolis-2012-1851-logo-original.png');
+        expect(html).toContain('images/tracks/VenueLogo_13746_on_dark_small.webp');
         expect(html).toContain('Indianapolis 2012');
     });
 

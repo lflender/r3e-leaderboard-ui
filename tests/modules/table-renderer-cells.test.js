@@ -464,7 +464,7 @@ describe('TableRenderer — cell rendering', () => {
         test('includes track logo when mapping exists', () => {
             const html = TableRenderer.renderTrackCellStatic('Donington Park - Grand Prix');
             expect(html).toContain('table-track-logo');
-            expect(html).toContain('donington-park');
+            expect(html).toContain('images/tracks/VenueLogo_13808_on_dark_small.webp');
         });
 
         test('applies custom td class', () => {

@@ -122,6 +122,79 @@ describe('car-info integration', () => {
         expect(JSON.parse(decodeURIComponent(image.dataset.imageList))).toEqual(images);
     });
 
+    it('keeps hovered previews within the viewport and updates them on load and scroll', async () => {
+        localStorage.removeItem('carInfoViewMode');
+        document.documentElement.style.fontSize = '16px';
+        window.CARS_DATA[0].cars[0].image = ['https://cdn.example.com/car.png'];
+        loadBrowserScript('modules/pages/car-info.js');
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        const link = document.querySelector('.row-link .car-link-thumbnail').closest('.row-link');
+        const preview = link.querySelector('.car-link-thumbnail');
+        let height = 130;
+        Object.defineProperties(preview, {
+            offsetWidth: { get: () => 250 },
+            offsetHeight: { get: () => height }
+        });
+        const bounds = { right: window.innerWidth - 5, top: window.innerHeight - 25, height: 20 };
+        vi.spyOn(link, 'getBoundingClientRect').mockImplementation(() => bounds);
+
+        link.dispatchEvent(new MouseEvent('mouseenter'));
+        expect(parseFloat(preview.style.getPropertyValue('--car-preview-left')) - 125).toBe(window.innerWidth - 508);
+        expect(parseFloat(preview.style.getPropertyValue('--car-preview-top')) + height).toBe(window.innerHeight - 8);
+
+        height = 160;
+        preview.querySelector('img').dispatchEvent(new Event('load'));
+        expect(parseFloat(preview.style.getPropertyValue('--car-preview-top')) + height).toBe(window.innerHeight - 8);
+
+        bounds.top = 250;
+        document.getElementById('cars-info-table').dispatchEvent(new Event('scroll'));
+        expect(parseFloat(preview.style.getPropertyValue('--car-preview-top'))).toBe(260);
+
+        link.dispatchEvent(new MouseEvent('mouseleave'));
+        bounds.top = 350;
+        window.dispatchEvent(new Event('resize'));
+        expect(parseFloat(preview.style.getPropertyValue('--car-preview-top'))).toBe(260);
+        document.documentElement.style.removeProperty('font-size');
+    });
+
+    it('positions keyboard-focused previews within a narrow viewport', async () => {
+        localStorage.removeItem('carInfoViewMode');
+        document.documentElement.style.fontSize = '16px';
+        vi.stubGlobal('innerWidth', 390);
+        window.CARS_DATA[0].cars[0].image = ['https://cdn.example.com/car.png'];
+        window.CARS_DATA[0].cars.push({
+            ...window.CARS_DATA[0].cars[0],
+            car: 'Audi R8',
+            link: 'https://example.com/audi'
+        });
+        loadBrowserScript('modules/pages/car-info.js');
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        const link = document.querySelector('.row-link .car-link-thumbnail').closest('.row-link');
+        const preview = link.querySelector('.car-link-thumbnail');
+        Object.defineProperties(preview, {
+            offsetWidth: { get: () => 187 },
+            offsetHeight: { get: () => 100 }
+        });
+        const bounds = { right: 30, top: 0, height: 20 };
+        vi.spyOn(link, 'getBoundingClientRect').mockImplementation(() => bounds);
+
+        link.focus();
+        expect(parseFloat(preview.style.getPropertyValue('--car-preview-left')) - 93.5).toBe(8);
+        expect(parseFloat(preview.style.getPropertyValue('--car-preview-top')) - 100).toBe(8);
+
+        const otherLink = document.querySelectorAll('.row-link .car-link-thumbnail')[1].closest('.row-link');
+        otherLink.dispatchEvent(new MouseEvent('mouseenter'));
+        otherLink.dispatchEvent(new MouseEvent('mouseleave'));
+        bounds.top = 300;
+        window.dispatchEvent(new Event('resize'));
+        expect(parseFloat(preview.style.getPropertyValue('--car-preview-top'))).toBe(310);
+
+        vi.unstubAllGlobals();
+        document.documentElement.style.removeProperty('font-size');
+    });
+
     it('starts with class groups collapsed and keeps expand controls working', async () => {
         localStorage.removeItem('carInfoViewMode');
         loadBrowserScript('modules/pages/car-info.js');

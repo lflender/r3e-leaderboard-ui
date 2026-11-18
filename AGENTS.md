@@ -27,3 +27,10 @@ Before making any code or client asset change, read the relevant skill(s) in thi
 - I verified the changed behavior with the smallest relevant test or functional check.
 
 This repository should treat these checks as mandatory for all edits that affect user-facing pages or browser-delivered assets.
+
+## UI preview
+
+Before completing a UI change, start or reuse the local preview server described
+in [README.md](README.md), verify the changed page in a browser, and provide
+the user a working preview link. Keep the server running so the user can inspect
+the changes. If a preview cannot be made available, report the blocker explicitly.

@@ -1,0 +1,437 @@
+/* ========================================
+   RANKED SERIES PAGE
+   ======================================== */
+
+#results-container:has(> .ranked-series-container) {
+    overflow: visible;
+}
+
+.ranked-series-container {
+    max-width: var(--content-max-width);
+}
+
+.ranked-series-header {
+    margin-bottom: var(--space-6);
+    padding: var(--space-4) var(--space-4) var(--space-5);
+}
+
+.ranked-series-header h2 {
+    margin: 0;
+    color: var(--color-text-primary);
+    font-size: clamp(var(--font-size-xl), 2.6vw, var(--font-size-2xl));
+    line-height: var(--line-height-tight);
+}
+
+.ranked-series-title-nowrap {
+    white-space: nowrap;
+}
+
+.ranked-series-round-subtitle {
+    display: table;
+    margin: var(--space-2) auto 0;
+    padding: var(--space-1) var(--space-3);
+    color: var(--color-text-blue-light);
+    background: linear-gradient(135deg, var(--color-primary-alpha-20), var(--color-primary-alpha-8));
+    border: 1px solid var(--color-primary-alpha-35);
+    border-radius: var(--radius-full);
+    box-shadow: 0 0 var(--space-4) var(--color-primary-alpha-10);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-bold);
+}
+
+.ranked-series-header .daily-races-cta {
+    margin: var(--space-2) 0 0;
+    padding: 0;
+    color: var(--color-primary-light-solid);
+    background: none;
+    border: 0;
+    box-shadow: none;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-normal);
+}
+
+.ranked-series-card .daily-race-class-logos--count-5 {
+    grid-template-columns: repeat(6, 1fr);
+    width: max-content;
+    justify-items: center;
+}
+
+.ranked-series-card .daily-race-class-logos--count-5 .daily-race-class-logo {
+    grid-column: span 2;
+    width: 36px;
+}
+
+.ranked-series-card .daily-race-class-logos--count-5 .daily-race-class-logo:nth-child(4) {
+    grid-column: 2 / span 2;
+}
+
+.ranked-series-card:has(.daily-race-class-logos--count-5) .ranked-series-card-heading h3,
+.ranked-series-card:has(.daily-race-class-logos--count-5) .daily-race-track {
+    padding-right: calc(3 * 36px + 1.1rem + var(--space-3));
+}
+
+.ranked-series-grid {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    justify-content: center;
+    gap: var(--space-5);
+}
+
+.ranked-series-item {
+    container: ranked-card / inline-size;
+    position: relative;
+    display: flex;
+    flex: 0 1 calc(33.333% - 0.84rem);
+    min-width: 280px;
+    max-width: 100%;
+    flex-direction: column;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-md);
+}
+
+.ranked-series-item:has(.ranked-series-rounds[open]) {
+    z-index: var(--z-raised);
+}
+
+.ranked-series-card-link {
+    display: block;
+    flex: 1;
+    color: inherit;
+    text-decoration: none;
+}
+
+.ranked-series-card {
+    height: 100%;
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+    box-shadow: none;
+}
+
+.ranked-series-card-link:hover .ranked-series-card {
+    background: var(--color-white-alpha-3);
+    box-shadow: none;
+    transform: none;
+}
+
+.ranked-series-card-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+.ranked-series-card-heading h3 {
+    min-width: 0;
+    padding-right: clamp(88px, 24%, 118px);
+    margin: 0;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+}
+
+.ranked-series-card .daily-race-schedule {
+    color: var(--color-text-primary);
+    font-style: normal;
+}
+
+.ranked-series-card .daily-race-meta {
+    margin-top: 0;
+}
+
+.ranked-series-card:has(.daily-race-class-logos--count-5) .daily-race-track > span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+@container ranked-card (max-width: 360px) {
+    .ranked-series-card:has(.daily-race-class-logos--count-5) .ranked-series-card-heading {
+        min-height: calc(2 * 36px + 0.45rem);
+        align-items: flex-start;
+    }
+
+    .ranked-series-card:has(.daily-race-class-logos--count-5) .daily-race-track {
+        padding-right: 0;
+    }
+}
+
+.ranked-series-card-link:focus-visible,
+.ranked-series-round-link:focus-visible,
+.ranked-series-rounds summary:focus-visible {
+    outline: 2px solid var(--color-primary-light-solid);
+    outline-offset: 3px;
+}
+
+.ranked-series-rounds {
+    position: relative;
+    border-top: 1px solid var(--color-border);
+}
+
+.ranked-series-rounds summary {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    background: linear-gradient(110deg, var(--color-primary-alpha-8), var(--color-white-alpha-3));
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    list-style: none;
+    transition: background-color 0.15s ease;
+}
+
+.ranked-series-rounds summary::-webkit-details-marker {
+    display: none;
+}
+
+.ranked-series-rounds:not([open]) summary {
+    border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
+}
+
+.ranked-series-rounds summary::after {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-top: 2px solid var(--color-primary);
+    border-right: 2px solid var(--color-primary);
+    content: "";
+    transform: rotate(135deg);
+    transition: transform 0.15s ease;
+}
+
+.ranked-series-rounds summary:hover {
+    background-color: var(--color-primary-alpha-8);
+}
+
+.ranked-series-rounds[open] summary {
+    box-shadow: inset 0 -1px var(--color-border);
+}
+
+.ranked-series-rounds[open] summary::after {
+    transform: rotate(-45deg);
+}
+
+.ranked-series-rounds ol {
+    position: absolute;
+    top: 100%;
+    right: -1px;
+    left: -1px;
+    display: grid;
+    gap: var(--space-2);
+    margin: 0;
+    padding: var(--space-3);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-top: 0;
+    border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
+    box-shadow: var(--shadow-lg);
+    list-style: none;
+}
+
+.ranked-series-round {
+    min-width: 0;
+    overflow: hidden;
+    background: var(--color-white-alpha-3);
+    border: 1px solid var(--color-border-alpha-50);
+    border-radius: var(--radius-md);
+}
+
+.ranked-series-round--current {
+    background: linear-gradient(110deg, var(--color-primary-alpha-10), var(--color-white-alpha-3));
+    border-color: var(--color-primary-alpha-50);
+    box-shadow: inset 3px 0 var(--color-primary);
+}
+
+.ranked-series-round--previous {
+    background: linear-gradient(110deg, var(--color-secondary-alpha-15), var(--color-white-alpha-3));
+    border-color: var(--color-secondary-alpha-15);
+}
+
+.ranked-series-round-link {
+    display: grid;
+    grid-template-columns: auto 44px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 3.5rem;
+    padding: var(--space-2);
+    color: inherit;
+    text-decoration: none;
+    transition: background-color 0.15s ease;
+}
+
+.ranked-series-round--previous .ranked-series-round-link {
+    color: var(--color-text-secondary);
+}
+
+.ranked-series-round--previous a.ranked-series-round-link:hover {
+    color: var(--color-text-primary);
+    background: var(--color-secondary-alpha-15);
+}
+
+.ranked-series-round-number {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    white-space: nowrap;
+}
+
+.ranked-series-round-logo {
+    width: 44px;
+    height: 30px;
+    object-fit: contain;
+}
+
+.ranked-series-round-info {
+    display: grid;
+    min-width: 0;
+    gap: 1px;
+}
+
+.ranked-series-round-info strong {
+    overflow: hidden;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-xs);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ranked-series-round-info > span,
+.ranked-series-round-info small,
+.ranked-series-round-info time {
+    overflow: hidden;
+    color: var(--color-text-secondary);
+    font-size: 0.68rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ranked-series-round-current-label {
+    padding: var(--space-1) var(--space-2);
+    color: var(--color-text-blue-light);
+    background: var(--color-primary-alpha-20);
+    border-radius: var(--radius-full);
+    font-size: 0.65rem;
+    font-weight: var(--font-weight-bold);
+    text-transform: uppercase;
+}
+
+.ranked-series-state {
+    max-width: 640px;
+    margin: var(--space-7) auto;
+    padding: var(--space-6) var(--space-4);
+    color: var(--color-text-primary);
+    text-align: center;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2xl);
+}
+
+.ranked-series-state h2 {
+    margin: 0;
+}
+
+.ranked-series-state p {
+    margin: var(--space-3) 0 0;
+    color: var(--color-text-secondary);
+}
+
+.ranked-series-spinner {
+    display: block;
+    width: 2rem;
+    height: 2rem;
+    margin: 0 auto;
+    border: 3px solid var(--color-border);
+    border-top-color: var(--color-primary);
+    border-radius: var(--radius-full);
+    animation: ranked-series-spin 0.8s linear infinite;
+}
+
+@keyframes ranked-series-spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+    .ranked-series-header {
+        padding: var(--space-4);
+    }
+
+    .ranked-series-header h2 {
+        font-size: var(--font-size-xl);
+    }
+
+    .ranked-series-card .daily-race-class-logos--count-5 .daily-race-class-logo {
+        width: 28px;
+    }
+
+    .ranked-series-card:has(.daily-race-class-logos--count-5) .ranked-series-card-heading h3,
+    .ranked-series-card:has(.daily-race-class-logos--count-5) .daily-race-track {
+        padding-right: calc(3 * 28px + 0.7rem + var(--space-3));
+    }
+
+    @container ranked-card (max-width: 360px) {
+        .ranked-series-card:has(.daily-race-class-logos--count-5) .ranked-series-card-heading {
+            min-height: calc(2 * 28px + 0.35rem);
+        }
+
+        .ranked-series-card:has(.daily-race-class-logos--count-5) .daily-race-track {
+            padding-right: 0;
+        }
+    }
+
+    .ranked-series-card {
+        padding: var(--space-4);
+    }
+
+    .ranked-series-round-link {
+        grid-template-columns: auto 38px minmax(0, 1fr) auto;
+        gap: var(--space-1);
+    }
+
+    .ranked-series-item {
+        flex-basis: 100%;
+        min-width: 0;
+    }
+
+    .ranked-series-round-logo {
+        width: 38px;
+    }
+
+    .ranked-series-round-current-label {
+        padding-inline: var(--space-1);
+        font-size: 0.6rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .ranked-series-header h2 {
+        font-size: clamp(var(--font-size-sm), 5.2vw, var(--font-size-xl));
+    }
+
+    .ranked-series-round-link {
+        grid-template-columns: auto 32px minmax(0, 1fr);
+    }
+
+    .ranked-series-round-logo {
+        width: 32px;
+    }
+
+    .ranked-series-round-current-label {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ranked-series-round-link {
+        transition: none;
+    }
+
+    .ranked-series-spinner {
+        animation-duration: 2s;
+    }
+}

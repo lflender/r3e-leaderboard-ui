@@ -51,13 +51,12 @@ describe('TabsLoader (real module)', () => {
         expect(document.querySelector('.tab-button')).toBeNull();
     });
 
-    it('shows NEW badge on Teams tab when not yet visited', () => {
+    it('does not show a retired NEW badge on Teams', () => {
         document.body.innerHTML = '<div class="tabs" id="site-tabs" data-active="drivers"></div>';
         loadBrowserScript('modules/loaders/tabs-loader.js');
         const teamsLink = Array.from(document.querySelectorAll('a.tab-button'))
             .find(a => a.getAttribute('href') === 'teams.html');
-        expect(teamsLink.querySelector('.tab-badge')).not.toBeNull();
-        expect(teamsLink.querySelector('.tab-badge').textContent).toBe('NEW!');
+        expect(teamsLink.querySelector('.tab-badge')).toBeNull();
     });
 
     it('hides NEW badge after Teams page has been visited', () => {

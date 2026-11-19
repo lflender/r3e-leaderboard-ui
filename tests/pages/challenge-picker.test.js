@@ -44,6 +44,7 @@ describe('ChallengePicker page', () => {
             { id: 2, label: 'Spa - Moto' },
             { id: 10, label: 'Monza - Grand Prix' }
         ];
+        window.TRACKS_META = {};
 
         const htmlPath = path.resolve(__dirname, '..', '..', 'pages', 'challenge.html');
         const fullHtml = fs.readFileSync(htmlPath, 'utf8');
@@ -144,6 +145,30 @@ describe('ChallengePicker page', () => {
 
         const trackHtml = document.getElementById('challenge-track-result').innerHTML;
         expect(trackHtml).toContain('challenge-result-layout');
+    });
+
+    test('uses the chosen layout ID for metadata in track and layout results', () => {
+        window.TRACKS_META = {
+            1: { url: 'https://example.com/other', description: 'Other layout' },
+            2: { url: 'https://example.com/spa', description: 'Spa description' }
+        };
+        const picker = vi.spyOn(window.ChallengePickerService, 'pickLayout').mockReturnValue({
+            trackBase: 'Renamed Spa', layoutId: 2, layoutLabel: 'Moto', trackLogo: ''
+        });
+
+        document.querySelector('[data-mode="track"]').click();
+        document.getElementById('challenge-pick-btn').click();
+        const result = document.getElementById('challenge-track-result');
+        expect(result.textContent).toContain('Renamed Spa');
+        expect(result.textContent).toContain('Spa description');
+        expect(result.querySelector('.challenge-track-link').href).toBe('https://example.com/spa');
+        expect(result.textContent).not.toContain('Other layout');
+
+        document.querySelector('#challenge-track-picker [data-granularity="layout"]').click();
+        expect(result.textContent).toContain('Moto');
+        expect(result.textContent).toContain('Spa description');
+        expect(result.querySelector('.challenge-track-link').href).toBe('https://example.com/spa');
+        picker.mockRestore();
     });
 
     test('car-only mode does not update track result', () => {

@@ -515,7 +515,7 @@
         const logo = result.trackLogo
             ? `<img class="challenge-result-track__logo" src="${escapeHtml(result.trackLogo)}" alt="${escapeHtml(result.trackBase)} logo" loading="lazy">`
             : '';
-        const meta = window.TRACKS_META && window.TRACKS_META[result.trackBase];
+        const meta = window.TRACKS_META && window.TRACKS_META[result.layoutId];
         const nameHtml = meta && meta.url
             ? `<a class="challenge-track-link" href="${escapeHtml(meta.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(result.trackBase)}</a>`
             : `<span>${escapeHtml(result.trackBase)}</span>`;
@@ -588,7 +588,11 @@
 
         // Always pick a full layout result (base + layout)
         const result = svc.pickLayout(tracksData, resolveTrackLogo, rng);
-        lastTrackBaseResult = result ? { trackBase: result.trackBase, trackLogo: result.trackLogo } : null;
+        lastTrackBaseResult = result ? {
+            trackBase: result.trackBase,
+            trackLogo: result.trackLogo,
+            layoutId: result.layoutId
+        } : null;
         lastPickedLayoutId = result ? result.layoutId : null;
         trackBaseHtml = renderTrackResult(lastTrackBaseResult);
         trackLayoutHtml = renderTrackResult(result);

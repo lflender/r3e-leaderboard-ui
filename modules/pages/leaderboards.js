@@ -854,26 +854,22 @@
 
   function updateTrackDescription() {
     if (!trackDescriptionEl) return;
-    if (!activeTrackId || !window.TRACKS_META) {
-      trackDescriptionEl.hidden = true;
-      trackDescriptionEl.innerHTML = '';
-      return;
-    }
-    // Resolve the track label from its ID, then extract the base name
-    const trackLabel = resolveTrackLabel(activeTrackId, '');
-    if (!trackLabel) {
-      trackDescriptionEl.hidden = true;
-      trackDescriptionEl.innerHTML = '';
-      return;
-    }
-    const baseName = trackLabel.split(/\s*[-–—]\s+/)[0];
-    const meta = window.TRACKS_META[baseName];
+    const meta = activeTrackId && window.TRACKS_META && window.TRACKS_META[activeTrackId];
     if (meta && meta.description) {
-      trackDescriptionEl.innerHTML = R3EUtils.escapeHtml(meta.description);
+      trackDescriptionEl.textContent = meta.description;
+      if (meta.url) {
+        trackDescriptionEl.href = meta.url;
+        trackDescriptionEl.title = 'View track in the RaceRoom store (opens in a new tab)';
+      } else {
+        trackDescriptionEl.removeAttribute('href');
+        trackDescriptionEl.removeAttribute('title');
+      }
       trackDescriptionEl.hidden = false;
     } else {
       trackDescriptionEl.hidden = true;
-      trackDescriptionEl.innerHTML = '';
+      trackDescriptionEl.textContent = '';
+      trackDescriptionEl.removeAttribute('href');
+      trackDescriptionEl.removeAttribute('title');
     }
   }
 

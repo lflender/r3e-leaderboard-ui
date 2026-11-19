@@ -121,36 +121,51 @@
     /**
      * Get track options for dropdown filters, with logo URLs resolved from track-images data.
      * Single source of truth for all track filter dropdowns across the site.
-     * @returns {Array<{value: string, label: string, logoUrl: string}>} Track options
+     * @returns {Array<{value: string, label: string, logoUrl?: string, aliases?: string[]}>} Track options
      */
     function getTrackOptions() {
         const tracks = Array.isArray(window.TRACKS_DATA) ? window.TRACKS_DATA : [];
-        const seen = new Set();
+        const byLabel = new Map();
         const uniqueTracks = [];
 
         tracks.forEach(track => {
             const rawLabel = track?.label || track?.name || '';
             const baseLabel = window.R3ETrackUtils?.getTrackBaseLabel?.(rawLabel) || '';
 
-            if (!baseLabel || seen.has(baseLabel.toLowerCase())) {
-                return;
+            if (!baseLabel) return;
+
+            const key = baseLabel.toLowerCase();
+            let groupedTrack = byLabel.get(key);
+            if (!groupedTrack) {
+                groupedTrack = {
+                    id: track?.id,
+                    label: baseLabel,
+                    aliases: []
+                };
+                byLabel.set(key, groupedTrack);
+                uniqueTracks.push(groupedTrack);
             }
 
-            seen.add(baseLabel.toLowerCase());
-            uniqueTracks.push({
-                id: track?.id,
-                label: baseLabel,
-                fullLabel: rawLabel
-            });
+            if (Array.isArray(track.aliases)) {
+                track.aliases.forEach(alias => {
+                    if (typeof alias !== 'string' || !alias.trim()) return;
+                    const value = alias.trim();
+                    if (!groupedTrack.aliases.some(existing => existing.toLowerCase() === value.toLowerCase())) {
+                        groupedTrack.aliases.push(value);
+                    }
+                });
+            }
         });
 
         return [{ value: '', label: 'All tracks' }].concat(
             uniqueTracks.map(track => {
                 const resultLabel = String(track.label || '');
-                const logoUrl = (window.R3ETrackImages && typeof window.R3ETrackImages.resolveTrackLogoByLabel === 'function')
-                    ? window.R3ETrackImages.resolveTrackLogoByLabel(track.fullLabel || resultLabel) || ''
+                const logoUrl = (window.R3ETrackImages && typeof window.R3ETrackImages.resolveTrackLogoById === 'function')
+                    ? window.R3ETrackImages.resolveTrackLogoById(track.id) || ''
                     : '';
-                return { value: String(track.id), label: resultLabel, logoUrl };
+                const option = { value: String(track.id), label: resultLabel, logoUrl };
+                if (track.aliases.length) option.aliases = track.aliases;
+                return option;
             })
         );
     }

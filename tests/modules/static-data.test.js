@@ -84,4 +84,76 @@ describe('TRACKS_DATA', () => {
         const uniqueIds = new Set(ids);
         expect(uniqueIds.size).toBe(ids.length);
     });
+
+    test('resolves renamed tracks and their layouts to the original metadata by ID', () => {
+        const cases = [
+            [[5301, 6164], 'anderstorp-motorbana'],
+            [[2024, 12318], 'autodromo-fernanda-pires-da-silva'],
+            [[1784, 1778, 1783, 1785], 'autodromo-internacional-do-algarve'],
+            [[1850], 'autodromo-internazionale-enzo-e-dino-ferrari'],
+            [[10463], 'autodromo-jose-carlos-pace'],
+            [[10392, 10258, 9659, 12573], 'circuit-paul-armagnac'],
+            [[2123], 'guia-circuit'],
+            [[1846], 'mount-panorama-circuit']
+        ];
+        for (const [ids, urlPart] of cases) {
+            for (const id of ids) {
+                expect(window.TRACKS_META[id].url).toContain(urlPart);
+                expect(window.TRACKS_META[id].description).toBeTruthy();
+            }
+        }
+    });
+
+    test('keeps metadata for historical track versions separate', () => {
+        expect(window.TRACKS_META[12112].url).toContain('/2001/');
+        expect(window.TRACKS_META[1693].url).toContain('/modern/');
+        expect(window.TRACKS_META[13428].url).toContain('/1995/');
+        expect(window.TRACKS_META[13256].url).toContain('/modern/');
+        expect(window.TRACKS_META[13533].url).toContain('/1987/');
+        expect(window.TRACKS_META[1856].url).toContain('/modern/');
+    });
+
+    test('includes the Glasbachrennen store link and description', () => {
+        expect(window.TRACKS_META[13632]).toMatchObject({
+            url: 'https://game.raceroomracing.com/store/tracks/glasbachrennen/glasbachrennen/13631',
+            description: 'The Glasbachrennen climbs the L1027 through the Thuringian Forest from Steinbach, near Bad Liebenstein. It was first run in 1974, in what was then East Germany, and is now a round of the FIA European Hill Climb Championship. The RaceRoom road is just over 5 km long, narrow, and climbs 223 m through the forest. It was built for the final of the 2026 FIA Esports European Hill Climb Cup. In multiplayer each driver runs alone against the clock, with the others shown as ghosts.'
+        });
+        expect(window.TRACKS_META[13632].location).toBe('Bad Liebenstein, Germany');
+        expect(window.TRACKS_META[13632].trackType).toBe('Hillclimb');
+        expect(window.TRACKS_META[13632].opened).toBe('1974');
+        expect(window.TRACKS_META[13632].racedHere).toBeUndefined();
+    });
+
+    test('includes the store details for Laguna Seca and its historic version', () => {
+        expect(window.TRACKS_META[1856]).toMatchObject({
+            location: 'Monterey, California, USA, United States',
+            trackType: 'Road Course',
+            opened: '1996',
+            racedHere: 'IMSA GT Championship, American Le Mans Series, Mazda MX-5 Cup, IMSA and 4 more'
+        });
+        expect(window.TRACKS_META[13533]).toMatchObject({
+            trackType: 'Road Course · historic',
+            opened: '1957–1995',
+            racedHere: 'IMSA GT Championship, Trans-Am'
+        });
+    });
+
+    test('each track location resolves to a flag through the country helper', () => {
+        loadBrowserScript('modules/data/country-mappings.js');
+        loadBrowserScript('modules/flag-helper.js');
+        for (const meta of new Set(Object.values(window.TRACKS_META))) {
+            if (meta.location) {
+                const country = meta.location.split(',').pop().trim();
+                expect(window.FlagHelper.countryToFlag(country), meta.location).toContain('fi-');
+            }
+        }
+    });
+
+    test('metadata keys refer to known layout IDs and cover every available track group', () => {
+        const ids = new Set(window.TRACKS_DATA.map(track => String(track.id)));
+        expect(Object.keys(window.TRACKS_META).every(id => ids.has(id))).toBe(true);
+
+        const noMetadata = window.TRACKS_DATA.filter(track => !window.TRACKS_META[track.id]);
+        expect(noMetadata).toEqual([]);
+    });
 });

@@ -152,9 +152,10 @@
 
             if (!label) return;
 
+            const trackId = String(entry?.track_id || entry?.TrackID || entry?.trackId || entry?.['Track ID'] || '').trim();
             const baseLabel = getTrackBaseLabel(label);
             if (!counts.has(baseLabel)) {
-                counts.set(baseLabel, { value: 0, details: new Map() });
+                counts.set(baseLabel, { trackId, value: 0, details: new Map() });
             }
 
             const group = counts.get(baseLabel);
@@ -166,6 +167,7 @@
         return Array.from(counts.entries())
             .map(([label, group]) => ({
                 label,
+                ...(group.trackId ? { trackId: group.trackId } : {}),
                 value: group.value,
                 ...(group.details.size > 1
                     ? { details: Array.from(group.details.entries()).map(([detailLabel, value]) => ({ label: detailLabel, value })) }

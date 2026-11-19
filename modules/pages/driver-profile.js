@@ -193,7 +193,10 @@ class DriverProfile {
         PieChart.render(
             document.getElementById('chart-track'),
             profile.trackDistribution,
-            { title: 'Tracks', logoResolver: window.R3ETrackImages && R3ETrackImages.resolveTrackLogoByLabel }
+            {
+                title: 'Tracks',
+                logoResolver: (_, trackId) => window.R3ETrackImages?.resolveTrackLogoById?.(trackId) || ''
+            }
         );
 
         DriverProfileInteractions.wireCarClassChartInteraction(entries);

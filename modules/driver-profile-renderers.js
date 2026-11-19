@@ -151,10 +151,7 @@ const DriverProfileRenderers = (() => {
             const trackName = topTrack.label;
             const trackCount = topTrack.value;
 
-            const resolveTrackLogo = (typeof window.R3ETrackImages !== 'undefined' && window.R3ETrackImages.resolveTrackLogoByLabel)
-                ? window.R3ETrackImages.resolveTrackLogoByLabel
-                : () => '';
-            const trackLogoUrl = resolveTrackLogo(trackName);
+            const trackLogoUrl = window.R3ETrackImages?.resolveTrackLogoById?.(topTrack.trackId) || '';
             const trackLogoHtml = trackLogoUrl
                 ? `<img class="highlight-track-logo" src="${escape(trackLogoUrl)}" alt="${escape(trackName)} logo" loading="lazy" decoding="async" />`
                 : '';

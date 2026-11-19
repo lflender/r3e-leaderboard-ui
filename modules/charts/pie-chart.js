@@ -22,7 +22,7 @@
     /**
      * Compute pie slices from data items
      * @param {Array<{label: string, value: number}>} items - Data items
-     * @returns {Array<{label: string, value: number, percentage: number, color: string, midAngle: number}>}
+     * @returns {Array<{label: string, value: number, trackId?: string|number, percentage: number, color: string, midAngle: number}>}
      */
     function computeSlices(items) {
         if (!Array.isArray(items) || items.length === 0) return [];
@@ -39,7 +39,7 @@
             const sliceAngle = (pct / 100) * 2 * Math.PI;
             const midAngle = currentAngle + sliceAngle / 2;
             currentAngle += sliceAngle;
-            return {
+            const slice = {
                 label: item.label,
                 value: item.value,
                 details: Array.isArray(item.details) ? item.details : [],
@@ -47,6 +47,10 @@
                 color: COLORS[i % COLORS.length],
                 midAngle
             };
+            if (item.trackId !== undefined && item.trackId !== null) {
+                slice.trackId = item.trackId;
+            }
+            return slice;
         });
     }
 
@@ -107,7 +111,7 @@
                 paths.push(
                     `<circle cx="${cx}" cy="${cy}" r="${r}" ` +
                     `fill="${slice.color}" class="pie-slice" data-index="${index}" ` +
-                    `data-label="${escapeAttr(slice.label)}" data-value="${slice.value}" ` +
+                    `data-label="${escapeAttr(slice.label)}" data-track-id="${escapeAttr(slice.trackId || '')}" data-value="${slice.value}" ` +
                     `data-percentage="${slice.percentage.toFixed(1)}" data-mid-angle="${slice.midAngle}" />`
                 );
             } else {
@@ -115,7 +119,7 @@
                 const d = describeArc(cx, cy, r, currentAngle, endAngle);
                 paths.push(
                     `<path d="${d}" fill="${slice.color}" class="pie-slice" ` +
-                    `data-index="${index}" data-label="${escapeAttr(slice.label)}" ` +
+                    `data-index="${index}" data-label="${escapeAttr(slice.label)}" data-track-id="${escapeAttr(slice.trackId || '')}" ` +
                     `data-value="${slice.value}" data-percentage="${slice.percentage.toFixed(1)}" ` +
                     `data-mid-angle="${slice.midAngle}" />`
                 );
@@ -126,7 +130,7 @@
         const titleHtml = title ? `<h3 class="pie-chart-title">${escapeHtml(title)}</h3>` : '';
 
         const legendItems = slices.map((slice, i) => {
-            const logoUrl = typeof logoResolver === 'function' ? logoResolver(slice.label) : '';
+            const logoUrl = typeof logoResolver === 'function' ? logoResolver(slice.label, slice.trackId) : '';
             const logoHtml = logoUrl ? `<img class="pie-legend-logo" src="${escapeAttr(logoUrl)}" alt="" aria-hidden="true">` : '';
             return `<li class="pie-legend-item" data-index="${i}">` +
                 `<span class="pie-legend-color" style="background:${slice.color}"></span>` +
@@ -349,16 +353,18 @@
             if (isNaN(midAngle)) return;
             const pct = parseFloat(slice.getAttribute('data-percentage')) || 0;
             const color = slice.getAttribute('fill') || '';
-            active.push({ label, midAngle, pct, color });
+            const trackId = slice.getAttribute('data-track-id') || '';
+            active.push({ label, trackId, midAngle, pct, color });
         });
         if (active.length === 0) return;
 
         // Assign sides based on angle
-        const positions = active.map(({ label, midAngle, pct, color }) => {
+        const positions = active.map(({ label, trackId, midAngle, pct, color }) => {
             const side = Math.cos(midAngle) >= 0 ? 1 : -1;
             return {
                 label: shortenLabel(label),
                 originalLabel: label,
+                trackId,
                 side,
                 midAngle,
                 color,
@@ -415,11 +421,11 @@
         const chartContainer = chartEl.closest('.driver-profile-chart-card') || chartEl;
         const logoResolver = chartContainer._pieLogoResolver || null;
 
-        allPositions.forEach(({ label, originalLabel, x, y, side }) => {
+        allPositions.forEach(({ label, originalLabel, trackId, x, y, side }) => {
             const el = document.createElement('span');
             el.className = 'pie-cross-label' + (side >= 0 ? ' pie-cross-label--right' : ' pie-cross-label--left');
             // Add logo icon if available
-            const logoUrl = logoResolver ? logoResolver(originalLabel || label) : '';
+            const logoUrl = logoResolver ? logoResolver(originalLabel || label, trackId) : '';
             if (logoUrl) {
                 const img = document.createElement('img');
                 img.className = 'pie-cross-label__logo';

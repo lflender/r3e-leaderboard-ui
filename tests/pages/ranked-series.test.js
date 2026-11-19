@@ -143,23 +143,29 @@ describe('ranked series page', () => {
         expect(currentLink.target).toBe('_blank');
         expect(currentUrl.searchParams.get('track')).toBe('layout-current');
         expect(currentUrl.searchParams.get('class')).toBe('class-1');
-        expect(window.R3ETrackImages.resolveTrackLogoById).toHaveBeenCalledWith(
-            'layout-current',
-            'Mantorp Park - Long Circuit'
-        );
+        expect(window.R3ETrackImages.resolveTrackLogoById).toHaveBeenCalledWith('layout-current');
     });
 
-    it('preserves the JSON order of leaderboard series while filtering other types', async () => {
+    it('groups fixed before open setups without otherwise changing their JSON order', async () => {
         const touring = { ...makeSeries(), name: 'Touring Cup' };
         const ignored = { ...makeSeries('live'), name: 'Ignored Series' };
+        const zulu = { ...makeSeries(), name: 'Zulu Cup' };
         const alpine = { ...makeSeries(), name: 'Alpine Cup' };
         const dtm = { ...makeSeries(), name: 'DTM Cup' };
-        const page = setup({ series: [touring, ignored, alpine, dtm] });
+        const unknown = { ...makeSeries(), name: 'Unknown Setup' };
+        const openSecond = { ...makeSeries(), name: 'Open Second' };
+        touring.format.fixed_setup = false;
+        dtm.format.fixed_setup = false;
+        openSecond.format.fixed_setup = false;
+        delete unknown.format.fixed_setup;
+        touring.current_round = 4;
+        const page = setup({ series: [touring, ignored, zulu, unknown, alpine, dtm, openSecond] });
         await page.ready;
 
         const names = [...document.querySelectorAll('.ranked-series-card h3')]
             .map(heading => heading.textContent);
-        expect(names).toEqual(['Touring Cup', 'Alpine Cup', 'DTM Cup']);
+        expect(names).toEqual(['Zulu Cup', 'Alpine Cup', 'Unknown Setup', 'Touring Cup', 'DTM Cup', 'Open Second']);
+        expect(document.querySelector('.ranked-series-round-subtitle').textContent).toBe('Round 4');
     });
 
     it('shows the current round of the first leaderboard series in the header', async () => {
@@ -190,6 +196,31 @@ describe('ranked series page', () => {
         const card = document.querySelector('.ranked-series-card');
         expect(card.textContent).toContain('Daily at 01:30, 12:30');
         expect(card.textContent).toContain('1 lap race');
+    });
+
+    it('shows fixed and open setup alongside the race duration', async () => {
+        const fixed = makeSeries();
+        const open = makeSeries();
+        open.format.fixed_setup = false;
+        const page = setup({ series: [fixed, open] });
+        await page.ready;
+
+        const tags = [...document.querySelectorAll('.ranked-series-card .daily-race-meta')]
+            .map(meta => [...meta.querySelectorAll('.daily-race-tag')].map(tag => tag.textContent));
+        expect(tags).toEqual([['15 min race', 'Fixed setup'], ['15 min race', 'Open setup']]);
+    });
+
+    it('does not infer setup from missing data and shows setup without a duration', async () => {
+        const unknown = makeSeries();
+        delete unknown.format.fixed_setup;
+        const withoutRace = makeSeries();
+        withoutRace.format.races = [];
+        const page = setup({ series: [unknown, withoutRace] });
+        await page.ready;
+
+        const tags = [...document.querySelectorAll('.ranked-series-card .daily-race-meta')]
+            .map(meta => [...meta.querySelectorAll('.daily-race-tag')].map(tag => tag.textContent));
+        expect(tags).toEqual([['15 min race'], ['Fixed setup']]);
     });
 
     it('uses the full track label mapped from the layout ID', async () => {

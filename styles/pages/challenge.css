@@ -173,22 +173,14 @@
     font-size: 0.95rem;
 }
 
-/* Car tile inside result — constrain width, remove background/border, remove default tile hover zoom */
+/* Constrain the shared car tile within the picker. */
 .challenge-car-tile {
     width: 100%;
     max-width: 340px;
     margin-top: 0.5rem;
-    border: none;
-    background: none;
-    padding: 0;
-}
-
-.challenge-car-tile .car-tile-image {
-    transform: translateY(var(--car-tile-image-offset-y, 10%));
-}
-
-.challenge-car-tile .car-tile-image:hover {
-    transform: translateY(var(--car-tile-image-offset-y, 10%)) scale(1.05);
+    color: var(--color-text-primary);
+    font-size: 1rem;
+    text-align: start;
 }
 
 .challenge-result-class {

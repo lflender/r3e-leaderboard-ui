@@ -3,6 +3,8 @@ import { loadBrowserScript } from '../helpers/script-loader.js';
 
 beforeAll(() => {
     loadBrowserScript('modules/track-helper.js');
+    loadBrowserScript('modules/data/country-mappings.js');
+    loadBrowserScript('modules/flag-helper.js');
 });
 
 function buildDom() {
@@ -481,8 +483,15 @@ describe('leaderboards fetchTopCombinations pipeline', () => {
     });
 
     it('updates track description when a track filter with matching TRACKS_META is active', async () => {
-        document.body.innerHTML = buildDom() + '<div id="track-description" hidden></div>';
-        window.TRACKS_META = { 'Spa': { description: 'Famous Belgian circuit' } };
+        document.body.innerHTML = buildDom() + '<a id="track-description" target="_blank" rel="noopener noreferrer" hidden></a>';
+        window.TRACKS_META = { 10: {
+            description: 'Famous Belgian circuit',
+            url: 'https://example.com/spa',
+            location: 'Francorchamps, Belgium',
+            trackType: 'Permanent Circuit',
+            opened: '2022',
+            racedHere: 'DTM and 17 more'
+        } };
 
         let trackFilterOnChange;
         window.CustomSelect = class {
@@ -505,10 +514,26 @@ describe('leaderboards fetchTopCombinations pipeline', () => {
         const descEl = document.getElementById('track-description');
         expect(descEl.hidden).toBe(false);
         expect(descEl.innerHTML).toContain('Famous Belgian circuit');
+        expect(descEl.href).toBe('https://example.com/spa');
+        expect(descEl.target).toBe('_blank');
+        expect(descEl.rel).toBe('noopener noreferrer');
+        const details = Array.from(descEl.querySelectorAll('dl > div')).map(item => [
+            item.querySelector('dt').textContent,
+            item.querySelector('dd').textContent
+        ]);
+        expect(details).toEqual([
+            ['Location:', 'Francorchamps, Belgium'],
+            ['Track:', 'Permanent Circuit'],
+            ['Opened:', '2022'],
+            ['Raced here:', 'DTM and 17 more']
+        ]);
+        const flag = descEl.querySelector('.track-description__flag');
+        expect(flag.querySelector('.fi-be')).not.toBeNull();
+        expect(flag.getAttribute('aria-hidden')).toBe('true');
     });
 
     it('shows the description for WeatherTech Raceway Laguna Seca 1987', async () => {
-        document.body.innerHTML = buildDom() + '<div id="track-description" hidden></div>';
+        document.body.innerHTML = buildDom() + '<a id="track-description" hidden></a>';
         loadBrowserScript('modules/data/tracks.js');
 
         let trackFilterOnChange;
@@ -534,9 +559,34 @@ describe('leaderboards fetchTopCombinations pipeline', () => {
         expect(descEl.textContent).toContain('Laguna Seca as it was until 1988');
     });
 
+    it('shows metadata by ID even when the displayed track name changes', async () => {
+        document.body.innerHTML = buildDom() + '<a id="track-description" hidden></a>';
+        loadBrowserScript('modules/data/tracks.js');
+        window.TRACKS_DATA.find(track => track.id === 2024).label = 'Renamed circuit - Grand Prix';
+        let trackFilterOnChange;
+        window.CustomSelect = class {
+            constructor(id, _options, onChange) {
+                if (id === 'track-filter-ui') trackFilterOnChange = onChange;
+            }
+        };
+        window.dataService.fetchAllCombinations = vi.fn().mockResolvedValue([]);
+
+        loadLeaderboards();
+        await new Promise(resolve => setTimeout(resolve, 20));
+        trackFilterOnChange('2024', { source: 'user' });
+        await new Promise(resolve => setTimeout(resolve, 20));
+
+        const descEl = document.getElementById('track-description');
+        expect(descEl.hidden).toBe(false);
+        expect(descEl.textContent).toContain('Estoril');
+    });
+
     it('hides track description when no track filter is active', async () => {
-        document.body.innerHTML = buildDom() + '<div id="track-description" hidden></div>';
-        window.TRACKS_META = { 'Spa': { description: 'Famous Belgian circuit' } };
+        document.body.innerHTML = buildDom() + '<a id="track-description" hidden></a>';
+        window.TRACKS_META = {
+            10: { description: 'Famous Belgian circuit', url: 'https://example.com/spa', location: 'Belgium' },
+            11: { description: 'Track without a link', trackType: '<Hillclimb>' }
+        };
 
         let trackFilterOnChange;
         window.CustomSelect = class {
@@ -555,11 +605,25 @@ describe('leaderboards fetchTopCombinations pipeline', () => {
         trackFilterOnChange('10', { source: 'user' });
         await new Promise(resolve => setTimeout(resolve, 20));
 
+        const descEl = document.getElementById('track-description');
+        expect(descEl.getAttribute('href')).toBe('https://example.com/spa');
+
+        trackFilterOnChange('11', { source: 'user' });
+        await new Promise(resolve => setTimeout(resolve, 20));
+        expect(descEl.hidden).toBe(false);
+        expect(descEl.textContent).toBe('Track without a linkTrack:<Hillclimb>');
+        expect(descEl.querySelectorAll('dl > div')).toHaveLength(1);
+        expect(descEl.querySelector('dd').textContent).toBe('<Hillclimb>');
+        expect(descEl.querySelector('dd').children).toHaveLength(0);
+        expect(descEl.querySelector('.track-description__flag')).toBeNull();
+        expect(descEl.hasAttribute('href')).toBe(false);
+        expect(descEl.hasAttribute('title')).toBe(false);
+
         trackFilterOnChange('', { source: 'user' });
         await new Promise(resolve => setTimeout(resolve, 20));
 
-        const descEl = document.getElementById('track-description');
         expect(descEl.hidden).toBe(true);
+        expect(descEl.textContent).toBe('');
     });
 
     it('renders table with track name split into name and layout parts', async () => {

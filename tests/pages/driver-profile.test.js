@@ -41,7 +41,7 @@ beforeAll(() => {
         })
     };
     window.R3ETrackImages = {
-        resolveTrackLogoByLabel: vi.fn(() => 'images/tracks/spa-logo.png')
+        resolveTrackLogoById: vi.fn(() => 'images/tracks/spa-logo.png')
     };
     window.CARS_DATA = [
         {

@@ -495,7 +495,8 @@ class TableRenderer {
      * @returns {string} HTML string
      */
     renderTrackCell(item, value) {
-        return TableRenderer.renderTrackCellStatic(this.resolveTrackLabel(item, value));
+        const trackId = item?.track_id || item?.TrackID || item?.trackId || item?.['Track ID'] || '';
+        return TableRenderer.renderTrackCellStatic(this.resolveTrackLabel(item, value), '', trackId);
     }
 
     resolveTrackLabel(item, fallback = '') {
@@ -538,9 +539,10 @@ class TableRenderer {
      * Static method to render track cell (can be used outside of class instances)
      * @param {string} value - Track name
      * @param {string} tdClass - Optional CSS class for td element
+     * @param {string|number} trackId - Track ID used to resolve its logo
      * @returns {string} HTML string
      */
-    static renderTrackCellStatic(value, tdClass = '') {
+    static renderTrackCellStatic(value, tdClass = '', trackId = '') {
         let trackStr = String(value || '');
         const classAttr = tdClass ? ` class="${tdClass}"` : '';
         
@@ -549,8 +551,8 @@ class TableRenderer {
             trackStr = window.DataNormalizer.normalizeTrackName(trackStr);
         }
 
-        const trackLogoUrl = (window.R3ETrackImages && typeof window.R3ETrackImages.resolveTrackLogoByLabel === 'function')
-            ? window.R3ETrackImages.resolveTrackLogoByLabel(trackStr)
+        const trackLogoUrl = (window.R3ETrackImages && typeof window.R3ETrackImages.resolveTrackLogoById === 'function')
+            ? window.R3ETrackImages.resolveTrackLogoById(trackId)
             : '';
         const trackLogoHtml = trackLogoUrl
             ? `<img class="table-track-logo" src="${R3EUtils.escapeHtml(trackLogoUrl)}" alt="${R3EUtils.escapeHtml(trackStr || 'Track')} logo" loading="lazy" decoding="async" />`

@@ -117,8 +117,8 @@
         return window.R3ECarUtils ? window.R3ECarUtils.resolveCarClassLogoByName(className) : '';
     }
 
-    function resolveTrackLogo(label) {
-        return window.R3ETrackImages ? window.R3ETrackImages.resolveTrackLogoByLabel(label) : '';
+    function resolveTrackLogo(trackId) {
+        return window.R3ETrackImages ? window.R3ETrackImages.resolveTrackLogoById(trackId) : '';
     }
 
     function resolveBrandLogo(carName) {
@@ -442,71 +442,10 @@
         let html = renderCarClassResult(result, true);
         if (!result.carName) return html;
 
-        const car = result.carData || {};
-        const CU = window.R3ECarUtils || {};
-        const wbFn = CU.wheelBadge || (() => '');
-        const tbFn = CU.transBadge || (() => '');
-        const dbFn = CU.driveBadge || (() => '');
-
-        const flag = (typeof FlagHelper !== 'undefined' && FlagHelper.countryToFlag)
-            ? FlagHelper.countryToFlag(car.country || '') : '';
-        const flagHtml = flag ? `<span class="car-tile-flag-overlay">${flag}</span>` : '';
-
-        // Rating
-        let ratingHtml = '';
-        if (typeof CarRatings !== 'undefined' && CU.buildRatingHtml) {
-            const carId = CarRatings.buildCarId(car);
-            const currentRating = CarRatings.get(carId) || 0;
-            ratingHtml = CU.buildRatingHtml(carId, currentRating, 'tile');
-        }
-
-        const carNameHtml = CU.renderCarDisplayHtml
-            ? CU.renderCarDisplayHtml(result.carName, { className: 'cars-page-car-name cars-page-car-name-tile' })
-            : escapeHtml(result.carName);
-
-        const carLink = car.link || '';
-        const carNameWrapped = carLink
-            ? `<a class="challenge-car-link" href="${escapeHtml(carLink)}" target="_blank" rel="noopener noreferrer">${carNameHtml}</a>`
-            : carNameHtml;
-
-        const imageUrl = escapeHtml(result.thumbnail || '');
-        const carNameAttr = escapeHtml(result.carName);
-        const yearColor = CU.yearBadgeColor ? CU.yearBadgeColor(car.year) : 'var(--color-badge-unknown-bg)';
-        const yearHtml = car.year
-            ? `<span class="car-tile-year-overlay car-badge year-badge" style="background:${yearColor}">${escapeHtml(car.year)}</span>`
-            : '';
-
-        // Assists
-        const assistBadges = [
-            car.TC === 'true' ? '<span class="car-tile-assist-badge car-tile-assist--tc">TC</span>' : '',
-            car.ABS === 'true' ? '<span class="car-tile-assist-badge car-tile-assist--abs">ABS</span>' : '',
-            car.LC === 'true' ? '<span class="car-tile-assist-badge car-tile-assist--lc">Launch Control</span>' : ''
-        ].filter(Boolean).join('');
-        const assistsHtml = assistBadges ? `<div class="car-tile-assists-row">${assistBadges}</div>` : '';
-
-        const weightDisplay = (car.weight || '—').replace(/kg\*$/, 'kg with driver');
-
         const classLogoHtml = (groupByCategory && result.superclass && result.classLogo)
             ? `<img class="challenge-car-class-logo" src="${escapeHtml(result.classLogo)}" alt="${escapeHtml(result.className)} logo" title="${escapeHtml(result.className)}" loading="lazy" decoding="async">`
             : '';
-
-        html += `<article class="car-tile challenge-car-tile">
-          <div class="car-tile-link">
-            <div class="car-tile-name">${classLogoHtml}${carNameWrapped}</div>
-            ${imageUrl ? `<div class="car-tile-image-wrap">
-              <div class="car-tile-top-row">${flagHtml}${ratingHtml}</div>
-              ${assistsHtml}
-              <img class="car-tile-image" src="${imageUrl}" alt="${carNameAttr}" loading="lazy" decoding="async">
-              ${yearHtml}
-            </div>` : ''}
-          </div>
-          <div class="car-tile-meta">
-            <span>${wbFn(car.wheel_cat)}</span>
-            <span>${tbFn(car.transmission_cat)}</span>
-            <span>${dbFn(car.drive)}</span>
-            <div class="car-tile-specs">${escapeHtml(car.power || '—')} • ${escapeHtml(weightDisplay)} • ${escapeHtml(car.engine || '—')}</div>
-          </div>
-        </article>`;
+        html += CarTile.render(result.carData, { className: 'challenge-car-tile', namePrefix: classLogoHtml });
         return html;
     }
 
@@ -515,7 +454,7 @@
         const logo = result.trackLogo
             ? `<img class="challenge-result-track__logo" src="${escapeHtml(result.trackLogo)}" alt="${escapeHtml(result.trackBase)} logo" loading="lazy">`
             : '';
-        const meta = window.TRACKS_META && window.TRACKS_META[result.trackBase];
+        const meta = window.TRACKS_META && window.TRACKS_META[result.layoutId];
         const nameHtml = meta && meta.url
             ? `<a class="challenge-track-link" href="${escapeHtml(meta.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(result.trackBase)}</a>`
             : `<span>${escapeHtml(result.trackBase)}</span>`;
@@ -543,6 +482,9 @@
         if (window.R3ECarUtils && window.R3ECarUtils.attachBrandLogoHandlers) {
             window.R3ECarUtils.attachBrandLogoHandlers(carResult);
         }
+        carResult.querySelectorAll('.car-tile-description').forEach(desc => {
+            desc.addEventListener('click', () => desc.classList.toggle('challenge-description-expanded'));
+        });
     }
 
     function doPickCar() {
@@ -588,7 +530,11 @@
 
         // Always pick a full layout result (base + layout)
         const result = svc.pickLayout(tracksData, resolveTrackLogo, rng);
-        lastTrackBaseResult = result ? { trackBase: result.trackBase, trackLogo: result.trackLogo } : null;
+        lastTrackBaseResult = result ? {
+            trackBase: result.trackBase,
+            trackLogo: result.trackLogo,
+            layoutId: result.layoutId
+        } : null;
         lastPickedLayoutId = result ? result.layoutId : null;
         trackBaseHtml = renderTrackResult(lastTrackBaseResult);
         trackLayoutHtml = renderTrackResult(result);
@@ -1165,8 +1111,8 @@
         let tracksHtml = '';
         for (const base of baseNames) {
             const layouts = grouped.get(base);
-            const logoLabel = layouts[0]?.label || base;
-            const logoUrl = resolveTrackLogo(logoLabel);
+            const trackId = layouts[0]?.id;
+            const logoUrl = resolveTrackLogo(trackId);
             const checked = excludedTracks.has(base) ? 'checked' : '';
             const excludedCls = excludedTracks.has(base) ? ' challenge-exclusions__item--excluded' : '';
             const logoImg = logoUrl

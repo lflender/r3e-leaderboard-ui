@@ -46,6 +46,11 @@
     animation: pulse-urgent 1s ease-in-out infinite;
 }
 
+.status-led--black {
+    background: var(--color-black);
+    box-shadow: 0 0 4px var(--color-black-alpha-35), 0 0 0 1px var(--color-text-secondary);
+}
+
 .status-led.is-fetching {
     animation: flicker 2.5s ease-in-out infinite;
 }

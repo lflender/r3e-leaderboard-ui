@@ -11,6 +11,8 @@ describe('ChallengePicker page', () => {
     beforeAll(() => {
         window.R3EAnalytics = { track: vi.fn() };
         window.R3EUtils = { escapeHtml: (v) => String(v ?? '') };
+        window.FlagHelper = { countryToFlag: country => country ? `<span class="flag">${country}</span>` : '' };
+        window.CarRatings = { buildCarId: () => 'car-id', get: () => 3 };
         window.R3ETrackUtils = {};
         window.R3ECarUtils = {
             resolveBrandLogoPath: (name) => name ? `brand-logo://${name}` : '',
@@ -18,11 +20,14 @@ describe('ChallengePicker page', () => {
             wheelBadge: (cat) => `<span class="car-badge">${cat}</span>`,
             transBadge: (cat) => `<span class="car-badge car-badge--trans">${cat}</span>`,
             driveBadge: (drive) => `<span class="car-badge car-badge--drive">${drive}</span>`,
+            yearBadgeColor: () => 'rgb(1,2,3)',
+            buildRatingHtml: () => '<div class="rating-widget">rating</div>',
             renderCarDisplayHtml: (name) => `<span class="cars-page-car-name">${name}</span>`,
             attachBrandLogoHandlers: () => {}
         };
+        loadBrowserScript('modules/car-tile.js');
         window.R3ETrackImages = {
-            resolveTrackLogoByLabel: (label) => label ? `track-logo://${label}` : ''
+            resolveTrackLogoById: (trackId) => trackId ? `track-logo://${trackId}` : ''
         };
         loadBrowserScript('modules/challenge-picker-service.js');
         loadBrowserScript('modules/pages/challenge-picker.js');
@@ -44,6 +49,8 @@ describe('ChallengePicker page', () => {
             { id: 2, label: 'Spa - Moto' },
             { id: 10, label: 'Monza - Grand Prix' }
         ];
+        window.TRACKS_META = {};
+        window.CAR_IMAGES_BY_LINK = {};
 
         const htmlPath = path.resolve(__dirname, '..', '..', 'pages', 'challenge.html');
         const fullHtml = fs.readFileSync(htmlPath, 'utf8');
@@ -136,6 +143,34 @@ describe('ChallengePicker page', () => {
         expect(carHtml).toContain('http://bmw.png');
     });
 
+    test('renders the shared car tile with the current car details and image', () => {
+        const car = window.CARS_DATA[0].cars[0];
+        Object.assign(car, {
+            link: 'https://example.com/bmw', year: '2022', country: 'DE',
+            TC: 'true', ABS: 'true', LC: 'true', weight: '1300kg*',
+            downforce: 'High', difficulty: 'very hard', description: 'Factory car'
+        });
+        window.CAR_IMAGES_BY_LINK = { [car.link]: ['https://example.com/large.png'] };
+        document.querySelector('#challenge-car-picker [data-granularity="car"]').click();
+        vi.spyOn(Math, 'random').mockReturnValue(0);
+        document.getElementById('challenge-pick-btn').click();
+        Math.random.mockRestore();
+
+        const tile = document.querySelector('.challenge-car-tile');
+        expect(tile.querySelector('.car-tile-link').getAttribute('href')).toBe(car.link);
+        expect(tile.querySelector('.car-tile-image').src).toBe('https://example.com/large.png');
+        expect(tile.querySelector('.car-tile-top-row .rating-widget')).not.toBeNull();
+        expect(tile.querySelector('.car-tile-meta .car-tile-assists-row').children).toHaveLength(3);
+        expect(tile.querySelector('.car-tile-image-wrap .car-tile-assists-row')).toBeNull();
+        expect(tile.querySelector('.carinfo-downforce--high').textContent).toBe('High');
+        expect(tile.querySelector('.carinfo-difficulty--very-hard').textContent).toBe('Very Hard');
+        expect(tile.querySelector('.car-tile-specs').textContent).toContain('1300kg with driver');
+        const description = tile.querySelector('.car-tile-description');
+        expect(description.textContent).toBe('Factory car');
+        description.click();
+        expect(description.classList.contains('challenge-description-expanded')).toBe(true);
+    });
+
     test('pick in layout granularity renders layout label', () => {
         document.querySelector('#challenge-track-picker [data-granularity="layout"]').click();
         vi.spyOn(Math, 'random').mockReturnValue(0);
@@ -144,6 +179,30 @@ describe('ChallengePicker page', () => {
 
         const trackHtml = document.getElementById('challenge-track-result').innerHTML;
         expect(trackHtml).toContain('challenge-result-layout');
+    });
+
+    test('uses the chosen layout ID for metadata in track and layout results', () => {
+        window.TRACKS_META = {
+            1: { url: 'https://example.com/other', description: 'Other layout' },
+            2: { url: 'https://example.com/spa', description: 'Spa description' }
+        };
+        const picker = vi.spyOn(window.ChallengePickerService, 'pickLayout').mockReturnValue({
+            trackBase: 'Renamed Spa', layoutId: 2, layoutLabel: 'Moto', trackLogo: ''
+        });
+
+        document.querySelector('[data-mode="track"]').click();
+        document.getElementById('challenge-pick-btn').click();
+        const result = document.getElementById('challenge-track-result');
+        expect(result.textContent).toContain('Renamed Spa');
+        expect(result.textContent).toContain('Spa description');
+        expect(result.querySelector('.challenge-track-link').href).toBe('https://example.com/spa');
+        expect(result.textContent).not.toContain('Other layout');
+
+        document.querySelector('#challenge-track-picker [data-granularity="layout"]').click();
+        expect(result.textContent).toContain('Moto');
+        expect(result.textContent).toContain('Spa description');
+        expect(result.querySelector('.challenge-track-link').href).toBe('https://example.com/spa');
+        picker.mockRestore();
     });
 
     test('car-only mode does not update track result', () => {

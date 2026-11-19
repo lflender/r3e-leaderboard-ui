@@ -35,6 +35,14 @@ describe('PieChart.computeSlices', () => {
         expect(slices[0].color).toBeTruthy();
     });
 
+    it('preserves a track ID on its computed slice', () => {
+        const slices = window.PieChart.computeSlices([
+            { label: 'Renamed venue', value: 10, trackId: '5301' }
+        ]);
+
+        expect(slices[0].trackId).toBe('5301');
+    });
+
     it('computes correct percentages for multiple items', () => {
         const data = [
             { label: 'A', value: 50 },
@@ -145,6 +153,16 @@ describe('PieChart.render', () => {
         expect(legendItems[1].querySelector('.pie-legend-label').textContent).toBe('Alpha');
     });
 
+    it('passes track IDs to logo resolvers independently of labels', () => {
+        const logoResolver = vi.fn((label, trackId) => `logo://${trackId}`);
+        window.PieChart.render(container, [
+            { label: 'Renamed venue', value: 1, trackId: '5301' }
+        ], { logoResolver });
+
+        expect(logoResolver).toHaveBeenCalledWith('Renamed venue', '5301');
+        expect(container.querySelector('.pie-legend-logo').getAttribute('src')).toBe('logo://5301');
+    });
+
     it('renders a tooltip element (hidden initially)', () => {
         window.PieChart.render(container, [{ label: 'X', value: 1 }]);
         const tooltip = container.querySelector('.pie-tooltip');
@@ -239,6 +257,18 @@ describe('PieChart.showSliceLabels', () => {
         const linesSvg = chartEl.querySelector('.pie-connector-lines');
         expect(linesSvg).toBeTruthy();
         expect(linesSvg.querySelectorAll('polyline').length).toBe(2);
+    });
+
+    it('passes track IDs to logo resolvers for floating slice labels', () => {
+        const logoResolver = vi.fn((label, trackId) => `logo://${trackId}`);
+        chartEl._pieLogoResolver = logoResolver;
+        const slice = chartEl.querySelector('[data-label="Alpha GP"]');
+        slice.setAttribute('data-track-id', '5301');
+
+        window.PieChart.showSliceLabels(chartEl, [slice]);
+
+        expect(logoResolver).toHaveBeenCalledWith('Alpha GP', '5301');
+        expect(document.querySelector('.pie-cross-label__logo').getAttribute('src')).toBe('logo://5301');
     });
 
     it('positions labels with left and top style percentages', () => {

@@ -459,61 +459,7 @@
     return wheelOk && transOk && classOk && searchOk && ratingOk;
   }
 
-  let normalizedImageMapSource = null;
-  let normalizedImageMap = new Map();
-
-  function getStoreCarIdentity(link) {
-    try {
-      const pathSegments = new URL(link).pathname.split('/').filter(Boolean);
-      const carsIndex = pathSegments.lastIndexOf('cars');
-      if (carsIndex < 0 || pathSegments.length <= carsIndex + 2) return '';
-
-      const classSlug = pathSegments[carsIndex + 1];
-      const productSlug = pathSegments
-        .slice(carsIndex + 2)
-        .filter(segment => !/^\d+$/.test(segment))
-        .pop();
-      const normalizeSlug = segment => segment.toLowerCase().replace(/[^a-z0-9]/g, '');
-      return classSlug && productSlug
-        ? `${normalizeSlug(classSlug)}/${normalizeSlug(productSlug)}`
-        : '';
-    } catch (err) {
-      return '';
-    }
-  }
-
-  function getNormalizedImageMap(imageMap) {
-    if (normalizedImageMapSource === imageMap) return normalizedImageMap;
-
-    normalizedImageMapSource = imageMap;
-    normalizedImageMap = new Map();
-    Object.entries(imageMap).forEach(([link, images]) => {
-      const identity = getStoreCarIdentity(link);
-      if (!identity || !Array.isArray(images)) return;
-      if (normalizedImageMap.has(identity)) {
-        normalizedImageMap.set(identity, null);
-      } else {
-        normalizedImageMap.set(identity, images);
-      }
-    });
-    return normalizedImageMap;
-  }
-
-  function getImageListForCar(car, rawLink) {
-    const imageMap = (window.CAR_IMAGES_BY_LINK && typeof window.CAR_IMAGES_BY_LINK === 'object')
-      ? window.CAR_IMAGES_BY_LINK
-      : null;
-    let mappedList = (imageMap && rawLink && Array.isArray(imageMap[rawLink]))
-      ? imageMap[rawLink]
-      : null;
-    if (!mappedList && imageMap && rawLink) {
-      const identity = getStoreCarIdentity(rawLink);
-      mappedList = identity ? getNormalizedImageMap(imageMap).get(identity) : null;
-    }
-    return mappedList || (Array.isArray(car.image)
-      ? car.image
-      : (car.image ? [car.image] : []));
-  }
+  const getImageListForCar = CarTile.getImageList;
 
   function createYearColorFn() {
     return R3ECarUtils.yearBadgeColor;
@@ -615,28 +561,8 @@
   const buildRatingHtml = R3ECarUtils.buildRatingHtml;
   const attachRatingHandlers = R3ECarUtils.attachRatingHandlers;
 
-  function formatCarDifficulty(difficulty) {
-    return String(difficulty || '')
-      .trim()
-      .split(/\s+/)
-      .filter(Boolean)
-      .map(word => `${word.charAt(0).toUpperCase()}${word.slice(1).toLowerCase()}`)
-      .join(' ');
-  }
-
-  const carValueClassValues = {
-    downforce: new Set(['low', 'medium', 'high']),
-    difficulty: new Set(['very-easy', 'easy', 'moderate', 'hard', 'very-hard'])
-  };
-
-  function getCarValueClass(prefix, value) {
-    const normalizedValue = String(value || '').trim().toLowerCase().replace(/\s+/g, '-');
-    const validValues = carValueClassValues[prefix];
-
-    return validValues?.has(normalizedValue)
-      ? `carinfo-${prefix}--${normalizedValue}`
-      : '';
-  }
+  const formatCarDifficulty = CarTile.formatDifficulty;
+  const getCarValueClass = CarTile.getValueClass;
 
   function buildClassHeadingHtml(className, superclass) {
     const classLogoUrl = (window.R3ECarUtils && typeof window.R3ECarUtils.resolveCarClassLogoByName === 'function')
@@ -854,8 +780,6 @@
   function renderTiles() {
     let displayedClasses = 0;
     let displayedCars = 0;
-    const yearColor = createYearColorFn();
-
     const isSuperclassFilter = classFilter && classFilter.startsWith('superclass:');
     const superclassClasses = new Set();
     if (isSuperclassFilter) {
@@ -883,54 +807,7 @@
       html += `<section class="cars-class-section"><div class="cars-class-heading-wrap"><h3 class="cars-class-heading">${classLogoHtml}${classHeaderText}</h3>${superclassChip}</div><div class="cars-tiles">`;
       filteredCars.forEach(car => {
         displayedCars++;
-        const rawLink = String(car.link || '').trim();
-        const rowLink = R3EUtils.escapeHtml(rawLink);
-        const imageList = getImageListForCar(car, rawLink);
-        const encodedImageList = encodeURIComponent(JSON.stringify(imageList));
-        const imageUrl = R3EUtils.escapeHtml(imageList[0] || car.thumbnail || '');
-        const flag = countryFlag(car.country || '');
-        const flagHtml = flag ? `<span class="car-tile-flag-overlay">${flag}</span>` : '';
-        const rawCarName = car.car || '';
-        const carNameHtml = renderCarDisplayHtml(rawCarName, {
-          className: 'cars-page-car-name cars-page-car-name-tile'
-        });
-        const carNameAttr = R3EUtils.escapeHtml(rawCarName);
-        const isSafetyCar = (car.car_class || car.class || '').toLowerCase() === 'safety car';
-        const warningIcon = isSafetyCar ? `<span class="warning-icon" title="Not eligible to Leaderboards" aria-label="Warning" role="img">⚠️</span>` : '';
-        const open = rowLink ? `<a class="car-tile-link" href="${rowLink}" target="_blank" rel="noopener">` : '<div class="car-tile-link">';
-        const close = rowLink ? '</a>' : '</div>';
-        const description = car.description ? `<div class="car-tile-description">${R3EUtils.escapeHtml(car.description)}</div>` : '';
-        const yearBadgeHtml = `<span class="car-tile-year-overlay car-badge year-badge" data-year="${car.year}" style="background:${yearColor(car.year)}">${R3EUtils.escapeHtml(car.year || '')}</span>`;
-        const weightDisplay = (car.weight || '—').replace(/kg\*$/, 'kg with driver');
-        const downforceDisplay = R3EUtils.escapeHtml(car.downforce || '—');
-        const difficultyDisplay = R3EUtils.escapeHtml(formatCarDifficulty(car.difficulty) || '—');
-        const drivingSpecsHtml = `<div class="car-tile-driving-specs">` +
-          `<div class="car-tile-driving-spec"><span>Downforce</span><strong class="carinfo-meta car-tile-value ${getCarValueClass('downforce', car.downforce)}">${downforceDisplay}</strong></div>` +
-          `<div class="car-tile-driving-spec"><span>Difficulty</span><strong class="carinfo-meta car-tile-value ${getCarValueClass('difficulty', car.difficulty)}">${difficultyDisplay}</strong></div>` +
-          `</div>`;
-        const carId = CarRatings.buildCarId(car);
-        const currentRating = (typeof CarRatings !== 'undefined') ? CarRatings.get(carId) : 0;
-        const ratingHtml = buildRatingHtml(carId, currentRating, 'tile');
-        const assistBadges = [
-          car.TC === 'true' ? '<span class="car-tile-assist-badge car-tile-assist--tc">TC</span>' : '',
-          car.ABS === 'true' ? '<span class="car-tile-assist-badge car-tile-assist--abs">ABS</span>' : '',
-          car.LC === 'true' ? '<span class="car-tile-assist-badge car-tile-assist--lc">Launch Control</span>' : ''
-        ].filter(Boolean).join('');
-        const assistsHtml = assistBadges ? `<div class="car-tile-assists-row">${assistBadges}</div>` : '';
-
-        html += `<article class="car-tile">` +
-                `${open}` +
-                `<div class="car-tile-name">${carNameHtml}${warningIcon}</div>` +
-                `${imageUrl ? `<div class="car-tile-image-wrap"><div class="car-tile-top-row">${flagHtml}${ratingHtml}</div><img class="car-tile-image car-rotating-image" data-image-list="${encodedImageList}" src="${imageUrl}" alt="${carNameAttr}" loading="lazy" decoding="async">${yearBadgeHtml}</div>` : ''}` +
-                `${close}` +
-                `<div class="car-tile-meta">` +
-                `<span>${wheelBadge(car.wheel_cat)}</span><span>${transBadge(car.transmission_cat)}</span><span>${driveBadge(car.drive)}</span>` +
-                `${assistsHtml}` +
-                `<div class="car-tile-specs">${R3EUtils.escapeHtml(car.power || '—')} • ${R3EUtils.escapeHtml(weightDisplay)} • ${R3EUtils.escapeHtml(car.engine || '—')}</div>` +
-                `${drivingSpecsHtml}` +
-                `${description}` +
-                `</div>` +
-                `</article>`;
+        html += CarTile.render(car);
       });
       html += '</div></section>';
     });

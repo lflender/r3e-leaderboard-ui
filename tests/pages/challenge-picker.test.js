@@ -22,7 +22,7 @@ describe('ChallengePicker page', () => {
             attachBrandLogoHandlers: () => {}
         };
         window.R3ETrackImages = {
-            resolveTrackLogoByLabel: (label) => label ? `track-logo://${label}` : ''
+            resolveTrackLogoById: (trackId) => trackId ? `track-logo://${trackId}` : ''
         };
         loadBrowserScript('modules/challenge-picker-service.js');
         loadBrowserScript('modules/pages/challenge-picker.js');

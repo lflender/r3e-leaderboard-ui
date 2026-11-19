@@ -703,8 +703,9 @@
           if (window.DataNormalizer && window.DataNormalizer.normalizeTrackName) {
             trackStr = window.DataNormalizer.normalizeTrackName(trackStr);
           }
-          const trackLogoUrl = (window.R3ETrackImages && typeof window.R3ETrackImages.resolveTrackLogoByLabel === 'function')
-            ? window.R3ETrackImages.resolveTrackLogoByLabel(trackStr)
+          const trackId = item.track_id || item.TrackID || item.trackId || item['Track ID'] || '';
+          const trackLogoUrl = (window.R3ETrackImages && typeof window.R3ETrackImages.resolveTrackLogoById === 'function')
+            ? window.R3ETrackImages.resolveTrackLogoById(trackId)
             : '';
           const trackLogoHtml = trackLogoUrl
             ? `<img class="table-track-logo" src="${R3EUtils.escapeHtml(trackLogoUrl)}" alt="${R3EUtils.escapeHtml(trackStr || 'Track')} logo" loading="lazy" decoding="async" />`

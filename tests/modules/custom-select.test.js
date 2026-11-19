@@ -5,6 +5,11 @@ describe('CustomSelect', () => {
     beforeAll(() => {
         window.R3EUtils = {
             escapeHtml: (value) => String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;')
         };
         window.matchMedia = vi.fn().mockReturnValue({ matches: true });
         loadBrowserScript('modules/custom-select.js');
@@ -112,5 +117,166 @@ describe('CustomSelect', () => {
         expect(select.searchInput.value).toBe('gt');
         expect(select.optionsList.scrollTop).toBe(44);
         expect(select.menu.querySelector('[data-value="tcr"]').hidden).toBe(true);
+    });
+
+    test('searches aliases case-insensitively without changing the label or selected value', () => {
+        const onChange = vi.fn();
+        const select = new window.CustomSelect('test-select', [
+            { value: '', label: 'All tracks' },
+            { value: '1846', label: 'Mount Panorama Circuit', aliases: ['Bathurst'] },
+            { value: '10', label: 'Other circuit' }
+        ], onChange);
+
+        select.open();
+        select.searchInput.value = 'THur';
+        select.searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+
+        const result = select.menu.querySelector('[data-value="1846"]');
+        expect(result.hidden).toBe(false);
+        expect(result.querySelector('.custom-select__label').textContent).toBe('Mount Panorama Circuit');
+        expect(select.menu.querySelector('[data-value="10"]').hidden).toBe(true);
+        expect(select.noResults.hidden).toBe(true);
+
+        result.click();
+        expect(select.getValue()).toBe('1846');
+        expect(select.toggle.textContent).toContain('Mount Panorama Circuit');
+        expect(onChange).toHaveBeenCalledWith('1846', { source: 'user' });
+
+        select.setOptions([{ value: '20', label: 'New track', aliases: ['Bathurst'] }]);
+        expect(select.menu.querySelector('[data-value="20"]').hidden).toBe(false);
+    });
+
+    test('searches labels and aliases without requiring matching diacritics', () => {
+        const select = new window.CustomSelect('test-select', [
+            { value: '1', label: 'Autódromo Fernanda Pires', aliases: ['Portimão'] },
+            { value: '2', label: 'Other circuit' }
+        ]);
+        select.open();
+
+        select.searchInput.value = 'autodromo';
+        select.searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+        expect(select.menu.querySelector('[data-value="1"]').hidden).toBe(false);
+        expect(select.menu.querySelector('[data-value="2"]').hidden).toBe(true);
+
+        select.searchInput.value = 'Óther';
+        select.searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+        expect(select.menu.querySelector('[data-value="1"]').hidden).toBe(true);
+        expect(select.menu.querySelector('[data-value="2"]').hidden).toBe(false);
+
+        select.searchInput.value = 'Portimao';
+        select.searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+        expect(select.menu.querySelector('[data-value="1"]').hidden).toBe(false);
+        expect(select.menu.querySelector('[data-value="2"]').hidden).toBe(true);
+    });
+
+    test('shows track aliases only while Ctrl is held', () => {
+        const select = new window.CustomSelect('test-select', [
+            { value: '', label: 'All tracks' },
+            { value: '1846', label: 'Mount Panorama Circuit', aliases: ['Bathurst'] }
+        ]);
+        select.setValue('1846', { notify: false });
+        select.menu.getBoundingClientRect = () => ({ top: 0, bottom: 200 });
+        select.optionsList.getBoundingClientRect = () => ({ top: 0, bottom: 100 });
+        select.menu.querySelector('[data-value="1846"]').getBoundingClientRect = () => ({
+            top: 20,
+            bottom: 60
+        });
+
+        const alias = select.menu.querySelector('.custom-select__track-alias');
+        expect(alias.textContent).toBe('(Bathurst)');
+        expect(document.documentElement.classList.contains('show-track-aliases')).toBe(false);
+
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Control', ctrlKey: true }));
+        expect(document.documentElement.classList.contains('show-track-aliases')).toBe(false);
+
+        select.open();
+        expect(document.documentElement.classList.contains('show-track-aliases')).toBe(true);
+
+        window.dispatchEvent(new KeyboardEvent('keyup', { key: 'x', ctrlKey: true }));
+        expect(document.documentElement.classList.contains('show-track-aliases')).toBe(true);
+
+        window.dispatchEvent(new KeyboardEvent('keyup', { key: 'Control', ctrlKey: false }));
+        expect(document.documentElement.classList.contains('show-track-aliases')).toBe(false);
+
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Alt', altKey: true }));
+        expect(document.documentElement.classList.contains('show-track-aliases')).toBe(false);
+
+        window.dispatchEvent(new KeyboardEvent('keyup', { key: 'Alt', altKey: false }));
+        expect(document.documentElement.classList.contains('show-track-aliases')).toBe(false);
+    });
+
+    test('hides aliases when no visible track option has an alias', () => {
+        const select = new window.CustomSelect('test-select', [
+            { value: '1', label: 'Aliased track', aliases: ['Old name'] },
+            { value: '2', label: 'Other track' }
+        ]);
+        select.open();
+        select.menu.getBoundingClientRect = () => ({ top: 0, bottom: 200 });
+        select.optionsList.getBoundingClientRect = () => ({ top: 40, bottom: 100 });
+        const aliasedOption = select.menu.querySelector('[data-value="1"]');
+        aliasedOption.getBoundingClientRect = () => ({ top: 110, bottom: 150 });
+        select.searchInput.value = 'Other';
+        select.searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Control', ctrlKey: true }));
+        expect(document.documentElement.classList.contains('show-track-aliases')).toBe(false);
+
+        select.searchInput.value = '';
+        select.searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+        expect(document.documentElement.classList.contains('show-track-aliases')).toBe(false);
+
+        aliasedOption.getBoundingClientRect = () => ({ top: 60, bottom: 100 });
+        select.optionsList.dispatchEvent(new Event('scroll'));
+        expect(document.documentElement.classList.contains('show-track-aliases')).toBe(true);
+
+        window.dispatchEvent(new KeyboardEvent('keyup', { key: 'Control', ctrlKey: false }));
+        expect(document.documentElement.classList.contains('show-track-aliases')).toBe(false);
+    });
+
+    test('sizes aliases from the option rows currently visible in the dropdown', () => {
+        const select = new window.CustomSelect('test-select', [
+            { value: '1', label: 'Short alias track', aliases: ['Short'] },
+            { value: '2', label: 'Long alias track', aliases: ['A much longer legacy track name'] }
+        ]);
+        select.open();
+        select.menu.getBoundingClientRect = () => ({ top: 0, bottom: 200 });
+        select.optionsList.getBoundingClientRect = () => ({ top: 40, bottom: 100 });
+
+        const shortAliasOption = select.menu.querySelector('[data-value="1"]');
+        const longAliasOption = select.menu.querySelector('[data-value="2"]');
+        let shortOptionTop = 50;
+        let longOptionTop = 110;
+        shortAliasOption.getBoundingClientRect = () => ({
+            top: shortOptionTop,
+            bottom: shortOptionTop + 30
+        });
+        longAliasOption.getBoundingClientRect = () => ({
+            top: longOptionTop,
+            bottom: longOptionTop + 30
+        });
+
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Control', ctrlKey: true }));
+
+        expect(shortAliasOption.classList.contains('custom-select__option--alias-visible')).toBe(true);
+        expect(longAliasOption.classList.contains('custom-select__option--alias-visible')).toBe(false);
+
+        shortOptionTop = 110;
+        longOptionTop = 60;
+        select.optionsList.dispatchEvent(new Event('scroll'));
+
+        expect(shortAliasOption.classList.contains('custom-select__option--alias-visible')).toBe(false);
+        expect(longAliasOption.classList.contains('custom-select__option--alias-visible')).toBe(true);
+
+        window.dispatchEvent(new KeyboardEvent('keyup', { key: 'Control', ctrlKey: false }));
+        expect(longAliasOption.classList.contains('custom-select__option--alias-visible')).toBe(false);
+    });
+
+    test('escapes track aliases before rendering them', () => {
+        const select = new window.CustomSelect('test-select', [
+            { value: '1', label: 'Track', aliases: ['<img src=x onerror=alert(1)>'] }
+        ]);
+
+        expect(select.menu.querySelector('.custom-select__track-alias').innerHTML)
+            .toBe('(&lt;img src=x onerror=alert(1)&gt;)');
     });
 });

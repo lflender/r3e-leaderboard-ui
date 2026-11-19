@@ -32,7 +32,7 @@ beforeAll(() => {
         COLORS: ['#3b82f6', '#22c55e', '#f59e0b']
     };
     window.R3ETrackImages = {
-        resolveTrackLogoByLabel: vi.fn(() => 'images/tracks/spa.png')
+        resolveTrackLogoById: vi.fn(() => 'images/tracks/spa.png')
     };
     window.CARS_DATA = [
         { cars: [{ car: 'BMW M4', thumbnail: 'https://example.com/bmw-m4-image-small.png' }] }
@@ -157,10 +157,12 @@ describe('DriverProfileRenderers', () => {
         it('renders most used track card', () => {
             const html = DriverProfileRenderers.renderHighlights({
                 carDistribution: [],
-                trackDistribution: [{ label: 'Spa - Grand Prix', value: 7 }]
+                trackDistribution: [{ label: 'Renamed Venue - Grand Prix', trackId: '13256', value: 7 }]
             });
             expect(html).toContain('Most Used Track');
-            expect(html).toContain('Spa');
+            expect(html).toContain('Renamed Venue');
+            expect(html).toContain('images/tracks/spa.png');
+            expect(window.R3ETrackImages.resolveTrackLogoById).toHaveBeenCalledWith('13256');
         });
 
         it('returns empty string when no distributions', () => {

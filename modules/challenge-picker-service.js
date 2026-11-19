@@ -293,7 +293,7 @@
      * Pick a random track (base track, not layout).
      * Each base track has equal probability regardless of layout count.
      * Excludes recently picked tracks.
-     * Returns { trackBase, trackLogo } or null.
+     * Returns { trackBase, trackId, trackLogo } or null.
      */
     function pickTrack(tracksData, resolveTrackLogo, randomFn) {
         if (!Array.isArray(tracksData) || tracksData.length === 0) return null;
@@ -303,11 +303,12 @@
         const bases = excludeRecent(allBases, 'track', b => b);
         const base = bases[randomIndex(bases.length, randomFn)];
         const layouts = grouped.get(base);
-        const logoLabel = layouts[0]?.label || base;
+        const trackId = layouts[0]?.id;
         history.add('track', base);
         return {
             trackBase: base,
-            trackLogo: resolveTrackLogo(logoLabel)
+            trackId,
+            trackLogo: resolveTrackLogo(trackId)
         };
     }
 
@@ -332,7 +333,7 @@
         history.add('layout', base);
         return {
             trackBase: base,
-            trackLogo: resolveTrackLogo(label),
+            trackLogo: resolveTrackLogo(layout.id),
             layoutLabel: layoutSuffix || label,
             layoutId: layout.id
         };
@@ -377,7 +378,7 @@
         const layoutSuffix = sepIdx !== -1 ? label.substring(sepIdx + 3).trim() : '';
         return {
             trackBase,
-            trackLogo: resolveTrackLogo(label),
+            trackLogo: resolveTrackLogo(layout.id),
             layoutLabel: layoutSuffix || label,
             layoutId: layout.id
         };

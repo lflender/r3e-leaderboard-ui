@@ -143,10 +143,7 @@ describe('ranked series page', () => {
         expect(currentLink.target).toBe('_blank');
         expect(currentUrl.searchParams.get('track')).toBe('layout-current');
         expect(currentUrl.searchParams.get('class')).toBe('class-1');
-        expect(window.R3ETrackImages.resolveTrackLogoById).toHaveBeenCalledWith(
-            'layout-current',
-            'Mantorp Park - Long Circuit'
-        );
+        expect(window.R3ETrackImages.resolveTrackLogoById).toHaveBeenCalledWith('layout-current');
     });
 
     it('preserves the JSON order of leaderboard series while filtering other types', async () => {

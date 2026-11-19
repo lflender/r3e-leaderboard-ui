@@ -9,7 +9,7 @@ describe('ChallengePickerService', () => {
             resolveCarClassLogoByName: (name) => name ? `logo://${name}` : ''
         };
         window.R3ETrackImages = {
-            resolveTrackLogoByLabel: (label) => label ? `track://${label}` : ''
+            resolveTrackLogoById: (trackId) => trackId ? `track://${trackId}` : ''
         };
         loadBrowserScript('modules/challenge-picker-service.js');
     });
@@ -178,10 +178,13 @@ describe('ChallengePickerService', () => {
             // With alwaysFirst (returns 0), picks first base alphabetically
             // Map iteration order is insertion order, so Spa comes first
             const result = window.ChallengePickerService.pickTrack(
-                tracks, (label) => `logo://${label}`, alwaysFirst
+                tracks, (trackId) => `logo://${trackId}`, alwaysFirst
             );
             expect(result.trackBase).toBe('Spa');
-            expect(result.trackLogo).toBe('logo://Spa - Grand Prix');
+            expect(result).toMatchObject({
+                trackId: 1,
+                trackLogo: 'logo://1'
+            });
         });
 
         test('each base track has equal chance regardless of layout count', () => {
@@ -213,12 +216,12 @@ describe('ChallengePickerService', () => {
                 { id: 10, label: 'Monza - Grand Prix' }
             ];
             const result = window.ChallengePickerService.pickLayout(
-                tracks, (l) => `logo://${l}`, alwaysFirst
+                tracks, (trackId) => `logo://${trackId}`, alwaysFirst
             );
             expect(result.trackBase).toBe('Spa');
             expect(result.layoutLabel).toBe('Grand Prix');
             expect(result.layoutId).toBe(1);
-            expect(result.trackLogo).toBe('logo://Spa - Grand Prix');
+            expect(result.trackLogo).toBe('logo://1');
         });
 
         test('selects second layout when randomFn returns 0.5', () => {

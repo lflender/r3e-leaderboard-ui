@@ -125,6 +125,7 @@ describe('DriverProfileData.getTrackDistribution', () => {
         const result = window.DriverProfileData.getTrackDistribution(entries);
         expect(result.find(r => r.label === 'Spa').value).toBe(2);
         expect(result.find(r => r.label === 'Monza').value).toBe(1);
+        expect(result.find(r => r.label === 'Spa').trackId).toBe('100');
     });
 
     it('falls back to track name when no resolver', () => {
@@ -144,6 +145,7 @@ describe('DriverProfileData.getTrackDistribution', () => {
 
         expect(result).toEqual([{
             label: 'Donington Park',
+            trackId: '301',
             value: 2,
             details: [
                 { label: 'National', value: 1 },

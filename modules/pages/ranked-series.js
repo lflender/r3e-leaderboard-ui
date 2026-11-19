@@ -157,10 +157,9 @@
 
     function getTrackLogoHtml(track, className) {
         const trackId = track && (track.layout_id || track.track_id);
-        const trackLabel = getTrackLabel(track);
         const images = window.R3ETrackImages;
         const logoUrl = images && typeof images.resolveTrackLogoById === 'function'
-            ? images.resolveTrackLogoById(trackId, trackLabel)
+            ? images.resolveTrackLogoById(trackId)
             : '';
         if (!logoUrl) return '';
 

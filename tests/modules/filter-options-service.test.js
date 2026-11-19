@@ -14,7 +14,7 @@ describe('FilterOptionsService', () => {
             resolveCarClassLogoByName: vi.fn().mockReturnValue('')
         };
         window.R3ETrackImages = {
-            resolveTrackLogoByLabel: vi.fn().mockReturnValue('')
+            resolveTrackLogoById: vi.fn().mockReturnValue('')
         };
         window.CARS_DATA = [];
         window.TRACKS_DATA = [];
@@ -129,8 +129,8 @@ describe('FilterOptionsService', () => {
                 { id: 10, label: 'Spa' },
                 { id: 20, label: 'Monza' }
             ];
-            window.R3ETrackImages.resolveTrackLogoByLabel = vi.fn(label =>
-                label === 'Spa' ? 'spa.png' : ''
+            window.R3ETrackImages.resolveTrackLogoById = vi.fn(trackId =>
+                String(trackId) === '10' ? 'spa.png' : ''
             );
 
             const result = window.FilterOptionsService.getTrackOptions();
@@ -138,6 +138,7 @@ describe('FilterOptionsService', () => {
             expect(result[0]).toEqual({ value: '', label: 'All tracks' });
             expect(result[1]).toEqual({ value: '10', label: 'Spa', logoUrl: 'spa.png' });
             expect(result[2]).toEqual({ value: '20', label: 'Monza', logoUrl: '' });
+            expect(window.R3ETrackImages.resolveTrackLogoById).toHaveBeenNthCalledWith(1, 10);
         });
 
         test('deduplicates layouts into one option per base track and keeps the first layout ID', () => {
@@ -166,6 +167,28 @@ describe('FilterOptionsService', () => {
             expect(result).toEqual([
                 { value: '', label: 'All tracks' },
                 { value: '13352', label: 'Adria International Raceway', logoUrl: '' }
+            ]);
+        });
+
+        test('includes the Bathurst alias from the real track data', () => {
+            loadBrowserScript('modules/data/tracks.js');
+            const option = window.FilterOptionsService.getTrackOptions().find(track => track.value === '1846');
+
+            expect(option).toMatchObject({
+                label: 'Mount Panorama Circuit',
+                aliases: ['Bathurst']
+            });
+        });
+
+        test('merges aliases from all layouts without changing the first layout value', () => {
+            window.TRACKS_DATA = [
+                { id: 10, label: 'Example - Grand Prix', aliases: ['First'] },
+                { id: 11, label: 'Example - Short', aliases: ['second', 'FIRST'] }
+            ];
+
+            expect(window.FilterOptionsService.getTrackOptions()).toEqual([
+                { value: '', label: 'All tracks' },
+                { value: '10', label: 'Example', logoUrl: '', aliases: ['First', 'second'] }
             ]);
         });
     });

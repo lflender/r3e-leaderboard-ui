@@ -153,17 +153,17 @@ class StatusDisplay {
             lastUpdateTime = new Date(timestamp);
         }
         
-        // Calculate LED status - RED has HIGHEST PRIORITY
+        // Discovery failure takes priority over completeness and freshness checks.
         let ledClass = 'status-led--green';
         let ledTitle = 'Ready';
         
-        // RED: if unique tracks < expected tracks (HIGHEST PRIORITY - check first)
-        if (uniqueTracks < expectedTracks) {
+        if (statusData.api_discovery_failed === true) {
+            ledClass = 'status-led--black';
+            ledTitle = 'Discovery failed';
+        } else if (uniqueTracks < expectedTracks) {
             ledClass = 'status-led--red';
             ledTitle = 'Incomplete';
-        }
-        // YELLOW: if last update > 24 hours ago (only if not red)
-        else if (lastUpdateTime) {
+        } else if (lastUpdateTime) {
             const now = new Date();
             const hoursSinceUpdate = (now - lastUpdateTime) / (1000 * 60 * 60);
             if (hoursSinceUpdate > 24) {

@@ -117,8 +117,8 @@
         return window.R3ECarUtils ? window.R3ECarUtils.resolveCarClassLogoByName(className) : '';
     }
 
-    function resolveTrackLogo(label) {
-        return window.R3ETrackImages ? window.R3ETrackImages.resolveTrackLogoByLabel(label) : '';
+    function resolveTrackLogo(trackId) {
+        return window.R3ETrackImages ? window.R3ETrackImages.resolveTrackLogoById(trackId) : '';
     }
 
     function resolveBrandLogo(carName) {
@@ -1165,8 +1165,8 @@
         let tracksHtml = '';
         for (const base of baseNames) {
             const layouts = grouped.get(base);
-            const logoLabel = layouts[0]?.label || base;
-            const logoUrl = resolveTrackLogo(logoLabel);
+            const trackId = layouts[0]?.id;
+            const logoUrl = resolveTrackLogo(trackId);
             const checked = excludedTracks.has(base) ? 'checked' : '';
             const excludedCls = excludedTracks.has(base) ? ' challenge-exclusions__item--excluded' : '';
             const logoImg = logoUrl

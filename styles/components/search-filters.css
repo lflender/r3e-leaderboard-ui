@@ -143,6 +143,16 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+.custom-select__track-alias {
+    display: none;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    font-style: italic;
+}
+html.show-track-aliases .custom-select__toggle .custom-select__track-alias,
+html.show-track-aliases .custom-select__option--alias-visible .custom-select__track-alias {
+    display: inline;
+}
 .custom-select__option[hidden] {
     display: none;
 }

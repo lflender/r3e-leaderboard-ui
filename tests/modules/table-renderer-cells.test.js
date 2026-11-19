@@ -54,6 +54,15 @@ describe('TableRenderer — cell rendering', () => {
             expect(html).toContain('Spa');
         });
 
+        test('resolves track logos by ID when the displayed name has changed', () => {
+            const html = renderer.renderCell({
+                track: 'Renamed Venue - Grand Prix',
+                track_id: '10394'
+            }, 'track');
+
+            expect(html).toContain('images/tracks/VenueLogo_13808_on_dark_small.webp');
+        });
+
         test('dispatches difficulty column to renderDifficultyCell', () => {
             const html = renderer.renderCell({ Difficulty: 'Get Real' }, 'Difficulty');
             expect(html).toContain('difficulty-pill');
@@ -462,7 +471,7 @@ describe('TableRenderer — cell rendering', () => {
         });
 
         test('includes track logo when mapping exists', () => {
-            const html = TableRenderer.renderTrackCellStatic('Donington Park - Grand Prix');
+            const html = TableRenderer.renderTrackCellStatic('Renamed Venue - Grand Prix', '', 10394);
             expect(html).toContain('table-track-logo');
             expect(html).toContain('images/tracks/VenueLogo_13808_on_dark_small.webp');
         });

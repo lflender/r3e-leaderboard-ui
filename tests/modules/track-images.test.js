@@ -10,46 +10,37 @@ describe('R3ETrackImages', () => {
         window.TRACKS_DATA = [];
     });
 
-    test('stores extracted logos by store slug', () => {
-        expect(window.TRACK_LOGOS_BY_SLUG['adria-international-raceway-2003']).toBe(
+    test('stores logos by track ID', () => {
+        expect(window.TRACK_LOGOS_BY_ID['13352']).toBe(
             'images/tracks/VenueLogo_13748_on_dark_small.webp'
         );
-        expect(window.TRACK_LOGOS_BY_SLUG['indianapolis-2012']).toBe(
+        expect(window.TRACK_LOGOS_BY_ID['2014']).toBe(
             'images/tracks/VenueLogo_13746_on_dark_small.webp'
         );
+        expect(window.TRACK_LOGOS_BY_SLUG).toBeUndefined();
     });
 
-    test('resolves logos by local track labels including accented and alias cases', () => {
-        expect(window.R3ETrackImages.resolveTrackLogoByLabel('Geller\u00e5sen Arena - Short Circuit')).toBe(
-            'images/tracks/VenueLogo_13786_on_dark_small.webp'
+    test('resolves logos directly by ID without track-name data', () => {
+        expect(window.R3ETrackImages.resolveTrackLogoById(' 5301 ')).toBe(
+            'images/tracks/VenueLogo_13784_on_dark_small.webp'
         );
-        expect(window.R3ETrackImages.resolveTrackLogoByLabel('V\u00e5lerbanen - Full Circuit')).toBe(
-            'images/tracks/VenueLogo_13804_on_dark_small.webp'
-        );
-        expect(window.R3ETrackImages.resolveTrackLogoByLabel('Hockenheimring DMEC - DMEC')).toBe(
-            'images/tracks/VenueLogo_13741_on_dark_small.webp'
-        );
-        expect(window.R3ETrackImages.resolveTrackLogoByLabel('Brands Hatch - Indy')).toBe(
-            'images/tracks/VenueLogo_13743_on_dark_small.webp'
-        );
-        expect(window.R3ETrackImages.resolveTrackLogoByLabel('Brands Hatch')).toBe(
-            'images/tracks/VenueLogo_13743_on_dark_small.webp'
-        );
+        expect(window.R3ETrackImages.resolveTrackLogoById('unknown')).toBe('');
+        expect(window.R3ETrackImages.resolveTrackLogoById('')).toBe('');
+        expect(window.R3ETrackImages.resolveTrackLogoByLabel).toBeUndefined();
     });
 
-    test('builds and resolves logos by track id using TRACKS_DATA labels', () => {
-        window.TRACKS_DATA = [
-            { id: 10274, label: 'Hockenheimring DMEC - DMEC' },
-            { id: 9465, label: 'V\u00e5lerbanen - Full Circuit' }
-        ];
+    test('maps every current track ID to a logo independent of its label', () => {
+        loadBrowserScript('modules/data/tracks.js');
+        expect(window.TRACKS_DATA.every(track =>
+            window.R3ETrackImages.resolveTrackLogoById(track.id)
+        )).toBe(true);
+    });
 
-        expect(window.R3ETrackImages.resolveTrackLogoById(10274)).toBe(
-            'images/tracks/VenueLogo_13741_on_dark_small.webp'
+    test('resolves logos for tracks whose labels were renamed', () => {
+        window.TRACKS_DATA = [{ id: 5301, label: 'A renamed track name' }];
+        expect(window.R3ETrackImages.resolveTrackLogoById(5301)).toBe(
+            'images/tracks/VenueLogo_13784_on_dark_small.webp'
         );
-        expect(window.R3ETrackImages.buildTrackLogosById()).toEqual({
-            '10274': 'images/tracks/VenueLogo_13741_on_dark_small.webp',
-            '9465': 'images/tracks/VenueLogo_13804_on_dark_small.webp'
-        });
     });
 });
 

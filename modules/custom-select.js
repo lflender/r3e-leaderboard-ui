@@ -4,11 +4,14 @@
  * Implements OCP (Open/Closed Principle) - open for extension, closed for modification
  */
 
+const TRACK_ALIAS_MODIFIER_KEY = 'Control';
+let trackAliasModifierPressed = false;
+
 class CustomSelect {
     /**
      * Creates a custom select component
      * @param {string} elementId - ID of the root element
-     * @param {Array<{value: string, label: string}>} options - Dropdown options
+     * @param {Array<{value: string, label: string, aliases?: string[]}>} options - Dropdown options
      * @param {Function} onChange - Callback when selection changes
      * @param {Object} [opts] - Additional options
      * @param {boolean} [opts.searchable=true] - Whether to show the search input
@@ -64,6 +67,24 @@ class CustomSelect {
         return '';
     }
 
+    static buildTrackAliasHtml(opt) {
+        const aliases = Array.isArray(opt.aliases)
+            ? opt.aliases
+                .filter(alias => typeof alias === 'string' && alias.trim())
+                .map(alias => R3EUtils.escapeHtml(alias.trim()))
+            : [];
+        return aliases.length
+            ? `<span class="custom-select__track-alias">(${aliases.join(', ')})</span>`
+            : '';
+    }
+
+    static normalizeSearchText(value) {
+        return String(value || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase();
+    }
+
     /**
      * Builds the dropdown menu from options
      */
@@ -90,8 +111,9 @@ class CustomSelect {
             }
 
             const logoHtml = CustomSelect.buildLogosHtml(opt);
+            const aliasHtml = CustomSelect.buildTrackAliasHtml(opt);
             
-            return `<div class="custom-select__option" data-value="${escapedValue}">${logoHtml}${formattedLabel}</div>`;
+            return `<div class="custom-select__option" data-value="${escapedValue}">${logoHtml}<span class="custom-select__label">${formattedLabel}</span>${aliasHtml}</div>`;
         }).join('');
 
         this.menu.innerHTML = searchHtml + `<div class="custom-select__options-list">${optionsHtml}</div>`;
@@ -127,6 +149,7 @@ class CustomSelect {
 
         this.optionsList.addEventListener('scroll', () => {
             this.uiState.optionsScrollTop = this.optionsList.scrollTop;
+            refreshTrackAliasesVisibility();
         });
         
         // Close when clicking outside
@@ -169,6 +192,7 @@ class CustomSelect {
         } else {
             this.optionsList.scrollTop = this.uiState.optionsScrollTop;
         }
+        refreshTrackAliasesVisibility();
     }
 
     /**
@@ -217,6 +241,7 @@ class CustomSelect {
         this.menu.style.maxWidth = '';
         this.toggle.setAttribute('aria-expanded', 'false');
         this.root.classList.remove('is-open');
+        refreshTrackAliasesVisibility();
     }
     
     /**
@@ -251,8 +276,9 @@ class CustomSelect {
 
             // Mirror the logo(s) into the toggle button so the selected class is visible when closed.
             const logoHtml = CustomSelect.buildLogosHtml(opt);
+            const aliasHtml = CustomSelect.buildTrackAliasHtml(opt);
             
-            this.toggle.innerHTML = `${logoHtml}${formattedLabel} ▾`;
+            this.toggle.innerHTML = `${logoHtml}<span class="custom-select__label">${formattedLabel}</span>${aliasHtml} ▾`;
         }
         
         this.updateSelectedState();
@@ -290,18 +316,24 @@ class CustomSelect {
      * @param {string} query
      */
     _filterOptions(query) {
-        const q = query.trim().toLowerCase();
+        const q = CustomSelect.normalizeSearchText(query.trim());
         const allOptions = this.menu.querySelectorAll('.custom-select__option');
         let visibleCount = 0;
-        allOptions.forEach(opt => {
-            const label = (opt.dataset.value === '' ? 'all' : '') + (opt.textContent || '').toLowerCase();
-            const matches = !q || label.includes(q);
+        allOptions.forEach((opt, index) => {
+            const label = (opt.dataset.value === '' ? 'all' : '') +
+                CustomSelect.normalizeSearchText(opt.textContent || '');
+            const aliases = this.options[index].aliases;
+            const matches = !q || label.includes(q) ||
+                (Array.isArray(aliases) && aliases.some(alias =>
+                    typeof alias === 'string' && CustomSelect.normalizeSearchText(alias).includes(q)
+                ));
             opt.hidden = !matches;
             if (matches) visibleCount++;
         });
         if (this.noResults) {
             this.noResults.hidden = visibleCount > 0;
         }
+        refreshTrackAliasesVisibility();
     }
     
     /**
@@ -319,8 +351,62 @@ class CustomSelect {
             this.optionsList.scrollTop = this.uiState.optionsScrollTop;
         }
         this.updateSelectedState();
+        refreshTrackAliasesVisibility();
     }
 }
 
 // Export for use in other modules
 window.CustomSelect = CustomSelect;
+
+function refreshTrackAliasesVisibility() {
+    const menu = document.querySelector('.custom-select__menu:not([hidden])');
+    const optionsList = menu?.querySelector('.custom-select__options-list');
+    let hasVisibleTrackAlias = false;
+
+    if (menu && optionsList) {
+        const menuRect = menu.getBoundingClientRect();
+        const listRect = optionsList.getBoundingClientRect();
+        const visibleTop = Math.max(0, menuRect.top, listRect.top);
+        const visibleBottom = Math.min(window.innerHeight, menuRect.bottom, listRect.bottom);
+
+        optionsList.querySelectorAll('.custom-select__option').forEach(option => {
+            let showAlias = false;
+            if (trackAliasModifierPressed &&
+                !option.hidden &&
+                Boolean(option.querySelector('.custom-select__track-alias')) &&
+                visibleBottom > visibleTop) {
+                const optionRect = option.getBoundingClientRect();
+                showAlias = optionRect.bottom > visibleTop && optionRect.top < visibleBottom;
+            }
+            option.classList.toggle('custom-select__option--alias-visible', showAlias);
+            hasVisibleTrackAlias ||= showAlias;
+        });
+    }
+
+    document.querySelectorAll(
+        '.custom-select__option--alias-visible'
+    ).forEach(option => {
+        if (!menu || !menu.contains(option)) {
+            option.classList.remove('custom-select__option--alias-visible');
+        }
+    });
+
+    document.documentElement.classList.toggle(
+        'show-track-aliases',
+        trackAliasModifierPressed && Boolean(hasVisibleTrackAlias)
+    );
+}
+
+function updateTrackAliasesVisibility(event) {
+    trackAliasModifierPressed = event.getModifierState(TRACK_ALIAS_MODIFIER_KEY);
+    refreshTrackAliasesVisibility();
+}
+
+window.addEventListener('keydown', updateTrackAliasesVisibility);
+window.addEventListener('keyup', updateTrackAliasesVisibility);
+window.addEventListener('resize', refreshTrackAliasesVisibility);
+
+window.addEventListener('blur', () => {
+    trackAliasModifierPressed = false;
+    refreshTrackAliasesVisibility();
+});

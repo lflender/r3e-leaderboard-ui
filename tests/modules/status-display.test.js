@@ -158,6 +158,20 @@ describe('StatusDisplay.updateStatusLed – LED colour logic', () => {
         expect(ledTitle()).toBe('Incomplete');
     });
 
+    it('sets black with a discovery failure tooltip when API discovery failed', () => {
+        const sd = makeInstance();
+        const stale = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+        sd.updateStatusLed({
+            api_discovery_failed: true,
+            total_unique_tracks: 100,
+            last_scrape_end: stale
+        }, false);
+        expect(ledClass()).toContain('status-led--black');
+        expect(ledClass()).not.toContain('status-led--red');
+        expect(ledClass()).not.toContain('status-led--yellow');
+        expect(ledTitle()).toBe('Discovery failed');
+    });
+
     it('sets yellow when update is older than 24 hours and tracks are full', () => {
         const sd = makeInstance();
         const stale = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString(); // 25h ago

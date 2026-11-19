@@ -255,7 +255,16 @@
                 return;
             }
 
-            const cards = series.map(item => this.renderSeries(item)).join('');
+            const orderedBySetup = [
+                ...series.filter(item => item.format.fixed_setup === true),
+                ...series.filter(item => item.format.fixed_setup === false)
+            ];
+            // Leave series with an unknown setup in their original positions.
+            let setupIndex = 0;
+            const cards = series.map(item => typeof item.format.fixed_setup === 'boolean'
+                ? orderedBySetup[setupIndex++]
+                : item
+            ).map(item => this.renderSeries(item)).join('');
             const round = Number(series[0].current_round);
             const roundLabel = Number.isInteger(round) && round > 0 ? `Round ${round}` : 'Round unavailable';
             this.resultsContainer.innerHTML = `
@@ -282,6 +291,10 @@
             const duration = Array.isArray(series.format && series.format.races)
                 ? series.format.races.map(formatRaceDuration).filter(Boolean).join(' / ')
                 : '';
+            const fixedSetup = series.format && series.format.fixed_setup;
+            const setupLabel = typeof fixedSetup === 'boolean'
+                ? (fixedSetup ? 'Fixed setup' : 'Open setup')
+                : '';
             const schedule = formatSchedule(series.schedule);
             const cardContent = `
                 <div class="daily-race-card ranked-series-card">
@@ -297,7 +310,7 @@
                                 : ''}</span>
                         </div>
                         <div class="daily-race-schedule">${escapeHtml(schedule)}</div>
-                        ${duration ? `<div class="daily-race-meta"><span class="daily-race-tag">${escapeHtml(duration)} race</span></div>` : ''}
+                        ${duration || setupLabel ? `<div class="daily-race-meta">${duration ? `<span class="daily-race-tag">${escapeHtml(duration)} race</span>` : ''}${setupLabel ? `<span class="daily-race-tag">${setupLabel}</span>` : ''}</div>` : ''}
                     </div>
                 </div>
             `;

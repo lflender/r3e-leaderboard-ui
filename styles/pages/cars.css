@@ -758,23 +758,23 @@
     font-weight: var(--font-weight-semibold);
 }
 
-#cars-info-table .car-tile .carinfo-meta.carinfo-downforce--low,
-#cars-info-table .car-tile .carinfo-meta.carinfo-difficulty--very-easy,
-#cars-info-table .car-tile .carinfo-meta.carinfo-difficulty--easy {
+.car-tile .carinfo-meta.carinfo-downforce--low,
+.car-tile .carinfo-meta.carinfo-difficulty--very-easy,
+.car-tile .carinfo-meta.carinfo-difficulty--easy {
     color: var(--color-success-light);
 }
 
-#cars-info-table .car-tile .carinfo-meta.carinfo-downforce--medium,
-#cars-info-table .car-tile .carinfo-meta.carinfo-difficulty--moderate {
+.car-tile .carinfo-meta.carinfo-downforce--medium,
+.car-tile .carinfo-meta.carinfo-difficulty--moderate {
     color: var(--color-warning);
 }
 
-#cars-info-table .car-tile .carinfo-meta.carinfo-downforce--high {
+.car-tile .carinfo-meta.carinfo-downforce--high {
     color: var(--color-primary-light-solid);
 }
 
-#cars-info-table .car-tile .carinfo-meta.carinfo-difficulty--hard,
-#cars-info-table .car-tile .carinfo-meta.carinfo-difficulty--very-hard {
+.car-tile .carinfo-meta.carinfo-difficulty--hard,
+.car-tile .carinfo-meta.carinfo-difficulty--very-hard {
     color: var(--color-danger-lighter);
 }
 
@@ -797,7 +797,8 @@
     transition: max-height 0.3s ease-out;
 }
 
-.cars-class-section.descriptions-expanded .car-tile-description {
+.cars-class-section.descriptions-expanded .car-tile-description,
+.car-tile-description.challenge-description-expanded {
     -webkit-line-clamp: 99;
 }
 

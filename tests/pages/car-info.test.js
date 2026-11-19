@@ -102,6 +102,7 @@ beforeEach(() => {
     if (!window.R3ECarUtils) {
         loadBrowserScript('modules/car-helper.js');
     }
+    loadBrowserScript('modules/car-tile.js');
 });
 
 describe('car-info integration', () => {

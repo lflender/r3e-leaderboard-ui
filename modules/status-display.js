@@ -12,7 +12,7 @@ class StatusDisplay {
                 <${headingTag}>Database Status <span id="status-led" class="status-led" title="Status indicator"></span></${headingTag}>
                 <div class="status-grid">
                     <div class="status-item">
-                        <span id="status-timestamp-label" class="status-label">Last Updated:</span>
+                        <span id="status-timestamp-label" class="status-label">Last update:</span>
                         <span id="status-timestamp" class="status-value">-</span>
                     </div>
                     <div class="status-item">
@@ -88,14 +88,12 @@ class StatusDisplay {
         
         // Update timestamp label
         if (this.elements.timestampLabel) {
-            this.elements.timestampLabel.textContent = fetchInProgress ? 
-                'Last partial update:' : 'Last complete update:';
+            this.elements.timestampLabel.textContent = 'Last update:';
         }
         
         // Update timestamp
         if (this.elements.timestamp) {
-            let timestamp = fetchInProgress ? 
-                statusData.last_index_update : statusData.last_scrape_end;
+            const timestamp = statusData.last_scrape_end;
             
             if (timestamp) {
                 const date = new Date(timestamp);
@@ -147,8 +145,7 @@ class StatusDisplay {
         
         // Parse last update timestamp
         let lastUpdateTime = null;
-        const timestamp = fetchInProgress ? 
-            statusData.last_index_update : statusData.last_scrape_end;
+        const timestamp = statusData.last_scrape_end;
         if (timestamp) {
             lastUpdateTime = new Date(timestamp);
         }

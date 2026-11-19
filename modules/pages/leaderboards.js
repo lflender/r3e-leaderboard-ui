@@ -856,10 +856,45 @@
     if (!trackDescriptionEl) return;
     const meta = activeTrackId && window.TRACKS_META && window.TRACKS_META[activeTrackId];
     if (meta && meta.description) {
-      trackDescriptionEl.textContent = meta.description;
+      const description = document.createElement('span');
+      description.className = 'track-description__description';
+      description.textContent = meta.description;
+      trackDescriptionEl.replaceChildren(description);
+
+      const details = [
+        ['Location', meta.location],
+        ['Track', meta.trackType],
+        ['Opened', meta.opened],
+        ['Raced here', meta.racedHere]
+      ].filter(([, value]) => value);
+      if (details.length) {
+        const list = document.createElement('dl');
+        list.className = 'track-description__details';
+        details.forEach(([label, value]) => {
+          const item = document.createElement('div');
+          const term = document.createElement('dt');
+          const definition = document.createElement('dd');
+          term.textContent = `${label}:`;
+          if (label === 'Location') {
+            const country = value.split(',').pop().trim();
+            const flag = window.FlagHelper.countryToFlag(country);
+            if (flag) {
+              const icon = document.createElement('span');
+              icon.className = 'track-description__flag';
+              icon.setAttribute('aria-hidden', 'true');
+              icon.innerHTML = flag;
+              definition.append(icon);
+            }
+          }
+          definition.append(document.createTextNode(value));
+          item.append(term, definition);
+          list.append(item);
+        });
+        trackDescriptionEl.append(list);
+      }
       if (meta.url) {
         trackDescriptionEl.href = meta.url;
-        trackDescriptionEl.title = 'View track in the RaceRoom store (opens in a new tab)';
+        trackDescriptionEl.title = 'View track in the RaceRoom store';
       } else {
         trackDescriptionEl.removeAttribute('href');
         trackDescriptionEl.removeAttribute('title');

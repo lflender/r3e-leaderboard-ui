@@ -40,25 +40,11 @@ function makeInstance() {
 // displayStatus – timestamp label
 // ---------------------------------------------------------------------------
 describe('StatusDisplay.displayStatus – timestamp label', () => {
-    it('shows "Last complete update:" when fetch is not in progress', () => {
+    it.each([false, true, 'true'])('shows "Last update:" when fetch_in_progress is %s', (fetchInProgress) => {
         const sd = makeInstance();
-        sd.displayStatus({ data: { fetch_in_progress: false } });
+        sd.displayStatus({ data: { fetch_in_progress: fetchInProgress } });
         expect(document.getElementById('status-timestamp-label').textContent)
-            .toBe('Last complete update:');
-    });
-
-    it('shows "Last partial update:" when fetch is in progress (boolean)', () => {
-        const sd = makeInstance();
-        sd.displayStatus({ data: { fetch_in_progress: true } });
-        expect(document.getElementById('status-timestamp-label').textContent)
-            .toBe('Last partial update:');
-    });
-
-    it('shows "Last partial update:" when fetch_in_progress is the string "true"', () => {
-        const sd = makeInstance();
-        sd.displayStatus({ data: { fetch_in_progress: 'true' } });
-        expect(document.getElementById('status-timestamp-label').textContent)
-            .toBe('Last partial update:');
+            .toBe('Last update:');
     });
 });
 
@@ -75,17 +61,20 @@ describe('StatusDisplay.displayStatus – timestamp value', () => {
         expect(text).not.toBe('-');
     });
 
-    it('formats last_index_update when fetching', () => {
+    it('shows the last completed refresh instead of the index update when fetching', () => {
         const sd = makeInstance();
-        sd.displayStatus({ data: { fetch_in_progress: true, last_index_update: '2025-06-15T08:00:00Z' } });
+        const completed = '2025-06-15T14:00:00Z';
+        sd.displayStatus({ data: { fetch_in_progress: true, last_scrape_end: completed, last_index_update: '2025-06-15T08:00:00Z' } });
         const text = document.getElementById('status-timestamp').textContent;
-        expect(text).not.toBe('');
-        expect(text).not.toBe('-');
+        expect(text).toBe(new Date(completed).toLocaleString('en-GB', {
+            year: 'numeric', month: 'short', day: 'numeric',
+            hour: '2-digit', minute: '2-digit', hour12: false
+        }));
     });
 
     it('shows "-" when relevant timestamp is missing', () => {
         const sd = makeInstance();
-        sd.displayStatus({ data: { fetch_in_progress: false } });
+        sd.displayStatus({ data: { fetch_in_progress: true, last_index_update: '2025-06-15T08:00:00Z' } });
         expect(document.getElementById('status-timestamp').textContent).toBe('-');
     });
 });
@@ -177,6 +166,19 @@ describe('StatusDisplay.updateStatusLed – LED colour logic', () => {
         const stale = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString(); // 25h ago
         sd.updateStatusLed({ total_unique_tracks: 177, last_scrape_end: stale }, false);
         expect(ledClass()).toContain('status-led--yellow');
+        expect(ledTitle()).toBe('Stale');
+    });
+
+    it('checks the completed refresh age while fetching even with a recent index update', () => {
+        const sd = makeInstance();
+        sd.displayStatus({ data: {
+            fetch_in_progress: true,
+            total_unique_tracks: 177,
+            last_scrape_end: new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString(),
+            last_index_update: new Date().toISOString()
+        } });
+        expect(ledClass()).toContain('status-led--yellow');
+        expect(ledClass()).toContain('is-fetching');
         expect(ledTitle()).toBe('Stale');
     });
 

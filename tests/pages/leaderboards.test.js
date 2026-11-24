@@ -1,5 +1,18 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { loadBrowserScript } from '../helpers/script-loader.js';
+
+it.each(['pages/leaderboards.html', 'pages/drivers.html'])(
+    'provides an accessible track alias hint next to the track filter on %s', (file) => {
+    const page = new DOMParser().parseFromString(readFileSync(file, 'utf8'), 'text/html');
+    const hint = page.querySelector('.search-container .track-alias-info');
+
+    expect(hint.classList.contains('info-icon')).toBe(true);
+    expect(hint.getAttribute('title')).toBe('Hold Ctrl to show track name aliases.\nAliases are also searchable.');
+    expect(hint.getAttribute('aria-label')).toBe(hint.getAttribute('title'));
+    expect(hint.tabIndex).toBe(0);
+    expect(hint.previousElementSibling.id).toBe('track-filter-ui');
+});
 
 beforeAll(() => {
     loadBrowserScript('modules/track-helper.js');

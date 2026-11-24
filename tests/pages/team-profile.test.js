@@ -241,6 +241,31 @@ describe('team profile page', () => {
         expect(container.innerHTML).toContain('Bob Jones');
         const rows = container.querySelectorAll('.driver-data-row');
         expect(rows.length).toBe(2);
+        expect(container.querySelector('.team-entries-scroll-track .team-entries-table')).toBeTruthy();
+    });
+
+    it('keeps the first column visible for oversized team entries', () => {
+        const page = Object.create(TeamProfilePage.prototype);
+        const container = document.createElement('div');
+        container.id = 'team-entries-container';
+        const scrollport = document.createElement('div');
+        scrollport.className = 'team-entries-scrollport';
+        Object.defineProperty(scrollport, 'clientWidth', { value: 400 });
+        const track = document.createElement('div');
+        track.className = 'team-entries-scroll-track';
+        const table = document.createElement('table');
+        table.className = 'team-entries-table';
+        table.getBoundingClientRect = () => ({ width: 600 });
+        track.append(table);
+        scrollport.append(track);
+        container.append(scrollport);
+        page.elements = { profileContainer: document.createElement('div') };
+        page.elements.profileContainer.append(container);
+
+        page._updateEntriesTableAlignment(true);
+
+        expect(track.style.getPropertyValue('--team-entries-overflow-gutter')).toBe('100px');
+        expect(scrollport.scrollLeft).toBe(100);
     });
 
     it('delegates Lap % enrichment to DataService and re-sorts after enrichment', async () => {

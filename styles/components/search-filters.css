@@ -48,6 +48,12 @@
     flex: 0 0 auto;
 }
 
+.track-filter-group {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+}
+
 /* Custom select UI */
 .custom-select {
     position: relative;
@@ -279,6 +285,10 @@ html.show-track-aliases .custom-select__option--alias-visible .custom-select__tr
 }
 
 @media (max-width: 768px) {
+    .info-icon.track-alias-info {
+        display: none;
+    }
+
     .custom-select__toggle,
     .combine-checkbox-label,
     .challenge-group-category,

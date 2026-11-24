@@ -28,7 +28,7 @@
     <!-- Analytics (PostHog via first-party proxy) -->
     <script src="modules/analytics.js?v=8" defer></script>
     
-    <link rel="stylesheet" href="styles/style.css?v=290">
+    <link rel="stylesheet" href="styles/style.css?v=309">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"/>
     <!-- Site Icons -->
     <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png?v=2">
@@ -58,9 +58,12 @@
                         <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All classes ▾</button>
                         <div class="custom-select__menu" role="presentation" hidden></div>
                     </div>
-                    <div id="track-filter-ui" class="custom-select" role="listbox" aria-label="Filter by track">
-                        <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All tracks ▾</button>
-                        <div class="custom-select__menu" role="presentation" hidden></div>
+                    <div class="track-filter-group">
+                        <div id="track-filter-ui" class="custom-select" role="listbox" aria-label="Filter by track">
+                            <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All tracks ▾</button>
+                            <div class="custom-select__menu" role="presentation" hidden></div>
+                        </div>
+                        <span class="info-icon track-alias-info" title="Hold Ctrl to show track name aliases.&#10;Aliases are also searchable." aria-label="Hold Ctrl to show track name aliases.&#10;Aliases are also searchable." role="img" tabindex="0">i</span>
                     </div>
                     <div id="track-layout-filter-ui" class="custom-select" role="listbox" aria-label="Filter by track layout">
                         <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All layouts ▾</button>

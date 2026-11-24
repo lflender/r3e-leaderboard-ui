@@ -227,17 +227,33 @@
     }
 }
 
-/* Wide desktop: show full entries table centered without scroll */
-@media (min-width: 1501px) {
-    #team-entries-container {
-        overflow-x: visible;
-    }
+/* Team entries table */
+#team-entries-container {
+    overflow-x: visible;
 }
 
-/* Team entries table */
+#team-entries-container .team-entries-scrollport {
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100vw;
+    overflow-x: auto;
+}
+
+#team-entries-container .team-entries-scroll-track {
+    --team-entries-overflow-gutter: 0px;
+    display: flex;
+    justify-content: center;
+    box-sizing: border-box;
+    width: max-content;
+    min-width: 100%;
+    padding-inline: var(--team-entries-overflow-gutter);
+}
+
 #team-entries-container .team-entries-table {
     width: max-content;
-    margin: 0 auto;
+    flex: 0 0 auto;
+    margin: 0;
 }
 
 .team-entries-table th {

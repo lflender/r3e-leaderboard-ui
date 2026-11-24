@@ -19,6 +19,7 @@ class TeamProfilePage {
         this._entriesPage = 1;
         this._entriesPerPage = 50;
         this._teamEntries = [];
+        window.addEventListener('resize', () => this._updateEntriesTableAlignment(true));
 
         this.init();
     }
@@ -497,7 +498,8 @@ class TeamProfilePage {
         }
 
         const sortBy = this._entriesSortBy;
-        let html = '<table class="results-table team-entries-table">';
+        let html = '<div class="team-entries-scrollport"><div class="team-entries-scroll-track">';
+        html += '<table class="results-table team-entries-table">';
         html += '<thead><tr>';
         html += '<th>Driver</th>';
         if (keys && tr) {
@@ -548,7 +550,7 @@ class TeamProfilePage {
             html += '</tr>';
         }
 
-        html += '</tbody></table>';
+        html += '</tbody></table></div></div>';
 
         if (totalPages > 1) {
             const infoText = `Showing entries ${startIndex + 1}\u2013${endIndex} of ${totalEntries}`;
@@ -564,6 +566,7 @@ class TeamProfilePage {
         }
 
         container.innerHTML = '<h3 class="team-section-tile-title">Entries</h3>' + html;
+        this._updateEntriesTableAlignment(true);
 
         // Wire entries table hover via TeamProfileInteractions
         const table = container.querySelector('.team-entries-table');
@@ -581,6 +584,24 @@ class TeamProfilePage {
         };
 
         this._bindEntriesSortHandlers();
+    }
+
+    _updateEntriesTableAlignment(center = false) {
+        const scrollport = this.elements.profileContainer.querySelector('#team-entries-container .team-entries-scrollport');
+        const track = scrollport?.querySelector('.team-entries-scroll-track');
+        const table = track?.querySelector('.team-entries-table');
+        if (!scrollport || !track || !table) return;
+
+        const styles = window.getComputedStyle(scrollport);
+        const padding = (parseFloat(styles.paddingLeft) || 0) + (parseFloat(styles.paddingRight) || 0);
+        const availableWidth = Math.max(0, scrollport.clientWidth - padding);
+        const tableWidth = table.getBoundingClientRect().width;
+        const gutter = Math.max(0, (tableWidth - availableWidth) / 2);
+
+        track.style.setProperty('--team-entries-overflow-gutter', `${gutter}px`);
+        if (center) {
+            scrollport.scrollLeft = gutter;
+        }
     }
 
     async _populateGapPercentages(entries, table, container) {

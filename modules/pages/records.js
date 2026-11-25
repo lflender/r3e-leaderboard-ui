@@ -1,5 +1,6 @@
 (function () {
     const FILTER_ROOT_ID = 'records-class-filter-ui';
+    const COUNTRY_FILTER_ROOT_ID = 'records-country-filter-ui';
     const TABLES_ROOT_ID = 'records-tables';
     const COLLAPSED_ROWS = 3;
     const PAGE_SIZE = 50;      // rows shown per expanded page
@@ -61,6 +62,9 @@
     const tablesRoot = document.getElementById(TABLES_ROOT_ID);
 
     let currentFilter = '';
+    let currentCountryFilter = '';
+    let countrySelect = null;
+    let countryOptionsPromise = null;
     let currentRequestId = 0;
     let expandedKey = null;
     // Cache of full normalized rows per metric key for the current filter.
@@ -104,6 +108,13 @@
         return value;
     }
 
+    function getRecordsLabel() {
+        const labels = [];
+        if (currentFilter) labels.push(getSelectedLabel(currentFilter));
+        if (currentCountryFilter) labels.push(currentCountryFilter);
+        return labels.length ? labels.join(' / ') : 'Overall';
+    }
+
     function getFilterType(value) {
         if (!value) return 'overall';
         return value.startsWith('superclass:') ? 'superclass' : 'class';
@@ -116,6 +127,7 @@
             filter_value: value || '',
             filter_label: getSelectedLabel(value),
             filter_type: getFilterType(value),
+            country_value: currentCountryFilter,
             ...counts
         });
         hasTrackedDisplayed = true;
@@ -127,6 +139,7 @@
             filter_value: value || '',
             filter_label: getSelectedLabel(value),
             filter_type: getFilterType(value),
+            country_value: currentCountryFilter,
             source: source || 'filter',
             ...counts
         });
@@ -140,6 +153,7 @@
             filter_value: value || '',
             filter_label: getSelectedLabel(value),
             filter_type: getFilterType(value),
+            country_value: currentCountryFilter,
             ...(extra || {})
         });
     }
@@ -581,22 +595,36 @@
                 ensureMpPosLoaded()
             ]);
 
-            const paths = statsData.getAllPathsForFilter(index, currentFilter);
-            if (!paths) {
+            const paths = currentCountryFilter
+                ? null
+                : statsData.getAllPathsForFilter(index, currentFilter);
+            const fullFiles = currentCountryFilter
+                ? statsData.getFilesEntryForFilter(index, currentFilter)
+                : null;
+            if (!paths && !fullFiles) {
                 throw new Error('No stats files found for this class filter.');
             }
 
+            loadCountryOptions(index, statsData);
+
+            const files = fullFiles || {
+                pole_file: paths.polePath,
+                bested_file: paths.bestedPath,
+                podium_file: paths.podiumPath,
+                avg_bested_file: paths.avgBestedPath,
+                entries_file: paths.entriesPath
+            };
             const pathByKey = {
-                pole: paths.polePath,
-                bested: paths.bestedPath,
-                podium: paths.podiumPath,
-                avg_bested: paths.avgBestedPath,
-                entries: paths.entriesPath
+                pole: files.pole_file,
+                bested: files.bested_file,
+                podium: files.podium_file,
+                avg_bested: files.avg_bested_file,
+                entries: files.entries_file
             };
 
             pageByKey = {};
             rowsByKey = {};
-            updateTitles(getSelectedLabel(currentFilter));
+            updateTitles(getRecordsLabel());
             updateNavButtons();
 
             // Fetch all sections in parallel. Each section renders into its own
@@ -627,8 +655,13 @@
 
                 // preFilter may be a factory function taking the active filterValue,
                 // or a plain predicate, or absent.
-                const effectivePreFilter = typeof section.preFilter === 'function'
+                const metricPreFilter = typeof section.preFilter === 'function'
                     ? section.preFilter(currentFilter)
+                    : null;
+                const countryValue = currentCountryFilter.trim().toLowerCase();
+                const effectivePreFilter = metricPreFilter || countryValue
+                    ? (row) => (!metricPreFilter || metricPreFilter(row)) &&
+                        (!countryValue || String(row?.country || '').trim().toLowerCase() === countryValue)
                     : null;
                 const normalized = payload
                     ? statsData.normalizeRows(payload, def.metricKey, MAX_FETCH_ROWS, { direction: def.direction, preFilter: effectivePreFilter })
@@ -684,11 +717,95 @@
         if (currentFilter) classSelect.setValue(currentFilter, { notify: false, source: 'restore' });
     }
 
+    function initCountryFilter() {
+        if (typeof window.CustomSelect !== 'function') {
+            console.warn('CustomSelect is not available for records country filter.');
+            return;
+        }
+
+        currentCountryFilter = String(PageFilterState.read('records').country || '').trim();
+        countrySelect = new window.CustomSelect(
+            COUNTRY_FILTER_ROOT_ID,
+            [{ value: '', label: 'All countries' }],
+            (value, opts) => {
+                currentCountryFilter = value || '';
+                PageFilterState.write('records', 'country', currentCountryFilter);
+                expandedKey = null;
+                if (opts?.source === 'user') {
+                    pendingTrackSource = 'filter';
+                }
+                fetchAndRender();
+            }
+        );
+        if (currentCountryFilter) {
+            countrySelect.setValue(currentCountryFilter, { notify: false, source: 'restore' });
+        }
+    }
+
+    function loadCountryOptions(index, statsData) {
+        if (countryOptionsPromise) return countryOptionsPromise;
+
+        countryOptionsPromise = (async () => {
+            const overallFiles = statsData.getFilesEntryForFilter(index, '');
+            if (!overallFiles?.entries_file) {
+                throw new Error('Country filter options are unavailable: overall entries file not found.');
+            }
+
+            const payload = await statsData.fetchGzipJson(overallFiles.entries_file);
+            const countries = new Map();
+            statsData.extractRows(payload).forEach((row) => {
+                const country = String(row?.country || '').trim();
+                if (!country) return;
+                const key = country.toLowerCase();
+                if (!countries.has(key)) countries.set(key, country);
+            });
+
+            const options = [{ value: '', label: 'All countries' }]
+                .concat(Array.from(countries.values())
+                    .sort((a, b) => a.localeCompare(b))
+                    .map((country) => {
+                        const flag = window.FlagHelper?.countryToFlag?.(country) || '';
+                        const label = escapeHtml(country);
+                        return {
+                            value: country,
+                            label: country,
+                            labelHtml: flag
+                                ? `<span class="country-flag">${flag}</span>${label}`
+                                : label
+                        };
+                    }));
+
+            if (countrySelect) {
+                countrySelect.setOptions(options);
+                const previousCountry = currentCountryFilter;
+                const selectedCountry = options.some(option => option.value === currentCountryFilter)
+                    ? currentCountryFilter
+                    : '';
+                if (selectedCountry !== currentCountryFilter) {
+                    currentCountryFilter = selectedCountry;
+                    PageFilterState.write('records', 'country', selectedCountry);
+                }
+                countrySelect.setValue(selectedCountry, { notify: false, source: 'restore' });
+                if (selectedCountry !== previousCountry) fetchAndRender();
+            }
+        })().catch((error) => {
+            countryOptionsPromise = null;
+            console.error('Failed to load records country filter options:', error);
+            if (countrySelect?.toggle) {
+                countrySelect.setOptions([{ value: '', label: 'Country filter unavailable' }]);
+                countrySelect.toggle.disabled = true;
+            }
+        });
+
+        return countryOptionsPromise;
+    }
+
     async function init() {
         if (!tablesRoot) return;
         createNavButtons();
         bindToggleHandler();
         initFilter();
+        initCountryFilter();
         await fetchAndRender();
     }
 

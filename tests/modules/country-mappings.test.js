@@ -4,6 +4,7 @@ import { loadBrowserScript } from '../helpers/script-loader.js';
 describe('CountryMappings', () => {
     beforeAll(() => {
         loadBrowserScript('modules/data/country-mappings.js');
+        loadBrowserScript('modules/flag-helper.js');
     });
 
     // ── COUNTRY_NAME_MAP ────────────────────────────────────────────
@@ -32,6 +33,21 @@ describe('CountryMappings', () => {
                 ['taiwan', 'TW'],
                 ['hong kong', 'HK'],
                 ['turkey', 'TR'],
+                ['congo', 'CG'],
+                ['dr congo', 'CD'],
+                ['falkland islands (malvinas)', 'FK'],
+                ['heard island and mcdonald islands', 'HM'],
+                ['kosovo', 'XK'],
+                ['myanmar', 'MM'],
+                ['pitcairn', 'PN'],
+                ['saint kitts and nevis', 'KN'],
+                ['saint martin', 'MF'],
+                ['saint pierre and miquelon', 'PM'],
+                ['saint vincent and the grenadines', 'VC'],
+                ['south georgia and the south sandwich islands', 'GS'],
+                ['turks and caicos islands', 'TC'],
+                ['u.s. minor outlying islands', 'UM'],
+                ['wallis and futuna', 'WF'],
             ];
             for (const [name, code] of cases) {
                 expect(window.COUNTRY_NAME_MAP[name]).toBe(code);
@@ -43,7 +59,7 @@ describe('CountryMappings', () => {
             expect(window.COUNTRY_NAME_MAP['turkiye']).toBe('TR');
         });
 
-        test('all values are valid 2-letter ISO codes', () => {
+        test('all values are valid 2-letter region codes', () => {
             for (const [name, code] of Object.entries(window.COUNTRY_NAME_MAP)) {
                 expect(code).toMatch(/^[A-Z]{2}$/);
             }
@@ -81,11 +97,35 @@ describe('CountryMappings', () => {
             expect(set.size).toBe(window.ISO_COUNTRY_CODES.length);
         });
 
-        test('every COUNTRY_NAME_MAP value is in ISO_COUNTRY_CODES', () => {
+        test('every country mapping uses an ISO code or the Kosovo flag-icons code', () => {
             const codeSet = new Set(window.ISO_COUNTRY_CODES);
             for (const code of Object.values(window.COUNTRY_NAME_MAP)) {
-                expect(codeSet.has(code)).toBe(true);
+                expect(codeSet.has(code) || code === 'XK').toBe(true);
             }
         });
+    });
+
+    test('all previously unresolved records country names render flags', () => {
+        const cases = [
+            ['Congo', 'cg'],
+            ['DR Congo', 'cd'],
+            ['Falkland Islands (Malvinas)', 'fk'],
+            ['Heard Island and McDonald Islands', 'hm'],
+            ['Kosovo', 'xk'],
+            ['Myanmar', 'mm'],
+            ['Pitcairn', 'pn'],
+            ['Saint Kitts and Nevis', 'kn'],
+            ['Saint Martin', 'mf'],
+            ['Saint Pierre and Miquelon', 'pm'],
+            ['Saint Vincent and the Grenadines', 'vc'],
+            ['South Georgia and the South Sandwich Islands', 'gs'],
+            ['Turks and Caicos Islands', 'tc'],
+            ['U.S. Minor Outlying Islands', 'um'],
+            ['Wallis and Futuna', 'wf']
+        ];
+
+        for (const [name, code] of cases) {
+            expect(window.FlagHelper.countryToFlag(name), name).toBe(`<span class="fi fi-${code}"></span>`);
+        }
     });
 });

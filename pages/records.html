@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Records - RaceRoom Leaderboards Explorer</title>
-    <meta name="description" content="Explore RaceRoom records: average percentile, bested drivers, pole positions, and podiums, overall or by class.">
+    <meta name="description" content="Explore RaceRoom records: average percentile, bested drivers, pole positions, and podiums, overall, by class, or by country.">
     <link rel="canonical" href="https://r3e-leaderboards.info/records.html">
     <link rel="alternate" hreflang="en" href="https://r3e-leaderboards.info/records.html">
     <link rel="alternate" hreflang="x-default" href="https://r3e-leaderboards.info/records.html">
     <meta name="robots" content="noindex, follow">
     <meta property="og:site_name" content="RaceRoom Leaderboards Explorer">
     <meta property="og:title" content="Records - RaceRoom Leaderboards Explorer">
-    <meta property="og:description" content="Top RaceRoom drivers by average percentile, bested drivers, pole positions, and podiums.">
+    <meta property="og:description" content="Top RaceRoom drivers by average percentile, bested drivers, pole positions, and podiums, overall, by class, or by country.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://r3e-leaderboards.info/records.html">
     <meta property="og:image" content="https://r3e-leaderboards.info/images/rle-share.png">
@@ -21,7 +21,7 @@
     <meta property="og:locale" content="en_US">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Records - RaceRoom Leaderboards Explorer">
-    <meta name="twitter:description" content="Top RaceRoom drivers by average percentile, bested drivers, pole positions, and podiums.">
+    <meta name="twitter:description" content="Top RaceRoom drivers by average percentile, bested drivers, pole positions, and podiums, overall, by class, or by country.">
     <meta name="twitter:image" content="https://r3e-leaderboards.info/images/rle-share.png">
 
     <script src="modules/analytics.js?v=8" defer></script>
@@ -45,6 +45,10 @@
                 <div class="search-container" id="records-search-container">
                     <div id="records-class-filter-ui" class="custom-select" role="listbox" aria-label="Filter by class">
                         <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All classes ▾</button>
+                        <div class="custom-select__menu" role="presentation" hidden></div>
+                    </div>
+                    <div id="records-country-filter-ui" class="custom-select" role="listbox" aria-label="Filter by country">
+                        <button type="button" class="custom-select__toggle" aria-haspopup="listbox" aria-expanded="false">All countries ▾</button>
                         <div class="custom-select__menu" role="presentation" hidden></div>
                     </div>
                 </div>
@@ -114,7 +118,7 @@
         </div>
 
         <section class="seo-content" aria-label="About records">
-            <p class="page-intro">Browse top <strong>RaceRoom leaderboards</strong> drivers across five record categories: average bested %, bested drivers, pole positions, podiums and number of entries &mdash; overall or per class.<br/>Or go back to this week's <a href="/" class="internal-link">ranked multiplayer races</a>.</p>
+            <p class="page-intro">Browse top <strong>RaceRoom leaderboards</strong> drivers across five record categories: average bested %, bested drivers, pole positions, podiums and number of entries &mdash; overall, per class, or by country.<br/>Or go back to this week's <a href="/" class="internal-link">ranked multiplayer races</a>.</p>
         </section>
 
         <section id="status-container" class="status-section" aria-label="Leaderboard Database Statistics" data-status-component data-heading-level="3"></section>
@@ -128,7 +132,7 @@
     <script src="modules/loaders/header-loader.js?v=2" defer></script>
 
     <!-- Core modules -->
-    <script src="modules/data/country-mappings.js?v=7" defer></script>
+    <script src="modules/data/country-mappings.js?v=8" defer></script>
     <script src="modules/custom-select.js?v=24" defer></script>
     <script src="modules/compressed-json-helper.js?v=2" defer></script>
     <script src="modules/driver-index-service.js?v=11" defer></script>
@@ -150,7 +154,7 @@
     <script src="modules/stats-data.js?v=15" defer></script>
     <script src="modules/stats-renderer.js?v=16" defer></script>
     <script src="modules/filter-state.js?v=1" defer></script>
-    <script src="modules/pages/records.js?v=54" defer></script>
+    <script src="modules/pages/records.js?v=55" defer></script>
     <script src="script.js?v=9" defer></script>
 </body>
 </html>

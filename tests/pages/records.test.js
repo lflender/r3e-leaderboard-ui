@@ -4,6 +4,7 @@ import { loadBrowserScript } from '../helpers/script-loader.js';
 function buildDom() {
     return [
         '<div id="records-class-filter-ui"></div>',
+        '<div id="records-country-filter-ui"></div>',
         '<div id="records-tables">',
         '  <section class="records-box" data-record-key="avg_bested">',
         '    <h2 id="records-avg-bested-title"></h2>',
@@ -52,14 +53,18 @@ function buildDom() {
 function makeDriverList(prefix, count) {
     return Array.from({ length: count }, (_, i) => ({
         name: `${prefix}-${i + 1}`,
-        country: 'DE',
+        country: i < 10 ? 'Germany' : 'Spain',
         rank: 'A',
-        value: count - i
+        value: count - i,
+        entries: 10,
+        bested_drivers: 100
     }));
 }
 
 function setupGlobals() {
     window.__recordsFilterOnChange = null;
+    window.__recordsCountryFilterOnChange = null;
+    window.__recordsFilters = {};
 
     window.R3EUtils = {
         escapeHtml: (value) => String(value ?? ''),
@@ -86,11 +91,19 @@ function setupGlobals() {
     };
 
     window.CustomSelect = class {
-        constructor(_rootId, _options, onChange) {
-            window.__recordsFilterOnChange = onChange;
+        constructor(rootId, options, onChange) {
+            this.options = options;
             this.onChange = onChange;
             this.currentValue = '';
-            window.__recordsFilterSelect = this;
+            this.rootId = rootId;
+            window.__recordsFilters[rootId] = this;
+            if (rootId === 'records-class-filter-ui') {
+                window.__recordsFilterOnChange = onChange;
+                window.__recordsFilterSelect = this;
+            } else if (rootId === 'records-country-filter-ui') {
+                window.__recordsCountryFilterOnChange = onChange;
+                window.__recordsCountryFilterSelect = this;
+            }
         }
 
         setValue(value, options = {}) {
@@ -98,6 +111,10 @@ function setupGlobals() {
             if (options.notify !== false && this.onChange) {
                 this.onChange(value, { source: options.source || 'programmatic' });
             }
+        }
+
+        setOptions(options) {
+            this.options = options;
         }
     };
 
@@ -126,17 +143,38 @@ function setupGlobals() {
             avgBestedPath: 'ab.gz',
             entriesPath: 'e.gz'
         })),
+        getFilesEntryForFilter: vi.fn(() => ({
+            pole_file: 'full-p.gz',
+            bested_file: 'full-b.gz',
+            podium_file: 'full-d.gz',
+            avg_bested_file: 'full-ab.gz',
+            entries_file: 'full-e.gz'
+        })),
+        extractRows: vi.fn((payload) => Array.isArray(payload) ? payload : payload?.results || []),
         fetchGzipJson: vi.fn((path) => {
-            if (path === 'ab.gz') return Promise.resolve({ kind: 'avg_bested' });
-            if (path === 'b.gz') return Promise.resolve({ kind: 'bested' });
-            if (path === 'p.gz') return Promise.resolve({ kind: 'pole' });
-            if (path === 'd.gz') return Promise.resolve({ kind: 'podium' });
-            if (path === 'e.gz') return Promise.resolve({ kind: 'entries' });
+            const kinds = {
+                'ab.gz': 'avg_bested',
+                'b.gz': 'bested',
+                'p.gz': 'pole',
+                'd.gz': 'podium',
+                'e.gz': 'entries',
+                'full-ab.gz': 'avg_bested',
+                'full-b.gz': 'bested',
+                'full-p.gz': 'pole',
+                'full-d.gz': 'podium',
+                'full-e.gz': 'entries'
+            };
+            const kind = kinds[path];
+            if (path === 'full-e.gz') {
+                return Promise.resolve({ kind, results: lists.entries });
+            }
+            if (kind) return Promise.resolve({ kind });
             return Promise.resolve(null);
         }),
-        normalizeRows: vi.fn((payload, _metricKey, topRows) => {
+        normalizeRows: vi.fn((payload, _metricKey, topRows, options = {}) => {
             if (!payload || !payload.kind) return [];
-            return lists[payload.kind].slice(0, topRows);
+            const rows = payload.results || lists[payload.kind];
+            return (options.preFilter ? rows.filter(options.preFilter) : rows).slice(0, topRows);
         })
     };
 }
@@ -170,6 +208,31 @@ describe('records page integration', () => {
             { index: true },
             'GT3'
         );
+    });
+
+    it('filters records by country using the full rankings', async () => {
+        await loadAndWait();
+
+        const countryOptions = window.__recordsCountryFilterSelect.options.map(option => option.value);
+        expect(countryOptions).toContain('Germany');
+        expect(countryOptions).toContain('Spain');
+
+        window.__recordsFilterOnChange('GT3', { source: 'user' });
+        window.__recordsCountryFilterOnChange('Spain', { source: 'user' });
+        await new Promise(resolve => setTimeout(resolve, 0));
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        expect(window.PageFilterState.read('records').country).toBe('Spain');
+        expect(window.StatsData.getFilesEntryForFilter).toHaveBeenLastCalledWith(
+            { index: true },
+            'GT3'
+        );
+        const driverNames = Array.from(
+            document.querySelectorAll('#records-entries-table .stats-driver-cell')
+        ).map(cell => cell.textContent);
+        expect(driverNames).toContain('ENT-11');
+        expect(driverNames).not.toContain('ENT-1');
+        expect(document.getElementById('records-entries-title').textContent).toContain('GT3 / Spain');
     });
 
     it('renders all 4 sections with top 3 rows by default', async () => {

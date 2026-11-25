@@ -16,6 +16,10 @@
     flex: 0 0 auto;
 }
 
+#records-country-filter-ui {
+    flex: 0 0 auto;
+}
+
 .records-tables {
     display: flex;
     flex-direction: column;

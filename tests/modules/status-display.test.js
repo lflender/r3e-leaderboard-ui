@@ -179,7 +179,7 @@ describe('StatusDisplay.updateStatusLed – LED colour logic', () => {
         } });
         expect(ledClass()).toContain('status-led--yellow');
         expect(ledClass()).toContain('is-fetching');
-        expect(ledTitle()).toBe('Stale');
+        expect(ledTitle()).toBe('Stale (updating)');
     });
 
     it('red takes priority over stale: red even when stale if tracks are incomplete', () => {
@@ -205,6 +205,22 @@ describe('StatusDisplay.updateStatusLed – LED colour logic', () => {
         const recent = new Date(Date.now() - 60 * 60 * 1000).toISOString();
         sd.updateStatusLed({ total_unique_tracks: 177, last_scrape_end: recent }, false);
         expect(ledClass()).not.toContain('is-fetching');
+    });
+
+    it.each([
+        [{ total_unique_tracks: 177 }, 'Ready'],
+        [{ total_unique_tracks: 100 }, 'Incomplete'],
+        [{ api_discovery_failed: true }, 'Discovery failed']
+    ])('updates the tooltip as fetching starts and stops for %s', (status, title) => {
+        const sd = makeInstance();
+
+        sd.displayStatus({ ...status, fetch_in_progress: 'true' });
+        expect(ledClass()).toContain('is-fetching');
+        expect(ledTitle()).toBe(`${title} (updating)`);
+
+        sd.displayStatus({ ...status, fetch_in_progress: false });
+        expect(ledClass()).not.toContain('is-fetching');
+        expect(ledTitle()).toBe(title);
     });
 
     it('uses window.TRACKS_DATA.length when available', () => {

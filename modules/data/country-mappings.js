@@ -1,6 +1,7 @@
 /**
- * Country name to ISO 3166-1 alpha-2 code mappings
- * Handles special cases and variations not covered by Intl.DisplayNames
+ * Country name to region code mappings
+ * Handles special cases and variations not covered by Intl.DisplayNames.
+ * XK is the flag-icons code for Kosovo; it is not an official ISO assignment.
  */
 const COUNTRY_NAME_MAP = {
     'netherlands': 'NL',
@@ -76,7 +77,22 @@ const COUNTRY_NAME_MAP = {
     'north macedonia': 'MK',
     "côte d'ivoire": 'CI',
     "cote d'ivoire": 'CI',
-    'ivory coast': 'CI'
+    'ivory coast': 'CI',
+    'congo': 'CG',
+    'dr congo': 'CD',
+    'falkland islands (malvinas)': 'FK',
+    'heard island and mcdonald islands': 'HM',
+    'kosovo': 'XK',
+    'myanmar': 'MM',
+    'pitcairn': 'PN',
+    'saint kitts and nevis': 'KN',
+    'saint martin': 'MF',
+    'saint pierre and miquelon': 'PM',
+    'saint vincent and the grenadines': 'VC',
+    'south georgia and the south sandwich islands': 'GS',
+    'turks and caicos islands': 'TC',
+    'u.s. minor outlying islands': 'UM',
+    'wallis and futuna': 'WF'
 };
 
 /**

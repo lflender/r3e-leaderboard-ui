@@ -176,7 +176,7 @@ class StatusDisplay {
         } else {
             this.elements.led.classList.remove('is-fetching');
         }
-        this.elements.led.title = ledTitle;
+        this.elements.led.title = fetchInProgress ? `${ledTitle} (updating)` : ledTitle;
     }
 
 }

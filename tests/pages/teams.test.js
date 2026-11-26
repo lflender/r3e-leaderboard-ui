@@ -111,9 +111,40 @@ beforeEach(() => {
     window.dataService.searchDriver.mockReset();
     window.dataService.searchDriver.mockResolvedValue([]);
     window.generatePaginationHTML.mockClear();
+    window.R3EAnalytics = { track: vi.fn() };
 });
 
 describe('teams page', () => {
+    it('tracks the first rendered team results, not the loading state or later searches', async () => {
+        let resolveTeams;
+        window.dataService.loadTeams.mockReturnValue(new Promise(resolve => { resolveTeams = resolve; }));
+        const page = new TeamsPage();
+        expect(window.R3EAnalytics.track).not.toHaveBeenCalled();
+
+        resolveTeams(MOCK_TEAMS);
+        await new Promise(resolve => setTimeout(resolve, 0));
+        expect(document.querySelector('.team-row')).not.toBeNull();
+        expect(window.R3EAnalytics.track).toHaveBeenCalledWith('teams page shown');
+
+        await page.searchTeams('beta');
+        expect(window.R3EAnalytics.track).toHaveBeenCalledTimes(1);
+    });
+
+    it('tracks an empty team list after it renders', async () => {
+        window.dataService.loadTeams.mockResolvedValue({});
+        new TeamsPage();
+        await new Promise(resolve => setTimeout(resolve, 0));
+        expect(document.getElementById('results-container').textContent).toContain('No results');
+        expect(window.R3EAnalytics.track).toHaveBeenCalledWith('teams page shown');
+    });
+
+    it('does not track a team page that fails to load', async () => {
+        window.dataService.loadTeams.mockRejectedValue(new Error('Network error'));
+        new TeamsPage();
+        await new Promise(resolve => setTimeout(resolve, 0));
+        expect(window.R3EAnalytics.track).not.toHaveBeenCalled();
+    });
+
     it('restores and applies the team search from the page URL', async () => {
         window.R3EUrlUtils.getUrlParam.mockImplementation(name => name === 'team' ? 'Beta' : '');
 

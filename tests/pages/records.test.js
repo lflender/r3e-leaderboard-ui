@@ -195,6 +195,22 @@ async function loadAndWait() {
 }
 
 describe('records page integration', () => {
+    it('tracks each user country change immediately, including clearing and superseded requests', async () => {
+        await loadAndWait();
+        window.R3EAnalytics.track.mockClear();
+
+        window.__recordsCountryFilterOnChange('Spain', { source: 'user' });
+        window.__recordsCountryFilterOnChange('', { source: 'user' });
+        window.__recordsCountryFilterOnChange('Germany', { source: 'restore' });
+
+        expect(window.R3EAnalytics.track.mock.calls.filter(([name]) => name === 'records country filter changed'))
+            .toEqual([
+                ['records country filter changed', { country_value: 'Spain', filter_value: '' }],
+                ['records country filter changed', { country_value: '', filter_value: '' }]
+            ]);
+        await new Promise(resolve => setTimeout(resolve, 0));
+    });
+
     it('restores a saved class filter before loading record sections', async () => {
         window.FilterOptionsService.getClassOptionsFromCarsData.mockReturnValue([
             { value: 'GT3', label: 'GT3' }
@@ -219,6 +235,10 @@ describe('records page integration', () => {
 
         window.__recordsFilterOnChange('GT3', { source: 'user' });
         window.__recordsCountryFilterOnChange('Spain', { source: 'user' });
+        expect(window.R3EAnalytics.track).toHaveBeenCalledWith(
+            'records country filter changed',
+            { country_value: 'Spain', filter_value: 'GT3' }
+        );
         await new Promise(resolve => setTimeout(resolve, 0));
         await new Promise(resolve => setTimeout(resolve, 0));
 

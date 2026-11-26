@@ -576,9 +576,9 @@
   // Render table using the same style/formatting as leaderboards
   async function renderTable(data) {
     trackAllResults = Array.isArray(data) ? data : [];
-    trackTrackPageShown(trackAllResults.length);
     if (trackAllResults.length === 0) {
       await TemplateHelper.showNoResults(tableContainer);
+      trackTrackPageShown(trackAllResults.length);
       return;
     }
 
@@ -769,6 +769,7 @@
     if (paginationHTML) {
       tableContainer.insertAdjacentHTML('beforeend', paginationHTML);
     }
+    trackTrackPageShown(trackAllResults.length);
 
     // Lazily load pole times for visible rows (non-blocking)
     if (showPoleColumn) {

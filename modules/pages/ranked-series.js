@@ -183,6 +183,7 @@
     class RankedSeriesPage {
         constructor() {
             this.resultsContainer = document.getElementById('results-container');
+            this.hasTrackedPageShown = false;
             if (this.resultsContainer) {
                 document.addEventListener('click', event => {
                     this.resultsContainer.querySelectorAll('.ranked-series-rounds[open]').forEach(schedule => {
@@ -233,6 +234,10 @@
                     item && item.format && item.format.qualifying_type === 'leaderboard'
                 );
                 this.render(series);
+                if (!this.hasTrackedPageShown && typeof R3EAnalytics !== 'undefined' && typeof R3EAnalytics.track === 'function') {
+                    R3EAnalytics.track('ranked page shown', { series_count: series.length });
+                    this.hasTrackedPageShown = true;
+                }
             } catch (error) {
                 console.error('Error loading ranked series:', error);
                 this.resultsContainer.innerHTML = `

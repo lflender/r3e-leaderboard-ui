@@ -140,9 +140,6 @@ function trackDetailFilter(selectedDifficulty, selectedCar, resultCount) {
 // ===========================================
 const resultsContainer = document.getElementById('detail-results-container');
 
-// Track detail page view from URL params as soon as script runs.
-trackDetailUrlView();
-
 // Fetch and display data
 fetchLeaderboardDetails();
 
@@ -766,6 +763,7 @@ async function displayResults(data) {
         if (baseResults.length > 0) {
             renderEmptyTimeframeState(baseResults, results);
             bindEntriesDistributionInteractions();
+            trackDetailUrlView();
             return;
         }
 
@@ -774,6 +772,7 @@ async function displayResults(data) {
             rescueFiltersToStash();
             resultsContainer.innerHTML = `<div class="detail-filters-slot"></div><p class="no-results">No entries match the selected filters.</p>`;
             moveFiltersIntoSlot();
+            trackDetailUrlView();
             return;
         }
 
@@ -907,6 +906,7 @@ async function displayResults(data) {
     // Wire car-based row hover highlighting
     wireCarRowHover();
     wireEntriesChartTableHover();
+    trackDetailUrlView();
 }
 
 /**
@@ -983,11 +983,13 @@ async function showNoResultsWithActionDelay() {
         setTimeout(async () => {
             if (resultsContainer.innerHTML.includes('Loading')) {
                 await TemplateHelper.showNoResults(resultsContainer);
+                trackDetailUrlView();
             }
         }, 1500 - timeSinceAction);
         return;
     }
     await TemplateHelper.showNoResults(resultsContainer);
+    trackDetailUrlView();
 }
 
 function isCarFilterCurrentlyActive() {

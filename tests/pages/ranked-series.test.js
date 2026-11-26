@@ -98,6 +98,7 @@ function setup(data, options = {}) {
     window.CompressedJsonHelper = {
         readGzipJson: vi.fn().mockResolvedValue(data)
     };
+    window.R3EAnalytics = { track: vi.fn() };
     window.rankedSeriesPage = null;
     loadBrowserScript('modules/pages/ranked-series.js');
     document.dispatchEvent(new Event('DOMContentLoaded'));
@@ -366,6 +367,7 @@ describe('ranked series page', () => {
         expect(document.querySelector('[role="alert"]').textContent)
             .toContain('Unable to load ranked series information');
         expect(console.error).toHaveBeenCalled();
+        expect(window.R3EAnalytics.track).not.toHaveBeenCalled();
     });
 
     it('shows an empty state when no leaderboard-qualifying series exist', async () => {
@@ -375,5 +377,15 @@ describe('ranked series page', () => {
         expect(document.querySelector('.ranked-series-card')).toBeNull();
         expect(document.querySelector('.ranked-series-state').textContent)
             .toContain('No leaderboard-qualifying series are available');
+        expect(window.R3EAnalytics.track).toHaveBeenCalledWith('ranked page shown', { series_count: 0 });
+    });
+
+    it('tracks the first rendered ranked page only once', async () => {
+        const page = setup({ series: [makeSeries(), makeSeries('live')] });
+        expect(window.R3EAnalytics.track).not.toHaveBeenCalled();
+        await page.ready;
+        expect(window.R3EAnalytics.track).toHaveBeenCalledWith('ranked page shown', { series_count: 1 });
+        await page.init();
+        expect(window.R3EAnalytics.track).toHaveBeenCalledTimes(1);
     });
 });

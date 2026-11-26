@@ -732,6 +732,12 @@
                 PageFilterState.write('records', 'country', currentCountryFilter);
                 expandedKey = null;
                 if (opts?.source === 'user') {
+                    if (typeof R3EAnalytics !== 'undefined' && typeof R3EAnalytics.track === 'function') {
+                        R3EAnalytics.track('records country filter changed', {
+                            country_value: currentCountryFilter,
+                            filter_value: currentFilter
+                        });
+                    }
                     pendingTrackSource = 'filter';
                 }
                 fetchAndRender();

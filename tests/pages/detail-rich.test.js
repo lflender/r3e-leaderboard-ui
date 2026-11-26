@@ -37,7 +37,11 @@ function makeEntry({ pos, name, lapTime, car, difficulty, dateTime, classId = 5,
 function setupGlobals() {
     window.history.replaceState({}, '', '/detail.html?track=10&class=5&driver=alice&time=1:20.000&pos=2&difficulty=All%20difficulties');
 
-    window.R3EAnalytics = { track: vi.fn() };
+    window.R3EAnalytics = { track: vi.fn((name) => {
+        if (name === 'detail page shown') {
+            window.__detailHtmlWhenTracked = document.getElementById('detail-results-container').innerHTML;
+        }
+    }) };
 
     window.R3EUtils = {
         getUrlParam: (name) => {
@@ -336,6 +340,7 @@ describe('detail page rich integration', () => {
     });
 
     it('tracks detail view analytics once from URL parameters', () => {
+        expect(window.__detailHtmlWhenTracked).toContain('results-table');
         expect(window.R3EAnalytics.track).toHaveBeenCalledWith(
             'detail page shown',
             expect.objectContaining({
@@ -345,6 +350,7 @@ describe('detail page rich integration', () => {
                 time_param: '1:20.000'
             })
         );
+        expect(window.R3EAnalytics.track.mock.calls.filter(([name]) => name === 'detail page shown')).toHaveLength(1);
     });
 
     it('applies difficulty badge toggles and car filter and tracks user filter analytics', async () => {

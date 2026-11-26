@@ -18,6 +18,7 @@ class TeamsPage {
         this.itemsPerPage = 50;
         this.searchDebounceTimer = null;
         this.minSearchLength = 0;
+        this.hasTrackedPageShown = false;
 
         this.init();
     }
@@ -27,12 +28,13 @@ class TeamsPage {
         this.elements.teamSearch.value = initialSearch;
         this.setupEventListeners();
         this.preloadTeams();
-        this._trackPageShown();
     }
 
     _trackPageShown() {
+        if (this.hasTrackedPageShown) return;
         if (typeof R3EAnalytics === 'undefined' || typeof R3EAnalytics.track !== 'function') return;
         R3EAnalytics.track('teams page shown');
+        this.hasTrackedPageShown = true;
     }
 
     /**
@@ -128,11 +130,12 @@ class TeamsPage {
         this.displayResults();
     }
 
-    displayResults() {
+    async displayResults() {
         const data = this.filteredTeams;
 
         if (data.length === 0) {
-            TemplateHelper.showNoResults(this.elements.resultsContainer);
+            await TemplateHelper.showNoResults(this.elements.resultsContainer);
+            this._trackPageShown();
             return;
         }
 
@@ -181,6 +184,7 @@ class TeamsPage {
         }
 
         this.elements.resultsContainer.innerHTML = html + paginationHTML;
+        this._trackPageShown();
 
         // Add click handlers — open team profile in a new tab
         this.elements.resultsContainer.querySelectorAll('.team-row').forEach(row => {
